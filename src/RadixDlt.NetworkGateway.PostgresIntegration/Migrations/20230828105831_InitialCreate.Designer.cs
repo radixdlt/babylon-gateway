@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230824092233_InitialCreate")]
+    [Migration("20230828105831_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1199,13 +1199,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
                     b.Property<long>("FromStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
-
-                    b.Property<long>("PackageEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("package_entity_id");
 
                     b.Property<byte[]>("Schema")
                         .IsRequired()
@@ -1219,7 +1219,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PackageEntityId", "FromStateVersion");
+                    b.HasIndex("EntityId", "FromStateVersion");
 
                     b.HasIndex("SchemaHash", "FromStateVersion");
 
@@ -1970,6 +1970,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<SborTypeKind>("SborTypeKind")
                         .HasColumnType("sbor_type_kind")
                         .HasColumnName("sbor_type_kind");
+
+                    b.Property<long>("SchemaDefiningEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("schema_defining_entity_id");
 
                     b.Property<byte[]>("SchemaHash")
                         .IsRequired()

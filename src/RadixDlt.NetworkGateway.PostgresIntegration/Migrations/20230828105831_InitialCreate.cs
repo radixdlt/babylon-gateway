@@ -606,7 +606,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    package_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
                     schema_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     schema = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
@@ -628,7 +628,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     sbor_state = table.Column<byte[]>(type: "bytea", nullable: true),
                     schema_hash = table.Column<byte[]>(type: "bytea", nullable: true),
                     sbor_type_kind = table.Column<SborTypeKind>(type: "sbor_type_kind", nullable: true),
-                    type_index = table.Column<long>(type: "bigint", nullable: true)
+                    type_index = table.Column<long>(type: "bigint", nullable: true),
+                    schema_defining_entity_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -880,9 +881,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_schema_history_package_entity_id_from_state_version",
+                name: "IX_schema_history_entity_id_from_state_version",
                 table: "schema_history",
-                columns: new[] { "package_entity_id", "from_state_version" });
+                columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_schema_history_schema_hash_from_state_version",

@@ -866,6 +866,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 SchemaHash = schemaDetails.SchemaHash.ConvertFromHex(),
                                 SborTypeKind = schemaDetails.SborTypeKind.ToModel(),
                                 TypeIndex = schemaDetails.TypeIndex,
+                                SchemaDefiningEntityId = referencedEntities.Get((EntityAddress)schemaDetails.SchemaDefiningEntityAddress).DatabaseId,
                             });
                         }
 
@@ -1069,7 +1070,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             {
                                 Id = sequences.SchemaHistorySequence++,
                                 FromStateVersion = stateVersion,
-                                PackageEntityId = referencedEntity.DatabaseId,
+                                EntityId = referencedEntity.DatabaseId,
                                 SchemaHash = schema.Key.SchemaHash.ConvertFromHex(),
                                 Schema = schema.Value.Schema.SborData.Hex.ConvertFromHex(),
                             });

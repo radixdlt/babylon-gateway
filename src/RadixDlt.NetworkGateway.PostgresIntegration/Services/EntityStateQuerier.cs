@@ -90,6 +90,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class EntityStateQuerier : IEntityStateQuerier
 {
+    private record struct SchemaIdentifier(ValueBytes SchemaHash, long EntityId);
+
     private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, bool IsLocked, int TotalCount);
 
     private record ValidatorCurrentStakeViewModel(
@@ -671,7 +673,7 @@ SELECT
     nfsh.type_index AS TypeIndex,
     nfsh.sbor_type_kind AS SborTypeKind
 FROM non_fungible_schema_history nfsh
-INNER JOIN schema_history sh ON sh.schema_hash = nfsh.schema_hash
+INNER JOIN schema_history sh ON sh.schema_hash = nfsh.schema_hash AND sh.entity_id = @entityId
 WHERE nfsh.resource_entity_id = @entityId AND nfsh.from_state_version <= @stateVersion
 ORDER BY nfsh.from_state_version DESC",
             parameters: new
@@ -979,8 +981,8 @@ SELECT
     kvssh.value_type_index AS ValueTypeIndex,
     kvssh.value_sbor_type_kind AS ValueSborTypeKind
 FROM key_value_store_schema_history kvssh
-INNER JOIN schema_history ksh ON ksh.schema_hash = kvssh.key_schema_hash
-INNER JOIN schema_history vsh ON vsh.schema_hash = kvssh.value_schema_hash
+INNER JOIN schema_history ksh ON ksh.schema_hash = kvssh.key_schema_hash AND ksh.entity_id = @entityId
+INNER JOIN schema_history vsh ON vsh.schema_hash = kvssh.value_schema_hash AND vsh.entity_id = @entityId
 WHERE kvssh.key_value_store_entity_id = @entityId AND kvssh.from_state_version <= @stateVersion
 ORDER BY kvssh.from_state_version DESC
 ",
@@ -2100,15 +2102,35 @@ INNER JOIN LATERAL (
 ) esh ON TRUE;")
             .ToListAsync(token);
 
-        var schemasToLoad = states.OfType<SborStateHistory>().Select(x => x.SchemaHash).Distinct().ToArray();
-        var schemas = new Dictionary<ValueBytes, byte[]>();
+        var schemasToLoad = states.OfType<SborStateHistory>()
+            .Select(x => new { x.SchemaHash, x.SchemaDefiningEntityId })
+            .ToArray();
+
+        var schemas = new Dictionary<SchemaIdentifier, byte[]>();
 
         if (schemasToLoad.Any())
         {
+            var schemaEntityIds = schemasToLoad.Select(x => x.SchemaDefiningEntityId).ToArray();
+            var schemaHashes = schemasToLoad.Select(x => x.SchemaHash).ToArray();
+
             schemas = await _dbContext
                 .SchemaHistory
-                .Where(x => schemasToLoad.Contains(x.SchemaHash))
-                .ToDictionaryAsync(x => (ValueBytes)x.SchemaHash, x => x.Schema, token);
+                .FromSqlInterpolated($@"
+WITH variables (schema_entity_id, schema_hash) AS (SELECT UNNEST({schemaEntityIds}), UNNEST({schemaHashes}))
+SELECT esh.*
+FROM variables v
+INNER JOIN LATERAL (
+    SELECT *
+    FROM schema_history sh
+    WHERE sh.entity_id = v.schema_entity_id AND sh.schema_hash = v.schema_hash
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) esh ON TRUE;
+")
+                .ToDictionaryAsync(
+                    x => new SchemaIdentifier(x.SchemaHash, x.EntityId),
+                    x => x.Schema,
+                    token);
         }
 
         foreach (var state in states)
@@ -2120,11 +2142,17 @@ INNER JOIN LATERAL (
                     break;
                 case SborStateHistory sborStateHistory:
                 {
-                    var schemaBytes = schemas[(ValueBytes)sborStateHistory.SchemaHash];
+                    var schemaIdentifier = new SchemaIdentifier((ValueBytes)sborStateHistory.SchemaHash, sborStateHistory.SchemaDefiningEntityId);
+                    var schemaFound = schemas.TryGetValue(schemaIdentifier, out var schemaBytes);
+
+                    if (!schemaFound)
+                    {
+                        throw new UnreachableException($"schema not found for entity :{sborStateHistory.EntityId} with schema defining entity id: {sborStateHistory.SchemaDefiningEntityId} and schema hash: {sborStateHistory.SchemaHash.ToHex()}");
+                    }
 
                     var jsonState = ScryptoSborUtils.DataToProgrammaticJson(
                         sborStateHistory.SborState,
-                        schemaBytes,
+                        schemaBytes!,
                         sborStateHistory.SborTypeKind,
                         sborStateHistory.TypeIndex,
                         _networkConfigurationProvider.GetNetworkId());
@@ -2200,10 +2228,10 @@ FROM variables
 INNER JOIN LATERAL(
     SELECT *
     FROM schema_history
-    WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
+    WHERE entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
 ) psh ON true")
                 .ToListAsync(token))
-            .GroupBy(b => b.PackageEntityId)
+            .GroupBy(b => b.EntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
     }
 

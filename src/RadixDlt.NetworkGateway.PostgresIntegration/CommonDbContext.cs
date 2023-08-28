@@ -419,7 +419,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<SchemaHistory>()
-            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<SchemaHistory>()
