@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using System.Collections.Generic;
+
 namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class PackageObjectSubstateTypeReference
@@ -69,5 +71,10 @@ public partial class PackageObjectSubstateTypeReference
     public override SchemaDetails GetSchemaDetails()
     {
         return new SchemaDetails(SchemaHash, PackageAddress, LocalTypeIndex.Index, LocalTypeIndex.Kind);
+    }
+
+    public override IEnumerable<string> GetEntityAddresses()
+    {
+        yield return PackageAddress;
     }
 }

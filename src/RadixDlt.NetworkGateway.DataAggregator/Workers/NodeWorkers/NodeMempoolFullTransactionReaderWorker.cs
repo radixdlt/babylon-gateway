@@ -239,14 +239,17 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
         var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.MempoolTransactionResponse, CoreModel.BasicErrorResponse>(() => coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
             new CoreModel.MempoolTransactionRequest(
                 network: _networkConfigurationProvider.GetNetworkName(),
-                payloadHash: hashes.PayloadHash
+                payloadHashes: new List<string>
+                {
+                    hashes.PayloadHash,
+                }
             ),
             token
         ));
 
         if (result.Succeeded)
         {
-            return new PendingTransactionData(hashes, _clock.UtcNow, result.SuccessResponse.GetPayloadBytes());
+            return new PendingTransactionData(hashes, _clock.UtcNow, result.SuccessResponse.Payloads.First().GetPayloadBytes());
         }
 
         if (result.FailureResponse.OriginalApiException.ErrorCode == (int)HttpStatusCode.NotFound)

@@ -105,7 +105,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="fieldTypeRef">fieldTypeRef (required).</param>
         /// <param name="condition">condition.</param>
-        public FieldSchema(BlueprintPayloadDef fieldTypeRef = default(BlueprintPayloadDef), FieldSchemaFeatureCondition condition = default(FieldSchemaFeatureCondition))
+        /// <param name="transientDefaultValueHex">The hex-encoded default value of this field. Only present if this field is transient..</param>
+        public FieldSchema(BlueprintPayloadDef fieldTypeRef = default(BlueprintPayloadDef), FieldSchemaFeatureCondition condition = default(FieldSchemaFeatureCondition), string transientDefaultValueHex = default(string))
         {
             // to ensure "fieldTypeRef" is required (not null)
             if (fieldTypeRef == null)
@@ -114,6 +115,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.FieldTypeRef = fieldTypeRef;
             this.Condition = condition;
+            this.TransientDefaultValueHex = transientDefaultValueHex;
         }
 
         /// <summary>
@@ -129,6 +131,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public FieldSchemaFeatureCondition Condition { get; set; }
 
         /// <summary>
+        /// The hex-encoded default value of this field. Only present if this field is transient.
+        /// </summary>
+        /// <value>The hex-encoded default value of this field. Only present if this field is transient.</value>
+        [DataMember(Name = "transient_default_value_hex", EmitDefaultValue = true)]
+        public string TransientDefaultValueHex { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -138,6 +147,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class FieldSchema {\n");
             sb.Append("  FieldTypeRef: ").Append(FieldTypeRef).Append("\n");
             sb.Append("  Condition: ").Append(Condition).Append("\n");
+            sb.Append("  TransientDefaultValueHex: ").Append(TransientDefaultValueHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -182,6 +192,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Condition == input.Condition ||
                     (this.Condition != null &&
                     this.Condition.Equals(input.Condition))
+                ) && 
+                (
+                    this.TransientDefaultValueHex == input.TransientDefaultValueHex ||
+                    (this.TransientDefaultValueHex != null &&
+                    this.TransientDefaultValueHex.Equals(input.TransientDefaultValueHex))
                 );
         }
 
@@ -201,6 +216,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Condition != null)
                 {
                     hashCode = (hashCode * 59) + this.Condition.GetHashCode();
+                }
+                if (this.TransientDefaultValueHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.TransientDefaultValueHex.GetHashCode();
                 }
                 return hashCode;
             }

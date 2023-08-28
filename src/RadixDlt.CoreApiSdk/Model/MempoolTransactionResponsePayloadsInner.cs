@@ -66,9 +66,22 @@ using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class MempoolTransactionResponse
+public partial class MempoolTransactionResponsePayloadsInner
 {
     private byte[] _payloadBytes;
 
-    public byte[] GetPayloadBytes() => _payloadBytes ??= Convert.FromHexString(PayloadHex);
+    public byte[] GetPayloadBytes()
+    {
+        if (_payloadBytes == null)
+        {
+            if (Hex == null || Error != null)
+            {
+                throw new InvalidOperationException("Erroneous payload.");
+            }
+
+            _payloadBytes = Convert.FromHexString(Hex);
+        }
+
+        return _payloadBytes;
+    }
 }

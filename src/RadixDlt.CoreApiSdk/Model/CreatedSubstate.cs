@@ -62,8 +62,6 @@
  * permissions under this License.
  */
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class CreatedSubstate : IUpsertedSubstate

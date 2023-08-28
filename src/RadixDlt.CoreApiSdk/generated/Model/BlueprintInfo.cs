@@ -105,10 +105,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="blueprintVersion">blueprintVersion (required).</param>
         /// <param name="outerObject">The Bech32m-encoded human readable version of any global address.</param>
         /// <param name="features">features (required).</param>
         /// <param name="genericSubstitutions">genericSubstitutions (required).</param>
-        public BlueprintInfo(string packageAddress = default(string), string blueprintName = default(string), string outerObject = default(string), List<string> features = default(List<string>), List<TypeIdentifier> genericSubstitutions = default(List<TypeIdentifier>))
+        public BlueprintInfo(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), string outerObject = default(string), List<string> features = default(List<string>), List<TypeIdentifier> genericSubstitutions = default(List<TypeIdentifier>))
         {
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
@@ -122,6 +123,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for BlueprintInfo and cannot be null");
             }
             this.BlueprintName = blueprintName;
+            // to ensure "blueprintVersion" is required (not null)
+            if (blueprintVersion == null)
+            {
+                throw new ArgumentNullException("blueprintVersion is a required property for BlueprintInfo and cannot be null");
+            }
+            this.BlueprintVersion = blueprintVersion;
             // to ensure "features" is required (not null)
             if (features == null)
             {
@@ -149,6 +156,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
         public string BlueprintName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintVersion
+        /// </summary>
+        [DataMember(Name = "blueprint_version", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintVersion { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of any global address
@@ -179,6 +192,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class BlueprintInfo {\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  BlueprintVersion: ").Append(BlueprintVersion).Append("\n");
             sb.Append("  OuterObject: ").Append(OuterObject).Append("\n");
             sb.Append("  Features: ").Append(Features).Append("\n");
             sb.Append("  GenericSubstitutions: ").Append(GenericSubstitutions).Append("\n");
@@ -228,6 +242,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.BlueprintName.Equals(input.BlueprintName))
                 ) && 
                 (
+                    this.BlueprintVersion == input.BlueprintVersion ||
+                    (this.BlueprintVersion != null &&
+                    this.BlueprintVersion.Equals(input.BlueprintVersion))
+                ) && 
+                (
                     this.OuterObject == input.OuterObject ||
                     (this.OuterObject != null &&
                     this.OuterObject.Equals(input.OuterObject))
@@ -262,6 +281,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.BlueprintName != null)
                 {
                     hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                if (this.BlueprintVersion != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintVersion.GetHashCode();
                 }
                 if (this.OuterObject != null)
                 {

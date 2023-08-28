@@ -62,9 +62,13 @@
  * permissions under this License.
  */
 
+using System.Collections.Generic;
+
 namespace RadixDlt.CoreApiSdk.Model;
 
-public abstract partial class ObjectSubstateTypeReference
+public abstract partial class ObjectSubstateTypeReference : IEntityAddressPointer
 {
     public abstract SchemaDetails GetSchemaDetails();
+
+    public abstract IEnumerable<string> GetEntityAddresses();
 }

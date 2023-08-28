@@ -100,7 +100,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Module
         /// </summary>
         [DataMember(Name = "module", IsRequired = true, EmitDefaultValue = true)]
-        public ObjectModuleId Module { get; set; }
+        public ModuleId Module { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleVersion" /> class.
         /// </summary>
@@ -111,7 +111,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="module">module (required).</param>
         /// <param name="version">A string of &#x60;Major.Minor.Patch&#x60; where Major, Minor and Patch are all u32s. (required).</param>
-        public ModuleVersion(ObjectModuleId module = default(ObjectModuleId), string version = default(string))
+        public ModuleVersion(ModuleId module = default(ModuleId), string version = default(string))
         {
             this.Module = module;
             // to ensure "version" is required (not null)

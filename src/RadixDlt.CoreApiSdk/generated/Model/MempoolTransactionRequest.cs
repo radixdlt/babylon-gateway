@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="MempoolTransactionRequest" /> class.
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="payloadHash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
-        public MempoolTransactionRequest(string network = default(string), string payloadHash = default(string))
+        /// <param name="payloadHashes">payloadHashes (required).</param>
+        public MempoolTransactionRequest(string network = default(string), List<string> payloadHashes = default(List<string>))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("network is a required property for MempoolTransactionRequest and cannot be null");
             }
             this.Network = network;
-            // to ensure "payloadHash" is required (not null)
-            if (payloadHash == null)
+            // to ensure "payloadHashes" is required (not null)
+            if (payloadHashes == null)
             {
-                throw new ArgumentNullException("payloadHash is a required property for MempoolTransactionRequest and cannot be null");
+                throw new ArgumentNullException("payloadHashes is a required property for MempoolTransactionRequest and cannot be null");
             }
-            this.PayloadHash = payloadHash;
+            this.PayloadHashes = payloadHashes;
         }
 
         /// <summary>
@@ -129,11 +129,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Network { get; set; }
 
         /// <summary>
-        /// The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. 
+        /// Gets or Sets PayloadHashes
         /// </summary>
-        /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
-        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHash { get; set; }
+        [DataMember(Name = "payload_hashes", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> PayloadHashes { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,7 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class MempoolTransactionRequest {\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
+            sb.Append("  PayloadHashes: ").Append(PayloadHashes).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -186,9 +185,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Network.Equals(input.Network))
                 ) && 
                 (
-                    this.PayloadHash == input.PayloadHash ||
-                    (this.PayloadHash != null &&
-                    this.PayloadHash.Equals(input.PayloadHash))
+                    this.PayloadHashes == input.PayloadHashes ||
+                    this.PayloadHashes != null &&
+                    input.PayloadHashes != null &&
+                    this.PayloadHashes.SequenceEqual(input.PayloadHashes)
                 );
         }
 
@@ -205,9 +205,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
-                if (this.PayloadHash != null)
+                if (this.PayloadHashes != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHashes.GetHashCode();
                 }
                 return hashCode;
             }

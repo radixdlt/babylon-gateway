@@ -264,142 +264,136 @@ namespace RadixDlt.CoreApiSdk.Model
         NonFungibleVaultContentsIndexEntry = 28,
 
         /// <summary>
-        /// Enum ConsensusManager for value: ConsensusManager
-        /// </summary>
-        [EnumMember(Value = "ConsensusManager")]
-        ConsensusManager = 29,
-
-        /// <summary>
         /// Enum ConsensusManagerFieldConfig for value: ConsensusManagerFieldConfig
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldConfig")]
-        ConsensusManagerFieldConfig = 30,
+        ConsensusManagerFieldConfig = 29,
 
         /// <summary>
         /// Enum ConsensusManagerFieldState for value: ConsensusManagerFieldState
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldState")]
-        ConsensusManagerFieldState = 31,
+        ConsensusManagerFieldState = 30,
 
         /// <summary>
         /// Enum ConsensusManagerFieldCurrentValidatorSet for value: ConsensusManagerFieldCurrentValidatorSet
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldCurrentValidatorSet")]
-        ConsensusManagerFieldCurrentValidatorSet = 32,
+        ConsensusManagerFieldCurrentValidatorSet = 31,
 
         /// <summary>
         /// Enum ConsensusManagerFieldCurrentProposalStatistic for value: ConsensusManagerFieldCurrentProposalStatistic
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldCurrentProposalStatistic")]
-        ConsensusManagerFieldCurrentProposalStatistic = 33,
+        ConsensusManagerFieldCurrentProposalStatistic = 32,
 
         /// <summary>
         /// Enum ConsensusManagerFieldCurrentTimeRoundedToMinutes for value: ConsensusManagerFieldCurrentTimeRoundedToMinutes
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
-        ConsensusManagerFieldCurrentTimeRoundedToMinutes = 34,
+        ConsensusManagerFieldCurrentTimeRoundedToMinutes = 33,
 
         /// <summary>
         /// Enum ConsensusManagerFieldCurrentTime for value: ConsensusManagerFieldCurrentTime
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldCurrentTime")]
-        ConsensusManagerFieldCurrentTime = 35,
+        ConsensusManagerFieldCurrentTime = 34,
 
         /// <summary>
         /// Enum ConsensusManagerFieldValidatorRewards for value: ConsensusManagerFieldValidatorRewards
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldValidatorRewards")]
-        ConsensusManagerFieldValidatorRewards = 36,
+        ConsensusManagerFieldValidatorRewards = 35,
 
         /// <summary>
         /// Enum ConsensusManagerRegisteredValidatorsByStakeIndexEntry for value: ConsensusManagerRegisteredValidatorsByStakeIndexEntry
         /// </summary>
         [EnumMember(Value = "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
-        ConsensusManagerRegisteredValidatorsByStakeIndexEntry = 37,
+        ConsensusManagerRegisteredValidatorsByStakeIndexEntry = 36,
 
         /// <summary>
         /// Enum ValidatorFieldState for value: ValidatorFieldState
         /// </summary>
         [EnumMember(Value = "ValidatorFieldState")]
-        ValidatorFieldState = 38,
+        ValidatorFieldState = 37,
 
         /// <summary>
         /// Enum ValidatorFieldProtocolUpdateReadinessSignal for value: ValidatorFieldProtocolUpdateReadinessSignal
         /// </summary>
         [EnumMember(Value = "ValidatorFieldProtocolUpdateReadinessSignal")]
-        ValidatorFieldProtocolUpdateReadinessSignal = 39,
+        ValidatorFieldProtocolUpdateReadinessSignal = 38,
 
         /// <summary>
         /// Enum AccountFieldState for value: AccountFieldState
         /// </summary>
         [EnumMember(Value = "AccountFieldState")]
-        AccountFieldState = 40,
+        AccountFieldState = 39,
 
         /// <summary>
         /// Enum AccountVaultEntry for value: AccountVaultEntry
         /// </summary>
         [EnumMember(Value = "AccountVaultEntry")]
-        AccountVaultEntry = 41,
+        AccountVaultEntry = 40,
 
         /// <summary>
         /// Enum AccountResourcePreferenceEntry for value: AccountResourcePreferenceEntry
         /// </summary>
         [EnumMember(Value = "AccountResourcePreferenceEntry")]
-        AccountResourcePreferenceEntry = 42,
+        AccountResourcePreferenceEntry = 41,
 
         /// <summary>
         /// Enum AccountAuthorizedDepositorEntry for value: AccountAuthorizedDepositorEntry
         /// </summary>
         [EnumMember(Value = "AccountAuthorizedDepositorEntry")]
-        AccountAuthorizedDepositorEntry = 43,
+        AccountAuthorizedDepositorEntry = 42,
 
         /// <summary>
         /// Enum AccessControllerFieldState for value: AccessControllerFieldState
         /// </summary>
         [EnumMember(Value = "AccessControllerFieldState")]
-        AccessControllerFieldState = 44,
+        AccessControllerFieldState = 43,
 
         /// <summary>
         /// Enum GenericScryptoComponentFieldState for value: GenericScryptoComponentFieldState
         /// </summary>
         [EnumMember(Value = "GenericScryptoComponentFieldState")]
-        GenericScryptoComponentFieldState = 45,
+        GenericScryptoComponentFieldState = 44,
 
         /// <summary>
         /// Enum GenericKeyValueStoreEntry for value: GenericKeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "GenericKeyValueStoreEntry")]
-        GenericKeyValueStoreEntry = 46,
+        GenericKeyValueStoreEntry = 45,
 
         /// <summary>
         /// Enum OneResourcePoolFieldState for value: OneResourcePoolFieldState
         /// </summary>
         [EnumMember(Value = "OneResourcePoolFieldState")]
-        OneResourcePoolFieldState = 47,
+        OneResourcePoolFieldState = 46,
 
         /// <summary>
         /// Enum TwoResourcePoolFieldState for value: TwoResourcePoolFieldState
         /// </summary>
         [EnumMember(Value = "TwoResourcePoolFieldState")]
-        TwoResourcePoolFieldState = 48,
+        TwoResourcePoolFieldState = 47,
 
         /// <summary>
         /// Enum MultiResourcePoolFieldState for value: MultiResourcePoolFieldState
         /// </summary>
         [EnumMember(Value = "MultiResourcePoolFieldState")]
-        MultiResourcePoolFieldState = 49,
+        MultiResourcePoolFieldState = 48,
 
         /// <summary>
         /// Enum TransactionTrackerFieldState for value: TransactionTrackerFieldState
         /// </summary>
         [EnumMember(Value = "TransactionTrackerFieldState")]
-        TransactionTrackerFieldState = 50,
+        TransactionTrackerFieldState = 49,
 
         /// <summary>
         /// Enum TransactionTrackerCollectionEntry for value: TransactionTrackerCollectionEntry
         /// </summary>
         [EnumMember(Value = "TransactionTrackerCollectionEntry")]
-        TransactionTrackerCollectionEntry = 51
+        TransactionTrackerCollectionEntry = 50
 
     }
 

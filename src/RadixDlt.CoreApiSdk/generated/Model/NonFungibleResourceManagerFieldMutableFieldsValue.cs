@@ -103,8 +103,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceManagerFieldMutableFieldsValue" /> class.
         /// </summary>
-        /// <param name="mutableFields">The field names of the NF Metadata which are mutable.  (required).</param>
-        public NonFungibleResourceManagerFieldMutableFieldsValue(List<string> mutableFields = default(List<string>))
+        /// <param name="mutableFields">The fields of the NF Metadata which are mutable. (required).</param>
+        public NonFungibleResourceManagerFieldMutableFieldsValue(List<MutableField> mutableFields = default(List<MutableField>))
         {
             // to ensure "mutableFields" is required (not null)
             if (mutableFields == null)
@@ -115,11 +115,11 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The field names of the NF Metadata which are mutable. 
+        /// The fields of the NF Metadata which are mutable.
         /// </summary>
-        /// <value>The field names of the NF Metadata which are mutable. </value>
+        /// <value>The fields of the NF Metadata which are mutable.</value>
         [DataMember(Name = "mutable_fields", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> MutableFields { get; set; }
+        public List<MutableField> MutableFields { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

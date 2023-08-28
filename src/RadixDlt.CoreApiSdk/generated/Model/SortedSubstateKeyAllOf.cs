@@ -103,11 +103,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SortedSubstateKeyAllOf" /> class.
         /// </summary>
-        /// <param name="sortPrefix">The sort part of the substate key (required).</param>
-        /// <param name="keyHex">The hex-encoded bytes of the substate key (required).</param>
-        public SortedSubstateKeyAllOf(int sortPrefix = default(int), string keyHex = default(string))
+        /// <param name="sortPrefixHex">The hex-encoded bytes of the sorted part of the key (required).</param>
+        /// <param name="keyHex">The hex-encoded remaining bytes of the key (required).</param>
+        public SortedSubstateKeyAllOf(string sortPrefixHex = default(string), string keyHex = default(string))
         {
-            this.SortPrefix = sortPrefix;
+            // to ensure "sortPrefixHex" is required (not null)
+            if (sortPrefixHex == null)
+            {
+                throw new ArgumentNullException("sortPrefixHex is a required property for SortedSubstateKeyAllOf and cannot be null");
+            }
+            this.SortPrefixHex = sortPrefixHex;
             // to ensure "keyHex" is required (not null)
             if (keyHex == null)
             {
@@ -117,16 +122,16 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The sort part of the substate key
+        /// The hex-encoded bytes of the sorted part of the key
         /// </summary>
-        /// <value>The sort part of the substate key</value>
-        [DataMember(Name = "sort_prefix", IsRequired = true, EmitDefaultValue = true)]
-        public int SortPrefix { get; set; }
+        /// <value>The hex-encoded bytes of the sorted part of the key</value>
+        [DataMember(Name = "sort_prefix_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SortPrefixHex { get; set; }
 
         /// <summary>
-        /// The hex-encoded bytes of the substate key
+        /// The hex-encoded remaining bytes of the key
         /// </summary>
-        /// <value>The hex-encoded bytes of the substate key</value>
+        /// <value>The hex-encoded remaining bytes of the key</value>
         [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
         public string KeyHex { get; set; }
 
@@ -138,7 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class SortedSubstateKeyAllOf {\n");
-            sb.Append("  SortPrefix: ").Append(SortPrefix).Append("\n");
+            sb.Append("  SortPrefixHex: ").Append(SortPrefixHex).Append("\n");
             sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -176,8 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.SortPrefix == input.SortPrefix ||
-                    this.SortPrefix.Equals(input.SortPrefix)
+                    this.SortPrefixHex == input.SortPrefixHex ||
+                    (this.SortPrefixHex != null &&
+                    this.SortPrefixHex.Equals(input.SortPrefixHex))
                 ) && 
                 (
                     this.KeyHex == input.KeyHex ||
@@ -195,7 +201,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.SortPrefix.GetHashCode();
+                if (this.SortPrefixHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.SortPrefixHex.GetHashCode();
+                }
                 if (this.KeyHex != null)
                 {
                     hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();

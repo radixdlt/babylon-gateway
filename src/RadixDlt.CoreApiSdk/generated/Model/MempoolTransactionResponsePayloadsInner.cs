@@ -84,63 +84,60 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// SortedSubstateKey
+    /// MempoolTransactionResponsePayloadsInner
     /// </summary>
-    [DataContract(Name = "SortedSubstateKey")]
-    [JsonConverter(typeof(JsonSubtypes), "key_type")]
-    [JsonSubtypes.KnownSubType(typeof(FieldSubstateKey), "Field")]
-    [JsonSubtypes.KnownSubType(typeof(MapSubstateKey), "Map")]
-    [JsonSubtypes.KnownSubType(typeof(SortedSubstateKey), "Sorted")]
-    public partial class SortedSubstateKey : SubstateKey, IEquatable<SortedSubstateKey>
+    [DataContract(Name = "MempoolTransactionResponse_payloads_inner")]
+    public partial class MempoolTransactionResponsePayloadsInner : IEquatable<MempoolTransactionResponsePayloadsInner>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SortedSubstateKey" /> class.
+        /// Initializes a new instance of the <see cref="MempoolTransactionResponsePayloadsInner" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected SortedSubstateKey() { }
+        protected MempoolTransactionResponsePayloadsInner() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="SortedSubstateKey" /> class.
+        /// Initializes a new instance of the <see cref="MempoolTransactionResponsePayloadsInner" /> class.
         /// </summary>
-        /// <param name="sortPrefixHex">The hex-encoded bytes of the sorted part of the key (required).</param>
-        /// <param name="keyHex">The hex-encoded remaining bytes of the key (required).</param>
-        /// <param name="keyType">keyType (required) (default to SubstateKeyType.Sorted).</param>
-        /// <param name="dbSortKeyHex">The hex-encoded bytes of the partially-hashed DB sort key, under the given entity partition (required).</param>
-        public SortedSubstateKey(string sortPrefixHex = default(string), string keyHex = default(string), SubstateKeyType keyType = SubstateKeyType.Sorted, string dbSortKeyHex = default(string)) : base(keyType, dbSortKeyHex)
+        /// <param name="hash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
+        /// <param name="hex">The hex-encoded full notarized transaction payload - returned only if found in mempool..</param>
+        /// <param name="error">Error message why &#x60;hex&#x60; field is missing: the transaction was not found in the mempool or the provided hash is invalid. .</param>
+        public MempoolTransactionResponsePayloadsInner(string hash = default(string), string hex = default(string), string error = default(string))
         {
-            // to ensure "sortPrefixHex" is required (not null)
-            if (sortPrefixHex == null)
+            // to ensure "hash" is required (not null)
+            if (hash == null)
             {
-                throw new ArgumentNullException("sortPrefixHex is a required property for SortedSubstateKey and cannot be null");
+                throw new ArgumentNullException("hash is a required property for MempoolTransactionResponsePayloadsInner and cannot be null");
             }
-            this.SortPrefixHex = sortPrefixHex;
-            // to ensure "keyHex" is required (not null)
-            if (keyHex == null)
-            {
-                throw new ArgumentNullException("keyHex is a required property for SortedSubstateKey and cannot be null");
-            }
-            this.KeyHex = keyHex;
+            this.Hash = hash;
+            this.Hex = hex;
+            this.Error = error;
         }
 
         /// <summary>
-        /// The hex-encoded bytes of the sorted part of the key
+        /// The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. 
         /// </summary>
-        /// <value>The hex-encoded bytes of the sorted part of the key</value>
-        [DataMember(Name = "sort_prefix_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string SortPrefixHex { get; set; }
+        /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
+        [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
+        public string Hash { get; set; }
 
         /// <summary>
-        /// The hex-encoded remaining bytes of the key
+        /// The hex-encoded full notarized transaction payload - returned only if found in mempool.
         /// </summary>
-        /// <value>The hex-encoded remaining bytes of the key</value>
-        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
+        /// <value>The hex-encoded full notarized transaction payload - returned only if found in mempool.</value>
+        [DataMember(Name = "hex", EmitDefaultValue = true)]
+        public string Hex { get; set; }
+
+        /// <summary>
+        /// Error message why &#x60;hex&#x60; field is missing: the transaction was not found in the mempool or the provided hash is invalid. 
+        /// </summary>
+        /// <value>Error message why &#x60;hex&#x60; field is missing: the transaction was not found in the mempool or the provided hash is invalid. </value>
+        [DataMember(Name = "error", EmitDefaultValue = true)]
+        public string Error { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +146,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class SortedSubstateKey {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  SortPrefixHex: ").Append(SortPrefixHex).Append("\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("class MempoolTransactionResponsePayloadsInner {\n");
+            sb.Append("  Hash: ").Append(Hash).Append("\n");
+            sb.Append("  Hex: ").Append(Hex).Append("\n");
+            sb.Append("  Error: ").Append(Error).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -161,7 +158,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -173,30 +170,35 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as SortedSubstateKey);
+            return this.Equals(input as MempoolTransactionResponsePayloadsInner);
         }
 
         /// <summary>
-        /// Returns true if SortedSubstateKey instances are equal
+        /// Returns true if MempoolTransactionResponsePayloadsInner instances are equal
         /// </summary>
-        /// <param name="input">Instance of SortedSubstateKey to be compared</param>
+        /// <param name="input">Instance of MempoolTransactionResponsePayloadsInner to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(SortedSubstateKey input)
+        public bool Equals(MempoolTransactionResponsePayloadsInner input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.SortPrefixHex == input.SortPrefixHex ||
-                    (this.SortPrefixHex != null &&
-                    this.SortPrefixHex.Equals(input.SortPrefixHex))
-                ) && base.Equals(input) && 
+                    this.Hash == input.Hash ||
+                    (this.Hash != null &&
+                    this.Hash.Equals(input.Hash))
+                ) && 
                 (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
+                    this.Hex == input.Hex ||
+                    (this.Hex != null &&
+                    this.Hex.Equals(input.Hex))
+                ) && 
+                (
+                    this.Error == input.Error ||
+                    (this.Error != null &&
+                    this.Error.Equals(input.Error))
                 );
         }
 
@@ -208,14 +210,18 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.SortPrefixHex != null)
+                int hashCode = 41;
+                if (this.Hash != null)
                 {
-                    hashCode = (hashCode * 59) + this.SortPrefixHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Hash.GetHashCode();
                 }
-                if (this.KeyHex != null)
+                if (this.Hex != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Hex.GetHashCode();
+                }
+                if (this.Error != null)
+                {
+                    hashCode = (hashCode * 59) + this.Error.GetHashCode();
                 }
                 return hashCode;
             }
