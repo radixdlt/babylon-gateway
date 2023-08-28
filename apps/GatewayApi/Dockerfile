@@ -1,4 +1,4 @@
-﻿# This dockerfile should be build with the context at the root of the repo, eg, from the repo root:
+# This dockerfile should be build with the context at the root of the repo, eg, from the repo root:
 # docker build -f apps/GatewayAPI/Dockerfile .
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
@@ -19,6 +19,12 @@ RUN dotnet publish "apps/GatewayApi/GatewayApi.csproj" -c Release -o /app/publis
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+RUN groupadd --gid 1000 gateway-api && \
+    useradd --uid 1000 --gid 1000 -m gateway-api
+
+USER 1000
+
 ENTRYPOINT ["dotnet", "GatewayApi.dll"]
 
 # TODO use local paths and adjust context for CI/CD

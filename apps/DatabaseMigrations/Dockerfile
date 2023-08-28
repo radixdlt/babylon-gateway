@@ -1,4 +1,4 @@
-﻿# This dockerfile should be build with the context at the root of the repo, eg, from the repo root:
+# This dockerfile should be build with the context at the root of the repo, eg, from the repo root:
 # docker build -f apps/DatabaseMigrations/Dockerfile .
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
@@ -16,6 +16,12 @@ RUN dotnet publish "apps/DatabaseMigrations/DatabaseMigrations.csproj" -c Releas
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+RUN groupadd --gid 1000 migrations && \
+    useradd --uid 1000 --gid 1000 -m migrations
+
+USER 1000
+
 ENTRYPOINT ["dotnet", "DatabaseMigrations.dll"]
 
 # TODO use local paths and adjust context for CI/CD
