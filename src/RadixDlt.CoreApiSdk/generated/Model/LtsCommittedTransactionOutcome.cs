@@ -113,7 +113,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="accumulatorHash">The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; combine(ACC_N, LEDGER_HASH_{N}))&#x60; (where &#x60;combine()&#x60; is an arbitrary deterministic function we use).  (required).</param>
         /// <param name="userTransactionIdentifiers">userTransactionIdentifiers.</param>
         /// <param name="status">status (required).</param>
-        /// <param name="fungibleEntityBalanceChanges">THE FEE ASSIGNMENT IS NOT CURRENTLY FULLY ACCURATE FOR SOME TRANSACTIONS. THIS WILL BE FIXED AT RCNET-V2. A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated.  (required).</param>
+        /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated.  (required).</param>
         /// <param name="resultantAccountFungibleBalances">THIS CURRENTLY RETURNS AN EMPTY LIST. THIS FEATURE WILL BE COMING AT RCNET-V2. A list of the resultant balances of any account balances changed in this transaction. Only balances for accounts are returned, not any other kind of entity.  (required).</param>
         /// <param name="totalFee">The string-encoded decimal representing the total amount of XRD payed as fee (execution, validator tip and royalties). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         public LtsCommittedTransactionOutcome(long stateVersion = default(long), string accumulatorHash = default(string), TransactionIdentifiers userTransactionIdentifiers = default(TransactionIdentifiers), LtsCommittedTransactionStatus status = default(LtsCommittedTransactionStatus), List<LtsEntityFungibleBalanceChanges> fungibleEntityBalanceChanges = default(List<LtsEntityFungibleBalanceChanges>), List<LtsResultantAccountFungibleBalances> resultantAccountFungibleBalances = default(List<LtsResultantAccountFungibleBalances>), string totalFee = default(string))
@@ -167,9 +167,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public TransactionIdentifiers UserTransactionIdentifiers { get; set; }
 
         /// <summary>
-        /// THE FEE ASSIGNMENT IS NOT CURRENTLY FULLY ACCURATE FOR SOME TRANSACTIONS. THIS WILL BE FIXED AT RCNET-V2. A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. 
+        /// A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. 
         /// </summary>
-        /// <value>THE FEE ASSIGNMENT IS NOT CURRENTLY FULLY ACCURATE FOR SOME TRANSACTIONS. THIS WILL BE FIXED AT RCNET-V2. A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. </value>
+        /// <value>A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. </value>
         [DataMember(Name = "fungible_entity_balance_changes", IsRequired = true, EmitDefaultValue = true)]
         public List<LtsEntityFungibleBalanceChanges> FungibleEntityBalanceChanges { get; set; }
 

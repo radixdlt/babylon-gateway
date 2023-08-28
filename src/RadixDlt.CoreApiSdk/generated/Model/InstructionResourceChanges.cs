@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="index">index (required).</param>
         /// <param name="resourceChanges">resourceChanges (required).</param>
-        public InstructionResourceChanges(int index = default(int), List<ResourceChange> resourceChanges = default(List<ResourceChange>))
+        public InstructionResourceChanges(long index = default(long), List<ResourceChange> resourceChanges = default(List<ResourceChange>))
         {
             this.Index = index;
             // to ensure "resourceChanges" is required (not null)
@@ -120,7 +120,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Index
         /// </summary>
         [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
-        public int Index { get; set; }
+        public long Index { get; set; }
 
         /// <summary>
         /// Gets or Sets ResourceChanges

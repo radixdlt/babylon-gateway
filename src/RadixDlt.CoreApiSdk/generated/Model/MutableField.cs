@@ -84,63 +84,49 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// SortedSubstateKey
+    /// MutableField
     /// </summary>
-    [DataContract(Name = "SortedSubstateKey")]
-    [JsonConverter(typeof(JsonSubtypes), "key_type")]
-    [JsonSubtypes.KnownSubType(typeof(FieldSubstateKey), "Field")]
-    [JsonSubtypes.KnownSubType(typeof(MapSubstateKey), "Map")]
-    [JsonSubtypes.KnownSubType(typeof(SortedSubstateKey), "Sorted")]
-    public partial class SortedSubstateKey : SubstateKey, IEquatable<SortedSubstateKey>
+    [DataContract(Name = "MutableField")]
+    public partial class MutableField : IEquatable<MutableField>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SortedSubstateKey" /> class.
+        /// Initializes a new instance of the <see cref="MutableField" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected SortedSubstateKey() { }
+        protected MutableField() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="SortedSubstateKey" /> class.
+        /// Initializes a new instance of the <see cref="MutableField" /> class.
         /// </summary>
-        /// <param name="sortPrefixHex">The hex-encoded bytes of the sorted part of the key (required).</param>
-        /// <param name="keyHex">The hex-encoded remaining bytes of the key (required).</param>
-        /// <param name="keyType">keyType (required) (default to SubstateKeyType.Sorted).</param>
-        /// <param name="dbSortKeyHex">The hex-encoded bytes of the partially-hashed DB sort key, under the given entity partition (required).</param>
-        public SortedSubstateKey(string sortPrefixHex = default(string), string keyHex = default(string), SubstateKeyType keyType = SubstateKeyType.Sorted, string dbSortKeyHex = default(string)) : base(keyType, dbSortKeyHex)
+        /// <param name="name">name (required).</param>
+        /// <param name="index">index (required).</param>
+        public MutableField(string name = default(string), long index = default(long))
         {
-            // to ensure "sortPrefixHex" is required (not null)
-            if (sortPrefixHex == null)
+            // to ensure "name" is required (not null)
+            if (name == null)
             {
-                throw new ArgumentNullException("sortPrefixHex is a required property for SortedSubstateKey and cannot be null");
+                throw new ArgumentNullException("name is a required property for MutableField and cannot be null");
             }
-            this.SortPrefixHex = sortPrefixHex;
-            // to ensure "keyHex" is required (not null)
-            if (keyHex == null)
-            {
-                throw new ArgumentNullException("keyHex is a required property for SortedSubstateKey and cannot be null");
-            }
-            this.KeyHex = keyHex;
+            this.Name = name;
+            this.Index = index;
         }
 
         /// <summary>
-        /// The hex-encoded bytes of the sorted part of the key
+        /// Gets or Sets Name
         /// </summary>
-        /// <value>The hex-encoded bytes of the sorted part of the key</value>
-        [DataMember(Name = "sort_prefix_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string SortPrefixHex { get; set; }
+        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
+        public string Name { get; set; }
 
         /// <summary>
-        /// The hex-encoded remaining bytes of the key
+        /// Gets or Sets Index
         /// </summary>
-        /// <value>The hex-encoded remaining bytes of the key</value>
-        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
+        [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
+        public long Index { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +135,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class SortedSubstateKey {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  SortPrefixHex: ").Append(SortPrefixHex).Append("\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("class MutableField {\n");
+            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("  Index: ").Append(Index).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -161,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -173,30 +158,29 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as SortedSubstateKey);
+            return this.Equals(input as MutableField);
         }
 
         /// <summary>
-        /// Returns true if SortedSubstateKey instances are equal
+        /// Returns true if MutableField instances are equal
         /// </summary>
-        /// <param name="input">Instance of SortedSubstateKey to be compared</param>
+        /// <param name="input">Instance of MutableField to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(SortedSubstateKey input)
+        public bool Equals(MutableField input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.SortPrefixHex == input.SortPrefixHex ||
-                    (this.SortPrefixHex != null &&
-                    this.SortPrefixHex.Equals(input.SortPrefixHex))
-                ) && base.Equals(input) && 
+                    this.Name == input.Name ||
+                    (this.Name != null &&
+                    this.Name.Equals(input.Name))
+                ) && 
                 (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
+                    this.Index == input.Index ||
+                    this.Index.Equals(input.Index)
                 );
         }
 
@@ -208,15 +192,12 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.SortPrefixHex != null)
+                int hashCode = 41;
+                if (this.Name != null)
                 {
-                    hashCode = (hashCode * 59) + this.SortPrefixHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
                 }
-                if (this.KeyHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Index.GetHashCode();
                 return hashCode;
             }
         }

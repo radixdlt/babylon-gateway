@@ -103,23 +103,32 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="MempoolTransactionResponse" /> class.
         /// </summary>
-        /// <param name="payloadHex">The hex-encoded full notarized transaction payload. (required).</param>
-        public MempoolTransactionResponse(string payloadHex = default(string))
+        /// <param name="count">An integer giving the total count of payload hashes checked in the returned response. (required).</param>
+        /// <param name="payloads">An array containing pairs of payload hash (query) and payload hex or error (response). Note that this response is bounded - this means it is not guaranteed all queries will be processed. Please query missing payload hashes again.  (required).</param>
+        public MempoolTransactionResponse(int count = default(int), List<MempoolTransactionResponsePayloadsInner> payloads = default(List<MempoolTransactionResponsePayloadsInner>))
         {
-            // to ensure "payloadHex" is required (not null)
-            if (payloadHex == null)
+            this.Count = count;
+            // to ensure "payloads" is required (not null)
+            if (payloads == null)
             {
-                throw new ArgumentNullException("payloadHex is a required property for MempoolTransactionResponse and cannot be null");
+                throw new ArgumentNullException("payloads is a required property for MempoolTransactionResponse and cannot be null");
             }
-            this.PayloadHex = payloadHex;
+            this.Payloads = payloads;
         }
 
         /// <summary>
-        /// The hex-encoded full notarized transaction payload.
+        /// An integer giving the total count of payload hashes checked in the returned response.
         /// </summary>
-        /// <value>The hex-encoded full notarized transaction payload.</value>
-        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHex { get; set; }
+        /// <value>An integer giving the total count of payload hashes checked in the returned response.</value>
+        [DataMember(Name = "count", IsRequired = true, EmitDefaultValue = true)]
+        public int Count { get; set; }
+
+        /// <summary>
+        /// An array containing pairs of payload hash (query) and payload hex or error (response). Note that this response is bounded - this means it is not guaranteed all queries will be processed. Please query missing payload hashes again. 
+        /// </summary>
+        /// <value>An array containing pairs of payload hash (query) and payload hex or error (response). Note that this response is bounded - this means it is not guaranteed all queries will be processed. Please query missing payload hashes again. </value>
+        [DataMember(Name = "payloads", IsRequired = true, EmitDefaultValue = true)]
+        public List<MempoolTransactionResponsePayloadsInner> Payloads { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +138,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class MempoolTransactionResponse {\n");
-            sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
+            sb.Append("  Count: ").Append(Count).Append("\n");
+            sb.Append("  Payloads: ").Append(Payloads).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,9 +176,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PayloadHex == input.PayloadHex ||
-                    (this.PayloadHex != null &&
-                    this.PayloadHex.Equals(input.PayloadHex))
+                    this.Count == input.Count ||
+                    this.Count.Equals(input.Count)
+                ) && 
+                (
+                    this.Payloads == input.Payloads ||
+                    this.Payloads != null &&
+                    input.Payloads != null &&
+                    this.Payloads.SequenceEqual(input.Payloads)
                 );
         }
 
@@ -181,9 +196,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PayloadHex != null)
+                hashCode = (hashCode * 59) + this.Count.GetHashCode();
+                if (this.Payloads != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Payloads.GetHashCode();
                 }
                 return hashCode;
             }
