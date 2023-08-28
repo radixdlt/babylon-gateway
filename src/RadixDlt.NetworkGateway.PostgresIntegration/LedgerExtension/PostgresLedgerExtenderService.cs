@@ -385,6 +385,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 .PostResolveConfigure((InternalFungibleVaultEntity e) => e.RoyaltyVaultOfEntityId = referencedEntity.DatabaseId);
                         }
 
+                        foreach (var entityAddress in substate.SystemStructure.GetEntityAddresses())
+                        {
+                            referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
+                        }
+
                         if (substateData is CoreModel.IEntityAddressPointer parentAddressPointer)
                         {
                             foreach (var entityAddress in parentAddressPointer.GetEntityAddresses())
@@ -462,6 +467,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         var sid = deletedSubstate.SubstateId;
                         referencedEntities.GetOrAdd((EntityAddress)sid.EntityAddress, ea => new ReferencedEntity(ea, sid.EntityType, stateVersion));
+
+                        foreach (var entityAddress in deletedSubstate.SystemStructure.GetEntityAddresses())
+                        {
+                            referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
+                        }
                     }
 
                     if (committedTransaction.Receipt.Events != null)

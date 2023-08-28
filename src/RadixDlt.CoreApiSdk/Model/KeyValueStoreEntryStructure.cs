@@ -66,10 +66,10 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class KeyValueStoreEntryStructure : IEntityAddressPointer
+public partial class KeyValueStoreEntryStructure
 {
-    public IEnumerable<string> GetEntityAddresses()
+    public override IEnumerable<string> GetEntityAddresses()
     {
-        yield return this.KeyValueStoreAddress;
+        yield return KeyValueStoreAddress;
     }
 }

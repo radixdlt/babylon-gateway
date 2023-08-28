@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using System.Collections.Generic;
+
 namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class ObjectInstanceTypeReference
@@ -69,5 +71,10 @@ public partial class ObjectInstanceTypeReference
     public override SchemaDetails GetSchemaDetails()
     {
         return new SchemaDetails(SchemaHash, EntityAddress, LocalTypeIndex.Index, LocalTypeIndex.Kind);
+    }
+
+    public override IEnumerable<string> GetEntityAddresses()
+    {
+        yield return EntityAddress;
     }
 }
