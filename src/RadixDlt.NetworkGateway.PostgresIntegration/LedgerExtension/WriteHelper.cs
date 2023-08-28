@@ -447,7 +447,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY state_history (id, from_state_version, entity_id, discriminator, json_state, sbor_state, type_index, schema_hash, sbor_type_kind) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY state_history (id, from_state_version, entity_id, discriminator, json_state, sbor_state, type_index, schema_hash, sbor_type_kind, schema_defining_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in stateHistory)
         {
@@ -465,6 +465,7 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
                     break;
                 case SborStateHistory sborStateHistory:
                     await writer.WriteNullAsync(token);
@@ -472,6 +473,7 @@ internal class WriteHelper
                     await writer.WriteAsync(sborStateHistory.TypeIndex, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(sborStateHistory.SchemaHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(sborStateHistory.SborTypeKind, "sbor_type_kind", token);
+                    await writer.WriteAsync(sborStateHistory.SchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
                     break;
             }
         }
@@ -943,14 +945,14 @@ internal class WriteHelper
         }
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY schema_history (id, from_state_version, package_entity_id, schema_hash, schema) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync("COPY schema_history (id, from_state_version, entity_id, schema_hash, schema) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
         }

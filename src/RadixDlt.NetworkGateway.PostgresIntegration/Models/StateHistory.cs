@@ -101,6 +101,9 @@ internal class SborStateHistory : StateHistory
 
     [Column("type_index")]
     public long TypeIndex { get; set; }
+
+    [Column("schema_defining_entity_id")]
+    public long SchemaDefiningEntityId { get; set; }
 }
 
 public enum StateType

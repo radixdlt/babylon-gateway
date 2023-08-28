@@ -77,8 +77,8 @@ internal class SchemaHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("package_entity_id")]
-    public long PackageEntityId { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
     [Column("schema_hash")]
     public byte[] SchemaHash { get; set; }
