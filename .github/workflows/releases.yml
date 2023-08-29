@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Get rele ase
         id: get_release
-        uses: bruceadams/get-release@f589ce0779c7bef1faf175f7488c972eb47dc046
+        uses: bruceadams/get-release@74c3d60f5a28f358ccf241a00c9021ea16f0569f
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Setup tags for docker image
@@ -101,7 +101,7 @@ jobs:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
-  
+
   docker-data-aggregator-dockerhub:
     name: (DataAggregator) Docker
     needs:
@@ -126,7 +126,7 @@ jobs:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
-  
+
   docker-gateway-api-dockerhub:
     name: (GatewayApi) Docker
     needs:
