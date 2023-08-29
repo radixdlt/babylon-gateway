@@ -66,17 +66,17 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 public interface IVirtualEntityMetadataProvider
 {
-    EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress);
+    GatewayModel.EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress);
 }
 
 public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
@@ -88,7 +88,7 @@ public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress)
+    public GatewayModel.EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress)
     {
         var decodedAddress = RadixAddressCodec.Decode(virtualEntityAddress);
 
@@ -124,13 +124,13 @@ public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
             ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, ToolkitModel.SerializationMode.PROGRAMMATIC,
                 _networkConfigurationProvider.GetNetworkId(), null);
 
-        return new EntityMetadataCollection(
+        return new GatewayModel.EntityMetadataCollection(
             totalCount: 2,
             nextCursor: null,
-            items: new List<EntityMetadataItem>
+            items: new List<GatewayModel.EntityMetadataItem>
             {
-                new("owner_keys", new EntityMetadataItemValue(ownerKeysRawHex, new JRaw(ownerKeysJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem))),
-                new("owner_badge", new EntityMetadataItemValue(ownerBadgeRawHex, new JRaw(ownerBadgeJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem))),
+                new("owner_keys", new GatewayModel.EntityMetadataItemValue(ownerKeysRawHex, new JRaw(ownerKeysJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem))),
+                new("owner_badge", new GatewayModel.EntityMetadataItemValue(ownerBadgeRawHex, new JRaw(ownerBadgeJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem))),
             }
         );
     }
