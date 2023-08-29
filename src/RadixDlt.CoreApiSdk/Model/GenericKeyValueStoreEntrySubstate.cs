@@ -71,14 +71,14 @@ public partial class GenericKeyValueStoreEntrySubstate : IEntityOwner, IEntityAd
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
-        return Value.Data != null
+        return Value?.Data != null
             ? Value.Data.OwnedEntities
             : Enumerable.Empty<EntityReference>();
     }
 
     public IEnumerable<string> GetEntityAddresses()
     {
-        return Value.Data != null
+        return Value?.Data != null
             ? Value.Data.ReferencedEntities.Select(re => re.EntityAddress)
             : Enumerable.Empty<string>();
     }
