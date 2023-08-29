@@ -25,6 +25,7 @@ Now:
 - Renamed `access_rules` to `role_assignments`. Included missing `module` to role assignment key.
 - Deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
 - Transaction hashes are now exposed as Bech32m hashes instead of hex-encoded binary sequences.
+- Dropped `previous_cursor` altogether from all paginable collections.
 
 ## Full technical changelog by minor release
 ### 0.4.1

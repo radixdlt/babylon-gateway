@@ -105,12 +105,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
         /// <param name="address">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public StateEntityNonFungibleResourceVaultsPageResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem> items = default(List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>), string address = default(string), string resourceAddress = default(string))
+        public StateEntityNonFungibleResourceVaultsPageResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string nextCursor = default(string), List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem> items = default(List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>), string address = default(string), string resourceAddress = default(string))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -137,7 +136,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.ResourceAddress = resourceAddress;
             this.TotalCount = totalCount;
-            this.PreviousCursor = previousCursor;
             this.NextCursor = nextCursor;
         }
 
@@ -153,13 +151,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
         [DataMember(Name = "total_count", EmitDefaultValue = true)]
         public long? TotalCount { get; set; }
-
-        /// <summary>
-        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
 
         /// <summary>
         /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
@@ -198,7 +189,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class StateEntityNonFungibleResourceVaultsPageResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
             sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
@@ -249,11 +239,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
-                ) && 
-                (
                     this.NextCursor == input.NextCursor ||
                     (this.NextCursor != null &&
                     this.NextCursor.Equals(input.NextCursor))
@@ -292,10 +277,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.TotalCount != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                }
-                if (this.PreviousCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
                 }
                 if (this.NextCursor != null)
                 {
