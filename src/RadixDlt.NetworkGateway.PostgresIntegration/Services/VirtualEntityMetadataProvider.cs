@@ -124,8 +124,10 @@ public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
             ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, ToolkitModel.SerializationMode.PROGRAMMATIC,
                 _networkConfigurationProvider.GetNetworkId(), null);
 
-        return new EntityMetadataCollection(2, null, null,
-            new List<EntityMetadataItem>
+        return new EntityMetadataCollection(
+            totalCount: 2,
+            nextCursor: null,
+            items: new List<EntityMetadataItem>
             {
                 new("owner_keys", new EntityMetadataItemValue(ownerKeysRawHex, new JRaw(ownerKeysJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem))),
                 new("owner_badge", new EntityMetadataItemValue(ownerBadgeRawHex, new JRaw(ownerBadgeJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem))),

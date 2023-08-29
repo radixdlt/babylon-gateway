@@ -483,7 +483,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             result.Items.ForEach(nfr => nfr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)nfr.ResourceAddress]]);
         }
 
-        return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, result.TotalCount, result.PreviousCursor, result.NextCursor, result.Items, pageRequest.Address);
+        return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, result.TotalCount, result.NextCursor, result.Items, pageRequest.Address);
     }
 
     public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(
@@ -537,7 +537,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             result.Items.ForEach(fr => fr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)fr.ResourceAddress]]);
         }
 
-        return new GatewayModel.StateEntityFungiblesPageResponse(ledgerState, result.TotalCount, result.PreviousCursor, result.NextCursor, result.Items, pageRequest.Address);
+        return new GatewayModel.StateEntityFungiblesPageResponse(ledgerState, result.TotalCount, result.NextCursor, result.Items, pageRequest.Address);
     }
 
     public async Task<GatewayModel.FungibleResourcesCollection> EntityFungibleResourcesPageSlice(
@@ -563,9 +563,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entity = await GetEntity<Entity>(request.Address, ledgerState, token);
         var metadata = (await GetMetadataSlices(new[] { entity.Id }, request.Offset, request.Limit, ledgerState, token))[entity.Id];
 
-        return new GatewayModel.StateEntityMetadataPageResponse(
-            ledgerState, metadata.TotalCount, metadata.PreviousCursor,
-            metadata.NextCursor, metadata.Items, entity.Address);
+        return new GatewayModel.StateEntityMetadataPageResponse(ledgerState, metadata.TotalCount, metadata.NextCursor, metadata.Items, entity.Address);
     }
 
     public async Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaults(
@@ -577,8 +575,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var resourceEntity = await GetEntity<GlobalFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
         var fungibles = await GetFungibleResourceVaults(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
 
-        return new GatewayModel.StateEntityFungibleResourceVaultsPageResponse(
-            ledgerState, fungibles.TotalCount, fungibles.PreviousCursor, fungibles.NextCursor, fungibles.Items, entity.Address, resourceEntity.Address);
+        return new GatewayModel.StateEntityFungibleResourceVaultsPageResponse(ledgerState, fungibles.TotalCount, fungibles.NextCursor, fungibles.Items, entity.Address, resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(
@@ -593,9 +590,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var vaultEntity = await GetEntity<VaultEntity>(vaultAddress, ledgerState, token);
         var nonFungibleIds = await GetNonFungibleIdsSlice(entity.Id, resourceEntity.Id, vaultEntity.Id, request.Offset, request.Limit, ledgerState, token);
 
-        return new GatewayModel.StateEntityNonFungibleIdsPageResponse(
-            ledgerState, nonFungibleIds.TotalCount, nonFungibleIds.PreviousCursor, nonFungibleIds.NextCursor,
-            nonFungibleIds.Items, entity.Address, resourceEntity.Address);
+        return new GatewayModel.StateEntityNonFungibleIdsPageResponse(ledgerState, nonFungibleIds.TotalCount, nonFungibleIds.NextCursor, nonFungibleIds.Items, entity.Address, resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(
@@ -640,10 +635,6 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
             })
             .ToList();
 
-        var previousCursor = request.Offset > 0
-            ? new GatewayModel.OffsetCursor(Math.Max(request.Offset - request.Limit, 0)).ToCursorString()
-            : null;
-
         var nextCursor = items.Count > request.Limit
             ? new GatewayModel.OffsetCursor(request.Offset + request.Limit).ToCursorString()
             : null;
@@ -653,7 +644,6 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
             resourceAddress: request.Address.ToString(),
             nonFungibleIds: new GatewayModel.NonFungibleIdsCollection(
                 totalCount: totalCount,
-                previousCursor: previousCursor,
                 nextCursor: nextCursor,
                 items: items.Take(request.Limit).ToList()));
     }
@@ -960,7 +950,7 @@ INNER JOIN LATERAL (
             ? new GatewayModel.StateValidatorsListCursor(validatorsAndOneMore.Last().Id).ToCursorString()
             : null;
 
-        return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, null, nextCursor, items));
+        return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, nextCursor, items));
     }
 
     public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
@@ -1088,15 +1078,11 @@ INNER JOIN LATERAL (
                 items: ids));
         }
 
-        var previousCursor = resourceOffset > 0
-            ? new GatewayApiSdk.Model.OffsetCursor(Math.Max(resourceOffset - resourceLimit, 0)).ToCursorString()
-            : null;
-
         var nextCursor = resourcesTotalCount > resourceLimit + resourceOffset
             ? new GatewayApiSdk.Model.OffsetCursor(resourceLimit).ToCursorString()
             : null;
 
-        return new GatewayApiSdk.Model.NonFungibleResourcesCollection(resourcesTotalCount, previousCursor, nextCursor,
+        return new GatewayApiSdk.Model.NonFungibleResourcesCollection(resourcesTotalCount, nextCursor,
             resources.Values.Cast<GatewayApiSdk.Model.NonFungibleResourcesCollectionItem>().ToList());
     }
 
@@ -1127,16 +1113,11 @@ INNER JOIN LATERAL (
 
         var vaultsTotalCount = input.FirstOrDefault()?.VaultTotalCount ?? 0;
 
-        var previousCursor = offset > 0
-            ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
-            : null;
-
         var nextCursor = vaultsTotalCount > offset + limit
             ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 
-        return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(ledgerState, vaultsTotalCount, previousCursor, nextCursor, mapped, entityGlobalAddress,
-            resourceGlobalAddress);
+        return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(ledgerState, vaultsTotalCount, nextCursor, mapped, entityGlobalAddress, resourceGlobalAddress);
     }
 
     private async Task<List<RoyaltyVaultBalanceViewModel>> RoyaltyVaultBalance(long[] ownerIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -1213,15 +1194,11 @@ ORDER BY metadata_join.ordinality ASC;",
         {
             if (!result.ContainsKey(vm.EntityId))
             {
-                var previousCursor = offset > 0
-                    ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
-                    : null;
-
                 var nextCursor = vm.TotalCount > limit
                     ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
                     : null;
 
-                result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, previousCursor, nextCursor, new List<GatewayModel.EntityMetadataItem>());
+                result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, nextCursor, new List<GatewayModel.EntityMetadataItem>());
             }
 
             var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
@@ -1376,15 +1353,11 @@ order by ah.ord
                 lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
         }
 
-        var previousCursor = offset > 0
-            ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
-            : null;
-
         var nextCursor = items.Count > limit
             ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 
-        return new GatewayModel.FungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
+        return new GatewayModel.FungibleResourcesCollection(totalCount, nextCursor, items.Take(limit).ToList());
     }
 
     private async Task<Dictionary<long, ResourceEntitySupplyHistory>> GetResourcesSupplyData(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
@@ -1522,15 +1495,11 @@ ORDER BY vah.resource_order, vah.vault_order;
                 lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
         }
 
-        var previousCursor = resourceOffset > 0
-            ? new GatewayModel.OffsetCursor(Math.Max(resourceOffset - resourceLimit, 0)).ToCursorString()
-            : null;
-
         var nextCursor = resourcesTotalCount > resourceLimit + resourceOffset
             ? new GatewayModel.OffsetCursor(resourceLimit).ToCursorString()
             : null;
 
-        return new GatewayModel.FungibleResourcesCollection(resourcesTotalCount, previousCursor, nextCursor, resources.Values.Cast<GatewayModel.FungibleResourcesCollectionItem>().ToList());
+        return new GatewayModel.FungibleResourcesCollection(resourcesTotalCount, nextCursor, resources.Values.Cast<GatewayModel.FungibleResourcesCollectionItem>().ToList());
     }
 
     private async Task<GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault> GetFungibleResourceVaults(
@@ -1599,15 +1568,11 @@ ORDER BY vah.ord;
                     lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion))
             .ToList();
 
-        var previousCursor = vaultOffset > 0
-            ? new GatewayModel.OffsetCursor(Math.Max(vaultOffset - vaultLimit, 0)).ToCursorString()
-            : null;
-
         var nextCursor = vaultsTotalCount > vaultOffset + vaultLimit
             ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
             : null;
 
-        return new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(vaultsTotalCount, previousCursor, nextCursor, castedResult);
+        return new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(vaultsTotalCount, nextCursor, castedResult);
     }
 
     private async Task<GatewayModel.NonFungibleResourcesCollection> GetNonFungiblesSliceAggregatedPerResource(
@@ -1670,15 +1635,11 @@ order by ah.ord;
                 lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
         }
 
-        var previousCursor = offset > 0
-            ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
-            : null;
-
         var nextCursor = items.Count > limit
             ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 
-        return new GatewayModel.NonFungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
+        return new GatewayModel.NonFungibleResourcesCollection(totalCount, nextCursor, items.Take(limit).ToList());
     }
 
     private async Task<List<NonFungibleAggregatedPerVaultViewModel>> GetNonFungiblesSliceAggregatedPerVault(
@@ -1941,15 +1902,11 @@ order by ord
             })
             .ToList();
 
-        var previousCursor = offset > 0
-            ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
-            : null;
-
         var nextCursor = offset + limit < totalCount
             ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 
-        return new GatewayModel.NonFungibleIdsCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
+        return new GatewayModel.NonFungibleIdsCollection(totalCount, nextCursor, items.Take(limit).ToList());
     }
 
     private async Task<TEntity> GetEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
