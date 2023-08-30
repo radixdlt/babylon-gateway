@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using GatewayApi.SlowRequestLogging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
@@ -117,17 +118,24 @@ public class GatewayApiStartup
         services
             .AddHealthChecks()
             .ForwardToPrometheus();
+
+        services
+            .AddSlowRequestLogging(options =>
+            {
+                options.SlowRequestThreshold = TimeSpan.FromMilliseconds(250);
+            });
     }
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
     {
         application
+            .UseSlowRequestLogging()
+            .UseRequestTimeout()
+            .UseCors()
+            .UseRouting()
             .UseAuthentication()
             .UseAuthorization()
-            .UseCors()
             .UseHttpMetrics()
-            .UseRouting()
-            .UseRequestTimeout()
             .UseEndpoints(endpoints =>
             {
                 if (_enableSwagger)
