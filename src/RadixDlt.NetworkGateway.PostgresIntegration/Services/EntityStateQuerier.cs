@@ -509,7 +509,7 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
                 stateVersion = ledgerState.StateVersion,
                 entityId = entity.Id,
                 startIndex = request.Offset + 1,
-                endIndex = request.Offset + 1 + request.Limit,
+                endIndex = request.Offset + request.Limit,
             },
             cancellationToken: token);
 
@@ -986,7 +986,7 @@ ORDER BY metadata_join.ordinality ASC;",
                 entityIds = entityIds,
                 stateVersion = ledgerState.StateVersion,
                 startIndex = offset + 1,
-                endIndex = offset + 1 + limit,
+                endIndex = offset + limit,
             },
             cancellationToken: token);
 
@@ -1104,7 +1104,7 @@ WITH most_recent_entity_resource_aggregate_history_nested AS (
 most_recent_entity_resource_aggregate_history AS (
     SELECT a.val AS fungible_resource_entity_id, cardinality(fungible_resource_entity_ids) AS resources_total_count, a.ord AS ord
     FROM most_recent_entity_resource_aggregate_history_nested
-    LEFT JOIN LATERAL UNNEST(fungible_resource_entity_ids[@offset:@limit]) WITH ORDINALITY AS a(val,ord) ON true
+    LEFT JOIN LATERAL UNNEST(fungible_resource_entity_ids[@startIndex:@endIndex]) WITH ORDINALITY AS a(val,ord) ON true
 )
 SELECT
     e.address AS ResourceEntityAddress,
@@ -1126,8 +1126,8 @@ order by ah.ord
             {
                 stateVersion = ledgerState.StateVersion,
                 entityId = entityId,
-                offset = offset + 1,
-                limit = offset + 1 + limit,
+                startIndex = offset + 1,
+                endIndex = offset + limit,
             },
             cancellationToken: token);
 
