@@ -47,11 +47,13 @@ export type StateEntityDetailsOptions = {
   componentRoyaltyVaultBalance?: true
 }
 
-export type StateEntityDetailsVaultResponseItem =
-  StateEntityDetailsResponseItem & {
-    fungible_resources: FungibleResourcesVaultCollection
-    non_fungible_resources: NonFungibleResourcesVaultCollection
-  }
+export type StateEntityDetailsVaultResponseItem = Omit<
+  StateEntityDetailsResponseItem,
+  'fungible_resources' | 'non_fungible_resources'
+> & {
+  fungible_resources: FungibleResourcesVaultCollection
+  non_fungible_resources: NonFungibleResourcesVaultCollection
+}
 
 export class State {
   constructor(
