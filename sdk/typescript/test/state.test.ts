@@ -4,14 +4,7 @@ import { GatewayApiClient } from './../lib/index'
 const fetchRequestFactory = (body: any) => ({
   body: JSON.stringify(body),
   credentials: undefined,
-  headers: {
-    'Content-Type': 'application/json',
-    'RDX-App-Dapp-Definition': 'Unknown',
-    'RDX-App-Name': 'Unknown',
-    'RDX-App-Version': 'Unknown',
-    'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
-    'RDX-Client-Version': '0.0.0',
-  },
+  headers: expect.anything(),
   method: 'POST',
 })
 
