@@ -33,12 +33,6 @@ export interface ValidatorCollection {
      */
     total_count?: number | null;
     /**
-     * If specified, contains a cursor to query previous page of the `items` collection.
-     * @type {string}
-     * @memberof ValidatorCollection
-     */
-    previous_cursor?: string | null;
-    /**
      * If specified, contains a cursor to query next page of the `items` collection.
      * @type {string}
      * @memberof ValidatorCollection
@@ -73,7 +67,6 @@ export function ValidatorCollectionFromJSONTyped(json: any, ignoreDiscriminator:
     return {
         
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
-        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
         'items': ((json['items'] as Array<any>).map(ValidatorCollectionItemFromJSON)),
     };
@@ -89,7 +82,6 @@ export function ValidatorCollectionToJSON(value?: ValidatorCollection | null): a
     return {
         
         'total_count': value.total_count,
-        'previous_cursor': value.previous_cursor,
         'next_cursor': value.next_cursor,
         'items': ((value.items as Array<any>).map(ValidatorCollectionItemToJSON)),
     };
