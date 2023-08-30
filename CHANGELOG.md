@@ -1,6 +1,5 @@
 # 0.5.0 - RCNet v3
 Release Date: unreleased
-- Return programmatic json with type names for custom component state in `/state/entity/details` endpoint.
 
 ## RCNet v2 to RCNet v3 Migration Guide
 
@@ -26,6 +25,7 @@ Now:
 - Deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
 - Transaction hashes are now exposed as Bech32m hashes instead of hex-encoded binary sequences.
 - Dropped `previous_cursor` altogether from all paginable collections.
+- Returning programmatic json with type names for custom scrypto component state in `/state/entity/details` endpoint.
 
 ## Full technical changelog by minor release
 ### 0.4.1
