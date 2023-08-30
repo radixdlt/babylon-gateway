@@ -239,6 +239,10 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity);
 
         modelBuilder
+            .Entity<LedgerTransactionMarker>()
+            .HasIndex(e => e.StateVersion);
+
+        modelBuilder
             .Entity<EventLedgerTransactionMarker>()
             .HasIndex(e => new { e.EventType, e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'event'");

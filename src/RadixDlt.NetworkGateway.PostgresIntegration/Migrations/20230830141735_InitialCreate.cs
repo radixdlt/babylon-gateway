@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -803,6 +803,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 table: "ledger_transaction_markers",
                 columns: new[] { "origin_type", "state_version" },
                 filter: "discriminator = 'origin'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_state_version",
+                table: "ledger_transaction_markers",
+                column: "state_version");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_epoch_round_in_epoch",
