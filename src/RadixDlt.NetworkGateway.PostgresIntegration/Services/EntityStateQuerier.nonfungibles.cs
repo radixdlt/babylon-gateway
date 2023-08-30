@@ -86,7 +86,7 @@ order by ah.ord;
                 stateVersion = ledgerState.StateVersion,
                 entityId = entityId,
                 startIndex = offset + 1,
-                endIndex = offset + 1 + limit,
+                endIndex = offset + limit,
             },
             cancellationToken: token);
 
@@ -178,9 +178,9 @@ ORDER BY vah.resource_order, vah.vault_order;
                 stateVersion = ledgerState.StateVersion,
                 entityId = entityId,
                 resourceStartIndex = resourceOffset + 1,
-                resourceEndIndex = resourceOffset + 1 + resourceLimit,
+                resourceEndIndex = resourceOffset + resourceLimit,
                 vaultStartIndex = vaultOffset + 1,
-                vaultEndIndex = vaultOffset + 1 + vaultLimit,
+                vaultEndIndex = vaultOffset + vaultLimit,
             },
             cancellationToken: token);
 
@@ -245,7 +245,7 @@ ORDER BY vah.ord;
                 entityId = entityId,
                 resourceEntityId = resourceEntityId,
                 startIndex = offset + 1,
-                endIndex = offset + 1 + limit,
+                endIndex = offset + limit,
             },
             cancellationToken: token);
 
@@ -286,7 +286,7 @@ order by ord
                 vaultEntityId = vaultEntityId,
                 resourceEntityId = resourceEntityId,
                 startIndex = offset + 1,
-                endIndex = offset + 1 + limit,
+                endIndex = offset + limit,
             },
             cancellationToken: token);
 
