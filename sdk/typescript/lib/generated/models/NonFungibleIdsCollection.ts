@@ -26,12 +26,6 @@ export interface NonFungibleIdsCollection {
      */
     total_count?: number | null;
     /**
-     * If specified, contains a cursor to query previous page of the `items` collection.
-     * @type {string}
-     * @memberof NonFungibleIdsCollection
-     */
-    previous_cursor?: string | null;
-    /**
      * If specified, contains a cursor to query next page of the `items` collection.
      * @type {string}
      * @memberof NonFungibleIdsCollection
@@ -66,7 +60,6 @@ export function NonFungibleIdsCollectionFromJSONTyped(json: any, ignoreDiscrimin
     return {
         
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
-        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
         'items': json['items'],
     };
@@ -82,7 +75,6 @@ export function NonFungibleIdsCollectionToJSON(value?: NonFungibleIdsCollection 
     return {
         
         'total_count': value.total_count,
-        'previous_cursor': value.previous_cursor,
         'next_cursor': value.next_cursor,
         'items': value.items,
     };

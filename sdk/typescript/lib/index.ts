@@ -9,6 +9,7 @@ import {
 import { State, Statistics, Status, Stream, Transaction } from './subapis'
 import { RuntimeConfiguration } from './runtime'
 import { normalizeBasePath } from './helpers/normalize-base-path'
+import { SDK_VERSION } from './constants'
 
 export * from './generated'
 export * from './subapis'
@@ -19,32 +20,50 @@ export type GatewayApiClientSettings = ConfigurationParameters & {
    * Maximum number of addresses that can be queried at once when using /state/entity/details endpoint
    */
   maxAddressesCount?: number
+
   /**
    * Maximum number of NFT IDs that can be queried at once when using /state/non-fungible/data endpoint
    */
   maxNftIdsCount?: number
+
   /**
-   * This is only used for statistics purposes. It is not required for any functionality.
+   * Application name required for statistics purposes.
    */
-  dAppDefinitionAddress?: string
+  applicationName: string
+
+  /**
+   * Application version which can be used for statistics purposes.
+   */
+  applicationVersion?: string
+
+  /**
+   * Application dApp definition address which can be used for statistics purposes.
+   */
+  applicationDappDefinitionAddress?: string
 }
 
 export class GatewayApiClient {
-  static initialize(settings?: GatewayApiClientSettings) {
+  static initialize(settings: GatewayApiClientSettings) {
     const configuration = GatewayApiClient.constructConfiguration(settings)
     return new GatewayApiClient(configuration)
   }
 
-  private static constructConfiguration(settings?: GatewayApiClientSettings) {
+  private static constructConfiguration(settings: GatewayApiClientSettings) {
     const basePath = normalizeBasePath(settings?.basePath)
+    const applicationName = settings?.applicationName ?? 'Unknown'
+
     return new RuntimeConfiguration({
       ...settings,
       basePath,
+      applicationName,
       headers: {
         ...(settings?.headers ?? {}),
-        ...(settings?.dAppDefinitionAddress
-          ? { 'dapp-definition-address': settings.dAppDefinitionAddress }
-          : {}),
+        'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
+        'RDX-Client-Version': SDK_VERSION,
+        'RDX-App-Name': applicationName,
+        'RDX-App-Version': settings.applicationVersion ?? 'Unknown',
+        'RDX-App-Dapp-Definition':
+          settings.applicationDappDefinitionAddress ?? 'Unknown',
       },
     })
   }
