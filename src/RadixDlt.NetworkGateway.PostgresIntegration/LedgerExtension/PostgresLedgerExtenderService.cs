@@ -609,7 +609,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     GlobalConsensusManager => CoreModel.EntityType.GlobalConsensusManager,
                     GlobalAccountEntity => CoreModel.EntityType.GlobalAccount,
-                    InternalAccountEntity => CoreModel.EntityType.InternalAccount,
                     GlobalFungibleResourceEntity => CoreModel.EntityType.GlobalFungibleResource,
                     GlobalNonFungibleResourceEntity => CoreModel.EntityType.GlobalNonFungibleResource,
                     GlobalValidatorEntity => CoreModel.EntityType.GlobalValidator,
@@ -655,7 +654,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.GlobalValidator => new GlobalValidatorEntity(),
                     CoreModel.EntityType.GlobalIdentity => new GlobalIdentityEntity(),
                     CoreModel.EntityType.GlobalAccount => new GlobalAccountEntity(),
-                    CoreModel.EntityType.InternalAccount => new InternalAccountEntity(),
                     CoreModel.EntityType.GlobalVirtualEd25519Identity => new GlobalIdentityEntity(),
                     CoreModel.EntityType.GlobalVirtualSecp256k1Identity => new GlobalIdentityEntity(),
                     CoreModel.EntityType.GlobalVirtualEd25519Account => new GlobalAccountEntity(),

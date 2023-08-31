@@ -115,7 +115,7 @@ internal static class ManifestAddressesExtractor
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();
         var accountAddresses = allAddresses
-            .Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_ACCOUNT or ToolkitModel.EntityType.INTERNAL_ACCOUNT or ToolkitModel.EntityType.GLOBAL_VIRTUAL_ED25519_ACCOUNT
+            .Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_ACCOUNT or ToolkitModel.EntityType.GLOBAL_VIRTUAL_ED25519_ACCOUNT
                 or ToolkitModel.EntityType.GLOBAL_VIRTUAL_SECP256K1_ACCOUNT)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();

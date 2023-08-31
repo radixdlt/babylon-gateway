@@ -200,7 +200,6 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 GlobalGenericComponent: GetHrpPrefix(at, AddressEntityType.GlobalGenericComponent),
                 InternalGenericComponent: GetHrpPrefix(at, AddressEntityType.InternalGenericComponent),
                 GlobalAccount: GetHrpPrefix(at, AddressEntityType.GlobalAccount),
-                InternalAccount: GetHrpPrefix(at, AddressEntityType.InternalAccount),
                 GlobalVirtualEd25519Account: GetHrpPrefix(at, AddressEntityType.GlobalVirtualEd25519Account),
                 GlobalVirtualSecp256k1Account: GetHrpPrefix(at, AddressEntityType.GlobalVirtualSecp256k1Account),
                 GlobalValidator: GetHrpPrefix(at, AddressEntityType.GlobalValidator),

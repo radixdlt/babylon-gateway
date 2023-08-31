@@ -104,9 +104,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="MempoolTransactionResponsePayloadsInner" /> class.
         /// </summary>
         /// <param name="hash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
+        /// <param name="hashBech32m">The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;. (required).</param>
         /// <param name="hex">The hex-encoded full notarized transaction payload - returned only if found in mempool..</param>
         /// <param name="error">Error message why &#x60;hex&#x60; field is missing: the transaction was not found in the mempool or the provided hash is invalid. .</param>
-        public MempoolTransactionResponsePayloadsInner(string hash = default(string), string hex = default(string), string error = default(string))
+        public MempoolTransactionResponsePayloadsInner(string hash = default(string), string hashBech32m = default(string), string hex = default(string), string error = default(string))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -114,6 +115,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("hash is a required property for MempoolTransactionResponsePayloadsInner and cannot be null");
             }
             this.Hash = hash;
+            // to ensure "hashBech32m" is required (not null)
+            if (hashBech32m == null)
+            {
+                throw new ArgumentNullException("hashBech32m is a required property for MempoolTransactionResponsePayloadsInner and cannot be null");
+            }
+            this.HashBech32m = hashBech32m;
             this.Hex = hex;
             this.Error = error;
         }
@@ -124,6 +131,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.</value>
+        [DataMember(Name = "hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
+        public string HashBech32m { get; set; }
 
         /// <summary>
         /// The hex-encoded full notarized transaction payload - returned only if found in mempool.
@@ -148,6 +162,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class MempoolTransactionResponsePayloadsInner {\n");
             sb.Append("  Hash: ").Append(Hash).Append("\n");
+            sb.Append("  HashBech32m: ").Append(HashBech32m).Append("\n");
             sb.Append("  Hex: ").Append(Hex).Append("\n");
             sb.Append("  Error: ").Append(Error).Append("\n");
             sb.Append("}\n");
@@ -191,6 +206,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Hash.Equals(input.Hash))
                 ) && 
                 (
+                    this.HashBech32m == input.HashBech32m ||
+                    (this.HashBech32m != null &&
+                    this.HashBech32m.Equals(input.HashBech32m))
+                ) && 
+                (
                     this.Hex == input.Hex ||
                     (this.Hex != null &&
                     this.Hex.Equals(input.Hex))
@@ -214,6 +234,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Hash != null)
                 {
                     hashCode = (hashCode * 59) + this.Hash.GetHashCode();
+                }
+                if (this.HashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.HashBech32m.GetHashCode();
                 }
                 if (this.Hex != null)
                 {

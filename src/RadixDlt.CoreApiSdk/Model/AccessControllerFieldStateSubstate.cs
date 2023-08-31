@@ -63,13 +63,18 @@
  */
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class AccessControllerFieldStateSubstate : IEntityOwner, IEntityAddressPointer
 {
-    public IEnumerable<EntityReference> GetOwnedEntities() => Value.DataStruct.OwnedEntities;
+    public IEnumerable<EntityReference> GetOwnedEntities()
+    {
+        yield return Value.ControlledVault;
+    }
 
-    public IEnumerable<string> GetEntityAddresses() => Value.DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
+    public IEnumerable<string> GetEntityAddresses()
+    {
+        yield return Value.RecoveryBadgeResourceAddress;
+    }
 }

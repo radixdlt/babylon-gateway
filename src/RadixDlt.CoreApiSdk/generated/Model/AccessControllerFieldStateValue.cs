@@ -103,22 +103,88 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessControllerFieldStateValue" /> class.
         /// </summary>
-        /// <param name="dataStruct">dataStruct (required).</param>
-        public AccessControllerFieldStateValue(DataStruct dataStruct = default(DataStruct))
+        /// <param name="controlledVault">controlledVault (required).</param>
+        /// <param name="timedRecoveryDelayMinutes">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the amount of time (in minutes) that it takes for timed recovery to be done. When not present, then timed recovery can not be performed through this access controller. .</param>
+        /// <param name="recoveryBadgeResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="isPrimaryRoleLocked">Whether the primary role is currently locked. (required).</param>
+        /// <param name="primaryRoleRecoveryAttempt">primaryRoleRecoveryAttempt.</param>
+        /// <param name="hasPrimaryRoleBadgeWithdrawAttempt">Whether the primary role badge withdraw is currently being attempted. (required).</param>
+        /// <param name="recoveryRoleRecoveryAttempt">recoveryRoleRecoveryAttempt.</param>
+        /// <param name="hasRecoveryRoleBadgeWithdrawAttempt">Whether the recovery role badge withdraw is currently being attempted. (required).</param>
+        public AccessControllerFieldStateValue(EntityReference controlledVault = default(EntityReference), long timedRecoveryDelayMinutes = default(long), string recoveryBadgeResourceAddress = default(string), bool isPrimaryRoleLocked = default(bool), PrimaryRoleRecoveryAttempt primaryRoleRecoveryAttempt = default(PrimaryRoleRecoveryAttempt), bool hasPrimaryRoleBadgeWithdrawAttempt = default(bool), RecoveryRoleRecoveryAttempt recoveryRoleRecoveryAttempt = default(RecoveryRoleRecoveryAttempt), bool hasRecoveryRoleBadgeWithdrawAttempt = default(bool))
         {
-            // to ensure "dataStruct" is required (not null)
-            if (dataStruct == null)
+            // to ensure "controlledVault" is required (not null)
+            if (controlledVault == null)
             {
-                throw new ArgumentNullException("dataStruct is a required property for AccessControllerFieldStateValue and cannot be null");
+                throw new ArgumentNullException("controlledVault is a required property for AccessControllerFieldStateValue and cannot be null");
             }
-            this.DataStruct = dataStruct;
+            this.ControlledVault = controlledVault;
+            // to ensure "recoveryBadgeResourceAddress" is required (not null)
+            if (recoveryBadgeResourceAddress == null)
+            {
+                throw new ArgumentNullException("recoveryBadgeResourceAddress is a required property for AccessControllerFieldStateValue and cannot be null");
+            }
+            this.RecoveryBadgeResourceAddress = recoveryBadgeResourceAddress;
+            this.IsPrimaryRoleLocked = isPrimaryRoleLocked;
+            this.HasPrimaryRoleBadgeWithdrawAttempt = hasPrimaryRoleBadgeWithdrawAttempt;
+            this.HasRecoveryRoleBadgeWithdrawAttempt = hasRecoveryRoleBadgeWithdrawAttempt;
+            this.TimedRecoveryDelayMinutes = timedRecoveryDelayMinutes;
+            this.PrimaryRoleRecoveryAttempt = primaryRoleRecoveryAttempt;
+            this.RecoveryRoleRecoveryAttempt = recoveryRoleRecoveryAttempt;
         }
 
         /// <summary>
-        /// Gets or Sets DataStruct
+        /// Gets or Sets ControlledVault
         /// </summary>
-        [DataMember(Name = "data_struct", IsRequired = true, EmitDefaultValue = true)]
-        public DataStruct DataStruct { get; set; }
+        [DataMember(Name = "controlled_vault", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference ControlledVault { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the amount of time (in minutes) that it takes for timed recovery to be done. When not present, then timed recovery can not be performed through this access controller. 
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the amount of time (in minutes) that it takes for timed recovery to be done. When not present, then timed recovery can not be performed through this access controller. </value>
+        [DataMember(Name = "timed_recovery_delay_minutes", EmitDefaultValue = true)]
+        public long TimedRecoveryDelayMinutes { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the resource address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "recovery_badge_resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string RecoveryBadgeResourceAddress { get; set; }
+
+        /// <summary>
+        /// Whether the primary role is currently locked.
+        /// </summary>
+        /// <value>Whether the primary role is currently locked.</value>
+        [DataMember(Name = "is_primary_role_locked", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsPrimaryRoleLocked { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PrimaryRoleRecoveryAttempt
+        /// </summary>
+        [DataMember(Name = "primary_role_recovery_attempt", EmitDefaultValue = true)]
+        public PrimaryRoleRecoveryAttempt PrimaryRoleRecoveryAttempt { get; set; }
+
+        /// <summary>
+        /// Whether the primary role badge withdraw is currently being attempted.
+        /// </summary>
+        /// <value>Whether the primary role badge withdraw is currently being attempted.</value>
+        [DataMember(Name = "has_primary_role_badge_withdraw_attempt", IsRequired = true, EmitDefaultValue = true)]
+        public bool HasPrimaryRoleBadgeWithdrawAttempt { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RecoveryRoleRecoveryAttempt
+        /// </summary>
+        [DataMember(Name = "recovery_role_recovery_attempt", EmitDefaultValue = true)]
+        public RecoveryRoleRecoveryAttempt RecoveryRoleRecoveryAttempt { get; set; }
+
+        /// <summary>
+        /// Whether the recovery role badge withdraw is currently being attempted.
+        /// </summary>
+        /// <value>Whether the recovery role badge withdraw is currently being attempted.</value>
+        [DataMember(Name = "has_recovery_role_badge_withdraw_attempt", IsRequired = true, EmitDefaultValue = true)]
+        public bool HasRecoveryRoleBadgeWithdrawAttempt { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +194,14 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessControllerFieldStateValue {\n");
-            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
+            sb.Append("  ControlledVault: ").Append(ControlledVault).Append("\n");
+            sb.Append("  TimedRecoveryDelayMinutes: ").Append(TimedRecoveryDelayMinutes).Append("\n");
+            sb.Append("  RecoveryBadgeResourceAddress: ").Append(RecoveryBadgeResourceAddress).Append("\n");
+            sb.Append("  IsPrimaryRoleLocked: ").Append(IsPrimaryRoleLocked).Append("\n");
+            sb.Append("  PrimaryRoleRecoveryAttempt: ").Append(PrimaryRoleRecoveryAttempt).Append("\n");
+            sb.Append("  HasPrimaryRoleBadgeWithdrawAttempt: ").Append(HasPrimaryRoleBadgeWithdrawAttempt).Append("\n");
+            sb.Append("  RecoveryRoleRecoveryAttempt: ").Append(RecoveryRoleRecoveryAttempt).Append("\n");
+            sb.Append("  HasRecoveryRoleBadgeWithdrawAttempt: ").Append(HasRecoveryRoleBadgeWithdrawAttempt).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +238,40 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DataStruct == input.DataStruct ||
-                    (this.DataStruct != null &&
-                    this.DataStruct.Equals(input.DataStruct))
+                    this.ControlledVault == input.ControlledVault ||
+                    (this.ControlledVault != null &&
+                    this.ControlledVault.Equals(input.ControlledVault))
+                ) && 
+                (
+                    this.TimedRecoveryDelayMinutes == input.TimedRecoveryDelayMinutes ||
+                    this.TimedRecoveryDelayMinutes.Equals(input.TimedRecoveryDelayMinutes)
+                ) && 
+                (
+                    this.RecoveryBadgeResourceAddress == input.RecoveryBadgeResourceAddress ||
+                    (this.RecoveryBadgeResourceAddress != null &&
+                    this.RecoveryBadgeResourceAddress.Equals(input.RecoveryBadgeResourceAddress))
+                ) && 
+                (
+                    this.IsPrimaryRoleLocked == input.IsPrimaryRoleLocked ||
+                    this.IsPrimaryRoleLocked.Equals(input.IsPrimaryRoleLocked)
+                ) && 
+                (
+                    this.PrimaryRoleRecoveryAttempt == input.PrimaryRoleRecoveryAttempt ||
+                    (this.PrimaryRoleRecoveryAttempt != null &&
+                    this.PrimaryRoleRecoveryAttempt.Equals(input.PrimaryRoleRecoveryAttempt))
+                ) && 
+                (
+                    this.HasPrimaryRoleBadgeWithdrawAttempt == input.HasPrimaryRoleBadgeWithdrawAttempt ||
+                    this.HasPrimaryRoleBadgeWithdrawAttempt.Equals(input.HasPrimaryRoleBadgeWithdrawAttempt)
+                ) && 
+                (
+                    this.RecoveryRoleRecoveryAttempt == input.RecoveryRoleRecoveryAttempt ||
+                    (this.RecoveryRoleRecoveryAttempt != null &&
+                    this.RecoveryRoleRecoveryAttempt.Equals(input.RecoveryRoleRecoveryAttempt))
+                ) && 
+                (
+                    this.HasRecoveryRoleBadgeWithdrawAttempt == input.HasRecoveryRoleBadgeWithdrawAttempt ||
+                    this.HasRecoveryRoleBadgeWithdrawAttempt.Equals(input.HasRecoveryRoleBadgeWithdrawAttempt)
                 );
         }
 
@@ -180,10 +284,26 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DataStruct != null)
+                if (this.ControlledVault != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ControlledVault.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.TimedRecoveryDelayMinutes.GetHashCode();
+                if (this.RecoveryBadgeResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.RecoveryBadgeResourceAddress.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.IsPrimaryRoleLocked.GetHashCode();
+                if (this.PrimaryRoleRecoveryAttempt != null)
+                {
+                    hashCode = (hashCode * 59) + this.PrimaryRoleRecoveryAttempt.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.HasPrimaryRoleBadgeWithdrawAttempt.GetHashCode();
+                if (this.RecoveryRoleRecoveryAttempt != null)
+                {
+                    hashCode = (hashCode * 59) + this.RecoveryRoleRecoveryAttempt.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.HasRecoveryRoleBadgeWithdrawAttempt.GetHashCode();
                 return hashCode;
             }
         }

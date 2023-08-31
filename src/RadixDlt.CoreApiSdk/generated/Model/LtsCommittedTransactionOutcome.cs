@@ -114,7 +114,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="userTransactionIdentifiers">userTransactionIdentifiers.</param>
         /// <param name="status">status (required).</param>
         /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated.  (required).</param>
-        /// <param name="resultantAccountFungibleBalances">THIS CURRENTLY RETURNS AN EMPTY LIST. THIS FEATURE WILL BE COMING AT RCNET-V2. A list of the resultant balances of any account balances changed in this transaction. Only balances for accounts are returned, not any other kind of entity.  (required).</param>
+        /// <param name="resultantAccountFungibleBalances">A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity.  (required).</param>
         /// <param name="totalFee">The string-encoded decimal representing the total amount of XRD payed as fee (execution, validator tip and royalties). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         public LtsCommittedTransactionOutcome(long stateVersion = default(long), string accumulatorHash = default(string), TransactionIdentifiers userTransactionIdentifiers = default(TransactionIdentifiers), LtsCommittedTransactionStatus status = default(LtsCommittedTransactionStatus), List<LtsEntityFungibleBalanceChanges> fungibleEntityBalanceChanges = default(List<LtsEntityFungibleBalanceChanges>), List<LtsResultantAccountFungibleBalances> resultantAccountFungibleBalances = default(List<LtsResultantAccountFungibleBalances>), string totalFee = default(string))
         {
@@ -174,9 +174,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<LtsEntityFungibleBalanceChanges> FungibleEntityBalanceChanges { get; set; }
 
         /// <summary>
-        /// THIS CURRENTLY RETURNS AN EMPTY LIST. THIS FEATURE WILL BE COMING AT RCNET-V2. A list of the resultant balances of any account balances changed in this transaction. Only balances for accounts are returned, not any other kind of entity. 
+        /// A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity. 
         /// </summary>
-        /// <value>THIS CURRENTLY RETURNS AN EMPTY LIST. THIS FEATURE WILL BE COMING AT RCNET-V2. A list of the resultant balances of any account balances changed in this transaction. Only balances for accounts are returned, not any other kind of entity. </value>
+        /// <value>A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity. </value>
         [DataMember(Name = "resultant_account_fungible_balances", IsRequired = true, EmitDefaultValue = true)]
         public List<LtsResultantAccountFungibleBalances> ResultantAccountFungibleBalances { get; set; }
 
