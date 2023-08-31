@@ -40,6 +40,12 @@ export interface StateEntityDetailsResponseComponentDetailsAllOf {
     blueprint_name: string;
     /**
      * 
+     * @type {string}
+     * @memberof StateEntityDetailsResponseComponentDetailsAllOf
+     */
+    blueprint_version: string;
+    /**
+     * 
      * @type {object}
      * @memberof StateEntityDetailsResponseComponentDetailsAllOf
      */
@@ -80,6 +86,7 @@ export type StateEntityDetailsResponseComponentDetailsAllOfTypeEnum = typeof Sta
 export function instanceOfStateEntityDetailsResponseComponentDetailsAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "blueprint_name" in value;
+    isInstance = isInstance && "blueprint_version" in value;
 
     return isInstance;
 }
@@ -96,6 +103,7 @@ export function StateEntityDetailsResponseComponentDetailsAllOfFromJSONTyped(jso
         
         'package_address': !exists(json, 'package_address') ? undefined : json['package_address'],
         'blueprint_name': json['blueprint_name'],
+        'blueprint_version': json['blueprint_version'],
         'state': !exists(json, 'state') ? undefined : json['state'],
         'role_assignments': !exists(json, 'role_assignments') ? undefined : ComponentEntityRoleAssignmentsFromJSON(json['role_assignments']),
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
@@ -114,6 +122,7 @@ export function StateEntityDetailsResponseComponentDetailsAllOfToJSON(value?: St
         
         'package_address': value.package_address,
         'blueprint_name': value.blueprint_name,
+        'blueprint_version': value.blueprint_version,
         'state': value.state,
         'role_assignments': ComponentEntityRoleAssignmentsToJSON(value.role_assignments),
         'royalty_vault_balance': value.royalty_vault_balance,
