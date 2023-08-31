@@ -282,6 +282,13 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
+    public ValueTask ResubmitAlreadyCommitted(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null)
+    {
+        _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_already_committed").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
     ValueTask ISubmissionServiceObserver.SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("success").Inc();

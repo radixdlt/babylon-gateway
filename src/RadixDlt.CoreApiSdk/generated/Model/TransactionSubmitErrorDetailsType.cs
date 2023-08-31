@@ -102,10 +102,16 @@ namespace RadixDlt.CoreApiSdk.Model
         PriorityThresholdNotMet = 1,
 
         /// <summary>
+        /// Enum IntentAlreadyCommitted for value: IntentAlreadyCommitted
+        /// </summary>
+        [EnumMember(Value = "IntentAlreadyCommitted")]
+        IntentAlreadyCommitted = 2,
+
+        /// <summary>
         /// Enum Rejected for value: Rejected
         /// </summary>
         [EnumMember(Value = "Rejected")]
-        Rejected = 2
+        Rejected = 3
 
     }
 
