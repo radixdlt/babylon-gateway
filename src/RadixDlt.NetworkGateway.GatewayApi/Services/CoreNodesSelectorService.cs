@@ -97,11 +97,14 @@ internal class CoreNodesSelectorService : ICoreNodesSelectorService
 
         var networkOptions = networkOptionsMonitor.CurrentValue;
 
-        _usableStatusesFromBestToWorst = Enum.GetValues(typeof(CoreNodeStatus)).Cast<CoreNodeStatus>()
+        _usableStatusesFromBestToWorst = Enum
+            .GetValues(typeof(CoreNodeStatus))
+            .Cast<CoreNodeStatus>()
             .Where(status => !networkOptions.IgnoreNonSyncedNodes || status == CoreNodeStatus.HealthyAndSynced)
             .OrderBy(s => s);
 
-        _allEnabledCoreNodes = networkOptions.CoreApiNodes
+        _allEnabledCoreNodes = networkOptions
+            .CoreApiNodes
             .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .ToList();
 

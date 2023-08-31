@@ -37,6 +37,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
       - run: cat $NPM_CONFIG_USERCONFIG
       - name: Build alphanet-gateway-sdk
+        env:
+          VITE_SDK_VERSION: ${{ github.event.inputs.package_version_number || steps.setup_tags.outputs.version-tag }}
         run: |
           npm ci
           npm run build

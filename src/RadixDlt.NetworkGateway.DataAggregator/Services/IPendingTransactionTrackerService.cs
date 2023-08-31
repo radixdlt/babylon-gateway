@@ -70,7 +70,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public readonly record struct PendingTransactionHashPair(ValueBytes IntentHash, ValueBytes PayloadHash);
+public readonly record struct PendingTransactionHashPair(string IntentHash, string PayloadHash);
 
 public sealed record PendingTransactionData(PendingTransactionHashPair Hashes, DateTime SeenAt, byte[] Payload);
 

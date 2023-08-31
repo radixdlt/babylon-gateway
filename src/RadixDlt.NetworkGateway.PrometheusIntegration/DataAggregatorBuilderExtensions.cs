@@ -85,7 +85,8 @@ public static class DataAggregatorBuilderExtensions
 
     public static DataAggregatorBuilder AddPrometheusObserverMetrics(this DataAggregatorBuilder builder)
     {
-        builder.Services
+        builder
+            .Services
             .AddSingleton<DataAggregatorMetricsObserver>()
             .AddSingleton<IGlobalWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INodeWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())

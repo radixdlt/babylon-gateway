@@ -72,7 +72,6 @@ public enum EntityType
     GlobalGenericComponent,
     InternalGenericComponent,
     GlobalAccountComponent,
-    InternalAccountComponent,
     GlobalPackage,
     InternalKeyValueStore,
     InternalFungibleVault,

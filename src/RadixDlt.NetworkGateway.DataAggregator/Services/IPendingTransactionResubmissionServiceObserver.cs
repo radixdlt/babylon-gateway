@@ -86,6 +86,8 @@ public interface IPendingTransactionResubmissionServiceObserver
 
     ValueTask PostResubmitDuplicate(byte[] notarizedTransaction);
 
+    ValueTask ResubmitAlreadyCommitted(byte[] notarizedTransaction);
+
     ValueTask PostResubmitSucceeded(byte[] notarizedTransaction);
 
     ValueTask ResubmitFailedPermanently(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);

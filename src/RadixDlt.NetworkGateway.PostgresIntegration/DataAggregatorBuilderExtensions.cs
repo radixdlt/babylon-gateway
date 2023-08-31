@@ -82,17 +82,18 @@ public static class DataAggregatorBuilderExtensions
 
     public static DataAggregatorBuilder AddPostgresPersistenceCore(this DataAggregatorBuilder builder)
     {
-        builder.Services
+        builder
+            .Services
             .AddSingleton<ILedgerExtenderService, PostgresLedgerExtenderService>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
-            .AddSingleton<IComponentSchemaProvider, ComponentSchemaProvider>()
             .AddSingleton<IPendingTransactionTrackerService, PendingTransactionTrackerService>()
             .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()
             .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>();
 
         CustomTypes.EnsureConfigured();
 
-        builder.Services
+        builder
+            .Services
             .AddNpgsqlDataSourceHolder<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
             .AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
             {
@@ -104,7 +105,8 @@ public static class DataAggregatorBuilderExtensions
 
     public static DataAggregatorBuilder AddPostgresPersistenceHealthChecks(this DataAggregatorBuilder builder)
     {
-        builder.Services
+        builder
+            .Services
             .AddHealthChecks()
             .AddDbContextCheck<ReadWriteDbContext>("database_connection_check");
 

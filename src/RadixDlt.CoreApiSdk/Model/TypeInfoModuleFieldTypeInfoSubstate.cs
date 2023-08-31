@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
@@ -77,5 +79,36 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
         }
 
         return Enumerable.Empty<string>();
+    }
+
+    public bool TryGetObjectInstanceGenericSubstitutions([NotNullWhen(true)] out List<TypeIdentifier> genericSubstitutions)
+    {
+        genericSubstitutions = null;
+
+        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions != null)
+        {
+            genericSubstitutions = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions;
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool TryGetNonFungibleDataSchemaDetails([NotNullWhen(true)] out TypeIdentifier schemaDetails)
+    {
+        schemaDetails = null;
+
+        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.BlueprintInfo.BlueprintName == NativeBlueprintNames.NonFungibleResourceManager)
+        {
+            if (objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions.Count != 1)
+            {
+                throw new NotSupportedException("Expected non fungible data with one data type entry.");
+            }
+
+            schemaDetails = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions.First();
+            return true;
+        }
+
+        return false;
     }
 }

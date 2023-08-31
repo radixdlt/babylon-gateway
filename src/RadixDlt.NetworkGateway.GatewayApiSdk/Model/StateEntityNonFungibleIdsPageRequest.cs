@@ -64,4 +64,6 @@
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public partial class StateEntityNonFungibleIdsPageRequest : IPaginableRequest { }
+public partial class StateEntityNonFungibleIdsPageRequest : IPaginableRequest
+{
+}

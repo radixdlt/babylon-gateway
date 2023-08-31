@@ -176,14 +176,16 @@ internal class GatewayApiMetricObserver :
         // This is a lot of labels, but the rest depend on the action and exception, so the cardinality isn't massive / worrying
         // Method/Controller/Action align with the prometheus-net http metrics
         // https://github.com/prometheus-net/prometheus-net/blob/master/Prometheus.AspNetCore/HttpMetrics/HttpRequestMiddlewareBase.cs
-        _apiResponseErrorCount.WithLabels(
-            actionContext.HttpContext.Request.Method, // method (GET or POST)
-            routeValueDictionary.GetValueOrDefault("Controller") as string ?? string.Empty, // controller
-            routeValueDictionary.GetValueOrDefault("Action") as string ?? string.Empty, // action
-            exception.GetNameForMetricsOrLogging(), // exception
-            gatewayErrorException.GatewayError.GetType().Name, // gateway_error
-            gatewayErrorException.StatusCode.ToString(CultureInfo.InvariantCulture) // status_code
-        ).Inc();
+        _apiResponseErrorCount
+            .WithLabels(
+                actionContext.HttpContext.Request.Method, // method (GET or POST)
+                routeValueDictionary.GetValueOrDefault("Controller") as string ?? string.Empty, // controller
+                routeValueDictionary.GetValueOrDefault("Action") as string ?? string.Empty, // action
+                exception.GetNameForMetricsOrLogging(), // exception
+                gatewayErrorException.GatewayError.GetType().Name, // gateway_error
+                gatewayErrorException.StatusCode.ToString(CultureInfo.InvariantCulture) // status_code
+            )
+            .Inc();
     }
 
     ValueTask ICoreNodeHealthCheckerObserver.CountByStatus(int healthyAndSyncedCount, int healthyButLaggingCount, int unhealthyCount)
@@ -276,6 +278,13 @@ internal class GatewayApiMetricObserver :
     ValueTask ISubmissionServiceObserver.SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask ResubmitAlreadyCommitted(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null)
+    {
+        _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_already_committed").Inc();
 
         return ValueTask.CompletedTask;
     }

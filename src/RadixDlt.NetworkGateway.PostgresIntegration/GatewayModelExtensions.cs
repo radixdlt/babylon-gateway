@@ -71,7 +71,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using LedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction;
+using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
+using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 using ToolkitModel = RadixEngineToolkit;
+using UserLedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransaction;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -115,19 +119,23 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(this LedgerTransaction lt, GatewayModel.TransactionCommittedDetailsOptIns optIns, Dictionary<long, string> entityIdToAddressMap)
+    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(
+        this LedgerTransaction lt,
+        GatewayModel.TransactionDetailsOptIns optIns,
+        Dictionary<long, string> entityIdToAddressMap,
+        List<string>? events)
     {
-        string? payloadHashHex = null;
-        string? intentHashHex = null;
+        string? payloadHash = null;
+        string? intentHash = null;
         string? rawHex = null;
-        string? messageHex = null;
+        JRaw? message = null;
 
         if (lt is UserLedgerTransaction ult)
         {
-            payloadHashHex = ult.PayloadHash.ToHex();
-            intentHashHex = ult.IntentHash.ToHex();
+            payloadHash = ult.PayloadHash;
+            intentHash = ult.IntentHash;
             rawHex = optIns.RawHex ? ult.RawPayload.ToHex() : null;
-            messageHex = ult.Message?.ToHex();
+            message = ult.Message != null ? new JRaw(ult.Message) : null;
         }
 
         var receipt = new GatewayModel.TransactionReceipt
@@ -136,9 +144,12 @@ internal static class GatewayModelExtensions
             Status = ToGatewayModel(lt.EngineReceipt.Status),
             Output = lt.EngineReceipt.Output != null ? new JRaw(lt.EngineReceipt.Output) : null,
             FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.EngineReceipt.FeeSummary) : null,
+            FeeDestination = optIns.ReceiptFeeDestination && lt.EngineReceipt.FeeDestination != null ? new JRaw(lt.EngineReceipt.FeeDestination) : null,
+            FeeSource = optIns.ReceiptFeeSource && lt.EngineReceipt.FeeSource != null ? new JRaw(lt.EngineReceipt.FeeSource) : null,
+            CostingParameters = optIns.ReceiptCostingParameters ? new JRaw(lt.EngineReceipt.CostingParameters) : null,
             NextEpoch = lt.EngineReceipt.NextEpoch != null ? new JRaw(lt.EngineReceipt.NextEpoch) : null,
             StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.EngineReceipt.StateUpdates) : null,
-            Events = optIns.ReceiptEvents && lt.EngineReceipt.Events != null ? new JRaw(lt.EngineReceipt.Events) : null,
+            Events = events?.Select(x => new JRaw(x)).ToList(),
         };
 
         return new GatewayModel.CommittedTransactionInfo(
@@ -148,14 +159,14 @@ internal static class GatewayModelExtensions
             roundTimestamp: lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
             transactionStatus: lt.EngineReceipt.Status.ToGatewayModel(),
             affectedGlobalEntities: optIns.AffectedGlobalEntities ? lt.AffectedGlobalEntities.Select(x => entityIdToAddressMap[x]).ToList() : null,
-            payloadHashHex: payloadHashHex,
-            intentHashHex: intentHashHex,
+            payloadHash: payloadHash,
+            intentHash: intentHash,
             feePaid: lt.FeePaid?.ToString(),
             confirmedAt: lt.RoundTimestamp,
             errorMessage: lt.EngineReceipt.ErrorMessage,
             rawHex: rawHex,
             receipt: receipt,
-            messageHex: messageHex
+            message: message
         );
     }
 
@@ -196,6 +207,18 @@ internal static class GatewayModelExtensions
             ToolkitModel.PublicKeyHash.Secp256k1 secp256k1 => new GatewayModel.PublicKeyHashEcdsaSecp256k1(secp256k1.value.ToArray().ToHex()),
             ToolkitModel.PublicKeyHash.Ed25519 ed25519 => new GatewayModel.PublicKeyHashEddsaEd25519(ed25519.value.ToArray().ToHex()),
             _ => throw new UnreachableException($"Didn't expect {publicKeyHash} value"),
+        };
+    }
+
+    public static GatewayModel.ObjectModuleId ToGatewayModel(this ObjectModuleId objectModuleId)
+    {
+        return objectModuleId switch
+        {
+            ObjectModuleId.Main => GatewayModel.ObjectModuleId.Main,
+            ObjectModuleId.Metadata => GatewayModel.ObjectModuleId.Metadata,
+            ObjectModuleId.Royalty => GatewayModel.ObjectModuleId.Royalty,
+            ObjectModuleId.RoleAssignment => GatewayModel.ObjectModuleId.RoleAssignment,
+            _ => throw new UnreachableException($"Didn't expect {objectModuleId} value"),
         };
     }
 }

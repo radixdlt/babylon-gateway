@@ -79,6 +79,6 @@ public partial class ValidatorFieldStateSubstate : IEntityOwner, IEntityAddressP
     public IEnumerable<string> GetEntityAddresses()
     {
         yield return Value.StakeUnitResourceAddress;
-        yield return Value.UnstakeClaimTokenResourceAddress;
+        yield return Value.ClaimTokenResourceAddress;
     }
 }

@@ -1,3 +1,55 @@
+# 0.5.0 - RCNet v3
+Release Date: 31.08.2023
+
+## RCNet v2 to RCNet v3 Migration Guide
+
+Use Bech32m-encoded transaction hashes in `/transaction/committed-details` and `/transaction/status` endpoints.
+
+Previously:
+```json
+{"intent_hash_hex": "efbbbfe1d0536d2f6e28cbe8f78f9fe519c4c799a9b0384b8d09e9ecdd66fcbb"}
+``` 
+Now:
+```json
+{"intent_hash": "txid_loc1lapmrzd6mwfamusjlqjaurmemla2xpx6mqygt74px72vtawjawws5rjtd4"}
+```
+
+---
+
+### What’s New?
+- state returned for access controller, pool components and account from `/state/entity/details` endpoint.
+- access controller access rules returned from `/state/entity/details` endpoint.
+- Added `blueprint_version` to `StateEntityDetailsResponseComponentDetails` response
+- fixed `total_supply`, `total_burned` and `total_minted` for resources (i.e native XRD).
+- new endpoint `/state/non-fungible/location` returns location of given non fungible id.
+- Return programmatic json with type names for:
+    - key-value key and data in `/state/key-value/data` endpoint
+    - non fungible data in `/state/non-fungible/data` endpoint
+    - events in `/transaction/committed-details` and `/stream/transactions` endpoints.
+    - custom scrypto component state in `/state/entity/details` endpoint.
+- New endpoint `/statistics/validators/uptime` returns validator uptime data.
+- New endpoint `/state/key-value/data` returns entries of requested KeyValueStore.
+- Rework in `role_assignments`. Returning all possible keys for native modules (`AccessRules`, `Metadata`, `Royalty`) and if no role is assigned pointer to owner role is returned. Same functionality applies to `MainModule` for FungibleResource and NonFungibleResource.
+
+### Breaking Changes
+
+- Renamed `access_rules` to `role_assignments`. Included missing `module` to role assignment key.
+- Deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
+- Transaction hashes are now exposed as Bech32m hashes instead of hex-encoded binary sequences.
+- Dropped `previous_cursor` altogether from all paginable collections.
+
+### Known Issues
+
+- only assigned `role_assignments` keys for `main` module for non resource entities are returned. If key is not assigned it'll not be returned from API.
+
+## Full technical changelog by minor release
+### 0.4.1
+
+- Renamed `access_rules` to `role_assignments`. Included missing `module` to role assignment key.
+- Added package details to `/satus/entity/details` endpoint.
+
+-------
+
 # 0.4.0 - RCNet v2
 Release Date: 26.07.2023
 
@@ -62,13 +114,14 @@ Release Date: 26.07.2023
 - Added `affected_global_entities` to `/transaction/committed-details` and `/stream/transactions` endpoints. To include them in response make sure to include `affected_global_entities` optin.
 - New `affected_global_entities_filter` filter in `/stream/transactions`.
 - Use strongly-typed metadata models.
-- return `pending_xrd_withdraw_vault`, `locked_owner_stake_unit_vault`, `pending_owner_stake_unit_unlock_vault`, `stake_vault` from `/state/validators/list` endpoint.
+- Return `pending_xrd_withdraw_vault`, `locked_owner_stake_unit_vault`, `pending_owner_stake_unit_unlock_vault`, `stake_vault` from `/state/validators/list` endpoint.
 - Changed `access_rule_chain` to partially strongly typed `access_rules`.
-- Added package details to `/satus/entity/details` endpoint.
 
 ### 0.3.1
 
 - Fix `/state/non-fungible/data` to return data for all NFIDs
+
+-------
 
 # 0.3.0 - RCNet v1
 Release Date: 31.03.2023
@@ -85,6 +138,7 @@ Release Date: 31.03.2023
 - new paginable endpoints `/state/entity/page/{x}` for metadata, fungibles, fungible-vaults, non-fungibles, non-fungible-vaults and non-fungible-vault/ids. Cursors returned from `state/entity/details` can be later used to query for next pages in specific endpoints.
 - `/transaction/committed-details` endpoint operates on `intent_hash_hex` only now
 
+-------
 
 # 0.1.1 - Betanet v2
 Release Date: 14.02.2023

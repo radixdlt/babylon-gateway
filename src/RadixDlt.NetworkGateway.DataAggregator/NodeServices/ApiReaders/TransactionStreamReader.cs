@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
@@ -82,7 +81,11 @@ internal class TransactionStreamReader : ITransactionStreamReader
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<ITransactionStreamReaderObserver> _observers;
 
-    public TransactionStreamReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<ITransactionStreamReaderObserver> observers)
+    public TransactionStreamReader(
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ICoreApiProvider coreApiProvider,
+        INodeConfigProvider nodeConfigProvider,
+        IEnumerable<ITransactionStreamReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _nodeConfigProvider = nodeConfigProvider;
@@ -106,12 +109,14 @@ internal class TransactionStreamReader : ITransactionStreamReader
                         RawLedgerTransaction = true,
                         RawNotarizedTransaction = true,
                         RawSystemTransaction = true,
+                        Message = true,
                     },
                     substateFormatOptions: new CoreModel.SubstateFormatOptions
                     {
                         Hash = false,
                         Raw = false,
                         Typed = true,
+                        Previous = true,
                     },
                     sborFormatOptions: new CoreModel.SborFormatOptions
                     {

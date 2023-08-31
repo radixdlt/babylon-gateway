@@ -267,7 +267,8 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     {
         try
         {
-            var topLedgerTransaction = await _dbContext.GetTopLedgerTransaction()
+            var topLedgerTransaction = await _dbContext
+                .GetTopLedgerTransaction()
                 .FirstOrDefaultAsync(token);
 
             if (topLedgerTransaction == null)
@@ -413,16 +414,18 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
             })
             .SingleOrDefaultAsync(token);
 
-        return lt == null ? null : new LedgerStateReport(
-            new GatewayModel.LedgerState(
-                _networkConfigurationProvider.GetNetworkName(),
-                lt.StateVersion,
-                lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
-                lt.Epoch,
-                lt.RoundInEpoch
-            ),
-            lt.RoundTimestamp,
-            resolvesTopOfLedger
-        );
+        return lt == null
+            ? null
+            : new LedgerStateReport(
+                new GatewayModel.LedgerState(
+                    _networkConfigurationProvider.GetNetworkName(),
+                    lt.StateVersion,
+                    lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
+                    lt.Epoch,
+                    lt.RoundInEpoch
+                ),
+                lt.RoundTimestamp,
+                resolvesTopOfLedger
+            );
     }
 }

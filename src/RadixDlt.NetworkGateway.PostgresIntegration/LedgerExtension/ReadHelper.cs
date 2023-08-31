@@ -67,13 +67,13 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -110,7 +110,8 @@ internal class ReadHelper
             keys.Add(lookup.Key);
         }
 
-        return await _dbContext.EntityMetadataHistory
+        return await _dbContext
+            .EntityMetadataHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, key) AS (
     SELECT UNNEST({entityIds}), UNNEST({keys})
@@ -137,7 +138,8 @@ INNER JOIN LATERAL (
 
         var entityIds = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
 
-        return await _dbContext.EntityMetadataAggregateHistory
+        return await _dbContext
+            .EntityMetadataAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
@@ -155,59 +157,67 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<AccessRuleEntryLookup, EntityAccessRulesEntryHistory>> MostRecentEntityAccessRulesEntryHistoryFor(ICollection<AccessRulesChangePointer> accessRuleChangePointers, CancellationToken token)
+    public async Task<Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityRoleAssignmentsEntryHistoryFor(
+        ICollection<RoleAssignmentsChangePointer> roleAssignmentsChangePointers,
+        CancellationToken token)
     {
-        if (!accessRuleChangePointers.Any())
+        if (!roleAssignmentsChangePointers.Any())
         {
-            return new Dictionary<AccessRuleEntryLookup, EntityAccessRulesEntryHistory>();
+            return new Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>();
         }
 
         var entityIds = new List<long>();
-        var keys = new List<string>();
-        var lookupSet = new HashSet<AccessRuleEntryLookup>();
+        var keyRoles = new List<string>();
+        var keyModuleIds = new List<ObjectModuleId>();
+        var lookupSet = new HashSet<RoleAssignmentEntryLookup>();
 
-        foreach (var accessRuleChangePointer in accessRuleChangePointers)
+        foreach (var roleAssignmentsChangePointer in roleAssignmentsChangePointers)
         {
-            foreach (var entry in accessRuleChangePointer.Entries)
+            foreach (var entry in roleAssignmentsChangePointer.Entries)
             {
-                lookupSet.Add(new AccessRuleEntryLookup(accessRuleChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey));
+                lookupSet.Add(new RoleAssignmentEntryLookup(roleAssignmentsChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
             }
         }
 
         foreach (var lookup in lookupSet)
         {
             entityIds.Add(lookup.EntityId);
-            keys.Add(lookup.Key);
+            keyRoles.Add(lookup.KeyRole);
+            keyModuleIds.Add(lookup.KeyModule);
         }
 
-        return await _dbContext.EntityAccessRulesEntryHistory
+        return await _dbContext
+            .EntityRoleAssignmentsEntryHistory
             .FromSqlInterpolated(@$"
-WITH variables (entity_id, key) AS (
-    SELECT UNNEST({entityIds}), UNNEST({keys})
+WITH variables (entity_id, key_role, module_id) AS (
+    SELECT UNNEST({entityIds}), UNNEST({keyRoles}), UNNEST({keyModuleIds})
 )
 SELECT eareh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_access_rules_entry_history
-    WHERE entity_id = variables.entity_id AND key = variables.key
+    FROM entity_role_assignments_entry_history
+    WHERE entity_id = variables.entity_id AND key_role = variables.key_role AND key_module = variables.module_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) eareh ON true;")
             .AsNoTracking()
-            .ToDictionaryAsync(e => new AccessRuleEntryLookup(e.EntityId, e.Key), token);
+            .ToDictionaryAsync(e => new RoleAssignmentEntryLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
     }
 
-    public async Task<Dictionary<long, EntityAccessRulesAggregateHistory>> MostRecentEntityAccessRulesAggregateHistoryFor(List<AccessRulesChangePointerLookup> accessRuleChanges, CancellationToken token)
+    public async Task<Dictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityRoleAssignmentsAggregateHistoryFor(
+        List<RoleAssignmentsChangePointerLookup> roleAssignmentChanges,
+        CancellationToken token)
     {
-        if (!accessRuleChanges.Any())
+        if (!roleAssignmentChanges.Any())
         {
-            return new Dictionary<long, EntityAccessRulesAggregateHistory>();
+            return new Dictionary<long, EntityRoleAssignmentsAggregateHistory>();
         }
 
-        var entityIds = accessRuleChanges.Select(x => x.EntityId).Distinct().ToList();
+        var entityIds = roleAssignmentChanges.Select(x => x.EntityId).Distinct().ToList();
 
-        return await _dbContext.EntityAccessRulesAggregateHistory
+        return await _dbContext
+            .EntityRoleAssignmentsAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
@@ -216,7 +226,7 @@ SELECT earah.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_access_rules_aggregate_history
+    FROM entity_role_assignments_aggregate_history
     WHERE entity_id = variables.entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
@@ -225,7 +235,10 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(
+        List<FungibleVaultChange> fungibleVaultChanges,
+        List<NonFungibleVaultChange> nonFungibleVaultChanges,
+        CancellationToken token)
     {
         if (!fungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
         {
@@ -248,7 +261,8 @@ INNER JOIN LATERAL (
 
         var ids = entityIds.ToList();
 
-        return await _dbContext.EntityResourceAggregateHistory
+        return await _dbContext
+            .EntityResourceAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({ids})
@@ -266,27 +280,20 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(
+        List<EntityFungibleResourceBalanceChangeEvent> fungibleEvents,
+        List<EntityNonFungibleResourceBalanceChangeEvent> nonFungibleEvents,
+        CancellationToken token)
     {
-        if (!fungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (!fungibleEvents.Any() && !nonFungibleEvents.Any())
         {
             return new Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>();
         }
 
-        var data = new HashSet<EntityResourceLookup>();
-
-        foreach (var change in fungibleVaultChanges)
-        {
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
-        foreach (var change in nonFungibleVaultChanges)
-        {
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
+        var data = fungibleEvents
+            .Select(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId))
+            .Concat(nonFungibleEvents.Select(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId)))
+            .ToHashSet();
         var entityIds = new List<long>();
         var resourceEntityIds = new List<long>();
 
@@ -296,7 +303,8 @@ INNER JOIN LATERAL (
             resourceEntityIds.Add(d.ResourceEntityId);
         }
 
-        return await _dbContext.EntityResourceAggregatedVaultsHistory
+        return await _dbContext
+            .EntityResourceAggregatedVaultsHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, resource_entity_id) AS (
     SELECT UNNEST({entityIds}), UNNEST({resourceEntityIds})
@@ -314,7 +322,10 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId), token);
     }
 
-    public async Task<Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(
+        List<FungibleVaultChange> fungibleVaultChanges,
+        List<NonFungibleVaultChange> nonFungibleVaultChanges,
+        CancellationToken token)
     {
         if (!fungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
         {
@@ -344,7 +355,8 @@ INNER JOIN LATERAL (
             resourceEntityIds.Add(d.ResourceEntityId);
         }
 
-        return await _dbContext.EntityResourceVaultAggregateHistory
+        return await _dbContext
+            .EntityResourceVaultAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, resource_entity_id) AS (
     SELECT UNNEST({entityIds}), UNNEST({resourceEntityIds})
@@ -371,7 +383,8 @@ INNER JOIN LATERAL (
 
         var vaultIds = nonFungibleVaultChanges.Select(x => x.ReferencedVault.DatabaseId).Distinct().ToList();
 
-        return await _dbContext.EntityVaultHistory
+        return await _dbContext
+            .EntityVaultHistory
             .FromSqlInterpolated(@$"
 WITH variables (vault_entity_id) AS (
     SELECT UNNEST({vaultIds})
@@ -405,7 +418,8 @@ INNER JOIN LATERAL (
 
         var ids = nonFungibleIdStoreChanges.Select(x => x.ReferencedResource.DatabaseId).Distinct().ToList();
 
-        return await _dbContext.NonFungibleIdStoreHistory
+        return await _dbContext
+            .NonFungibleIdStoreHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({ids})
@@ -432,7 +446,8 @@ INNER JOIN LATERAL (
 
         var ids = resourceSupplyChanges.Select(c => c.ResourceEntityId).Distinct().ToList();
 
-        return await _dbContext.ResourceEntitySupplyHistory
+        return await _dbContext
+            .ResourceEntitySupplyHistory
             .FromSqlInterpolated(@$"
 WITH variables (resource_entity_id) AS (
     SELECT UNNEST({ids})
@@ -459,7 +474,8 @@ INNER JOIN LATERAL (
             Value = entityAddressesToLoad.Concat(knownAddressesToLoad).ToArray(),
         };
 
-        return await _dbContext.Entities
+        return await _dbContext
+            .Entities
             .FromSqlInterpolated($@"
 SELECT *
 FROM entities
@@ -472,9 +488,12 @@ WHERE id IN(
             .ToDictionaryAsync(e => e.Address, token);
     }
 
-    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
+        List<NonFungibleIdChange> nonFungibleIdStoreChanges,
+        List<NonFungibleVaultChange> nonFungibleVaultChanges,
+        CancellationToken token)
     {
-        if (!nonFungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (!nonFungibleIdStoreChanges.Any() && !nonFungibleVaultChanges.Any())
         {
             return new Dictionary<NonFungibleIdLookup, NonFungibleIdData>();
         }
@@ -499,7 +518,8 @@ WHERE id IN(
             nonFungibleIds.Add(nf.NonFungibleId);
         }
 
-        return await _dbContext.NonFungibleIdData
+        return await _dbContext
+            .NonFungibleIdData
             .FromSqlInterpolated(@$"
 SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_fungible_id) IN (
     SELECT UNNEST({resourceEntityIds}), UNNEST({nonFungibleIds})
@@ -533,7 +553,8 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
             validatorKeys.Add(lookup.PublicKey);
         }
 
-        return await _dbContext.ValidatorKeyHistory
+        return await _dbContext
+            .ValidatorKeyHistory
             .FromSqlInterpolated(@$"
 WITH variables (validator_entity_id, key_type, key) AS (
     SELECT UNNEST({validatorEntityIds}), UNNEST({validatorKeyTypes}), UNNEST({validatorKeys})
@@ -558,8 +579,8 @@ INNER JOIN LATERAL (
             commandText: @"
 SELECT
     nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
-    nextval('account_resource_deposit_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
-    nextval('entity_state_history_id_seq') AS EntityStateHistorySequence,
+    nextval('account_resource_preference_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
+    nextval('state_history_id_seq') AS StateHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_metadata_aggregate_history_id_seq') AS EntityMetadataAggregateHistorySequence,
@@ -567,9 +588,9 @@ SELECT
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_vault_aggregate_history_id_seq') AS EntityResourceVaultAggregateHistorySequence,
     nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,
-    nextval('entity_access_rules_aggregate_history_id_seq') AS EntityAccessRulesAggregateHistorySequence,
-    nextval('entity_access_rules_entry_history_id_seq') AS EntityAccessRulesEntryHistorySequence,
-    nextval('entity_access_rules_owner_role_history_id_seq') AS EntityAccessRulesOwnerRoleHistorySequence,
+    nextval('entity_role_assignments_aggregate_history_id_seq') AS EntityRoleAssignmentsAggregateHistorySequence,
+    nextval('entity_role_assignments_entry_history_id_seq') AS EntityRoleAssignmentsEntryHistorySequence,
+    nextval('entity_role_assignments_owner_role_history_id_seq') AS EntityRoleAssignmentsOwnerRoleHistorySequence,
     nextval('component_method_royalty_entry_history_id_seq') AS ComponentMethodRoyaltyEntryHistorySequence,
     nextval('resource_entity_supply_history_id_seq') AS ResourceEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
@@ -578,7 +599,13 @@ SELECT
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence,
     nextval('ledger_transaction_markers_id_seq') AS LedgerTransactionMarkerSequence,
-    nextval('package_blueprint_history_id_seq') AS PackageBlueprintHistorySequence",
+    nextval('package_blueprint_history_id_seq') AS PackageBlueprintHistorySequence,
+    nextval('package_code_history_id_seq') AS PackageCodeHistorySequence,
+    nextval('schema_history_id_seq') AS SchemaHistorySequence,
+    nextval('key_value_store_entry_history_id_seq') AS KeyValueStoreEntryHistorySequence,
+    nextval('validator_emission_statistics_id_seq') AS ValidatorEmissionStatisticsSequence,
+    nextval('non_fungible_schema_history_id_seq') AS NonFungibleSchemaHistorySequence,
+    nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence",
             cancellationToken: token);
 
         return await _connection.QueryFirstAsync<SequencesHolder>(cd);

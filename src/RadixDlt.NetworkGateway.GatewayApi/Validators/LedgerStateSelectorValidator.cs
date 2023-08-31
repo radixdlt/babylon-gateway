@@ -75,7 +75,8 @@ internal class LedgerStateSelectorValidator : AbstractValidator<GatewayModel.Led
         RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x)
-            .Must(x => x.HasStateVersion() || x.HasTimestamp() || x.HasEpoch()).WithMessage("The property was not either (A) missing; (B) with only a State Version; (C) with only a Timestamp; (D) with only an Epoch; or (E) with only an Epoch and Round");
+            .Must(x => x.HasStateVersion() || x.HasTimestamp() || x.HasEpoch())
+            .WithMessage("The property was not either (A) missing; (B) with only a State Version; (C) with only a Timestamp; (D) with only an Epoch; or (E) with only an Epoch and Round");
 
         RuleFor(x => x.StateVersion)
             .GreaterThan(0)
@@ -90,7 +91,8 @@ internal class LedgerStateSelectorValidator : AbstractValidator<GatewayModel.Led
             .When(x => x.StateVersion.HasValue);
 
         RuleFor(x => x.Timestamp)
-            .LessThanOrEqualTo(clock.UtcNow).WithMessage("'{PropertyName}' must not be in future.")
+            .LessThanOrEqualTo(clock.UtcNow)
+            .WithMessage("'{PropertyName}' must not be in future.")
             .DependentRules(() =>
             {
                 const string NullMessage = "'{PropertyName}' must be null when 'timestamp' is defined.";

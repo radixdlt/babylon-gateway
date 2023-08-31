@@ -69,9 +69,6 @@ namespace RadixDlt.CoreApiSdk.Model;
 public partial class NotarizedTransaction
 {
     private byte[] _payloadBytes;
-    private byte[] _hashBytes;
 
     public byte[] GetPayloadBytes() => _payloadBytes ??= Convert.FromHexString(PayloadHex);
-
-    public byte[] GetHashBytes() => _hashBytes ??= Convert.FromHexString(Hash);
 }

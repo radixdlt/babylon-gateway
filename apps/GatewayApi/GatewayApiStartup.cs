@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using GatewayApi.SlowRequestLogging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
@@ -73,6 +74,7 @@ using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
+using System;
 using System.Globalization;
 
 namespace GatewayApi;
@@ -98,9 +100,9 @@ public class GatewayApiStartup
         services
             .AddCors(options =>
             {
-                options.AddDefaultPolicy(corsPolicyBuilder =>
+                options.AddDefaultPolicy(builder =>
                 {
-                    corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().SetPreflightMaxAge(TimeSpan.FromDays(20));
                 });
             });
 
@@ -121,12 +123,13 @@ public class GatewayApiStartup
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
     {
         application
+            .UseSlowRequestLogging()
+            .UseRequestTimeout()
+            .UseCors()
+            .UseRouting()
             .UseAuthentication()
             .UseAuthorization()
-            .UseCors()
             .UseHttpMetrics()
-            .UseRouting()
-            .UseRequestTimeout()
             .UseEndpoints(endpoints =>
             {
                 if (_enableSwagger)

@@ -66,7 +66,6 @@ using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -84,9 +83,6 @@ internal abstract class LedgerTransaction
     [Column("state_version")]
     public long StateVersion { get; set; }
 
-    [Column("message")]
-    public byte[]? Message { get; set; }
-
     [Column("epoch")]
     public long Epoch { get; set; }
 
@@ -98,9 +94,6 @@ internal abstract class LedgerTransaction
 
     [Column("index_in_round")]
     public long IndexInRound { get; set; }
-
-    [Column("is_end_of_epoch")]
-    public bool IsEndOfEpoch { get; set; }
 
     [Column("fee_paid")]
     public TokenAmount? FeePaid { get; set; }
@@ -154,6 +147,15 @@ internal class TransactionReceipt
     [Column("receipt_state_updates", TypeName = "jsonb")]
     public string StateUpdates { get; set; }
 
+    [Column("receipt_costing_parameters", TypeName = "jsonb")]
+    public string CostingParameters { get; set; }
+
+    [Column("receipt_fee_source", TypeName = "jsonb")]
+    public string? FeeSource { get; set; }
+
+    [Column("receipt_fee_destination", TypeName = "jsonb")]
+    public string? FeeDestination { get; set; }
+
     [Column("receipt_next_epoch", TypeName = "jsonb")]
     public string? NextEpoch { get; set; }
 
@@ -163,8 +165,17 @@ internal class TransactionReceipt
     [Column("receipt_error_message")]
     public string? ErrorMessage { get; set; }
 
-    [Column("receipt_events", TypeName = "jsonb")]
-    public string? Events { get; set; }
+    [Column("receipt_event_sbors")]
+    public byte[][] EventsSbors { get; set; }
+
+    [Column("receipt_event_schema_hashes")]
+    public byte[][] EventSchemaHashes { get; set; }
+
+    [Column("receipt_event_type_indexes")]
+    public long[] EventTypeIndexes { get; set; }
+
+    [Column("receipt_event_sbor_type_kinds")]
+    public SborTypeKind[] EventSborTypeKinds { get; set; }
 }
 
 internal class GenesisLedgerTransaction : LedgerTransaction
@@ -179,19 +190,22 @@ internal class UserLedgerTransaction : LedgerTransaction
     /// The intent hash should be used for tracking of user transactions.
     /// </summary>
     [Column("payload_hash")]
-    public byte[] PayloadHash { get; set; }
+    public string PayloadHash { get; set; }
 
     /// <summary>
     /// The transaction intent hash. The engine ensures two transactions with the same intent hash cannot be committed.
     /// </summary>
     [Column("intent_hash")]
-    public byte[] IntentHash { get; set; }
+    public string IntentHash { get; set; }
 
     /// <summary>
     /// The hash of the signed transaction, which is what the notary signs.
     /// </summary>
     [Column("signed_intent_hash")]
-    public byte[] SignedIntentHash { get; set; }
+    public string SignedIntentHash { get; set; }
+
+    [Column("message", TypeName = "jsonb")]
+    public string? Message { get; set; }
 }
 
 internal class RoundUpdateLedgerTransaction : LedgerTransaction

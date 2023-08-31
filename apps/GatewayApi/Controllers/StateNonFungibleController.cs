@@ -95,4 +95,10 @@ public class StateNonFungibleController : ControllerBase
     {
         return await _nonFungibleHandler.Data(request, token);
     }
+
+    [HttpPost("location")]
+    public async Task<GatewayModel.StateNonFungibleLocationResponse> Location(GatewayModel.StateNonFungibleLocationRequest request, CancellationToken token)
+    {
+        return await _nonFungibleHandler.Location(request, token);
+    }
 }

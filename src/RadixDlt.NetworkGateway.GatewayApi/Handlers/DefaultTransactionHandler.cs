@@ -107,9 +107,9 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), GatewayModel.TransactionCommittedDetailsOptIns.Default, ledgerState, false, token);
-        var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.GetIntentHashBytes(), token);
-        var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.PayloadHashHex).ToList();
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.IntentHash, GatewayModel.TransactionDetailsOptIns.Default, ledgerState, false, token);
+        var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.IntentHash, token);
+        var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHash != committedTransaction?.PayloadHash).ToList();
 
         var status = GatewayModel.TransactionStatus.Unknown;
         var errorMessage = (string?)null;
@@ -121,7 +121,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
             errorMessage = committedTransaction.ErrorMessage;
 
             knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
-                payloadHashHex: committedTransaction.PayloadHashHex,
+                payloadHash: committedTransaction.PayloadHash,
                 status: status,
                 errorMessage: committedTransaction.ErrorMessage));
         }
@@ -131,7 +131,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         }
 
         knownPayloads.AddRange(remainingPendingTransactions.Select(pt => new GatewayModel.TransactionStatusResponseKnownPayloadItem(
-            payloadHashHex: pt.PayloadHashHex,
+            payloadHash: pt.PayloadHash,
             status: pt.Status,
             errorMessage: pt.ErrorMessage)));
 
@@ -144,18 +144,18 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var withDetails = true;
 
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(
-                request.GetIntentHashBytes(),
-                request.OptIns ?? GatewayModel.TransactionCommittedDetailsOptIns.Default,
-                ledgerState,
-                withDetails,
-                token);
+            request.IntentHash,
+            request.OptIns ?? GatewayModel.TransactionDetailsOptIns.Default,
+            ledgerState,
+            withDetails,
+            token);
 
         if (committedTransaction != null)
         {
             return new GatewayModel.TransactionCommittedDetailsResponse(ledgerState, committedTransaction);
         }
 
-        throw new TransactionNotFoundException(request.IntentHashHex);
+        throw new TransactionNotFoundException(request.IntentHash);
     }
 
     public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
@@ -215,7 +215,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
             PageSize: request.LimitPerPage ?? DefaultPageLimit,
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
             SearchCriteria: searchCriteria,
-            OptIns: request.OptIns ?? GatewayModel.TransactionCommittedDetailsOptIns.Default
+            OptIns: request.OptIns ?? GatewayModel.TransactionDetailsOptIns.Default
         );
 
         var results = await _transactionQuerier.GetTransactionStream(transactionsPageRequest, atLedgerState, token);

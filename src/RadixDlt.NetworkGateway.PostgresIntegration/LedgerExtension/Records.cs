@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -74,11 +75,15 @@ internal record FungibleVaultChange(ReferencedEntity ReferencedVault, Referenced
 
 internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion);
 
+internal record EntityFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, TokenAmount Delta, long StateVersion);
+
+internal record EntityNonFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, long Delta, long StateVersion);
+
 internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
 
 internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
 
-internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? TotalSupply = null, TokenAmount? Minted = null, TokenAmount? Burned = null);
+internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? Minted = null, TokenAmount? Burned = null);
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
 
@@ -96,13 +101,13 @@ internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFung
 
 internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
 
-internal record struct AccessRulesChangePointerLookup(long EntityId, long StateVersion);
+internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
 
-internal record struct AccessRuleEntryLookup(long EntityId, string Key);
+internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ObjectModuleId KeyModule);
 
-internal record AccessRulesChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
+internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
 {
-    public CoreModel.AccessRulesModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
+    public CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
 
-    public IList<CoreModel.AccessRulesModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.AccessRulesModuleRuleEntrySubstate>();
+    public IList<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.RoleAssignmentModuleRuleEntrySubstate>();
 }

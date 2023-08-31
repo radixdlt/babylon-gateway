@@ -1,9 +1,14 @@
 import { chunk } from '../helpers/chunk'
-import { exhaustPagination } from '../helpers/exhaust-pagination'
+import {
+  exhaustPagination,
+  exhaustPaginationWithLedgerState,
+} from '../helpers/exhaust-pagination'
 import {
   EntityMetadataItem,
   FungibleResourcesCollection,
   FungibleResourcesCollectionItemVaultAggregated,
+  LedgerState,
+  LedgerStateSelector,
   NonFungibleIdsCollection,
   NonFungibleResourcesCollection,
   NonFungibleResourcesCollectionItemVaultAggregated,
@@ -42,11 +47,13 @@ export type StateEntityDetailsOptions = {
   componentRoyaltyVaultBalance?: true
 }
 
-export type StateEntityDetailsVaultResponseItem =
-  StateEntityDetailsResponseItem & {
-    fungible_resources: FungibleResourcesVaultCollection
-    non_fungible_resources: NonFungibleResourcesVaultCollection
-  }
+export type StateEntityDetailsVaultResponseItem = Omit<
+  StateEntityDetailsResponseItem,
+  'fungible_resources' | 'non_fungible_resources'
+> & {
+  fungible_resources: FungibleResourcesVaultCollection
+  non_fungible_resources: NonFungibleResourcesVaultCollection
+}
 
 export class State {
   constructor(
@@ -70,15 +77,18 @@ export class State {
    */
   async getEntityDetailsVaultAggregated(
     addresses: string,
-    options?: StateEntityDetailsOptions
+    options?: StateEntityDetailsOptions,
+    ledgerState?: LedgerStateSelector
   ): Promise<StateEntityDetailsVaultResponseItem>
   async getEntityDetailsVaultAggregated(
     addresses: string[],
-    options?: StateEntityDetailsOptions
+    options?: StateEntityDetailsOptions,
+    ledgerState?: LedgerStateSelector
   ): Promise<StateEntityDetailsVaultResponseItem[]>
   async getEntityDetailsVaultAggregated(
     addresses: string[] | string,
-    options?: StateEntityDetailsOptions
+    options?: StateEntityDetailsOptions,
+    ledgerState?: LedgerStateSelector
   ): Promise<
     StateEntityDetailsVaultResponseItem[] | StateEntityDetailsVaultResponseItem
   > {
@@ -87,7 +97,9 @@ export class State {
     if (isArray && addresses.length > this.configuration.maxAddressesCount) {
       const chunks = chunk(addresses, this.configuration.maxAddressesCount)
       return Promise.all(
-        chunks.map((chunk) => this.getEntityDetailsVaultAggregated(chunk))
+        chunks.map((chunk) =>
+          this.getEntityDetailsVaultAggregated(chunk, options, ledgerState)
+        )
       ).then((results) => results.flat())
     }
 
@@ -104,6 +116,7 @@ export class State {
           non_fungible_include_nfids: options?.nonFungibleIncludeNfids ?? true,
           explicit_metadata: options?.explicitMetadata ?? [],
         },
+        at_ledger_state: ledgerState,
       },
     })
     return isArray
@@ -167,12 +180,39 @@ export class State {
   }
 
   /**
+   * Get paged list of validators
+   * @param cursor
+   */
+  async getValidatorsWithLedgerState(cursor?: string) {
+    return this.innerClient.stateValidatorsList({
+      stateValidatorsListRequest: {
+        cursor: cursor || null,
+      },
+    })
+  }
+
+  /**
+   * Get list of all validators. This will iterate over returned cursors and aggregate all responses.
+   */
+  async getAllValidatorsWithLedgerState(start?: string) {
+    return exhaustPaginationWithLedgerState(
+      (cursor?: string) =>
+        this.getValidatorsWithLedgerState(cursor).then((res) => ({
+          items: res.validators.items,
+          ledger_state: res.ledger_state,
+        })),
+      start
+    )
+  }
+
+  /**
    *  Get paged list of non fungible ids for given non fungible resource address
    * @params address - non fungible resource address
    * @params cursor - optional cursor used for pagination
    */
   async getNonFungibleIds(
     address: string,
+    ledgerState?: LedgerStateSelector,
     cursor?: string
   ): Promise<NonFungibleIdsCollection> {
     return this.innerClient
@@ -180,6 +220,7 @@ export class State {
         stateNonFungibleIdsRequest: {
           resource_address: address,
           cursor,
+          at_ledger_state: ledgerState,
         },
       })
       .then(({ non_fungible_ids }) => non_fungible_ids)
@@ -193,25 +234,29 @@ export class State {
    */
   async getAllNonFungibleIds(
     address: string,
-    startCursor?: string
+    startCursor?: string,
+    ledgerState?: LedgerStateSelector
   ): Promise<string[]> {
     return exhaustPagination(
-      this.getNonFungibleIds.bind(this, address),
+      this.getNonFungibleIds.bind(this, address, ledgerState),
       startCursor
     )
   }
 
   async getNonFungibleData(
     address: string,
-    ids: string
+    ids: string,
+    ledgerState?: LedgerStateSelector
   ): Promise<StateNonFungibleDetailsResponseItem>
   async getNonFungibleData(
     address: string,
-    ids: string[]
+    ids: string[],
+    ledgerState?: LedgerStateSelector
   ): Promise<StateNonFungibleDetailsResponseItem[]>
   async getNonFungibleData(
     address: string,
-    ids: string | string[]
+    ids: string | string[],
+    ledgerState?: LedgerStateSelector
   ): Promise<
     StateNonFungibleDetailsResponseItem | StateNonFungibleDetailsResponseItem[]
   > {
@@ -220,7 +265,9 @@ export class State {
     if (isArray && ids.length > this.configuration.maxNftIdsCount) {
       const chunks = chunk(ids, this.configuration.maxNftIdsCount)
       return Promise.all(
-        chunks.map((chunk) => this.getNonFungibleData(address, chunk))
+        chunks.map((chunk) =>
+          this.getNonFungibleData(address, chunk, ledgerState)
+        )
       ).then((results) => results.flat())
     }
 
@@ -228,6 +275,7 @@ export class State {
       stateNonFungibleDataRequest: {
         resource_address: address,
         non_fungible_ids: isArray ? ids : [ids],
+        at_ledger_state: ledgerState,
       },
     })
     return isArray

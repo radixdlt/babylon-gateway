@@ -82,17 +82,22 @@ public static class GatewayApiBuilderExtensions
 
     public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
     {
-        builder.Services
+        builder
+            .Services
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()
             .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
+            .AddScoped<IRoleAssignmentsKeyProvider, RoleAssignmentsKeyProvider>()
+            .AddScoped<IRoleAssignmentsMapper, RoleAssignmentsMapper>()
+            .AddScoped<IValidatorQuerier, ValidatorQuerier>()
             .AddScoped<IVirtualEntityMetadataProvider, VirtualEntityMetadataProvider>()
             .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
             .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
 
         CustomTypes.EnsureConfigured();
 
-        builder.Services
+        builder
+            .Services
             .AddNpgsqlDataSourceHolder<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)
             .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
             {
@@ -117,7 +122,8 @@ public static class GatewayApiBuilderExtensions
 
     public static GatewayApiBuilder AddPostgresPersistenceHealthChecks(this GatewayApiBuilder builder)
     {
-        builder.Services
+        builder
+            .Services
             .AddHealthChecks()
             .AddDbContextCheck<ReadOnlyDbContext>("readonly_database_connection_check")
             .AddDbContextCheck<ReadWriteDbContext>("readwrite_database_connection_check");

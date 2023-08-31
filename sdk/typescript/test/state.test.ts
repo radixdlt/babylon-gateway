@@ -4,9 +4,7 @@ import { GatewayApiClient } from './../lib/index'
 const fetchRequestFactory = (body: any) => ({
   body: JSON.stringify(body),
   credentials: undefined,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: expect.anything(),
   method: 'POST',
 })
 
@@ -110,7 +108,7 @@ describe('State Subapi', () => {
         last_updated_at_state_version: 1,
         value: {
           raw_hex: '',
-          raw_json: {},
+          programmatic_json: undefined,
           typed: undefined,
         },
       })

@@ -67,6 +67,9 @@ using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
+using PackageVmType = RadixDlt.NetworkGateway.Abstractions.Model.PackageVmType;
+using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -91,7 +94,7 @@ internal static class CustomTypes
 #pragma warning disable CS0618
         // needed to support custom enums in postgres
         NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountDefaultDepositRule>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountResourceDepositRule>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountResourcePreferenceRule>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
@@ -104,6 +107,9 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<ObjectModuleId>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<SborTypeKind>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
 #pragma warning restore CS0618
 
         _configured = true;
