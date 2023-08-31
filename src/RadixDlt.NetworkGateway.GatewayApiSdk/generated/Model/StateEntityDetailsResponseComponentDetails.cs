@@ -113,11 +113,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="packageAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="blueprintVersion">blueprintVersion (required).</param>
         /// <param name="state">state.</param>
         /// <param name="roleAssignments">roleAssignments.</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Component).</param>
-        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
+        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -125,6 +126,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
             }
             this.BlueprintName = blueprintName;
+            // to ensure "blueprintVersion" is required (not null)
+            if (blueprintVersion == null)
+            {
+                throw new ArgumentNullException("blueprintVersion is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
+            }
+            this.BlueprintVersion = blueprintVersion;
             this.PackageAddress = packageAddress;
             this.State = state;
             this.RoleAssignments = roleAssignments;
@@ -143,6 +150,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
         public string BlueprintName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintVersion
+        /// </summary>
+        [DataMember(Name = "blueprint_version", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintVersion { get; set; }
 
         /// <summary>
         /// Gets or Sets State
@@ -174,6 +187,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  BlueprintVersion: ").Append(BlueprintVersion).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
@@ -223,6 +237,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.BlueprintName.Equals(input.BlueprintName))
                 ) && base.Equals(input) && 
                 (
+                    this.BlueprintVersion == input.BlueprintVersion ||
+                    (this.BlueprintVersion != null &&
+                    this.BlueprintVersion.Equals(input.BlueprintVersion))
+                ) && base.Equals(input) && 
+                (
                     this.State == input.State ||
                     (this.State != null &&
                     this.State.Equals(input.State))
@@ -255,6 +274,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.BlueprintName != null)
                 {
                     hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                if (this.BlueprintVersion != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintVersion.GetHashCode();
                 }
                 if (this.State != null)
                 {

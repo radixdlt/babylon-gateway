@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -166,6 +166,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     discriminator = table.Column<EntityType>(type: "entity_type", nullable: false),
                     package_id = table.Column<long>(type: "bigint", nullable: true),
                     blueprint_name = table.Column<string>(type: "text", nullable: true),
+                    blueprint_version = table.Column<string>(type: "text", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
                     non_fungible_id_type = table.Column<NonFungibleIdType>(type: "non_fungible_id_type", nullable: true),
                     vm_type = table.Column<PackageVmType>(type: "package_vm_type", nullable: true),
@@ -803,6 +804,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 table: "ledger_transaction_markers",
                 columns: new[] { "origin_type", "state_version" },
                 filter: "discriminator = 'origin'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_state_version",
+                table: "ledger_transaction_markers",
+                column: "state_version");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_epoch_round_in_epoch",
