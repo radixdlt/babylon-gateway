@@ -425,6 +425,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     {
                                         e.PackageId = referencedEntities.Get((EntityAddress)objectDetails.BlueprintInfo.PackageAddress).DatabaseId;
                                         e.BlueprintName = objectDetails.BlueprintInfo.BlueprintName;
+                                        e.BlueprintVersion = objectDetails.BlueprintInfo.BlueprintVersion;
                                     });
 
                                     if (objectDetails.BlueprintInfo.BlueprintName is CoreModel.NativeBlueprintNames.FungibleVault or CoreModel.NativeBlueprintNames.NonFungibleVault)

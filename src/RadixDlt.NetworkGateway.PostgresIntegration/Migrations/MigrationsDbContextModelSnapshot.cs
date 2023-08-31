@@ -1368,6 +1368,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1387,6 +1393,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
 
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
@@ -1408,6 +1420,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1427,6 +1445,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
 
                     b.Property<int>("Divisibility")
                         .HasColumnType("integer")
@@ -1452,6 +1476,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1471,6 +1501,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
 
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
@@ -1492,6 +1528,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1511,6 +1553,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
 
                     b.Property<NonFungibleIdType>("NonFungibleIdType")
                         .HasColumnType("non_fungible_id_type")
@@ -1536,6 +1584,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1555,6 +1609,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
 
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
@@ -1580,6 +1640,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1600,6 +1666,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1619,6 +1691,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
 
                     b.Property<long>("LockedOwnerStakeUnitVault")
                         .HasColumnType("bigint")
@@ -1656,6 +1734,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1675,6 +1759,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
 
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
@@ -1705,6 +1795,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1733,6 +1829,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
 
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()

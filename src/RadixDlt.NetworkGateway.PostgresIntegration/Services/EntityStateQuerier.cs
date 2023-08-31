@@ -256,6 +256,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     // TODO - we should better fake the data - eg roleAssignments when this is possible
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
+                        blueprintVersion: "1.0.0",
                         state: new JObject(),
                         roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(new JObject(), new List<GatewayModel.ComponentEntityRoleAssignmentEntry>())
                     );
@@ -268,6 +269,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     // TODO - we should better fake the data - eg roleAssignments when this is possible
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
+                        blueprintVersion: "1.0.0",
                         state: new JObject(),
                         roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(new JObject(), new List<GatewayModel.ComponentEntityRoleAssignmentEntry>())
                     );
@@ -281,6 +283,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
+                        blueprintVersion: ce.BlueprintVersion,
                         state: state != null ? new JRaw(state) : null,
                         roleAssignments: roleAssignments,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
