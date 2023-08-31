@@ -118,12 +118,6 @@ public class GatewayApiStartup
         services
             .AddHealthChecks()
             .ForwardToPrometheus();
-
-        services
-            .AddSlowRequestLogging(options =>
-            {
-                options.SlowRequestThreshold = TimeSpan.FromMilliseconds(250);
-            });
     }
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)

@@ -7,7 +7,7 @@ public sealed class SlowRequestLoggingOptions
 {
     public int RequestBodyLogLimit { get; set; } = 1 * 1024;
 
-    public TimeSpan SlowRequestThreshold { get; set; } = TimeSpan.FromMilliseconds(500);
+    public TimeSpan SlowRequestThreshold { get; set; } = TimeSpan.FromMilliseconds(250);
 
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 }
