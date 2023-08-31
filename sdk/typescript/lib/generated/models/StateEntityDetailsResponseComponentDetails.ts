@@ -46,6 +46,12 @@ export interface StateEntityDetailsResponseComponentDetails {
     blueprint_name: string;
     /**
      * 
+     * @type {string}
+     * @memberof StateEntityDetailsResponseComponentDetails
+     */
+    blueprint_version: string;
+    /**
+     * 
      * @type {object}
      * @memberof StateEntityDetailsResponseComponentDetails
      */
@@ -81,6 +87,7 @@ export function instanceOfStateEntityDetailsResponseComponentDetails(value: obje
     let isInstance = true;
     isInstance = isInstance && "type" in value;
     isInstance = isInstance && "blueprint_name" in value;
+    isInstance = isInstance && "blueprint_version" in value;
 
     return isInstance;
 }
@@ -98,6 +105,7 @@ export function StateEntityDetailsResponseComponentDetailsFromJSONTyped(json: an
         'type': json['type'],
         'package_address': !exists(json, 'package_address') ? undefined : json['package_address'],
         'blueprint_name': json['blueprint_name'],
+        'blueprint_version': json['blueprint_version'],
         'state': !exists(json, 'state') ? undefined : json['state'],
         'role_assignments': !exists(json, 'role_assignments') ? undefined : ComponentEntityRoleAssignmentsFromJSON(json['role_assignments']),
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
@@ -116,6 +124,7 @@ export function StateEntityDetailsResponseComponentDetailsToJSON(value?: StateEn
         'type': value.type,
         'package_address': value.package_address,
         'blueprint_name': value.blueprint_name,
+        'blueprint_version': value.blueprint_version,
         'state': value.state,
         'role_assignments': ComponentEntityRoleAssignmentsToJSON(value.role_assignments),
         'royalty_vault_balance': value.royalty_vault_balance,
