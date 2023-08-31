@@ -18,6 +18,7 @@ Now:
 
 ### What’s New?
 
+- Added `blueprint_version` to `StateEntityDetailsResponseComponentDetails` response
 
 ### Breaking Changes
 
