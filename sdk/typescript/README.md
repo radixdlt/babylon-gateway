@@ -11,58 +11,26 @@ There are four sub APIs available in the Gateway API:
 - Stream - For reading committed transactions.
 - State - For reading the current or past ledger state of the network.
 
-All APIs generated from OpenAPI specification are available after initialization through `innerClient` object on corresponding sub-api. See examples in [Low Level APIs section](#low-level-apis). On top of that, this package provides [high-level counterparts](#high-level-apis) for each sub api. 
+All APIs generated from OpenAPI specification are available after initialization through `innerClient` object on corresponding sub-api. See examples in [Low Level APIs section](#low-level-apis). On top of that, this package provides [high-level counterparts](#high-level-apis) for each sub api.
 
 ## Versioning
 
-All developers looking for an RCnet V1 compatible API should install versions which have `-rc.1.X` suffix. We'll be publishing internal versions with different suffixes which might not work well with publicly available network. All availble versions are published to [NPM repository](https://www.npmjs.com/package/@radixdlt/babylon-gateway-api-sdk?activeTab=versions)
+All developers looking for an RCnet V3 compatible API should install versions which have `-rc.3.X` suffix. We'll be publishing internal versions with different suffixes which might not work well with publicly available network. All availble versions are published to [NPM repository](https://www.npmjs.com/package/@radixdlt/babylon-gateway-api-sdk?activeTab=versions)
 
 ## Initialization
 
 Calling static `intialize` method from `GatewayApiClient` class will instantiate all low-level APIs together with their high-level equivalents and return them as a single object.
+
+`applicationName` is required purely for statictis purposes and will be added as a request header. Additional fields you can set up are `applicationVersion` and `applicationDappDefinitionAddress`
 
 ```typescript
 import { GatewayApiClient } from '@radixdlt/babylon-gateway-api-sdk'
 
 const gatewayApi = GatewayApiClient.initialize({
   basePath: 'https://rcnet-v3.radixdlt.com',
+  applicationName: 'Your dApp Name',
 })
 const { status, transaction, stream, state } = gatewayApi
-```
-
-## Low Level APIs
-
-Low level APIs are generated automatically based on OpenAPI spec. You can get a good sense of available methods by looking at [Swagger](https://rcnet.radixdlt.com/swagger/index.html). In order to access automatically generated methods you have two options:
-
-### Using generated APIs through `innerClient`
-
-```typescript
-async function getTransactionStatus(transactionIntentHash: string) {
-  let response = await gatewayApi.transaction.innerClient.transactionStatus({
-    transactionStatusRequest: {
-      intent_hash: transactionIntentHash,
-    },
-  })
-  return response.status
-}
-console.log(await getTransactionStatus('txid_tdx_21_18g0pfaxkprvz3c5tee8aydhujmm74yeul7v824fvaye2n7fvlzfqvpn2kz'))
-```
-
-### Using generated APIs manually
-
-You can always opt-out of using aggregated gateway client and instantiate sub-apis manually
-
-```typescript
-import { Configuration, StateApi } from '@radixdlt/babylon-gateway-api-sdk'
-const config = new Configuration({ basePath: 'https://rcnet-v3.radixdlt.com' })
-const stateApi = new StateApi(config)
-const response = await stateApi.nonFungibleData({
-    stateNonFungibleDataRequest: {
-      resource_address: address,
-      non_fungible_ids: [id]
-    }
-  })
-console.log(response.non_fungible_ids)
 ```
 
 ## High Level APIs
@@ -93,6 +61,45 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 ### Stream
 
 - `getTransactionsList(affectedEntities?: string[], cursor?: string)` - get transaction list for given list of entities
+
+## Low Level APIs
+
+Low level APIs are generated automatically based on OpenAPI spec. You can get a good sense of available methods by looking at [Swagger](https://rcnet.radixdlt.com/swagger/index.html). In order to access automatically generated methods you have two options:
+
+### Using generated APIs through `innerClient`
+
+```typescript
+async function getTransactionStatus(transactionIntentHash: string) {
+  let response = await gatewayApi.transaction.innerClient.transactionStatus({
+    transactionStatusRequest: {
+      intent_hash: transactionIntentHash,
+    },
+  })
+  return response.status
+}
+console.log(
+  await getTransactionStatus(
+    'txid_tdx_21_18g0pfaxkprvz3c5tee8aydhujmm74yeul7v824fvaye2n7fvlzfqvpn2kz'
+  )
+)
+```
+
+### Using generated APIs manually
+
+You can always opt-out of using aggregated gateway client and instantiate sub-apis manually
+
+```typescript
+import { Configuration, StateApi } from '@radixdlt/babylon-gateway-api-sdk'
+const config = new Configuration({ basePath: 'https://rcnet-v3.radixdlt.com' })
+const stateApi = new StateApi(config)
+const response = await stateApi.nonFungibleData({
+  stateNonFungibleDataRequest: {
+    resource_address: address,
+    non_fungible_ids: [id],
+  },
+})
+console.log(response.non_fungible_ids)
+```
 
 ## Fetch polyfill
 

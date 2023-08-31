@@ -14,5 +14,5 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["lib"]
+  "include": ["lib", "env.d.ts"]
 }

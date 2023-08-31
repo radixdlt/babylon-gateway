@@ -192,40 +192,34 @@ namespace RadixDlt.CoreApiSdk.Model
         InternalGenericComponent = 16,
 
         /// <summary>
-        /// Enum InternalAccount for value: InternalAccount
-        /// </summary>
-        [EnumMember(Value = "InternalAccount")]
-        InternalAccount = 17,
-
-        /// <summary>
         /// Enum InternalKeyValueStore for value: InternalKeyValueStore
         /// </summary>
         [EnumMember(Value = "InternalKeyValueStore")]
-        InternalKeyValueStore = 18,
+        InternalKeyValueStore = 17,
 
         /// <summary>
         /// Enum GlobalOneResourcePool for value: GlobalOneResourcePool
         /// </summary>
         [EnumMember(Value = "GlobalOneResourcePool")]
-        GlobalOneResourcePool = 19,
+        GlobalOneResourcePool = 18,
 
         /// <summary>
         /// Enum GlobalTwoResourcePool for value: GlobalTwoResourcePool
         /// </summary>
         [EnumMember(Value = "GlobalTwoResourcePool")]
-        GlobalTwoResourcePool = 20,
+        GlobalTwoResourcePool = 19,
 
         /// <summary>
         /// Enum GlobalMultiResourcePool for value: GlobalMultiResourcePool
         /// </summary>
         [EnumMember(Value = "GlobalMultiResourcePool")]
-        GlobalMultiResourcePool = 21,
+        GlobalMultiResourcePool = 20,
 
         /// <summary>
         /// Enum GlobalTransactionTracker for value: GlobalTransactionTracker
         /// </summary>
         [EnumMember(Value = "GlobalTransactionTracker")]
-        GlobalTransactionTracker = 22
+        GlobalTransactionTracker = 21
 
     }
 

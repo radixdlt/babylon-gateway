@@ -45,12 +45,6 @@ export interface StateEntityFungibleResourceVaultsPageResponse {
      */
     total_count?: number | null;
     /**
-     * If specified, contains a cursor to query previous page of the `items` collection.
-     * @type {string}
-     * @memberof StateEntityFungibleResourceVaultsPageResponse
-     */
-    previous_cursor?: string | null;
-    /**
      * If specified, contains a cursor to query next page of the `items` collection.
      * @type {string}
      * @memberof StateEntityFungibleResourceVaultsPageResponse
@@ -101,7 +95,6 @@ export function StateEntityFungibleResourceVaultsPageResponseFromJSONTyped(json:
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
-        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
         'items': ((json['items'] as Array<any>).map(FungibleResourcesCollectionItemVaultAggregatedVaultItemFromJSON)),
         'address': json['address'],
@@ -120,7 +113,6 @@ export function StateEntityFungibleResourceVaultsPageResponseToJSON(value?: Stat
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
         'total_count': value.total_count,
-        'previous_cursor': value.previous_cursor,
         'next_cursor': value.next_cursor,
         'items': ((value.items as Array<any>).map(FungibleResourcesCollectionItemVaultAggregatedVaultItemToJSON)),
         'address': value.address,

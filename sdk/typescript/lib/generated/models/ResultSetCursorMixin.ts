@@ -26,12 +26,6 @@ export interface ResultSetCursorMixin {
      */
     total_count?: number | null;
     /**
-     * If specified, contains a cursor to query previous page of the `items` collection.
-     * @type {string}
-     * @memberof ResultSetCursorMixin
-     */
-    previous_cursor?: string | null;
-    /**
      * If specified, contains a cursor to query next page of the `items` collection.
      * @type {string}
      * @memberof ResultSetCursorMixin
@@ -59,7 +53,6 @@ export function ResultSetCursorMixinFromJSONTyped(json: any, ignoreDiscriminator
     return {
         
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
-        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
     };
 }
@@ -74,7 +67,6 @@ export function ResultSetCursorMixinToJSON(value?: ResultSetCursorMixin | null):
     return {
         
         'total_count': value.total_count,
-        'previous_cursor': value.previous_cursor,
         'next_cursor': value.next_cursor,
     };
 }

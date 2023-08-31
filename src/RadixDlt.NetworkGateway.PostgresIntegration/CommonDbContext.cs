@@ -293,7 +293,6 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<GlobalNonFungibleResourceEntity>(EntityType.GlobalNonFungibleResource)
             .HasValue<GlobalGenericComponentEntity>(EntityType.GlobalGenericComponent)
             .HasValue<InternalGenericComponentEntity>(EntityType.InternalGenericComponent)
-            .HasValue<InternalAccountEntity>(EntityType.InternalAccountComponent)
             .HasValue<GlobalAccountEntity>(EntityType.GlobalAccountComponent)
             .HasValue<GlobalPackageEntity>(EntityType.GlobalPackage)
             .HasValue<InternalKeyValueStoreEntity>(EntityType.InternalKeyValueStore)

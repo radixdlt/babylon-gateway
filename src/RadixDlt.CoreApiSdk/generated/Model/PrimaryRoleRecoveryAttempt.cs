@@ -90,50 +90,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionReceiptRequest
+    /// PrimaryRoleRecoveryAttempt
     /// </summary>
-    [DataContract(Name = "TransactionReceiptRequest")]
-    public partial class TransactionReceiptRequest : IEquatable<TransactionReceiptRequest>
+    [DataContract(Name = "PrimaryRoleRecoveryAttempt")]
+    public partial class PrimaryRoleRecoveryAttempt : IEquatable<PrimaryRoleRecoveryAttempt>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceiptRequest" /> class.
+        /// Initializes a new instance of the <see cref="PrimaryRoleRecoveryAttempt" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionReceiptRequest() { }
+        protected PrimaryRoleRecoveryAttempt() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceiptRequest" /> class.
+        /// Initializes a new instance of the <see cref="PrimaryRoleRecoveryAttempt" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="intentHash">The intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. Either hex or Bech32m-encoded strings are supported.  (required).</param>
-        public TransactionReceiptRequest(string network = default(string), string intentHash = default(string))
+        /// <param name="recoveryProposal">recoveryProposal (required).</param>
+        public PrimaryRoleRecoveryAttempt(RecoveryProposal recoveryProposal = default(RecoveryProposal))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
+            // to ensure "recoveryProposal" is required (not null)
+            if (recoveryProposal == null)
             {
-                throw new ArgumentNullException("network is a required property for TransactionReceiptRequest and cannot be null");
+                throw new ArgumentNullException("recoveryProposal is a required property for PrimaryRoleRecoveryAttempt and cannot be null");
             }
-            this.Network = network;
-            // to ensure "intentHash" is required (not null)
-            if (intentHash == null)
-            {
-                throw new ArgumentNullException("intentHash is a required property for TransactionReceiptRequest and cannot be null");
-            }
-            this.IntentHash = intentHash;
+            this.RecoveryProposal = recoveryProposal;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// Gets or Sets RecoveryProposal
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
-
-        /// <summary>
-        /// The intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. Either hex or Bech32m-encoded strings are supported. 
-        /// </summary>
-        /// <value>The intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. Either hex or Bech32m-encoded strings are supported. </value>
-        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHash { get; set; }
+        [DataMember(Name = "recovery_proposal", IsRequired = true, EmitDefaultValue = true)]
+        public RecoveryProposal RecoveryProposal { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceiptRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("class PrimaryRoleRecoveryAttempt {\n");
+            sb.Append("  RecoveryProposal: ").Append(RecoveryProposal).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +149,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceiptRequest);
+            return this.Equals(input as PrimaryRoleRecoveryAttempt);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceiptRequest instances are equal
+        /// Returns true if PrimaryRoleRecoveryAttempt instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceiptRequest to be compared</param>
+        /// <param name="input">Instance of PrimaryRoleRecoveryAttempt to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceiptRequest input)
+        public bool Equals(PrimaryRoleRecoveryAttempt input)
         {
             if (input == null)
             {
@@ -181,14 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
-                ) && 
-                (
-                    this.IntentHash == input.IntentHash ||
-                    (this.IntentHash != null &&
-                    this.IntentHash.Equals(input.IntentHash))
+                    this.RecoveryProposal == input.RecoveryProposal ||
+                    (this.RecoveryProposal != null &&
+                    this.RecoveryProposal.Equals(input.RecoveryProposal))
                 );
         }
 
@@ -201,13 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
+                if (this.RecoveryProposal != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
-                }
-                if (this.IntentHash != null)
-                {
-                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RecoveryProposal.GetHashCode();
                 }
                 return hashCode;
             }

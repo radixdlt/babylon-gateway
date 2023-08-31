@@ -244,10 +244,6 @@ internal class GlobalAccountEntity : ComponentEntity
 {
 }
 
-internal class InternalAccountEntity : ComponentEntity
-{
-}
-
 internal class GlobalIdentityEntity : ComponentEntity
 {
 }

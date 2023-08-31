@@ -90,50 +90,70 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionReceiptRequest
+    /// RecoveryProposal
     /// </summary>
-    [DataContract(Name = "TransactionReceiptRequest")]
-    public partial class TransactionReceiptRequest : IEquatable<TransactionReceiptRequest>
+    [DataContract(Name = "RecoveryProposal")]
+    public partial class RecoveryProposal : IEquatable<RecoveryProposal>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceiptRequest" /> class.
+        /// Initializes a new instance of the <see cref="RecoveryProposal" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionReceiptRequest() { }
+        protected RecoveryProposal() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceiptRequest" /> class.
+        /// Initializes a new instance of the <see cref="RecoveryProposal" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="intentHash">The intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. Either hex or Bech32m-encoded strings are supported.  (required).</param>
-        public TransactionReceiptRequest(string network = default(string), string intentHash = default(string))
+        /// <param name="primaryRole">primaryRole (required).</param>
+        /// <param name="recoveryRole">recoveryRole (required).</param>
+        /// <param name="confirmationRole">confirmationRole (required).</param>
+        /// <param name="timedRecoveryDelayMinutes">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the optional proposal delay of timed recoveries. .</param>
+        public RecoveryProposal(AccessRule primaryRole = default(AccessRule), AccessRule recoveryRole = default(AccessRule), AccessRule confirmationRole = default(AccessRule), long timedRecoveryDelayMinutes = default(long))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
+            // to ensure "primaryRole" is required (not null)
+            if (primaryRole == null)
             {
-                throw new ArgumentNullException("network is a required property for TransactionReceiptRequest and cannot be null");
+                throw new ArgumentNullException("primaryRole is a required property for RecoveryProposal and cannot be null");
             }
-            this.Network = network;
-            // to ensure "intentHash" is required (not null)
-            if (intentHash == null)
+            this.PrimaryRole = primaryRole;
+            // to ensure "recoveryRole" is required (not null)
+            if (recoveryRole == null)
             {
-                throw new ArgumentNullException("intentHash is a required property for TransactionReceiptRequest and cannot be null");
+                throw new ArgumentNullException("recoveryRole is a required property for RecoveryProposal and cannot be null");
             }
-            this.IntentHash = intentHash;
+            this.RecoveryRole = recoveryRole;
+            // to ensure "confirmationRole" is required (not null)
+            if (confirmationRole == null)
+            {
+                throw new ArgumentNullException("confirmationRole is a required property for RecoveryProposal and cannot be null");
+            }
+            this.ConfirmationRole = confirmationRole;
+            this.TimedRecoveryDelayMinutes = timedRecoveryDelayMinutes;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// Gets or Sets PrimaryRole
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
+        [DataMember(Name = "primary_role", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRule PrimaryRole { get; set; }
 
         /// <summary>
-        /// The intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. Either hex or Bech32m-encoded strings are supported. 
+        /// Gets or Sets RecoveryRole
         /// </summary>
-        /// <value>The intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. Either hex or Bech32m-encoded strings are supported. </value>
-        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHash { get; set; }
+        [DataMember(Name = "recovery_role", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRule RecoveryRole { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ConfirmationRole
+        /// </summary>
+        [DataMember(Name = "confirmation_role", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRule ConfirmationRole { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the optional proposal delay of timed recoveries. 
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the optional proposal delay of timed recoveries. </value>
+        [DataMember(Name = "timed_recovery_delay_minutes", EmitDefaultValue = true)]
+        public long TimedRecoveryDelayMinutes { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +162,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceiptRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("class RecoveryProposal {\n");
+            sb.Append("  PrimaryRole: ").Append(PrimaryRole).Append("\n");
+            sb.Append("  RecoveryRole: ").Append(RecoveryRole).Append("\n");
+            sb.Append("  ConfirmationRole: ").Append(ConfirmationRole).Append("\n");
+            sb.Append("  TimedRecoveryDelayMinutes: ").Append(TimedRecoveryDelayMinutes).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +187,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceiptRequest);
+            return this.Equals(input as RecoveryProposal);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceiptRequest instances are equal
+        /// Returns true if RecoveryProposal instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceiptRequest to be compared</param>
+        /// <param name="input">Instance of RecoveryProposal to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceiptRequest input)
+        public bool Equals(RecoveryProposal input)
         {
             if (input == null)
             {
@@ -181,14 +203,23 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
+                    this.PrimaryRole == input.PrimaryRole ||
+                    (this.PrimaryRole != null &&
+                    this.PrimaryRole.Equals(input.PrimaryRole))
                 ) && 
                 (
-                    this.IntentHash == input.IntentHash ||
-                    (this.IntentHash != null &&
-                    this.IntentHash.Equals(input.IntentHash))
+                    this.RecoveryRole == input.RecoveryRole ||
+                    (this.RecoveryRole != null &&
+                    this.RecoveryRole.Equals(input.RecoveryRole))
+                ) && 
+                (
+                    this.ConfirmationRole == input.ConfirmationRole ||
+                    (this.ConfirmationRole != null &&
+                    this.ConfirmationRole.Equals(input.ConfirmationRole))
+                ) && 
+                (
+                    this.TimedRecoveryDelayMinutes == input.TimedRecoveryDelayMinutes ||
+                    this.TimedRecoveryDelayMinutes.Equals(input.TimedRecoveryDelayMinutes)
                 );
         }
 
@@ -201,14 +232,19 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
+                if (this.PrimaryRole != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PrimaryRole.GetHashCode();
                 }
-                if (this.IntentHash != null)
+                if (this.RecoveryRole != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RecoveryRole.GetHashCode();
                 }
+                if (this.ConfirmationRole != null)
+                {
+                    hashCode = (hashCode * 59) + this.ConfirmationRole.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.TimedRecoveryDelayMinutes.GetHashCode();
                 return hashCode;
             }
         }

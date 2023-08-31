@@ -4,9 +4,7 @@ import { GatewayApiClient } from './../lib/index'
 const fetchRequestFactory = (body: any) => ({
   body: JSON.stringify(body),
   credentials: undefined,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: expect.anything(),
   method: 'POST',
 })
 

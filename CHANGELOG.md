@@ -17,7 +17,8 @@ Now:
 ---
 
 ### What’s New?
-
+- state returned for access controller, pool components and account from `/state/entity/details` endpoint.
+- access controller access rules returned from `/state/entity/details` endpoint.
 - Added `blueprint_version` to `StateEntityDetailsResponseComponentDetails` response
 
 ### Breaking Changes

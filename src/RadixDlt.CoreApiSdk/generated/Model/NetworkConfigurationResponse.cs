@@ -107,9 +107,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="networkId">The logical id of the network (required).</param>
         /// <param name="networkHrpSuffix">The network suffix used for Bech32m HRPs used for addressing. (required).</param>
+        /// <param name="usdPriceInXrd">The current value of the protocol-based USD/XRD multiplier (i.e. an amount of XRDs to be paid for 1 USD). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         /// <param name="addressTypes">addressTypes (required).</param>
         /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
-        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), string network = default(string), int networkId = default(int), string networkHrpSuffix = default(string), List<AddressType> addressTypes = default(List<AddressType>), NetworkConfigurationResponseWellKnownAddresses wellKnownAddresses = default(NetworkConfigurationResponseWellKnownAddresses))
+        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), string network = default(string), int networkId = default(int), string networkHrpSuffix = default(string), string usdPriceInXrd = default(string), List<AddressType> addressTypes = default(List<AddressType>), NetworkConfigurationResponseWellKnownAddresses wellKnownAddresses = default(NetworkConfigurationResponseWellKnownAddresses))
         {
             // to ensure "version" is required (not null)
             if (version == null)
@@ -130,6 +131,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("networkHrpSuffix is a required property for NetworkConfigurationResponse and cannot be null");
             }
             this.NetworkHrpSuffix = networkHrpSuffix;
+            // to ensure "usdPriceInXrd" is required (not null)
+            if (usdPriceInXrd == null)
+            {
+                throw new ArgumentNullException("usdPriceInXrd is a required property for NetworkConfigurationResponse and cannot be null");
+            }
+            this.UsdPriceInXrd = usdPriceInXrd;
             // to ensure "addressTypes" is required (not null)
             if (addressTypes == null)
             {
@@ -172,6 +179,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public string NetworkHrpSuffix { get; set; }
 
         /// <summary>
+        /// The current value of the protocol-based USD/XRD multiplier (i.e. an amount of XRDs to be paid for 1 USD). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
+        /// </summary>
+        /// <value>The current value of the protocol-based USD/XRD multiplier (i.e. an amount of XRDs to be paid for 1 USD). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
+        [DataMember(Name = "usd_price_in_xrd", IsRequired = true, EmitDefaultValue = true)]
+        public string UsdPriceInXrd { get; set; }
+
+        /// <summary>
         /// Gets or Sets AddressTypes
         /// </summary>
         [DataMember(Name = "address_types", IsRequired = true, EmitDefaultValue = true)]
@@ -195,6 +209,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  NetworkId: ").Append(NetworkId).Append("\n");
             sb.Append("  NetworkHrpSuffix: ").Append(NetworkHrpSuffix).Append("\n");
+            sb.Append("  UsdPriceInXrd: ").Append(UsdPriceInXrd).Append("\n");
             sb.Append("  AddressTypes: ").Append(AddressTypes).Append("\n");
             sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
             sb.Append("}\n");
@@ -252,6 +267,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.NetworkHrpSuffix.Equals(input.NetworkHrpSuffix))
                 ) && 
                 (
+                    this.UsdPriceInXrd == input.UsdPriceInXrd ||
+                    (this.UsdPriceInXrd != null &&
+                    this.UsdPriceInXrd.Equals(input.UsdPriceInXrd))
+                ) && 
+                (
                     this.AddressTypes == input.AddressTypes ||
                     this.AddressTypes != null &&
                     input.AddressTypes != null &&
@@ -285,6 +305,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.NetworkHrpSuffix != null)
                 {
                     hashCode = (hashCode * 59) + this.NetworkHrpSuffix.GetHashCode();
+                }
+                if (this.UsdPriceInXrd != null)
+                {
+                    hashCode = (hashCode * 59) + this.UsdPriceInXrd.GetHashCode();
                 }
                 if (this.AddressTypes != null)
                 {

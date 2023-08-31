@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="MempoolTransactionRequest" /> class.
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="payloadHashes">payloadHashes (required).</param>
+        /// <param name="payloadHashes">A list of payload hashes to attempt to read. Each hash must be either hex, or in Bech32m format. (required).</param>
         public MempoolTransactionRequest(string network = default(string), List<string> payloadHashes = default(List<string>))
         {
             // to ensure "network" is required (not null)
@@ -129,8 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Network { get; set; }
 
         /// <summary>
-        /// Gets or Sets PayloadHashes
+        /// A list of payload hashes to attempt to read. Each hash must be either hex, or in Bech32m format.
         /// </summary>
+        /// <value>A list of payload hashes to attempt to read. Each hash must be either hex, or in Bech32m format.</value>
         [DataMember(Name = "payload_hashes", IsRequired = true, EmitDefaultValue = true)]
         public List<string> PayloadHashes { get; set; }
 
