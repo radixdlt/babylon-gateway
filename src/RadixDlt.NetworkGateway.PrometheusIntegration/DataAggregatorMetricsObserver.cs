@@ -611,6 +611,13 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
+    public ValueTask ResubmitAlreadyCommitted(byte[] notarizedTransaction)
+    {
+        _transactionResubmissionResolutionByResultCount.WithLabels("node_marks_as_already_committed").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
     ValueTask IPendingTransactionResubmissionServiceObserver.PostResubmitSucceeded(byte[] notarizedTransaction)
     {
         _transactionResubmissionResolutionByResultCount.WithLabels("success").Inc();

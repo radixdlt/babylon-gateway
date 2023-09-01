@@ -1,5 +1,5 @@
 # 0.5.0 - RCNet v3
-Release Date: unreleased
+Release Date: 31.08.2023
 
 ## RCNet v2 to RCNet v3 Migration Guide
 
@@ -20,6 +20,16 @@ Now:
 - state returned for access controller, pool components and account from `/state/entity/details` endpoint.
 - access controller access rules returned from `/state/entity/details` endpoint.
 - Added `blueprint_version` to `StateEntityDetailsResponseComponentDetails` response
+- fixed `total_supply`, `total_burned` and `total_minted` for resources (i.e native XRD).
+- new endpoint `/state/non-fungible/location` returns location of given non fungible id.
+- Return programmatic json with type names for:
+    - key-value key and data in `/state/key-value/data` endpoint
+    - non fungible data in `/state/non-fungible/data` endpoint
+    - events in `/transaction/committed-details` and `/stream/transactions` endpoints.
+    - custom scrypto component state in `/state/entity/details` endpoint.
+- New endpoint `/statistics/validators/uptime` returns validator uptime data.
+- New endpoint `/state/key-value/data` returns entries of requested KeyValueStore.
+- Rework in `role_assignments`. Returning all possible keys for native modules (`AccessRules`, `Metadata`, `Royalty`) and if no role is assigned pointer to owner role is returned. Same functionality applies to `MainModule` for FungibleResource and NonFungibleResource.
 
 ### Breaking Changes
 
@@ -27,22 +37,16 @@ Now:
 - Deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
 - Transaction hashes are now exposed as Bech32m hashes instead of hex-encoded binary sequences.
 - Dropped `previous_cursor` altogether from all paginable collections.
-- Returning programmatic json with type names for custom scrypto component state in `/state/entity/details` endpoint.
+
+### Known Issues
+
+- only assigned `role_assignments` keys for `main` module for non resource entities are returned. If key is not assigned it'll not be returned from API.
 
 ## Full technical changelog by minor release
 ### 0.4.1
 
 - Renamed `access_rules` to `role_assignments`. Included missing `module` to role assignment key.
 - Added package details to `/satus/entity/details` endpoint.
-- New endpoint `/statistics/validators/uptime` returns validator uptime data.
-- New endpoint `/state/key-value/data` returns entries of requested KeyValueStore.
-- Return programmatic json with type names for:
-  - key-value key and data in `/state/key-value/data` endpoint
-  - non fungible data in `/state/non-fungible/data` endpoint
-  - events in `/transaction/committed-details` and `/stream/transactions` endpoints.
-- new endpoint `/state/non-fungible/location` returns location of given non fungible id.
-- deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
-- Rework in `role_assignments`. Returning all possible keys for native modules (`AccessRules`, `Metadata`, `Royalty`) and if no role is assigned pointer to owner role is returned. Same functionality applies to `MainModule` for FungibleResource and NonFungibleResource.
 
 -------
 

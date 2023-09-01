@@ -337,6 +337,14 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
             switch (details)
             {
+                case CoreModel.TransactionSubmitIntentAlreadyCommitted intentAlreadyCommitted:
+                    await _observers.ForEachAsync(x => x.ResubmitAlreadyCommitted(notarizedTransaction));
+
+                    _logger.LogInformation(
+                        "CoreAPI returned that submitted transaction with intent hash: {IntentHash} was already committed to ledger at state version: {StateVersion}",
+                        transaction.IntentHash, intentAlreadyCommitted.CommittedAs.StateVersion);
+
+                    return new SubmissionResult(transaction, false, null, chosenNode.Name);
                 case CoreModel.TransactionSubmitPriorityThresholdNotMetErrorDetails priorityThresholdNotMet:
                     detailedMessage = $"insufficient tip percentage of {priorityThresholdNotMet.TipPercentage}; min tip percentage {priorityThresholdNotMet.MinTipPercentageRequired}";
                     break;

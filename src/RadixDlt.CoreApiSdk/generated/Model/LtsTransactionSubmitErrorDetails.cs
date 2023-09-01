@@ -95,6 +95,8 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "LtsTransactionSubmitErrorDetails")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitIntentAlreadyCommitted), "IntentAlreadyCommitted")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitIntentAlreadyCommitted), "LtsTransactionSubmitIntentAlreadyCommitted")]
     [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitPriorityThresholdNotMetErrorDetails), "LtsTransactionSubmitPriorityThresholdNotMetErrorDetails")]
     [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitRejectedErrorDetails), "LtsTransactionSubmitRejectedErrorDetails")]
     [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitPriorityThresholdNotMetErrorDetails), "PriorityThresholdNotMet")]

@@ -225,6 +225,16 @@ internal class SubmissionService : ISubmissionService
 
             switch (details)
             {
+                case CoreModel.TransactionSubmitIntentAlreadyCommitted intentAlreadyCommitted:
+                    await _observers.ForEachAsync(x => x.ResubmitAlreadyCommitted(request, result.FailureResponse));
+
+                    _logger.LogInformation(
+                        "CoreAPI returned that submitted transaction with intent hash: {IntentHash} was already committed to ledger at state version: {StateVersion}",
+                        parsedTransaction.IntentHash().AsStr(), intentAlreadyCommitted.CommittedAs.StateVersion);
+
+                    return new GatewayModel.TransactionSubmitResponse(
+                        duplicate: false
+                    );
                 case CoreModel.TransactionSubmitPriorityThresholdNotMetErrorDetails priorityThresholdNotMet:
                     detailedMessage = $"insufficient tip percentage of {priorityThresholdNotMet.TipPercentage}; min tip percentage {priorityThresholdNotMet.MinTipPercentageRequired}";
                     break;

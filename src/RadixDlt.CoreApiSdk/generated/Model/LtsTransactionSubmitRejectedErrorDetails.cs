@@ -95,6 +95,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "LtsTransactionSubmitRejectedErrorDetails")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitIntentAlreadyCommitted), "IntentAlreadyCommitted")]
     [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitPriorityThresholdNotMetErrorDetails), "PriorityThresholdNotMet")]
     [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitRejectedErrorDetails), "Rejected")]
     public partial class LtsTransactionSubmitRejectedErrorDetails : LtsTransactionSubmitErrorDetails, IEquatable<LtsTransactionSubmitRejectedErrorDetails>
@@ -111,13 +112,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="isFresh">Whether (true) this rejected status has just been calculated fresh, or (false) the status is from the pending transaction result cache.  (required).</param>
         /// <param name="isPayloadRejectionPermanent">Whether the rejection of this payload is known to be permanent.  (required).</param>
         /// <param name="isIntentRejectionPermanent">Whether the rejection of this intent is known to be permanent - this is a stronger statement than the payload rejection being permanent, as it implies any payloads containing the intent will also be permanently rejected.  (required).</param>
-        /// <param name="isRejectedBecauseIntentAlreadyCommitted">Whether the cached rejection of this intent is due to the intent already having been committed. If so, see the /transaction/receipt endpoint for further information.  (required).</param>
-        /// <param name="intentAlreadyCommittedAs">intentAlreadyCommittedAs.</param>
         /// <param name="retryFromTimestamp">retryFromTimestamp.</param>
         /// <param name="retryFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch after which the node will consider recalculating the validity of the transaction. Only present if the rejection is temporary due to a header specifying a \&quot;from epoch\&quot; in the future. .</param>
         /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the rejection isn&#39;t permanent. .</param>
         /// <param name="type">type (required) (default to LtsTransactionSubmitErrorDetailsType.Rejected).</param>
-        public LtsTransactionSubmitRejectedErrorDetails(string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), bool isRejectedBecauseIntentAlreadyCommitted = default(bool), CommittedIntentMetadata intentAlreadyCommittedAs = default(CommittedIntentMetadata), Instant retryFromTimestamp = default(Instant), long retryFromEpoch = default(long), long invalidFromEpoch = default(long), LtsTransactionSubmitErrorDetailsType type = LtsTransactionSubmitErrorDetailsType.Rejected) : base(type)
+        public LtsTransactionSubmitRejectedErrorDetails(string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), Instant retryFromTimestamp = default(Instant), long retryFromEpoch = default(long), long invalidFromEpoch = default(long), LtsTransactionSubmitErrorDetailsType type = LtsTransactionSubmitErrorDetailsType.Rejected) : base(type)
         {
             // to ensure "errorMessage" is required (not null)
             if (errorMessage == null)
@@ -128,8 +127,6 @@ namespace RadixDlt.CoreApiSdk.Model
             this.IsFresh = isFresh;
             this.IsPayloadRejectionPermanent = isPayloadRejectionPermanent;
             this.IsIntentRejectionPermanent = isIntentRejectionPermanent;
-            this.IsRejectedBecauseIntentAlreadyCommitted = isRejectedBecauseIntentAlreadyCommitted;
-            this.IntentAlreadyCommittedAs = intentAlreadyCommittedAs;
             this.RetryFromTimestamp = retryFromTimestamp;
             this.RetryFromEpoch = retryFromEpoch;
             this.InvalidFromEpoch = invalidFromEpoch;
@@ -164,19 +161,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool IsIntentRejectionPermanent { get; set; }
 
         /// <summary>
-        /// Whether the cached rejection of this intent is due to the intent already having been committed. If so, see the /transaction/receipt endpoint for further information. 
-        /// </summary>
-        /// <value>Whether the cached rejection of this intent is due to the intent already having been committed. If so, see the /transaction/receipt endpoint for further information. </value>
-        [DataMember(Name = "is_rejected_because_intent_already_committed", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsRejectedBecauseIntentAlreadyCommitted { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IntentAlreadyCommittedAs
-        /// </summary>
-        [DataMember(Name = "intent_already_committed_as", EmitDefaultValue = true)]
-        public CommittedIntentMetadata IntentAlreadyCommittedAs { get; set; }
-
-        /// <summary>
         /// Gets or Sets RetryFromTimestamp
         /// </summary>
         [DataMember(Name = "retry_from_timestamp", EmitDefaultValue = true)]
@@ -209,8 +193,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  IsFresh: ").Append(IsFresh).Append("\n");
             sb.Append("  IsPayloadRejectionPermanent: ").Append(IsPayloadRejectionPermanent).Append("\n");
             sb.Append("  IsIntentRejectionPermanent: ").Append(IsIntentRejectionPermanent).Append("\n");
-            sb.Append("  IsRejectedBecauseIntentAlreadyCommitted: ").Append(IsRejectedBecauseIntentAlreadyCommitted).Append("\n");
-            sb.Append("  IntentAlreadyCommittedAs: ").Append(IntentAlreadyCommittedAs).Append("\n");
             sb.Append("  RetryFromTimestamp: ").Append(RetryFromTimestamp).Append("\n");
             sb.Append("  RetryFromEpoch: ").Append(RetryFromEpoch).Append("\n");
             sb.Append("  InvalidFromEpoch: ").Append(InvalidFromEpoch).Append("\n");
@@ -267,15 +249,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.IsIntentRejectionPermanent.Equals(input.IsIntentRejectionPermanent)
                 ) && base.Equals(input) && 
                 (
-                    this.IsRejectedBecauseIntentAlreadyCommitted == input.IsRejectedBecauseIntentAlreadyCommitted ||
-                    this.IsRejectedBecauseIntentAlreadyCommitted.Equals(input.IsRejectedBecauseIntentAlreadyCommitted)
-                ) && base.Equals(input) && 
-                (
-                    this.IntentAlreadyCommittedAs == input.IntentAlreadyCommittedAs ||
-                    (this.IntentAlreadyCommittedAs != null &&
-                    this.IntentAlreadyCommittedAs.Equals(input.IntentAlreadyCommittedAs))
-                ) && base.Equals(input) && 
-                (
                     this.RetryFromTimestamp == input.RetryFromTimestamp ||
                     (this.RetryFromTimestamp != null &&
                     this.RetryFromTimestamp.Equals(input.RetryFromTimestamp))
@@ -306,11 +279,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 hashCode = (hashCode * 59) + this.IsFresh.GetHashCode();
                 hashCode = (hashCode * 59) + this.IsPayloadRejectionPermanent.GetHashCode();
                 hashCode = (hashCode * 59) + this.IsIntentRejectionPermanent.GetHashCode();
-                hashCode = (hashCode * 59) + this.IsRejectedBecauseIntentAlreadyCommitted.GetHashCode();
-                if (this.IntentAlreadyCommittedAs != null)
-                {
-                    hashCode = (hashCode * 59) + this.IntentAlreadyCommittedAs.GetHashCode();
-                }
                 if (this.RetryFromTimestamp != null)
                 {
                     hashCode = (hashCode * 59) + this.RetryFromTimestamp.GetHashCode();

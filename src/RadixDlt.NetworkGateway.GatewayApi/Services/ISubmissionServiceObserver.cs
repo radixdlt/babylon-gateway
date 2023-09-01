@@ -92,6 +92,8 @@ public interface ISubmissionServiceObserver
 
     ValueTask SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
 
+    ValueTask ResubmitAlreadyCommitted(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
+
     ValueTask SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
 
     ValueTask HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception);

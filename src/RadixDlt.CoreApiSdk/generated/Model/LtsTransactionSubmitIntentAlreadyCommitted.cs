@@ -91,37 +91,40 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitErrorDetails
+    /// LtsTransactionSubmitIntentAlreadyCommitted
     /// </summary>
-    [DataContract(Name = "TransactionSubmitErrorDetails")]
+    [DataContract(Name = "LtsTransactionSubmitIntentAlreadyCommitted")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitIntentAlreadyCommitted), "IntentAlreadyCommitted")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitPriorityThresholdNotMetErrorDetails), "PriorityThresholdNotMet")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitRejectedErrorDetails), "Rejected")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitIntentAlreadyCommitted), "TransactionSubmitIntentAlreadyCommitted")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitPriorityThresholdNotMetErrorDetails), "TransactionSubmitPriorityThresholdNotMetErrorDetails")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitRejectedErrorDetails), "TransactionSubmitRejectedErrorDetails")]
-    public partial class TransactionSubmitErrorDetails : IEquatable<TransactionSubmitErrorDetails>
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitIntentAlreadyCommitted), "IntentAlreadyCommitted")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitPriorityThresholdNotMetErrorDetails), "PriorityThresholdNotMet")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitRejectedErrorDetails), "Rejected")]
+    public partial class LtsTransactionSubmitIntentAlreadyCommitted : LtsTransactionSubmitErrorDetails, IEquatable<LtsTransactionSubmitIntentAlreadyCommitted>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionSubmitErrorDetailsType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitErrorDetails" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionSubmitIntentAlreadyCommitted" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitErrorDetails() { }
+        protected LtsTransactionSubmitIntentAlreadyCommitted() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitErrorDetails" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionSubmitIntentAlreadyCommitted" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public TransactionSubmitErrorDetails(TransactionSubmitErrorDetailsType type = default(TransactionSubmitErrorDetailsType))
+        /// <param name="committedAs">committedAs (required).</param>
+        /// <param name="type">type (required) (default to LtsTransactionSubmitErrorDetailsType.IntentAlreadyCommitted).</param>
+        public LtsTransactionSubmitIntentAlreadyCommitted(CommittedIntentMetadata committedAs = default(CommittedIntentMetadata), LtsTransactionSubmitErrorDetailsType type = LtsTransactionSubmitErrorDetailsType.IntentAlreadyCommitted) : base(type)
         {
-            this.Type = type;
+            // to ensure "committedAs" is required (not null)
+            if (committedAs == null)
+            {
+                throw new ArgumentNullException("committedAs is a required property for LtsTransactionSubmitIntentAlreadyCommitted and cannot be null");
+            }
+            this.CommittedAs = committedAs;
         }
+
+        /// <summary>
+        /// Gets or Sets CommittedAs
+        /// </summary>
+        [DataMember(Name = "committed_as", IsRequired = true, EmitDefaultValue = true)]
+        public CommittedIntentMetadata CommittedAs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,8 +133,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitErrorDetails {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class LtsTransactionSubmitIntentAlreadyCommitted {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  CommittedAs: ").Append(CommittedAs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -140,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -152,24 +156,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitErrorDetails);
+            return this.Equals(input as LtsTransactionSubmitIntentAlreadyCommitted);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitErrorDetails instances are equal
+        /// Returns true if LtsTransactionSubmitIntentAlreadyCommitted instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitErrorDetails to be compared</param>
+        /// <param name="input">Instance of LtsTransactionSubmitIntentAlreadyCommitted to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitErrorDetails input)
+        public bool Equals(LtsTransactionSubmitIntentAlreadyCommitted input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.CommittedAs == input.CommittedAs ||
+                    (this.CommittedAs != null &&
+                    this.CommittedAs.Equals(input.CommittedAs))
                 );
         }
 
@@ -181,8 +186,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
+                if (this.CommittedAs != null)
+                {
+                    hashCode = (hashCode * 59) + this.CommittedAs.GetHashCode();
+                }
                 return hashCode;
             }
         }
