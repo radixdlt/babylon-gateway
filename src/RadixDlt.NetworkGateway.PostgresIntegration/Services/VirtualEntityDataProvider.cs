@@ -76,7 +76,7 @@ using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public interface IVirtualEntityDataProvider
+internal interface IVirtualEntityDataProvider
 {
     public bool IsVirtualAccountAddress(EntityAddress address);
 
@@ -85,7 +85,7 @@ public interface IVirtualEntityDataProvider
     (GatewayModel.StateEntityDetailsResponseComponentDetails Details, GatewayModel.EntityMetadataCollection Metadata) GetVirtualEntityData(EntityAddress address);
 }
 
-public class VirtualEntityDataProvider : IVirtualEntityDataProvider
+internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
 {
     private readonly string _accountPackage;
     private readonly string _identityPackage;
@@ -98,7 +98,7 @@ public class VirtualEntityDataProvider : IVirtualEntityDataProvider
     private readonly string _ed25519SignatureVirtualBadge;
     private readonly List<GatewayModel.ComponentEntityRoleAssignmentEntry> _virtualEntityRoleAssignmentEntries;
 
-    public VirtualEntityDataProvider(INetworkConfigurationProvider networkConfigurationProvider)
+    public VirtualEntityDataProvider(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider, INetworkConfigurationProvider networkConfigurationProvider)
     {
         _accountPackage = networkConfigurationProvider.GetWellKnownAddresses().AccountPackage;
         _identityPackage = networkConfigurationProvider.GetWellKnownAddresses().IdentityPackage;
@@ -109,7 +109,7 @@ public class VirtualEntityDataProvider : IVirtualEntityDataProvider
         _ed25519VirtualIdentityDiscriminator = (byte)networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Identity).AddressBytePrefix;
         _secp256k1SignatureVirtualBadge = networkConfigurationProvider.GetWellKnownAddresses().Secp256k1SignatureVirtualBadge;
         _ed25519SignatureVirtualBadge = networkConfigurationProvider.GetWellKnownAddresses().Ed25519SignatureVirtualBadge;
-        _virtualEntityRoleAssignmentEntries = GenerateVirtualEntityRoleAssignmentEntries();
+        _virtualEntityRoleAssignmentEntries = GenerateVirtualEntityRoleAssignmentEntries(roleAssignmentsKeyProvider);
     }
 
     public bool IsVirtualAccountAddress(EntityAddress address)
@@ -223,31 +223,12 @@ public class VirtualEntityDataProvider : IVirtualEntityDataProvider
         return decoded.DiscriminatorByte == _ed25519VirtualAccountDiscriminator || decoded.DiscriminatorByte == _ed25519VirtualIdentityDiscriminator;
     }
 
-    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GenerateVirtualEntityRoleAssignmentEntries()
+    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GenerateVirtualEntityRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
-        GatewayModel.ComponentEntityRoleAssignmentEntry GenerateEntry(GatewayModel.ObjectModuleId moduleId, string roleKey, string updaterRoleKey)
-        {
-            return new GatewayModel.ComponentEntityRoleAssignmentEntry(
-                roleKey: new GatewayModel.RoleKey(roleKey, moduleId),
-                assignment: new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner),
-                updaterRoles: new List<GatewayModel.RoleKey>
-                {
-                    new(updaterRoleKey, moduleId),
-                });
-        }
-
-        return new List<GatewayModel.ComponentEntityRoleAssignmentEntry>
-        {
-            GenerateEntry(GatewayModel.ObjectModuleId.Metadata, "metadata_locker", "metadata_locker_updater"),
-            GenerateEntry(GatewayModel.ObjectModuleId.Metadata, "metadata_locker_updater", "metadata_locker_updater"),
-            GenerateEntry(GatewayModel.ObjectModuleId.Metadata, "metadata_setter", "metadata_setter_updater"),
-            GenerateEntry(GatewayModel.ObjectModuleId.Metadata, "metadata_setter_updater", "metadata_setter_updater"),
-            GenerateEntry(GatewayModel.ObjectModuleId.Royalty, "royalty_setter", "royalty_setter_updater"),
-            GenerateEntry(GatewayModel.ObjectModuleId.Royalty, "royalty_setter_updater", "royalty_setter_updater"),
-            GenerateEntry(GatewayModel.ObjectModuleId.Royalty, "royalty_locker", "royalty_locker_updater"),
-            GenerateEntry(GatewayModel.ObjectModuleId.Royalty, "royalty_locker_updater", "royalty_locker_updater"),
-            GenerateEntry(GatewayModel.ObjectModuleId.Royalty, "royalty_claimer", "royalty_claimer_updater"),
-            GenerateEntry(GatewayModel.ObjectModuleId.Royalty, "royalty_claimer_updater", "royalty_claimer_updater"),
-        };
+        return roleAssignmentsKeyProvider.GetNativeModulesKeys().Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
+            new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ObjectModuleId.ToGatewayModel()),
+            new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
+            entry.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ObjectModuleId.ToGatewayModel())).ToList()
+        )).ToList();
     }
 }

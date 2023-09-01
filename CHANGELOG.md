@@ -7,6 +7,7 @@ Release Date: _unreleased_
 Release Date: 01.09.2023
 
 - Fix data aggregator processing custom events.
+- Fix virtual identity and account details.
 
 # 0.5.0 - RCNet v3
 Release Date: 31.08.2023
