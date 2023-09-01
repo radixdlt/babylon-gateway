@@ -118,10 +118,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IVirtualEntityMetadataProvider _virtualEntityMetadataProvider;
     private readonly IRoleAssignmentsMapper _roleAssignmentsMapper;
-    private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
-    private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
-    private readonly byte _ecdsaSecp256k1VirtualIdentityAddressPrefix;
-    private readonly byte _eddsaEd25519VirtualIdentityAddressPrefix;
+    private readonly byte _secp256k1VirtualAccountAddressPrefix;
+    private readonly byte _ed25519VirtualAccountAddressPrefix;
+    private readonly byte _secp256k1VirtualIdentityAddressPrefix;
+    private readonly byte _ed25519VirtualIdentityAddressPrefix;
 
     public EntityStateQuerier(
         INetworkConfigurationProvider networkConfigurationProvider,
@@ -136,10 +136,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         _virtualEntityMetadataProvider = virtualEntityMetadataProvider;
         _roleAssignmentsMapper = roleAssignmentsMapper;
 
-        _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
-        _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
-        _ecdsaSecp256k1VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Identity).AddressBytePrefix;
-        _eddsaEd25519VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Identity).AddressBytePrefix;
+        _secp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
+        _ed25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
+        _secp256k1VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Identity).AddressBytePrefix;
+        _ed25519VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Identity).AddressBytePrefix;
     }
 
     public async Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(
@@ -255,7 +255,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
                     // TODO - we should better fake the data - eg roleAssignments when this is possible
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
-                        blueprintName: "Account",
+                        blueprintName: "Identity",
                         blueprintVersion: "1.0.0",
                         state: new JObject(),
                         roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(new JObject(), new List<GatewayModel.ComponentEntityRoleAssignmentEntry>())
@@ -1210,14 +1210,14 @@ INNER JOIN LATERAL(
     {
         var firstAddressByte = RadixAddressCodec.Decode(address).Data[0];
 
-        if (firstAddressByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstAddressByte == _eddsaEd25519VirtualAccountAddressPrefix)
+        if (firstAddressByte == _secp256k1VirtualAccountAddressPrefix || firstAddressByte == _ed25519VirtualAccountAddressPrefix)
         {
             entity = new VirtualAccountComponentEntity(address);
 
             return true;
         }
 
-        if (firstAddressByte == _ecdsaSecp256k1VirtualIdentityAddressPrefix || firstAddressByte == _eddsaEd25519VirtualIdentityAddressPrefix)
+        if (firstAddressByte == _secp256k1VirtualIdentityAddressPrefix || firstAddressByte == _ed25519VirtualIdentityAddressPrefix)
         {
             entity = new VirtualIdentityEntity(address);
 
