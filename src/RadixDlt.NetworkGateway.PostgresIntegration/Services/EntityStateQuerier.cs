@@ -67,7 +67,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
@@ -116,30 +115,21 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
     private readonly ReadOnlyDbContext _dbContext;
-    private readonly IVirtualEntityMetadataProvider _virtualEntityMetadataProvider;
+    private readonly IVirtualEntityDataProvider _virtualEntityDataProvider;
     private readonly IRoleAssignmentsMapper _roleAssignmentsMapper;
-    private readonly byte _secp256k1VirtualAccountAddressPrefix;
-    private readonly byte _ed25519VirtualAccountAddressPrefix;
-    private readonly byte _secp256k1VirtualIdentityAddressPrefix;
-    private readonly byte _ed25519VirtualIdentityAddressPrefix;
 
     public EntityStateQuerier(
         INetworkConfigurationProvider networkConfigurationProvider,
         ReadOnlyDbContext dbContext,
         IOptionsSnapshot<EndpointOptions> endpointConfiguration,
-        IVirtualEntityMetadataProvider virtualEntityMetadataProvider,
+        IVirtualEntityDataProvider virtualEntityDataProvider,
         IRoleAssignmentsMapper roleAssignmentsMapper)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
         _endpointConfiguration = endpointConfiguration;
-        _virtualEntityMetadataProvider = virtualEntityMetadataProvider;
+        _virtualEntityDataProvider = virtualEntityDataProvider;
         _roleAssignmentsMapper = roleAssignmentsMapper;
-
-        _secp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
-        _ed25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
-        _secp256k1VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Identity).AddressBytePrefix;
-        _ed25519VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Identity).AddressBytePrefix;
     }
 
     public async Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(
@@ -250,29 +240,11 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     break;
 
                 case VirtualIdentityEntity:
-                    var virtualIdentityMetadata = _virtualEntityMetadataProvider.GetVirtualEntityMetadata(entity.Address);
-                    metadata[entity.Id] = virtualIdentityMetadata;
-
-                    // TODO - we should better fake the data - eg roleAssignments when this is possible
-                    details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
-                        blueprintName: "Identity",
-                        blueprintVersion: "1.0.0",
-                        state: new JObject(),
-                        roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(new JObject(), new List<GatewayModel.ComponentEntityRoleAssignmentEntry>())
-                    );
-                    break;
-
                 case VirtualAccountComponentEntity:
-                    var virtualAccountMetadata = _virtualEntityMetadataProvider.GetVirtualEntityMetadata(entity.Address);
-                    metadata[entity.Id] = virtualAccountMetadata;
+                    var virtualEntityData = _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
 
-                    // TODO - we should better fake the data - eg roleAssignments when this is possible
-                    details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
-                        blueprintName: "Account",
-                        blueprintVersion: "1.0.0",
-                        state: new JObject(),
-                        roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(new JObject(), new List<GatewayModel.ComponentEntityRoleAssignmentEntry>())
-                    );
+                    details = virtualEntityData.Details;
+                    metadata[entity.Id] = virtualEntityData.Metadata;
                     break;
 
                 case ComponentEntity ce:
@@ -1208,16 +1180,14 @@ INNER JOIN LATERAL(
 
     private bool TryGetVirtualEntity(EntityAddress address, [NotNullWhen(true)] out Entity? entity)
     {
-        var firstAddressByte = RadixAddressCodec.Decode(address).Data[0];
-
-        if (firstAddressByte == _secp256k1VirtualAccountAddressPrefix || firstAddressByte == _ed25519VirtualAccountAddressPrefix)
+        if (_virtualEntityDataProvider.IsVirtualAccountAddress(address))
         {
             entity = new VirtualAccountComponentEntity(address);
 
             return true;
         }
 
-        if (firstAddressByte == _secp256k1VirtualIdentityAddressPrefix || firstAddressByte == _ed25519VirtualIdentityAddressPrefix)
+        if (_virtualEntityDataProvider.IsVirtualIdentityAddress(address))
         {
             entity = new VirtualIdentityEntity(address);
 
