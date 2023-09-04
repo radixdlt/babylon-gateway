@@ -90,7 +90,7 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<IRoleAssignmentsKeyProvider, RoleAssignmentsKeyProvider>()
             .AddScoped<IRoleAssignmentsMapper, RoleAssignmentsMapper>()
             .AddScoped<IValidatorQuerier, ValidatorQuerier>()
-            .AddScoped<IVirtualEntityMetadataProvider, VirtualEntityMetadataProvider>()
+            .AddScoped<IVirtualEntityDataProvider, VirtualEntityDataProvider>()
             .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
             .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
 

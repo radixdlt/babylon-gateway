@@ -2,6 +2,7 @@
 Release Date: _unreleased_
 
 - Fix invalid `index_in_epoch` and `index_in_round` for genesis TX.
+- Fix virtual identity and account details.
 
 ### 0.5.1 RCNet v3 revision 2
 Release Date: 01.09.2023
