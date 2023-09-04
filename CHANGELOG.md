@@ -1,4 +1,9 @@
-# 0.5.1 RCNet v3 revision 2
+### 0.5.2 RCNet v3 revision 3
+Release Date: _unreleased_
+
+- Fix invalid `index_in_epoch` and `index_in_round` for genesis TX.
+
+### 0.5.1 RCNet v3 revision 2
 Release Date: 01.09.2023
 
 - Fix data aggregator processing custom events.
