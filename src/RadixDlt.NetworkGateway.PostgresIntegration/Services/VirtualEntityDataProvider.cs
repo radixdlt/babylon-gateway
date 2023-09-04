@@ -152,9 +152,9 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
         var ownerBadgeJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, ToolkitModel.SerializationMode.PROGRAMMATIC, _networkId, null);
 
         var roleAssignmentOwnerProofLocalId = new CoreModel.NonFungibleLocalId(
-            simpleRep: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.Data.ToList())),
+            simpleRep: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes.ToList())),
             idType: CoreModel.NonFungibleIdType.Bytes,
-            sborHex: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborEncode(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.Data.ToList())).ToArray().ToHex());
+            sborHex: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborEncode(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes.ToList())).ToArray().ToHex());
         var roleAssignmentOwnerProofGlobalId = IsSecp256k1(decoded)
             ? new CoreModel.NonFungibleGlobalId(_secp256k1SignatureVirtualBadge, roleAssignmentOwnerProofLocalId)
             : new CoreModel.NonFungibleGlobalId(_ed25519SignatureVirtualBadge, roleAssignmentOwnerProofLocalId);
