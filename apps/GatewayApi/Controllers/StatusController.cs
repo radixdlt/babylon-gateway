@@ -94,13 +94,13 @@ public sealed class StatusController : ControllerBase
     }
 
     [HttpPost("network-configuration")]
-    public GatewayModel.NetworkConfigurationResponse NetworkConfiguration()
+    public async Task<GatewayModel.NetworkConfigurationResponse> NetworkConfiguration()
     {
-        var wellKnownAddresses = _networkConfigurationProvider.GetWellKnownAddresses();
+        var wellKnownAddresses = await _networkConfigurationProvider.GetWellKnownAddresses();
 
         return new GatewayModel.NetworkConfigurationResponse(
-            _networkConfigurationProvider.GetNetworkId(),
-            _networkConfigurationProvider.GetNetworkName(),
+            await _networkConfigurationProvider.GetNetworkId(),
+            await _networkConfigurationProvider.GetNetworkName(),
             new GatewayModel.NetworkConfigurationResponseWellKnownAddresses(
                 xrd: wellKnownAddresses.Xrd,
                 secp256k1SignatureVirtualBadge: wellKnownAddresses.Secp256k1SignatureVirtualBadge,

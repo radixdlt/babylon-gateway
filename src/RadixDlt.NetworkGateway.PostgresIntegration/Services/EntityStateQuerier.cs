@@ -569,7 +569,7 @@ ORDER BY nfid.from_state_version DESC
         {
             var programmaticJson = !vm.IsDeleted
                 ? ScryptoSborUtils.DataToProgrammaticJson(vm.Data, nonFungibleDataSchema.Schema,
-                    nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, _networkConfigurationProvider.GetNetworkId())
+                    nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, await _networkConfigurationProvider.GetNetworkId())
                 : null;
 
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
@@ -880,10 +880,10 @@ INNER JOIN LATERAL (
             }
 
             var keyJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.KeySchema, keyValueStoreSchema.KeySborTypeKind,
-                keyValueStoreSchema.KeyTypeIndex, _networkConfigurationProvider.GetNetworkId());
+                keyValueStoreSchema.KeyTypeIndex, await _networkConfigurationProvider.GetNetworkId());
 
             var valueJson = ScryptoSborUtils.DataToProgrammaticJson(e.Value, keyValueStoreSchema.ValueSchema, keyValueStoreSchema.ValueSborTypeKind,
-                keyValueStoreSchema.ValueTypeIndex, _networkConfigurationProvider.GetNetworkId());
+                keyValueStoreSchema.ValueTypeIndex, await _networkConfigurationProvider.GetNetworkId());
 
             items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(
                 key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), new JRaw(keyJson)),
@@ -972,9 +972,9 @@ ORDER BY metadata_join.ordinality ASC;",
                 result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, GenerateOffsetCursor(offset, limit, vm.TotalCount), new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, await _networkConfigurationProvider.GetNetworkId());
             var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(vm.Value.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC,
-                _networkConfigurationProvider.GetNetworkId(), null);
+                await _networkConfigurationProvider.GetNetworkId(), null);
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), new JRaw(stringRepresentation), value);
 
             result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
@@ -1043,9 +1043,9 @@ INNER JOIN LATERAL (
                 result[mh.EntityId] = new GatewayModel.EntityMetadataCollection(items: new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId());
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, await _networkConfigurationProvider.GetNetworkId());
             var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(mh.Value.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC,
-                _networkConfigurationProvider.GetNetworkId(), null);
+                await _networkConfigurationProvider.GetNetworkId(), null);
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), new JRaw(stringRepresentation), value);
 
             result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, entityMetadataItemValue, mh.IsLocked, mh.FromStateVersion));
@@ -1354,7 +1354,7 @@ INNER JOIN LATERAL (
                         schemaBytes!,
                         sborStateHistory.SborTypeKind,
                         sborStateHistory.TypeIndex,
-                        _networkConfigurationProvider.GetNetworkId());
+                        await _networkConfigurationProvider.GetNetworkId());
 
                     result.Add(state.EntityId, jsonState);
                     break;

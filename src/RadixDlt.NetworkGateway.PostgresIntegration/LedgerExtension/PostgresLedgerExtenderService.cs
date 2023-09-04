@@ -305,7 +305,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
                         var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
-                        using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, _networkConfigurationProvider.GetNetworkId());
+                        using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, await _networkConfigurationProvider.GetNetworkId());
                         using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex().ToList()).ToList());
                         var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest);
 
@@ -1220,7 +1220,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         var eventEmitterEntity = referencedEntities.Get((EntityAddress)methodEventEmitter.Entity.EntityAddress);
 
-                        using var decodedEvent = EventDecoder.DecodeEvent(@event, _networkConfigurationProvider.GetNetworkId());
+                        using var decodedEvent = EventDecoder.DecodeEvent(@event, await _networkConfigurationProvider.GetNetworkId());
 
                         if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
                         {
@@ -1905,7 +1905,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var lastTransaction = await dbContext.GetTopLedgerTransaction().FirstOrDefaultAsync(token);
 
         return lastTransaction == null
-            ? PreGenesisTransactionSummary()
+            ? await PreGenesisTransactionSummary()
             : new TransactionSummary(
                 StateVersion: lastTransaction.StateVersion,
                 RoundTimestamp: lastTransaction.RoundTimestamp,
@@ -1918,7 +1918,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             );
     }
 
-    private TransactionSummary PreGenesisTransactionSummary()
+    private async Task<TransactionSummary> PreGenesisTransactionSummary()
     {
         // Nearly all of theses turn out to be unused!
         return new TransactionSummary(
@@ -1926,8 +1926,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             CreatedTimestamp: _clock.UtcNow,
-            Epoch: _networkConfigurationProvider.GetGenesisEpoch(),
-            RoundInEpoch: _networkConfigurationProvider.GetGenesisRound(),
+            Epoch: await _networkConfigurationProvider.GetGenesisEpoch(),
+            RoundInEpoch: await _networkConfigurationProvider.GetGenesisRound(),
             IndexInEpoch: -1, // invalid, but we increase it by one to in ProcessTransactions
             IndexInRound: -1 // invalid, but we increase it by one to in ProcessTransactions
         );

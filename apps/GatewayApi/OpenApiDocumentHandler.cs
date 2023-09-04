@@ -152,11 +152,11 @@ public static class OpenApiDocumentHandler
 
         try
         {
-            var wellKnownAddresses = networkConfigurationProvider.GetWellKnownAddresses();
+            var wellKnownAddresses = await networkConfigurationProvider.GetWellKnownAddresses();
             placeholderReplacements.ResourceAddress = wellKnownAddresses.Xrd;
             placeholderReplacements.ComponentAddress = wellKnownAddresses.Faucet;
-            placeholderReplacements.NetworkId = networkConfigurationProvider.GetNetworkId();
-            placeholderReplacements.NetworkName = networkConfigurationProvider.GetNetworkName();
+            placeholderReplacements.NetworkId = await networkConfigurationProvider.GetNetworkId();
+            placeholderReplacements.NetworkName = await networkConfigurationProvider.GetNetworkName();
         }
         catch (Exception)
         {

@@ -77,11 +77,11 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 
     Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token);
 
-    byte GetNetworkId();
+    ValueTask<byte> GetNetworkId();
 
-    string GetNetworkName();
+    ValueTask<string> GetNetworkName();
 
-    long GetGenesisEpoch();
+    ValueTask<long> GetGenesisEpoch();
 
-    long GetGenesisRound();
+    ValueTask<long> GetGenesisRound();
 }

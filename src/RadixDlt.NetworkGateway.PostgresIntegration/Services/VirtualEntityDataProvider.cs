@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using ToolkitModel = RadixEngineToolkit;
@@ -87,19 +88,26 @@ internal interface IVirtualEntityDataProvider
 
 internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
 {
-    private readonly string _accountPackage;
-    private readonly string _identityPackage;
-    private readonly byte _networkId;
-    private readonly byte _secp256k1VirtualAccountDiscriminator;
-    private readonly byte _ed25519VirtualAccountDiscriminator;
-    private readonly byte _secp256k1VirtualIdentityDiscriminator;
-    private readonly byte _ed25519VirtualIdentityDiscriminator;
-    private readonly string _secp256k1SignatureVirtualBadge;
-    private readonly string _ed25519SignatureVirtualBadge;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly Lazy<ValueTask<string>> _accountPackage;
+    private readonly Lazy<ValueTask<string>> _identityPackage;
+    private readonly Lazy<ValueTask<byte>> _networkId;
+    private readonly Lazy<ValueTask<byte>> _secp256k1VirtualAccountDiscriminator;
+    private readonly Lazy<ValueTask<byte>> _ed25519VirtualAccountDiscriminator;
+    private readonly Lazy<ValueTask<byte>> _secp256k1VirtualIdentityDiscriminator;
+    private readonly Lazy<ValueTask<byte>> _ed25519VirtualIdentityDiscriminator;
+    private readonly Lazy<ValueTask<string>> _secp256k1SignatureVirtualBadge;
+    private readonly Lazy<ValueTask<string>> _ed25519SignatureVirtualBadge;
     private readonly List<GatewayModel.ComponentEntityRoleAssignmentEntry> _virtualEntityRoleAssignmentEntries;
 
     public VirtualEntityDataProvider(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider, INetworkConfigurationProvider networkConfigurationProvider)
     {
+        _networkConfigurationProvider = networkConfigurationProvider;
+
+        _networkId = new(async () => await networkConfigurationProvider.GetNetworkId());
+        _secp256k1VirtualAccountDiscriminator =
+            new Lazy(async () => (byte)(await networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account)).AddressBytePrefix);
+
         _accountPackage = networkConfigurationProvider.GetWellKnownAddresses().AccountPackage;
         _identityPackage = networkConfigurationProvider.GetWellKnownAddresses().IdentityPackage;
         _networkId = networkConfigurationProvider.GetNetworkId();
@@ -205,7 +213,7 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
 
     private bool IsAccount(DecodedRadixAddress decoded)
     {
-        return decoded.DiscriminatorByte == _secp256k1VirtualAccountDiscriminator || decoded.DiscriminatorByte == _ed25519VirtualAccountDiscriminator;
+        return decoded.DiscriminatorByte == await _secp256k1VirtualAccountDiscriminator.Value || decoded.DiscriminatorByte == await _ed25519VirtualAccountDiscriminator.Value;
     }
 
     private bool IsIdentity(DecodedRadixAddress decoded)

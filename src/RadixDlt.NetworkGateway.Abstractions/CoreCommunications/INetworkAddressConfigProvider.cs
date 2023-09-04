@@ -63,14 +63,15 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
 public interface INetworkAddressConfigProvider
 {
-    HrpDefinition GetHrpDefinition();
+    ValueTask<HrpDefinition> GetHrpDefinition();
 
-    WellKnownAddresses GetWellKnownAddresses();
+    ValueTask<WellKnownAddresses> GetWellKnownAddresses();
 
-    AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType);
+    ValueTask<AddressTypeDefinition> GetAddressTypeDefinition(AddressEntityType entityType);
 }

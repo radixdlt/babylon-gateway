@@ -83,11 +83,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 /// </summary>
 internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
+    private readonly TaskCompletionSource<NetworkConfiguration> _tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly ILogger<NetworkConfigurationProvider> _logger;
-
-    private readonly object _writeLock = new();
-    private NetworkConfiguration? _capturedConfig;
 
     public NetworkConfigurationProvider(IDbContextFactory<ReadWriteDbContext> dbContextFactory, ILogger<NetworkConfigurationProvider> logger)
     {
@@ -103,7 +101,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         var networkConfiguration = Map(inputNetworkConfiguration, inputNetworkStatus);
         var existingNetworkConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
 
-        EnsureNetworkConfigurationCaptured(networkConfiguration);
+        _tcs.TrySetResult(networkConfiguration);
 
         if (existingNetworkConfiguration != null)
         {
@@ -113,28 +111,10 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             }
         }
 
-        if (!GetCapturedConfig().HasEqualConfiguration(networkConfiguration))
+        if (!(await GetCapturedConfig()).HasEqualConfiguration(networkConfiguration))
         {
             throw new ConfigurationException("Network configuration does does not match those stored from other nodes.");
         }
-    }
-
-    public async Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(CancellationToken token = default)
-    {
-        var currentConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
-
-        if (currentConfiguration != null)
-        {
-            EnsureNetworkConfigurationCaptured(currentConfiguration);
-
-            _logger.LogInformation("Network configuration for network {NetworkName} loaded from database", currentConfiguration.NetworkName);
-
-            return currentConfiguration.NetworkName;
-        }
-
-        _logger.LogInformation("Network configuration not loaded from database (db ledger likely empty)");
-
-        return null;
     }
 
     public async Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token)
@@ -151,39 +131,39 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return true;
     }
 
-    public byte GetNetworkId()
+    public async ValueTask<byte> GetNetworkId()
     {
-        return GetCapturedConfig().NetworkId;
+        return (await GetCapturedConfig()).NetworkId;
     }
 
-    public string GetNetworkName()
+    public async ValueTask<string> GetNetworkName()
     {
-        return GetCapturedConfig().NetworkName;
+        return (await GetCapturedConfig()).NetworkName;
     }
 
-    public long GetGenesisEpoch()
+    public async ValueTask<long> GetGenesisEpoch()
     {
-        return GetCapturedConfig().GenesisEpoch;
+        return (await GetCapturedConfig()).GenesisEpoch;
     }
 
-    public long GetGenesisRound()
+    public async ValueTask<long> GetGenesisRound()
     {
-        return GetCapturedConfig().GenesisRound;
+        return (await GetCapturedConfig()).GenesisRound;
     }
 
-    public HrpDefinition GetHrpDefinition()
+    public async ValueTask<HrpDefinition> GetHrpDefinition()
     {
-        return GetCapturedConfig().HrpDefinition;
+        return (await GetCapturedConfig()).HrpDefinition;
     }
 
-    public WellKnownAddresses GetWellKnownAddresses()
+    public async ValueTask<WellKnownAddresses> GetWellKnownAddresses()
     {
-        return GetCapturedConfig().WellKnownAddresses;
+        return (await GetCapturedConfig()).WellKnownAddresses;
     }
 
-    public AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType)
+    public async ValueTask<AddressTypeDefinition> GetAddressTypeDefinition(AddressEntityType entityType)
     {
-        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
+        return (await GetCapturedConfig()).AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
     }
 
     private static NetworkConfiguration Map(CoreModel.NetworkConfigurationResponse networkConfiguration, CoreModel.NetworkStatusResponse networkStatus)
@@ -257,22 +237,14 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return new AddressTypeDefinition(Enum.Parse<AddressEntityType>(arg.EntityType.ToString(), true), arg.HrpPrefix, arg.AddressBytePrefix, arg.AddressByteLength);
     }
 
-    private NetworkConfiguration GetCapturedConfig()
+    private ValueTask<NetworkConfiguration> GetCapturedConfig()
     {
-        return _capturedConfig ?? throw new ConfigurationException("Config hasn't been captured from a Node or from the Database yet.");
-    }
-
-    private void EnsureNetworkConfigurationCaptured(NetworkConfiguration inputNetworkConfiguration)
-    {
-        lock (_writeLock)
+        if (_tcs.Task.IsCompletedSuccessfully)
         {
-            if (_capturedConfig != null)
-            {
-                return;
-            }
-
-            _capturedConfig = inputNetworkConfiguration;
+            return ValueTask.FromResult(_tcs.Task.Result);
         }
+
+        return new ValueTask<NetworkConfiguration>(_tcs.Task);
     }
 
     private async Task<NetworkConfiguration?> GetCurrentLedgerNetworkConfigurationFromDb(CancellationToken token)

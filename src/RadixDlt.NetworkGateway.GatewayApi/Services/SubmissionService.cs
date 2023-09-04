@@ -161,7 +161,7 @@ internal class SubmissionService : ISubmissionService
         try
         {
             var notarizedTransaction = ToolkitModel.NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes().ToList());
-            notarizedTransaction.StaticallyValidate(ToolkitModel.ValidationConfig.Default(_coreApiHandler.GetNetworkId()));
+            notarizedTransaction.StaticallyValidate(ToolkitModel.ValidationConfig.Default(await _coreApiHandler.GetNetworkId()));
             return notarizedTransaction;
         }
         catch (ToolkitModel.RadixEngineToolkitException.TransactionValidationFailed ex)
@@ -194,7 +194,7 @@ internal class SubmissionService : ISubmissionService
         {
             var result = await _coreApiHandler.SubmitTransaction(
                 new CoreModel.TransactionSubmitRequest(
-                    _coreApiHandler.GetNetworkName(),
+                    await _coreApiHandler.GetNetworkName(),
                     request.NotarizedTransactionHex
                 ),
                 finalTokenSource.Token

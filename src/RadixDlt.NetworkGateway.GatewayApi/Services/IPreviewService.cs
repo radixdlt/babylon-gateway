@@ -128,7 +128,7 @@ internal class PreviewService : IPreviewService
             skipEpochCheck: request.Flags.SkipEpochCheck);
 
         var coreRequest = new CoreModel.TransactionPreviewRequest(
-            network: _coreApiHandler.GetNetworkName(),
+            network: await _coreApiHandler.GetNetworkName(),
             manifest: request.Manifest,
             blobsHex: request.BlobsHex,
             startEpochInclusive: request.StartEpochInclusive,

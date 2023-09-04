@@ -62,9 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System.Linq;
 using System.Threading;
@@ -78,9 +76,9 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {
     Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
 
-    byte GetNetworkId();
+    ValueTask<byte> GetNetworkId();
 
-    string GetNetworkName();
+    ValueTask<string> GetNetworkName();
 }
 
 public sealed record CapturedConfig(
@@ -99,51 +97,47 @@ public interface ICapturedConfigProvider
 
 internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
-    private readonly object _writeLock = new();
-    private CapturedConfig? _capturedConfig;
+    private readonly TaskCompletionSource<CapturedConfig> _tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     public async Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token)
     {
         var capturedConfig = await capturedConfigProvider.CaptureConfiguration();
 
-        lock (_writeLock)
+        _tcs.TrySetResult(capturedConfig);
+    }
+
+    public async ValueTask<byte> GetNetworkId()
+    {
+        return (await GetCapturedConfig()).NetworkId;
+    }
+
+    public async ValueTask<string> GetNetworkName()
+    {
+        return (await GetCapturedConfig()).NetworkName;
+    }
+
+    public async ValueTask<HrpDefinition> GetHrpDefinition()
+    {
+        return (await GetCapturedConfig()).HrpDefinition;
+    }
+
+    public async ValueTask<WellKnownAddresses> GetWellKnownAddresses()
+    {
+        return (await GetCapturedConfig()).WellKnownAddresses;
+    }
+
+    public async ValueTask<AddressTypeDefinition> GetAddressTypeDefinition(AddressEntityType entityType)
+    {
+        return (await GetCapturedConfig()).AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
+    }
+
+    private ValueTask<CapturedConfig> GetCapturedConfig()
+    {
+        if (_tcs.Task.IsCompletedSuccessfully)
         {
-            if (_capturedConfig != null)
-            {
-                return;
-            }
-
-            _capturedConfig = capturedConfig;
+            return ValueTask.FromResult(_tcs.Task.Result);
         }
-    }
 
-    public byte GetNetworkId()
-    {
-        return GetCapturedConfig().NetworkId;
-    }
-
-    public string GetNetworkName()
-    {
-        return GetCapturedConfig().NetworkName;
-    }
-
-    public HrpDefinition GetHrpDefinition()
-    {
-        return GetCapturedConfig().HrpDefinition;
-    }
-
-    public WellKnownAddresses GetWellKnownAddresses()
-    {
-        return GetCapturedConfig().WellKnownAddresses;
-    }
-
-    public AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType)
-    {
-        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
-    }
-
-    private CapturedConfig GetCapturedConfig()
-    {
-        return _capturedConfig ?? throw new ConfigurationException("Config hasn't been captured from a Node or from the Database yet.");
+        return new ValueTask<CapturedConfig>(_tcs.Task);
     }
 }

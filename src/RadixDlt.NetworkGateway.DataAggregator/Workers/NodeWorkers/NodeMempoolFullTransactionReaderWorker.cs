@@ -154,7 +154,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
         // We duplicate this call from the TransactionHashesReader for simplicity, to mean the workers don't need
         // to sync up. This should be a cheap call to the Core API.
         var mempoolListResponse = await coreApiProvider.MempoolApi.MempoolListPostAsync(
-            new CoreModel.MempoolListRequest(network: _networkConfigurationProvider.GetNetworkName()),
+            new CoreModel.MempoolListRequest(network: await _networkConfigurationProvider.GetNetworkName()),
             cancellationToken);
 
         var hashesInMempool = mempoolListResponse
@@ -236,9 +236,10 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
     private async Task<PendingTransactionData?> FetchTransactionContents(ICoreApiProvider coreApiProvider, PendingTransactionHashPair hashes, CancellationToken token)
     {
+        var networkName = await _networkConfigurationProvider.GetNetworkName();
         var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.MempoolTransactionResponse, CoreModel.BasicErrorResponse>(() => coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
             new CoreModel.MempoolTransactionRequest(
-                network: _networkConfigurationProvider.GetNetworkName(),
+                network: networkName,
                 payloadHashes: new List<string>
                 {
                     hashes.PayloadHash,

@@ -301,7 +301,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         var coreApiProvider = nodeScope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
 
         var submitRequest = new CoreModel.TransactionSubmitRequest(
-            network: _networkConfigurationProvider.GetNetworkName(),
+            network: await _networkConfigurationProvider.GetNetworkName(),
             notarizedTransactionHex: notarizedTransaction.ToHex()
         );
 

@@ -143,7 +143,7 @@ public class NodeMempoolTransactionHashesReaderWorker : NodeWorker
 
         var (mempoolListResponse, fetchMs) = await CodeStopwatch.TimeInMs(async () =>
             await coreApiProvider.MempoolApi.MempoolListPostAsync(
-                new CoreModel.MempoolListRequest(network: _networkConfigurationProvider.GetNetworkName()),
+                new CoreModel.MempoolListRequest(network: await _networkConfigurationProvider.GetNetworkName()),
                 stoppingToken));
 
         await _observers.ForEachAsync(x => x.MempoolSize(_nodeConfig.CoreApiNode.Name, mempoolListResponse.Contents.Count));
