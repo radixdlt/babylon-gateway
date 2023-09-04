@@ -20,8 +20,8 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-RUN groupadd --gid 1000 data-aggregator && \
-    useradd --uid 1000 --gid 1000 -m data-aggregator
+RUN groupadd --gid 1000 app && \
+    useradd --uid 1000 --gid 1000 -m app
 
 USER 1000
 
