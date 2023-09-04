@@ -1928,8 +1928,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             CreatedTimestamp: _clock.UtcNow,
             Epoch: _networkConfigurationProvider.GetGenesisEpoch(),
             RoundInEpoch: _networkConfigurationProvider.GetGenesisRound(),
-            IndexInEpoch: 0,
-            IndexInRound: 0
+            IndexInEpoch: -1, // invalid, but we increase it by one to in ProcessTransactions
+            IndexInRound: -1 // invalid, but we increase it by one to in ProcessTransactions
         );
     }
 }
