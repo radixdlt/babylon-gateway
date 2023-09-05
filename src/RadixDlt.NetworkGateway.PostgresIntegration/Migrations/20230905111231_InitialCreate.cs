@@ -643,6 +643,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     epoch_number = table.Column<long>(type: "bigint", nullable: false),
                     proposals_made = table.Column<long>(type: "bigint", nullable: false),

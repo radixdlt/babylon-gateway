@@ -1306,6 +1306,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("epoch_number");
 
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
                     b.Property<long>("ProposalsMade")
                         .HasColumnType("bigint")
                         .HasColumnName("proposals_made");
