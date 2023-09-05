@@ -1023,7 +1023,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("PackageEntityId", "FromStateVersion");
 
-                    b.HasIndex("Name", "Version", "PackageEntityId", "FromStateVersion");
+                    b.HasIndex("PackageEntityId", "Name", "Version", "FromStateVersion");
 
                     b.ToTable("package_blueprint_history");
                 });
