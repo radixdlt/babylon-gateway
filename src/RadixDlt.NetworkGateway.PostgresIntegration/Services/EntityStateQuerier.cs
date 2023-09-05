@@ -117,7 +117,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IVirtualEntityMetadataProvider _virtualEntityMetadataProvider;
-    private readonly IRoleAssignmentsMapper _roleAssignmentsMapper;
+    private readonly IRoleAssignmentQuerier _roleAssignmentQuerier;
     private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
     private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
     private readonly byte _ecdsaSecp256k1VirtualIdentityAddressPrefix;
@@ -128,13 +128,14 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         ReadOnlyDbContext dbContext,
         IOptionsSnapshot<EndpointOptions> endpointConfiguration,
         IVirtualEntityMetadataProvider virtualEntityMetadataProvider,
-        IRoleAssignmentsMapper roleAssignmentsMapper)
+        IRoleAssignmentsMapper roleAssignmentsMapper,
+        IRoleAssignmentQuerier roleAssignmentQuerier)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
         _endpointConfiguration = endpointConfiguration;
         _virtualEntityMetadataProvider = virtualEntityMetadataProvider;
-        _roleAssignmentsMapper = roleAssignmentsMapper;
+        _roleAssignmentQuerier = roleAssignmentQuerier;
 
         _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
         _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
@@ -151,13 +152,13 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     {
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
-        var globalEntities = entities.Where(x => x.IsGlobal).ToList();
+        var roleAssignmentPossibleComponentEntities = componentEntities.Where(x => x.IsGlobal).ToList();
         var resourceEntities = entities.OfType<ResourceEntity>().ToList();
         var packageEntities = entities.OfType<GlobalPackageEntity>().ToList();
 
         // TODO ideally we'd like to run those in parallel
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var roleAssignmentsHistory = await GetRoleAssignmentsHistory(globalEntities, ledgerState, token);
+        var roleAssignmentsHistory = await _roleAssignmentQuerier.GetRoleAssignmentsHistory(roleAssignmentPossibleComponentEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
 
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
@@ -1001,7 +1002,7 @@ ORDER BY metadata_join.ordinality ASC;",
             }
 
             var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
-            var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(vm.Value.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC,
+            var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(vm.Value, ToolkitModel.SerializationMode.PROGRAMMATIC,
                 _networkConfigurationProvider.GetNetworkId(), null);
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), new JRaw(stringRepresentation), value);
 
@@ -1072,7 +1073,7 @@ INNER JOIN LATERAL (
             }
 
             var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId());
-            var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(mh.Value.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC,
+            var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(mh.Value, ToolkitModel.SerializationMode.PROGRAMMATIC,
                 _networkConfigurationProvider.GetNetworkId(), null);
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), new JRaw(stringRepresentation), value);
 
@@ -1247,57 +1248,6 @@ INNER JOIN LATERAL(
         return entities;
     }
 
-    private async Task<Dictionary<long, GatewayModel.ComponentEntityRoleAssignments>> GetRoleAssignmentsHistory(
-        List<Entity> globalEntities,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var lookup = new HashSet<long>();
-
-        foreach (var componentEntity in globalEntities)
-        {
-            lookup.Add(componentEntity.Id);
-        }
-
-        if (!lookup.Any())
-        {
-            return new Dictionary<long, GatewayModel.ComponentEntityRoleAssignments>();
-        }
-
-        var entityIds = lookup.ToList();
-
-        var aggregates = await _dbContext
-            .EntityRoleAssignmentsAggregateHistory
-            .FromSqlInterpolated($@"
-WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
-SELECT earah.*
-FROM variables v
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_role_assignments_aggregate_history
-    WHERE entity_id = v.entity_id AND from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) earah ON TRUE;")
-            .ToListAsync(token);
-
-        var ownerRoleIds = aggregates.Select(a => a.OwnerRoleId).Distinct().ToList();
-        var roleAssignmentsHistory = aggregates.SelectMany(a => a.EntryIds).Distinct().ToList();
-
-        var ownerRoles = await _dbContext
-            .EntityRoleAssignmentsOwnerHistory
-            .Where(e => ownerRoleIds.Contains(e.Id))
-            .ToListAsync(token);
-
-        var entries = await _dbContext
-            .EntityRoleAssignmentsEntryHistory
-            .Where(e => roleAssignmentsHistory.Contains(e.Id))
-            .Where(e => !e.IsDeleted)
-            .ToListAsync(token);
-
-        return _roleAssignmentsMapper.GetEffectiveRoleAssignments(globalEntities, ownerRoles, entries);
-    }
-
     private async Task<Dictionary<long, string>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var lookup = new HashSet<long>();
@@ -1331,7 +1281,8 @@ INNER JOIN LATERAL (
 ) esh ON TRUE;")
             .ToListAsync(token);
 
-        var schemasToLoad = states.OfType<SborStateHistory>()
+        var schemasToLoad = states
+            .OfType<SborStateHistory>()
             .Select(x => new { x.SchemaHash, x.SchemaDefiningEntityId })
             .ToArray();
 
@@ -1376,7 +1327,8 @@ INNER JOIN LATERAL (
 
                     if (!schemaFound)
                     {
-                        throw new UnreachableException($"schema not found for entity :{sborStateHistory.EntityId} with schema defining entity id: {sborStateHistory.SchemaDefiningEntityId} and schema hash: {sborStateHistory.SchemaHash.ToHex()}");
+                        throw new UnreachableException(
+                            $"schema not found for entity :{sborStateHistory.EntityId} with schema defining entity id: {sborStateHistory.SchemaDefiningEntityId} and schema hash: {sborStateHistory.SchemaHash.ToHex()}");
                     }
 
                     var jsonState = ScryptoSborUtils.DataToProgrammaticJson(

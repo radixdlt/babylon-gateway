@@ -108,16 +108,16 @@ public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
             throw new NotSupportedException("Failed to detect if it's virtualEd25519 or virtualSecp256k1");
         }
 
-        var last29BytesOfAddress = decodedAddress.Data.Skip(1).Take(29).ToList();
+        var last29BytesOfAddress = decodedAddress.Data.Skip(1).Take(29).ToArray();
 
         ToolkitModel.PublicKeyHash publicKeyHash = isVirtualSecp256k1 ? new ToolkitModel.PublicKeyHash.Secp256k1(last29BytesOfAddress) : new ToolkitModel.PublicKeyHash.Ed25519(last29BytesOfAddress);
-        using ToolkitModel.MetadataValue ownedKeysItem = new ToolkitModel.MetadataValue.PublicKeyHashArrayValue(new List<ToolkitModel.PublicKeyHash> { publicKeyHash });
+        using ToolkitModel.MetadataValue ownedKeysItem = new ToolkitModel.MetadataValue.PublicKeyHashArrayValue(new[] { publicKeyHash });
         var ownerKeysBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownedKeysItem);
         var ownerKeysRawHex = Convert.ToHexString(ownerKeysBytes.ToArray());
         var ownerKeysJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerKeysBytes, ToolkitModel.SerializationMode.PROGRAMMATIC,
             _networkConfigurationProvider.GetNetworkId(), null);
 
-        using ToolkitModel.MetadataValue ownerBadgeItem = new ToolkitModel.MetadataValue.NonFungibleLocalIdValue(new ToolkitModel.NonFungibleLocalId.Bytes(decodedAddress.Data.ToList()));
+        using ToolkitModel.MetadataValue ownerBadgeItem = new ToolkitModel.MetadataValue.NonFungibleLocalIdValue(new ToolkitModel.NonFungibleLocalId.Bytes(decodedAddress.Data));
         var ownerBadgeBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownerBadgeItem);
         var ownerBadgeRawHex = Convert.ToHexString(ownerBadgeBytes.ToArray());
         var ownerBadgeJson =

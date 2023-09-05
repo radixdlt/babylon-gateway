@@ -69,6 +69,8 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CoreApiModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
@@ -77,7 +79,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 internal interface IRoleAssignmentsMapper
 {
     Dictionary<long, GatewayApiSdk.Model.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
-        ICollection<Entity> componentEntities,
+        ICollection<ComponentEntity> componentEntities,
+        Dictionary<BlueprintDefinitionIdentifier, CoreApiModel.AuthConfig> blueprintAuthConfigs,
         ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
         ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments);
 }
@@ -92,12 +95,11 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
     }
 
     public Dictionary<long, GatewayModel.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
-        ICollection<Entity> componentEntities,
+        ICollection<ComponentEntity> componentEntities,
+        Dictionary<BlueprintDefinitionIdentifier, CoreApiModel.AuthConfig> blueprintAuthConfigs,
         ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
         ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
     {
-        var fungibleResourceKeys = _roleAssignmentsKeyProvider.GetFungibleResourceKeys();
-        var nonFungibleResourceKeys = _roleAssignmentsKeyProvider.GetNonFungibleResourceKeys();
         var nativeModulesKeys = _roleAssignmentsKeyProvider.GetNativeModulesKeys();
 
         return componentEntities.ToDictionary(entity => entity.Id, entity =>
@@ -109,28 +111,20 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
                 throw new UnreachableException($"No owner role defined for entity: {entity.Address}");
             }
 
-            var isFungibleResource = entity is GlobalFungibleResourceEntity;
-            var isNonFungibleResource = entity is GlobalNonFungibleResourceEntity;
+            var authConfigFound = blueprintAuthConfigs.TryGetValue(new BlueprintDefinitionIdentifier(entity.BlueprintName, entity.BlueprintVersion, entity.PackageId), out var authConfig);
 
-            if (isFungibleResource)
+            if (!authConfigFound)
             {
-                return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
-                    new JRaw(ownerRole),
-                    GetEntries(entity.Id, fungibleResourceKeys, roleAssignments)
-                );
+                throw new UnreachableException($"blueprint: {entity.BlueprintName} {entity.BlueprintVersion} in package: {entity.PackageId} not found");
             }
 
-            if (isNonFungibleResource)
-            {
-                return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
-                    new JRaw(ownerRole),
-                    GetEntries(entity.Id, nonFungibleResourceKeys, roleAssignments)
-                );
-            }
+            var mainModuleKeys = _roleAssignmentsKeyProvider.ExtractKeysFromBlueprintAuthConfig(authConfig!);
+
+            var allModulesKeys = mainModuleKeys.Concat(nativeModulesKeys).ToList();
 
             return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
                 new JRaw(ownerRole),
-                GetEntries(entity.Id, nativeModulesKeys, roleAssignments)
+                GetEntries(entity.Id, allModulesKeys, roleAssignments)
             );
         });
     }

@@ -1,3 +1,14 @@
+# UNRELEASED
+Release Date: Unreleased
+
+### What’s New?
+- Returning all possible role assignment keys in `main` module for all entity types (previously only for fungible and non fungible resources).
+
+### Breaking Changes
+
+### Known Issues
+
+----------------------
 # 0.5.0 - RCNet v3
 Release Date: 31.08.2023
 

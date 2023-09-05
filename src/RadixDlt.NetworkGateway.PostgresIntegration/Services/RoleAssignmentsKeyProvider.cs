@@ -62,9 +62,16 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -72,32 +79,24 @@ internal record RoleAssignmentRuleKey(string Name, ObjectModuleId ObjectModuleId
 
 internal record RoleAssignmentEntry(RoleAssignmentRuleKey Key, RoleAssignmentRuleKey[] Updaters);
 
+internal record BlueprintDefinitionIdentifier(string Name, string Version, long PackageEntityId);
+
 internal interface IRoleAssignmentsKeyProvider
 {
     List<RoleAssignmentEntry> GetNativeModulesKeys();
 
-    List<RoleAssignmentEntry> GetNonFungibleResourceKeys();
-
-    List<RoleAssignmentEntry> GetFungibleResourceKeys();
+    List<RoleAssignmentEntry> ExtractKeysFromBlueprintAuthConfig(CoreModel.AuthConfig authConfig);
 }
 
 internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 {
-    private static readonly string[] _fungibleMainModuleResourceRuleKeys = { "burner", "minter", "freezer", "recaller", "depositor", "withdrawer", };
-
-    private static readonly string[] _nonFungibleMainModuleResourceRuleKeys = { "burner", "minter", "freezer", "recaller", "depositor", "withdrawer", "non_fungible_data_updater", };
-
     private static readonly string[] _metadataRuleKeys = { "metadata_locker", "metadata_setter", };
 
     private static readonly string[] _royaltyRuleKeys = { "royalty_setter", "royalty_locker", "royalty_claimer", };
 
     private readonly List<RoleAssignmentEntry> _nativeModulesKeys;
 
-    private readonly List<RoleAssignmentEntry> _nonFungibleResourceKeys;
-
-    private readonly List<RoleAssignmentEntry> _fungibleResourceKeys;
-
-    public RoleAssignmentsKeyProvider()
+    public RoleAssignmentsKeyProvider(ReadOnlyDbContext readOnlyDbContext)
     {
         var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, ObjectModuleId.Metadata);
         var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, ObjectModuleId.Royalty);
@@ -105,21 +104,27 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
         _nativeModulesKeys = metadataWithUpdaterKeys
             .Concat(royaltyWithUpdaterKeys)
             .ToList();
-
-        _nonFungibleResourceKeys = _nativeModulesKeys
-            .Concat(GetKeysWithUpdaterRoles(_nonFungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
-            .ToList();
-
-        _fungibleResourceKeys = _nativeModulesKeys
-            .Concat(GetKeysWithUpdaterRoles(_fungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
-            .ToList();
     }
 
     public List<RoleAssignmentEntry> GetNativeModulesKeys() => _nativeModulesKeys;
 
-    public List<RoleAssignmentEntry> GetNonFungibleResourceKeys() => _nonFungibleResourceKeys;
+    public List<RoleAssignmentEntry> ExtractKeysFromBlueprintAuthConfig(CoreModel.AuthConfig authConfig)
+    {
+        if (authConfig.MethodRoles?.Roles?.Any() != true)
+        {
+            return new List<RoleAssignmentEntry>();
+        }
 
-    public List<RoleAssignmentEntry> GetFungibleResourceKeys() => _fungibleResourceKeys;
+        return authConfig
+            .MethodRoles
+            !.Roles
+            !.Select(x =>
+                new RoleAssignmentEntry(
+                    new RoleAssignmentRuleKey(x.Key, ObjectModuleId.Main),
+                    x.Value.UpdaterRoles.Select(u => new RoleAssignmentRuleKey(u, ObjectModuleId.Main)).ToArray()
+                ))
+            .ToList();
+    }
 
     private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, ObjectModuleId objectModuleId)
     {
