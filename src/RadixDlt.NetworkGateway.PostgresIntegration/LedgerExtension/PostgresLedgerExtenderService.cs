@@ -1221,6 +1221,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             validatorEmissionStatisticsToAdd.Add(new ValidatorEmissionStatistics
                             {
                                 Id = sequences.ValidatorEmissionStatisticsSequence++,
+                                FromStateVersion = stateVersion,
                                 ValidatorEntityId = eventEmitterEntity.DatabaseId,
                                 EpochNumber = (long)validatorUptimeEvent.epoch,
                                 ProposalsMade = (long)validatorUptimeEvent.proposalsMade,

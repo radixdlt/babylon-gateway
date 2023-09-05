@@ -777,12 +777,13 @@ internal class WriteHelper
         }
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY validator_emission_statistics (id, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync("COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entries)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ValidatorEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EpochNumber, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ProposalsMade, NpgsqlDbType.Bigint, token);

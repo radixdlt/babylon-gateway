@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230905101724_InitialCreate")]
+    [Migration("20230905111231_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1308,6 +1308,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("EpochNumber")
                         .HasColumnType("bigint")
                         .HasColumnName("epoch_number");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
 
                     b.Property<long>("ProposalsMade")
                         .HasColumnType("bigint")
