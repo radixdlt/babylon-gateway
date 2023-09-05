@@ -161,7 +161,7 @@ internal static class GatewayModelExtensions
             affectedGlobalEntities: optIns.AffectedGlobalEntities ? lt.AffectedGlobalEntities.Select(x => entityIdToAddressMap[x]).ToList() : null,
             payloadHash: payloadHash,
             intentHash: intentHash,
-            feePaid: lt.FeePaid?.ToString(),
+            feePaid: lt.FeePaid.ToString(),
             confirmedAt: lt.RoundTimestamp,
             errorMessage: lt.EngineReceipt.ErrorMessage,
             rawHex: rawHex,

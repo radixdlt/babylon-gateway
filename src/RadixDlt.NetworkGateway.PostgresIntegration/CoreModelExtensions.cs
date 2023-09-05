@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -141,5 +142,20 @@ internal static class CoreModelExtensions
             CoreModel.LocalTypeIndex.KindEnum.WellKnown => SborTypeKind.WellKnown,
             _ => throw new ArgumentOutOfRangeException(nameof(indexKind), indexKind, null),
         };
+    }
+
+    public static TokenAmount TotalFee(this CoreModel.FeeSummary feeSummary)
+    {
+        var royaltyCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalRoyaltyCost);
+        var storageCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalStorageCost);
+        var executionCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalExecutionCost);
+        var finalizationCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalFinalizationCost);
+
+        return royaltyCost + storageCost + executionCost + finalizationCost;
+    }
+
+    public static TokenAmount TotalTip(this CoreModel.FeeSummary feeSummary)
+    {
+        return TokenAmount.FromDecimalString(feeSummary.XrdTotalTippingCost);
     }
 }
