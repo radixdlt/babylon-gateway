@@ -540,19 +540,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         _ => throw new UnreachableException(),
                     };
 
-                    var feeSummary = committedTransaction.Receipt.FeeSummary;
-
                     ledgerTransaction.StateVersion = stateVersion;
                     ledgerTransaction.Epoch = summary.Epoch;
                     ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
                     ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
                     ledgerTransaction.IndexInRound = summary.IndexInRound;
-                    ledgerTransaction.FeePaid = feeSummary != null
-                        ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost)
-                        : null;
-                    ledgerTransaction.TipPaid = feeSummary != null
-                        ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalTippingCost)
-                        : null;
+                    ledgerTransaction.FeePaid = committedTransaction.Receipt.FeeSummary.TotalFee();
+                    ledgerTransaction.TipPaid = committedTransaction.Receipt.FeeSummary.TotalTip();
                     ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                     ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                     ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
