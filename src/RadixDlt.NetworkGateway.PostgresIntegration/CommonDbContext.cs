@@ -417,6 +417,10 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder
+            .Entity<PackageBlueprintHistory>()
+            .HasIndex(e => new { e.Name, e.Version, e.PackageEntityId, e.FromStateVersion });
+
+        modelBuilder
             .Entity<PackageCodeHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 

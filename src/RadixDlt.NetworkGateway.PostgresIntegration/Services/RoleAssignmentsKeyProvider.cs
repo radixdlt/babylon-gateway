@@ -110,20 +110,15 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     public List<RoleAssignmentEntry> ExtractKeysFromBlueprintAuthConfig(CoreModel.AuthConfig authConfig)
     {
-        if (authConfig.MethodRoles?.Roles?.Any() != true)
-        {
-            return new List<RoleAssignmentEntry>();
-        }
-
         return authConfig
             .MethodRoles
-            !.Roles
-            !.Select(x =>
+            ?.Roles
+            ?.Select(x =>
                 new RoleAssignmentEntry(
                     new RoleAssignmentRuleKey(x.Key, ObjectModuleId.Main),
                     x.Value.UpdaterRoles.Select(u => new RoleAssignmentRuleKey(u, ObjectModuleId.Main)).ToArray()
                 ))
-            .ToList();
+            .ToList() ?? new List<RoleAssignmentEntry>();
     }
 
     private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, ObjectModuleId objectModuleId)

@@ -856,6 +856,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_package_blueprint_history_name_version_package_entity_id_fr~",
+                table: "package_blueprint_history",
+                columns: new[] { "name", "version", "package_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_package_blueprint_history_package_entity_id_from_state_vers~",
                 table: "package_blueprint_history",
                 columns: new[] { "package_entity_id", "from_state_version" });
