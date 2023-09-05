@@ -174,6 +174,7 @@ internal abstract class CommonDbContext : DbContext
         HookupPendingTransactions(modelBuilder);
         HookupEntities(modelBuilder);
         HookupHistory(modelBuilder);
+        HookupStatistics(modelBuilder);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

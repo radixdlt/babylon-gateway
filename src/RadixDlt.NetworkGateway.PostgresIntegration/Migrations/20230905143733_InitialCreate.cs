@@ -922,6 +922,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "validator_public_key_history_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_validator_emission_statistics_validator_entity_id_epoch_num~",
+                table: "validator_emission_statistics",
+                columns: new[] { "validator_entity_id", "epoch_number" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_public_key_history_validator_entity_id_from_state~",
                 table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "from_state_version" });

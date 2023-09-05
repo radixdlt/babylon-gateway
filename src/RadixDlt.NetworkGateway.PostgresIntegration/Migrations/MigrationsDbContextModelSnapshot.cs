@@ -1322,6 +1322,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ValidatorEntityId", "EpochNumber");
+
                     b.ToTable("validator_emission_statistics");
                 });
 
