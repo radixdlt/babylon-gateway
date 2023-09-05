@@ -717,13 +717,6 @@ SELECT
 FROM variables
 INNER JOIN entities e ON e.id = variables.validator_entity_id AND from_state_version <= @stateVersion
 INNER JOIN LATERAL (
-    SELECT balance, from_state_version
-    FROM entity_vault_history
-    WHERE vault_entity_id = e.stake_vault_entity_id AND from_state_version <= @stateVersion
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) evh ON TRUE
-INNER JOIN LATERAL (
     SELECT json_state as state, from_state_version
     FROM state_history
     WHERE entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
@@ -733,28 +726,35 @@ INNER JOIN LATERAL (
 INNER JOIN LATERAL (
     SELECT balance, from_state_version
     FROM entity_vault_history
-    WHERE vault_entity_id = e.pending_xrd_withdraw_vault_entity_id AND from_state_version <= @stateVersion
+    WHERE global_entity_id = e.id AND vault_entity_id = e.stake_vault_entity_id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) evh ON TRUE
+INNER JOIN LATERAL (
+    SELECT balance, from_state_version
+    FROM entity_vault_history
+    WHERE global_entity_id = e.id AND vault_entity_id = e.pending_xrd_withdraw_vault_entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) pxrwv ON true
 INNER JOIN LATERAL (
     SELECT balance, from_state_version
     FROM entity_vault_history
-    WHERE vault_entity_id = e.locked_owner_stake_unit_vault_entity_id AND from_state_version <= @stateVersion
+    WHERE global_entity_id = e.id AND vault_entity_id = e.locked_owner_stake_unit_vault_entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) losuv ON true
 INNER JOIN LATERAL (
     SELECT balance, from_state_version
     FROM entity_vault_history
-    WHERE vault_entity_id = e.pending_owner_stake_unit_unlock_vault_entity_id AND from_state_version <= @stateVersion
+    WHERE global_entity_id = e.id AND vault_entity_id = e.pending_owner_stake_unit_unlock_vault_entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
-) posuuv ON true
-;",
+) posuuv ON true;",
             parameters: new
             {
-                validatorIds = validatorIds, stateVersion = ledgerState.StateVersion,
+                validatorIds = validatorIds,
+                stateVersion = ledgerState.StateVersion,
             },
             cancellationToken: token);
 
@@ -762,8 +762,8 @@ INNER JOIN LATERAL (
         var vaultAddresses = await _dbContext
             .Entities
             .Where(e => validatorVaultIds.Contains(e.Id))
-            .Select(e => new { e.Id, GlobalAddress = e.Address })
-            .ToDictionaryAsync(e => e.Id, e => e.GlobalAddress, token);
+            .Select(e => new { e.Id, e.Address })
+            .ToDictionaryAsync(e => e.Id, e => e.Address, token);
 
         var metadataById = await GetMetadataSlices(validatorIds, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
 
