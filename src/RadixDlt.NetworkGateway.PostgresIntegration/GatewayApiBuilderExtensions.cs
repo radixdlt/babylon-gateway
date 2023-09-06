@@ -87,6 +87,8 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()
             .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
+            .AddScoped<IRoleAssignmentQuerier, RoleAssignmentQuerier>()
+            .AddScoped<IBlueprintProvider, BlueprintProvider>()
             .AddScoped<IRoleAssignmentsKeyProvider, RoleAssignmentsKeyProvider>()
             .AddScoped<IRoleAssignmentsMapper, RoleAssignmentsMapper>()
             .AddScoped<IValidatorQuerier, ValidatorQuerier>()

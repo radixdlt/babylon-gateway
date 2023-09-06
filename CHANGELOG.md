@@ -1,4 +1,4 @@
-### 0.5.2 RCNet v3 revision 3
+### 0.5.2 RCNet v3.1
 Release Date: _unreleased_
 
 - Fix broken pagination for NFIDs under `/state/entity/details` and `/state/entity/page/non-fungible-vaults` endpoints.
@@ -6,6 +6,7 @@ Release Date: _unreleased_
 - Fix virtual identity and account details.
 - Fix how TX total fee paid is calculated.
 - Add `from_state_version` to `validator_emission_statistics`.
+- Returning all possible role assignment keys in `main` module for all entity types (previously only for fungible and non fungible resources).
 
 ### 0.5.1 RCNet v3 revision 2
 Release Date: 01.09.2023

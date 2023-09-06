@@ -97,7 +97,7 @@ public static class EventDecoder
         return unwrappedEvent != null;
     }
 
-    public static bool TryGetNonFungibleVaultWithdrawalEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out List<ToolkitModel.NonFungibleLocalId>? unwrappedEvent)
+    public static bool TryGetNonFungibleVaultWithdrawalEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.NonFungibleLocalId[]? unwrappedEvent)
     {
         unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.NonFungibleVault)?.value as
             ToolkitModel.TypedNonFungibleVaultBlueprintEvent.NonFungibleVaultWithdrawEventValue)?.value.ids;
@@ -105,7 +105,7 @@ public static class EventDecoder
         return unwrappedEvent != null;
     }
 
-    public static bool TryGetNonFungibleVaultDepositEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out List<ToolkitModel.NonFungibleLocalId>? unwrappedEvent)
+    public static bool TryGetNonFungibleVaultDepositEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.NonFungibleLocalId[]? unwrappedEvent)
     {
         unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.NonFungibleVault)?.value as
             ToolkitModel.TypedNonFungibleVaultBlueprintEvent.NonFungibleVaultDepositEventValue)?.value.ids;
@@ -154,9 +154,9 @@ public static class EventDecoder
 
         using var address = new ToolkitModel.Address(methodEventEmitter.Entity.EntityAddress);
         using var emitter = new ToolkitModel.Emitter.Method(address, MapModuleId(methodEventEmitter.ObjectModuleId));
-        using var hash = new ToolkitModel.Hash(Convert.FromHexString(@event.Type.TypeReference.SchemaHash).ToList());
+        using var hash = new ToolkitModel.Hash(Convert.FromHexString(@event.Type.TypeReference.SchemaHash));
         using var eventIdentifier = new ToolkitModel.EventTypeIdentifier(emitter, @event.Type.Name);
-        return ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToTypedNativeEvent(eventIdentifier, @event.Data.GetDataBytes().ToList(), networkId);
+        return ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToTypedNativeEvent(eventIdentifier, @event.Data.GetDataBytes(), networkId);
     }
 
     private static ToolkitModel.ObjectModuleId MapModuleId(CoreModel.ObjectModuleId core) =>

@@ -174,6 +174,7 @@ internal abstract class CommonDbContext : DbContext
         HookupPendingTransactions(modelBuilder);
         HookupEntities(modelBuilder);
         HookupHistory(modelBuilder);
+        HookupStatistics(modelBuilder);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -415,6 +416,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<PackageBlueprintHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<PackageBlueprintHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.Name, e.Version, e.FromStateVersion });
 
         modelBuilder
             .Entity<PackageCodeHistory>()

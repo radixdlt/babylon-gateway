@@ -62,90 +62,58 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json.Linq;
+using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreApiModel = RadixDlt.CoreApiSdk.Model;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal interface IRoleAssignmentsMapper
+internal interface IBlueprintProvider
 {
-    Dictionary<long, GatewayApiSdk.Model.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
-        ICollection<ComponentEntity> componentEntities,
-        Dictionary<BlueprintDefinitionIdentifier, CoreApiModel.AuthConfig> blueprintAuthConfigs,
-        ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
-        ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments);
+    Task<Dictionary<BlueprintDefinitionIdentifier, PackageBlueprintHistory>> GetBlueprints(
+        IReadOnlyCollection<BlueprintDefinitionIdentifier> blueprintDefinitions,
+        GatewayApiSdk.Model.LedgerState ledgerState,
+        CancellationToken token = default
+    );
 }
 
-internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
+internal class BlueprintProvider : IBlueprintProvider
 {
-    private readonly IRoleAssignmentsKeyProvider _roleAssignmentsKeyProvider;
+    private readonly ReadOnlyDbContext _dbContext;
 
-    public RoleAssignmentsMapper(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
+    public BlueprintProvider(ReadOnlyDbContext dbContext)
     {
-        _roleAssignmentsKeyProvider = roleAssignmentsKeyProvider;
+        _dbContext = dbContext;
     }
 
-    public Dictionary<long, GatewayModel.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
-        ICollection<ComponentEntity> componentEntities,
-        Dictionary<BlueprintDefinitionIdentifier, CoreApiModel.AuthConfig> blueprintAuthConfigs,
-        ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
-        ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
+    public async Task<Dictionary<BlueprintDefinitionIdentifier, PackageBlueprintHistory>> GetBlueprints(
+        IReadOnlyCollection<BlueprintDefinitionIdentifier> blueprintDefinitions,
+        GatewayApiSdk.Model.LedgerState ledgerState,
+        CancellationToken token = default
+    )
     {
-        var nativeModulesKeys = _roleAssignmentsKeyProvider.GetNativeModulesKeys();
+        var blueprintNames = blueprintDefinitions.Select(x => x.Name).ToList();
+        var blueprintVersions = blueprintDefinitions.Select(x => x.Version).ToList();
+        var packageEntityIds = blueprintDefinitions.Select(x => x.PackageEntityId).ToList();
 
-        return componentEntities.ToDictionary(entity => entity.Id, entity =>
-        {
-            var ownerRole = ownerRoles.FirstOrDefault(x => x.EntityId == entity.Id)?.RoleAssignments;
+        var result = await _dbContext
+            .PackageBlueprintHistory
+            .FromSqlInterpolated($@"
+WITH variables (blueprint_name, blueprint_version, package_entity_id) AS (SELECT UNNEST({blueprintNames}), UNNEST({blueprintVersions}), UNNEST({packageEntityIds}))
+SELECT pbh.*
+FROM variables v
+INNER JOIN package_blueprint_history pbh
+ON pbh.name = v.blueprint_name AND pbh.version = v.blueprint_version and pbh.package_entity_id = v.package_entity_id
+WHERE from_state_version <= {ledgerState.StateVersion}
+")
+            .ToDictionaryAsync(
+                x => new BlueprintDefinitionIdentifier(x.Name, x.Version, x.PackageEntityId),
+                x => x,
+                token);
 
-            if (ownerRole == null)
-            {
-                throw new UnreachableException($"No owner role defined for entity: {entity.Address}");
-            }
-
-            var authConfigFound = blueprintAuthConfigs.TryGetValue(new BlueprintDefinitionIdentifier(entity.BlueprintName, entity.BlueprintVersion, entity.PackageId), out var authConfig);
-
-            if (!authConfigFound)
-            {
-                throw new UnreachableException($"blueprint: {entity.BlueprintName} {entity.BlueprintVersion} in package: {entity.PackageId} not found");
-            }
-
-            var mainModuleKeys = _roleAssignmentsKeyProvider.ExtractKeysFromBlueprintAuthConfig(authConfig!);
-
-            var allModulesKeys = mainModuleKeys.Concat(nativeModulesKeys).ToList();
-
-            return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
-                new JRaw(ownerRole),
-                GetEntries(entity.Id, allModulesKeys, roleAssignments)
-            );
-        });
-    }
-
-    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GetEntries(
-        long entityId,
-        List<RoleAssignmentEntry> roleAssignmentKeys,
-        ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
-    {
-        return roleAssignmentKeys
-            .Select(role =>
-            {
-                var existingRoleAssignments = roleAssignments
-                    .Where(e => e.EntityId == entityId && e.KeyRole == role.Key.Name && e.KeyModule == role.Key.ObjectModuleId)
-                    .Select(x => new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Explicit, new JRaw(x.RoleAssignments)))
-                    .FirstOrDefault();
-
-                return new GatewayModel.ComponentEntityRoleAssignmentEntry(
-                    new GatewayModel.RoleKey(role.Key.Name, role.Key.ObjectModuleId.ToGatewayModel()),
-                    existingRoleAssignments ?? new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
-                    role.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ObjectModuleId.ToGatewayModel())).ToList()
-                );
-            })
-            .ToList();
+        return result;
     }
 }

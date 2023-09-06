@@ -137,11 +137,11 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
         }
 
         ToolkitModel.PublicKeyHash publicKeyHash = IsSecp256k1(decoded)
-            ? new ToolkitModel.PublicKeyHash.Secp256k1(decoded.AddressBytes.ToList())
-            : new ToolkitModel.PublicKeyHash.Ed25519(decoded.AddressBytes.ToList());
+            ? new ToolkitModel.PublicKeyHash.Secp256k1(decoded.AddressBytes)
+            : new ToolkitModel.PublicKeyHash.Ed25519(decoded.AddressBytes);
 
-        using var ownedKeysItem = new ToolkitModel.MetadataValue.PublicKeyHashArrayValue(new List<ToolkitModel.PublicKeyHash> { publicKeyHash });
-        using var ownerBadgeItem = new ToolkitModel.MetadataValue.NonFungibleLocalIdValue(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.Data.ToList()));
+        using var ownedKeysItem = new ToolkitModel.MetadataValue.PublicKeyHashArrayValue(new[] { publicKeyHash });
+        using var ownerBadgeItem = new ToolkitModel.MetadataValue.NonFungibleLocalIdValue(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.Data));
 
         var ownerKeysBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownedKeysItem);
         var ownerKeysRawHex = ownerKeysBytes.ToArray().ToHex();
@@ -152,9 +152,9 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
         var ownerBadgeJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, ToolkitModel.SerializationMode.PROGRAMMATIC, _networkId, null);
 
         var roleAssignmentOwnerProofLocalId = new CoreModel.NonFungibleLocalId(
-            simpleRep: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes.ToList())),
+            simpleRep: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes)),
             idType: CoreModel.NonFungibleIdType.Bytes,
-            sborHex: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborEncode(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes.ToList())).ToArray().ToHex());
+            sborHex: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborEncode(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes)).ToArray().ToHex());
         var roleAssignmentOwnerProofGlobalId = IsSecp256k1(decoded)
             ? new CoreModel.NonFungibleGlobalId(_secp256k1SignatureVirtualBadge, roleAssignmentOwnerProofLocalId)
             : new CoreModel.NonFungibleGlobalId(_ed25519SignatureVirtualBadge, roleAssignmentOwnerProofLocalId);
