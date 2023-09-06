@@ -65,11 +65,11 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class StateEntityNonFungibleResourceVaultsPageRequestValidator : AbstractValidator<StateEntityNonFungibleResourceVaultsPageRequest>
+internal class StateEntityNonFungibleResourceVaultsPageRequestValidator : AbstractValidator<GatewayModel.StateEntityNonFungibleResourceVaultsPageRequest>
 {
     public StateEntityNonFungibleResourceVaultsPageRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
