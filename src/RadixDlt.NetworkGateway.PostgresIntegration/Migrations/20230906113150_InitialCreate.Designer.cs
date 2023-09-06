@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230905143733_InitialCreate")]
+    [Migration("20230906113150_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -713,7 +713,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("epoch");
 
-                    b.Property<BigInteger?>("FeePaid")
+                    b.Property<BigInteger>("FeePaid")
                         .HasPrecision(1000)
                         .HasColumnType("numeric")
                         .HasColumnName("fee_paid");
@@ -743,7 +743,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
-                    b.Property<BigInteger?>("TipPaid")
+                    b.Property<BigInteger>("TipPaid")
                         .HasPrecision(1000)
                         .HasColumnType("numeric")
                         .HasColumnName("tip_paid");
@@ -1310,6 +1310,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("EpochNumber")
                         .HasColumnType("bigint")
                         .HasColumnName("epoch_number");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
 
                     b.Property<long>("ProposalsMade")
                         .HasColumnType("bigint")

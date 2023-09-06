@@ -72,10 +72,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.Abstractions.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal record RoleAssignmentRuleKey(string Name, ObjectModuleId ObjectModuleId);
+internal record RoleAssignmentRuleKey(string Name, GatewayModel.ObjectModuleId ObjectModuleId);
 
 internal record RoleAssignmentEntry(RoleAssignmentRuleKey Key, RoleAssignmentRuleKey[] Updaters);
 
@@ -98,8 +99,8 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     public RoleAssignmentsKeyProvider(ReadOnlyDbContext readOnlyDbContext)
     {
-        var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, ObjectModuleId.Metadata);
-        var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, ObjectModuleId.Royalty);
+        var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, GatewayModel.ObjectModuleId.Metadata);
+        var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, GatewayModel.ObjectModuleId.Royalty);
 
         _nativeModulesKeys = metadataWithUpdaterKeys
             .Concat(royaltyWithUpdaterKeys)
@@ -121,7 +122,7 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
             .ToList() ?? new List<RoleAssignmentEntry>();
     }
 
-    private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, ObjectModuleId objectModuleId)
+    private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, GatewayModel.ObjectModuleId objectModuleId)
     {
         const string UpdaterSuffix = "updater";
 

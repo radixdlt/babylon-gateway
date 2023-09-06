@@ -540,19 +540,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         _ => throw new UnreachableException(),
                     };
 
-                    var feeSummary = committedTransaction.Receipt.FeeSummary;
-
                     ledgerTransaction.StateVersion = stateVersion;
                     ledgerTransaction.Epoch = summary.Epoch;
                     ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
                     ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
                     ledgerTransaction.IndexInRound = summary.IndexInRound;
-                    ledgerTransaction.FeePaid = feeSummary != null
-                        ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost)
-                        : null;
-                    ledgerTransaction.TipPaid = feeSummary != null
-                        ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalTippingCost)
-                        : null;
+                    ledgerTransaction.FeePaid = committedTransaction.Receipt.FeeSummary.TotalFee();
+                    ledgerTransaction.TipPaid = committedTransaction.Receipt.FeeSummary.TotalTip();
                     ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                     ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                     ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
@@ -1211,7 +1205,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     foreach (var @event in committedTransaction.Receipt.Events)
                     {
                         if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter
-                            || methodEventEmitter.ObjectModuleId != CoreModel.ObjectModuleId.Main)
+                            || methodEventEmitter.ObjectModuleId != CoreModel.ObjectModuleId.Main
+                            || methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalGenericComponent
+                            || methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalGenericComponent)
                         {
                             continue;
                         }
@@ -1225,6 +1221,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             validatorEmissionStatisticsToAdd.Add(new ValidatorEmissionStatistics
                             {
                                 Id = sequences.ValidatorEmissionStatisticsSequence++,
+                                FromStateVersion = stateVersion,
                                 ValidatorEntityId = eventEmitterEntity.DatabaseId,
                                 EpochNumber = (long)validatorUptimeEvent.epoch,
                                 ProposalsMade = (long)validatorUptimeEvent.proposalsMade,
@@ -1926,8 +1923,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             CreatedTimestamp: _clock.UtcNow,
             Epoch: _networkConfigurationProvider.GetGenesisEpoch(),
             RoundInEpoch: _networkConfigurationProvider.GetGenesisRound(),
-            IndexInEpoch: 0,
-            IndexInRound: 0
+            IndexInEpoch: -1, // invalid, but we increase it by one to in ProcessTransactions
+            IndexInRound: -1 // invalid, but we increase it by one to in ProcessTransactions
         );
     }
 }

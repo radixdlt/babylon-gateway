@@ -64,7 +64,7 @@
 
 using FluentAssertions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using System;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using System.Collections.Generic;
 using Xunit;
 
@@ -85,12 +85,12 @@ public class RadixAddressTests
     }
 
     [Theory]
-    [InlineData("account_loc1qdj0c2rrk5v9yv87gr9zz9mdcrjpxq60fyw0n6j57q3szeyglx", "0364FC2863B5185230FE40CA21176DC0E413034F491CF9EA54F023")]
-    [InlineData("resource_loc1qrky4vgxu4pqpk07k6hem2kx23wshq4renre04smrlwsvvyu3v", "00EC4AB106E54200D9FEB6AF9DAAC6545D0B82A3CCC797D61B1FDD")]
+    [InlineData("account_loc1qdj0c2rrk5v9yv87gr9zz9mdcrjpxq60fyw0n6j57q3szeyglx", "0364fc2863b5185230fe40ca21176dc0e413034f491cf9ea54f023")]
+    [InlineData("resource_loc1qrky4vgxu4pqpk07k6hem2kx23wshq4renre04smrlwsvvyu3v", "00ec4ab106e54200d9feb6af9daac6545d0b82a3ccc797d61b1fdd")]
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeGivesAddress(string encodedString, string expectedAddress)
     {
         var decodedData = RadixAddressCodec.Decode(encodedString);
-        var decodedHex = Convert.ToHexString(decodedData.Data);
+        var decodedHex = decodedData.Data.ToHex();
 
         decodedHex.Should().Be(expectedAddress);
     }

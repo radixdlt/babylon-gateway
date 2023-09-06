@@ -404,8 +404,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     round_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_round = table.Column<long>(type: "bigint", nullable: false),
-                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     affected_global_entities = table.Column<long[]>(type: "bigint[]", nullable: false),
                     round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -643,6 +643,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     epoch_number = table.Column<long>(type: "bigint", nullable: false),
                     proposals_made = table.Column<long>(type: "bigint", nullable: false),
