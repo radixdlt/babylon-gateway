@@ -1,3 +1,17 @@
+### 0.5.2 RCNet v3 revision 3
+Release Date: _unreleased_
+
+- Fix broken pagination for NFIDs under `/state/entity/details` and `/state/entity/page/non-fungible-vaults` endpoints.
+- Fix invalid `index_in_epoch` and `index_in_round` for genesis TX.
+- Fix virtual identity and account details.
+- Fix how TX total fee paid is calculated.
+- Add `from_state_version` to `validator_emission_statistics`.
+
+### 0.5.1 RCNet v3 revision 2
+Release Date: 01.09.2023
+
+- Fix data aggregator processing custom events.
+
 # 0.5.0 - RCNet v3
 Release Date: 31.08.2023
 

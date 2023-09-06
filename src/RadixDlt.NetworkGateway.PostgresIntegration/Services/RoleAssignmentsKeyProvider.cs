@@ -62,13 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
 using System.Linq;
+using GatewayModel = RadixDlt.NetworkGateway.Abstractions.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal record RoleAssignmentRuleKey(string Name, ObjectModuleId ObjectModuleId);
+internal record RoleAssignmentRuleKey(string Name, GatewayModel.ObjectModuleId ObjectModuleId);
 
 internal record RoleAssignmentEntry(RoleAssignmentRuleKey Key, RoleAssignmentRuleKey[] Updaters);
 
@@ -99,19 +99,19 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     public RoleAssignmentsKeyProvider()
     {
-        var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, ObjectModuleId.Metadata);
-        var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, ObjectModuleId.Royalty);
+        var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, GatewayModel.ObjectModuleId.Metadata);
+        var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, GatewayModel.ObjectModuleId.Royalty);
 
         _nativeModulesKeys = metadataWithUpdaterKeys
             .Concat(royaltyWithUpdaterKeys)
             .ToList();
 
         _nonFungibleResourceKeys = _nativeModulesKeys
-            .Concat(GetKeysWithUpdaterRoles(_nonFungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
+            .Concat(GetKeysWithUpdaterRoles(_nonFungibleMainModuleResourceRuleKeys, GatewayModel.ObjectModuleId.Main))
             .ToList();
 
         _fungibleResourceKeys = _nativeModulesKeys
-            .Concat(GetKeysWithUpdaterRoles(_fungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
+            .Concat(GetKeysWithUpdaterRoles(_fungibleMainModuleResourceRuleKeys, GatewayModel.ObjectModuleId.Main))
             .ToList();
     }
 
@@ -121,7 +121,7 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     public List<RoleAssignmentEntry> GetFungibleResourceKeys() => _fungibleResourceKeys;
 
-    private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, ObjectModuleId objectModuleId)
+    private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, GatewayModel.ObjectModuleId objectModuleId)
     {
         const string UpdaterSuffix = "updater";
 

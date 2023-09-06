@@ -62,9 +62,7 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Diagnostics;

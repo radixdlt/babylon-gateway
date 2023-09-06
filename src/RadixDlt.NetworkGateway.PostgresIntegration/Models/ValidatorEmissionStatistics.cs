@@ -74,6 +74,9 @@ internal class ValidatorEmissionStatistics
     [Column("id")]
     public long Id { get; set; }
 
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
     [Column("validator_entity_id")]
     public long ValidatorEntityId { get; set; }
 

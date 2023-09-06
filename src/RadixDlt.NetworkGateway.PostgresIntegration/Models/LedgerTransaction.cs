@@ -96,10 +96,10 @@ internal abstract class LedgerTransaction
     public long IndexInRound { get; set; }
 
     [Column("fee_paid")]
-    public TokenAmount? FeePaid { get; set; }
+    public TokenAmount FeePaid { get; set; }
 
     [Column("tip_paid")]
-    public TokenAmount? TipPaid { get; set; }
+    public TokenAmount TipPaid { get; set; }
 
     [Column("affected_global_entities")]
     public long[] AffectedGlobalEntities { get; set; }
