@@ -1,6 +1,7 @@
 ### 0.5.2 RCNet v3 revision 3
 Release Date: _unreleased_
 
+- Fix broken pagination for NFIDs under `/state/entity/details` and `/state/entity/page/non-fungible-vaults` endpoints.
 - Fix invalid `index_in_epoch` and `index_in_round` for genesis TX.
 - Fix virtual identity and account details.
 - Fix how TX total fee paid is calculated.
