@@ -306,7 +306,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
                         var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
                         using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, _networkConfigurationProvider.GetNetworkId());
-                        using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex().ToArray()).ToArray());
+                        using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
                         var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest);
 
                         foreach (var address in extractedAddresses.All())
@@ -563,9 +563,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         CostingParameters = committedTransaction.Receipt.CostingParameters.ToJson(),
                         FeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson(),
                         FeeSource = committedTransaction.Receipt.FeeSource?.ToJson(),
-                        EventSchemaHashes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.SchemaHash.ConvertFromHex()).ToArray() ?? Array.Empty<byte[]>(),
-                        EventTypeIndexes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.LocalTypeIndex.Index).ToArray() ?? Array.Empty<long>(),
-                        EventSborTypeKinds = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.LocalTypeIndex.Kind.ToModel()).ToArray().ToArray() ?? Array.Empty<SborTypeKind>(),
+                        EventSchemaHashes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray() ?? Array.Empty<byte[]>(),
+                        EventTypeIndexes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray() ?? Array.Empty<long>(),
+                        EventSborTypeKinds = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray().ToArray() ?? Array.Empty<SborTypeKind>(),
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
@@ -1094,34 +1094,33 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
                         {
-                            if (typeInfoSubstate.TryGetNonFungibleDataSchemaDetails(out var nonFungibleDataSchemaDetails))
+                            if (typeInfoSubstate.TryGetNonFungibleDataLocalSchemaDetails(out var nonFungibleDataSchemaDetails))
                             {
                                 nonFungibleSchemaHistoryToAdd.Add(new NonFungibleSchemaHistory
                                 {
                                     Id = sequences.NonFungibleSchemaHistorySequence++,
                                     ResourceEntityId = referencedEntity.DatabaseId,
-                                    SchemaHash = nonFungibleDataSchemaDetails.SchemaHash.ConvertFromHex(),
-                                    SborTypeKind = nonFungibleDataSchemaDetails.LocalTypeIndex.Kind.ToModel(),
-                                    TypeIndex = nonFungibleDataSchemaDetails.LocalTypeIndex.Index,
+                                    SchemaHash = nonFungibleDataSchemaDetails.ScopedTypeId.SchemaHash.ConvertFromHex(),
+                                    SborTypeKind = nonFungibleDataSchemaDetails.ScopedTypeId.LocalTypeId.Kind.ToModel(),
+                                    TypeIndex = nonFungibleDataSchemaDetails.ScopedTypeId.LocalTypeId.Id,
                                     FromStateVersion = stateVersion,
                                 });
                             }
 
-                            if (typeInfoSubstate.Value.Details is CoreModel.KeyValueStoreTypeInfoDetails keyValueStoreTypeInfoDetails)
+                            if (typeInfoSubstate.Value.Details is CoreModel.KeyValueStoreTypeInfoDetails
+                                && typeInfoSubstate.TryGetKeyValueStoreKeyLocalSchemaDetails(out var keySchemaDetails)
+                                && typeInfoSubstate.TryGetKeyValueStoreValueLocalSchemaDetails(out var valueSchemaDetails))
                             {
-                                var keySchemaDetails = keyValueStoreTypeInfoDetails.KeyValueStoreInfo.KeyGenericSubstitution;
-                                var valueSchemaDetails = keyValueStoreTypeInfoDetails.KeyValueStoreInfo.ValueGenericSubstitution;
-
                                 keyValueStoreSchemaHistoryToAdd.Add(new KeyValueStoreSchemaHistory
                                 {
                                     Id = sequences.KeyValueSchemaHistorySequence++,
                                     KeyValueStoreEntityId = referencedEntity.DatabaseId,
-                                    KeySchemaHash = keySchemaDetails.SchemaHash.ConvertFromHex(),
-                                    KeySborTypeKind = keySchemaDetails.LocalTypeIndex.Kind.ToModel(),
-                                    KeyTypeIndex = keySchemaDetails.LocalTypeIndex.Index,
-                                    ValueSchemaHash = valueSchemaDetails.SchemaHash.ConvertFromHex(),
-                                    ValueSborTypeKind = valueSchemaDetails.LocalTypeIndex.Kind.ToModel(),
-                                    ValueTypeIndex = valueSchemaDetails.LocalTypeIndex.Index,
+                                    KeySchemaHash = keySchemaDetails.ScopedTypeId.SchemaHash.ConvertFromHex(),
+                                    KeySborTypeKind = keySchemaDetails.ScopedTypeId.LocalTypeId.Kind.ToModel(),
+                                    KeyTypeIndex = keySchemaDetails.ScopedTypeId.LocalTypeId.Id,
+                                    ValueSchemaHash = valueSchemaDetails.ScopedTypeId.SchemaHash.ConvertFromHex(),
+                                    ValueSborTypeKind = valueSchemaDetails.ScopedTypeId.LocalTypeId.Kind.ToModel(),
+                                    ValueTypeIndex = valueSchemaDetails.ScopedTypeId.LocalTypeId.Id,
                                     FromStateVersion = stateVersion,
                                 });
                             }
