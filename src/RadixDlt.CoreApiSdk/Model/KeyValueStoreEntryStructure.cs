@@ -70,6 +70,7 @@ public partial class KeyValueStoreEntryStructure
 {
     public override IEnumerable<string> GetEntityAddresses()
     {
-        yield return KeyValueStoreAddress;
+        yield return KeyFullTypeId.EntityAddress;
+        yield return ValueFullTypeId.EntityAddress;
     }
 }

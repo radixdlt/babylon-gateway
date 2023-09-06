@@ -70,11 +70,11 @@ public partial class PackageObjectSubstateTypeReference
 {
     public override SchemaDetails GetSchemaDetails()
     {
-        return new SchemaDetails(SchemaHash, PackageAddress, LocalTypeIndex.Index, LocalTypeIndex.Kind);
+        return new SchemaDetails(FullTypeId.SchemaHash, FullTypeId.EntityAddress, FullTypeId.LocalTypeId.Id, FullTypeId.LocalTypeId.Kind);
     }
 
     public override IEnumerable<string> GetEntityAddresses()
     {
-        yield return PackageAddress;
+        yield return FullTypeId.EntityAddress;
     }
 }

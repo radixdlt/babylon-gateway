@@ -64,4 +64,4 @@
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public record struct SchemaDetails(string SchemaHash, string SchemaDefiningEntityAddress, long TypeIndex, LocalTypeIndex.KindEnum SborTypeKind);
+public record struct SchemaDetails(string SchemaHash, string SchemaDefiningEntityAddress, long TypeIndex, LocalTypeId.KindEnum SborTypeKind);

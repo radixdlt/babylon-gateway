@@ -81,7 +81,7 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
         return Enumerable.Empty<string>();
     }
 
-    public bool TryGetObjectInstanceGenericSubstitutions([NotNullWhen(true)] out List<TypeIdentifier> genericSubstitutions)
+    public bool TryGetObjectInstanceGenericSubstitutions([NotNullWhen(true)] out List<GenericSubstitution> genericSubstitutions)
     {
         genericSubstitutions = null;
 
@@ -94,7 +94,7 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
         return false;
     }
 
-    public bool TryGetNonFungibleDataSchemaDetails([NotNullWhen(true)] out TypeIdentifier schemaDetails)
+    public bool TryGetNonFungibleDataLocalSchemaDetails([NotNullWhen(true)] out LocalGenericSubstition schemaDetails)
     {
         schemaDetails = null;
 
@@ -105,8 +105,49 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
                 throw new NotSupportedException("Expected non fungible data with one data type entry.");
             }
 
-            schemaDetails = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions.First();
-            return true;
+            var genericSubstitution = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions.First();
+
+            if (genericSubstitution.Type == GenericSubstitutionType.Local)
+            {
+                schemaDetails = genericSubstitution as LocalGenericSubstition;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryGetKeyValueStoreKeyLocalSchemaDetails([NotNullWhen(true)] out LocalGenericSubstition keySchemaDetails)
+    {
+        keySchemaDetails = null;
+
+        if (Value.Details is KeyValueStoreTypeInfoDetails keyValueStoreInfoDetails)
+        {
+            var keyGenericSubstitution = keyValueStoreInfoDetails.KeyValueStoreInfo.KeyGenericSubstitution;
+
+            if (keyGenericSubstitution.Type == GenericSubstitutionType.Local)
+            {
+                keySchemaDetails = keyGenericSubstitution as LocalGenericSubstition;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryGetKeyValueStoreValueLocalSchemaDetails([NotNullWhen(true)] out LocalGenericSubstition valueSchemaDetails)
+    {
+        valueSchemaDetails = null;
+
+        if (Value.Details is KeyValueStoreTypeInfoDetails keyValueStoreInfoDetails)
+        {
+            var valueGenericSubstitution = keyValueStoreInfoDetails.KeyValueStoreInfo.ValueGenericSubstitution;
+
+            if (valueGenericSubstitution.Type == GenericSubstitutionType.Local)
+            {
+                valueSchemaDetails = valueGenericSubstitution as LocalGenericSubstition;
+                return true;
+            }
         }
 
         return false;

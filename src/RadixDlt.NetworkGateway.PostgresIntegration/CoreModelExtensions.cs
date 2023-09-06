@@ -134,12 +134,12 @@ internal static class CoreModelExtensions
         };
     }
 
-    public static SborTypeKind ToModel(this CoreModel.LocalTypeIndex.KindEnum indexKind)
+    public static SborTypeKind ToModel(this CoreModel.LocalTypeId.KindEnum indexKind)
     {
         return indexKind switch
         {
-            CoreModel.LocalTypeIndex.KindEnum.SchemaLocal => SborTypeKind.SchemaLocal,
-            CoreModel.LocalTypeIndex.KindEnum.WellKnown => SborTypeKind.WellKnown,
+            CoreModel.LocalTypeId.KindEnum.SchemaLocal => SborTypeKind.SchemaLocal,
+            CoreModel.LocalTypeId.KindEnum.WellKnown => SborTypeKind.WellKnown,
             _ => throw new ArgumentOutOfRangeException(nameof(indexKind), indexKind, null),
         };
     }
