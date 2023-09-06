@@ -122,14 +122,14 @@ internal static class CoreModelExtensions
         };
     }
 
-    public static ObjectModuleId ToModel(this CoreModel.ObjectModuleId objectModuleId)
+    public static ModuleId ToModel(this CoreModel.ModuleId objectModuleId)
     {
         return objectModuleId switch
         {
-            CoreModel.ObjectModuleId.Main => ObjectModuleId.Main,
-            CoreModel.ObjectModuleId.Metadata => ObjectModuleId.Metadata,
-            CoreModel.ObjectModuleId.Royalty => ObjectModuleId.Royalty,
-            CoreModel.ObjectModuleId.RoleAssignment => ObjectModuleId.RoleAssignment,
+            CoreModel.ModuleId.Main => ModuleId.Main,
+            CoreModel.ModuleId.Metadata => ModuleId.Metadata,
+            CoreModel.ModuleId.Royalty => ModuleId.Royalty,
+            CoreModel.ModuleId.RoleAssignment => ModuleId.RoleAssignment,
             _ => throw new ArgumentOutOfRangeException(nameof(objectModuleId), objectModuleId, null),
         };
     }

@@ -226,9 +226,9 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
     private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GenerateVirtualEntityRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
         return roleAssignmentsKeyProvider.GetNativeModulesKeys().Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
-            new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ObjectModuleId.ToGatewayModel()),
+            new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ModuleId.ToGatewayModel()),
             new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
-            entry.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ObjectModuleId.ToGatewayModel())).ToList()
+            entry.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ModuleId.ToGatewayModel())).ToList()
         )).ToList();
     }
 }

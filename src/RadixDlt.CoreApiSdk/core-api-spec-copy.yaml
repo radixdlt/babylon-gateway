@@ -52,7 +52,7 @@ openapi: 3.0.0
 # => Hex-encoded hashes should end _hash
 # => Hex-encoded bytes/payload should end _hex and not include _bytes
 info:
-  version: '0.5.0'
+  version: '0.5.1'
   title: 'Babylon Core API - RCnet v3.1'
   license:
     name: The Radix License, Version 1.0
@@ -2296,7 +2296,7 @@ components:
             entity:
               $ref: "#/components/schemas/EntityReference"
             object_module_id:
-              $ref: "#/components/schemas/ObjectModuleId"
+              $ref: "#/components/schemas/ModuleId"
 
 #################################################
 # GENERAL / SHARED MODELS - keys and signatures #
@@ -3511,13 +3511,13 @@ components:
     EntityAddress:
       type: string
       description: Bech32m-encoded human readable version of the entity's address (ie the entity's node id)
-    ModuleId:
+    AttachedModuleId:
       type: string
       enum:
         - Metadata
         - Royalty
         - RoleAssignment
-    ObjectModuleId:
+    ModuleId:
       type: string
       enum:
         - Main
@@ -3669,7 +3669,7 @@ components:
         - role_key
       properties:
         object_module_id:
-          $ref: "#/components/schemas/ObjectModuleId"
+          $ref: "#/components/schemas/ModuleId"
         role_key:
           type: string
     MainMethodKey:
@@ -3862,7 +3862,7 @@ components:
         - version
       properties:
         module:
-          $ref: '#/components/schemas/ModuleId'
+          $ref: '#/components/schemas/AttachedModuleId'
         version:
           type: string
           description: A string of `Major.Minor.Patch` where Major, Minor and Patch are all u32s.
@@ -6850,6 +6850,12 @@ components:
         - max_ledger_state_version
         - transactions
       properties:
+        previous_state_identifiers:
+          $ref: "#/components/schemas/CommittedStateIdentifier"
+          description: |
+            Identifiers for the state on top of which the returned transactions were executed (ie `from_state_version - 1`).
+            This should be used for sanity-checking that you're reading from the ledger history you're expecting.
+            If this is field is missing, the previous state does not exists (`from_state_version` is 0).
         from_state_version:
           $ref: "#/components/schemas/StateVersion"
           description: |

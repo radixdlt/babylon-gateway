@@ -64,7 +64,7 @@
 
 namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-public enum ObjectModuleId
+public enum ModuleId
 {
     Main,
     Metadata,

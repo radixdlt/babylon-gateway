@@ -166,7 +166,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
-        modelBuilder.HasPostgresEnum<ObjectModuleId>();
+        modelBuilder.HasPostgresEnum<ModuleId>();
         modelBuilder.HasPostgresEnum<SborTypeKind>();
         modelBuilder.HasPostgresEnum<StateType>();
 

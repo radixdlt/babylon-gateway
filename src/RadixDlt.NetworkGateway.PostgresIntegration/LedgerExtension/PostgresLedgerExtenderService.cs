@@ -1204,7 +1204,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     foreach (var @event in committedTransaction.Receipt.Events)
                     {
                         if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter
-                            || methodEventEmitter.ObjectModuleId != CoreModel.ObjectModuleId.Main
+                            || methodEventEmitter.ObjectModuleId != CoreModel.ModuleId.Main
                             || methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalGenericComponent
                             || methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalGenericComponent)
                         {
