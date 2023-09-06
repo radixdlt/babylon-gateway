@@ -424,7 +424,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyRole, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.KeyModule, "object_module_id", token);
+            await writer.WriteAsync(e.KeyModule, "module_id", token);
             await writer.WriteAsync(e.RoleAssignments, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
         }
