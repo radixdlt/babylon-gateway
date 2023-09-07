@@ -168,7 +168,7 @@ INNER JOIN LATERAL (
 
         var entityIds = new List<long>();
         var keyRoles = new List<string>();
-        var keyModuleIds = new List<ObjectModuleId>();
+        var keyModuleIds = new List<ModuleId>();
         var lookupSet = new HashSet<RoleAssignmentEntryLookup>();
 
         foreach (var roleAssignmentsChangePointer in roleAssignmentsChangePointers)

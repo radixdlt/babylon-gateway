@@ -160,7 +160,7 @@ internal class SubmissionService : ISubmissionService
     {
         try
         {
-            var notarizedTransaction = ToolkitModel.NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes().ToList());
+            var notarizedTransaction = ToolkitModel.NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes());
             notarizedTransaction.StaticallyValidate(ToolkitModel.ValidationConfig.Default(_coreApiHandler.GetNetworkId()));
             return notarizedTransaction;
         }

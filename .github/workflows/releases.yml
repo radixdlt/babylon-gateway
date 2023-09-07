@@ -27,33 +27,18 @@ jobs:
           zip -r database-migrations.zip apps/DatabaseMigrations/output/
           zip -r gateway-api.zip apps/GatewayApi/output/
 
+      - name: Move zip
+        run: |
+          mv ./data-aggregator.zip data-aggregator-${{ github.event.release.tag_name }}-linux-x64.zip
+          mv ./gateway-api.zip gateway-api-${{ github.event.release.tag_name }}-linux-x64.zip
+          mv ./database-migrations.zip database-migrations-${{ github.event.release.tag_name }}-linux-x64.zip
       - name: Upload DataAggreagtor zip
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./data-aggregator.zip
-          asset_name: data-aggregator-${{ github.event.release.tag_name }}-linux-x64.zip
-          asset_content_type: application/zip
-      - name: Upload GatewayAPI zip
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./gateway-api.zip
-          asset_name: gateway-api-${{ github.event.release.tag_name }}-linux-x64.zip
-          asset_content_type: application/zip
-      - name: Upload DatabaseMigrations zip
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./database-migrations.zip
-          asset_name: database-migrations-${{ github.event.release.tag_name }}-linux-x64.zip
-          asset_content_type: application/zip
+          files: |
+            data-aggregator-${{ github.event.release.tag_name }}-linux-x64.zip
+            gateway-api-${{ github.event.release.tag_name }}-linux-x64.zip
+            database-migrations-${{ github.event.release.tag_name }}-linux-x64.zip
 
   setup-tags:
     runs-on: ubuntu-22.04
@@ -244,7 +229,6 @@ jobs:
           args: --all-projects --org=${{ env.SNYK_NETWORK_ORG_ID }} --format=cyclonedx1.4+json --json-file-output sbom.json
           command: sbom
       - name: Upload SBOM
-        uses: AButler/upload-release-assets@c94805dc72e4b20745f543da0f62eaee7722df7a # v2.0.2
+        uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
         with:
           files: sbom.json
-          repo-token: ${{ secrets.GITHUB_TOKEN }}

@@ -107,7 +107,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ObjectModuleId>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<ModuleId>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<SborTypeKind>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
 #pragma warning restore CS0618

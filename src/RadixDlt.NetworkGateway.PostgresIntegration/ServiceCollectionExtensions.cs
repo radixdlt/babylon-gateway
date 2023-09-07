@@ -114,7 +114,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<PendingTransactionStatus>();
                 dataSourceBuilder.MapEnum<PublicKeyType>();
                 dataSourceBuilder.MapEnum<ResourceType>();
-                dataSourceBuilder.MapEnum<ObjectModuleId>();
+                dataSourceBuilder.MapEnum<ModuleId>();
                 dataSourceBuilder.MapEnum<SborTypeKind>();
                 dataSourceBuilder.MapEnum<StateType>();
 

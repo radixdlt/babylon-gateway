@@ -91,8 +91,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
+                .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,ruid")
-                .Annotation("Npgsql:Enum:object_module_id", "main,metadata,royalty,role_assignment")
                 .Annotation("Npgsql:Enum:package_vm_type", "native,scrypto_v1")
                 .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,rejected_temporarily,rejected_permanently,committed_success,committed_failure")
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
@@ -292,7 +292,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     key_role = table.Column<string>(type: "text", nullable: false),
-                    key_module = table.Column<ObjectModuleId>(type: "object_module_id", nullable: false),
+                    key_module = table.Column<ModuleId>(type: "module_id", nullable: false),
                     role_assignments = table.Column<string>(type: "jsonb", nullable: true),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -404,8 +404,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     round_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_round = table.Column<long>(type: "bigint", nullable: false),
-                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     affected_global_entities = table.Column<long[]>(type: "bigint[]", nullable: false),
                     round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -643,6 +643,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     epoch_number = table.Column<long>(type: "bigint", nullable: false),
                     proposals_made = table.Column<long>(type: "bigint", nullable: false),
@@ -861,6 +862,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "package_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_package_blueprint_history_package_entity_id_name_version_fr~",
+                table: "package_blueprint_history",
+                columns: new[] { "package_entity_id", "name", "version", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_package_code_history_package_entity_id_from_state_version",
                 table: "package_code_history",
                 columns: new[] { "package_entity_id", "from_state_version" });
@@ -915,6 +921,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_validator_active_set_history_validator_public_key_history_id",
                 table: "validator_active_set_history",
                 column: "validator_public_key_history_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_emission_statistics_validator_entity_id_epoch_num~",
+                table: "validator_emission_statistics",
+                columns: new[] { "validator_entity_id", "epoch_number" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_validator_public_key_history_validator_entity_id_from_state~",

@@ -387,7 +387,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
                     if (!schemaFound)
                     {
-                        throw new UnreachableException($"Unable to find schema for given hash {Convert.ToHexString(@event.SchemaHash)}");
+                        throw new UnreachableException($"Unable to find schema for given hash {@event.SchemaHash.ToHex()}");
                     }
 
                     events.Add(ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema!, @event.KeyTypeKind, @event.TypeIndex, networkId));

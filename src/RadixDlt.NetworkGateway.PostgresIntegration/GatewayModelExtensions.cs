@@ -161,7 +161,7 @@ internal static class GatewayModelExtensions
             affectedGlobalEntities: optIns.AffectedGlobalEntities ? lt.AffectedGlobalEntities.Select(x => entityIdToAddressMap[x]).ToList() : null,
             payloadHash: payloadHash,
             intentHash: intentHash,
-            feePaid: lt.FeePaid?.ToString(),
+            feePaid: lt.FeePaid.ToString(),
             confirmedAt: lt.RoundTimestamp,
             errorMessage: lt.EngineReceipt.ErrorMessage,
             rawHex: rawHex,
@@ -210,15 +210,15 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.ObjectModuleId ToGatewayModel(this ObjectModuleId objectModuleId)
+    public static GatewayModel.ObjectModuleId ToGatewayModel(this ModuleId moduleId)
     {
-        return objectModuleId switch
+        return moduleId switch
         {
-            ObjectModuleId.Main => GatewayModel.ObjectModuleId.Main,
-            ObjectModuleId.Metadata => GatewayModel.ObjectModuleId.Metadata,
-            ObjectModuleId.Royalty => GatewayModel.ObjectModuleId.Royalty,
-            ObjectModuleId.RoleAssignment => GatewayModel.ObjectModuleId.RoleAssignment,
-            _ => throw new UnreachableException($"Didn't expect {objectModuleId} value"),
+            ModuleId.Main => GatewayModel.ObjectModuleId.Main,
+            ModuleId.Metadata => GatewayModel.ObjectModuleId.Metadata,
+            ModuleId.Royalty => GatewayModel.ObjectModuleId.Royalty,
+            ModuleId.RoleAssignment => GatewayModel.ObjectModuleId.RoleAssignment,
+            _ => throw new UnreachableException($"Didn't expect {moduleId} value"),
         };
     }
 }

@@ -75,24 +75,24 @@ internal static class ScryptoSborUtils
 {
     public static string GetNonFungibleId(string input)
     {
-        var decodedNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborDecode(Convert.FromHexString(input).ToList());
+        var decodedNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborDecode(Convert.FromHexString(input));
         var stringNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(decodedNfid);
         return stringNfid;
     }
 
     public static string DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, long schemaIndex, byte networkId)
     {
-        ToolkitModel.LocalTypeIndex typeIndex = keyTypeKind switch
+        ToolkitModel.LocalTypeId typeIndex = keyTypeKind switch
         {
-            SborTypeKind.SchemaLocal => new ToolkitModel.LocalTypeIndex.SchemaLocalIndex((ulong)schemaIndex),
-            SborTypeKind.WellKnown => new ToolkitModel.LocalTypeIndex.WellKnown((byte)schemaIndex),
+            SborTypeKind.SchemaLocal => new ToolkitModel.LocalTypeId.SchemaLocalIndex((ulong)schemaIndex),
+            SborTypeKind.WellKnown => new ToolkitModel.LocalTypeId.WellKnown((byte)schemaIndex),
             _ => throw new ArgumentOutOfRangeException(nameof(keyTypeKind), keyTypeKind, null),
         };
 
-        var schema = new ToolkitModel.Schema(typeIndex, schemaBytes.ToList());
+        var schema = new ToolkitModel.Schema(typeIndex, schemaBytes);
 
         var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(
-            data.ToList(),
+            data,
             ToolkitModel.SerializationMode.PROGRAMMATIC,
             networkId,
             schema);
@@ -102,7 +102,7 @@ internal static class ScryptoSborUtils
 
     public static GatewayModel.MetadataTypedValue DecodeToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)
     {
-        using var metadataValue = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborDecode(rawScryptoSbor.ToList(), networkId);
+        using var metadataValue = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborDecode(rawScryptoSbor, networkId);
         return ConvertToolkitMetadataToGateway(metadataValue);
     }
 
@@ -162,7 +162,7 @@ internal static class ScryptoSborUtils
             case ToolkitModel.MetadataValue.PublicKeyHashValue publicKeyHashValue:
                 return new GatewayModel.MetadataPublicKeyHashValue(publicKeyHashValue.value.ToGatewayModel());
             case ToolkitModel.MetadataValue.StringArrayValue stringArrayValue:
-                return new GatewayModel.MetadataStringArrayValue(stringArrayValue.value);
+                return new GatewayModel.MetadataStringArrayValue(stringArrayValue.value.ToList());
             case ToolkitModel.MetadataValue.StringValue stringValue:
                 return new GatewayModel.MetadataStringValue(stringValue.value);
             case ToolkitModel.MetadataValue.U32ArrayValue u32ArrayValue:
@@ -178,7 +178,7 @@ internal static class ScryptoSborUtils
             case ToolkitModel.MetadataValue.U8Value u8Value:
                 return new GatewayModel.MetadataU8Value(u8Value.value.ToString());
             case ToolkitModel.MetadataValue.UrlArrayValue urlArrayValue:
-                return new GatewayModel.MetadataUrlArrayValue(urlArrayValue.value);
+                return new GatewayModel.MetadataUrlArrayValue(urlArrayValue.value.ToList());
             case ToolkitModel.MetadataValue.UrlValue urlValue:
                 return new GatewayModel.MetadataUrlValue(urlValue.value);
             default:

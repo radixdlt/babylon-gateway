@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -121,25 +122,40 @@ internal static class CoreModelExtensions
         };
     }
 
-    public static ObjectModuleId ToModel(this CoreModel.ObjectModuleId objectModuleId)
+    public static ModuleId ToModel(this CoreModel.ModuleId objectModuleId)
     {
         return objectModuleId switch
         {
-            CoreModel.ObjectModuleId.Main => ObjectModuleId.Main,
-            CoreModel.ObjectModuleId.Metadata => ObjectModuleId.Metadata,
-            CoreModel.ObjectModuleId.Royalty => ObjectModuleId.Royalty,
-            CoreModel.ObjectModuleId.RoleAssignment => ObjectModuleId.RoleAssignment,
+            CoreModel.ModuleId.Main => ModuleId.Main,
+            CoreModel.ModuleId.Metadata => ModuleId.Metadata,
+            CoreModel.ModuleId.Royalty => ModuleId.Royalty,
+            CoreModel.ModuleId.RoleAssignment => ModuleId.RoleAssignment,
             _ => throw new ArgumentOutOfRangeException(nameof(objectModuleId), objectModuleId, null),
         };
     }
 
-    public static SborTypeKind ToModel(this CoreModel.LocalTypeIndex.KindEnum indexKind)
+    public static SborTypeKind ToModel(this CoreModel.LocalTypeId.KindEnum indexKind)
     {
         return indexKind switch
         {
-            CoreModel.LocalTypeIndex.KindEnum.SchemaLocal => SborTypeKind.SchemaLocal,
-            CoreModel.LocalTypeIndex.KindEnum.WellKnown => SborTypeKind.WellKnown,
+            CoreModel.LocalTypeId.KindEnum.SchemaLocal => SborTypeKind.SchemaLocal,
+            CoreModel.LocalTypeId.KindEnum.WellKnown => SborTypeKind.WellKnown,
             _ => throw new ArgumentOutOfRangeException(nameof(indexKind), indexKind, null),
         };
+    }
+
+    public static TokenAmount TotalFee(this CoreModel.FeeSummary feeSummary)
+    {
+        var royaltyCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalRoyaltyCost);
+        var storageCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalStorageCost);
+        var executionCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalExecutionCost);
+        var finalizationCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalFinalizationCost);
+
+        return royaltyCost + storageCost + executionCost + finalizationCost;
+    }
+
+    public static TokenAmount TotalTip(this CoreModel.FeeSummary feeSummary)
+    {
+        return TokenAmount.FromDecimalString(feeSummary.XrdTotalTippingCost);
     }
 }

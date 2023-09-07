@@ -103,7 +103,7 @@ internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType 
 
 internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
 
-internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ObjectModuleId KeyModule);
+internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ModuleId KeyModule);
 
 internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
 {

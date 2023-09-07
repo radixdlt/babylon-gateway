@@ -70,11 +70,11 @@ public partial class ObjectInstanceTypeReference
 {
     public override SchemaDetails GetSchemaDetails()
     {
-        return new SchemaDetails(SchemaHash, EntityAddress, LocalTypeIndex.Index, LocalTypeIndex.Kind);
+        return new SchemaDetails(ResolvedFullTypeId.SchemaHash, ResolvedFullTypeId.EntityAddress, ResolvedFullTypeId.LocalTypeId.Id, ResolvedFullTypeId.LocalTypeId.Kind);
     }
 
     public override IEnumerable<string> GetEntityAddresses()
     {
-        yield return EntityAddress;
+        yield return ResolvedFullTypeId.EntityAddress;
     }
 }

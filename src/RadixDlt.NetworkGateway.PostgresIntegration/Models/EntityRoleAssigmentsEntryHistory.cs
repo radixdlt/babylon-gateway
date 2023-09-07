@@ -86,7 +86,7 @@ internal class EntityRoleAssignmentsEntryHistory
     public string KeyRole { get; set; }
 
     [Column("key_module")]
-    public ObjectModuleId KeyModule { get; set; }
+    public ModuleId KeyModule { get; set; }
 
     [Column("role_assignments", TypeName = "jsonb")]
     public string? RoleAssignments { get; set; }

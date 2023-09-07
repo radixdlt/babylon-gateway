@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230831085106_InitialCreate")]
+    [Migration("20230906132318_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -101,8 +101,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address", "affected_global_entity" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "round_update" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "module_id", new[] { "main", "metadata", "royalty", "role_assignment" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "integer", "bytes", "ruid" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "object_module_id", new[] { "main", "metadata", "royalty", "role_assignment" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "package_vm_type", new[] { "native", "scrypto_v1" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
@@ -507,8 +507,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
-                    b.Property<ObjectModuleId>("KeyModule")
-                        .HasColumnType("object_module_id")
+                    b.Property<ModuleId>("KeyModule")
+                        .HasColumnType("module_id")
                         .HasColumnName("key_module");
 
                     b.Property<string>("KeyRole")
@@ -713,7 +713,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("epoch");
 
-                    b.Property<BigInteger?>("FeePaid")
+                    b.Property<BigInteger>("FeePaid")
                         .HasPrecision(1000)
                         .HasColumnType("numeric")
                         .HasColumnName("fee_paid");
@@ -743,7 +743,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
-                    b.Property<BigInteger?>("TipPaid")
+                    b.Property<BigInteger>("TipPaid")
                         .HasPrecision(1000)
                         .HasColumnType("numeric")
                         .HasColumnName("tip_paid");
@@ -1025,6 +1025,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PackageEntityId", "FromStateVersion");
+
+                    b.HasIndex("PackageEntityId", "Name", "Version", "FromStateVersion");
 
                     b.ToTable("package_blueprint_history");
                 });
@@ -1309,6 +1311,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("epoch_number");
 
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
                     b.Property<long>("ProposalsMade")
                         .HasColumnType("bigint")
                         .HasColumnName("proposals_made");
@@ -1322,6 +1328,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("validator_entity_id");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ValidatorEntityId", "EpochNumber");
 
                     b.ToTable("validator_emission_statistics");
                 });
