@@ -32,13 +32,13 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
     networkName: 'Mainnet',
     networkId: RadixNetwork.Mainnet,
     gatewayUrl: 'https://mainnet.radixdlt.com',
-    dashboardUrl: '',
+    dashboardUrl: 'https://mainnet-dashboard.radixdlt.com',
   },
   Stokenet: {
     networkName: 'Stokenet',
     networkId: RadixNetwork.Stokenet,
     gatewayUrl: 'https://babylon-stokenet-gateway.radixdlt.com',
-    dashboardUrl: '',
+    dashboardUrl: 'https://babylon-stokenet-dashboard.radixdlt.com',
   },
   Kisharnet: {
     networkName: 'Kisharnet',
