@@ -395,7 +395,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     {
                         items = nfids.Take(nonFungibleIdsLimit).Select(y => y.NonFungibleId).ToList();
                         nextCursor = GenerateOffsetCursor(0, nonFungibleIdsLimit, x.NonFungibleIdsCount);
-    }
+                    }
 
                     return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
                         totalCount: x.NonFungibleIdsCount,
@@ -456,7 +456,17 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         CancellationToken token = default)
     {
         var entity = await GetEntity<Entity>(request.Address, ledgerState, token);
-        var metadata = (await GetMetadataSlices(new[] { entity.Id }, request.Offset, request.Limit, ledgerState, token))[entity.Id];
+        GatewayModel.EntityMetadataCollection metadata;
+
+        if (entity is VirtualIdentityEntity or VirtualAccountComponentEntity)
+        {
+            var (_, virtualEntityMetadata) = _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
+            metadata = virtualEntityMetadata;
+        }
+        else
+        {
+            metadata = (await GetMetadataSlices(new[] { entity.Id }, request.Offset, request.Limit, ledgerState, token))[entity.Id];
+        }
 
         return new GatewayModel.StateEntityMetadataPageResponse(ledgerState, metadata.TotalCount, metadata.NextCursor, metadata.Items, entity.Address);
     }

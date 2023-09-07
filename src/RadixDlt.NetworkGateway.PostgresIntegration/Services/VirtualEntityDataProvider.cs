@@ -158,9 +158,18 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
         var roleAssignmentOwnerProofGlobalId = IsSecp256k1(decoded)
             ? new CoreModel.NonFungibleGlobalId(_secp256k1SignatureVirtualBadge, roleAssignmentOwnerProofLocalId)
             : new CoreModel.NonFungibleGlobalId(_ed25519SignatureVirtualBadge, roleAssignmentOwnerProofLocalId);
-        var roleAssignmentOwner = new CoreModel.OwnerRole(
-            rule: new CoreModel.ProtectedAccessRule(new CoreModel.ProofAccessRuleNode(new CoreModel.RequireProofRule(new CoreModel.NonFungibleRequirement(roleAssignmentOwnerProofGlobalId)))),
-            updater: CoreModel.OwnerRoleUpdater.Object);
+        var ownerRule = new CoreModel.ProtectedAccessRule(new CoreModel.ProofAccessRuleNode(new CoreModel.RequireProofRule(new CoreModel.NonFungibleRequirement(roleAssignmentOwnerProofGlobalId))));
+        var roleAssignmentOwner = new CoreModel.OwnerRole(rule: ownerRule, updater: CoreModel.OwnerRoleUpdater.Object);
+
+        var securifyRule = new[]
+        {
+            new GatewayModel.ComponentEntityRoleAssignmentEntry(
+                new GatewayModel.RoleKey("securify", GatewayModel.ObjectModuleId.Main),
+                new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Explicit, ownerRule),
+                new List<GatewayModel.RoleKey> { new("_self_", GatewayModel.ObjectModuleId.Main) }),
+        };
+
+        var effectiveRoleAssignmentEntries = securifyRule.Concat(_virtualEntityRoleAssignmentEntries).ToList();
 
         var details = IsAccount(decoded)
             ? new GatewayModel.StateEntityDetailsResponseComponentDetails(
@@ -168,14 +177,14 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
                 blueprintName: "Account",
                 blueprintVersion: "1.0.0",
                 state: new CoreModel.AccountFieldStateValue(CoreModel.DefaultDepositRule.Accept),
-                roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, _virtualEntityRoleAssignmentEntries),
+                roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, effectiveRoleAssignmentEntries),
                 royaltyVaultBalance: null)
             : new GatewayModel.StateEntityDetailsResponseComponentDetails(
                 packageAddress: _identityPackage,
                 blueprintName: "Identity",
                 blueprintVersion: "1.0.0",
                 state: null,
-                roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, _virtualEntityRoleAssignmentEntries),
+                roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, effectiveRoleAssignmentEntries),
                 royaltyVaultBalance: null);
 
         var metadata = new GatewayModel.EntityMetadataCollection(
@@ -225,10 +234,13 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
 
     private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GenerateVirtualEntityRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
-        return roleAssignmentsKeyProvider.GetNativeModulesKeys().Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
-            new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ModuleId.ToGatewayModel()),
-            new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
-            entry.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ModuleId.ToGatewayModel())).ToList()
-        )).ToList();
+        return roleAssignmentsKeyProvider
+            .GetNativeModulesKeys()
+            .Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
+                new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ModuleId.ToGatewayModel()),
+                new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
+                entry.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ModuleId.ToGatewayModel())).ToList()
+            ))
+            .ToList();
     }
 }

@@ -97,7 +97,7 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     private readonly List<RoleAssignmentEntry> _nativeModulesKeys;
 
-    public RoleAssignmentsKeyProvider(ReadOnlyDbContext readOnlyDbContext)
+    public RoleAssignmentsKeyProvider()
     {
         var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, GatewayModel.ModuleId.Metadata);
         var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, GatewayModel.ModuleId.Royalty);
