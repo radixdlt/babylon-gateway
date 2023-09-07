@@ -28,6 +28,18 @@ export type NetworkConfig = {
 }
 
 export const RadixNetworkConfig: Record<string, NetworkConfig> = {
+  Mainnet: {
+    networkName: 'Mainnet',
+    networkId: RadixNetwork.Mainnet,
+    gatewayUrl: 'https://mainnet-gateway.radixdlt.com/',
+    dashboardUrl: '',
+  },
+  Stokenet: {
+    networkName: 'Stokenet',
+    networkId: RadixNetwork.Stokenet,
+    gatewayUrl: 'https://babylon-stokenet-gateway.radixdlt.com',
+    dashboardUrl: '',
+  },
   Kisharnet: {
     networkName: 'Kisharnet',
     networkId: RadixNetwork.Kisharnet,
