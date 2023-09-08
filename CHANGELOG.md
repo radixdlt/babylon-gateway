@@ -1,3 +1,8 @@
+### 0.5.3 RCNet v3.1 revision 2
+Release Date: _unreleased_
+
+- Fix incomplete entity type mapping.
+
 ### 0.5.2 RCNet v3.1
 Release Date: 07.09.2023
 
