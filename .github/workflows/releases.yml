@@ -7,7 +7,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    environment: release
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
       - name: Setup .NET SDK
@@ -78,7 +77,6 @@ jobs:
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/amd64"
-      environment: release
       cache_tag_suffix: "release"
       enable_dockerhub: "true"
       restore_artifact: "true"
@@ -103,7 +101,6 @@ jobs:
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
       platforms: "linux/amd64"
-      environment: release
       cache_tag_suffix: "release"
       enable_dockerhub: "true"
       restore_artifact: "true"
@@ -128,7 +125,6 @@ jobs:
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
       platforms: "linux/amd64"
-      environment: release
       cache_tag_suffix: "release"
       enable_dockerhub: "true"
       restore_artifact: "true"
