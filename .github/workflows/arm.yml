@@ -1,0 +1,97 @@
+name: main
+
+on:
+  push:
+    branches:
+      - chore/arm-build
+
+jobs:
+
+  setup-tags:
+    runs-on: ubuntu-22.04
+    outputs:
+      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
+      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
+      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
+    steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - name: Setup tags for docker image
+        id: setup_tags
+        uses: ./.github/actions/set-variables
+        with:
+          github_event_name: ${{ github.event_name }}
+          github_action_name: ${{ github.event.action}}
+      - name: Publish Gateway Settings
+        uses: actions/upload-artifact@v3
+        with:
+          path: Directory.Build.props
+          name: build_props
+          retention-days: 1
+
+  docker-database-migrations-private:
+    name: (DatabaseMigrations) Docker
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: ubuntu-22.04
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-database-migrations"
+      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
+      context: "."
+      dockerfile: "./apps/DatabaseMigrations/Dockerfile"
+      platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
+      scan_image: true
+      snyk_target_ref: ${{ github.ref_name }}
+    secrets:
+      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+  docker-data-aggregator-private:
+    name: (DataAggregator) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: ubuntu-22.04
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-data-aggregator"
+      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
+      context: "."
+      dockerfile: "./apps/DataAggregator/Dockerfile"
+      platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
+      scan_image: true
+      snyk_target_ref: ${{ github.ref_name }}
+    secrets:
+      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+  docker-gateway-api-private:
+    name: (GatewayApi) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: ubuntu-22.04
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-gateway-api"
+      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
+      context: "."
+      dockerfile: "./apps/GatewayApi/Dockerfile"
+      platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
+      scan_image: true
+      snyk_target_ref: ${{ github.ref_name }}
+    secrets:
+      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
