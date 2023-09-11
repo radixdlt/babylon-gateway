@@ -111,6 +111,8 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
+      scan_image: true
+      snyk_target_ref: ${{ github.ref_name }}
   
   docker-database-migrations-private-arm:
     name: ARM Migration
@@ -151,137 +153,8 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
-
-  
-  docker-gateway-aoi-private-arm-no-reusable:
-    name: ARM API
-    needs:
-      - setup-tags
-    runs-on: babylon-gateway-arm
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
-        with:
-          fetch-depth: 0
-      - name: Download artifact
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
-        with:
-          name: build_props
-          path: ./
-      - name: Display structure of downloaded files
-        run: ls -R ./
-      - name: "Configure AWS credentials (Private)"
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355
-        with:
-          role-to-assume: arn:aws:iam::308190735829:role/gh-common-secrets-read-access
-          aws-region: eu-west-2
-      - name: Read secrets from AWS Secrets Manager into environment variables (Private)
-        uses: aws-actions/aws-secretsmanager-get-secrets@022e8919774ecb75e8e375656d7b1898936ab878
-        with:
-          secret-ids: |
-            DOCKERHUB_PRIVATE, github-actions/common/dockerhub-credentials
-          parse-json-secrets: true
-      - name: Login to Docker Hub (Private)
-        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
-        with:
-          username: ${{env.DOCKERHUB_PRIVATE_USERNAME}}
-          password: ${{env.DOCKERHUB_PRIVATE_TOKEN}}
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Setup tags with metadata-action
-        id: metadata
-        uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175
-        with:
-          images: |
-            docker.io/radixdlt/private-babylon-ng-gateway-api
-          tags: |
-            type=raw,value=${{ needs.setup-tags.outputs.gateway-api-tag }}-amd64,enable=true
-          flavor: |
-            latest=false
-      - name: Build and push Docker Image
-        uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825
-        with:
-          file: ./apps/GatewayApi/Dockerfile
-          context: ./
-          push: true
-          platforms: "linux/arm64"
-          cache-from: |
-            type=local,src=/tmp/outputs/cache/docker
-          cache-to: |
-            type=local,dest=/tmp/outputs/cache/docker,mode=max
-          tags: ${{ steps.metadata.outputs.tags }}
-          provenance: false
-          sbom: true
-
-  docker-data-aggregator-private-arm-no-reusable:
-    name: ARM Aggregator2
-    needs:
-      - setup-tags
-    runs-on: babylon-gateway-arm
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
-        with:
-          fetch-depth: 0
-      - name: Download artifact
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
-        with:
-          name: build_props
-          path: ./
-      - name: Display structure of downloaded files
-        run: ls -R ./
-      - name: "Configure AWS credentials (Private)"
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355
-        with:
-          role-to-assume: arn:aws:iam::308190735829:role/gh-common-secrets-read-access
-          aws-region: eu-west-2
-      - name: Read secrets from AWS Secrets Manager into environment variables (Private)
-        uses: aws-actions/aws-secretsmanager-get-secrets@022e8919774ecb75e8e375656d7b1898936ab878
-        with:
-          secret-ids: |
-            DOCKERHUB_PRIVATE, github-actions/common/dockerhub-credentials
-          parse-json-secrets: true
-      - name: Login to Docker Hub (Private)
-        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
-        with:
-          username: ${{env.DOCKERHUB_PRIVATE_USERNAME}}
-          password: ${{env.DOCKERHUB_PRIVATE_TOKEN}}
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Setup tags with metadata-action
-        id: metadata
-        uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175
-        with:
-          images: |
-            docker.io/radixdlt/private-babylon-ng-data-aggregator
-          tags: |
-            type=raw,value=${{ needs.setup-tags.outputs.gateway-api-tag }}-amd64,enable=true
-          flavor: |
-            latest=false
-      - name: Build and push Docker Image
-        uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825
-        with:
-          file: ./apps/DataAggregator/Dockerfile
-          context: ./
-          push: true
-          platforms: "linux/arm64"
-          cache-from: |
-            type=local,src=/tmp/outputs/cache/docker
-          cache-to: |
-            type=local,dest=/tmp/outputs/cache/docker,mode=max
-          tags: ${{ steps.metadata.outputs.tags }}
-          provenance: false
-          sbom: true
+      scan_image: true
+      snyk_target_ref: ${{ github.ref_name }}
 
   docker-data-aggregator-private-arm:
     name: ARM Aggregator
@@ -322,6 +195,8 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
+      scan_image: true
+      snyk_target_ref: ${{ github.ref_name }}
       
   docker-gateway-api-private-arm:
     name: ARM Gateway
