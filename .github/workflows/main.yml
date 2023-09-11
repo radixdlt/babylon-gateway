@@ -116,7 +116,7 @@ jobs:
     name: ARM Migration
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@merge-image-workflow
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: babylon-gateway-arm
       image_registry: "docker.io"
@@ -130,8 +130,6 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
-      scan_image: true
-      snyk_target_ref: ${{ github.ref_name }}
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -160,7 +158,7 @@ jobs:
     name: ARM Aggregator
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@merge-image-workflow
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: babylon-gateway-arm
       image_registry: "docker.io"
@@ -174,8 +172,6 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
-      scan_image: true
-      snyk_target_ref: ${{ github.ref_name }}
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -199,14 +195,12 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
-      scan_image: true
-      snyk_target_ref: ${{ github.ref_name }}
-
+      
   docker-gateway-api-private-arm:
     name: ARM Gateway
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@merge-image-workflow
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: babylon-gateway-arm
       image_registry: "docker.io"
