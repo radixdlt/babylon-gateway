@@ -296,7 +296,7 @@ jobs:
       tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}-arm64
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
-      platforms: "linux/amd64"
+      platforms: "linux/arm64"
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
@@ -336,7 +336,7 @@ jobs:
       tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}-arm64
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
-      platforms: "linux/amd64"
+      platforms: "linux/arm64"
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
