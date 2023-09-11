@@ -107,7 +107,8 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var rawCountByStatus = await dbContext.PendingTransactions
+        var rawCountByStatus = await dbContext
+            .PendingTransactions
             .GroupBy(t => t.Status)
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToListAsync(token);
@@ -131,7 +132,8 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
             pruneIfCommittedBefore
         );
 
-        var transactionsToPrune = await dbContext.PendingTransactions
+        var transactionsToPrune = await dbContext
+            .PendingTransactions
             .Where(mt =>
                 (
                     /* For committed transactions, remove from the mempool if we're synced up (as a committed transaction will be on ledger) */

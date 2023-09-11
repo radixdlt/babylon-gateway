@@ -75,12 +75,17 @@ public interface ITransactionQuerier
 {
     Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
 
-    Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
+    Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
+        string intentHash,
+        GatewayModel.TransactionDetailsOptIns optIns,
+        GatewayModel.LedgerState ledgerState,
+        bool withDetails,
+        CancellationToken token = default);
 
-    Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default);
+    Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(string intentHash, CancellationToken token = default);
 }
 
-public sealed record StatusLookupResult(string PayloadHashHex, GatewayModel.TransactionStatus Status, string? ErrorMessage);
+public sealed record StatusLookupResult(string PayloadHash, GatewayModel.TransactionStatus Status, string? ErrorMessage);
 
 public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions)
 {
@@ -93,7 +98,7 @@ public sealed record TransactionStreamPageRequest(
     int PageSize,
     bool AscendingOrder,
     TransactionStreamPageRequestSearchCriteria SearchCriteria,
-    GatewayModel.TransactionCommittedDetailsOptIns OptIns);
+    GatewayModel.TransactionDetailsOptIns OptIns);
 
 public class TransactionStreamPageRequestSearchCriteria
 {

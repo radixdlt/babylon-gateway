@@ -81,8 +81,8 @@ public class ScryptoSborUtilsTests
         var result = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(Convert.FromHexString(Input), 1);
 
         result.ShouldNotBeNull();
-        result.Should().BeOfType<GatewayModel.MetadataScalarValue>();
-        (result as GatewayModel.MetadataScalarValue)!.Value.Should().BeEquivalentTo("My metadata string");
+        result.Should().BeOfType<GatewayModel.MetadataStringValue>();
+        (result as GatewayModel.MetadataStringValue)!.Value.Should().BeEquivalentTo("My metadata string");
     }
 
     [Fact]
@@ -93,8 +93,8 @@ public class ScryptoSborUtilsTests
         var expected = new List<string> { "My metadata array string 1", "My metadata array string 2" };
 
         result.ShouldNotBeNull();
-        result.Should().BeOfType<GatewayModel.MetadataScalarArrayValue>();
-        (result as GatewayModel.MetadataScalarArrayValue)!.Values.Should().BeEquivalentTo(expected);
+        result.Should().BeOfType<GatewayModel.MetadataStringArrayValue>();
+        (result as GatewayModel.MetadataStringArrayValue)!.Values.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
@@ -112,8 +112,8 @@ public class ScryptoSborUtilsTests
     [InlineData("5c2285012004020400000005000000")]
     [InlineData("5c220601050500000000000000")]
     [InlineData("5c22860120050205000000000000000600000000000000")]
-    [InlineData("5c220701a0000064a7b3b6e00d000000000000000000000000000000000000000000000000")]
-    [InlineData("5c22870120a002000064a7b3b6e00d000000000000000000000000000000000000000000000000000052acdfb2241d000000000000000000000000000000000000000000000000")]
+    [InlineData("5c220701a0000064a7b3b6e00d00000000000000000000000000000000")]
+    [InlineData("5c22870120a002000064a7b3b6e00d000000000000000000000000000000000000000000000000000052acdfb2241d0000000000000000")]
     [InlineData("5c220801805da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6")]
     [InlineData("5c2288012080015da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6")]
     [InlineData("5c2209012201012007200000000000000000000000000000000000000000000000000000000000000000")]

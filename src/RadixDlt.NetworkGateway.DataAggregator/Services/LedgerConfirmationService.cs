@@ -270,7 +270,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     {
         // We persist these to avoid excessive config load allocations;
         // but update them at the start of each loop in case the config has changed
-        TransactionNodes = _networkOptionsMonitor.CurrentValue.CoreApiNodes
+        TransactionNodes = _networkOptionsMonitor
+            .CurrentValue
+            .CoreApiNodes
             .Where(n => n.Enabled && !n.DisabledForTransactionIndexing)
             .ToList();
 
@@ -411,7 +413,8 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         var currentTimestamp = _clock.UtcNow;
         var committedTransactionSummary = commitReport.FinalTransaction;
 
-        _observers.ForEach(x => x.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.LatestTransactionSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount));
+        _observers.ForEach(x =>
+            x.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.LatestTransactionSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount));
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten}]",
@@ -506,7 +509,8 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         var orderedTransactionClaims = groupedTransactions.OrderByDescending(t => t.Trust).ToList();
         var topTransaction = orderedTransactionClaims.First();
 
-        var inconsistentNodeNames = orderedTransactionClaims.Skip(1)
+        var inconsistentNodeNames = orderedTransactionClaims
+            .Skip(1)
             .SelectMany(t => t.NodeNames)
             .ToList();
 

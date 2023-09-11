@@ -157,8 +157,9 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
             new CoreModel.MempoolListRequest(network: _networkConfigurationProvider.GetNetworkName()),
             cancellationToken);
 
-        var hashesInMempool = mempoolListResponse.Contents
-            .Select(ti => new PendingTransactionHashPair(ti.GetIntentHashBytes(), ti.GetPayloadHashBytes()))
+        var hashesInMempool = mempoolListResponse
+            .Contents
+            .Select(ti => new PendingTransactionHashPair(ti.IntentHashBech32m, ti.PayloadHashBech32m))
             .ToList();
 
         if (hashesInMempool.Count == 0)
@@ -238,14 +239,17 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
         var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.MempoolTransactionResponse, CoreModel.BasicErrorResponse>(() => coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
             new CoreModel.MempoolTransactionRequest(
                 network: _networkConfigurationProvider.GetNetworkName(),
-                payloadHash: hashes.PayloadHash.ToHex()
+                payloadHashes: new List<string>
+                {
+                    hashes.PayloadHash,
+                }
             ),
             token
         ));
 
         if (result.Succeeded)
         {
-            return new PendingTransactionData(hashes, _clock.UtcNow, result.SuccessResponse.GetPayloadBytes());
+            return new PendingTransactionData(hashes, _clock.UtcNow, result.SuccessResponse.Payloads.First().GetPayloadBytes());
         }
 
         if (result.FailureResponse.OriginalApiException.ErrorCode == (int)HttpStatusCode.NotFound)

@@ -81,7 +81,7 @@ public interface ISubmissionTrackingService
 
     Task MarkInitialFailure(
         bool permanent,
-        byte[] payloadHash,
+        string payloadHash,
         string failureReason,
         CancellationToken token = default
     );

@@ -119,6 +119,7 @@ public static class Bech32Codec
 
     // The Bech32 character set for decoding
     // ReSharper disable once StaticMemberInGenericType
+    // @formatter:off
     private static readonly short[] _charsetRev =
     {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -130,6 +131,7 @@ public static class Bech32Codec
         -1, 29, -1, 24, 13, 25,  9,  8, 23, -1, 18, 22, 31, 27, 19, -1,
         1,   0,  3, 16, 11, 28, 12, 14,  6,  4,  2, -1, -1, -1, -1, -1,
     };
+    // @formatter:on
 
     /// <summary>
     /// Each Bech32 data character only stores 5 bits, so we need to unpack back to 8bits.

@@ -66,5 +66,5 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 public partial class StateEntityNonFungiblesPageRequestOptIns
 {
-    public static StateEntityNonFungiblesPageRequestOptIns Default => new ();
+    public static StateEntityNonFungiblesPageRequestOptIns Default => new();
 }

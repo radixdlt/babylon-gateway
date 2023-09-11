@@ -97,7 +97,8 @@ public sealed class Base64Validator<T> : PropertyValidator<T, string?>
 
         if (_expectedLength.HasValue && bytesWritten != _expectedLength.Value)
         {
-            context.MessageFormatter
+            context
+                .MessageFormatter
                 .AppendArgument("ExpectedBytes", _expectedLength)
                 .AppendArgument("ActualBytes", bytesWritten);
 

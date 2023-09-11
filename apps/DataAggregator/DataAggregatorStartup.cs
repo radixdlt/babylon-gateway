@@ -107,11 +107,11 @@ public class DataAggregatorStartup
     public void Configure(IApplicationBuilder application, ILogger<DataAggregatorStartup> logger)
     {
         application
+            .UseCors()
+            .UseRouting()
             .UseAuthentication()
             .UseAuthorization()
-            .UseCors()
             .UseHttpMetrics()
-            .UseRouting()
             .UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/health");

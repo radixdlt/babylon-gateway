@@ -72,8 +72,8 @@ internal class TransactionStatusRequestValidator : AbstractValidator<GatewayMode
 {
     public TransactionStatusRequestValidator()
     {
-        RuleFor(x => x.IntentHashHex)
+        RuleFor(x => x.IntentHash)
             .NotNull()
-            .Hex(NetworkGatewayConstants.Transaction.IdentifierByteLength);
+            .RadixAddress();
     }
 }

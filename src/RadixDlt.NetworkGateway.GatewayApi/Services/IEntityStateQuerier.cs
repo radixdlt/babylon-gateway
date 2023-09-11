@@ -76,23 +76,66 @@ public interface IEntityStateQuerier
 
     public sealed record ResourceVaultsPageRequest(EntityAddress Address, EntityAddress ResourceAddress, int Offset, int Limit);
 
-    Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(List<EntityAddress> addresses, bool aggregatePerVault, GatewayModel.StateEntityDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(
+        List<EntityAddress> addresses,
+        bool aggregatePerVault,
+        GatewayModel.StateEntityDetailsOptIns optIns,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 
     Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<GatewayModel.StateEntityFungiblesPageResponse> EntityFungibleResourcesPage(PageRequest pageRequest, bool aggregatePerVault, GatewayModel.StateEntityFungiblesPageRequestOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateEntityFungiblesPageResponse> EntityFungibleResourcesPage(
+        PageRequest pageRequest,
+        bool aggregatePerVault,
+        GatewayModel.StateEntityFungiblesPageRequestOptIns optIns,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 
-    Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaults(ResourceVaultsPageRequest request, GatewayModel.LedgerState ledgerState,  CancellationToken token = default);
+    Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaults(
+        ResourceVaultsPageRequest request,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 
-    Task<GatewayModel.StateEntityNonFungiblesPageResponse> EntityNonFungibleResourcesPage(PageRequest pageRequest, bool aggregatePerVault, GatewayModel.StateEntityNonFungiblesPageRequestOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateEntityNonFungiblesPageResponse> EntityNonFungibleResourcesPage(
+        PageRequest pageRequest,
+        bool aggregatePerVault,
+        GatewayModel.StateEntityNonFungiblesPageRequestOptIns optIns,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 
-    Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(ResourceVaultsPageRequest request, GatewayModel.StateEntityNonFungibleResourceVaultsPageOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(
+        ResourceVaultsPageRequest request,
+        GatewayModel.StateEntityNonFungibleResourceVaultsPageOptIns optIns,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 
-    Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(PageRequest request, EntityAddress resourceAddress, EntityAddress vaultAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(
+        PageRequest request,
+        EntityAddress resourceAddress,
+        EntityAddress vaultAddress,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 
     Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(EntityAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(
+        EntityAddress resourceAddress,
+        IList<string> nonFungibleIds,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
+
+    Task<GatewayModel.StateNonFungibleLocationResponse> NonFungibleIdLocation(
+        EntityAddress resourceAddress,
+        IList<string> nonFungibleIds,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 
     Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+
+    Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
+        EntityAddress keyValueStoreAddress,
+        IList<ValueBytes> keys,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 }

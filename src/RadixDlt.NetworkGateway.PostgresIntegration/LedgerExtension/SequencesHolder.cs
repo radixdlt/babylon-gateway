@@ -70,7 +70,7 @@ internal class SequencesHolder
 
     public long AccountResourceDepositRuleHistorySequence { get; set; }
 
-    public long EntityStateHistorySequence { get; set; }
+    public long StateHistorySequence { get; set; }
 
     public long EntitySequence { get; set; }
 
@@ -86,11 +86,11 @@ internal class SequencesHolder
 
     public long EntityVaultHistorySequence { get; set; }
 
-    public long EntityAccessRulesAggregateHistorySequence { get; set; }
+    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
 
-    public long EntityAccessRulesEntryHistorySequence { get; set; }
+    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
 
-    public long EntityAccessRulesOwnerRoleHistorySequence { get; set; }
+    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
 
     public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
 
@@ -109,4 +109,16 @@ internal class SequencesHolder
     public long LedgerTransactionMarkerSequence { get; set; }
 
     public long PackageBlueprintHistorySequence { get; set; }
+
+    public long PackageCodeHistorySequence { get; set; }
+
+    public long SchemaHistorySequence { get; set; }
+
+    public long KeyValueStoreEntryHistorySequence { get; set; }
+
+    public long ValidatorEmissionStatisticsSequence { get; set; }
+
+    public long NonFungibleSchemaHistorySequence { get; set; }
+
+    public long KeyValueSchemaHistorySequence { get; set; }
 }

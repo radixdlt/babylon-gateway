@@ -73,6 +73,10 @@ namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 
 public sealed record DecodedRadixAddress(string Hrp, byte[] Data, Bech32Codec.Variant Variant)
 {
+    public byte DiscriminatorByte => Data[0];
+
+    public byte[] AddressBytes => Data[1..];
+
     public override string ToString()
     {
         return RadixAddressCodec.Encode(Hrp, Data);

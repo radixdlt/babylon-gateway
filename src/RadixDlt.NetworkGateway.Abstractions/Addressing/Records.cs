@@ -69,7 +69,6 @@ public sealed record HrpDefinition(
     string GlobalGenericComponent,
     string InternalGenericComponent,
     string GlobalAccount,
-    string InternalAccount,
     string GlobalVirtualEd25519Account,
     string GlobalVirtualSecp256k1Account,
     string GlobalValidator,
@@ -110,7 +109,8 @@ public sealed record WellKnownAddresses(
     string FaucetPackage,
     string ConsensusManager,
     string GenesisHelper,
-    string Faucet
+    string Faucet,
+    string PoolPackage
 );
 
 public enum AddressEntityType
@@ -121,7 +121,6 @@ public enum AddressEntityType
     GlobalGenericComponent,
     InternalGenericComponent,
     GlobalAccount,
-    InternalAccount,
     GlobalVirtualSecp256k1Account,
     GlobalVirtualEd25519Account,
     GlobalIdentity,

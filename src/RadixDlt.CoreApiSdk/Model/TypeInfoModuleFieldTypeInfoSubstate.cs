@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
@@ -77,5 +79,77 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
         }
 
         return Enumerable.Empty<string>();
+    }
+
+    public bool TryGetObjectInstanceGenericSubstitutions([NotNullWhen(true)] out List<GenericSubstitution> genericSubstitutions)
+    {
+        genericSubstitutions = null;
+
+        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions != null)
+        {
+            genericSubstitutions = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions;
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool TryGetNonFungibleDataLocalSchemaDetails([NotNullWhen(true)] out LocalGenericSubstition schemaDetails)
+    {
+        schemaDetails = null;
+
+        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.BlueprintInfo.BlueprintName == NativeBlueprintNames.NonFungibleResourceManager)
+        {
+            if (objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions.Count != 1)
+            {
+                throw new NotSupportedException("Expected non fungible data with one data type entry.");
+            }
+
+            var genericSubstitution = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions.First();
+
+            if (genericSubstitution.Type == GenericSubstitutionType.Local)
+            {
+                schemaDetails = genericSubstitution as LocalGenericSubstition;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryGetKeyValueStoreKeyLocalSchemaDetails([NotNullWhen(true)] out LocalGenericSubstition keySchemaDetails)
+    {
+        keySchemaDetails = null;
+
+        if (Value.Details is KeyValueStoreTypeInfoDetails keyValueStoreInfoDetails)
+        {
+            var keyGenericSubstitution = keyValueStoreInfoDetails.KeyValueStoreInfo.KeyGenericSubstitution;
+
+            if (keyGenericSubstitution.Type == GenericSubstitutionType.Local)
+            {
+                keySchemaDetails = keyGenericSubstitution as LocalGenericSubstition;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryGetKeyValueStoreValueLocalSchemaDetails([NotNullWhen(true)] out LocalGenericSubstition valueSchemaDetails)
+    {
+        valueSchemaDetails = null;
+
+        if (Value.Details is KeyValueStoreTypeInfoDetails keyValueStoreInfoDetails)
+        {
+            var valueGenericSubstitution = keyValueStoreInfoDetails.KeyValueStoreInfo.ValueGenericSubstitution;
+
+            if (valueGenericSubstitution.Type == GenericSubstitutionType.Local)
+            {
+                valueSchemaDetails = valueGenericSubstitution as LocalGenericSubstition;
+                return true;
+            }
+        }
+
+        return false;
     }
 }

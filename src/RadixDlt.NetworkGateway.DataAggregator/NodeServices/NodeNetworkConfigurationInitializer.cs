@@ -106,7 +106,7 @@ public sealed class NodeNetworkConfigurationInitializer : NodeInitializer
         if (_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName != network.Configuration.Network)
         {
             throw new NodeInitializationException(
-            $"The node's network name is {network.Configuration.Network}, not {_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName}"
+                $"The node's network name is {network.Configuration.Network}, not {_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName}"
             );
         }
 

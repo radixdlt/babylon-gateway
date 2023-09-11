@@ -63,17 +63,19 @@
  */
 
 using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateEntityDetailsOptInsValidator : AbstractValidator<GatewayModel.StateEntityDetailsOptIns>
 {
-    public StateEntityDetailsOptInsValidator()
+    public StateEntityDetailsOptInsValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
     {
-        // TODO avoid .Must / hardcoded values
         RuleFor(x => x.ExplicitMetadata)
-            .Must(x => x == null || x.Count <= 10)
+            .Must(x => x == null || x.Count <= endpointOptionsSnapshot.Value.ExplicitMetadataMaxItems)
+            .WithMessage($"Maximum {endpointOptionsSnapshot.Value.ExplicitMetadataMaxItems} explicit metadata properties are allowed.")
             .ForEach(emRule =>
             {
                 emRule

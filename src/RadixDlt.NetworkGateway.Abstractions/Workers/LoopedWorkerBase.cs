@@ -260,7 +260,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
     /// </summary>
     protected virtual Task OnStoppedSuccessfully()
     {
-        _logger.LogInformation("Stopped successfully at: {Time}",  _clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
+        _logger.LogInformation("Stopped successfully at: {Time}", _clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
         return Task.CompletedTask;
     }
 
@@ -337,7 +337,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
                 _logger.LogInformation("Detected as re-enabled at {Time}, service will start doing work in a loop again", _clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
             }
 
-            _logger.Log(_stillRunningLogLimiter.GetLogLevel(),  "Still running at {Time}", _clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
+            _logger.Log(_stillRunningLogLimiter.GetLogLevel(), "Still running at {Time}", _clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
             await DoWork(cancellationToken);
         }
         else

@@ -69,6 +69,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -82,16 +83,20 @@ internal class TransactionQuerier : ITransactionQuerier
 {
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
-    public TransactionQuerier(ReadOnlyDbContext dbContext, ReadWriteDbContext rwDbContext)
+    public TransactionQuerier(ReadOnlyDbContext dbContext, ReadWriteDbContext rwDbContext, INetworkConfigurationProvider networkConfigurationProvider)
     {
         _dbContext = dbContext;
         _rwDbContext = rwDbContext;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
     {
-        var referencedAddresses = request.SearchCriteria.ManifestAccountsDepositedInto
+        var referencedAddresses = request
+            .SearchCriteria
+            .ManifestAccountsDepositedInto
             .Concat(request.SearchCriteria.ManifestAccountsWithdrawnFrom)
             .Concat(request.SearchCriteria.ManifestResources)
             .Concat(request.SearchCriteria.AffectedGlobalEntities)
@@ -124,7 +129,8 @@ internal class TransactionQuerier : ITransactionQuerier
             ? request.Cursor?.StateVersionBoundary ?? request.FromStateVersion
             : request.FromStateVersion;
 
-        var searchQuery = _dbContext.LedgerTransactionMarkers
+        var searchQuery = _dbContext
+            .LedgerTransactionMarkers
             .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion))
             .Select(lt => lt.StateVersion);
 
@@ -145,6 +151,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<ManifestAddressLedgerTransactionMarker>()
                     .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountDepositedInto && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
                     .Select(maltm => maltm.StateVersion);
             }
         }
@@ -164,6 +171,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<ManifestAddressLedgerTransactionMarker>()
                     .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountWithdrawnFrom && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
                     .Select(maltm => maltm.StateVersion);
             }
         }
@@ -183,6 +191,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<ManifestAddressLedgerTransactionMarker>()
                     .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.ResourceInUse && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
                     .Select(maltm => maltm.StateVersion);
             }
         }
@@ -200,6 +209,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<AffectedGlobalEntityTransactionMarker>()
                     .Where(agetm => agetm.EntityId == entityId)
+                    .Where(agetm => agetm.StateVersion <= upperStateVersion && agetm.StateVersion >= (lowerStateVersion ?? agetm.StateVersion))
                     .Select(agetm => agetm.StateVersion);
             }
         }
@@ -244,6 +254,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<EventLedgerTransactionMarker>()
                     .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
+                    .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
                     .Select(eltm => eltm.StateVersion);
             }
         }
@@ -269,6 +280,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                 .OfType<OriginLedgerTransactionMarker>()
                 .Where(oltm => oltm.OriginType == originType)
+                .Where(oltm => oltm.StateVersion <= upperStateVersion && oltm.StateVersion >= (lowerStateVersion ?? oltm.StateVersion))
                 .Select(oltm => oltm.StateVersion);
         }
 
@@ -295,9 +307,15 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
+    public async Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
+        string intentHash,
+        GatewayModel.TransactionDetailsOptIns optIns,
+        GatewayModel.LedgerState ledgerState,
+        bool withDetails,
+        CancellationToken token = default)
     {
-        var stateVersion = await _dbContext.LedgerTransactions
+        var stateVersion = await _dbContext
+            .LedgerTransactions
             .OfType<UserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion && ult.IntentHash == intentHash)
             .Select(ult => ult.StateVersion)
@@ -313,27 +331,73 @@ internal class TransactionQuerier : ITransactionQuerier
         return transactions.First();
     }
 
-    public async Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default)
+    public async Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(string intentHash, CancellationToken token = default)
     {
-        var pendingTransactions = await _rwDbContext.PendingTransactions
+        var pendingTransactions = await _rwDbContext
+            .PendingTransactions
             .Where(pt => pt.IntentHash == intentHash)
             .ToListAsync(token);
 
-        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.LastFailureReason)).ToArray();
+        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash, pt.Status.ToGatewayModel(), pt.LastFailureReason)).ToArray();
     }
 
-    private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(List<long> transactionStateVersions, GatewayModel.TransactionCommittedDetailsOptIns optIns, CancellationToken token)
+    private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(
+        List<long> transactionStateVersions,
+        GatewayModel.TransactionDetailsOptIns optIns,
+        CancellationToken token)
     {
-        var transactions = await _dbContext.LedgerTransactions
+        var transactions = await _dbContext
+            .LedgerTransactions
             .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
             .ToListAsync(token);
 
         var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
 
-        return transactions
-            .OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion))
-            .Select(lt => lt.ToGatewayModel(optIns, entityIdToAddressMap))
+        var schemaHashes = transactions
+            .Where(x => x.EngineReceipt.EventSchemaHashes.Any())
+            .SelectMany(x => x.EngineReceipt.EventSchemaHashes)
             .ToList();
+
+        Dictionary<ValueBytes, byte[]> schemas = new Dictionary<ValueBytes, byte[]>();
+
+        if (optIns.ReceiptEvents && schemaHashes.Any())
+        {
+            schemas = await _dbContext
+                .SchemaHistory
+                .Where(x => schemaHashes.Contains(x.SchemaHash))
+                .ToDictionaryAsync(x => (ValueBytes)x.SchemaHash, x => x.Schema, token);
+        }
+
+        List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
+        var networkId = _networkConfigurationProvider.GetNetworkId();
+
+        foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)))
+        {
+            if (!optIns.ReceiptEvents || schemaHashes?.Any() == false)
+            {
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null));
+            }
+            else
+            {
+                List<string> events = new List<string>();
+
+                foreach (var @event in transaction.EngineReceipt.GetEvents())
+                {
+                    var schemaFound = schemas.TryGetValue(@event.SchemaHash, out var schema);
+
+                    if (!schemaFound)
+                    {
+                        throw new UnreachableException($"Unable to find schema for given hash {@event.SchemaHash.ToHex()}");
+                    }
+
+                    events.Add(ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema!, @event.KeyTypeKind, @event.TypeIndex, networkId));
+                }
+
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events));
+            }
+        }
+
+        return mappedTransactions;
     }
 
     private async Task<Dictionary<string, long>> GetEntityIds(List<string> addresses, CancellationToken token = default)
@@ -343,7 +407,8 @@ internal class TransactionQuerier : ITransactionQuerier
             return new Dictionary<string, long>();
         }
 
-        return await _dbContext.Entities
+        return await _dbContext
+            .Entities
             .Where(e => addresses.Contains(e.Address))
             .Select(e => new { e.Id, e.Address })
             .ToDictionaryAsync(e => e.Address.ToString(), e => e.Id, token);
@@ -356,7 +421,8 @@ internal class TransactionQuerier : ITransactionQuerier
             return new Dictionary<long, string>();
         }
 
-        return await _dbContext.Entities
+        return await _dbContext
+            .Entities
             .Where(e => entityIds.Contains(e.Id))
             .Select(e => new { e.Id, e.Address })
             .ToDictionaryAsync(e => e.Id, e => e.Address.ToString(), token);

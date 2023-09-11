@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -101,13 +102,12 @@ internal static class CoreModelExtensions
         };
     }
 
-    public static AccountResourceDepositRule ToModel(this CoreModel.DepositRule input)
+    public static AccountResourcePreferenceRule ToModel(this CoreModel.ResourcePreference input)
     {
         return input switch
         {
-            CoreModel.DepositRule.Neither => AccountResourceDepositRule.Neither,
-            CoreModel.DepositRule.Allowed => AccountResourceDepositRule.Allowed,
-            CoreModel.DepositRule.Disallowed => AccountResourceDepositRule.Disallowed,
+            CoreModel.ResourcePreference.Allowed => AccountResourcePreferenceRule.Allowed,
+            CoreModel.ResourcePreference.Disallowed => AccountResourcePreferenceRule.Disallowed,
             _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
         };
     }
@@ -120,5 +120,42 @@ internal static class CoreModelExtensions
             CoreModel.VmType.ScryptoV1 => PackageVmType.ScryptoV1,
             _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
         };
+    }
+
+    public static ObjectModuleId ToModel(this CoreModel.ObjectModuleId objectModuleId)
+    {
+        return objectModuleId switch
+        {
+            CoreModel.ObjectModuleId.Main => ObjectModuleId.Main,
+            CoreModel.ObjectModuleId.Metadata => ObjectModuleId.Metadata,
+            CoreModel.ObjectModuleId.Royalty => ObjectModuleId.Royalty,
+            CoreModel.ObjectModuleId.RoleAssignment => ObjectModuleId.RoleAssignment,
+            _ => throw new ArgumentOutOfRangeException(nameof(objectModuleId), objectModuleId, null),
+        };
+    }
+
+    public static SborTypeKind ToModel(this CoreModel.LocalTypeId.KindEnum indexKind)
+    {
+        return indexKind switch
+        {
+            CoreModel.LocalTypeId.KindEnum.SchemaLocal => SborTypeKind.SchemaLocal,
+            CoreModel.LocalTypeId.KindEnum.WellKnown => SborTypeKind.WellKnown,
+            _ => throw new ArgumentOutOfRangeException(nameof(indexKind), indexKind, null),
+        };
+    }
+
+    public static TokenAmount TotalFee(this CoreModel.FeeSummary feeSummary)
+    {
+        var royaltyCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalRoyaltyCost);
+        var storageCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalStorageCost);
+        var executionCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalExecutionCost);
+        var finalizationCost = TokenAmount.FromDecimalString(feeSummary.XrdTotalFinalizationCost);
+
+        return royaltyCost + storageCost + executionCost + finalizationCost;
+    }
+
+    public static TokenAmount TotalTip(this CoreModel.FeeSummary feeSummary)
+    {
+        return TokenAmount.FromDecimalString(feeSummary.XrdTotalTippingCost);
     }
 }

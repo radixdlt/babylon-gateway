@@ -101,7 +101,7 @@ public static class ServiceCollectionExtensions
 
                 dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
                 dataSourceBuilder.MapEnum<AccountDefaultDepositRule>();
-                dataSourceBuilder.MapEnum<AccountResourceDepositRule>();
+                dataSourceBuilder.MapEnum<AccountResourcePreferenceRule>();
                 dataSourceBuilder.MapEnum<EntityType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
                 dataSourceBuilder.MapEnum<LedgerTransactionType>();
@@ -114,6 +114,9 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<PendingTransactionStatus>();
                 dataSourceBuilder.MapEnum<PublicKeyType>();
                 dataSourceBuilder.MapEnum<ResourceType>();
+                dataSourceBuilder.MapEnum<ObjectModuleId>();
+                dataSourceBuilder.MapEnum<SborTypeKind>();
+                dataSourceBuilder.MapEnum<StateType>();
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },
