@@ -160,6 +160,10 @@ jobs:
     needs:
       - setup-tags
     runs-on: babylon-gateway-arm
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
@@ -218,6 +222,10 @@ jobs:
     needs:
       - setup-tags
     runs-on: babylon-gateway-arm
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
