@@ -130,9 +130,7 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
-    secrets:
-      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      disable_qemu: true
 
   docker-data-aggregator-private:
     name: AMD Aggregator
@@ -303,9 +301,7 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
-    secrets:
-      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      disable_qemu: true
 
   docker-gateway-api-private:
     name: AMD Gateway
@@ -345,6 +341,7 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
+      disable_qemu: true
 
   join-gateway-images:
     name: Gateway
