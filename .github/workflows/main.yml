@@ -224,7 +224,7 @@ jobs:
       - setup-tags
       - docker-gateway-api-private
       - docker-gateway-api-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@merge-image-workflow
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
     with: 
       image_name: private-babylon-ng-gateway-api
       image_tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
@@ -240,7 +240,7 @@ jobs:
       - setup-tags
       - docker-data-aggregator-private
       - docker-data-aggregator-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@merge-image-workflow
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
     with: 
       image_name: private-babylon-ng-data-aggregator
       image_tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
@@ -256,7 +256,7 @@ jobs:
       - setup-tags
       - docker-database-migrations-private
       - docker-database-migrations-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@merge-image-workflow
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
     with: 
       image_name: private-babylon-ng-database-migrations
       image_tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
