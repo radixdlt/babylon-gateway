@@ -284,7 +284,13 @@ internal abstract class CommonDbContext : DbContext
     {
         modelBuilder
             .Entity<Entity>()
-            .HasIndex(e => e.Address);
+            .HasIndex(e => e.Address)
+            .IsUnique();
+
+        modelBuilder
+            .Entity<Entity>()
+            .HasIndex(e => new { e.FromStateVersion })
+            .HasFilter("discriminator = 'global_validator'");
 
         modelBuilder
             .Entity<Entity>()

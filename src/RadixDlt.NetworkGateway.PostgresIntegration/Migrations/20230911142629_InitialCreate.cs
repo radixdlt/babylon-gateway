@@ -715,7 +715,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_entities_address",
                 table: "entities",
-                column: "address");
+                column: "address",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_from_state_version",
+                table: "entities",
+                column: "from_state_version",
+                filter: "discriminator = 'global_validator'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_entity_metadata_aggregate_history_entity_id_from_state_vers~",

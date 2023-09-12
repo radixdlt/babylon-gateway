@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230906132318_InitialCreate")]
+    [Migration("20230911142629_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -262,7 +262,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Address");
+                    b.HasIndex("Address")
+                        .IsUnique();
+
+                    b.HasIndex("FromStateVersion")
+                        .HasFilter("discriminator = 'global_validator'");
 
                     b.ToTable("entities");
 

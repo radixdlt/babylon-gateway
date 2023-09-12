@@ -259,7 +259,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Address");
+                    b.HasIndex("Address")
+                        .IsUnique();
+
+                    b.HasIndex("FromStateVersion")
+                        .HasFilter("discriminator = 'global_validator'");
 
                     b.ToTable("entities");
 
