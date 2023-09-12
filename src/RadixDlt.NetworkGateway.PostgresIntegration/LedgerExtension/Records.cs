@@ -71,13 +71,31 @@ using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
+internal interface IVaultSnapshot
+{
+    public ReferencedEntity ReferencedVault { get; }
 
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion);
+    public ReferencedEntity ReferencedResource { get; }
 
-internal record EntityFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, TokenAmount Delta, long StateVersion);
+    public long StateVersion { get; }
+}
 
-internal record EntityNonFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, long Delta, long StateVersion);
+internal interface IVaultChange
+{
+    public long EntityId { get; }
+
+    public long ResourceEntityId { get; }
+
+    public long StateVersion { get; }
+}
+
+internal record FungibleVaultSnapshot(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion) : IVaultSnapshot;
+
+internal record NonFungibleVaultSnapshot(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion) : IVaultSnapshot;
+
+internal record EntityFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, TokenAmount Delta, long StateVersion) : IVaultChange;
+
+internal record EntityNonFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, long Delta, long StateVersion) : IVaultChange;
 
 internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
 

@@ -235,25 +235,16 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(
-        List<FungibleVaultChange> fungibleVaultChanges,
-        List<NonFungibleVaultChange> nonFungibleVaultChanges,
-        CancellationToken token)
+    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<IVaultSnapshot> vaultSnapshots, CancellationToken token)
     {
-        if (!fungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (!vaultSnapshots.Any())
         {
             return new Dictionary<long, EntityResourceAggregateHistory>();
         }
 
         var entityIds = new HashSet<long>();
 
-        foreach (var change in fungibleVaultChanges)
-        {
-            entityIds.Add(change.ReferencedVault.DatabaseOwnerAncestorId);
-            entityIds.Add(change.ReferencedVault.DatabaseGlobalAncestorId);
-        }
-
-        foreach (var change in nonFungibleVaultChanges)
+        foreach (var change in vaultSnapshots)
         {
             entityIds.Add(change.ReferencedVault.DatabaseOwnerAncestorId);
             entityIds.Add(change.ReferencedVault.DatabaseGlobalAncestorId);
@@ -281,23 +272,18 @@ INNER JOIN LATERAL (
     }
 
     public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(
-        List<EntityFungibleResourceBalanceChangeEvent> fungibleEvents,
-        List<EntityNonFungibleResourceBalanceChangeEvent> nonFungibleEvents,
+        List<IVaultChange> vaultChanges,
         CancellationToken token)
     {
-        if (!fungibleEvents.Any() && !nonFungibleEvents.Any())
+        if (!vaultChanges.Any())
         {
             return new Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>();
         }
 
-        var data = fungibleEvents
-            .Select(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId))
-            .Concat(nonFungibleEvents.Select(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId)))
-            .ToHashSet();
         var entityIds = new List<long>();
         var resourceEntityIds = new List<long>();
 
-        foreach (var d in data)
+        foreach (var d in vaultChanges.Select(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId)).ToHashSet())
         {
             entityIds.Add(d.EntityId);
             resourceEntityIds.Add(d.ResourceEntityId);
@@ -323,24 +309,17 @@ INNER JOIN LATERAL (
     }
 
     public async Task<Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(
-        List<FungibleVaultChange> fungibleVaultChanges,
-        List<NonFungibleVaultChange> nonFungibleVaultChanges,
+        List<IVaultSnapshot> vaultSnapshots,
         CancellationToken token)
     {
-        if (!fungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (!vaultSnapshots.Any())
         {
             return new Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>();
         }
 
         var data = new HashSet<EntityResourceVaultLookup>();
 
-        foreach (var change in fungibleVaultChanges)
-        {
-            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
-        foreach (var change in nonFungibleVaultChanges)
+        foreach (var change in vaultSnapshots)
         {
             data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
             data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
@@ -374,14 +353,14 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => new EntityResourceVaultLookup(e.EntityId, e.ResourceEntityId), token);
     }
 
-    public async Task<Dictionary<long, EntityNonFungibleVaultHistory>> MostRecentEntityNonFungibleVaultHistory(List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<long, EntityNonFungibleVaultHistory>> MostRecentEntityNonFungibleVaultHistory(List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots, CancellationToken token)
     {
-        if (!nonFungibleVaultChanges.Any())
+        if (!nonFungibleVaultSnapshots.Any())
         {
             return new Dictionary<long, EntityNonFungibleVaultHistory>();
         }
 
-        var vaultIds = nonFungibleVaultChanges.Select(x => x.ReferencedVault.DatabaseId).Distinct().ToList();
+        var vaultIds = nonFungibleVaultSnapshots.Select(x => x.ReferencedVault.DatabaseId).ToHashSet().ToList();
 
         return await _dbContext
             .EntityVaultHistory
@@ -490,10 +469,10 @@ WHERE id IN(
 
     public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
         List<NonFungibleIdChange> nonFungibleIdStoreChanges,
-        List<NonFungibleVaultChange> nonFungibleVaultChanges,
+        List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
         CancellationToken token)
     {
-        if (!nonFungibleIdStoreChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (!nonFungibleIdStoreChanges.Any() && !nonFungibleVaultSnapshots.Any())
         {
             return new Dictionary<NonFungibleIdLookup, NonFungibleIdData>();
         }
@@ -507,7 +486,7 @@ WHERE id IN(
             nonFungibles.Add(new NonFungibleIdLookup(nonFungibleIdChange.ReferencedResource.DatabaseId, nonFungibleIdChange.NonFungibleId));
         }
 
-        foreach (var nonFungibleVaultChange in nonFungibleVaultChanges)
+        foreach (var nonFungibleVaultChange in nonFungibleVaultSnapshots)
         {
             nonFungibles.Add(new NonFungibleIdLookup(nonFungibleVaultChange.ReferencedResource.DatabaseId, nonFungibleVaultChange.NonFungibleId));
         }

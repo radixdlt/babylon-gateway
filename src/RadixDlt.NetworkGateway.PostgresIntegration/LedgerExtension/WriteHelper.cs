@@ -671,9 +671,9 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityVaultHistory(ICollection<EntityFungibleVaultHistory> fungibleEntities, ICollection<EntityNonFungibleVaultHistory> nonFungibleEntities, CancellationToken token)
+    public async Task<int> CopyEntityVaultHistory(ICollection<EntityVaultHistory> entities, CancellationToken token)
     {
-        if (!fungibleEntities.Any() && !nonFungibleEntities.Any())
+        if (!entities.Any())
         {
             return 0;
         }
@@ -683,7 +683,7 @@ internal class WriteHelper
                 "COPY entity_vault_history (id, from_state_version, owner_entity_id, global_entity_id, vault_entity_id, resource_entity_id, discriminator, balance, is_royalty_vault, non_fungible_ids) FROM STDIN (FORMAT BINARY)",
                 token);
 
-        foreach (var e in fungibleEntities)
+        foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -693,29 +693,27 @@ internal class WriteHelper
             await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-            await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(e.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
-            await writer.WriteNullAsync(token);
-        }
 
-        foreach (var e in nonFungibleEntities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.OwnerEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-            await writer.WriteNullAsync(token);
-            await writer.WriteNullAsync(token);
-            await writer.WriteAsync(e.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            switch (e)
+            {
+                case EntityFungibleVaultHistory fe:
+                    await writer.WriteAsync(fe.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(fe.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case EntityNonFungibleVaultHistory nfe:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(nfe.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(e), e, null);
+            }
         }
 
         await writer.CompleteAsync(token);
 
-        return fungibleEntities.Count + nonFungibleEntities.Count;
+        return entities.Count;
     }
 
     public async Task<int> CopyComponentMethodRoyalties(List<ComponentMethodRoyaltyEntryHistory> entities, CancellationToken token)
