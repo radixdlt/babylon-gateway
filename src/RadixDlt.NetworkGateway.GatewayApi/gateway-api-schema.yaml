@@ -2401,15 +2401,19 @@ components:
       example:
         key_value_store_address: "<key-value-store-address>"
         keys:
-          - key_hex: "edafaaccee"
-          - key_hex: "ffbbaa2311"
+          - key_hex: "5C21010901000000"
+          - key_json:
+              kind: Tuple
+              fields:
+                - kind: "U32"
+                  value: "1"
     StateKeyValueStoreDataRequestKeyItem:
       type: object
-      required:
-        - key_hex
       properties:
         key_hex:
           $ref: "#/components/schemas/HexString"
+        key_json:
+          type: object
     StateKeyValueStoreDataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
