@@ -282,7 +282,7 @@ jobs:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
         with:
-          role_name: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
+          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
           app_name: "babylon-gateway"
           step_name: "deploy-on-mardunet"
           secret_prefix: "CF_GITHUB_WORKER"
@@ -334,7 +334,7 @@ jobs:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
         with:
-          role_name: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
+          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
           app_name: "babylon-gateway"
           step_name: "ephemeral-deploy-and-benchmark"
           secret_prefix: "JENKINS"
@@ -381,7 +381,7 @@ jobs:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
         with:
-          role_name: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
+          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
           app_name: "babylon-gateway"
           step_name: "deploy-pr"
           secret_prefix: "CF_GITHUB_WORKER"
@@ -424,7 +424,7 @@ jobs:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
         with:
-          role_name: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
+          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
           app_name: "babylon-gateway"
           step_name: "ephemeral-deploy-and-test"
           secret_prefix: "JENKINS"
