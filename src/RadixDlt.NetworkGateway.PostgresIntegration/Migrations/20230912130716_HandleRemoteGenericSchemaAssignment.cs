@@ -62,46 +62,52 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+#nullable disable
 
-[Table("key_value_store_schema_history")]
-internal class KeyValueStoreSchemaHistory
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    /// <inheritdoc />
+    public partial class HandleRemoteGenericSchemaAssignment : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<long>(
+                name: "schema_defining_entity_id",
+                table: "non_fungible_schema_history",
+                type: "bigint",
+                nullable: true);
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+            migrationBuilder.AddColumn<long>(
+                name: "key_schema_defining_entity_id",
+                table: "key_value_store_schema_history",
+                type: "bigint",
+                nullable: true);
 
-    [Column("key_value_store_entity_id")]
-    public long KeyValueStoreEntityId { get; set; }
+            migrationBuilder.AddColumn<long>(
+                name: "value_schema_defining_entity_id",
+                table: "key_value_store_schema_history",
+                type: "bigint",
+                nullable: true);
+        }
 
-    [Column("key_schema_hash")]
-    public byte[] KeySchemaHash { get; set; }
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "schema_defining_entity_id",
+                table: "non_fungible_schema_history");
 
-    [Column("key_schema_defining_entity_id")]
-    public long? KeySchemaDefiningEntityId { get; set; }
+            migrationBuilder.DropColumn(
+                name: "key_schema_defining_entity_id",
+                table: "key_value_store_schema_history");
 
-    [Column("key_sbor_type_kind")]
-    public SborTypeKind KeySborTypeKind { get; set; }
-
-    [Column("key_type_index")]
-    public long KeyTypeIndex { get; set; }
-
-    [Column("value_schema_hash")]
-    public byte[] ValueSchemaHash { get; set; }
-
-    [Column("value_schema_defining_entity_id")]
-    public long? ValueSchemaDefiningEntityId { get; set; }
-
-    [Column("value_sbor_type_kind")]
-    public SborTypeKind ValueSborTypeKind { get; set; }
-
-    [Column("value_type_index")]
-    public long ValueTypeIndex { get; set; }
+            migrationBuilder.DropColumn(
+                name: "value_schema_defining_entity_id",
+                table: "key_value_store_schema_history");
+        }
+    }
 }

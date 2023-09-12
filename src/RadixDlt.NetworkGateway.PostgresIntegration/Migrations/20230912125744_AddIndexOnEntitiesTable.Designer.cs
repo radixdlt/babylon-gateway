@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -68,6 +68,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
@@ -80,9 +81,11 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    partial class MigrationsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230912125744_AddIndexOnEntitiesTable")]
+    partial class AddIndexOnEntitiesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -662,10 +665,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("sbor_type_kind")
                         .HasColumnName("key_sbor_type_kind");
 
-                    b.Property<long?>("KeySchemaDefiningEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("key_schema_defining_entity_id");
-
                     b.Property<byte[]>("KeySchemaHash")
                         .IsRequired()
                         .HasColumnType("bytea")
@@ -682,10 +681,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<SborTypeKind>("ValueSborTypeKind")
                         .HasColumnType("sbor_type_kind")
                         .HasColumnName("value_sbor_type_kind");
-
-                    b.Property<long?>("ValueSchemaDefiningEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("value_schema_defining_entity_id");
 
                     b.Property<byte[]>("ValueSchemaHash")
                         .IsRequired()
@@ -962,10 +957,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<SborTypeKind>("SborTypeKind")
                         .HasColumnType("sbor_type_kind")
                         .HasColumnName("sbor_type_kind");
-
-                    b.Property<long?>("SchemaDefiningEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("schema_defining_entity_id");
 
                     b.Property<byte[]>("SchemaHash")
                         .IsRequired()

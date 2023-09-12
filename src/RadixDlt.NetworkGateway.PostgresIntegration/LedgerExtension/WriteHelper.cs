@@ -466,7 +466,10 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY state_history (id, from_state_version, entity_id, discriminator, json_state, sbor_state, type_index, schema_hash, sbor_type_kind, schema_defining_entity_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer =
+            await _connection.BeginBinaryImportAsync(
+                "COPY state_history (id, from_state_version, entity_id, discriminator, json_state, sbor_state, type_index, schema_hash, sbor_type_kind, schema_defining_entity_id) FROM STDIN (FORMAT BINARY)",
+                token);
 
         foreach (var e in stateHistory)
         {
@@ -775,7 +778,8 @@ internal class WriteHelper
         }
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync(
+                "COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entries)
         {
@@ -1016,7 +1020,8 @@ internal class WriteHelper
         }
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY non_fungible_schema_history (id, from_state_version, resource_entity_id, schema_hash, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync(
+                "COPY non_fungible_schema_history (id, from_state_version, resource_entity_id, schema_defining_entity_id, schema_hash, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -1024,6 +1029,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteNullableAsync(e.SchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.SborTypeKind, "sbor_type_kind", token);
             await writer.WriteAsync(e.TypeIndex, NpgsqlDbType.Bigint, token);
@@ -1043,7 +1049,7 @@ internal class WriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY key_value_store_schema_history (id, from_state_version, key_value_store_entity_id, key_schema_hash, key_sbor_type_kind, key_type_index, value_schema_hash, value_sbor_type_kind, value_type_index) FROM STDIN (FORMAT BINARY)",
+                "COPY key_value_store_schema_history (id, from_state_version, key_value_store_entity_id, key_schema_defining_entity_id, key_schema_hash, key_sbor_type_kind, key_type_index, value_schema_defining_entity_id, value_schema_hash, value_sbor_type_kind, value_type_index) FROM STDIN (FORMAT BINARY)",
                 token);
 
         foreach (var e in entities)
@@ -1052,9 +1058,11 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteNullableAsync(e.KeySchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeySchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.KeySborTypeKind, "sbor_type_kind", token);
             await writer.WriteAsync(e.KeyTypeIndex, NpgsqlDbType.Bigint, token);
+            await writer.WriteNullableAsync(e.ValueSchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ValueSchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.ValueSborTypeKind, "sbor_type_kind", token);
             await writer.WriteAsync(e.ValueTypeIndex, NpgsqlDbType.Bigint, token);

@@ -62,46 +62,51 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+#nullable disable
 
-[Table("key_value_store_schema_history")]
-internal class KeyValueStoreSchemaHistory
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    /// <inheritdoc />
+    public partial class AddIndexOnEntitiesTable : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_entities_address",
+                table: "entities");
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_address",
+                table: "entities",
+                column: "address",
+                unique: true);
 
-    [Column("key_value_store_entity_id")]
-    public long KeyValueStoreEntityId { get; set; }
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_from_state_version",
+                table: "entities",
+                column: "from_state_version",
+                filter: "discriminator = 'global_validator'");
+        }
 
-    [Column("key_schema_hash")]
-    public byte[] KeySchemaHash { get; set; }
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_entities_address",
+                table: "entities");
 
-    [Column("key_schema_defining_entity_id")]
-    public long? KeySchemaDefiningEntityId { get; set; }
+            migrationBuilder.DropIndex(
+                name: "IX_entities_from_state_version",
+                table: "entities");
 
-    [Column("key_sbor_type_kind")]
-    public SborTypeKind KeySborTypeKind { get; set; }
-
-    [Column("key_type_index")]
-    public long KeyTypeIndex { get; set; }
-
-    [Column("value_schema_hash")]
-    public byte[] ValueSchemaHash { get; set; }
-
-    [Column("value_schema_defining_entity_id")]
-    public long? ValueSchemaDefiningEntityId { get; set; }
-
-    [Column("value_sbor_type_kind")]
-    public SborTypeKind ValueSborTypeKind { get; set; }
-
-    [Column("value_type_index")]
-    public long ValueTypeIndex { get; set; }
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_address",
+                table: "entities",
+                column: "address");
+        }
+    }
 }

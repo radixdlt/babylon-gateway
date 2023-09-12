@@ -569,7 +569,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         FeeSource = committedTransaction.Receipt.FeeSource?.ToJson(),
                         EventSchemaHashes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray() ?? Array.Empty<byte[]>(),
                         EventTypeIndexes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray() ?? Array.Empty<long>(),
-                        EventSborTypeKinds = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray().ToArray() ?? Array.Empty<SborTypeKind>(),
+                        EventSborTypeKinds = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray().ToArray() ??
+                                             Array.Empty<SborTypeKind>(),
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
@@ -1090,33 +1091,48 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
                         {
-                            if (typeInfoSubstate.TryGetNonFungibleDataLocalSchemaDetails(out var nonFungibleDataSchemaDetails))
+                            if (typeInfoSubstate.TryGetNonFungibleDataSchemaDetails(out var nonFungibleDataSchemaDetails))
                             {
+                                var schemaDefiningEntityId = !string.IsNullOrEmpty(nonFungibleDataSchemaDetails.Value.SchemaDefiningEntityAddress)
+                                    ? referencedEntities.Get((EntityAddress)nonFungibleDataSchemaDetails.Value.SchemaDefiningEntityAddress).DatabaseId
+                                    : referencedEntity.DatabaseId;
+
                                 nonFungibleSchemaHistoryToAdd.Add(new NonFungibleSchemaHistory
                                 {
                                     Id = sequences.NonFungibleSchemaHistorySequence++,
                                     ResourceEntityId = referencedEntity.DatabaseId,
-                                    SchemaHash = nonFungibleDataSchemaDetails.ScopedTypeId.SchemaHash.ConvertFromHex(),
-                                    SborTypeKind = nonFungibleDataSchemaDetails.ScopedTypeId.LocalTypeId.Kind.ToModel(),
-                                    TypeIndex = nonFungibleDataSchemaDetails.ScopedTypeId.LocalTypeId.Id,
+                                    SchemaHash = nonFungibleDataSchemaDetails.Value.SchemaHash.ConvertFromHex(),
+                                    SborTypeKind = nonFungibleDataSchemaDetails.Value.SborTypeKind.ToModel(),
+                                    TypeIndex = nonFungibleDataSchemaDetails.Value.TypeIndex,
+                                    SchemaDefiningEntityId = schemaDefiningEntityId,
                                     FromStateVersion = stateVersion,
                                 });
                             }
 
                             if (typeInfoSubstate.Value.Details is CoreModel.KeyValueStoreTypeInfoDetails
-                                && typeInfoSubstate.TryGetKeyValueStoreKeyLocalSchemaDetails(out var keySchemaDetails)
-                                && typeInfoSubstate.TryGetKeyValueStoreValueLocalSchemaDetails(out var valueSchemaDetails))
+                                && typeInfoSubstate.TryGetKeyValueStoreKeySchemaDetails(out var keySchemaDetails)
+                                && typeInfoSubstate.TryGetKeyValueStoreValueSchemaDetails(out var valueSchemaDetails))
                             {
+                                var keySchemaDefiningEntityId = !string.IsNullOrEmpty(keySchemaDetails.Value.SchemaDefiningEntityAddress)
+                                    ? referencedEntities.Get((EntityAddress)keySchemaDetails.Value.SchemaDefiningEntityAddress).DatabaseId
+                                    : referencedEntity.DatabaseId;
+
+                                var valueSchemaDefiningEntityId = !string.IsNullOrEmpty(valueSchemaDetails.Value.SchemaDefiningEntityAddress)
+                                    ? referencedEntities.Get((EntityAddress)valueSchemaDetails.Value.SchemaDefiningEntityAddress).DatabaseId
+                                    : referencedEntity.DatabaseId;
+
                                 keyValueStoreSchemaHistoryToAdd.Add(new KeyValueStoreSchemaHistory
                                 {
                                     Id = sequences.KeyValueSchemaHistorySequence++,
                                     KeyValueStoreEntityId = referencedEntity.DatabaseId,
-                                    KeySchemaHash = keySchemaDetails.ScopedTypeId.SchemaHash.ConvertFromHex(),
-                                    KeySborTypeKind = keySchemaDetails.ScopedTypeId.LocalTypeId.Kind.ToModel(),
-                                    KeyTypeIndex = keySchemaDetails.ScopedTypeId.LocalTypeId.Id,
-                                    ValueSchemaHash = valueSchemaDetails.ScopedTypeId.SchemaHash.ConvertFromHex(),
-                                    ValueSborTypeKind = valueSchemaDetails.ScopedTypeId.LocalTypeId.Kind.ToModel(),
-                                    ValueTypeIndex = valueSchemaDetails.ScopedTypeId.LocalTypeId.Id,
+                                    KeySchemaDefiningEntityId = keySchemaDefiningEntityId,
+                                    KeySchemaHash = keySchemaDetails.Value.SchemaHash.ConvertFromHex(),
+                                    KeySborTypeKind = keySchemaDetails.Value.SborTypeKind.ToModel(),
+                                    KeyTypeIndex = keySchemaDetails.Value.TypeIndex,
+                                    ValueSchemaDefiningEntityId = valueSchemaDefiningEntityId,
+                                    ValueSchemaHash = valueSchemaDetails.Value.SchemaHash.ConvertFromHex(),
+                                    ValueSborTypeKind = valueSchemaDetails.Value.SborTypeKind.ToModel(),
+                                    ValueTypeIndex = valueSchemaDetails.Value.TypeIndex,
                                     FromStateVersion = stateVersion,
                                 });
                             }
