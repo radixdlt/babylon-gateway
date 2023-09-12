@@ -84,32 +84,37 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The generic substitution is provided by the instance itself. 
+    /// LocalGenericSubstitution
     /// </summary>
-    [DataContract(Name = "LocalGenericSubstition_allOf")]
-    public partial class LocalGenericSubstitionAllOf : IEquatable<LocalGenericSubstitionAllOf>
+    [DataContract(Name = "LocalGenericSubstitution")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(LocalGenericSubstitution), "Local")]
+    [JsonSubtypes.KnownSubType(typeof(RemoteGenericSubstitution), "Remote")]
+    public partial class LocalGenericSubstitution : GenericSubstitution, IEquatable<LocalGenericSubstitution>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalGenericSubstitionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="LocalGenericSubstitution" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LocalGenericSubstitionAllOf() { }
+        protected LocalGenericSubstitution() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalGenericSubstitionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="LocalGenericSubstitution" /> class.
         /// </summary>
         /// <param name="scopedTypeId">scopedTypeId (required).</param>
-        public LocalGenericSubstitionAllOf(ScopedTypeId scopedTypeId = default(ScopedTypeId))
+        /// <param name="type">type (required) (default to GenericSubstitutionType.Local).</param>
+        public LocalGenericSubstitution(ScopedTypeId scopedTypeId = default(ScopedTypeId), GenericSubstitutionType type = GenericSubstitutionType.Local) : base(type)
         {
             // to ensure "scopedTypeId" is required (not null)
             if (scopedTypeId == null)
             {
-                throw new ArgumentNullException("scopedTypeId is a required property for LocalGenericSubstitionAllOf and cannot be null");
+                throw new ArgumentNullException("scopedTypeId is a required property for LocalGenericSubstitution and cannot be null");
             }
             this.ScopedTypeId = scopedTypeId;
         }
@@ -127,7 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LocalGenericSubstitionAllOf {\n");
+            sb.Append("class LocalGenericSubstitution {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  ScopedTypeId: ").Append(ScopedTypeId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -137,7 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,21 +155,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LocalGenericSubstitionAllOf);
+            return this.Equals(input as LocalGenericSubstitution);
         }
 
         /// <summary>
-        /// Returns true if LocalGenericSubstitionAllOf instances are equal
+        /// Returns true if LocalGenericSubstitution instances are equal
         /// </summary>
-        /// <param name="input">Instance of LocalGenericSubstitionAllOf to be compared</param>
+        /// <param name="input">Instance of LocalGenericSubstitution to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LocalGenericSubstitionAllOf input)
+        public bool Equals(LocalGenericSubstitution input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
                     this.ScopedTypeId == input.ScopedTypeId ||
                     (this.ScopedTypeId != null &&
@@ -179,7 +185,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
+                int hashCode = base.GetHashCode();
                 if (this.ScopedTypeId != null)
                 {
                     hashCode = (hashCode * 59) + this.ScopedTypeId.GetHashCode();

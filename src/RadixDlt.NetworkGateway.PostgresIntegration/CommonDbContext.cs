@@ -461,11 +461,11 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<KeyValueStoreSchemaHistory>()
-            .HasIndex(e => new { EntityId = e.KeyValueStoreEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.KeyValueStoreEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<NonFungibleSchemaHistory>()
-            .HasIndex(e => new { EntityId = e.ResourceEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
     }
 
     private static void HookupStatistics(ModelBuilder modelBuilder)

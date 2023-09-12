@@ -91,39 +91,47 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LocalGenericSubstition
+    /// RemoteGenericSubstitution
     /// </summary>
-    [DataContract(Name = "LocalGenericSubstition")]
+    [DataContract(Name = "RemoteGenericSubstitution")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(LocalGenericSubstition), "Local")]
-    [JsonSubtypes.KnownSubType(typeof(RemoteGenericSubstition), "Remote")]
-    public partial class LocalGenericSubstition : GenericSubstitution, IEquatable<LocalGenericSubstition>
+    [JsonSubtypes.KnownSubType(typeof(LocalGenericSubstitution), "Local")]
+    [JsonSubtypes.KnownSubType(typeof(RemoteGenericSubstitution), "Remote")]
+    public partial class RemoteGenericSubstitution : GenericSubstitution, IEquatable<RemoteGenericSubstitution>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalGenericSubstition" /> class.
+        /// Initializes a new instance of the <see cref="RemoteGenericSubstitution" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LocalGenericSubstition() { }
+        protected RemoteGenericSubstitution() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalGenericSubstition" /> class.
+        /// Initializes a new instance of the <see cref="RemoteGenericSubstitution" /> class.
         /// </summary>
-        /// <param name="scopedTypeId">scopedTypeId (required).</param>
-        /// <param name="type">type (required) (default to GenericSubstitutionType.Local).</param>
-        public LocalGenericSubstition(ScopedTypeId scopedTypeId = default(ScopedTypeId), GenericSubstitutionType type = GenericSubstitutionType.Local) : base(type)
+        /// <param name="blueprintTypeIdentifier">blueprintTypeIdentifier (required).</param>
+        /// <param name="resolvedFullTypeId">resolvedFullTypeId.</param>
+        /// <param name="type">type (required) (default to GenericSubstitutionType.Remote).</param>
+        public RemoteGenericSubstitution(BlueprintTypeIdentifier blueprintTypeIdentifier = default(BlueprintTypeIdentifier), FullyScopedTypeId resolvedFullTypeId = default(FullyScopedTypeId), GenericSubstitutionType type = GenericSubstitutionType.Remote) : base(type)
         {
-            // to ensure "scopedTypeId" is required (not null)
-            if (scopedTypeId == null)
+            // to ensure "blueprintTypeIdentifier" is required (not null)
+            if (blueprintTypeIdentifier == null)
             {
-                throw new ArgumentNullException("scopedTypeId is a required property for LocalGenericSubstition and cannot be null");
+                throw new ArgumentNullException("blueprintTypeIdentifier is a required property for RemoteGenericSubstitution and cannot be null");
             }
-            this.ScopedTypeId = scopedTypeId;
+            this.BlueprintTypeIdentifier = blueprintTypeIdentifier;
+            this.ResolvedFullTypeId = resolvedFullTypeId;
         }
 
         /// <summary>
-        /// Gets or Sets ScopedTypeId
+        /// Gets or Sets BlueprintTypeIdentifier
         /// </summary>
-        [DataMember(Name = "scoped_type_id", IsRequired = true, EmitDefaultValue = true)]
-        public ScopedTypeId ScopedTypeId { get; set; }
+        [DataMember(Name = "blueprint_type_identifier", IsRequired = true, EmitDefaultValue = true)]
+        public BlueprintTypeIdentifier BlueprintTypeIdentifier { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ResolvedFullTypeId
+        /// </summary>
+        [DataMember(Name = "resolved_full_type_id", EmitDefaultValue = true)]
+        public FullyScopedTypeId ResolvedFullTypeId { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -132,9 +140,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LocalGenericSubstition {\n");
+            sb.Append("class RemoteGenericSubstitution {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ScopedTypeId: ").Append(ScopedTypeId).Append("\n");
+            sb.Append("  BlueprintTypeIdentifier: ").Append(BlueprintTypeIdentifier).Append("\n");
+            sb.Append("  ResolvedFullTypeId: ").Append(ResolvedFullTypeId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -155,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LocalGenericSubstition);
+            return this.Equals(input as RemoteGenericSubstitution);
         }
 
         /// <summary>
-        /// Returns true if LocalGenericSubstition instances are equal
+        /// Returns true if RemoteGenericSubstitution instances are equal
         /// </summary>
-        /// <param name="input">Instance of LocalGenericSubstition to be compared</param>
+        /// <param name="input">Instance of RemoteGenericSubstitution to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LocalGenericSubstition input)
+        public bool Equals(RemoteGenericSubstitution input)
         {
             if (input == null)
             {
@@ -171,9 +180,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.ScopedTypeId == input.ScopedTypeId ||
-                    (this.ScopedTypeId != null &&
-                    this.ScopedTypeId.Equals(input.ScopedTypeId))
+                    this.BlueprintTypeIdentifier == input.BlueprintTypeIdentifier ||
+                    (this.BlueprintTypeIdentifier != null &&
+                    this.BlueprintTypeIdentifier.Equals(input.BlueprintTypeIdentifier))
+                ) && base.Equals(input) && 
+                (
+                    this.ResolvedFullTypeId == input.ResolvedFullTypeId ||
+                    (this.ResolvedFullTypeId != null &&
+                    this.ResolvedFullTypeId.Equals(input.ResolvedFullTypeId))
                 );
         }
 
@@ -186,9 +200,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.ScopedTypeId != null)
+                if (this.BlueprintTypeIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.ScopedTypeId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlueprintTypeIdentifier.GetHashCode();
+                }
+                if (this.ResolvedFullTypeId != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResolvedFullTypeId.GetHashCode();
                 }
                 return hashCode;
             }

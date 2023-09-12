@@ -70,11 +70,20 @@ public partial class ObjectTypeInfoDetails : IEntityAddressPointer
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        yield return BlueprintInfo.PackageAddress;
+        var addresses = new List<string>();
+
+        addresses.Add(BlueprintInfo.PackageAddress);
 
         if (BlueprintInfo.OuterObject != null)
         {
-            yield return BlueprintInfo.OuterObject;
+            addresses.Add(BlueprintInfo.OuterObject);
         }
+
+        foreach (var genericSubstitution in BlueprintInfo.GenericSubstitutions)
+        {
+            addresses.AddRange(genericSubstitution.GetEntityAddresses());
+        }
+
+        return addresses;
     }
 }
