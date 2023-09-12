@@ -90,7 +90,7 @@ public sealed class InvalidRequestException : ValidationException
             new GatewayModel.InvalidRequestError(
                 new List<GatewayModel.ValidationErrorsAtPath> { new("?", new List<string> { error }) }
             ),
-            "One or more validation errors occurred"
+            "One or more errors occurred"
         );
     }
 }
