@@ -72,7 +72,9 @@ internal class StateKeyValueStoreDataRequestKeyItemValidator : AbstractValidator
     public StateKeyValueStoreDataRequestKeyItemValidator()
     {
         RuleFor(x => x.KeyHex)
-            .NotEmpty()
             .Hex();
+
+        RuleFor(x => x)
+            .Must(x => x.KeyHex != null || x.KeyJson != null).WithMessage("Either key_hex or key_json must be not empty.");
     }
 }
