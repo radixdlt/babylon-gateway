@@ -1,9 +1,10 @@
 ### 0.5.3 RCNet v3.1 revision 2
-Release Date: _unreleased_
+Release Date: 13.09.2023
 
 - Fix incomplete entity type mapping.
 - Fix non-fungible resource aggregation.
 - Add `key_json` property to `StateKeyValueStoreDataRequestKeyItem` enabling JSON-based KVStore lookup.
+- support remote schema assignment for generic (key value store, non fungible data) substitution.
 
 ### 0.5.2 RCNet v3.1
 Release Date: 07.09.2023
