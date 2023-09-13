@@ -1,3 +1,7 @@
+### TBA
+Release Date: _unreleased_
+
+- fixed `epoch` in `from_state_version` forward querying for migrated environments where lowest epoch number isn't 1. 
 ### 0.5.4 RCNet v3.1 revision 3
 Release Date: 15.09.2023
 
