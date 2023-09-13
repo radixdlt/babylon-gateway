@@ -85,7 +85,7 @@ internal class KeyValueStoreSchemaHistory
     public byte[] KeySchemaHash { get; set; }
 
     [Column("key_schema_defining_entity_id")]
-    public long? KeySchemaDefiningEntityId { get; set; }
+    public long KeySchemaDefiningEntityId { get; set; }
 
     [Column("key_sbor_type_kind")]
     public SborTypeKind KeySborTypeKind { get; set; }
@@ -97,7 +97,7 @@ internal class KeyValueStoreSchemaHistory
     public byte[] ValueSchemaHash { get; set; }
 
     [Column("value_schema_defining_entity_id")]
-    public long? ValueSchemaDefiningEntityId { get; set; }
+    public long ValueSchemaDefiningEntityId { get; set; }
 
     [Column("value_sbor_type_kind")]
     public SborTypeKind ValueSborTypeKind { get; set; }

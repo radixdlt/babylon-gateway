@@ -82,7 +82,7 @@ internal class NonFungibleSchemaHistory
     public long ResourceEntityId { get; set; }
 
     [Column("schema_defining_entity_id")]
-    public long? SchemaDefiningEntityId { get; set; }
+    public long SchemaDefiningEntityId { get; set; }
 
     [Column("schema_hash")]
     public byte[] SchemaHash { get; set; }

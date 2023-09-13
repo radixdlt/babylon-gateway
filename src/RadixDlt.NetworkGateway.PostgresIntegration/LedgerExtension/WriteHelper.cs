@@ -1029,7 +1029,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.SchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.SchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.SborTypeKind, "sbor_type_kind", token);
             await writer.WriteAsync(e.TypeIndex, NpgsqlDbType.Bigint, token);
@@ -1058,11 +1058,11 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.KeySchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.KeySchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeySchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.KeySborTypeKind, "sbor_type_kind", token);
             await writer.WriteAsync(e.KeyTypeIndex, NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.ValueSchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ValueSchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ValueSchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.ValueSborTypeKind, "sbor_type_kind", token);
             await writer.WriteAsync(e.ValueTypeIndex, NpgsqlDbType.Bigint, token);
