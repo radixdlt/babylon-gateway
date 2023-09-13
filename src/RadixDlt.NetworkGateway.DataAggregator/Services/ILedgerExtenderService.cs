@@ -79,6 +79,9 @@ public interface ILedgerExtenderService
 
 public sealed record TransactionSummary(
     long StateVersion,
+    string TransactionTreeHash,
+    string ReceiptTreeHash,
+    string StateTreeHash,
     DateTime RoundTimestamp,
     DateTime NormalizedRoundTimestamp,
     DateTime CreatedTimestamp,

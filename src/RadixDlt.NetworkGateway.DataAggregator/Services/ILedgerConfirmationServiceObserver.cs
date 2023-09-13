@@ -71,8 +71,6 @@ public interface ILedgerConfirmationServiceObserver
 {
     void ResetQuorum();
 
-    void TrustWeightingRequirementsComputed(LedgerConfirmationService.TrustWeightingReport report);
-
     ValueTask PreHandleLedgerExtensionIfQuorum(DateTime timestamp);
 
     void PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion);
@@ -83,15 +81,18 @@ public interface ILedgerConfirmationServiceObserver
 
     void SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion);
 
-    void LedgerTipInconsistentWithQuorumStatus(string inconsistentNodeName);
+    // void TrustWeightingRequirementsComputed(LedgerConfirmationService.TrustWeightingReport report);
 
-    void LedgerTipConsistentWithQuorumStatus(string consistentNodeName);
+    // TODO PP: do we need to replace that with sthn else?
+    // void LedgerTipInconsistentWithQuorumStatus(string inconsistentNodeName);
 
-    void UnknownQuorumStatus();
+    // void LedgerTipConsistentWithQuorumStatus(string consistentNodeName);
 
-    void QuorumLost();
+    // void UnknownQuorumStatus();
 
-    void QuorumGained();
+    // void QuorumLost();
+
+    // void QuorumGained();
 
     void ReportOnLedgerExtensionSuccess(DateTime timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount);
 

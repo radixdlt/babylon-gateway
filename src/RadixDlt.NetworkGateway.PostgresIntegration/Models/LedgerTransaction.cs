@@ -138,6 +138,21 @@ internal abstract class LedgerTransaction
     public byte[] RawPayload { get; set; }
 
     public TransactionReceipt EngineReceipt { get; set; }
+
+    public LedgerHashes LedgerHashes { get; set; }
+}
+
+[Owned]
+internal class LedgerHashes
+{
+    [Column("transaction_tree_hash")]
+    public string TransactionTreeHash { get; set; }
+
+    [Column("receipt_tree_hash")]
+    public string ReceiptTreeHash { get; set; }
+
+    [Column("state_tree_hash")]
+    public string StateTreeHash { get; set; }
 }
 
 [Owned]

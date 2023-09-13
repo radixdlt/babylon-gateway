@@ -98,6 +98,6 @@ public sealed class LedgerConfirmationWorker : GlobalWorker
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _ledgerConfirmationService.HandleLedgerExtensionIfQuorum(cancellationToken);
+        await _ledgerConfirmationService.HandleLedgerExtension(cancellationToken);
     }
 }

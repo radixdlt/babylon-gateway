@@ -506,6 +506,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         StateVersion: stateVersion,
                         RoundTimestamp: roundTimestamp,
                         NormalizedRoundTimestamp: normalizedRoundTimestamp,
+                        TransactionTreeHash: lastTransactionSummary.TransactionTreeHash,
+                        ReceiptTreeHash: lastTransactionSummary.ReceiptTreeHash,
+                        StateTreeHash: lastTransactionSummary.StateTreeHash,
                         CreatedTimestamp: createdTimestamp,
                         Epoch: epochUpdate ?? lastTransactionSummary.Epoch,
                         RoundInEpoch: roundInEpochUpdate ?? lastTransactionSummary.RoundInEpoch,
@@ -527,6 +530,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     };
 
                     ledgerTransaction.StateVersion = stateVersion;
+                    ledgerTransaction.LedgerHashes = new LedgerHashes
+                    {
+                        TransactionTreeHash = committedTransaction.ResultantStateIdentifiers.TransactionTreeHash,
+                        ReceiptTreeHash = committedTransaction.ResultantStateIdentifiers.ReceiptTreeHash,
+                        StateTreeHash = committedTransaction.ResultantStateIdentifiers.StateTreeHash,
+                    };
                     ledgerTransaction.Epoch = summary.Epoch;
                     ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
                     ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
@@ -1926,6 +1935,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             ? PreGenesisTransactionSummary()
             : new TransactionSummary(
                 StateVersion: lastTransaction.StateVersion,
+                TransactionTreeHash: lastTransaction.LedgerHashes.TransactionTreeHash,
+                ReceiptTreeHash: lastTransaction.LedgerHashes.ReceiptTreeHash,
+                StateTreeHash: lastTransaction.LedgerHashes.StateTreeHash,
                 RoundTimestamp: lastTransaction.RoundTimestamp,
                 NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
                 CreatedTimestamp: lastTransaction.CreatedTimestamp,
@@ -1941,6 +1953,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         // Nearly all of theses turn out to be unused!
         return new TransactionSummary(
             StateVersion: 0,
+            TransactionTreeHash: string.Empty,
+            ReceiptTreeHash: string.Empty,
+            StateTreeHash: string.Empty,
             RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             CreatedTimestamp: _clock.UtcNow,

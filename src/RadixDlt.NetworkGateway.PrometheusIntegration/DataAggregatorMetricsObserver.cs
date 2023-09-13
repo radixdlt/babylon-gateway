@@ -445,18 +445,6 @@ internal class DataAggregatorMetricsObserver :
         _quorumExtensionConsistentStatus.SetStatus(MetricStatus.Unknown);
     }
 
-    void ILedgerConfirmationServiceObserver.TrustWeightingRequirementsComputed(LedgerConfirmationService.TrustWeightingReport report)
-    {
-        _configuredNodesTotal.Set(report.TotalTransactionNodes);
-        _configuredNodesTrustWeightingTotal.Set((double)report.TrustWeightingAvailableAcrossAllNodes);
-
-        _sufficientlySyncedUpNodesTotal.Set(report.TotalSufficientlySyncedUpNodes);
-        _sufficientlySyncedUpNodesTrustWeightingTotal.Set((double)report.TrustWeightingOfSufficientlySyncedUpNodes);
-
-        _ledgerNodeTrustWeightingRequiredForQuorum.Set((double)report.TrustWeightingRequiredForQuorumAtPresentTime);
-        _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced.Set((double)report.TrustWeightingRequiredForQuorumIfAllNodesAvailableForQuorum);
-    }
-
     ValueTask ILedgerConfirmationServiceObserver.PreHandleLedgerExtensionIfQuorum(DateTime timestamp)
     {
         _ledgerLastExtensionAttemptStartTimestamp.Set(timestamp.ToUnixTimeSecondsWithMilliPrecision());
@@ -484,30 +472,31 @@ internal class DataAggregatorMetricsObserver :
         _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.No);
     }
 
-    void ILedgerConfirmationServiceObserver.LedgerTipInconsistentWithQuorumStatus(string inconsistentNodeName)
-    {
-        _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(inconsistentNodeName).SetStatus(MetricStatus.No);
-    }
-
-    void ILedgerConfirmationServiceObserver.LedgerTipConsistentWithQuorumStatus(string consistentNodeName)
-    {
-        _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(consistentNodeName).SetStatus(MetricStatus.Yes);
-    }
-
-    void ILedgerConfirmationServiceObserver.UnknownQuorumStatus()
-    {
-        _quorumExistsStatus.SetStatus(MetricStatus.Unknown);
-    }
-
-    void ILedgerConfirmationServiceObserver.QuorumLost()
-    {
-        _quorumExistsStatus.SetStatus(MetricStatus.No);
-    }
-
-    void ILedgerConfirmationServiceObserver.QuorumGained()
-    {
-        _quorumExistsStatus.SetStatus(MetricStatus.Yes);
-    }
+    // TODO PP: to replace by sthn else.
+    // void ILedgerConfirmationServiceObserver.LedgerTipInconsistentWithQuorumStatus(string inconsistentNodeName)
+    // {
+    //     _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(inconsistentNodeName).SetStatus(MetricStatus.No);
+    // }
+    //
+    // void ILedgerConfirmationServiceObserver.LedgerTipConsistentWithQuorumStatus(string consistentNodeName)
+    // {
+    //     _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(consistentNodeName).SetStatus(MetricStatus.Yes);
+    // }
+    //
+    // void ILedgerConfirmationServiceObserver.UnknownQuorumStatus()
+    // {
+    //     _quorumExistsStatus.SetStatus(MetricStatus.Unknown);
+    // }
+    //
+    // void ILedgerConfirmationServiceObserver.QuorumLost()
+    // {
+    //     _quorumExistsStatus.SetStatus(MetricStatus.No);
+    // }
+    //
+    // void ILedgerConfirmationServiceObserver.QuorumGained()
+    // {
+    //     _quorumExistsStatus.SetStatus(MetricStatus.Yes);
+    // }
 
     void ILedgerConfirmationServiceObserver.ReportOnLedgerExtensionSuccess(DateTime timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount)
     {
