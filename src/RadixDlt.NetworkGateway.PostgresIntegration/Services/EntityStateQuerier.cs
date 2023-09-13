@@ -395,7 +395,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     {
                         items = nfids.Take(nonFungibleIdsLimit).Select(y => y.NonFungibleId).ToList();
                         nextCursor = GenerateOffsetCursor(0, nonFungibleIdsLimit, x.NonFungibleIdsCount);
-    }
+                    }
 
                     return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
                         totalCount: x.NonFungibleIdsCount,
@@ -456,7 +456,17 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         CancellationToken token = default)
     {
         var entity = await GetEntity<Entity>(request.Address, ledgerState, token);
-        var metadata = (await GetMetadataSlices(new[] { entity.Id }, request.Offset, request.Limit, ledgerState, token))[entity.Id];
+        GatewayModel.EntityMetadataCollection metadata;
+
+        if (entity is VirtualIdentityEntity or VirtualAccountComponentEntity)
+        {
+            var (_, virtualEntityMetadata) = _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
+            metadata = virtualEntityMetadata;
+        }
+        else
+        {
+            metadata = (await GetMetadataSlices(new[] { entity.Id }, request.Offset, request.Limit, ledgerState, token))[entity.Id];
+        }
 
         return new GatewayModel.StateEntityMetadataPageResponse(ledgerState, metadata.TotalCount, metadata.NextCursor, metadata.Items, entity.Address);
     }
@@ -554,7 +564,7 @@ SELECT
     nfsh.type_index AS TypeIndex,
     nfsh.sbor_type_kind AS SborTypeKind
 FROM non_fungible_schema_history nfsh
-INNER JOIN schema_history sh ON sh.schema_hash = nfsh.schema_hash AND sh.entity_id = @entityId
+INNER JOIN schema_history sh ON sh.schema_hash = nfsh.schema_hash AND sh.entity_id = nfsh.schema_defining_entity_id
 WHERE nfsh.resource_entity_id = @entityId AND nfsh.from_state_version <= @stateVersion
 ORDER BY nfsh.from_state_version DESC",
             parameters: new
@@ -862,8 +872,8 @@ SELECT
     kvssh.value_type_index AS ValueTypeIndex,
     kvssh.value_sbor_type_kind AS ValueSborTypeKind
 FROM key_value_store_schema_history kvssh
-INNER JOIN schema_history ksh ON ksh.schema_hash = kvssh.key_schema_hash AND ksh.entity_id = @entityId
-INNER JOIN schema_history vsh ON vsh.schema_hash = kvssh.value_schema_hash AND vsh.entity_id = @entityId
+INNER JOIN schema_history ksh ON ksh.schema_hash = kvssh.key_schema_hash AND ksh.entity_id = kvssh.key_schema_defining_entity_id
+INNER JOIN schema_history vsh ON vsh.schema_hash = kvssh.value_schema_hash AND vsh.entity_id = kvssh.value_schema_defining_entity_id
 WHERE kvssh.key_value_store_entity_id = @entityId AND kvssh.from_state_version <= @stateVersion
 ORDER BY kvssh.from_state_version DESC
 ",

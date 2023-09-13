@@ -91,8 +91,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
+                .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,ruid")
-                .Annotation("Npgsql:Enum:object_module_id", "main,metadata,royalty,role_assignment")
                 .Annotation("Npgsql:Enum:package_vm_type", "native,scrypto_v1")
                 .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,rejected_temporarily,rejected_permanently,committed_success,committed_failure")
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
@@ -292,7 +292,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     key_role = table.Column<string>(type: "text", nullable: false),
-                    key_module = table.Column<ObjectModuleId>(type: "object_module_id", nullable: false),
+                    key_module = table.Column<ModuleId>(type: "module_id", nullable: false),
                     role_assignments = table.Column<string>(type: "jsonb", nullable: true),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false)
                 },

@@ -76,7 +76,7 @@ using GatewayModel = RadixDlt.NetworkGateway.Abstractions.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal record RoleAssignmentRuleKey(string Name, GatewayModel.ObjectModuleId ObjectModuleId);
+internal record RoleAssignmentRuleKey(string Name, GatewayModel.ModuleId ModuleId);
 
 internal record RoleAssignmentEntry(RoleAssignmentRuleKey Key, RoleAssignmentRuleKey[] Updaters);
 
@@ -97,10 +97,10 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     private readonly List<RoleAssignmentEntry> _nativeModulesKeys;
 
-    public RoleAssignmentsKeyProvider(ReadOnlyDbContext readOnlyDbContext)
+    public RoleAssignmentsKeyProvider()
     {
-        var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, GatewayModel.ObjectModuleId.Metadata);
-        var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, GatewayModel.ObjectModuleId.Royalty);
+        var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, GatewayModel.ModuleId.Metadata);
+        var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, GatewayModel.ModuleId.Royalty);
 
         _nativeModulesKeys = metadataWithUpdaterKeys
             .Concat(royaltyWithUpdaterKeys)
@@ -116,13 +116,13 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
             ?.Roles
             ?.Select(x =>
                 new RoleAssignmentEntry(
-                    new RoleAssignmentRuleKey(x.Key, ObjectModuleId.Main),
-                    x.Value.UpdaterRoles.Select(u => new RoleAssignmentRuleKey(u, ObjectModuleId.Main)).ToArray()
+                    new RoleAssignmentRuleKey(x.Key, ModuleId.Main),
+                    x.Value.UpdaterRoles.Select(u => new RoleAssignmentRuleKey(u, ModuleId.Main)).ToArray()
                 ))
             .ToList() ?? new List<RoleAssignmentEntry>();
     }
 
-    private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, GatewayModel.ObjectModuleId objectModuleId)
+    private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, GatewayModel.ModuleId moduleId)
     {
         const string UpdaterSuffix = "updater";
 
@@ -130,8 +130,8 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
             ruleKeys
                 .Select(key => new List<RoleAssignmentEntry>
                 {
-                    new(new RoleAssignmentRuleKey(key, objectModuleId), new[] { new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", objectModuleId) }),
-                    new(new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", objectModuleId), new[] { new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", objectModuleId) }),
+                    new(new RoleAssignmentRuleKey(key, moduleId), new[] { new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", moduleId) }),
+                    new(new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", moduleId), new[] { new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", moduleId) }),
                 })
                 .SelectMany(x => x)
                 .ToList();

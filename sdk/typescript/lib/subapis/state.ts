@@ -7,7 +7,6 @@ import {
   EntityMetadataItem,
   FungibleResourcesCollection,
   FungibleResourcesCollectionItemVaultAggregated,
-  LedgerState,
   LedgerStateSelector,
   NonFungibleIdsCollection,
   NonFungibleResourcesCollection,
@@ -17,6 +16,7 @@ import {
   StateEntityDetailsResponseItem,
   StateEntityMetadataPageResponse,
   StateNonFungibleDetailsResponseItem,
+  StateNonFungibleIdsResponse,
   ValidatorCollection,
   ValidatorCollectionItem,
 } from '../generated'
@@ -237,10 +237,27 @@ export class State {
     startCursor?: string,
     ledgerState?: LedgerStateSelector
   ): Promise<string[]> {
-    return exhaustPagination(
-      this.getNonFungibleIds.bind(this, address, ledgerState),
-      startCursor
-    )
+    let atLedgerState = ledgerState
+    let next_cursor: string | null | undefined = startCursor
+    const aggregatedEntities: string[] = []
+
+    do {
+      const queryFunctionResponse: StateNonFungibleIdsResponse =
+        await this.innerClient.nonFungibleIds({
+          stateNonFungibleIdsRequest: {
+            resource_address: address,
+            cursor: next_cursor,
+            at_ledger_state: atLedgerState,
+          },
+        })
+      aggregatedEntities.push(...queryFunctionResponse.non_fungible_ids.items)
+      atLedgerState = atLedgerState || {
+        state_version: queryFunctionResponse.ledger_state.state_version,
+      }
+      next_cursor = queryFunctionResponse.non_fungible_ids.next_cursor
+    } while (next_cursor)
+
+    return aggregatedEntities
   }
 
   async getNonFungibleData(

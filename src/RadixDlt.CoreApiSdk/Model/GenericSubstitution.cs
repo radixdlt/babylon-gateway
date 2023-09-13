@@ -62,12 +62,11 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using System.Collections.Generic;
 
-public enum ObjectModuleId
+namespace RadixDlt.CoreApiSdk.Model;
+
+public abstract partial class GenericSubstitution : IEntityAddressPointer
 {
-    Main,
-    Metadata,
-    Royalty,
-    RoleAssignment,
+    public abstract IEnumerable<string> GetEntityAddresses();
 }

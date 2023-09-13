@@ -424,7 +424,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyRole, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.KeyModule, "object_module_id", token);
+            await writer.WriteAsync(e.KeyModule, "module_id", token);
             await writer.WriteAsync(e.RoleAssignments, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
         }
@@ -466,7 +466,10 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY state_history (id, from_state_version, entity_id, discriminator, json_state, sbor_state, type_index, schema_hash, sbor_type_kind, schema_defining_entity_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer =
+            await _connection.BeginBinaryImportAsync(
+                "COPY state_history (id, from_state_version, entity_id, discriminator, json_state, sbor_state, type_index, schema_hash, sbor_type_kind, schema_defining_entity_id) FROM STDIN (FORMAT BINARY)",
+                token);
 
         foreach (var e in stateHistory)
         {
@@ -671,9 +674,9 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityVaultHistory(ICollection<EntityFungibleVaultHistory> fungibleEntities, ICollection<EntityNonFungibleVaultHistory> nonFungibleEntities, CancellationToken token)
+    public async Task<int> CopyEntityVaultHistory(ICollection<EntityVaultHistory> entities, CancellationToken token)
     {
-        if (!fungibleEntities.Any() && !nonFungibleEntities.Any())
+        if (!entities.Any())
         {
             return 0;
         }
@@ -683,7 +686,7 @@ internal class WriteHelper
                 "COPY entity_vault_history (id, from_state_version, owner_entity_id, global_entity_id, vault_entity_id, resource_entity_id, discriminator, balance, is_royalty_vault, non_fungible_ids) FROM STDIN (FORMAT BINARY)",
                 token);
 
-        foreach (var e in fungibleEntities)
+        foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -693,29 +696,27 @@ internal class WriteHelper
             await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-            await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(e.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
-            await writer.WriteNullAsync(token);
-        }
 
-        foreach (var e in nonFungibleEntities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.OwnerEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-            await writer.WriteNullAsync(token);
-            await writer.WriteNullAsync(token);
-            await writer.WriteAsync(e.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            switch (e)
+            {
+                case EntityFungibleVaultHistory fe:
+                    await writer.WriteAsync(fe.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(fe.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case EntityNonFungibleVaultHistory nfe:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(nfe.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(e), e, null);
+            }
         }
 
         await writer.CompleteAsync(token);
 
-        return fungibleEntities.Count + nonFungibleEntities.Count;
+        return entities.Count;
     }
 
     public async Task<int> CopyComponentMethodRoyalties(List<ComponentMethodRoyaltyEntryHistory> entities, CancellationToken token)
@@ -777,7 +778,8 @@ internal class WriteHelper
         }
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync(
+                "COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entries)
         {
@@ -1018,7 +1020,8 @@ internal class WriteHelper
         }
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY non_fungible_schema_history (id, from_state_version, resource_entity_id, schema_hash, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync(
+                "COPY non_fungible_schema_history (id, from_state_version, resource_entity_id, schema_defining_entity_id, schema_hash, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -1026,6 +1029,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.SchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.SborTypeKind, "sbor_type_kind", token);
             await writer.WriteAsync(e.TypeIndex, NpgsqlDbType.Bigint, token);
@@ -1045,7 +1049,7 @@ internal class WriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY key_value_store_schema_history (id, from_state_version, key_value_store_entity_id, key_schema_hash, key_sbor_type_kind, key_type_index, value_schema_hash, value_sbor_type_kind, value_type_index) FROM STDIN (FORMAT BINARY)",
+                "COPY key_value_store_schema_history (id, from_state_version, key_value_store_entity_id, key_schema_defining_entity_id, key_schema_hash, key_sbor_type_kind, key_type_index, value_schema_defining_entity_id, value_schema_hash, value_sbor_type_kind, value_type_index) FROM STDIN (FORMAT BINARY)",
                 token);
 
         foreach (var e in entities)
@@ -1054,9 +1058,11 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.KeySchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeySchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.KeySborTypeKind, "sbor_type_kind", token);
             await writer.WriteAsync(e.KeyTypeIndex, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ValueSchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ValueSchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.ValueSborTypeKind, "sbor_type_kind", token);
             await writer.WriteAsync(e.ValueTypeIndex, NpgsqlDbType.Bigint, token);

@@ -1,12 +1,21 @@
-### 0.5.2 RCNet v3.1
-Release Date: _unreleased_
+### 0.5.3 RCNet v3.1 revision 2
+Release Date: 13.09.2023
 
-- Fix broken pagination for NFIDs under `/state/entity/details` and `/state/entity/page/non-fungible-vaults` endpoints.
-- Fix invalid `index_in_epoch` and `index_in_round` for genesis TX.
-- Fix virtual identity and account details.
-- Fix how TX total fee paid is calculated.
+- Fix incomplete entity type mapping.
+- Fix non-fungible resource aggregation.
+- Add `key_json` property to `StateKeyValueStoreDataRequestKeyItem` enabling JSON-based KVStore lookup.
+- support remote schema assignment for generic (key value store, non fungible data) substitution.
+
+### 0.5.2 RCNet v3.1
+Release Date: 07.09.2023
+
+### What’s New?
 - Add `from_state_version` to `validator_emission_statistics`.
 - Returning all possible role assignment keys in `main` module for all entity types (previously only for fungible and non fungible resources).
+- Fixed broken pagination for NFIDs under `/state/entity/details` and `/state/entity/page/non-fungible-vaults` endpoints.
+- Fixed invalid `index_in_epoch` and `index_in_round` for genesis TX.
+- Fixed virtual identity and account details.
+- Fixed how TX total fee paid is calculated.
 
 ### 0.5.1 RCNet v3 revision 2
 Release Date: 01.09.2023
