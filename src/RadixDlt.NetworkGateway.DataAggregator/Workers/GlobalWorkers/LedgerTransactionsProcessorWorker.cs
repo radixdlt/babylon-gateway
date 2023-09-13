@@ -62,26 +62,42 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Workers;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
+namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
-public interface ILedgerConfirmationService
+/// <summary>
+/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// </summary>
+public sealed class LedgerTransactionsProcessorWorker : BaseGlobalWorker
 {
-    public TransactionSummary? GetTip();
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(100),
+            TimeSpan.FromMilliseconds(100));
 
-    // This method is to be called from the global LedgerExtensionWorker
-    Task HandleLedgerExtensionIfQuorum(CancellationToken token);
+    private readonly ILedgerTransactionsProcessor _ledgerTransactionsProcessor;
 
-    // Below are to be called from the node transaction log workers - to communicate with the LedgerConfirmationService
-    void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipTreeHash);
+    public LedgerTransactionsProcessorWorker(
+        ILogger<LedgerTransactionsProcessorWorker> logger,
+        ILedgerTransactionsProcessor ledgerTransactionsProcessor,
+        IEnumerable<IGlobalWorkerObserver> observers,
+        IClock clock
+    )
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30), observers, clock)
+    {
+        _ledgerTransactionsProcessor = ledgerTransactionsProcessor;
+    }
 
-    void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions, int responseSize);
-
-    TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName);
+    protected override async Task DoWork(CancellationToken cancellationToken)
+    {
+        await _ledgerTransactionsProcessor.ProcessTransactions(cancellationToken);
+    }
 }
-
-public sealed record TransactionsRequested(long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound);

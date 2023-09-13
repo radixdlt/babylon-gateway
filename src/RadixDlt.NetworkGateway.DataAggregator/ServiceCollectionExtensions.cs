@@ -74,6 +74,7 @@ using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
+using System;
 using System.Net;
 using System.Net.Http;
 
@@ -119,7 +120,7 @@ public static class ServiceCollectionExtensions
     {
         services.TryAddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
         services.TryAddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
-        services.TryAddSingleton<ILedgerConfirmationService, LedgerConfirmationService>();
+        services.TryAddSingleton<ILedgerTransactionsProcessor, LedgerTransactionsProcessor>();
         services.TryAddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.TryAddSingleton<ISystemStatusService, SystemStatusService>();
     }
@@ -142,6 +143,9 @@ public static class ServiceCollectionExtensions
         services.TryAddTransient<ITransactionStreamReader, TransactionStreamReader>();
         services.TryAddTransient<INetworkConfigurationReader, NetworkConfigurationReader>();
         services.TryAddTransient<INetworkStatusReader, NetworkStatusReader>();
+
+        services.TryAddTransient<Func<ITransactionStreamReader>>(provider => provider.GetRequiredService<ITransactionStreamReader>);
+        services.TryAddTransient<Func<INetworkStatusReader>>(provider => provider.GetRequiredService<INetworkStatusReader>);
     }
 
     private static void AddNodeInitializers(IServiceCollection services)
@@ -153,7 +157,7 @@ public static class ServiceCollectionExtensions
     private static void AddNodeWorkers(IServiceCollection services)
     {
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
-        services.TryAddScoped<INodeWorker, NodeTransactionLogWorker>();
+        services.TryAddScoped<INodeWorker, NodeTransactionFetcherWorker>();
         services.AddScoped<INodeWorker, NodeMempoolTransactionHashesReaderWorker>();
         services.AddScoped<INodeWorker, NodeMempoolFullTransactionReaderWorker>();
     }

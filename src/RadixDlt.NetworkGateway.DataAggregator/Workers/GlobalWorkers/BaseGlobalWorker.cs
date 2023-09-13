@@ -62,31 +62,39 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Workers;
+using System;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.DataAggregator;
+namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
-public static class TransactionConsistency
+public abstract class BaseGlobalWorker : LoopedWorkerBase
 {
-    public static void AssertLatestTransactionConsistent(long latestTransactionStateVersion, long topOfLedgerStateVersion)
+    private readonly IEnumerable<IGlobalWorkerObserver> _observers;
+
+    protected BaseGlobalWorker(
+            ILogger logger,
+            IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,
+            TimeSpan minDelayBetweenInfoLogs,
+            IEnumerable<IGlobalWorkerObserver> observers,
+            IClock clock)
+        // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
+        // crash the application so that it can be automatically restarted.
+        : base(logger, BehaviourOnFault.ApplicationExit, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs, clock)
     {
-        if (latestTransactionStateVersion != topOfLedgerStateVersion)
-        {
-            throw new InvalidLedgerCommitException(
-                $"Tried to commit transactions with parent state version {latestTransactionStateVersion} " +
-                $"on top of a ledger with state version {topOfLedgerStateVersion}"
-            );
-        }
+        _observers = observers;
     }
 
-    public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
+    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
     {
-        if (stateVersion != previousStateVersion + 1)
-        {
-            throw new InvalidLedgerCommitException(
-                $"Attempted to commit a transaction with state version {stateVersion}" +
-                $" on top of transaction with state version {previousStateVersion}"
-            );
-        }
+        _observers.ForEach(x => x.TrackNonFaultingExceptionInWorkLoop(GetType(), ex));
+    }
+
+    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
+    {
+        _observers.ForEach(x => x.TrackWorkerFaultedException(GetType(), ex, isStopRequested));
     }
 }

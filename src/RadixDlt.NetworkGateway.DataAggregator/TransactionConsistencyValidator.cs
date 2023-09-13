@@ -62,39 +62,61 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Workers;
-using System;
-using System.Collections.Generic;
+using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.Abstractions;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
+namespace RadixDlt.NetworkGateway.DataAggregator;
 
-public abstract class GlobalWorker : LoopedWorkerBase
+public static class TransactionConsistencyValidator
 {
-    private readonly IEnumerable<IGlobalWorkerObserver> _observers;
-
-    protected GlobalWorker(
-            ILogger logger,
-            IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,
-            TimeSpan minDelayBetweenInfoLogs,
-            IEnumerable<IGlobalWorkerObserver> observers,
-            IClock clock)
-        // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
-        // crash the application so that it can be automatically restarted.
-        : base(logger, BehaviourOnFault.ApplicationExit, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs, clock)
+    public static void AssertLatestTransactionConsistent(long latestTransactionStateVersion, long topOfLedgerStateVersion)
     {
-        _observers = observers;
+        if (latestTransactionStateVersion != topOfLedgerStateVersion)
+        {
+            throw new InvalidLedgerCommitException(
+                $"Tried to commit transactions with parent state version {latestTransactionStateVersion} " +
+                $"on top of a ledger with state version {topOfLedgerStateVersion}"
+            );
+        }
     }
 
-    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
+    public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
     {
-        _observers.ForEach(x => x.TrackNonFaultingExceptionInWorkLoop(GetType(), ex));
+        if (stateVersion != previousStateVersion + 1)
+        {
+            throw new InvalidLedgerCommitException(
+                $"Attempted to commit a transaction with state version {stateVersion}" +
+                $" on top of transaction with state version {previousStateVersion}"
+            );
+        }
     }
 
-    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
+    public static void ValidateHashes(long previousStateVersion, GatewayModel.CommittedStateIdentifiers? knownStateIdentifiers, CoreModel.CommittedStateIdentifier firstFetchedStateIdentifiers)
     {
-        _observers.ForEach(x => x.TrackWorkerFaultedException(GetType(), ex, isStopRequested));
+        if (previousStateVersion == 0 && knownStateIdentifiers == null)
+        {
+            return;
+        }
+
+        if (knownStateIdentifiers == null)
+        {
+            throw new InvalidLedgerCommitException($"Previously fetched state identifiers are not initialized.");
+        }
+
+        if (firstFetchedStateIdentifiers.ReceiptTreeHash != knownStateIdentifiers.Value.ReceiptTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected receipt three hash: {knownStateIdentifiers.Value.ReceiptTreeHash} but {firstFetchedStateIdentifiers.ReceiptTreeHash} found.");
+        }
+
+        if (firstFetchedStateIdentifiers.StateTreeHash != knownStateIdentifiers.Value.StateTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected state three hash: {knownStateIdentifiers.Value.StateTreeHash} but {firstFetchedStateIdentifiers.StateTreeHash} found.");
+        }
+
+        if (firstFetchedStateIdentifiers.TransactionTreeHash != knownStateIdentifiers.Value.TransactionTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected state three hash: {knownStateIdentifiers.Value.TransactionTreeHash} but {firstFetchedStateIdentifiers.TransactionTreeHash} found.");
+        }
     }
 }

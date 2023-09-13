@@ -71,33 +71,15 @@ public interface ILedgerConfirmationServiceObserver
 {
     void ResetQuorum();
 
-    void TrustWeightingRequirementsComputed(LedgerConfirmationService.TrustWeightingReport report);
-
-    ValueTask PreHandleLedgerExtensionIfQuorum(DateTime timestamp);
+    ValueTask PreHandleLedgerExtension(DateTime timestamp);
 
     void PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion);
-
-    void SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion);
-
-    void SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion);
-
-    void SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion);
-
-    void LedgerTipInconsistentWithQuorumStatus(string inconsistentNodeName);
-
-    void LedgerTipConsistentWithQuorumStatus(string consistentNodeName);
-
-    void UnknownQuorumStatus();
-
-    void QuorumLost();
-
-    void QuorumGained();
 
     void ReportOnLedgerExtensionSuccess(DateTime timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount);
 
     void RecordTopOfDbLedger(long stateVersion, DateTime roundTimestamp);
 
-    void QuorumExtensionConsistentGained();
+    void ExtensionConsistencyGained();
 
-    void QuorumExtensionConsistentLost();
+    void ExtensionConsistencyLost();
 }

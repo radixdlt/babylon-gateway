@@ -76,7 +76,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 /// <summary>
 /// Responsible for keeping the db pruned.
 /// </summary>
-public sealed class PendingTransactionPrunerWorker : GlobalWorker
+public sealed class PendingTransactionPrunerWorker : BaseGlobalWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
