@@ -62,30 +62,37 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+#nullable disable
 
-internal record TransactionReceiptEventData(byte[] Data, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
-
-internal static class TransactionReceiptExtensions
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    public static List<TransactionReceiptEventData> GetEvents(this TransactionReceipt transactionReceipt)
+    /// <inheritdoc />
+    public partial class DropDefaultEventSchemaEntityIdsToLedgerTransactions : Migration
     {
-        var result = new List<TransactionReceiptEventData>();
-
-        for (var i = 0; i < transactionReceipt.EventSbors.Length; ++i)
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            var eventData = transactionReceipt.EventSbors[i];
-            var schemaHash = transactionReceipt.EventSchemaHashes[i];
-            var index = transactionReceipt.EventTypeIndexes[i];
-            var typeKind = transactionReceipt.EventSborTypeKinds[i];
-
-            result.Add(new TransactionReceiptEventData(eventData, schemaHash, index, typeKind));
+            migrationBuilder.AlterColumn<long[]>(
+                name: "receipt_event_schema_entity_ids",
+                table: "ledger_transactions",
+                type: "bigint[]",
+                nullable: false,
+                defaultValue: null,
+                oldDefaultValue: new long[0]);
         }
 
-        return result;
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterColumn<long[]>(
+                name: "receipt_event_schema_entity_ids",
+                table: "ledger_transactions",
+                type: "bigint[]",
+                nullable: false,
+                defaultValue: new long[0],
+                oldDefaultValue: null);
+        }
     }
 }

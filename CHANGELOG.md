@@ -1,3 +1,8 @@
+### 0.5.4 RCNet v3.1 revision 3
+Release Date: 14.09.2023
+
+- Fix event schema lookup in `/stream/transactions` and `/transaction/committed-details`
+
 ### 0.5.3 RCNet v3.1 revision 2
 Release Date: 13.09.2023
 
