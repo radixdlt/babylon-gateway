@@ -479,30 +479,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                     }
 
-                    if (committedTransaction.Receipt.Events != null)
+                    foreach (var @event in committedTransaction.Receipt.Events ?? Enumerable.Empty<CoreModel.Event>())
                     {
-                        foreach (var @event in committedTransaction.Receipt.Events)
+                        foreach (var entityAddress in @event.Type.GetEntityAddresses())
                         {
-                            switch (@event.Type.Emitter)
-                            {
-                                case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
-                                {
-                                    var entityAddress = (EntityAddress)functionEventEmitterIdentifier.PackageAddress;
-                                    referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, CoreModel.EntityType.GlobalPackage, stateVersion));
-                                    break;
-                                }
-
-                                case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
-                                {
-                                    var entityAddress = (EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress;
-
-                                    referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, methodEventEmitterIdentifier.Entity.EntityType, stateVersion));
-                                    break;
-                                }
-
-                                default:
-                                    throw new ArgumentOutOfRangeException(nameof(@event.Type.Emitter), @event.Type.Emitter, null);
-                            }
+                            referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
                         }
                     }
 
