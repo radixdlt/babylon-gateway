@@ -287,6 +287,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             {
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
+                var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
 
                 try
                 {
@@ -479,30 +480,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                     }
 
-                    if (committedTransaction.Receipt.Events != null)
+                    foreach (var @event in events)
                     {
-                        foreach (var @event in committedTransaction.Receipt.Events)
+                        foreach (var entityAddress in @event.Type.GetEntityAddresses())
                         {
-                            switch (@event.Type.Emitter)
-                            {
-                                case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
-                                {
-                                    var entityAddress = (EntityAddress)functionEventEmitterIdentifier.PackageAddress;
-                                    referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, CoreModel.EntityType.GlobalPackage, stateVersion));
-                                    break;
-                                }
-
-                                case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
-                                {
-                                    var entityAddress = (EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress;
-
-                                    referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, methodEventEmitterIdentifier.Entity.EntityType, stateVersion));
-                                    break;
-                                }
-
-                                default:
-                                    throw new ArgumentOutOfRangeException(nameof(@event.Type.Emitter), @event.Type.Emitter, null);
-                            }
+                            referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
                         }
                     }
 
@@ -551,6 +533,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     ledgerTransaction.IndexInRound = summary.IndexInRound;
                     ledgerTransaction.FeePaid = committedTransaction.Receipt.FeeSummary.TotalFee();
                     ledgerTransaction.TipPaid = committedTransaction.Receipt.FeeSummary.TotalTip();
+                    ledgerTransaction.AffectedGlobalEntities = default!; // configured later on
                     ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                     ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                     ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
@@ -563,14 +546,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         ErrorMessage = committedTransaction.Receipt.ErrorMessage,
                         Output = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
                         NextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson(),
-                        EventsSbors = committedTransaction.Receipt.Events?.Select(x => x.Data.GetDataBytes()).ToArray() ?? Array.Empty<byte[]>(),
                         CostingParameters = committedTransaction.Receipt.CostingParameters.ToJson(),
                         FeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson(),
                         FeeSource = committedTransaction.Receipt.FeeSource?.ToJson(),
-                        EventSchemaHashes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray() ?? Array.Empty<byte[]>(),
-                        EventTypeIndexes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray() ?? Array.Empty<long>(),
-                        EventSborTypeKinds = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray().ToArray() ??
-                                             Array.Empty<SborTypeKind>(),
+                        EventSbors = default!, // configured later on
+                        EventSchemaEntityIds = default!, // configured later on
+                        EventSchemaHashes = default!, // configured later on
+                        EventTypeIndexes = default!, // configured later on
+                        EventSborTypeKinds = default!, // configured later on
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
@@ -761,6 +744,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             {
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
+                var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
                 long? newEpoch = null;
                 var affectedGlobalEntities = new HashSet<long>();
 
@@ -1199,7 +1183,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
+
                     transaction.AffectedGlobalEntities = affectedGlobalEntities.ToArray();
+                    transaction.EngineReceipt.EventSbors = events.Select(e => e.Data.GetDataBytes()).ToArray();
+                    transaction.EngineReceipt.EventSchemaEntityIds = events.Select(e => referencedEntities.Get((EntityAddress)e.Type.TypeReference.FullTypeId.EntityAddress).DatabaseId).ToArray();
+                    transaction.EngineReceipt.EventSchemaHashes = events.Select(e => e.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray();
+                    transaction.EngineReceipt.EventTypeIndexes = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray();
+                    transaction.EngineReceipt.EventSborTypeKinds = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray();
 
                     ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntities.Select(affectedEntity => new AffectedGlobalEntityTransactionMarker
                     {
@@ -1208,7 +1198,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         StateVersion = stateVersion,
                     }));
 
-                    foreach (var @event in committedTransaction.Receipt.Events)
+                    foreach (var @event in events)
                     {
                         if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter
                             || methodEventEmitter.ObjectModuleId != CoreModel.ModuleId.Main

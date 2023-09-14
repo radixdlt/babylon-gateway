@@ -166,7 +166,10 @@ internal class TransactionReceipt
     public string? ErrorMessage { get; set; }
 
     [Column("receipt_event_sbors")]
-    public byte[][] EventsSbors { get; set; }
+    public byte[][] EventSbors { get; set; }
+
+    [Column("receipt_event_schema_entity_ids")]
+    public long[] EventSchemaEntityIds { get; set; }
 
     [Column("receipt_event_schema_hashes")]
     public byte[][] EventSchemaHashes { get; set; }
