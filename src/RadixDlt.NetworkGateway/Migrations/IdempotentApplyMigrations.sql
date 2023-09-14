@@ -1091,3 +1091,22 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914134119_DropNonFungibleIdLocationHistoryIsDeleted') THEN
+    ALTER TABLE non_fungible_id_location_history DROP COLUMN is_deleted;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914134119_DropNonFungibleIdLocationHistoryIsDeleted') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20230914134119_DropNonFungibleIdLocationHistoryIsDeleted', '7.0.9');
+    END IF;
+END $EF$;
+COMMIT;
+

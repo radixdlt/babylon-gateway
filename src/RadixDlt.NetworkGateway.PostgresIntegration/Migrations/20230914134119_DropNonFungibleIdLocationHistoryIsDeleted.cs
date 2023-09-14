@@ -62,24 +62,32 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+#nullable disable
 
-[Table("non_fungible_id_location_history")]
-internal class NonFungibleIdLocationHistory
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    /// <inheritdoc />
+    public partial class DropNonFungibleIdLocationHistoryIsDeleted : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "is_deleted",
+                table: "non_fungible_id_location_history");
+        }
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("non_fungible_id_data_id")]
-    public long NonFungibleIdDataId { get; set; }
-
-    [Column("vault_entity_id")]
-    public long VaultEntityId { get; set; }
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<bool>(
+                name: "is_deleted",
+                table: "non_fungible_id_location_history",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
+        }
+    }
 }

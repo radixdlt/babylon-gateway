@@ -1376,6 +1376,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var entityAccessRulesAggregateHistoryToAdd = new List<EntityRoleAssignmentsAggregateHistory>();
             var nonFungibleIdStoreHistoryToAdd = new Dictionary<NonFungibleStoreLookup, NonFungibleIdStoreHistory>();
             var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
+            var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
 
             foreach (var metadataChange in metadataChanges)
@@ -1712,13 +1713,23 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             vaultHistory = previous;
                         }
 
+                        var nonFungibleIdDataId = existingNonFungibleIdData[new NonFungibleIdLookup(nfe.ReferencedResource.DatabaseId, nfe.NonFungibleId)].Id;
+
                         if (nfe.IsWithdrawal)
                         {
-                            vaultHistory.NonFungibleIds.Remove(existingNonFungibleIdData[new NonFungibleIdLookup(nfe.ReferencedResource.DatabaseId, nfe.NonFungibleId)].Id);
+                            vaultHistory.NonFungibleIds.Remove(nonFungibleIdDataId);
                         }
                         else
                         {
-                            vaultHistory.NonFungibleIds.Add(existingNonFungibleIdData[new NonFungibleIdLookup(nfe.ReferencedResource.DatabaseId, nfe.NonFungibleId)].Id);
+                            vaultHistory.NonFungibleIds.Add(nonFungibleIdDataId);
+
+                            nonFungibleIdLocationHistoryToAdd.Add(new NonFungibleIdLocationHistory
+                            {
+                                Id = sequences.NonFungibleIdLocationHistorySequence++,
+                                FromStateVersion = nfe.StateVersion,
+                                NonFungibleIdDataId = nonFungibleIdDataId,
+                                VaultEntityId = nfe.ReferencedVault.DatabaseId,
+                            });
                         }
 
                         break;
@@ -1871,6 +1882,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyNonFungibleIdData(nonFungibleIdDataToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);

@@ -99,6 +99,8 @@ internal record EntityNonFungibleResourceBalanceChangeEvent(long EntityId, long 
 
 internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
 
+internal record NonFungibleIdDeletion(ReferencedEntity ReferencedResource, string NonFungibleId, long StateVersion);
+
 internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
 
 internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? Minted = null, TokenAmount? Burned = null);

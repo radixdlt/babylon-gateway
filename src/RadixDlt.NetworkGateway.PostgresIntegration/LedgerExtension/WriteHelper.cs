@@ -903,6 +903,30 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyNonFungibleIdLocationHistory(List<NonFungibleIdLocationHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer =
+            await _connection.BeginBinaryImportAsync("COPY non_fungible_id_location_history (id, from_state_version, non_fungible_id_data_id, vault_entity_id) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
     public async Task<int> CopyPackageBlueprintHistory(ICollection<PackageBlueprintHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -1097,6 +1121,7 @@ SELECT
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
+    setval('non_fungible_id_location_history_id_seq', @nonFungibleIdLocationHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
     setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
@@ -1127,6 +1152,7 @@ SELECT
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                 nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
                 nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
+                nonFungibleIdLocationHistorySequence = sequences.NonFungibleIdLocationHistorySequence,
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
                 ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
