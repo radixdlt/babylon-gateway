@@ -1026,70 +1026,7 @@ START TRANSACTION;
 DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
-    ALTER TABLE validator_active_set_history ALTER COLUMN stake TYPE numeric(1000,0);
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
-    ALTER TABLE resource_entity_supply_history ALTER COLUMN total_supply TYPE numeric(1000,0);
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
-    ALTER TABLE resource_entity_supply_history ALTER COLUMN total_minted TYPE numeric(1000,0);
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
-    ALTER TABLE resource_entity_supply_history ALTER COLUMN total_burned TYPE numeric(1000,0);
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
-    ALTER TABLE ledger_transactions ALTER COLUMN tip_paid TYPE numeric(1000,0);
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
-    ALTER TABLE ledger_transactions ALTER COLUMN fee_paid TYPE numeric(1000,0);
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
     ALTER TABLE ledger_transactions ADD receipt_event_schema_entity_ids bigint[] NOT NULL DEFAULT ARRAY[]::bigint[];
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
-    ALTER TABLE ledger_transaction_markers ALTER COLUMN quantity TYPE numeric(1000,0);
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
-    ALTER TABLE entity_vault_history ALTER COLUMN balance TYPE numeric(1000,0);
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
-    ALTER TABLE entity_resource_aggregated_vaults_history ALTER COLUMN balance TYPE numeric(1000,0);
     END IF;
 END $EF$;
 
@@ -1098,6 +1035,25 @@ BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
     VALUES ('20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions', '7.0.9');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914101822_DropDefaultEventSchemaEntityIdsToLedgerTransactions') THEN
+    ALTER TABLE ledger_transactions ALTER COLUMN receipt_event_schema_entity_ids DROP DEFAULT;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230914101822_DropDefaultEventSchemaEntityIdsToLedgerTransactions') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20230914101822_DropDefaultEventSchemaEntityIdsToLedgerTransactions', '7.0.9');
     END IF;
 END $EF$;
 COMMIT;
