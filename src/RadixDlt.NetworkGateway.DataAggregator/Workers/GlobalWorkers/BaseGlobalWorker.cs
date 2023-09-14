@@ -71,11 +71,11 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
-public abstract class GlobalWorker : LoopedWorkerBase
+public abstract class BaseGlobalWorker : LoopedWorkerBase
 {
     private readonly IEnumerable<IGlobalWorkerObserver> _observers;
 
-    protected GlobalWorker(
+    protected BaseGlobalWorker(
             ILogger logger,
             IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,
             TimeSpan minDelayBetweenInfoLogs,

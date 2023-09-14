@@ -71,15 +71,16 @@ public interface ILedgerConfirmationServiceObserver
 {
     void ResetQuorum();
 
-    ValueTask PreHandleLedgerExtensionIfQuorum(DateTime timestamp);
+    ValueTask PreHandleLedgerExtension(DateTime timestamp);
 
     void PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion);
 
-    void SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion);
+    // TODO PP: i think they are never published.
+    // void SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion);
 
-    void SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion);
+    // void SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion);
 
-    void SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion);
+    // void SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion);
 
     // void TrustWeightingRequirementsComputed(LedgerConfirmationService.TrustWeightingReport report);
 

@@ -116,7 +116,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         return await GetTopOfLedger(dbContext, token);
     }
 
-    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token = default)
+    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default)
     {
         // TODO further improvements:
         // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
@@ -134,7 +134,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         {
             var topOfLedgerSummary = await GetTopOfLedger(dbContext, token);
 
-            TransactionConsistency.AssertLatestTransactionConsistent(ledgerExtension.LatestTransactionSummary.StateVersion, topOfLedgerSummary.StateVersion);
+            TransactionConsistencyValidator.AssertLatestTransactionConsistent(ledgerExtension.LatestTransactionSummary.StateVersion, topOfLedgerSummary.StateVersion);
 
             if (topOfLedgerSummary.StateVersion == 0)
             {

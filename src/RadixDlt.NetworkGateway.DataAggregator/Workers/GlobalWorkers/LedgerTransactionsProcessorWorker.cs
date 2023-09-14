@@ -76,28 +76,28 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 /// <summary>
 /// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
 /// </summary>
-public sealed class LedgerConfirmationWorker : GlobalWorker
+public sealed class LedgerTransactionsProcessorWorker : BaseGlobalWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
             TimeSpan.FromMilliseconds(100),
             TimeSpan.FromMilliseconds(100));
 
-    private readonly ILedgerConfirmationService _ledgerConfirmationService;
+    private readonly ILedgerTransactionsProcessor _ledgerTransactionsProcessor;
 
-    public LedgerConfirmationWorker(
-        ILogger<LedgerConfirmationWorker> logger,
-        ILedgerConfirmationService ledgerConfirmationService,
+    public LedgerTransactionsProcessorWorker(
+        ILogger<LedgerTransactionsProcessorWorker> logger,
+        ILedgerTransactionsProcessor ledgerTransactionsProcessor,
         IEnumerable<IGlobalWorkerObserver> observers,
         IClock clock
     )
         : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30), observers, clock)
     {
-        _ledgerConfirmationService = ledgerConfirmationService;
+        _ledgerTransactionsProcessor = ledgerTransactionsProcessor;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _ledgerConfirmationService.HandleLedgerExtension(cancellationToken);
+        await _ledgerTransactionsProcessor.ProcessTransactions(cancellationToken);
     }
 }

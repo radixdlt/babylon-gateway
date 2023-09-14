@@ -82,12 +82,12 @@ public interface INodeWorker : ILoopedWorkerBase
 /// <summary>
 /// A base class for NodeWorkers. There is one worker of each type spawned by NodeWorkers / NodeWorkersRunner.
 /// </summary>
-public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
+public abstract class BaseNodeWorker : LoopedWorkerBase, INodeWorker
 {
     private readonly IEnumerable<INodeWorkerObserver> _observers;
     private readonly string _nodeName;
 
-    protected NodeWorker(
+    protected BaseNodeWorker(
             ILogger logger,
             string nodeName,
             IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,

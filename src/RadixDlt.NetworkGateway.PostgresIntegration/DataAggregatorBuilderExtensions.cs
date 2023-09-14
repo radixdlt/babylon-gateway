@@ -85,6 +85,9 @@ public static class DataAggregatorBuilderExtensions
         builder
             .Services
             .AddSingleton<ILedgerExtenderService, PostgresLedgerExtenderService>()
+            .AddSingleton<IFetchedTransactionStore, FetchedTransactionStore>()
+            .AddSingleton<INodeStatusStore, NodeStatusStore>()
+            .AddSingleton<IProcessedTransactionsStore, ProcessedTransactionsStore>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
             .AddSingleton<IPendingTransactionTrackerService, PendingTransactionTrackerService>()
             .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()

@@ -62,26 +62,51 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
+namespace RadixDlt.NetworkGateway.DataAggregator;
 
-public interface ILedgerConfirmationService
+public static class TransactionConsistencyValidator
 {
-    public TransactionSummary? GetTip();
+    public static void AssertLatestTransactionConsistent(long latestTransactionStateVersion, long topOfLedgerStateVersion)
+    {
+        if (latestTransactionStateVersion != topOfLedgerStateVersion)
+        {
+            throw new InvalidLedgerCommitException(
+                $"Tried to commit transactions with parent state version {latestTransactionStateVersion} " +
+                $"on top of a ledger with state version {topOfLedgerStateVersion}"
+            );
+        }
+    }
 
-    // This method is to be called from the global LedgerExtensionWorker
-    Task HandleLedgerExtension(CancellationToken token);
+    public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
+    {
+        if (stateVersion != previousStateVersion + 1)
+        {
+            throw new InvalidLedgerCommitException(
+                $"Attempted to commit a transaction with state version {stateVersion}" +
+                $" on top of transaction with state version {previousStateVersion}"
+            );
+        }
+    }
 
-    // Below are to be called from the node transaction log workers - to communicate with the LedgerConfirmationService
-    void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipTreeHash);
+    public static void ValidateHashes(TransactionSummary lastCommittedTransactionSummary, CoreModel.CommittedStateIdentifier fetchedPreviousStateIdentifier)
+    {
+        if (lastCommittedTransactionSummary.ReceiptTreeHash != fetchedPreviousStateIdentifier.ReceiptTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected receipt three hash: {lastCommittedTransactionSummary.ReceiptTreeHash} but {fetchedPreviousStateIdentifier.ReceiptTreeHash} found.");
+        }
 
-    void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions, int responseSize);
+        if (lastCommittedTransactionSummary.StateTreeHash != fetchedPreviousStateIdentifier.StateTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected state three hash: {lastCommittedTransactionSummary.StateTreeHash} but {fetchedPreviousStateIdentifier.StateTreeHash} found.");
+        }
 
-    TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName);
+        if (lastCommittedTransactionSummary.TransactionTreeHash != fetchedPreviousStateIdentifier.TransactionTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected state three hash: {lastCommittedTransactionSummary.TransactionTreeHash} but {fetchedPreviousStateIdentifier.TransactionTreeHash} found.");
+        }
+    }
 }
-
-public sealed record TransactionsRequested(long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound);
