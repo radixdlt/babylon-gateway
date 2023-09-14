@@ -115,6 +115,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
+    public DbSet<NonFungibleIdLocationHistory> NonFungibleIdLocationHistory => Set<NonFungibleIdLocationHistory>();
+
     public DbSet<StateHistory> StateHistory => Set<StateHistory>();
 
     public DbSet<ValidatorPublicKeyHistory> ValidatorKeyHistory => Set<ValidatorPublicKeyHistory>();
@@ -414,6 +416,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<NonFungibleIdStoreHistory>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<NonFungibleIdLocationHistory>()
+            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
 
         modelBuilder
             .Entity<StateHistory>()
