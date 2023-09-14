@@ -62,30 +62,24 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal record TransactionReceiptEventData(byte[] Data, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
-
-internal static class TransactionReceiptExtensions
+[Table("non_fungible_id_location_history")]
+internal class NonFungibleIdLocationHistory
 {
-    public static List<TransactionReceiptEventData> GetEvents(this TransactionReceipt transactionReceipt)
-    {
-        var result = new List<TransactionReceiptEventData>();
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-        for (var i = 0; i < transactionReceipt.EventsSbors.Length; ++i)
-        {
-            var eventData = transactionReceipt.EventsSbors[i];
-            var schemaHash = transactionReceipt.EventSchemaHashes[i];
-            var index = transactionReceipt.EventTypeIndexes[i];
-            var typeKind = transactionReceipt.EventSborTypeKinds[i];
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-            result.Add(new TransactionReceiptEventData(eventData, schemaHash, index, typeKind));
-        }
+    [Column("non_fungible_id_data_id")]
+    public long NonFungibleIdDataId { get; set; }
 
-        return result;
-    }
+    [Column("vault_entity_id")]
+    public long VaultEntityId { get; set; }
 }

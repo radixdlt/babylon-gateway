@@ -201,7 +201,7 @@ internal class WriteHelper
         }
 
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY ledger_transactions (state_version, epoch, round_in_epoch, index_in_epoch, index_in_round, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_fee_source, receipt_fee_destination, receipt_costing_parameters, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_sbors, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash, message) FROM STDIN (FORMAT BINARY)",
+            "COPY ledger_transactions (state_version, epoch, round_in_epoch, index_in_epoch, index_in_round, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_fee_source, receipt_fee_destination, receipt_costing_parameters, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_sbors, receipt_event_schema_entity_ids, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash, message) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var lt in entities)
@@ -231,7 +231,8 @@ internal class WriteHelper
             await writer.WriteAsync(lt.EngineReceipt.ErrorMessage, NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.EngineReceipt.Output, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.NextEpoch, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventsSbors, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventSbors, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventSchemaEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.EngineReceipt.EventSchemaHashes, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(lt.EngineReceipt.EventTypeIndexes, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.EngineReceipt.EventSborTypeKinds, "sbor_type_kind[]", token);
@@ -902,6 +903,30 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyNonFungibleIdLocationHistory(List<NonFungibleIdLocationHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer =
+            await _connection.BeginBinaryImportAsync("COPY non_fungible_id_location_history (id, from_state_version, non_fungible_id_data_id, vault_entity_id) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
     public async Task<int> CopyPackageBlueprintHistory(ICollection<PackageBlueprintHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -1096,6 +1121,7 @@ SELECT
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
+    setval('non_fungible_id_location_history_id_seq', @nonFungibleIdLocationHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
     setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
@@ -1126,6 +1152,7 @@ SELECT
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                 nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
                 nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
+                nonFungibleIdLocationHistorySequence = sequences.NonFungibleIdLocationHistorySequence,
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
                 ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,

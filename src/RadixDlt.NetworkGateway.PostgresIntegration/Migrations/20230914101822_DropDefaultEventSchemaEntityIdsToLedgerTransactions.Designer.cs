@@ -81,8 +81,8 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230912144644_MarkSchemaDefiningColumnsAsRequired")]
-    partial class MarkSchemaDefiningColumnsAsRequired
+    [Migration("20230914101822_DropDefaultEventSchemaEntityIdsToLedgerTransactions")]
+    partial class DropDefaultEventSchemaEntityIdsToLedgerTransactions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2112,6 +2112,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasColumnType("sbor_type_kind[]")
                                 .HasColumnName("receipt_event_sbor_type_kinds");
 
+                            b1.Property<byte[][]>("EventSbors")
+                                .IsRequired()
+                                .HasColumnType("bytea[]")
+                                .HasColumnName("receipt_event_sbors");
+
+                            b1.Property<long[]>("EventSchemaEntityIds")
+                                .IsRequired()
+                                .HasColumnType("bigint[]")
+                                .HasColumnName("receipt_event_schema_entity_ids");
+
                             b1.Property<byte[][]>("EventSchemaHashes")
                                 .IsRequired()
                                 .HasColumnType("bytea[]")
@@ -2121,11 +2131,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .IsRequired()
                                 .HasColumnType("bigint[]")
                                 .HasColumnName("receipt_event_type_indexes");
-
-                            b1.Property<byte[][]>("EventsSbors")
-                                .IsRequired()
-                                .HasColumnType("bytea[]")
-                                .HasColumnName("receipt_event_sbors");
 
                             b1.Property<string>("FeeDestination")
                                 .HasColumnType("jsonb")

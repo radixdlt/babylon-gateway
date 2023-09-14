@@ -636,35 +636,38 @@ ORDER BY nfid.from_state_version DESC
 
         var cd = new CommandDefinition(
             commandText: @"
+WITH variables (non_fungible_id) AS (
+    SELECT UNNEST(@nonFungibleIds)
+)
 SELECT
-    nfid.non_fungible_id as NonFungibleId,
-    md.IsDeleted,
-    vh.OwnerVaultId,
-    e.address as OwnerVaultAddress,
-    (CASE WHEN md.IsDeleted THEN md.DataFromStateVersion
-          ELSE vh.LocationFromStateVersion END) AS FromStateVersion
-FROM non_fungible_id_data nfid
-LEFT JOIN LATERAL (
-    SELECT
-        is_deleted as IsDeleted,
-        from_state_version as DataFromStateVersion
-    FROM non_fungible_id_data_history nfiddh
-    WHERE nfiddh.non_fungible_id_data_id = nfid.id AND nfiddh.from_state_version <= @stateVersion
-    ORDER BY nfiddh.from_state_version DESC
+    nfid.non_fungible_id AS NonFungibleId,
+    md.is_deleted AS IsDeleted,
+    lh.vault_entity_id AS OwnerVaultId,
+    e.address AS OwnerVaultAddress,
+    (CASE WHEN md.is_deleted THEN md.from_state_version ELSE lh.from_state_version END) AS FromStateVersion
+FROM variables var
+INNER JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_data
+    WHERE non_fungible_resource_entity_id = @resourceEntityId AND non_fungible_id = var.non_fungible_id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) nfid ON TRUE
+INNER JOIN LATERAL (
+    SELECT is_deleted, from_state_version
+    FROM non_fungible_id_data_history
+    WHERE non_fungible_id_data_id = nfid.id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
     LIMIT 1
 ) md ON TRUE
-LEFT JOIN LATERAL (
-    SELECT
-        vault_entity_id as OwnerVaultId,
-        from_state_version as LocationFromStateVersion
-    FROM entity_vault_history evh
-    WHERE resource_entity_id = @resourceEntityId AND from_state_version <= @stateVersion and nfid.id = ANY(non_fungible_ids)
-    ORDER BY evh.from_state_version DESC
+INNER JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_location_history
+    WHERE non_fungible_id_data_id = nfid.id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
     LIMIT 1
-) vh ON TRUE
-INNER JOIN entities e ON e.id = vh.OwnerVaultId AND e.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @resourceEntityId AND nfid.non_fungible_id = ANY(@nonFungibleIds)
-order by FromStateVersion DESC
-",
+) lh ON TRUE
+INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @stateVersion",
             parameters: new
             {
                 stateVersion = ledgerState.StateVersion,

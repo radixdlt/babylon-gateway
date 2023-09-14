@@ -62,72 +62,46 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+#nullable disable
 
-internal interface IVaultSnapshot
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    public ReferencedEntity ReferencedVault { get; }
+    /// <inheritdoc />
+    public partial class CreateNonFungibleIdLocationHistory : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "non_fungible_id_location_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    non_fungible_id_data_id = table.Column<long>(type: "bigint", nullable: false),
+                    vault_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_non_fungible_id_location_history", x => x.id);
+                });
 
-    public ReferencedEntity ReferencedResource { get; }
+            migrationBuilder.CreateIndex(
+                name: "IX_non_fungible_id_location_history_non_fungible_id_data_id_fr~",
+                table: "non_fungible_id_location_history",
+                columns: new[] { "non_fungible_id_data_id", "from_state_version" });
+        }
 
-    public long StateVersion { get; }
-}
-
-internal interface IVaultChange
-{
-    public long EntityId { get; }
-
-    public long ResourceEntityId { get; }
-
-    public long StateVersion { get; }
-}
-
-internal record FungibleVaultSnapshot(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion) : IVaultSnapshot;
-
-internal record NonFungibleVaultSnapshot(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion) : IVaultSnapshot;
-
-internal record EntityFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, TokenAmount Delta, long StateVersion) : IVaultChange;
-
-internal record EntityNonFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, long Delta, long StateVersion) : IVaultChange;
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
-
-internal record NonFungibleIdDeletion(ReferencedEntity ReferencedResource, string NonFungibleId, long StateVersion);
-
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
-
-internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? Minted = null, TokenAmount? Burned = null);
-
-internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record struct MetadataLookup(long EntityId, string Key);
-
-internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string BlueprintVersion);
-
-internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
-
-internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
-
-internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
-
-internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
-
-internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
-
-internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
-
-internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ModuleId KeyModule);
-
-internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
-{
-    public CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
-
-    public IList<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.RoleAssignmentModuleRuleEntrySubstate>();
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "non_fungible_id_location_history");
+        }
+    }
 }

@@ -575,6 +575,7 @@ SELECT
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_data_history_id_seq') AS NonFungibleIdDataHistorySequence,
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
+    nextval('non_fungible_id_location_history_id_seq') AS NonFungibleIdLocationHistorySequence,
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence,
     nextval('ledger_transaction_markers_id_seq') AS LedgerTransactionMarkerSequence,
