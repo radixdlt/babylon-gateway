@@ -68,6 +68,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
@@ -80,9 +81,11 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    partial class MigrationsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230914092705_AddMissingEventSchemaEntityIdsToLedgerTransactions")]
+    partial class AddMissingEventSchemaEntityIdsToLedgerTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -591,12 +594,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GlobalEntityId", "FromStateVersion")
-                        .HasFilter("is_royalty_vault = true");
-
-                    b.HasIndex("OwnerEntityId", "FromStateVersion")
-                        .HasFilter("is_royalty_vault = true");
-
                     b.HasIndex("GlobalEntityId", "VaultEntityId", "FromStateVersion");
 
                     b.HasIndex("Id", "ResourceEntityId", "FromStateVersion");
@@ -917,34 +914,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("NonFungibleIdDataId", "FromStateVersion");
 
                     b.ToTable("non_fungible_id_data_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdLocationHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long>("NonFungibleIdDataId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("non_fungible_id_data_id");
-
-                    b.Property<long>("VaultEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("vault_entity_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NonFungibleIdDataId", "FromStateVersion");
-
-                    b.ToTable("non_fungible_id_location_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdStoreHistory", b =>

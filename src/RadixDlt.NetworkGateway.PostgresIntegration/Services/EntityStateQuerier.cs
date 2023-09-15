@@ -564,7 +564,7 @@ SELECT
     nfsh.type_index AS TypeIndex,
     nfsh.sbor_type_kind AS SborTypeKind
 FROM non_fungible_schema_history nfsh
-INNER JOIN schema_history sh ON sh.schema_hash = nfsh.schema_hash AND sh.entity_id = @entityId
+INNER JOIN schema_history sh ON sh.schema_hash = nfsh.schema_hash AND sh.entity_id = nfsh.schema_defining_entity_id
 WHERE nfsh.resource_entity_id = @entityId AND nfsh.from_state_version <= @stateVersion
 ORDER BY nfsh.from_state_version DESC",
             parameters: new
@@ -636,35 +636,38 @@ ORDER BY nfid.from_state_version DESC
 
         var cd = new CommandDefinition(
             commandText: @"
+WITH variables (non_fungible_id) AS (
+    SELECT UNNEST(@nonFungibleIds)
+)
 SELECT
-    nfid.non_fungible_id as NonFungibleId,
-    md.IsDeleted,
-    vh.OwnerVaultId,
-    e.address as OwnerVaultAddress,
-    (CASE WHEN md.IsDeleted THEN md.DataFromStateVersion
-          ELSE vh.LocationFromStateVersion END) AS FromStateVersion
-FROM non_fungible_id_data nfid
-LEFT JOIN LATERAL (
-    SELECT
-        is_deleted as IsDeleted,
-        from_state_version as DataFromStateVersion
-    FROM non_fungible_id_data_history nfiddh
-    WHERE nfiddh.non_fungible_id_data_id = nfid.id AND nfiddh.from_state_version <= @stateVersion
-    ORDER BY nfiddh.from_state_version DESC
+    nfid.non_fungible_id AS NonFungibleId,
+    md.is_deleted AS IsDeleted,
+    lh.vault_entity_id AS OwnerVaultId,
+    e.address AS OwnerVaultAddress,
+    (CASE WHEN md.is_deleted THEN md.from_state_version ELSE lh.from_state_version END) AS FromStateVersion
+FROM variables var
+INNER JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_data
+    WHERE non_fungible_resource_entity_id = @resourceEntityId AND non_fungible_id = var.non_fungible_id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) nfid ON TRUE
+INNER JOIN LATERAL (
+    SELECT is_deleted, from_state_version
+    FROM non_fungible_id_data_history
+    WHERE non_fungible_id_data_id = nfid.id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
     LIMIT 1
 ) md ON TRUE
-LEFT JOIN LATERAL (
-    SELECT
-        vault_entity_id as OwnerVaultId,
-        from_state_version as LocationFromStateVersion
-    FROM entity_vault_history evh
-    WHERE resource_entity_id = @resourceEntityId AND from_state_version <= @stateVersion and nfid.id = ANY(non_fungible_ids)
-    ORDER BY evh.from_state_version DESC
+INNER JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_location_history
+    WHERE non_fungible_id_data_id = nfid.id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
     LIMIT 1
-) vh ON TRUE
-INNER JOIN entities e ON e.id = vh.OwnerVaultId AND e.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @resourceEntityId AND nfid.non_fungible_id = ANY(@nonFungibleIds)
-order by FromStateVersion DESC
-",
+) lh ON TRUE
+INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @stateVersion",
             parameters: new
             {
                 stateVersion = ledgerState.StateVersion,
@@ -872,8 +875,8 @@ SELECT
     kvssh.value_type_index AS ValueTypeIndex,
     kvssh.value_sbor_type_kind AS ValueSborTypeKind
 FROM key_value_store_schema_history kvssh
-INNER JOIN schema_history ksh ON ksh.schema_hash = kvssh.key_schema_hash AND ksh.entity_id = @entityId
-INNER JOIN schema_history vsh ON vsh.schema_hash = kvssh.value_schema_hash AND vsh.entity_id = @entityId
+INNER JOIN schema_history ksh ON ksh.schema_hash = kvssh.key_schema_hash AND ksh.entity_id = kvssh.key_schema_defining_entity_id
+INNER JOIN schema_history vsh ON vsh.schema_hash = kvssh.value_schema_hash AND vsh.entity_id = kvssh.value_schema_defining_entity_id
 WHERE kvssh.key_value_store_entity_id = @entityId AND kvssh.from_state_version <= @stateVersion
 ORDER BY kvssh.from_state_version DESC
 ",

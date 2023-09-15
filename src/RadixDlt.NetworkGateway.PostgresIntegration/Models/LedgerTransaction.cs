@@ -63,13 +63,18 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+internal record TransactionReceiptEventLookup(long EntityId, ValueBytes SchemaHash);
+internal record TransactionReceiptEventData(byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
 
 /// <summary>
 /// A transaction committed onto the radix ledger.
@@ -166,7 +171,10 @@ internal class TransactionReceipt
     public string? ErrorMessage { get; set; }
 
     [Column("receipt_event_sbors")]
-    public byte[][] EventsSbors { get; set; }
+    public byte[][] EventSbors { get; set; }
+
+    [Column("receipt_event_schema_entity_ids")]
+    public long[] EventSchemaEntityIds { get; set; }
 
     [Column("receipt_event_schema_hashes")]
     public byte[][] EventSchemaHashes { get; set; }
@@ -176,6 +184,48 @@ internal class TransactionReceipt
 
     [Column("receipt_event_sbor_type_kinds")]
     public SborTypeKind[] EventSborTypeKinds { get; set; }
+
+    public List<TransactionReceiptEventLookup> GetEventLookups()
+    {
+        var result = new List<TransactionReceiptEventLookup>();
+
+        // TODO drop this if statement once we deploy with complete db-wipe
+        if (EventSchemaEntityIds.Length != EventSbors.Length)
+        {
+            throw new NotSupportedException("Missing EventSchemaEntityIds - wipe your database and ingest all the data");
+        }
+
+        for (var i = 0; i < EventSbors.Length; ++i)
+        {
+            result.Add(new TransactionReceiptEventLookup(EventSchemaEntityIds[i], EventSchemaHashes[i]));
+        }
+
+        return result;
+    }
+
+    public List<TransactionReceiptEventData> GetEvents()
+    {
+        var result = new List<TransactionReceiptEventData>();
+
+        // TODO drop this if statement once we deploy with complete db-wipe
+        if (EventSchemaEntityIds.Length != EventSbors.Length)
+        {
+            throw new NotSupportedException("Missing EventSchemaEntityIds - wipe your database and ingest all the data");
+        }
+
+        for (var i = 0; i < EventSbors.Length; ++i)
+        {
+            var eventData = EventSbors[i];
+            var entityId = EventSchemaEntityIds[i];
+            var schemaHash = EventSchemaHashes[i];
+            var index = EventTypeIndexes[i];
+            var typeKind = EventSborTypeKinds[i];
+
+            result.Add(new TransactionReceiptEventData(eventData, entityId, schemaHash, index, typeKind));
+        }
+
+        return result;
+    }
 }
 
 internal class GenesisLedgerTransaction : LedgerTransaction

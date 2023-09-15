@@ -62,46 +62,46 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+#nullable disable
 
-[Table("key_value_store_schema_history")]
-internal class KeyValueStoreSchemaHistory
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    /// <inheritdoc />
+    public partial class CreateNonFungibleIdLocationHistory : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "non_fungible_id_location_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    non_fungible_id_data_id = table.Column<long>(type: "bigint", nullable: false),
+                    vault_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_non_fungible_id_location_history", x => x.id);
+                });
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+            migrationBuilder.CreateIndex(
+                name: "IX_non_fungible_id_location_history_non_fungible_id_data_id_fr~",
+                table: "non_fungible_id_location_history",
+                columns: new[] { "non_fungible_id_data_id", "from_state_version" });
+        }
 
-    [Column("key_value_store_entity_id")]
-    public long KeyValueStoreEntityId { get; set; }
-
-    [Column("key_schema_hash")]
-    public byte[] KeySchemaHash { get; set; }
-
-    [Column("key_schema_defining_entity_id")]
-    public long KeySchemaDefiningEntityId { get; set; }
-
-    [Column("key_sbor_type_kind")]
-    public SborTypeKind KeySborTypeKind { get; set; }
-
-    [Column("key_type_index")]
-    public long KeyTypeIndex { get; set; }
-
-    [Column("value_schema_hash")]
-    public byte[] ValueSchemaHash { get; set; }
-
-    [Column("value_schema_defining_entity_id")]
-    public long ValueSchemaDefiningEntityId { get; set; }
-
-    [Column("value_sbor_type_kind")]
-    public SborTypeKind ValueSborTypeKind { get; set; }
-
-    [Column("value_type_index")]
-    public long ValueTypeIndex { get; set; }
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "non_fungible_id_location_history");
+        }
+    }
 }

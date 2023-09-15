@@ -69,7 +69,6 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -81,6 +80,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class TransactionQuerier : ITransactionQuerier
 {
+    private record SchemaLookup(long EntityId, ValueBytes SchemaHash);
+
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -353,19 +354,27 @@ internal class TransactionQuerier : ITransactionQuerier
 
         var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
 
-        var schemaHashes = transactions
-            .Where(x => x.EngineReceipt.EventSchemaHashes.Any())
-            .SelectMany(x => x.EngineReceipt.EventSchemaHashes)
-            .ToList();
+        var schemaLookups = transactions
+            .SelectMany(x => x.EngineReceipt.GetEventLookups())
+            .ToHashSet();
 
-        Dictionary<ValueBytes, byte[]> schemas = new Dictionary<ValueBytes, byte[]>();
+        Dictionary<SchemaLookup, byte[]> schemas = new Dictionary<SchemaLookup, byte[]>();
 
-        if (optIns.ReceiptEvents && schemaHashes.Any())
+        if (optIns.ReceiptEvents && schemaLookups.Any())
         {
+            var entityIds = schemaLookups.Select(x => x.EntityId).ToList();
+            var schemaHashes = schemaLookups.Select(x => (byte[])x.SchemaHash).ToList();
+
             schemas = await _dbContext
                 .SchemaHistory
-                .Where(x => schemaHashes.Contains(x.SchemaHash))
-                .ToDictionaryAsync(x => (ValueBytes)x.SchemaHash, x => x.Schema, token);
+                .FromSqlInterpolated($@"
+WITH variables (entity_id, schema_hash) AS (
+    SELECT UNNEST({entityIds}), UNNEST({schemaHashes})
+)
+SELECT sh.*
+FROM variables var
+INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash = var.schema_hash")
+                .ToDictionaryAsync(x => new SchemaLookup(x.EntityId, x.SchemaHash), x => x.Schema, token);
         }
 
         List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
@@ -373,7 +382,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
         foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)))
         {
-            if (!optIns.ReceiptEvents || schemaHashes?.Any() == false)
+            if (!optIns.ReceiptEvents || schemaLookups?.Any() == false)
             {
                 mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null));
             }
@@ -383,14 +392,12 @@ internal class TransactionQuerier : ITransactionQuerier
 
                 foreach (var @event in transaction.EngineReceipt.GetEvents())
                 {
-                    var schemaFound = schemas.TryGetValue(@event.SchemaHash, out var schema);
-
-                    if (!schemaFound)
+                    if (!schemas.TryGetValue(new SchemaLookup(@event.EntityId, @event.SchemaHash), out var schema))
                     {
                         throw new UnreachableException($"Unable to find schema for given hash {@event.SchemaHash.ToHex()}");
                     }
 
-                    events.Add(ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema!, @event.KeyTypeKind, @event.TypeIndex, networkId));
+                    events.Add(ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId));
                 }
 
                 mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events));

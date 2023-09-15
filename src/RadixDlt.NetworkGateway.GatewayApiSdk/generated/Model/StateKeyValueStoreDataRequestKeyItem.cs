@@ -98,28 +98,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected StateKeyValueStoreDataRequestKeyItem() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
-        /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob. (required).</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string))
+        /// <param name="keyHex">Hex-encoded binary blob..</param>
+        /// <param name="keyJson">keyJson.</param>
+        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), Object keyJson = default(Object))
         {
-            // to ensure "keyHex" is required (not null)
-            if (keyHex == null)
-            {
-                throw new ArgumentNullException("keyHex is a required property for StateKeyValueStoreDataRequestKeyItem and cannot be null");
-            }
             this.KeyHex = keyHex;
+            this.KeyJson = keyJson;
         }
 
         /// <summary>
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "key_hex", EmitDefaultValue = true)]
         public string KeyHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets KeyJson
+        /// </summary>
+        [DataMember(Name = "key_json", EmitDefaultValue = true)]
+        public Object KeyJson { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,6 +128,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateKeyValueStoreDataRequestKeyItem {\n");
             sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,6 +168,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.KeyHex == input.KeyHex ||
                     (this.KeyHex != null &&
                     this.KeyHex.Equals(input.KeyHex))
+                ) && 
+                (
+                    this.KeyJson == input.KeyJson ||
+                    (this.KeyJson != null &&
+                    this.KeyJson.Equals(input.KeyJson))
                 );
         }
 
@@ -184,6 +188,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.KeyHex != null)
                 {
                     hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                }
+                if (this.KeyJson != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
                 }
                 return hashCode;
             }

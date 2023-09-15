@@ -90,28 +90,30 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The generic substitution is provided remotely by a blueprint type. 
+    /// The generic substitution is provided remotely by a blueprint type. The &#x60;resolved_full_type_id&#x60; is added by the node, and is always present in the model returned from the transaction stream API. Other APIs may not resolve the type from the blueprint definition. 
     /// </summary>
-    [DataContract(Name = "RemoteGenericSubstition_allOf")]
-    public partial class RemoteGenericSubstitionAllOf : IEquatable<RemoteGenericSubstitionAllOf>
+    [DataContract(Name = "RemoteGenericSubstitution_allOf")]
+    public partial class RemoteGenericSubstitutionAllOf : IEquatable<RemoteGenericSubstitutionAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RemoteGenericSubstitionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="RemoteGenericSubstitutionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected RemoteGenericSubstitionAllOf() { }
+        protected RemoteGenericSubstitutionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="RemoteGenericSubstitionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="RemoteGenericSubstitutionAllOf" /> class.
         /// </summary>
         /// <param name="blueprintTypeIdentifier">blueprintTypeIdentifier (required).</param>
-        public RemoteGenericSubstitionAllOf(BlueprintTypeIdentifier blueprintTypeIdentifier = default(BlueprintTypeIdentifier))
+        /// <param name="resolvedFullTypeId">resolvedFullTypeId.</param>
+        public RemoteGenericSubstitutionAllOf(BlueprintTypeIdentifier blueprintTypeIdentifier = default(BlueprintTypeIdentifier), FullyScopedTypeId resolvedFullTypeId = default(FullyScopedTypeId))
         {
             // to ensure "blueprintTypeIdentifier" is required (not null)
             if (blueprintTypeIdentifier == null)
             {
-                throw new ArgumentNullException("blueprintTypeIdentifier is a required property for RemoteGenericSubstitionAllOf and cannot be null");
+                throw new ArgumentNullException("blueprintTypeIdentifier is a required property for RemoteGenericSubstitutionAllOf and cannot be null");
             }
             this.BlueprintTypeIdentifier = blueprintTypeIdentifier;
+            this.ResolvedFullTypeId = resolvedFullTypeId;
         }
 
         /// <summary>
@@ -121,14 +123,21 @@ namespace RadixDlt.CoreApiSdk.Model
         public BlueprintTypeIdentifier BlueprintTypeIdentifier { get; set; }
 
         /// <summary>
+        /// Gets or Sets ResolvedFullTypeId
+        /// </summary>
+        [DataMember(Name = "resolved_full_type_id", EmitDefaultValue = true)]
+        public FullyScopedTypeId ResolvedFullTypeId { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class RemoteGenericSubstitionAllOf {\n");
+            sb.Append("class RemoteGenericSubstitutionAllOf {\n");
             sb.Append("  BlueprintTypeIdentifier: ").Append(BlueprintTypeIdentifier).Append("\n");
+            sb.Append("  ResolvedFullTypeId: ").Append(ResolvedFullTypeId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +158,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as RemoteGenericSubstitionAllOf);
+            return this.Equals(input as RemoteGenericSubstitutionAllOf);
         }
 
         /// <summary>
-        /// Returns true if RemoteGenericSubstitionAllOf instances are equal
+        /// Returns true if RemoteGenericSubstitutionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of RemoteGenericSubstitionAllOf to be compared</param>
+        /// <param name="input">Instance of RemoteGenericSubstitutionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(RemoteGenericSubstitionAllOf input)
+        public bool Equals(RemoteGenericSubstitutionAllOf input)
         {
             if (input == null)
             {
@@ -168,6 +177,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.BlueprintTypeIdentifier == input.BlueprintTypeIdentifier ||
                     (this.BlueprintTypeIdentifier != null &&
                     this.BlueprintTypeIdentifier.Equals(input.BlueprintTypeIdentifier))
+                ) && 
+                (
+                    this.ResolvedFullTypeId == input.ResolvedFullTypeId ||
+                    (this.ResolvedFullTypeId != null &&
+                    this.ResolvedFullTypeId.Equals(input.ResolvedFullTypeId))
                 );
         }
 
@@ -183,6 +197,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.BlueprintTypeIdentifier != null)
                 {
                     hashCode = (hashCode * 59) + this.BlueprintTypeIdentifier.GetHashCode();
+                }
+                if (this.ResolvedFullTypeId != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResolvedFullTypeId.GetHashCode();
                 }
                 return hashCode;
             }

@@ -62,46 +62,80 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Numerics;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+#nullable disable
 
-[Table("key_value_store_schema_history")]
-internal class KeyValueStoreSchemaHistory
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    /// <inheritdoc />
+    public partial class MarkSchemaDefiningColumnsAsRequired : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.Sql("UPDATE key_value_store_schema_history SET value_schema_defining_entity_id = key_value_store_entity_id");
+            migrationBuilder.Sql("UPDATE key_value_store_schema_history SET key_schema_defining_entity_id = key_value_store_entity_id");
+            migrationBuilder.Sql("UPDATE non_fungible_schema_history SET schema_defining_entity_id = resource_entity_id");
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+            migrationBuilder.AlterColumn<long>(
+                name: "schema_defining_entity_id",
+                table: "non_fungible_schema_history",
+                type: "bigint",
+                nullable: false,
+                defaultValue: 0L,
+                oldClrType: typeof(long),
+                oldType: "bigint",
+                oldNullable: true);
 
-    [Column("key_value_store_entity_id")]
-    public long KeyValueStoreEntityId { get; set; }
+            migrationBuilder.AlterColumn<long>(
+                name: "value_schema_defining_entity_id",
+                table: "key_value_store_schema_history",
+                type: "bigint",
+                nullable: false,
+                defaultValue: 0L,
+                oldClrType: typeof(long),
+                oldType: "bigint",
+                oldNullable: true);
 
-    [Column("key_schema_hash")]
-    public byte[] KeySchemaHash { get; set; }
+            migrationBuilder.AlterColumn<long>(
+                name: "key_schema_defining_entity_id",
+                table: "key_value_store_schema_history",
+                type: "bigint",
+                nullable: false,
+                defaultValue: 0L,
+                oldClrType: typeof(long),
+                oldType: "bigint",
+                oldNullable: true);
+        }
 
-    [Column("key_schema_defining_entity_id")]
-    public long KeySchemaDefiningEntityId { get; set; }
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterColumn<long>(
+                name: "schema_defining_entity_id",
+                table: "non_fungible_schema_history",
+                type: "bigint",
+                nullable: true,
+                oldClrType: typeof(long),
+                oldType: "bigint");
 
-    [Column("key_sbor_type_kind")]
-    public SborTypeKind KeySborTypeKind { get; set; }
+            migrationBuilder.AlterColumn<long>(
+                name: "value_schema_defining_entity_id",
+                table: "key_value_store_schema_history",
+                type: "bigint",
+                nullable: true,
+                oldClrType: typeof(long),
+                oldType: "bigint");
 
-    [Column("key_type_index")]
-    public long KeyTypeIndex { get; set; }
-
-    [Column("value_schema_hash")]
-    public byte[] ValueSchemaHash { get; set; }
-
-    [Column("value_schema_defining_entity_id")]
-    public long ValueSchemaDefiningEntityId { get; set; }
-
-    [Column("value_sbor_type_kind")]
-    public SborTypeKind ValueSborTypeKind { get; set; }
-
-    [Column("value_type_index")]
-    public long ValueTypeIndex { get; set; }
+            migrationBuilder.AlterColumn<long>(
+                name: "key_schema_defining_entity_id",
+                table: "key_value_store_schema_history",
+                type: "bigint",
+                nullable: true,
+                oldClrType: typeof(long),
+                oldType: "bigint");
+        }
+    }
 }

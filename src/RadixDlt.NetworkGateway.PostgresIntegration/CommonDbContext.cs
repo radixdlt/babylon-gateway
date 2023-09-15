@@ -115,6 +115,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
+    public DbSet<NonFungibleIdLocationHistory> NonFungibleIdLocationHistory => Set<NonFungibleIdLocationHistory>();
+
     public DbSet<StateHistory> StateHistory => Set<StateHistory>();
 
     public DbSet<ValidatorPublicKeyHistory> ValidatorKeyHistory => Set<ValidatorPublicKeyHistory>();
@@ -188,7 +190,7 @@ internal abstract class CommonDbContext : DbContext
             .Properties<TokenAmount>()
             .HaveConversion<TokenAmountToBigIntegerConverter>()
             .HaveColumnType("numeric")
-            .HavePrecision(1000, 0);
+            .HavePrecision(1000);
 
         configurationBuilder
             .Properties<RadixAddress>()
@@ -284,7 +286,13 @@ internal abstract class CommonDbContext : DbContext
     {
         modelBuilder
             .Entity<Entity>()
-            .HasIndex(e => e.Address);
+            .HasIndex(e => e.Address)
+            .IsUnique();
+
+        modelBuilder
+            .Entity<Entity>()
+            .HasIndex(e => new { e.FromStateVersion })
+            .HasFilter("discriminator = 'global_validator'");
 
         modelBuilder
             .Entity<Entity>()
@@ -369,6 +377,16 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.Id, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder
+            .Entity<EntityVaultHistory>()
+            .HasIndex(e => new { e.OwnerEntityId, e.FromStateVersion })
+            .HasFilter("is_royalty_vault = true");
+
+        modelBuilder
+            .Entity<EntityVaultHistory>()
+            .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion })
+            .HasFilter("is_royalty_vault = true");
+
+        modelBuilder
             .Entity<EntityRoleAssignmentsOwnerRoleHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
@@ -408,6 +426,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<NonFungibleIdStoreHistory>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<NonFungibleIdLocationHistory>()
+            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
 
         modelBuilder
             .Entity<StateHistory>()
@@ -455,11 +477,11 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<KeyValueStoreSchemaHistory>()
-            .HasIndex(e => new { EntityId = e.KeyValueStoreEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.KeyValueStoreEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<NonFungibleSchemaHistory>()
-            .HasIndex(e => new { EntityId = e.ResourceEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
     }
 
     private static void HookupStatistics(ModelBuilder modelBuilder)

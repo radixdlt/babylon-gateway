@@ -62,46 +62,41 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+#nullable disable
 
-[Table("key_value_store_schema_history")]
-internal class KeyValueStoreSchemaHistory
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    /// <inheritdoc />
+    public partial class AddRoyaltyVaultIndexToVaultHistory : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_vault_history_global_entity_id_from_state_version",
+                table: "entity_vault_history",
+                columns: new[] { "global_entity_id", "from_state_version" },
+                filter: "is_royalty_vault = true");
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_vault_history_owner_entity_id_from_state_version",
+                table: "entity_vault_history",
+                columns: new[] { "owner_entity_id", "from_state_version" },
+                filter: "is_royalty_vault = true");
+        }
 
-    [Column("key_value_store_entity_id")]
-    public long KeyValueStoreEntityId { get; set; }
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_entity_vault_history_global_entity_id_from_state_version",
+                table: "entity_vault_history");
 
-    [Column("key_schema_hash")]
-    public byte[] KeySchemaHash { get; set; }
-
-    [Column("key_schema_defining_entity_id")]
-    public long KeySchemaDefiningEntityId { get; set; }
-
-    [Column("key_sbor_type_kind")]
-    public SborTypeKind KeySborTypeKind { get; set; }
-
-    [Column("key_type_index")]
-    public long KeyTypeIndex { get; set; }
-
-    [Column("value_schema_hash")]
-    public byte[] ValueSchemaHash { get; set; }
-
-    [Column("value_schema_defining_entity_id")]
-    public long ValueSchemaDefiningEntityId { get; set; }
-
-    [Column("value_sbor_type_kind")]
-    public SborTypeKind ValueSborTypeKind { get; set; }
-
-    [Column("value_type_index")]
-    public long ValueTypeIndex { get; set; }
+            migrationBuilder.DropIndex(
+                name: "IX_entity_vault_history_owner_entity_id_from_state_version",
+                table: "entity_vault_history");
+        }
+    }
 }

@@ -62,46 +62,19 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.CoreApiSdk.Model;
 
-[Table("key_value_store_schema_history")]
-internal class KeyValueStoreSchemaHistory
+public partial class EventTypeIdentifier : IEntityAddressPointer
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public IEnumerable<string> GetEntityAddresses()
+    {
+        yield return TypeReference.FullTypeId.EntityAddress;
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("key_value_store_entity_id")]
-    public long KeyValueStoreEntityId { get; set; }
-
-    [Column("key_schema_hash")]
-    public byte[] KeySchemaHash { get; set; }
-
-    [Column("key_schema_defining_entity_id")]
-    public long KeySchemaDefiningEntityId { get; set; }
-
-    [Column("key_sbor_type_kind")]
-    public SborTypeKind KeySborTypeKind { get; set; }
-
-    [Column("key_type_index")]
-    public long KeyTypeIndex { get; set; }
-
-    [Column("value_schema_hash")]
-    public byte[] ValueSchemaHash { get; set; }
-
-    [Column("value_schema_defining_entity_id")]
-    public long ValueSchemaDefiningEntityId { get; set; }
-
-    [Column("value_sbor_type_kind")]
-    public SborTypeKind ValueSborTypeKind { get; set; }
-
-    [Column("value_type_index")]
-    public long ValueTypeIndex { get; set; }
+        foreach (var address in this.Emitter.GetEntityAddresses())
+        {
+            yield return address;
+        }
+    }
 }

@@ -62,13 +62,17 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
@@ -76,18 +80,55 @@ internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IEntityStateQuerier _entityStateQuerier;
+    private readonly ILogger _logger;
 
-    public DefaultKeyValueStoreHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
+    public DefaultKeyValueStoreHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier, ILogger<DefaultKeyValueStoreHandler> logger)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _entityStateQuerier = entityStateQuerier;
+        _logger = logger;
     }
 
     public async Task<GatewayModel.StateKeyValueStoreDataResponse> Data(GatewayModel.StateKeyValueStoreDataRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var keys = request.Keys.Select(k => new ValueBytes(k.KeyHex.ConvertFromHex())).ToArray();
+        var keys = ExtractKeys(request.Keys).ToArray();
 
         return await _entityStateQuerier.KeyValueStoreData((EntityAddress)request.KeyValueStoreAddress, keys, ledgerState, token);
+    }
+
+    private IEnumerable<ValueBytes> ExtractKeys(List<GatewayModel.StateKeyValueStoreDataRequestKeyItem> keys)
+    {
+        foreach (var item in keys)
+        {
+            byte[]? rawBytes = null;
+
+            if (item.KeyHex != null)
+            {
+                rawBytes = item.KeyHex.ConvertFromHex();
+            }
+            else if (item.KeyJson != null)
+            {
+                try
+                {
+                    var rawJson = item.KeyJson.ToString();
+
+                    if (rawJson != null)
+                    {
+                        var input = new RadixEngineToolkit.ScryptoSborString.ProgrammaticJson(rawJson);
+                        rawBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborEncodeStringRepresentation(input);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Malformed or invalid JSON input.");
+                }
+            }
+
+            if (rawBytes != null)
+            {
+                yield return new ValueBytes(rawBytes);
+            }
+        }
     }
 }

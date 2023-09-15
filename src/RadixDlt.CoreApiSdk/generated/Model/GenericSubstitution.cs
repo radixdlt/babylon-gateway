@@ -95,10 +95,10 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "GenericSubstitution")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(LocalGenericSubstition), "Local")]
-    [JsonSubtypes.KnownSubType(typeof(LocalGenericSubstition), "LocalGenericSubstition")]
-    [JsonSubtypes.KnownSubType(typeof(RemoteGenericSubstition), "Remote")]
-    [JsonSubtypes.KnownSubType(typeof(RemoteGenericSubstition), "RemoteGenericSubstition")]
+    [JsonSubtypes.KnownSubType(typeof(LocalGenericSubstitution), "Local")]
+    [JsonSubtypes.KnownSubType(typeof(LocalGenericSubstitution), "LocalGenericSubstitution")]
+    [JsonSubtypes.KnownSubType(typeof(RemoteGenericSubstitution), "Remote")]
+    [JsonSubtypes.KnownSubType(typeof(RemoteGenericSubstitution), "RemoteGenericSubstitution")]
     public partial class GenericSubstitution : IEquatable<GenericSubstitution>
     {
 

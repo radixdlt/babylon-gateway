@@ -64,6 +64,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -78,23 +79,15 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
             return otid.GetEntityAddresses();
         }
 
+        if (Value.Details is KeyValueStoreTypeInfoDetails keyValueStoreTypeInfoDetails)
+        {
+            return keyValueStoreTypeInfoDetails.GetEntityAddresses();
+        }
+
         return Enumerable.Empty<string>();
     }
 
-    public bool TryGetObjectInstanceGenericSubstitutions([NotNullWhen(true)] out List<GenericSubstitution> genericSubstitutions)
-    {
-        genericSubstitutions = null;
-
-        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions != null)
-        {
-            genericSubstitutions = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions;
-            return true;
-        }
-
-        return false;
-    }
-
-    public bool TryGetNonFungibleDataLocalSchemaDetails([NotNullWhen(true)] out LocalGenericSubstition schemaDetails)
+    public bool TryGetNonFungibleDataSchemaDetails([NotNullWhen(true)] out SchemaDetails? schemaDetails)
     {
         schemaDetails = null;
 
@@ -106,50 +99,59 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
             }
 
             var genericSubstitution = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions.First();
+            schemaDetails = ExtractSchemaDetailsFromGenericSubstitution(genericSubstitution);
 
-            if (genericSubstitution.Type == GenericSubstitutionType.Local)
-            {
-                schemaDetails = genericSubstitution as LocalGenericSubstition;
-                return true;
-            }
+            return true;
         }
 
         return false;
     }
 
-    public bool TryGetKeyValueStoreKeyLocalSchemaDetails([NotNullWhen(true)] out LocalGenericSubstition keySchemaDetails)
+    public bool TryGetKeyValueStoreKeySchemaDetails([NotNullWhen(true)] out SchemaDetails? keySchemaDetails)
     {
         keySchemaDetails = null;
 
         if (Value.Details is KeyValueStoreTypeInfoDetails keyValueStoreInfoDetails)
         {
             var keyGenericSubstitution = keyValueStoreInfoDetails.KeyValueStoreInfo.KeyGenericSubstitution;
-
-            if (keyGenericSubstitution.Type == GenericSubstitutionType.Local)
-            {
-                keySchemaDetails = keyGenericSubstitution as LocalGenericSubstition;
-                return true;
-            }
+            keySchemaDetails = ExtractSchemaDetailsFromGenericSubstitution(keyGenericSubstitution);
+            return true;
         }
 
         return false;
     }
 
-    public bool TryGetKeyValueStoreValueLocalSchemaDetails([NotNullWhen(true)] out LocalGenericSubstition valueSchemaDetails)
+    public bool TryGetKeyValueStoreValueSchemaDetails([NotNullWhen(true)] out SchemaDetails? valueSchemaDetails)
     {
         valueSchemaDetails = null;
 
         if (Value.Details is KeyValueStoreTypeInfoDetails keyValueStoreInfoDetails)
         {
             var valueGenericSubstitution = keyValueStoreInfoDetails.KeyValueStoreInfo.ValueGenericSubstitution;
-
-            if (valueGenericSubstitution.Type == GenericSubstitutionType.Local)
-            {
-                valueSchemaDetails = valueGenericSubstitution as LocalGenericSubstition;
-                return true;
-            }
+            valueSchemaDetails = ExtractSchemaDetailsFromGenericSubstitution(valueGenericSubstitution);
+            return true;
         }
 
         return false;
+    }
+
+    private SchemaDetails ExtractSchemaDetailsFromGenericSubstitution(GenericSubstitution genericSubstitution)
+    {
+        return genericSubstitution switch
+        {
+            LocalGenericSubstitution localGenericSubstitution =>
+                new SchemaDetails(
+                    localGenericSubstitution.ScopedTypeId.SchemaHash,
+                    null,
+                    localGenericSubstitution.ScopedTypeId.LocalTypeId.Id,
+                    localGenericSubstitution.ScopedTypeId.LocalTypeId.Kind),
+            RemoteGenericSubstitution remoteGenericSubstitution =>
+                new SchemaDetails(
+                    remoteGenericSubstitution.ResolvedFullTypeId.SchemaHash,
+                    remoteGenericSubstitution.ResolvedFullTypeId.EntityAddress,
+                    remoteGenericSubstitution.ResolvedFullTypeId.LocalTypeId.Id,
+                    remoteGenericSubstitution.ResolvedFullTypeId.LocalTypeId.Kind),
+            _ => throw new UnreachableException($"Unexpected type of generic substitution {genericSubstitution.GetType()}")
+        };
     }
 }

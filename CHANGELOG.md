@@ -1,3 +1,18 @@
+### 0.5.4 RCNet v3.1 revision 3
+Release Date: 15.09.2023
+
+- Fix event schema lookup in `/stream/transactions` and `/transaction/committed-details`.
+- Add `non_fungible_id_location_history` table to improve NFID lookup performance.
+- Add missing index to `entity_vault_history` table to improve royalty vault lookup performance.
+
+### 0.5.3 RCNet v3.1 revision 2
+Release Date: 13.09.2023
+
+- Fix incomplete entity type mapping.
+- Fix non-fungible resource aggregation.
+- Add `key_json` property to `StateKeyValueStoreDataRequestKeyItem` enabling JSON-based KVStore lookup.
+- support remote schema assignment for generic (key value store, non fungible data) substitution.
+
 ### 0.5.2 RCNet v3.1
 Release Date: 07.09.2023
 
