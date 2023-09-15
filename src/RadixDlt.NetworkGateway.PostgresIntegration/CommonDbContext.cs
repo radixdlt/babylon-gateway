@@ -377,6 +377,16 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.Id, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder
+            .Entity<EntityVaultHistory>()
+            .HasIndex(e => new { e.OwnerEntityId, e.FromStateVersion })
+            .HasFilter("is_royalty_vault = true");
+
+        modelBuilder
+            .Entity<EntityVaultHistory>()
+            .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion })
+            .HasFilter("is_royalty_vault = true");
+
+        modelBuilder
             .Entity<EntityRoleAssignmentsOwnerRoleHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
