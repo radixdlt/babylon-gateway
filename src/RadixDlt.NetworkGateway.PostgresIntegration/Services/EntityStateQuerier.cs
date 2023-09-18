@@ -1295,15 +1295,16 @@ INNER JOIN LATERAL (
 
         var schemasToLoad = states
             .OfType<SborStateHistory>()
-            .Select(x => new { x.SchemaHash, x.SchemaDefiningEntityId })
+            .Select(x => new SchemaIdentifier(x.SchemaHash, x.SchemaDefiningEntityId))
+            .Distinct()
             .ToArray();
 
         var schemas = new Dictionary<SchemaIdentifier, byte[]>();
 
         if (schemasToLoad.Any())
         {
-            var schemaEntityIds = schemasToLoad.Select(x => x.SchemaDefiningEntityId).ToArray();
-            var schemaHashes = schemasToLoad.Select(x => x.SchemaHash).ToArray();
+            var schemaEntityIds = schemasToLoad.Select(x => x.EntityId).ToArray();
+            var schemaHashes = schemasToLoad.Select(x => (byte[])x.SchemaHash).ToArray();
 
             schemas = await _dbContext
                 .SchemaHistory

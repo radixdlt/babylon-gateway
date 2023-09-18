@@ -1,3 +1,8 @@
+### 0.5.5 RCNet v3.1 revision 4
+Release Date: 18.09.2023
+
+- fix `/state/entity/details` endpoint when querying for multiple components with same schema.
+
 ### 0.5.4 RCNet v3.1 revision 3
 Release Date: 15.09.2023
 
