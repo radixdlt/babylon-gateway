@@ -2,6 +2,7 @@
 Release Date: _unreleased_
 
 - fixed `epoch` in `from_state_version` forward querying for migrated environments where lowest epoch number isn't 1. 
+- fixed `validator_active_set_history` table which contains data about validator active set history. It was wrongly attached to future epoch not current one.
 
 ### 0.5.5 RCNet v3.1 revision 4
 Release Date: 18.09.2023
