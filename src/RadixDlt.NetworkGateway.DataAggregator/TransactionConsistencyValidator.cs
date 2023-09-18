@@ -63,8 +63,8 @@
  */
 
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.Abstractions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator;
 
@@ -92,21 +92,31 @@ public static class TransactionConsistencyValidator
         }
     }
 
-    public static void ValidateHashes(TransactionSummary lastCommittedTransactionSummary, CoreModel.CommittedStateIdentifier fetchedPreviousStateIdentifier)
+    public static void ValidateHashes(long previousStateVersion, GatewayModel.CommittedStateIdentifiers? knownStateIdentifiers, CoreModel.CommittedStateIdentifier firstFetchedStateIdentifiers)
     {
-        if (lastCommittedTransactionSummary.ReceiptTreeHash != fetchedPreviousStateIdentifier.ReceiptTreeHash)
+        if (previousStateVersion == 0 && knownStateIdentifiers == null)
         {
-            throw new InvalidLedgerCommitException($"Expected receipt three hash: {lastCommittedTransactionSummary.ReceiptTreeHash} but {fetchedPreviousStateIdentifier.ReceiptTreeHash} found.");
+            return;
         }
 
-        if (lastCommittedTransactionSummary.StateTreeHash != fetchedPreviousStateIdentifier.StateTreeHash)
+        if (knownStateIdentifiers == null)
         {
-            throw new InvalidLedgerCommitException($"Expected state three hash: {lastCommittedTransactionSummary.StateTreeHash} but {fetchedPreviousStateIdentifier.StateTreeHash} found.");
+            throw new InvalidLedgerCommitException($"Previously fetched state identifiers are not initialized.");
         }
 
-        if (lastCommittedTransactionSummary.TransactionTreeHash != fetchedPreviousStateIdentifier.TransactionTreeHash)
+        if (firstFetchedStateIdentifiers.ReceiptTreeHash != knownStateIdentifiers.Value.ReceiptTreeHash)
         {
-            throw new InvalidLedgerCommitException($"Expected state three hash: {lastCommittedTransactionSummary.TransactionTreeHash} but {fetchedPreviousStateIdentifier.TransactionTreeHash} found.");
+            throw new InvalidLedgerCommitException($"Expected receipt three hash: {knownStateIdentifiers.Value.ReceiptTreeHash} but {firstFetchedStateIdentifiers.ReceiptTreeHash} found.");
+        }
+
+        if (firstFetchedStateIdentifiers.StateTreeHash != knownStateIdentifiers.Value.StateTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected state three hash: {knownStateIdentifiers.Value.StateTreeHash} but {firstFetchedStateIdentifiers.StateTreeHash} found.");
+        }
+
+        if (firstFetchedStateIdentifiers.TransactionTreeHash != knownStateIdentifiers.Value.TransactionTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected state three hash: {knownStateIdentifiers.Value.TransactionTreeHash} but {firstFetchedStateIdentifiers.TransactionTreeHash} found.");
         }
     }
 }

@@ -62,10 +62,8 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.Abstractions.Workers;
@@ -79,6 +77,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.Abstractions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
@@ -98,11 +97,13 @@ public sealed class NodeTransactionFetcherWorker : BaseNodeWorker
     private readonly ILogger<NodeTransactionFetcherWorker> _logger;
     private readonly IFetchedTransactionStore _fetchedTransactionStore;
     private readonly INodeConfigProvider _nodeConfigProvider;
-    private readonly IServiceProvider _services;
-    private readonly INodeStatusStore _nodeStatusStore;
+    private readonly INodeStatusProvider _nodeStatusProvider;
     private readonly IEnumerable<INodeTransactionLogWorkerObserver> _observers;
     private readonly IOptionsMonitor<LedgerConfirmationOptions> _ledgerConfirmationOptionsMonitor;
-    private readonly IProcessedTransactionsStore _processedTransactionsStore;
+    private readonly ICommittedStateIdentifiersReader _committedStateIdentifiersReader;
+    private readonly Func<ITransactionStreamReader> _transactionStreamReaderFactory;
+    private readonly Func<INetworkStatusReader> _networkStatusReaderFactory;
+    private readonly ITopOfLedgerCache _topOfLedgerCache;
 
     /* Properties */
     private string NodeName => _nodeConfigProvider.CoreApiNode.Name;
@@ -111,23 +112,27 @@ public sealed class NodeTransactionFetcherWorker : BaseNodeWorker
         ILogger<NodeTransactionFetcherWorker> logger,
         IFetchedTransactionStore fetchedTransactionStore,
         INodeConfigProvider nodeConfigProvider,
-        IServiceProvider services,
         IEnumerable<INodeTransactionLogWorkerObserver> observers,
         IEnumerable<INodeWorkerObserver> nodeWorkerObservers,
-        IClock clock,
+        GatewayModel.IClock clock,
         IOptionsMonitor<LedgerConfirmationOptions> ledgerConfirmationOptionsMonitor,
-        INodeStatusStore nodeStatusStore,
-        IProcessedTransactionsStore processedTransactionsStore)
+        INodeStatusProvider nodeStatusProvider,
+        ICommittedStateIdentifiersReader committedStateIdentifiersReader,
+        Func<ITransactionStreamReader> transactionStreamReaderFactory,
+        ITopOfLedgerCache topOfLedgerCache,
+        Func<INetworkStatusReader> networkStatusReaderFactory)
         : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers, clock)
     {
         _logger = logger;
         _fetchedTransactionStore = fetchedTransactionStore;
         _nodeConfigProvider = nodeConfigProvider;
-        _services = services;
         _observers = observers;
         _ledgerConfirmationOptionsMonitor = ledgerConfirmationOptionsMonitor;
-        _nodeStatusStore = nodeStatusStore;
-        _processedTransactionsStore = processedTransactionsStore;
+        _nodeStatusProvider = nodeStatusProvider;
+        _committedStateIdentifiersReader = committedStateIdentifiersReader;
+        _transactionStreamReaderFactory = transactionStreamReaderFactory;
+        _topOfLedgerCache = topOfLedgerCache;
+        _networkStatusReaderFactory = networkStatusReaderFactory;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -151,11 +156,10 @@ public sealed class NodeTransactionFetcherWorker : BaseNodeWorker
     private async Task FetchTransactions(CancellationToken cancellationToken)
     {
         var fetchMaxBatchSize = _ledgerConfirmationOptionsMonitor.CurrentValue.MaxCoreApiTransactionBatchSize;
-        var networkStatus = await _services.GetRequiredService<INetworkStatusReader>().GetNetworkStatus(cancellationToken); // TODO PP: i want to cry.
-        _nodeStatusStore.StoreNodeStatus(NodeName, networkStatus.CurrentStateIdentifier.StateVersion);
+        var nodeStatus = await _networkStatusReaderFactory().GetNetworkStatus(cancellationToken);
+        _nodeStatusProvider.UpdateNodeStatus(NodeName, nodeStatus);
 
-        var lastCommittedTransactionSummary = _processedTransactionsStore.GetLastCommittedTransactionSummary();
-        var transactionsToFetch = GetTransactionsToFetch(NodeName, lastCommittedTransactionSummary);
+        var transactionsToFetch = GetTransactionsToFetch(NodeName);
 
         if (transactionsToFetch == null)
         {
@@ -183,15 +187,37 @@ public sealed class NodeTransactionFetcherWorker : BaseNodeWorker
                 "No new transactions found, sleeping for {DelayMs}ms",
                 _delayBetweenLoopsStrategy.DelayAfterSuccess(ElapsedSinceLoopBeginning())
             );
+            return;
         }
 
-        TransactionConsistencyValidator.ValidateHashes(lastCommittedTransactionSummary, batch.PreviousStateIdentifiers);
+        var previousStateVersion = batch.Transactions[0].ResultantStateIdentifiers.StateVersion - 1;
+        var knownPreviousStateIdentifiers = await GetKnownPreviousStateIdentifiers(previousStateVersion, cancellationToken);
+
+        TransactionConsistencyValidator.ValidateHashes(previousStateVersion, knownPreviousStateIdentifiers, batch.PreviousStateIdentifiers);
 
         _fetchedTransactionStore.StoreNodeTransactions(
             NodeName,
             batch.Transactions,
             batch.ResponseSize
         );
+    }
+
+    private async Task<GatewayModel.CommittedStateIdentifiers?> GetKnownPreviousStateIdentifiers(long previousStateVersion, CancellationToken cancellationToken)
+    {
+        var fetchedStateIdentifiers = _fetchedTransactionStore.GetStateIdentifiersForStateVersion(previousStateVersion);
+        if (fetchedStateIdentifiers != null)
+        {
+            return fetchedStateIdentifiers;
+        }
+
+        var storedStateIdentifiers = await _committedStateIdentifiersReader.GetStateIdentifiersForStateVersion(previousStateVersion, cancellationToken);
+
+        if (storedStateIdentifiers != null)
+        {
+            return storedStateIdentifiers;
+        }
+
+        return null;
     }
 
     private async Task<FetchedTransactions> FetchTransactions(long fromStateVersion, int count, CancellationToken token)
@@ -202,9 +228,7 @@ public sealed class NodeTransactionFetcherWorker : BaseNodeWorker
             fromStateVersion
         );
 
-        var transactionStreamReader = _services.GetRequiredService<ITransactionStreamReader>();
-
-        var (apiResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(async () => await transactionStreamReader.GetTransactionStream(fromStateVersion, count, token));
+        var (apiResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(async () => await _transactionStreamReaderFactory().GetTransactionStream(fromStateVersion, count, token));
         var transactions = apiResponse.Data.Transactions;
 
         await _observers.ForEachAsync(x => x.TransactionsFetched(NodeName, transactions, fetchTransactionsMs));
@@ -222,13 +246,9 @@ public sealed class NodeTransactionFetcherWorker : BaseNodeWorker
         return new FetchedTransactions(transactions, apiResponse.Data.PreviousStateIdentifiers, Encoding.UTF8.GetByteCount(apiResponse.RawContent));
     }
 
-    private (long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound)? GetTransactionsToFetch(string nodeName, TransactionSummary lastCommittedTransactionSummary)
+    private (long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound)? GetTransactionsToFetch(string nodeName)
     {
-        if (!_processedTransactionsStore.IsInitialized())
-        {
-            return null;
-        }
-
+        var lastCommittedTransactionSummary = _topOfLedgerCache.GetLastCommittedTransactionSummary();
         var processTransactionFromStateVersion = lastCommittedTransactionSummary.StateVersion;
         var maxUpperLimit = processTransactionFromStateVersion + _ledgerConfirmationOptionsMonitor.CurrentValue.MaxTransactionPipelineSizePerNode;
 

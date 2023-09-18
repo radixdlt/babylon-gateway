@@ -94,8 +94,8 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
     private readonly IEnumerable<ILedgerConfirmationServiceObserver> _observers;
     private readonly IClock _clock;
 
-    private readonly IProcessedTransactionsStore _processedTransactionsStore;
     private readonly IFetchedTransactionStore _fetchedTransactionStore;
+    private readonly ITopOfLedgerCache _topOfLedgerCache;
 
     private IList<CoreApiNode> TransactionNodes { get; set; } = new List<CoreApiNode>();
 
@@ -109,7 +109,7 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         ILedgerExtenderService ledgerExtenderService,
         IEnumerable<ILedgerConfirmationServiceObserver> observers,
         IFetchedTransactionStore fetchedTransactionStore,
-        IProcessedTransactionsStore processedTransactionsStore,
+        ITopOfLedgerCache topOfLedgerCache,
         IClock clock
         )
     {
@@ -121,7 +121,7 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         _observers = observers;
         _clock = clock;
         _fetchedTransactionStore = fetchedTransactionStore;
-        _processedTransactionsStore = processedTransactionsStore;
+        _topOfLedgerCache = topOfLedgerCache;
 
         _observers.ForEach(x => x.ResetQuorum());
 
@@ -166,28 +166,18 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
 
     private List<CoreModel.CommittedTransaction> ConstructLedgerExtension()
     {
-        var ledgerExtension = new List<CoreModel.CommittedTransaction>();
-
-        var lastCommittedStateVersion = _processedTransactionsStore.GetLastCommittedStateVersion();
-
+        var lastCommittedStateVersion = _topOfLedgerCache.GetLastCommittedStateVersion();
         var startStateVersion = lastCommittedStateVersion + 1;
 
-        for (var stateVersion = startStateVersion; stateVersion < startStateVersion + Config.MaxCommitBatchSize; stateVersion++)
-        {
-            var chosenTransaction = _fetchedTransactionStore.GetTransactionFromRandomNode(stateVersion);
-            ledgerExtension.Add(chosenTransaction);
-        }
-
-        return ledgerExtension;
+        var transactions = _fetchedTransactionStore.GetTransactionBatch(startStateVersion, (int)Config.MaxCommitBatchSize);
+        return transactions;
     }
 
     private async Task LoadTopOfDbLedger(CancellationToken token)
     {
         var (topOfLedger, readTopOfLedgerMs) = await CodeStopwatch.TimeInMs(
-            () => _ledgerExtenderService.GetLatestTransactionSummary(token)
+            () => _topOfLedgerCache.Refresh(token)
         );
-
-        _processedTransactionsStore.Update(topOfLedger);
 
         _logger.LogDebug(
             "Top of DB ledger is at state version {StateVersion} (read in {ReadTopOfLedgerMs}ms)",
@@ -198,7 +188,7 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
 
     private void HandleLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs, CommitTransactionsReport commitReport)
     {
-        _processedTransactionsStore.Update(commitReport.FinalTransaction);
+        _topOfLedgerCache.Update(commitReport.FinalTransaction);
         ReportOnLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
         _fetchedTransactionStore.RemoveProcessedTransactions(commitReport.FinalTransaction.StateVersion);
     }
@@ -255,7 +245,7 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
 
     private ConsistentLedgerExtension GenerateConsistentLedgerExtension(List<CoreModel.CommittedTransaction> transactions)
     {
-        var lastCommittedTransactionSummary = _processedTransactionsStore.GetLastCommittedTransactionSummary();
+        var lastCommittedTransactionSummary = _topOfLedgerCache.GetLastCommittedTransactionSummary();
         var previousStateVersion = lastCommittedTransactionSummary.StateVersion;
 
         try
@@ -266,16 +256,16 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
                 previousStateVersion = transaction.ResultantStateIdentifiers.StateVersion;
             }
 
-            _observers.ForEach(x => x.QuorumExtensionConsistentGained());
+            _observers.ForEach(x => x.ExtensionConsistencyGained());
         }
         catch (InvalidLedgerCommitException)
         {
-            _observers.ForEach(x => x.QuorumExtensionConsistentLost());
+            _observers.ForEach(x => x.ExtensionConsistencyLost());
             throw;
         }
         catch (InconsistentLedgerException)
         {
-            _observers.ForEach(x => x.QuorumExtensionConsistentLost());
+            _observers.ForEach(x => x.ExtensionConsistencyLost());
             throw;
         }
 

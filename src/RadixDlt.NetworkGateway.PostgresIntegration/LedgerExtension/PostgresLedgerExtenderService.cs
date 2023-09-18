@@ -92,6 +92,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
     private readonly ILogger<PostgresLedgerExtenderService> _logger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ITopOfLedgerProvider _topOfLedgerProvider;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly IClock _clock;
 
@@ -100,20 +101,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         INetworkConfigurationProvider networkConfigurationProvider,
         IEnumerable<ILedgerExtenderServiceObserver> observers,
-        IClock clock)
+        IClock clock,
+        ITopOfLedgerProvider topOfLedgerProvider)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _networkConfigurationProvider = networkConfigurationProvider;
         _observers = observers;
         _clock = clock;
-    }
-
-    public async Task<TransactionSummary> GetLatestTransactionSummary(CancellationToken token = default)
-    {
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-
-        return await GetTopOfLedger(dbContext, token);
+        _topOfLedgerProvider = topOfLedgerProvider;
     }
 
     public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default)
@@ -132,7 +128,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         try
         {
-            var topOfLedgerSummary = await GetTopOfLedger(dbContext, token);
+            var topOfLedgerSummary = await _topOfLedgerProvider.GetTopOfLedger(token);
 
             TransactionConsistencyValidator.AssertLatestTransactionConsistent(ledgerExtension.LatestTransactionSummary.StateVersion, topOfLedgerSummary.StateVersion);
 
@@ -1925,44 +1921,5 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 _networkConfigurationProvider.GetNetworkName()
             );
         }
-    }
-
-    private async Task<TransactionSummary> GetTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)
-    {
-        var lastTransaction = await dbContext.GetTopLedgerTransaction().FirstOrDefaultAsync(token);
-
-        return lastTransaction == null
-            ? PreGenesisTransactionSummary()
-            : new TransactionSummary(
-                StateVersion: lastTransaction.StateVersion,
-                TransactionTreeHash: lastTransaction.LedgerHashes.TransactionTreeHash,
-                ReceiptTreeHash: lastTransaction.LedgerHashes.ReceiptTreeHash,
-                StateTreeHash: lastTransaction.LedgerHashes.StateTreeHash,
-                RoundTimestamp: lastTransaction.RoundTimestamp,
-                NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
-                CreatedTimestamp: lastTransaction.CreatedTimestamp,
-                Epoch: lastTransaction.Epoch,
-                RoundInEpoch: lastTransaction.RoundInEpoch,
-                IndexInEpoch: lastTransaction.IndexInEpoch,
-                IndexInRound: lastTransaction.IndexInRound
-            );
-    }
-
-    private TransactionSummary PreGenesisTransactionSummary()
-    {
-        // Nearly all of theses turn out to be unused!
-        return new TransactionSummary(
-            StateVersion: 0,
-            TransactionTreeHash: string.Empty,
-            ReceiptTreeHash: string.Empty,
-            StateTreeHash: string.Empty,
-            RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
-            NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
-            CreatedTimestamp: _clock.UtcNow,
-            Epoch: _networkConfigurationProvider.GetGenesisEpoch(),
-            RoundInEpoch: _networkConfigurationProvider.GetGenesisRound(),
-            IndexInEpoch: -1, // invalid, but we increase it by one to in ProcessTransactions
-            IndexInRound: -1 // invalid, but we increase it by one to in ProcessTransactions
-        );
     }
 }

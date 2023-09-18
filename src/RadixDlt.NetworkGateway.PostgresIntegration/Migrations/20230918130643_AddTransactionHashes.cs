@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     /// <inheritdoc />
-    public partial class AddLedgerHashesToTransaction : Migration
+    public partial class AddTransactionHashes : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

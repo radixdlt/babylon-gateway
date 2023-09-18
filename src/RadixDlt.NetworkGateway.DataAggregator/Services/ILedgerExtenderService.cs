@@ -73,8 +73,6 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 public interface ILedgerExtenderService
 {
     Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default);
-
-    Task<TransactionSummary> GetLatestTransactionSummary(CancellationToken token = default);
 }
 
 public sealed record TransactionSummary(

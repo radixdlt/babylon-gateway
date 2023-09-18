@@ -2,36 +2,35 @@
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public interface IProcessedTransactionsStore
+public interface ITopOfLedgerCache
 {
-    public bool IsInitialized();
+    TransactionSummary GetLastCommittedTransactionSummary();
 
-    public TransactionSummary GetLastCommittedTransactionSummary();
+    long GetLastCommittedStateVersion();
 
-    public long GetLastCommittedStateVersion();
+    Task<TransactionSummary> Refresh(CancellationToken token);
 
-    public void Update(TransactionSummary topOfLedger);
+    void Update(TransactionSummary transactionSummary);
 }
 
-public class ProcessedTransactionsStore : IProcessedTransactionsStore
+public class TopOfLedgerCache : ITopOfLedgerCache
 {
     private readonly ISystemStatusService _systemStatusService;
+    private readonly ITopOfLedgerProvider _topOfLedgerProvider;
     private readonly IEnumerable<ILedgerConfirmationServiceObserver> _observers;
 
     private TransactionSummary? _knownTopOfCommittedLedger;
 
-    public ProcessedTransactionsStore(ISystemStatusService systemStatusService, IEnumerable<ILedgerConfirmationServiceObserver> observers)
+    public TopOfLedgerCache(ISystemStatusService systemStatusService, IEnumerable<ILedgerConfirmationServiceObserver> observers, ITopOfLedgerProvider topOfLedgerProvider)
     {
         _systemStatusService = systemStatusService;
         _observers = observers;
-    }
-
-    public bool IsInitialized()
-    {
-        return _knownTopOfCommittedLedger != null;
+        _topOfLedgerProvider = topOfLedgerProvider;
     }
 
     public TransactionSummary GetLastCommittedTransactionSummary()
@@ -54,12 +53,19 @@ public class ProcessedTransactionsStore : IProcessedTransactionsStore
         return _knownTopOfCommittedLedger.StateVersion;
     }
 
-    public void Update(TransactionSummary topOfLedger)
+    public async Task<TransactionSummary> Refresh(CancellationToken token)
     {
-        _knownTopOfCommittedLedger = topOfLedger;
+        var topOfLedger = await _topOfLedgerProvider.GetTopOfLedger(token);
+        Update(topOfLedger);
+        return topOfLedger;
+    }
 
-        _observers.ForEach(x => x.RecordTopOfDbLedger(topOfLedger.StateVersion, topOfLedger.RoundTimestamp));
+    public void Update(TransactionSummary transactionSummary)
+    {
+        _knownTopOfCommittedLedger = transactionSummary;
 
-        _systemStatusService.SetTopOfDbLedgerNormalizedRoundTimestamp(topOfLedger.NormalizedRoundTimestamp);
+        _observers.ForEach(x => x.RecordTopOfDbLedger(_knownTopOfCommittedLedger.StateVersion, _knownTopOfCommittedLedger.RoundTimestamp));
+
+        _systemStatusService.SetTopOfDbLedgerNormalizedRoundTimestamp(_knownTopOfCommittedLedger.NormalizedRoundTimestamp);
     }
 }

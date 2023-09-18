@@ -75,31 +75,11 @@ public interface ILedgerConfirmationServiceObserver
 
     void PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion);
 
-    // TODO PP: i think they are never published.
-    // void SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion);
-
-    // void SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion);
-
-    // void SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion);
-
-    // void TrustWeightingRequirementsComputed(LedgerConfirmationService.TrustWeightingReport report);
-
-    // TODO PP: do we need to replace that with sthn else?
-    // void LedgerTipInconsistentWithQuorumStatus(string inconsistentNodeName);
-
-    // void LedgerTipConsistentWithQuorumStatus(string consistentNodeName);
-
-    // void UnknownQuorumStatus();
-
-    // void QuorumLost();
-
-    // void QuorumGained();
-
     void ReportOnLedgerExtensionSuccess(DateTime timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount);
 
     void RecordTopOfDbLedger(long stateVersion, DateTime roundTimestamp);
 
-    void QuorumExtensionConsistentGained();
+    void ExtensionConsistencyGained();
 
-    void QuorumExtensionConsistentLost();
+    void ExtensionConsistencyLost();
 }

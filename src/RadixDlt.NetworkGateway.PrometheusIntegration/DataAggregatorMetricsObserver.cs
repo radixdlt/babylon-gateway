@@ -457,48 +457,6 @@ internal class DataAggregatorMetricsObserver :
         _nodeLedgerTipStateVersion.WithLabels(nodeName).Set(ledgerTipStateVersion);
     }
 
-    // TODO PP: that was never called.
-    // void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion)
-    // {
-    //     _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Unknown);
-    // }
-    //
-    // void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion)
-    // {
-    //     _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Yes);
-    // }
-    //
-    // void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion)
-    // {
-    //     _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.No);
-    // }
-
-    // TODO PP: to replace by sthn else.
-    // void ILedgerConfirmationServiceObserver.LedgerTipInconsistentWithQuorumStatus(string inconsistentNodeName)
-    // {
-    //     _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(inconsistentNodeName).SetStatus(MetricStatus.No);
-    // }
-    //
-    // void ILedgerConfirmationServiceObserver.LedgerTipConsistentWithQuorumStatus(string consistentNodeName)
-    // {
-    //     _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(consistentNodeName).SetStatus(MetricStatus.Yes);
-    // }
-    //
-    // void ILedgerConfirmationServiceObserver.UnknownQuorumStatus()
-    // {
-    //     _quorumExistsStatus.SetStatus(MetricStatus.Unknown);
-    // }
-    //
-    // void ILedgerConfirmationServiceObserver.QuorumLost()
-    // {
-    //     _quorumExistsStatus.SetStatus(MetricStatus.No);
-    // }
-    //
-    // void ILedgerConfirmationServiceObserver.QuorumGained()
-    // {
-    //     _quorumExistsStatus.SetStatus(MetricStatus.Yes);
-    // }
-
     void ILedgerConfirmationServiceObserver.ReportOnLedgerExtensionSuccess(DateTime timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount)
     {
         _peakLedgerLagBeforeLastCommit.Set(parentSummaryRoundTimestamp.TotalSeconds);
@@ -513,12 +471,12 @@ internal class DataAggregatorMetricsObserver :
         _ledgerUnixRoundTimestamp.Set(roundTimestamp.ToUnixTimeSecondsWithMilliPrecision());
     }
 
-    void ILedgerConfirmationServiceObserver.QuorumExtensionConsistentGained()
+    void ILedgerConfirmationServiceObserver.ExtensionConsistencyGained()
     {
         _quorumExtensionConsistentStatus.SetStatus(MetricStatus.Yes);
     }
 
-    void ILedgerConfirmationServiceObserver.QuorumExtensionConsistentLost()
+    void ILedgerConfirmationServiceObserver.ExtensionConsistencyLost()
     {
         _quorumExtensionConsistentStatus.SetStatus(MetricStatus.No);
     }
