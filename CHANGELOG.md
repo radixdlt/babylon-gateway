@@ -1,8 +1,9 @@
 ### 0.5.4 RCNet v3.1 revision 3
-Release Date: 14.09.2023
+Release Date: 15.09.2023
 
 - Fix event schema lookup in `/stream/transactions` and `/transaction/committed-details`.
 - Add `non_fungible_id_location_history` table to improve NFID lookup performance.
+- Add missing index to `entity_vault_history` table to improve royalty vault lookup performance.
 
 ### 0.5.3 RCNet v3.1 revision 2
 Release Date: 13.09.2023
