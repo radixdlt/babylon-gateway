@@ -17,8 +17,8 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230919115118_StoreRawTransactionOnlyForUserTransactions")]
-    partial class StoreRawTransactionOnlyForUserTransactions
+    [Migration("20230919142500_AddTransactionHashes")]
+    partial class AddTransactionHashes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -535,6 +535,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("OwnerEntityId", "FromStateVersion")
                         .HasFilter("is_royalty_vault = true");
+
+                    b.HasIndex("VaultEntityId", "FromStateVersion")
+                        .HasFilter("discriminator = 'non_fungible'");
 
                     b.HasIndex("GlobalEntityId", "VaultEntityId", "FromStateVersion");
 
