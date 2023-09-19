@@ -746,6 +746,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
                 var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
                 long? newEpoch = null;
+                long? passingEpoch = null;
                 var affectedGlobalEntities = new HashSet<long>();
 
                 try
@@ -896,6 +897,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             if (consensusManagerFieldStateSubstate.Value.Round == 0)
                             {
                                 newEpoch = consensusManagerFieldStateSubstate.Value.Epoch;
+                                passingEpoch = newEpoch - 1;
                             }
                         }
 
@@ -911,7 +913,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     },
                                     v => TokenAmount.FromDecimalString(v.Stake));
 
-                            validatorSetChanges.Add(new ValidatorSetChange(newEpoch!.Value, change, stateVersion));
+                            validatorSetChanges.Add(new ValidatorSetChange(passingEpoch!.Value, change, stateVersion));
                         }
 
                         if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
