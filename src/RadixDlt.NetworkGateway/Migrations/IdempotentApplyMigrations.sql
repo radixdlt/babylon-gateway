@@ -1136,3 +1136,22 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230919125354_AddVaultHistoryNfIndex') THEN
+    CREATE INDEX "IX_entity_vault_history_vault_entity_id_from_state_version" ON entity_vault_history (vault_entity_id, from_state_version) WHERE discriminator = 'non_fungible';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20230919125354_AddVaultHistoryNfIndex') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20230919125354_AddVaultHistoryNfIndex', '7.0.9');
+    END IF;
+END $EF$;
+COMMIT;
+

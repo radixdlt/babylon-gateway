@@ -387,6 +387,11 @@ internal abstract class CommonDbContext : DbContext
             .HasFilter("is_royalty_vault = true");
 
         modelBuilder
+            .Entity<EntityVaultHistory>()
+            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion })
+            .HasFilter("discriminator = 'non_fungible'");
+
+        modelBuilder
             .Entity<EntityRoleAssignmentsOwnerRoleHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 

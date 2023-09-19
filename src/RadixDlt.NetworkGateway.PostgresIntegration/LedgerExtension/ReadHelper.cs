@@ -373,7 +373,7 @@ FROM variables
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_vault_history
-    WHERE vault_entity_id = variables.vault_entity_id
+    WHERE vault_entity_id = variables.vault_entity_id AND discriminator = 'non_fungible'
     ORDER BY from_state_version DESC
     LIMIT 1
 ) evh ON true;")
