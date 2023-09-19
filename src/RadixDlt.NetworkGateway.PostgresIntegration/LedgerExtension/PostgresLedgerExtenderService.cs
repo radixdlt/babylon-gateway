@@ -520,6 +520,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.HashBech32m,
                             SignedIntentHash = ult.NotarizedTransaction.SignedIntent.HashBech32m,
                             Message = ult.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
+                            RawPayload = ult.NotarizedTransaction.GetPayloadBytes(),
                         },
                         CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
                         _ => throw new UnreachableException(),
@@ -536,7 +537,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
                     ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
                     ledgerTransaction.IndexInRound = summary.IndexInRound;
-                    ledgerTransaction.RawPayload = committedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
                     ledgerTransaction.FeePaid = committedTransaction.Receipt.FeeSummary.TotalFee();
                     ledgerTransaction.TipPaid = committedTransaction.Receipt.FeeSummary.TotalTip();
                     ledgerTransaction.AffectedGlobalEntities = default!; // configured later on
