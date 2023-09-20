@@ -1282,11 +1282,28 @@ components:
           type: object
         events:
           description: Events emitted by a transaction.
-          type: object
+          type: array
+          items:
+            $ref: "#/components/schemas/EventsItem"
+
         error_message:
           description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
           nullable: true
+
+    EventsItem:
+      type: object
+      required:
+        - name
+        - emitter
+        - data
+      properties:
+        name:
+          type: string
+        emitter:
+          type: object
+        data:
+          type: object
 
     NonFungibleIdType:
       type: string

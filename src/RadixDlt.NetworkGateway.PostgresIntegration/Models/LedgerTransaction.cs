@@ -74,7 +74,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 internal record TransactionReceiptEventLookup(long EntityId, ValueBytes SchemaHash);
-internal record TransactionReceiptEventData(byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
+internal record TransactionReceiptEvent(string Name, string Emitter, byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
 
 /// <summary>
 /// A transaction committed onto the radix ledger.
@@ -150,6 +150,63 @@ internal class LedgerHashes
 }
 
 [Owned]
+internal class ReceiptEvents
+{
+    [Column("receipt_event_emitters", TypeName = "jsonb[]")]
+    public string[] Emitters { get; set; }
+
+    [Column("receipt_event_names", TypeName = "text[]")]
+    public string[] Names { get; set; }
+
+    [Column("receipt_event_sbors")]
+    public byte[][] Sbors { get; set; }
+
+    [Column("receipt_event_schema_entity_ids")]
+    public long[] SchemaEntityIds { get; set; }
+
+    [Column("receipt_event_schema_hashes")]
+    public byte[][] SchemaHashes { get; set; }
+
+    [Column("receipt_event_type_indexes")]
+    public long[] TypeIndexes { get; set; }
+
+    [Column("receipt_event_sbor_type_kinds")]
+    public SborTypeKind[] SborTypeKinds { get; set; }
+
+    public List<TransactionReceiptEventLookup> GetEventLookups()
+    {
+        var result = new List<TransactionReceiptEventLookup>();
+
+        for (var i = 0; i < Sbors.Length; ++i)
+        {
+            result.Add(new TransactionReceiptEventLookup(SchemaEntityIds[i], SchemaHashes[i]));
+        }
+
+        return result;
+    }
+
+    public List<TransactionReceiptEvent> GetEvents()
+    {
+        var result = new List<TransactionReceiptEvent>();
+
+        for (var i = 0; i < Sbors.Length; ++i)
+        {
+            var eventData = Sbors[i];
+            var entityId = SchemaEntityIds[i];
+            var schemaHash = SchemaHashes[i];
+            var index = TypeIndexes[i];
+            var typeKind = SborTypeKinds[i];
+            var emitter = Emitters[i];
+            var name = Names[i];
+
+            result.Add(new TransactionReceiptEvent(name, emitter, eventData, entityId, schemaHash, index, typeKind));
+        }
+
+        return result;
+    }
+}
+
+[Owned]
 internal class TransactionReceipt
 {
     [Column("receipt_status")]
@@ -179,62 +236,7 @@ internal class TransactionReceipt
     [Column("receipt_error_message")]
     public string? ErrorMessage { get; set; }
 
-    [Column("receipt_event_sbors")]
-    public byte[][] EventSbors { get; set; }
-
-    [Column("receipt_event_schema_entity_ids")]
-    public long[] EventSchemaEntityIds { get; set; }
-
-    [Column("receipt_event_schema_hashes")]
-    public byte[][] EventSchemaHashes { get; set; }
-
-    [Column("receipt_event_type_indexes")]
-    public long[] EventTypeIndexes { get; set; }
-
-    [Column("receipt_event_sbor_type_kinds")]
-    public SborTypeKind[] EventSborTypeKinds { get; set; }
-
-    public List<TransactionReceiptEventLookup> GetEventLookups()
-    {
-        var result = new List<TransactionReceiptEventLookup>();
-
-        // TODO drop this if statement once we deploy with complete db-wipe
-        if (EventSchemaEntityIds.Length != EventSbors.Length)
-        {
-            throw new NotSupportedException("Missing EventSchemaEntityIds - wipe your database and ingest all the data");
-        }
-
-        for (var i = 0; i < EventSbors.Length; ++i)
-        {
-            result.Add(new TransactionReceiptEventLookup(EventSchemaEntityIds[i], EventSchemaHashes[i]));
-        }
-
-        return result;
-    }
-
-    public List<TransactionReceiptEventData> GetEvents()
-    {
-        var result = new List<TransactionReceiptEventData>();
-
-        // TODO drop this if statement once we deploy with complete db-wipe
-        if (EventSchemaEntityIds.Length != EventSbors.Length)
-        {
-            throw new NotSupportedException("Missing EventSchemaEntityIds - wipe your database and ingest all the data");
-        }
-
-        for (var i = 0; i < EventSbors.Length; ++i)
-        {
-            var eventData = EventSbors[i];
-            var entityId = EventSchemaEntityIds[i];
-            var schemaHash = EventSchemaHashes[i];
-            var index = EventTypeIndexes[i];
-            var typeKind = EventSborTypeKinds[i];
-
-            result.Add(new TransactionReceiptEventData(eventData, entityId, schemaHash, index, typeKind));
-        }
-
-        return result;
-    }
+    public ReceiptEvents Events { get; set; }
 }
 
 internal class GenesisLedgerTransaction : LedgerTransaction
