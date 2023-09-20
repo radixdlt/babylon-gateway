@@ -549,7 +549,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         CostingParameters = committedTransaction.Receipt.CostingParameters.ToJson(),
                         FeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson(),
                         FeeSource = committedTransaction.Receipt.FeeSource?.ToJson(),
-                        Events = new ReceiptEvents(), // configured later on
+                        Events = default!, // will be filled later on.
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
@@ -1183,13 +1183,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
 
                     transaction.AffectedGlobalEntities = affectedGlobalEntities.ToArray();
-                    transaction.EngineReceipt.Events.Emitters = events.Select(e => e.Type.Emitter.ToJson()).ToArray();
-                    transaction.EngineReceipt.Events.Names = events.Select(e => e.Type.Name).ToArray();
-                    transaction.EngineReceipt.Events.Sbors = events.Select(e => e.Data.GetDataBytes()).ToArray();
-                    transaction.EngineReceipt.Events.SchemaEntityIds = events.Select(e => referencedEntities.Get((EntityAddress)e.Type.TypeReference.FullTypeId.EntityAddress).DatabaseId).ToArray();
-                    transaction.EngineReceipt.Events.SchemaHashes = events.Select(e => e.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray();
-                    transaction.EngineReceipt.Events.TypeIndexes = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray();
-                    transaction.EngineReceipt.Events.SborTypeKinds = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray();
+                    transaction.EngineReceipt.Events = new ReceiptEvents
+                    {
+                        Emitters = events.Select(e => e.Type.Emitter.ToJson()).ToArray(),
+                        Names = events.Select(e => e.Type.Name).ToArray(),
+                        Sbors = events.Select(e => e.Data.GetDataBytes()).ToArray(),
+                        SchemaEntityIds = events.Select(e => referencedEntities.Get((EntityAddress)e.Type.TypeReference.FullTypeId.EntityAddress).DatabaseId).ToArray(),
+                        SchemaHashes = events.Select(e => e.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray(),
+                        TypeIndexes = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray(),
+                        SborTypeKinds = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray(),
+                    };
 
                     ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntities.Select(affectedEntity => new AffectedGlobalEntityTransactionMarker
                     {
