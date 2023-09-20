@@ -92,7 +92,7 @@ public sealed class DataAggregatorBuilder
     public DataAggregatorBuilder AddHostedServices()
     {
         Services.AddHostedService<NodeConfigurationMonitorWorker>();
-        Services.AddHostedService<LedgerConfirmationWorker>();
+        Services.AddHostedService<LedgerTransactionsProcessorWorker>();
         Services.AddHostedService<PendingTransactionTrackerWorker>();
         Services.AddHostedService<PendingTransactionResubmissionWorker>();
         Services.AddHostedService<PendingTransactionPrunerWorker>();

@@ -62,26 +62,12 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public interface ILedgerConfirmationService
+public interface ITopOfLedgerProvider
 {
-    public TransactionSummary? GetTip();
-
-    // This method is to be called from the global LedgerExtensionWorker
-    Task HandleLedgerExtensionIfQuorum(CancellationToken token);
-
-    // Below are to be called from the node transaction log workers - to communicate with the LedgerConfirmationService
-    void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipTreeHash);
-
-    void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions, int responseSize);
-
-    TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName);
+    Task<TransactionSummary> GetTopOfLedger(CancellationToken token);
 }
-
-public sealed record TransactionsRequested(long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound);

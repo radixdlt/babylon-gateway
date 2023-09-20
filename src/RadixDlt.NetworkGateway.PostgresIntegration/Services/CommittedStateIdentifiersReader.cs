@@ -62,41 +62,39 @@
  * permissions under this License.
  */
 
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.Abstractions;
 
-#nullable disable
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+internal sealed class CommittedStateIdentifiersReader : ICommittedStateIdentifiersReader
 {
-    /// <inheritdoc />
-    public partial class AddRoyaltyVaultIndexToVaultHistory : Migration
+    private readonly IDbContextFactory<ReadOnlyDbContext> _dbContextFactory;
+
+    public CommittedStateIdentifiersReader(IDbContextFactory<ReadOnlyDbContext> dbContextFactory)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_vault_history_global_entity_id_from_state_version",
-                table: "entity_vault_history",
-                columns: new[] { "global_entity_id", "from_state_version" },
-                filter: "is_royalty_vault = true");
+        _dbContextFactory = dbContextFactory;
+    }
 
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_vault_history_owner_entity_id_from_state_version",
-                table: "entity_vault_history",
-                columns: new[] { "owner_entity_id", "from_state_version" },
-                filter: "is_royalty_vault = true");
+    public async Task<GatewayModel.CommittedStateIdentifiers?> GetStateIdentifiersForStateVersion(long stateVersion, CancellationToken cancellationToken)
+    {
+        var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var transaction = await dbContext.LedgerTransactions
+            .FirstOrDefaultAsync(x => x.StateVersion == stateVersion, cancellationToken);
+
+        if (transaction == null)
+        {
+            return null;
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropIndex(
-                name: "IX_entity_vault_history_global_entity_id_from_state_version",
-                table: "entity_vault_history");
-
-            migrationBuilder.DropIndex(
-                name: "IX_entity_vault_history_owner_entity_id_from_state_version",
-                table: "entity_vault_history");
-        }
+        return new GatewayModel.CommittedStateIdentifiers(
+            transaction.StateVersion,
+            transaction.LedgerHashes.StateTreeHash,
+            transaction.LedgerHashes.TransactionTreeHash,
+            transaction.LedgerHashes.ReceiptTreeHash);
     }
 }

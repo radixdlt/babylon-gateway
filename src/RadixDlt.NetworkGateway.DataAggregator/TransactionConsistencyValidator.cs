@@ -62,33 +62,61 @@
  * permissions under this License.
  */
 
-﻿using System.Numerics;
-using Microsoft.EntityFrameworkCore.Migrations;
+using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.Abstractions;
 
-#nullable disable
+namespace RadixDlt.NetworkGateway.DataAggregator;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+public static class TransactionConsistencyValidator
 {
-    /// <inheritdoc />
-    public partial class AddMissingEventSchemaEntityIdsToLedgerTransactions : Migration
+    public static void AssertLatestTransactionConsistent(long latestTransactionStateVersion, long topOfLedgerStateVersion)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+        if (latestTransactionStateVersion != topOfLedgerStateVersion)
         {
-            migrationBuilder.AddColumn<long[]>(
-                name: "receipt_event_schema_entity_ids",
-                table: "ledger_transactions",
-                type: "bigint[]",
-                nullable: false,
-                defaultValue: new long[0]);
+            throw new InvalidLedgerCommitException(
+                $"Tried to commit transactions with parent state version {latestTransactionStateVersion} " +
+                $"on top of a ledger with state version {topOfLedgerStateVersion}"
+            );
+        }
+    }
+
+    public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
+    {
+        if (stateVersion != previousStateVersion + 1)
+        {
+            throw new InvalidLedgerCommitException(
+                $"Attempted to commit a transaction with state version {stateVersion}" +
+                $" on top of transaction with state version {previousStateVersion}"
+            );
+        }
+    }
+
+    public static void ValidateHashes(long previousStateVersion, GatewayModel.CommittedStateIdentifiers? knownStateIdentifiers, CoreModel.CommittedStateIdentifier firstFetchedStateIdentifiers)
+    {
+        if (previousStateVersion == 0 && knownStateIdentifiers == null)
+        {
+            return;
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+        if (knownStateIdentifiers == null)
         {
-            migrationBuilder.DropColumn(
-                name: "receipt_event_schema_entity_ids",
-                table: "ledger_transactions");
+            throw new InvalidLedgerCommitException($"Previously fetched state identifiers are not initialized.");
+        }
+
+        if (firstFetchedStateIdentifiers.ReceiptTreeHash != knownStateIdentifiers.Value.ReceiptTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected receipt three hash: {knownStateIdentifiers.Value.ReceiptTreeHash} but {firstFetchedStateIdentifiers.ReceiptTreeHash} found.");
+        }
+
+        if (firstFetchedStateIdentifiers.StateTreeHash != knownStateIdentifiers.Value.StateTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected state three hash: {knownStateIdentifiers.Value.StateTreeHash} but {firstFetchedStateIdentifiers.StateTreeHash} found.");
+        }
+
+        if (firstFetchedStateIdentifiers.TransactionTreeHash != knownStateIdentifiers.Value.TransactionTreeHash)
+        {
+            throw new InvalidLedgerCommitException($"Expected state three hash: {knownStateIdentifiers.Value.TransactionTreeHash} but {firstFetchedStateIdentifiers.TransactionTreeHash} found.");
         }
     }
 }

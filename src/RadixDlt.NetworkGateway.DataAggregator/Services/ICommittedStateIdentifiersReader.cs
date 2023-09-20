@@ -62,39 +62,12 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Workers;
-using System;
-using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public abstract class GlobalWorker : LoopedWorkerBase
+public interface ICommittedStateIdentifiersReader
 {
-    private readonly IEnumerable<IGlobalWorkerObserver> _observers;
-
-    protected GlobalWorker(
-            ILogger logger,
-            IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,
-            TimeSpan minDelayBetweenInfoLogs,
-            IEnumerable<IGlobalWorkerObserver> observers,
-            IClock clock)
-        // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
-        // crash the application so that it can be automatically restarted.
-        : base(logger, BehaviourOnFault.ApplicationExit, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs, clock)
-    {
-        _observers = observers;
-    }
-
-    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
-    {
-        _observers.ForEach(x => x.TrackNonFaultingExceptionInWorkLoop(GetType(), ex));
-    }
-
-    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
-    {
-        _observers.ForEach(x => x.TrackWorkerFaultedException(GetType(), ex, isStopRequested));
-    }
+    Task<Abstractions.CommittedStateIdentifiers?> GetStateIdentifiersForStateVersion(long stateVersion, CancellationToken cancellationToken);
 }

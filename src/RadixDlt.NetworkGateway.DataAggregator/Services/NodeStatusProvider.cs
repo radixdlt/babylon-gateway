@@ -62,80 +62,52 @@
  * permissions under this License.
  */
 
-﻿using System.Numerics;
-using Microsoft.EntityFrameworkCore.Migrations;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
+using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-#nullable disable
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+public interface INodeStatusProvider
 {
-    /// <inheritdoc />
-    public partial class MarkSchemaDefiningColumnsAsRequired : Migration
+    void UpdateNodeStatus(string nodeName, CoreModel.NetworkStatusResponse networkStatus);
+
+    long GetHighestKnownStateVersion();
+}
+
+public sealed class NodeStatusProvider : INodeStatusProvider
+{
+    private readonly ConcurrentDictionary<string, long> _latestLedgerTipByNode = new();
+    private readonly IEnumerable<ILedgerConfirmationServiceObserver> _observers;
+
+    public NodeStatusProvider(IEnumerable<ILedgerConfirmationServiceObserver> observers)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+        _observers = observers;
+    }
+
+    public void UpdateNodeStatus(string nodeName, CoreModel.NetworkStatusResponse networkStatus)
+    {
+        var ledgerTipStateVersion = networkStatus.CurrentStateIdentifier.StateVersion;
+
+        _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion));
+        _latestLedgerTipByNode[nodeName] = ledgerTipStateVersion;
+    }
+
+    public long GetHighestKnownStateVersion()
+    {
+        var ledgerTips = _latestLedgerTipByNode.Values.ToList();
+
+        if (ledgerTips.Count == 0)
         {
-            migrationBuilder.Sql("UPDATE key_value_store_schema_history SET value_schema_defining_entity_id = key_value_store_entity_id");
-            migrationBuilder.Sql("UPDATE key_value_store_schema_history SET key_schema_defining_entity_id = key_value_store_entity_id");
-            migrationBuilder.Sql("UPDATE non_fungible_schema_history SET schema_defining_entity_id = resource_entity_id");
-
-            migrationBuilder.AlterColumn<long>(
-                name: "schema_defining_entity_id",
-                table: "non_fungible_schema_history",
-                type: "bigint",
-                nullable: false,
-                defaultValue: 0L,
-                oldClrType: typeof(long),
-                oldType: "bigint",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<long>(
-                name: "value_schema_defining_entity_id",
-                table: "key_value_store_schema_history",
-                type: "bigint",
-                nullable: false,
-                defaultValue: 0L,
-                oldClrType: typeof(long),
-                oldType: "bigint",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<long>(
-                name: "key_schema_defining_entity_id",
-                table: "key_value_store_schema_history",
-                type: "bigint",
-                nullable: false,
-                defaultValue: 0L,
-                oldClrType: typeof(long),
-                oldType: "bigint",
-                oldNullable: true);
+            throw new InvalidNodeStateException("At least one ledger tip must have been submitted");
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AlterColumn<long>(
-                name: "schema_defining_entity_id",
-                table: "non_fungible_schema_history",
-                type: "bigint",
-                nullable: true,
-                oldClrType: typeof(long),
-                oldType: "bigint");
-
-            migrationBuilder.AlterColumn<long>(
-                name: "value_schema_defining_entity_id",
-                table: "key_value_store_schema_history",
-                type: "bigint",
-                nullable: true,
-                oldClrType: typeof(long),
-                oldType: "bigint");
-
-            migrationBuilder.AlterColumn<long>(
-                name: "key_schema_defining_entity_id",
-                table: "key_value_store_schema_history",
-                type: "bigint",
-                nullable: true,
-                oldClrType: typeof(long),
-                oldType: "bigint");
-        }
+        return ledgerTips.Max();
     }
 }

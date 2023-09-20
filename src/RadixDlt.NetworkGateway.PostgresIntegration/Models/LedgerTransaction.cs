@@ -131,13 +131,22 @@ internal abstract class LedgerTransaction
     [Column("normalized_round_timestamp")]
     public DateTime NormalizedRoundTimestamp { get; set; }
 
-    /// <summary>
-    /// The raw payload of the transaction.
-    /// </summary>
-    [Column("raw_payload")]
-    public byte[] RawPayload { get; set; }
-
     public TransactionReceipt EngineReceipt { get; set; }
+
+    public LedgerHashes LedgerHashes { get; set; }
+}
+
+[Owned]
+internal class LedgerHashes
+{
+    [Column("transaction_tree_hash")]
+    public string TransactionTreeHash { get; set; }
+
+    [Column("receipt_tree_hash")]
+    public string ReceiptTreeHash { get; set; }
+
+    [Column("state_tree_hash")]
+    public string StateTreeHash { get; set; }
 }
 
 [Owned]
@@ -258,6 +267,12 @@ internal class UserLedgerTransaction : LedgerTransaction
 
     [Column("message", TypeName = "jsonb")]
     public string? Message { get; set; }
+
+    /// <summary>
+    /// The raw payload of the transaction.
+    /// </summary>
+    [Column("raw_payload")]
+    public byte[] RawPayload { get; set; }
 }
 
 internal class RoundUpdateLedgerTransaction : LedgerTransaction

@@ -62,52 +62,39 @@
  * permissions under this License.
  */
 
-using System.Numerics;
-using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Workers;
+using System;
+using System.Collections.Generic;
 
-#nullable disable
+namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+public abstract class BaseGlobalWorker : LoopedWorkerBase
 {
-    /// <inheritdoc />
-    public partial class HandleRemoteGenericSchemaAssignment : Migration
+    private readonly IEnumerable<IGlobalWorkerObserver> _observers;
+
+    protected BaseGlobalWorker(
+            ILogger logger,
+            IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,
+            TimeSpan minDelayBetweenInfoLogs,
+            IEnumerable<IGlobalWorkerObserver> observers,
+            IClock clock)
+        // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
+        // crash the application so that it can be automatically restarted.
+        : base(logger, BehaviourOnFault.ApplicationExit, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs, clock)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<long>(
-                name: "schema_defining_entity_id",
-                table: "non_fungible_schema_history",
-                type: "bigint",
-                nullable: true);
+        _observers = observers;
+    }
 
-            migrationBuilder.AddColumn<long>(
-                name: "key_schema_defining_entity_id",
-                table: "key_value_store_schema_history",
-                type: "bigint",
-                nullable: true);
+    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
+    {
+        _observers.ForEach(x => x.TrackNonFaultingExceptionInWorkLoop(GetType(), ex));
+    }
 
-            migrationBuilder.AddColumn<long>(
-                name: "value_schema_defining_entity_id",
-                table: "key_value_store_schema_history",
-                type: "bigint",
-                nullable: true);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "schema_defining_entity_id",
-                table: "non_fungible_schema_history");
-
-            migrationBuilder.DropColumn(
-                name: "key_schema_defining_entity_id",
-                table: "key_value_store_schema_history");
-
-            migrationBuilder.DropColumn(
-                name: "value_schema_defining_entity_id",
-                table: "key_value_store_schema_history");
-        }
+    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
+    {
+        _observers.ForEach(x => x.TrackWorkerFaultedException(GetType(), ex, isStopRequested));
     }
 }

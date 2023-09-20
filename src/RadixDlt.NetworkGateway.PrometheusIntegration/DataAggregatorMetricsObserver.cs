@@ -112,56 +112,13 @@ internal class DataAggregatorMetricsObserver :
         );
 
     /* Global Metrics - Quorum/Sync related - ie ledger_node prefix */
-    private static readonly Gauge _quorumExistsStatus = Metrics
-        .CreateGauge(
-            "ng_ledger_sync_quorum_exists_status",
-            "Whether enough nodes agree to continue committing transaction to the DB. 1 = true, 0.5 = unknown, 0 = false. (if 0, it's a critical alarm)."
-        );
-
-    private static readonly Gauge _quorumExtensionConsistentStatus = Metrics
+    private static readonly Gauge _extensionConsistentStatus = Metrics
         .CreateGauge(
             "ng_ledger_sync_quorum_extension_consistent_status",
             "If a node quorum exists for a ledger extension, whether it agrees with the existing DB accumulator and is internally consistent. 1 = true, 0.5 = unknown, 0 = false. If 0, it's a critical alarm."
         );
 
-    private static readonly Gauge _sufficientlySyncedUpNodesTotal = Metrics
-        .CreateGauge(
-            "ng_ledger_sync_sufficiently_synced_up_nodes_total",
-            "The number of nodes which are sufficiently synced up."
-        );
-
-    private static readonly Gauge _sufficientlySyncedUpNodesTrustWeightingTotal = Metrics
-        .CreateGauge(
-            "ng_ledger_sync_sufficiently_synced_up_nodes_trust_weighting_total",
-            "The trust weighting of all nodes which are currently sufficiently synced up"
-        );
-
-    private static readonly Gauge _configuredNodesTotal = Metrics
-        .CreateGauge(
-            "ng_ledger_sync_configured_nodes_total",
-            "The number of nodes which are configured for transaction syncing."
-        );
-
-    private static readonly Gauge _configuredNodesTrustWeightingTotal = Metrics
-        .CreateGauge(
-            "ng_ledger_sync_configured_nodes_trust_weighting_total",
-            "The trust weighting of all nodes which are currently configured for transaction syncing."
-        );
-
-    private static readonly Gauge _ledgerNodeTrustWeightingRequiredForQuorum = Metrics
-        .CreateGauge(
-            "ng_ledger_sync_trust_weighting_required_for_quorum_total",
-            "The trust weighting currently required for quorum"
-        );
-
-    private static readonly Gauge _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced = Metrics
-        .CreateGauge(
-            "ng_ledger_sync_trust_weighting_required_for_quorum_if_all_nodes_sufficiently_synced_total",
-            "The trust weighting required for quorum, if/once all nodes are synced up"
-        );
-
     /* Global Metrics - Quorum/Sync related - ie ledger_commit prefix */
-
     private static readonly Histogram _batchCommitTimeSeconds = Metrics
         .CreateHistogram(
             "ng_ledger_commit_batch_commit_time_seconds",
@@ -210,13 +167,6 @@ internal class DataAggregatorMetricsObserver :
         .CreateGauge(
             "ng_node_ledger_tip_state_version",
             "The state version at the tip of the node's ledger.",
-            new GaugeConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private static readonly Gauge _nodeLedgerTipIsConsistentWithQuorumStatus = Metrics
-        .CreateGauge(
-            "ng_node_ledger_tip_is_consistent_with_quorum_status",
-            "If the node's ledger tip is consistent with the committed quorum. 1 = true, 0.5 = unknown, 0 = false. If 0, this is an important warning alarm - this node will need to be fixed.",
             new GaugeConfiguration { LabelNames = new[] { "node" } }
         );
 
@@ -439,25 +389,7 @@ internal class DataAggregatorMetricsObserver :
         _nodeWorkerErrorsCount.WithLabels(worker.Name, nodeName, exception.GetNameForMetricsOrLogging(), errorType).Inc();
     }
 
-    void ILedgerConfirmationServiceObserver.ResetQuorum()
-    {
-        _quorumExistsStatus.SetStatus(MetricStatus.Unknown);
-        _quorumExtensionConsistentStatus.SetStatus(MetricStatus.Unknown);
-    }
-
-    void ILedgerConfirmationServiceObserver.TrustWeightingRequirementsComputed(LedgerConfirmationService.TrustWeightingReport report)
-    {
-        _configuredNodesTotal.Set(report.TotalTransactionNodes);
-        _configuredNodesTrustWeightingTotal.Set((double)report.TrustWeightingAvailableAcrossAllNodes);
-
-        _sufficientlySyncedUpNodesTotal.Set(report.TotalSufficientlySyncedUpNodes);
-        _sufficientlySyncedUpNodesTrustWeightingTotal.Set((double)report.TrustWeightingOfSufficientlySyncedUpNodes);
-
-        _ledgerNodeTrustWeightingRequiredForQuorum.Set((double)report.TrustWeightingRequiredForQuorumAtPresentTime);
-        _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced.Set((double)report.TrustWeightingRequiredForQuorumIfAllNodesAvailableForQuorum);
-    }
-
-    ValueTask ILedgerConfirmationServiceObserver.PreHandleLedgerExtensionIfQuorum(DateTime timestamp)
+    ValueTask ILedgerConfirmationServiceObserver.PreHandleLedgerExtension(DateTime timestamp)
     {
         _ledgerLastExtensionAttemptStartTimestamp.Set(timestamp.ToUnixTimeSecondsWithMilliPrecision());
 
@@ -467,46 +399,6 @@ internal class DataAggregatorMetricsObserver :
     void ILedgerConfirmationServiceObserver.PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion)
     {
         _nodeLedgerTipStateVersion.WithLabels(nodeName).Set(ledgerTipStateVersion);
-    }
-
-    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion)
-    {
-        _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Unknown);
-    }
-
-    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion)
-    {
-        _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Yes);
-    }
-
-    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion)
-    {
-        _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.No);
-    }
-
-    void ILedgerConfirmationServiceObserver.LedgerTipInconsistentWithQuorumStatus(string inconsistentNodeName)
-    {
-        _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(inconsistentNodeName).SetStatus(MetricStatus.No);
-    }
-
-    void ILedgerConfirmationServiceObserver.LedgerTipConsistentWithQuorumStatus(string consistentNodeName)
-    {
-        _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(consistentNodeName).SetStatus(MetricStatus.Yes);
-    }
-
-    void ILedgerConfirmationServiceObserver.UnknownQuorumStatus()
-    {
-        _quorumExistsStatus.SetStatus(MetricStatus.Unknown);
-    }
-
-    void ILedgerConfirmationServiceObserver.QuorumLost()
-    {
-        _quorumExistsStatus.SetStatus(MetricStatus.No);
-    }
-
-    void ILedgerConfirmationServiceObserver.QuorumGained()
-    {
-        _quorumExistsStatus.SetStatus(MetricStatus.Yes);
     }
 
     void ILedgerConfirmationServiceObserver.ReportOnLedgerExtensionSuccess(DateTime timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount)
@@ -523,14 +415,14 @@ internal class DataAggregatorMetricsObserver :
         _ledgerUnixRoundTimestamp.Set(roundTimestamp.ToUnixTimeSecondsWithMilliPrecision());
     }
 
-    void ILedgerConfirmationServiceObserver.QuorumExtensionConsistentGained()
+    void ILedgerConfirmationServiceObserver.ExtensionConsistencyGained()
     {
-        _quorumExtensionConsistentStatus.SetStatus(MetricStatus.Yes);
+        _extensionConsistentStatus.SetStatus(MetricStatus.Yes);
     }
 
-    void ILedgerConfirmationServiceObserver.QuorumExtensionConsistentLost()
+    void ILedgerConfirmationServiceObserver.ExtensionConsistencyLost()
     {
-        _quorumExtensionConsistentStatus.SetStatus(MetricStatus.No);
+        _extensionConsistentStatus.SetStatus(MetricStatus.No);
     }
 
     public ValueTask PrePendingTransactionPrune(List<PendingTransactionStatusCount> mempoolCountByStatus)

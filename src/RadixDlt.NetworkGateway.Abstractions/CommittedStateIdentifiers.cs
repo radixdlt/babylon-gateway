@@ -62,31 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
+namespace RadixDlt.NetworkGateway.Abstractions;
 
-namespace RadixDlt.NetworkGateway.DataAggregator;
-
-public static class TransactionConsistency
-{
-    public static void AssertLatestTransactionConsistent(long latestTransactionStateVersion, long topOfLedgerStateVersion)
-    {
-        if (latestTransactionStateVersion != topOfLedgerStateVersion)
-        {
-            throw new InvalidLedgerCommitException(
-                $"Tried to commit transactions with parent state version {latestTransactionStateVersion} " +
-                $"on top of a ledger with state version {topOfLedgerStateVersion}"
-            );
-        }
-    }
-
-    public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
-    {
-        if (stateVersion != previousStateVersion + 1)
-        {
-            throw new InvalidLedgerCommitException(
-                $"Attempted to commit a transaction with state version {stateVersion}" +
-                $" on top of transaction with state version {previousStateVersion}"
-            );
-        }
-    }
-}
+public record struct CommittedStateIdentifiers(long StateVersion, string StateTreeHash, string TransactionTreeHash, string ReceiptTreeHash);

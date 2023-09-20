@@ -106,9 +106,9 @@ internal class TransactionStreamReader : ITransactionStreamReader
                     {
                         Blobs = true,
                         Manifest = true,
-                        RawLedgerTransaction = true,
+                        RawLedgerTransaction = false,
                         RawNotarizedTransaction = true,
-                        RawSystemTransaction = true,
+                        RawSystemTransaction = false,
                         Message = true,
                     },
                     substateFormatOptions: new CoreModel.SubstateFormatOptions
@@ -121,7 +121,7 @@ internal class TransactionStreamReader : ITransactionStreamReader
                     sborFormatOptions: new CoreModel.SborFormatOptions
                     {
                         Raw = true,
-                        ProgrammaticJson = true,
+                        ProgrammaticJson = false,
                     }
                 ),
                 token

@@ -62,43 +62,42 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Workers;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
-#nullable disable
+namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+/// <summary>
+/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// </summary>
+public sealed class LedgerTransactionsProcessorWorker : BaseGlobalWorker
 {
-    /// <inheritdoc />
-    public partial class AddEventEmitterAndName : Migration
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(100),
+            TimeSpan.FromMilliseconds(100));
+
+    private readonly ILedgerTransactionsProcessor _ledgerTransactionsProcessor;
+
+    public LedgerTransactionsProcessorWorker(
+        ILogger<LedgerTransactionsProcessorWorker> logger,
+        ILedgerTransactionsProcessor ledgerTransactionsProcessor,
+        IEnumerable<IGlobalWorkerObserver> observers,
+        IClock clock
+    )
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30), observers, clock)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<string[]>(
-                name: "receipt_event_emitters",
-                table: "ledger_transactions",
-                type: "jsonb[]",
-                nullable: false,
-                defaultValue: new string[0]);
+        _ledgerTransactionsProcessor = ledgerTransactionsProcessor;
+    }
 
-            migrationBuilder.AddColumn<string[]>(
-                name: "receipt_event_names",
-                table: "ledger_transactions",
-                type: "text[]",
-                nullable: false,
-                defaultValue: new string[0]);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "receipt_event_emitters",
-                table: "ledger_transactions");
-
-            migrationBuilder.DropColumn(
-                name: "receipt_event_names",
-                table: "ledger_transactions");
-        }
+    protected override async Task DoWork(CancellationToken cancellationToken)
+    {
+        await _ledgerTransactionsProcessor.ProcessTransactions(cancellationToken);
     }
 }

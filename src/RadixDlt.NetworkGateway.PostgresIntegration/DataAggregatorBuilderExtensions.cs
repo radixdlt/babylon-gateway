@@ -85,6 +85,11 @@ public static class DataAggregatorBuilderExtensions
         builder
             .Services
             .AddSingleton<ILedgerExtenderService, PostgresLedgerExtenderService>()
+            .AddSingleton<IFetchedTransactionStore, FetchedTransactionStore>()
+            .AddSingleton<INodeStatusProvider, NodeStatusProvider>()
+            .AddSingleton<ICommittedStateIdentifiersReader, CommittedStateIdentifiersReader>()
+            .AddSingleton<ITopOfLedgerProvider, TopOfLedgerProvider>()
+            .AddSingleton<ITopOfLedgerCache, TopOfLedgerCache>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
             .AddSingleton<IPendingTransactionTrackerService, PendingTransactionTrackerService>()
             .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()
@@ -98,6 +103,11 @@ public static class DataAggregatorBuilderExtensions
             .AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
             {
                 options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);
+            })
+            .AddNpgsqlDataSourceHolder<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)
+            .AddDbContextFactory<ReadOnlyDbContext>((serviceProvider, options) =>
+            {
+                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadOnlyDbContext>>().NpgsqlDataSource);
             });
 
         return builder;

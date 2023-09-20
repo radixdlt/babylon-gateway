@@ -72,13 +72,14 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerExtenderService
 {
-    Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token = default);
-
-    Task<TransactionSummary> GetLatestTransactionSummary(CancellationToken token = default);
+    Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default);
 }
 
 public sealed record TransactionSummary(
     long StateVersion,
+    string TransactionTreeHash,
+    string ReceiptTreeHash,
+    string StateTreeHash,
     DateTime RoundTimestamp,
     DateTime NormalizedRoundTimestamp,
     DateTime CreatedTimestamp,
@@ -86,10 +87,6 @@ public sealed record TransactionSummary(
     long RoundInEpoch,
     long IndexInEpoch,
     long IndexInRound
-);
-
-public sealed record SyncTargetCarrier(
-    long TargetStateVersion
 );
 
 public sealed record ConsistentLedgerExtension(

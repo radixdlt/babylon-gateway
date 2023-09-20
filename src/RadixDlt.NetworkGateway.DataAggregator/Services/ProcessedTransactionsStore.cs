@@ -62,36 +62,74 @@
  * permissions under this License.
  */
 
-using System;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.CoreApiSdk.Model;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public partial class LedgerTransaction
+public interface ITopOfLedgerCache
 {
-    public byte[] GetPayloadBytes()
+    TransactionSummary GetLastCommittedTransactionSummary();
+
+    long GetLastCommittedStateVersion();
+
+    Task<TransactionSummary> Refresh(CancellationToken token);
+
+    void Update(TransactionSummary transactionSummary);
+}
+
+public class TopOfLedgerCache : ITopOfLedgerCache
+{
+    private readonly ISystemStatusService _systemStatusService;
+    private readonly ITopOfLedgerProvider _topOfLedgerProvider;
+    private readonly IEnumerable<ILedgerConfirmationServiceObserver> _observers;
+
+    private TransactionSummary? _knownTopOfCommittedLedger;
+
+    public TopOfLedgerCache(ISystemStatusService systemStatusService, IEnumerable<ILedgerConfirmationServiceObserver> observers, ITopOfLedgerProvider topOfLedgerProvider)
     {
-        return this switch
-        {
-            GenesisLedgerTransaction glt => glt.GetPayloadBytes(),
-            UserLedgerTransaction ult => ult.GetPayloadBytes(),
-            RoundUpdateLedgerTransaction rult => rult.GetPayloadBytes(),
-            _ => throw new UnreachableException($"Didn't expect {this.GetType().Name} type"),
-        };
+        _systemStatusService = systemStatusService;
+        _observers = observers;
+        _topOfLedgerProvider = topOfLedgerProvider;
     }
 
-    // TODO:
-    // This is rcnet quick fix for returning transaction hex that's not boxed in user/validator/system enum by node.
-    // Boxed payload is not supported by the toolkit and client's can't actually do anything about it.
-    // Needs revisiting.
-    public byte[] GetUnwrappedPayloadBytes()
+    public TransactionSummary GetLastCommittedTransactionSummary()
     {
-        return this switch
+        if (_knownTopOfCommittedLedger == null)
         {
-            GenesisLedgerTransaction glt => glt.IsFlash ? Array.Empty<byte>() : glt.SystemTransaction.GetPayloadBytes(),
-            UserLedgerTransaction ult => ult.NotarizedTransaction.GetPayloadBytes(),
-            RoundUpdateLedgerTransaction rult => rult.GetPayloadBytes(),
-            _ => throw new UnreachableException($"Didn't expect {this.GetType().Name} type"),
-        };
+            throw new UnreachableException("Unexpected situation. Last committed state version is null");
+        }
+
+        return _knownTopOfCommittedLedger;
+    }
+
+    public long GetLastCommittedStateVersion()
+    {
+        if (_knownTopOfCommittedLedger == null)
+        {
+            throw new UnreachableException("Unexpected situation. Last committed state version is null");
+        }
+
+        return _knownTopOfCommittedLedger.StateVersion;
+    }
+
+    public async Task<TransactionSummary> Refresh(CancellationToken token)
+    {
+        var topOfLedger = await _topOfLedgerProvider.GetTopOfLedger(token);
+        Update(topOfLedger);
+        return topOfLedger;
+    }
+
+    public void Update(TransactionSummary transactionSummary)
+    {
+        _knownTopOfCommittedLedger = transactionSummary;
+
+        _observers.ForEach(x => x.RecordTopOfDbLedger(_knownTopOfCommittedLedger.StateVersion, _knownTopOfCommittedLedger.RoundTimestamp));
+
+        _systemStatusService.SetTopOfDbLedgerNormalizedRoundTimestamp(_knownTopOfCommittedLedger.NormalizedRoundTimestamp);
     }
 }
