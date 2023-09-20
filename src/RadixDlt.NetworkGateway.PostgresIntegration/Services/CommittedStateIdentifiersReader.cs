@@ -72,9 +72,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal sealed class CommittedStateIdentifiersReader : ICommittedStateIdentifiersReader
 {
-    private readonly IDbContextFactory<ReadOnlyDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
 
-    public CommittedStateIdentifiersReader(IDbContextFactory<ReadOnlyDbContext> dbContextFactory)
+    public CommittedStateIdentifiersReader(IDbContextFactory<ReadWriteDbContext> dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
     }

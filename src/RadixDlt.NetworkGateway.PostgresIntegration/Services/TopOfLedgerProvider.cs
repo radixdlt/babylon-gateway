@@ -74,9 +74,9 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
 {
     private readonly Abstractions.IClock _clock;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IDbContextFactory<ReadOnlyDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
 
-    public TopOfLedgerProvider(Abstractions.IClock clock, INetworkConfigurationProvider networkConfigurationProvider, IDbContextFactory<ReadOnlyDbContext> dbContextFactory)
+    public TopOfLedgerProvider(Abstractions.IClock clock, INetworkConfigurationProvider networkConfigurationProvider, IDbContextFactory<ReadWriteDbContext> dbContextFactory)
     {
         _clock = clock;
         _networkConfigurationProvider = networkConfigurationProvider;
