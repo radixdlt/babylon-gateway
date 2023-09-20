@@ -108,7 +108,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)..</param>
         /// <param name="events">Events emitted by a transaction..</param>
         /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object costingParameters = default(Object), Object feeDestination = default(Object), Object feeSource = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), Object events = default(Object), string errorMessage = default(string))
+        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object costingParameters = default(Object), Object feeDestination = default(Object), Object feeSource = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), List<EventsItem> events = default(List<EventsItem>), string errorMessage = default(string))
         {
             this.Status = status;
             this.FeeSummary = feeSummary;
@@ -182,7 +182,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>Events emitted by a transaction.</value>
         [DataMember(Name = "events", EmitDefaultValue = true)]
-        public Object Events { get; set; }
+        public List<EventsItem> Events { get; set; }
 
         /// <summary>
         /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
@@ -286,8 +286,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 ) && 
                 (
                     this.Events == input.Events ||
-                    (this.Events != null &&
-                    this.Events.Equals(input.Events))
+                    this.Events != null &&
+                    input.Events != null &&
+                    this.Events.SequenceEqual(input.Events)
                 ) && 
                 (
                     this.ErrorMessage == input.ErrorMessage ||
