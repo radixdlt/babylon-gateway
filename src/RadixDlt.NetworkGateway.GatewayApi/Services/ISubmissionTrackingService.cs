@@ -62,6 +62,9 @@
  * permissions under this License.
  */
 
+using RadixDlt.CoreApiSdk.Api;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -72,19 +75,17 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ISubmissionTrackingService
 {
-    Task<TackingGuidance> TrackInitialSubmission(
-        DateTime submittedTimestamp,
+    Task<SubmissionResult> ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
+        TransactionApi transactionApi,
+        string networkName,
+        string nodeName,
+        PendingTransactionHandlingConfig handlingConfig,
         ToolkitModel.NotarizedTransaction notarizedTransaction,
-        string submittedToNodeName,
-        CancellationToken token = default
-    );
-
-    Task MarkInitialFailure(
-        bool permanent,
-        string payloadHash,
-        string failureReason,
+        byte[] notarizedTransactionBytes,
+        TimeSpan submissionTimeout,
+        long currentEpoch,
         CancellationToken token = default
     );
 }
 
-public sealed record TackingGuidance(bool ShouldSubmitToNode, string? FailureReason = null);
+public sealed record SubmissionResult(bool AlreadyKnown, string? PermanentlyRejectedReason = null, NodeSubmissionResult? NodeSubmissionResult = null);

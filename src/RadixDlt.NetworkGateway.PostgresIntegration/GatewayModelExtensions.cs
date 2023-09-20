@@ -94,16 +94,18 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.TransactionStatus ToGatewayModel(this PendingTransactionStatus status)
+    public static GatewayModel.TransactionStatus ToGatewayModel(this PendingTransactionPayloadLedgerStatus status)
     {
         return status switch
         {
-            PendingTransactionStatus.SubmittedOrKnownInNodeMempool => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionStatus.Missing => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionStatus.RejectedTemporarily => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionStatus.RejectedPermanently => GatewayModel.TransactionStatus.Rejected,
-            PendingTransactionStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
-            PendingTransactionStatus.CommittedFailure => GatewayModel.TransactionStatus.CommittedFailure,
+            PendingTransactionPayloadLedgerStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
+            PendingTransactionPayloadLedgerStatus.CommittedFailure => GatewayModel.TransactionStatus.CommittedFailure,
+            PendingTransactionPayloadLedgerStatus.CommitPendingOutcomeUnknown => GatewayModel.TransactionStatus.Pending,
+            PendingTransactionPayloadLedgerStatus.CommitOfOtherPayloadForIntentPendingOutcomeUnknown => GatewayModel.TransactionStatus.Rejected,
+            PendingTransactionPayloadLedgerStatus.PermanentlyRejected => GatewayModel.TransactionStatus.Rejected,
+            PendingTransactionPayloadLedgerStatus.TransientlyAccepted => GatewayModel.TransactionStatus.Pending,
+            PendingTransactionPayloadLedgerStatus.TransientlyRejected => GatewayModel.TransactionStatus.Pending,
+            PendingTransactionPayloadLedgerStatus.Unknown => GatewayModel.TransactionStatus.Pending,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
     }

@@ -64,7 +64,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
@@ -82,205 +82,110 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ISubmissionService
 {
-    Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.LedgerState ledgerState, GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
 internal class SubmissionService : ISubmissionService
 {
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly ISubmissionTrackingService _submissionTrackingService;
-    private readonly IClock _clock;
-    private readonly IEnumerable<ISubmissionServiceObserver> _observers;
+    private readonly IReadOnlyCollection<ISubmissionServiceObserver> _observers;
     private readonly IOptionsMonitor<CoreApiIntegrationOptions> _coreApiIntegrationOptions;
-    private readonly ILogger _logger;
+    private readonly ILogger<SubmissionService> _logger;
 
     public SubmissionService(
         ICoreApiHandler coreApiHandler,
         ISubmissionTrackingService submissionTrackingService,
-        IClock clock,
         IEnumerable<ISubmissionServiceObserver> observers,
-        ILogger<SubmissionService> logger,
-        IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptions)
+        IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptions,
+        ILogger<SubmissionService> logger)
     {
         _coreApiHandler = coreApiHandler;
         _submissionTrackingService = submissionTrackingService;
-        _clock = clock;
-        _observers = observers;
-        _logger = logger;
+        _observers = observers.ToArray();
         _coreApiIntegrationOptions = coreApiIntegrationOptions;
+        _logger = logger;
     }
 
-    public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.LedgerState ledgerState, GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
-        using var parsedTransaction = await HandlePreSubmissionParseTransaction(request);
-        var submittedTimestamp = _clock.UtcNow;
+        var transactionBytes = request.GetNotarizedTransactionBytes();
+        // If these checks fails, it's not worth saving this transaction to our database or submitting it to the node.
+        using var parsedTransaction = await HandlePreSubmissionParseTransaction(transactionBytes);
+        await CheckPendingTransactionEpochValidity(ledgerState, parsedTransaction);
 
-        var trackingGuidance = await _submissionTrackingService.TrackInitialSubmission(
-            submittedTimestamp,
-            parsedTransaction,
+        var submissionResult = await _submissionTrackingService.ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
+            _coreApiHandler.GetTransactionApi(),
+            _coreApiHandler.GetNetworkName(),
             _coreApiHandler.GetCoreNodeConnectedTo().Name,
+            new PendingTransactionHandlingConfig(
+                _coreApiIntegrationOptions.CurrentValue.MaxSubmissionAttempts,
+                _coreApiIntegrationOptions.CurrentValue.StopResubmittingAfter),
+            parsedTransaction,
+            transactionBytes,
+            _coreApiIntegrationOptions.CurrentValue.SubmitTransactionTimeout,
+            ledgerState.Epoch,
             token
         );
 
-        if (trackingGuidance.FailureReason != null)
+        // Note: I'm not sure this is the correct choice of what should be an API error here, but I don't want to change the API errors that are thrown this close to launch
+        if (submissionResult.PermanentlyRejectedReason != null)
         {
-            await _observers.ForEachAsync(x => x.SubmissionAlreadyFailed(request, trackingGuidance));
-
-            throw InvalidTransactionException.FromPreviouslyFailedTransactionError(trackingGuidance.FailureReason);
+            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.PermanentlyRejected));
+            throw InvalidTransactionException.FromPermanentlyRejectedTransactionError(submissionResult.PermanentlyRejectedReason);
         }
 
-        if (!trackingGuidance.ShouldSubmitToNode)
+        if (submissionResult.AlreadyKnown)
         {
-            await _observers.ForEachAsync(x => x.SubmissionAlreadySubmitted(request, trackingGuidance));
-
-            return new GatewayModel.TransactionSubmitResponse(
-                duplicate: true
-            );
+            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.DuplicateSubmission));
+            return new GatewayModel.TransactionSubmitResponse(duplicate: true);
         }
 
-        try
+        await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.SubmittedToNetwork));
+        return new GatewayModel.TransactionSubmitResponse(duplicate: false);
+    }
+
+    private async Task CheckPendingTransactionEpochValidity(GatewayModel.LedgerState ledgerState, ToolkitModel.NotarizedTransaction parsedTransaction)
+    {
+        var header = parsedTransaction.SignedIntent().Intent().Header();
+        var currentEpoch = (ulong)ledgerState.Epoch;
+
+        if (header.startEpochInclusive > currentEpoch + 1)
         {
-            await _observers.ForEachAsync(x => x.PreHandleSubmitRequest(request));
-
-            var response = await HandleSubmitAndCreateResponse(request, parsedTransaction, token);
-
-            await _observers.ForEachAsync(x => x.PostHandleSubmitRequest(request, response));
-
-            return response;
+            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.StartEpochInFuture));
+            throw InvalidTransactionException.StartEpochTooFarInFuture(currentEpoch, header.startEpochInclusive);
         }
-        catch (Exception ex)
-        {
-            await _observers.ForEachAsync(x => x.HandleSubmitRequestFailed(request, ex));
 
-            throw;
+        if (header.endEpochExclusive <= currentEpoch)
+        {
+            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.EndEpochInPast));
+            throw InvalidTransactionException.NoLongerValid(currentEpoch, header.endEpochExclusive);
         }
     }
 
-    private async Task<ToolkitModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request)
+    private async Task<ToolkitModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(byte[] notarizedTransactionBytes)
     {
         try
         {
-            var notarizedTransaction = ToolkitModel.NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes());
+            var notarizedTransaction = ToolkitModel.NotarizedTransaction.Decompile(notarizedTransactionBytes);
             notarizedTransaction.StaticallyValidate(ToolkitModel.ValidationConfig.Default(_coreApiHandler.GetNetworkId()));
             return notarizedTransaction;
         }
         catch (ToolkitModel.RadixEngineToolkitException.TransactionValidationFailed ex)
         {
-            await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, ex.error));
+            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.ParseFailedStaticallyInvalid));
             throw InvalidTransactionException.FromStaticallyInvalid(ex.error);
         }
-        catch (ToolkitModel.RadixEngineToolkitException ex)
+        catch (ToolkitModel.RadixEngineToolkitException)
         {
-            await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, ex));
+            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.ParseFailedIncorrectFormat));
             throw InvalidTransactionException.FromUnsupportedPayloadType();
         }
         catch (Exception ex)
         {
-            await _observers.ForEachAsync(x => x.ParseTransactionFailedUnknown(request, ex));
-
+            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.ParseFailedOtherError));
+            _logger.LogWarning(ex, "Unexpected exception when parsing / validating submitted transaction");
             throw;
         }
-    }
-
-    private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(
-        GatewayModel.TransactionSubmitRequest request,
-        ToolkitModel.NotarizedTransaction parsedTransaction,
-        CancellationToken token)
-    {
-        using var timeoutTokenSource = new CancellationTokenSource(_coreApiIntegrationOptions.CurrentValue.SubmitTransactionTimeout);
-        using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
-
-        try
-        {
-            var result = await _coreApiHandler.SubmitTransaction(
-                new CoreModel.TransactionSubmitRequest(
-                    _coreApiHandler.GetNetworkName(),
-                    request.NotarizedTransactionHex
-                ),
-                finalTokenSource.Token
-            );
-
-            if (result.Succeeded)
-            {
-                var response = result.SuccessResponse;
-
-                if (response.Duplicate)
-                {
-                    await _observers.ForEachAsync(x => x.SubmissionDuplicate(request, response));
-                }
-                else
-                {
-                    await _observers.ForEachAsync(x => x.SubmissionSucceeded(request, response));
-                }
-
-                return new GatewayModel.TransactionSubmitResponse(
-                    duplicate: response.Duplicate
-                );
-            }
-
-            var details = result.FailureResponse.Details;
-            var isPermanent = false;
-            var message = result.FailureResponse.Message;
-            var detailedMessage = (string?)null;
-
-            switch (details)
-            {
-                case CoreModel.TransactionSubmitIntentAlreadyCommitted intentAlreadyCommitted:
-                    await _observers.ForEachAsync(x => x.ResubmitAlreadyCommitted(request, result.FailureResponse));
-
-                    _logger.LogInformation(
-                        "CoreAPI returned that submitted transaction with intent hash: {IntentHash} was already committed to ledger at state version: {StateVersion}",
-                        parsedTransaction.IntentHash().AsStr(), intentAlreadyCommitted.CommittedAs.StateVersion);
-
-                    return new GatewayModel.TransactionSubmitResponse(
-                        duplicate: false
-                    );
-                case CoreModel.TransactionSubmitPriorityThresholdNotMetErrorDetails priorityThresholdNotMet:
-                    detailedMessage = $"insufficient tip percentage of {priorityThresholdNotMet.TipPercentage}; min tip percentage {priorityThresholdNotMet.MinTipPercentageRequired}";
-                    break;
-                case CoreModel.TransactionSubmitRejectedErrorDetails rejected:
-                    isPermanent = rejected.IsIntentRejectionPermanent || rejected.IsPayloadRejectionPermanent;
-                    detailedMessage = rejected.ErrorMessage;
-                    break;
-            }
-
-            if (isPermanent)
-            {
-                await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(request, result.FailureResponse));
-            }
-            else
-            {
-                await _observers.ForEachAsync(x => x.HandleSubmissionFailedTemporary(request, result.FailureResponse));
-            }
-
-            await _submissionTrackingService.MarkInitialFailure(
-                isPermanent,
-                parsedTransaction.Hash().AsStr(),
-                message + (detailedMessage != null ? " (" + detailedMessage + ")" : string.Empty),
-                token
-            );
-
-            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiError(result.FailureResponse);
-        }
-        catch (OperationCanceledException ex) when (timeoutTokenSource.Token.IsCancellationRequested)
-        {
-            await _observers.ForEachAsync(x => x.HandleSubmissionFailedTimeout(request, ex));
-
-            _logger.LogWarning(ex, "Request timeout submitting transaction with hash {TransactionHash}", request.NotarizedTransactionHex);
-        }
-        catch (Exception ex)
-        {
-            // Any other kind of exception is unknown - eg it a connection drop or a 500 from the Core API.
-            // In theory, the transaction could have been submitted -- so we return success and
-            // if it wasn't submitted successfully, it'll be retried automatically by the resubmission service in
-            // any case.
-            await _observers.ForEachAsync(x => x.HandleSubmissionFailedUnknown(request, ex));
-
-            _logger.LogWarning(ex, "Unknown error submitting transaction with hash {TransactionHash}", request.NotarizedTransactionHex);
-        }
-
-        return new GatewayModel.TransactionSubmitResponse(
-            duplicate: false
-        );
     }
 }

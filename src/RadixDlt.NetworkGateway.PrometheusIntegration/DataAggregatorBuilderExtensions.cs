@@ -99,7 +99,6 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<IMempoolTrackerServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INodeTransactionLogWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INodeMempoolTransactionHashesReaderWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
-            .AddSingleton<INodeMempoolFullTransactionReaderWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<ILedgerExtenderServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INetworkConfigurationReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INetworkStatusReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())

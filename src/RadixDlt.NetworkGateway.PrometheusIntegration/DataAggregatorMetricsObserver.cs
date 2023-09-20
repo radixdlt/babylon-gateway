@@ -63,7 +63,7 @@
  */
 
 using Prometheus;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
@@ -73,7 +73,6 @@ using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -91,7 +90,6 @@ internal class DataAggregatorMetricsObserver :
     IMempoolTrackerServiceObserver,
     INodeTransactionLogWorkerObserver,
     INodeMempoolTransactionHashesReaderWorkerObserver,
-    INodeMempoolFullTransactionReaderWorkerObserver,
     ILedgerExtenderServiceObserver,
     INetworkConfigurationReaderObserver,
     INetworkStatusReaderObserver,
@@ -170,10 +168,10 @@ internal class DataAggregatorMetricsObserver :
             new GaugeConfiguration { LabelNames = new[] { "node" } }
         );
 
-    private static readonly Gauge _mempoolDbSizeByStatus = Metrics
+    private static readonly Gauge _pendingTransactionTableCountByPruneStatus = Metrics
         .CreateGauge(
             "ng_db_mempool_size_by_status_total",
-            "Number of transactions currently tracked in the MempoolTransaction table, by status.",
+            "Number of transactions currently tracked in the PendingTransaction table, by prune status.",
             new GaugeConfiguration { LabelNames = new[] { "status" } }
         );
 
@@ -189,28 +187,16 @@ internal class DataAggregatorMetricsObserver :
             "Current number of transactions which have dropped out of mempools and need resubmitting."
         );
 
-    private static readonly Counter _dbMempoolTransactionsMarkedAsResolvedButUnknownStatusCount = Metrics
+    private static readonly Counter _dbMempoolTransactionsMarkedAsSubmissionPendingCount = Metrics
         .CreateCounter(
-            "ng_db_mempool_transactions_marked_resolved_but_unknown_status_count",
-            "Number of mempool transactions marked as resolved but with an as-yet-unknown status during resubmission"
+            "ng_db_mempool_transactions_marked_as_submission_pending_count",
+            "Number of mempool transactions marked as submission pending at resubmission"
         );
 
-    private static readonly Counter _dbMempoolTransactionsMarkedAsFailedDuringResubmissionCount = Metrics
+    private static readonly Counter _dbMempoolTransactionsMarkedAsNoLongerSubmittingCount = Metrics
         .CreateCounter(
-            "ng_db_mempool_transactions_marked_failed_during_resubmission_count",
-            "Number of mempool transactions marked as failed due to error during resubmission"
-        );
-
-    private static readonly Counter _dbMempoolTransactionsMarkedAsAssumedInNodeMempoolAfterResubmissionCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_assumed_in_node_mempool_after_resubmission_count",
-            "Number of mempool transactions marked as InNodeMempool after resubmission"
-        );
-
-    private static readonly Counter _dbTransactionsMarkedAsFailedForTimeoutCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_as_failed_for_timeout_count",
-            "Number of mempool transactions in the DB marked as failed due to timeout as they won't be resubmitted"
+            "ng_db_mempool_transactions_marked_as_no_longer_submitting_count",
+            "Number of mempool transactions in the DB marked as no longer submitting"
         );
 
     private static readonly Counter _transactionResubmissionAttemptCount = Metrics
@@ -271,12 +257,6 @@ internal class DataAggregatorMetricsObserver :
             "Number of transactions seen currently in any node mempool."
         );
 
-    private static readonly Counter _dbTransactionsAddedDueToNodeMempoolAppearanceCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_added_from_node_mempool_count",
-            "Number of mempool transactions added to the DB due to appearing in a node mempool"
-        );
-
     private static readonly Counter _dbTransactionsMarkedAsMissingCount = Metrics
         .CreateCounter(
             "ng_db_mempool_transactions_marked_as_missing_count",
@@ -327,20 +307,13 @@ internal class DataAggregatorMetricsObserver :
             new CounterConfiguration { LabelNames = new[] { "node" } }
         );
 
-    private static readonly Counter _fullTransactionsFetchedCount = Metrics
-        .CreateCounter(
-            "ng_node_mempool_full_transactions_fetched_count",
-            "Count of transaction contents fetched from the node.",
-            new CounterConfiguration { LabelNames = new[] { "node", "is_duplicate" } }
-        );
-
     private static readonly Counter _transactionsMarkedCommittedCount = Metrics
         .CreateCounter(
             "ng_db_mempool_transactions_marked_committed_count",
             "Number of mempool transactions which are marked committed"
         );
 
-    private static readonly Counter _transactionsMarkedCommittedWhichWereFailedCount = Metrics
+    private static readonly Counter _transactionsMarkedCommittedWhichWerePermanentlyRejectedCount = Metrics
         .CreateCounter(
             "ng_db_mempool_transactions_marked_committed_which_were_failed_count",
             "Number of mempool transactions which are marked committed which were previously marked as failed"
@@ -425,126 +398,77 @@ internal class DataAggregatorMetricsObserver :
         _extensionConsistentStatus.SetStatus(MetricStatus.No);
     }
 
-    public ValueTask PrePendingTransactionPrune(List<PendingTransactionStatusCount> mempoolCountByStatus)
+    public ValueTask PrePendingTransactionPrune(List<PendingTransactionCountByPruneStatus> mempoolCountByStatus)
     {
-        var existingStatusLabelsNeedingUpdating = _mempoolDbSizeByStatus.GetAllLabelValues().SelectMany(x => x).ToHashSet();
-
         foreach (var countByStatus in mempoolCountByStatus)
         {
-            _mempoolDbSizeByStatus.WithLabels(countByStatus.Status.ToString()).Set(countByStatus.Count);
-            existingStatusLabelsNeedingUpdating.Remove(countByStatus.Status.ToString());
-        }
-
-        // If a known status doesn't appear in the database, it should be set to 0.
-        foreach (var statusName in existingStatusLabelsNeedingUpdating)
-        {
-            _mempoolDbSizeByStatus.WithLabels(statusName).Set(0);
+            _pendingTransactionTableCountByPruneStatus.WithLabels(countByStatus.CanPrune ? "for_pruning" : "current").Set(countByStatus.Count);
         }
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPendingTransactionPrunerServiceObserver.PreMempoolTransactionPruned(int count)
+    ValueTask IPendingTransactionPrunerServiceObserver.PendingTransactionsPruned(int count)
     {
         _mempoolTransactionsPrunedCount.Inc(count);
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPendingTransactionResubmissionServiceObserver.TransactionsSelected(int totalTransactionsNeedingResubmission)
+    ValueTask IPendingTransactionResubmissionServiceObserver.ObserveResubmissionQueueSize(int totalTransactionsNeedingResubmission)
     {
         _resubmissionQueueSize.Set(totalTransactionsNeedingResubmission);
 
         return ValueTask.CompletedTask;
     }
 
-    void IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsAssumedSuccessfullySubmittedToNode()
+    ValueTask IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsSubmissionPending()
     {
-        _dbMempoolTransactionsMarkedAsAssumedInNodeMempoolAfterResubmissionCount.Inc();
-    }
-
-    void IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsFailed()
-    {
-        _dbTransactionsMarkedAsFailedForTimeoutCount.Inc();
-    }
-
-    ValueTask IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode()
-    {
-        _dbMempoolTransactionsMarkedAsResolvedButUnknownStatusCount.Inc();
+        _dbMempoolTransactionsMarkedAsSubmissionPendingCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsFailedAfterSubmittedToNode()
+    ValueTask IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsNoLongerSubmitting()
     {
-        _dbMempoolTransactionsMarkedAsFailedDuringResubmissionCount.Inc();
+        _dbMempoolTransactionsMarkedAsNoLongerSubmittingCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPendingTransactionResubmissionServiceObserver.PreResubmit(byte[] notarizedTransaction)
+    ValueTask ITransactionSubmitterObserver.ObserveSubmitAttempt(SubmitContext context)
     {
+        if (!context.IsResubmission)
+        {
+            throw new Exception("Aggregator is only supposed to handle resubmissions");
+        }
+
         _transactionResubmissionAttemptCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPendingTransactionResubmissionServiceObserver.PostResubmit(byte[] notarizedTransaction)
+    /// <summary>
+    /// Note - this parallels ObserveSubmitResult in GatewayApiMetricObserver.
+    /// </summary>
+    ValueTask ITransactionSubmitterObserver.ObserveSubmitResult(SubmitContext context, NodeSubmissionResult nodeSubmissionResult)
     {
-        _transactionResubmissionSuccessCount.Inc();
+        if (!context.IsResubmission)
+        {
+            throw new Exception("Aggregator is only supposed to handle resubmissions");
+        }
 
-        return ValueTask.CompletedTask;
-    }
+        if (nodeSubmissionResult.IsSubmissionSuccess())
+        {
+            _transactionResubmissionSuccessCount.Inc();
+        }
 
-    ValueTask IPendingTransactionResubmissionServiceObserver.PostResubmitDuplicate(byte[] notarizedTransaction)
-    {
-        _transactionResubmissionResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
+        if (nodeSubmissionResult.IsSubmissionError())
+        {
+            _transactionResubmissionErrorCount.Inc();
+        }
 
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask ResubmitAlreadyCommitted(byte[] notarizedTransaction)
-    {
-        _transactionResubmissionResolutionByResultCount.WithLabels("node_marks_as_already_committed").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IPendingTransactionResubmissionServiceObserver.PostResubmitSucceeded(byte[] notarizedTransaction)
-    {
-        _transactionResubmissionResolutionByResultCount.WithLabels("success").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedPermanently(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse)
-    {
-        _transactionResubmissionErrorCount.Inc();
-        _transactionResubmissionResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedTemporary(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse)
-    {
-        _transactionResubmissionErrorCount.Inc();
-        _transactionResubmissionResolutionByResultCount.WithLabels("unknown_temporary_error").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedTimeout(byte[] notarizedTransaction, OperationCanceledException operationCanceledException)
-    {
-        _transactionResubmissionErrorCount.Inc();
-        _transactionResubmissionResolutionByResultCount.WithLabels("request_timeout").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedUnknown(byte[] notarizedTransaction, Exception exception)
-    {
-        _transactionResubmissionErrorCount.Inc();
-        _transactionResubmissionResolutionByResultCount.WithLabels("unknown_error").Inc();
+        _transactionResubmissionResolutionByResultCount.WithLabels(nodeSubmissionResult.MetricLabel()).Inc();
 
         return ValueTask.CompletedTask;
     }
@@ -576,11 +500,6 @@ internal class DataAggregatorMetricsObserver :
     void IMempoolTrackerServiceObserver.TransactionsReappearedCount(int count)
     {
         _dbTransactionsReappearedCount.Inc(count);
-    }
-
-    void IMempoolTrackerServiceObserver.TransactionsAddedDueToNodeMempoolAppearanceCount(int count)
-    {
-        _dbTransactionsAddedDueToNodeMempoolAppearanceCount.Inc(count);
     }
 
     void IMempoolTrackerServiceObserver.TransactionsMarkedAsMissing()
@@ -617,16 +536,9 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask INodeMempoolFullTransactionReaderWorkerObserver.FullTransactionsFetchedCount(string nodeName, bool wasDuplicate)
+    ValueTask ILedgerExtenderServiceObserver.TransactionsMarkedCommittedWhichWasPermanentlyRejected()
     {
-        _fullTransactionsFetchedCount.WithLabels(nodeName, wasDuplicate ? "true" : "false").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ILedgerExtenderServiceObserver.TransactionsMarkedCommittedWhichWasFailed()
-    {
-        _transactionsMarkedCommittedWhichWereFailedCount.Inc();
+        _transactionsMarkedCommittedWhichWerePermanentlyRejectedCount.Inc();
 
         return ValueTask.CompletedTask;
     }

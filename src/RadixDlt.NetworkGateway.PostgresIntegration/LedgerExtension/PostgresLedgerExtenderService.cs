@@ -178,26 +178,33 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
          *
          * and then simple foreach loop notifying the observers
          */
-
-        var userTransactionStatusByPayloadHash = new Dictionary<string, PendingTransactionStatus>(committedTransactions.Count);
+        var timestamp = _clock.UtcNow;
+        var userTransactionStateVersionAndSuccessByPayloadHash = new Dictionary<string, (long, bool, string?)>(committedTransactions.Count);
 
         foreach (var committedTransaction in committedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
         {
-            var ult = ((CoreModel.UserLedgerTransaction)committedTransaction.LedgerTransaction).NotarizedTransaction;
+            var payloadHash = ((CoreModel.UserLedgerTransaction)committedTransaction.LedgerTransaction).NotarizedTransaction.HashBech32m;
 
-            userTransactionStatusByPayloadHash[ult.HashBech32m] = committedTransaction.Receipt.Status switch
+            var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
+            var isSuccess = committedTransaction.Receipt.Status switch
             {
-                CoreModel.TransactionStatus.Succeeded => PendingTransactionStatus.CommittedSuccess,
-                CoreModel.TransactionStatus.Failed => PendingTransactionStatus.CommittedFailure,
+                CoreModel.TransactionStatus.Succeeded => true,
+                CoreModel.TransactionStatus.Failed => false,
                 _ => throw new UnreachableException($"Didn't expect {committedTransaction.Receipt.Status} value"),
             };
+
+            var errorMessage = committedTransaction.Receipt.ErrorMessage;
+
+            userTransactionStateVersionAndSuccessByPayloadHash[payloadHash] = (stateVersion, isSuccess, errorMessage);
         }
 
-        var payloadHashes = userTransactionStatusByPayloadHash.Keys.ToList();
+        var payloadHashes = userTransactionStateVersionAndSuccessByPayloadHash.Keys.ToList();
 
         var toUpdate = await dbContext
             .PendingTransactions
-            .Where(pt => pt.Status != PendingTransactionStatus.CommittedSuccess && pt.Status != PendingTransactionStatus.CommittedFailure)
+            .Where(pt =>
+                pt.LedgerDetails.PayloadLedgerStatus != PendingTransactionPayloadLedgerStatus.CommittedSuccess
+                && pt.LedgerDetails.PayloadLedgerStatus != PendingTransactionPayloadLedgerStatus.CommittedFailure)
             .Where(pt => payloadHashes.Contains(pt.PayloadHash))
             .ToListAsync(token);
 
@@ -208,23 +215,22 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         foreach (var pendingTransaction in toUpdate)
         {
-            if (pendingTransaction.Status is PendingTransactionStatus.RejectedPermanently)
+            if (pendingTransaction.LedgerDetails.PayloadLedgerStatus is PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
             {
-                await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
+                await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasPermanentlyRejected());
 
                 _logger.LogError(
-                    "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
+                    "Transaction with payload hash {PayloadHash} which was first submitted to Gateway at {FirstGatewaySubmissionTime} was marked permanently rejected at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
                     pendingTransaction.PayloadHash,
-                    pendingTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.Status,
-                    pendingTransaction.LastFailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LastFailureReason
+                    pendingTransaction.GatewayHandling.FirstSubmittedToGatewayTimestamp.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.LedgerDetails.LastFailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.LedgerDetails.LastFailureReason
                 );
             }
 
-            pendingTransaction.MarkAsCommitted(userTransactionStatusByPayloadHash[pendingTransaction.PayloadHash], _clock.UtcNow);
+            var (stateVersion, isSuccess, errorMessage) = userTransactionStateVersionAndSuccessByPayloadHash[pendingTransaction.PayloadHash];
+
+            pendingTransaction.MarkAsCommitted(stateVersion, isSuccess, errorMessage, timestamp);
         }
 
         // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider

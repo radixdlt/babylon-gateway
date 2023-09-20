@@ -83,22 +83,27 @@ public class InvalidTransactionException : ValidationException
         ErrorResponse = errorResponse;
     }
 
-    public static InvalidTransactionException FromInvalidTransactionDueToCoreApiError(CoreModel.TransactionSubmitErrorResponse errorResponse)
+    public static InvalidTransactionException StartEpochTooFarInFuture(ulong currentEpoch, ulong startEpochInclusive)
     {
-        return new InvalidTransactionException("Transaction is invalid", errorResponse);
+        return new InvalidTransactionException($"Transaction start epoch {startEpochInclusive} is not yet close enough to current epoch {currentEpoch}");
     }
 
-    public static InvalidTransactionException FromPreviouslyFailedTransactionError(string failureReason)
+    public static InvalidTransactionException NoLongerValid(ulong currentEpoch, ulong endEpochExclusive)
     {
-        return new InvalidTransactionException(failureReason);
+        return new InvalidTransactionException($"Transaction is no longer valid from epoch {endEpochExclusive} but it is now epoch {currentEpoch}");
     }
 
-    public static Exception FromUnsupportedPayloadType()
+    public static InvalidTransactionException FromPermanentlyRejectedTransactionError(string rejectionReason)
+    {
+        return new InvalidTransactionException(rejectionReason);
+    }
+
+    public static InvalidTransactionException FromUnsupportedPayloadType()
     {
         return new InvalidTransactionException("Expected notarized transaction");
     }
 
-    public static Exception FromStaticallyInvalid(string validityError)
+    public static InvalidTransactionException FromStaticallyInvalid(string validityError)
     {
         return new InvalidTransactionException("Invalid transaction: " + validityError);
     }

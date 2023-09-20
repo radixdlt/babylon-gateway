@@ -62,69 +62,90 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
-
-public static class ServiceCollectionExtensions
+public static class PendingTransactionIntentLedgerStatusExtensions
 {
-    public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
+    /// <summary>
+    /// A new status should overwrite an older status for a given payload only if it has >= ReplacementPriority.
+    /// </summary>
+    public static int ReplacementPriorityForSinglePayload(this PendingTransactionIntentLedgerStatus status)
     {
-        CustomTypes.EnsureConfigured();
-
-        services
-            .AddNpgsqlDataSourceHolder<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
-            .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(
-                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<MigrationsDbContext>>().NpgsqlDataSource,
-                    o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name));
-            });
+        return status switch
+        {
+            PendingTransactionIntentLedgerStatus.CommittedSuccess => 5,
+            PendingTransactionIntentLedgerStatus.CommittedFailure => 5,
+            PendingTransactionIntentLedgerStatus.CommitPendingOutcomeUnknown => 4,
+            PendingTransactionIntentLedgerStatus.PermanentRejection => 3,
+            PendingTransactionIntentLedgerStatus.PossibleToCommit => 1,
+            PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => 1,
+            PendingTransactionIntentLedgerStatus.Unknown => 0,
+        };
     }
 
-    // TODO the moment we eliminate multiple data sources per application we could roll back to Npgsql.DependencyInjection and its AddNpgsqlDataSource
-    internal static IServiceCollection AddNpgsqlDataSourceHolder<T>(this IServiceCollection services, string connectionStringName)
+    /// <summary>
+    /// A new status should replace an older status when aggregating across multiple payloads only if it has >= AggregationPriority.
+    /// </summary>
+    public static int AggregationPriorityAcrossKnownPayloads(this PendingTransactionIntentLedgerStatus status)
     {
-        services.TryAdd(new ServiceDescriptor(
-            typeof(NpgsqlDataSourceHolder<T>),
-            sp =>
-            {
-                var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionStringName);
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-
-                dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
-                dataSourceBuilder.MapEnum<AccountDefaultDepositRule>();
-                dataSourceBuilder.MapEnum<AccountResourcePreferenceRule>();
-                dataSourceBuilder.MapEnum<EntityType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
-                dataSourceBuilder.MapEnum<LedgerTransactionType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerEventType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOperationType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOriginType>();
-                dataSourceBuilder.MapEnum<NonFungibleIdType>();
-                dataSourceBuilder.MapEnum<PackageVmType>();
-                dataSourceBuilder.MapEnum<PendingTransactionPayloadLedgerStatus>();
-                dataSourceBuilder.MapEnum<PendingTransactionIntentLedgerStatus>();
-                dataSourceBuilder.MapEnum<PendingTransactionMempoolStatus>();
-                dataSourceBuilder.MapEnum<PendingTransactionHandlingStatus>();
-                dataSourceBuilder.MapEnum<PublicKeyType>();
-                dataSourceBuilder.MapEnum<ResourceType>();
-                dataSourceBuilder.MapEnum<ModuleId>();
-                dataSourceBuilder.MapEnum<SborTypeKind>();
-                dataSourceBuilder.MapEnum<StateType>();
-
-                return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
-            },
-            ServiceLifetime.Singleton));
-
-        return services;
+        return status switch
+        {
+            PendingTransactionIntentLedgerStatus.CommittedSuccess => 5,
+            PendingTransactionIntentLedgerStatus.CommittedFailure => 5,
+            PendingTransactionIntentLedgerStatus.CommitPendingOutcomeUnknown => 4,
+            PendingTransactionIntentLedgerStatus.PermanentRejection => 3,
+            PendingTransactionIntentLedgerStatus.PossibleToCommit => 2,
+            PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => 1,
+            PendingTransactionIntentLedgerStatus.Unknown => 0,
+        };
     }
+}
+
+/// <summary>
+/// Any additional knowledge we have about the intent.
+/// </summary>
+public enum PendingTransactionIntentLedgerStatus
+{
+    /// <summary>
+    /// We don't know anything about whether the intent could be committed or rejected.
+    /// This is first so it gets the default value of 0.
+    /// </summary>
+    Unknown,
+
+    /// <summary>
+    /// We know that the intent has been committed as a success.
+    /// </summary>
+    CommittedSuccess,
+
+    /// <summary>
+    /// We know that the intent has been committed as a failure.
+    /// </summary>
+    CommittedFailure,
+
+    /// <summary>
+    /// We know that the intent has been committed, but don't yet know the outcome until it's synced (Success/Failure).
+    /// </summary>
+    CommitPendingOutcomeUnknown,
+
+    /// <summary>
+    /// We know that the intent is permanently rejected.
+    /// </summary>
+    PermanentRejection,
+
+    /// <summary>
+    /// The intent is known to have been submitted, and at least one payload was not rejected at last submission.
+    /// </summary>
+    PossibleToCommit,
+
+    /// <summary>
+    /// <para>All known payloads containing this intent were rejected at their last submission,
+    /// therefore the intent is likely to end up rejected, but this is not guaranteed.</para>
+    ///
+    /// <para>For example, it could have been rejected because a user didn't have enough XRD in their account
+    /// to lock their fee, and they then top up their account, and the transaction can commit.</para>
+    ///
+    /// <para>Or the payload could have been submitted with the wrong signatures, and the notary corrects
+    /// these and resubmits the intent in a new payload, which can be submitted.</para>
+    /// </summary>
+    LikelyButNotCertainRejection,
 }

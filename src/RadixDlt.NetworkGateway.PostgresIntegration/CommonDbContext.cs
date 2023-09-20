@@ -165,7 +165,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PackageVmType>();
-        modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
+        modelBuilder.HasPostgresEnum<PendingTransactionPayloadLedgerStatus>();
+        modelBuilder.HasPostgresEnum<PendingTransactionIntentLedgerStatus>();
+        modelBuilder.HasPostgresEnum<PendingTransactionMempoolStatus>();
+        modelBuilder.HasPostgresEnum<PendingTransactionHandlingStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
         modelBuilder.HasPostgresEnum<ModuleId>();
@@ -268,9 +271,28 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
     {
+        // These together need to handle the following queries:
+        // - LedgerExtenderService:
+        //   > MarkCommitted: Lookup by PayloadHash + PayloadStatus
+        // - TrackerService:
+        //   > MarkAsMissing: HandlingStatus == Submitting && MempoolStatus == InNodeMempool && PayloadHash NOT in list && More than grace period since LastNodeSubmissionTimestamp
+        //   > NewlyDiscovered: PayloadHash
+        // - ResubmissionService:
+        //   > ForResubmitting: HandlingStatus == Submitting && MempoolStatus == (MissingFromKnownMempools || Submitting) && LastDroppedOutOfMempoolTimestamp < X && LastNodeSubmissionTimestamp < Y
+        // - PrunerService:
+        //   > PruneIf: LastSubmittedToGatewayTimestamp < pruneIfLastGatewaySubmissionBefore
+        // - TransactionStatusAPI:
+        //   > Lookup by intent
+        //
+        // The following indices make all these queries performant.
         modelBuilder
             .Entity<PendingTransaction>()
-            .HasIndex(pt => pt.Status);
+            .HasIndex(pt => pt.MempoolStatus)
+            .HasFilter($"handling_status = '{PendingTransactionHandlingStatus.Submitting.ToString().ToLowerInvariant()}'");
+
+        modelBuilder
+            .Entity<PendingTransaction>()
+            .HasIndex(pt => pt.LastSubmittedToGatewayTimestamp);
 
         modelBuilder
             .Entity<PendingTransaction>()

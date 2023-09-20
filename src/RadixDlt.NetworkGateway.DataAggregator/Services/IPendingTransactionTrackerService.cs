@@ -72,8 +72,6 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public readonly record struct PendingTransactionHashPair(string IntentHash, string PayloadHash);
 
-public sealed record PendingTransactionData(PendingTransactionHashPair Hashes, DateTime SeenAt, byte[] Payload);
-
 public sealed record NodeMempoolHashes(HashSet<PendingTransactionHashPair> TransactionHashes, DateTime AtTime);
 
 public interface IPendingTransactionTrackerService
@@ -81,20 +79,4 @@ public interface IPendingTransactionTrackerService
     void RegisterNodeMempoolHashes(string nodeName, NodeMempoolHashes nodeMempoolHashes);
 
     Task HandleChanges(CancellationToken token);
-
-    /// <summary>
-    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
-    /// contents actually need fetching.
-    /// </summary>
-    Task<HashSet<PendingTransactionHashPair>> WhichTransactionsNeedContentFetching(IEnumerable<PendingTransactionHashPair> candidates, CancellationToken cancellationToken);
-
-    bool SubmitTransactionContents(PendingTransactionData pendingTransactionData);
-
-    /// <summary>
-    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to check if the transaction
-    /// identifier still needs fetching. This is to try to not make a call if we've already got the transaction contents
-    /// from another node in the mean-time.
-    /// </summary>
-    /// <returns>If the transaction was first seen (true) or (false).</returns>
-    bool TransactionContentsStillNeedFetching(PendingTransactionHashPair hashPair);
 }

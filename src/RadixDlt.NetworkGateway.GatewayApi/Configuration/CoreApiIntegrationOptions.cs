@@ -69,10 +69,23 @@ using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
+/// <summary>
+/// These should probably match MempoolOptions in the DataAggregator.
+/// </summary>
 public sealed class CoreApiIntegrationOptions
 {
-    [ConfigurationKeyName("SubmitTransactionTimeout")]
-    public TimeSpan SubmitTransactionTimeout { get; set; } = TimeSpan.FromSeconds(3);
+    [ConfigurationKeyName("SubmitTransactionNodeRequestTimeoutMilliseconds")]
+    public long SubmitTransactionNodeRequestTimeoutMilliseconds { get; set; } = 4000;
+
+    public TimeSpan SubmitTransactionTimeout => TimeSpan.FromMilliseconds(SubmitTransactionNodeRequestTimeoutMilliseconds);
+
+    [ConfigurationKeyName("StopResubmittingAfterSeconds")]
+    public long StopResubmittingAfterSeconds { get; set; } = 5 * 60;
+
+    public TimeSpan StopResubmittingAfter => TimeSpan.FromSeconds(StopResubmittingAfterSeconds);
+
+    [ConfigurationKeyName("MaxSubmissionAttempts")]
+    public int MaxSubmissionAttempts { get; set; } = 5;
 }
 
 internal class CoreApiIntegrationOptionsValidator : AbstractOptionsValidator<CoreApiIntegrationOptions>
@@ -80,5 +93,7 @@ internal class CoreApiIntegrationOptionsValidator : AbstractOptionsValidator<Cor
     public CoreApiIntegrationOptionsValidator()
     {
         RuleFor(x => x.SubmitTransactionTimeout).GreaterThan(TimeSpan.Zero);
+        RuleFor(x => x.StopResubmittingAfterSeconds).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.MaxSubmissionAttempts).GreaterThanOrEqualTo(0);
     }
 }

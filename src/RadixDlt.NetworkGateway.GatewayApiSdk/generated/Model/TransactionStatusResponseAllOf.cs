@@ -101,6 +101,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
         public TransactionStatus Status { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IntentStatus
+        /// </summary>
+        [DataMember(Name = "intent_status", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionIntentStatus IntentStatus { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatusResponseAllOf" /> class.
         /// </summary>
@@ -110,19 +116,37 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionStatusResponseAllOf" /> class.
         /// </summary>
         /// <param name="status">status (required).</param>
+        /// <param name="intentStatus">intentStatus (required).</param>
+        /// <param name="intentStatusDescription">An additional description to clarify the intent status.  (required).</param>
         /// <param name="knownPayloads">knownPayloads (required).</param>
-        /// <param name="errorMessage">errorMessage.</param>
-        public TransactionStatusResponseAllOf(TransactionStatus status = default(TransactionStatus), List<TransactionStatusResponseKnownPayloadItem> knownPayloads = default(List<TransactionStatusResponseKnownPayloadItem>), string errorMessage = default(string))
+        /// <param name="committedStateVersion">If the intent was committed, this gives the state version when this intent was committed. .</param>
+        /// <param name="errorMessage">The most relevant error message received, due to a rejection or commit as failure. Please note that presence of an error message doesn&#39;t imply that the intent will definitely reject or fail. This could represent a temporary error (such as out of fees), or an error with a payload which doesn&#39;t end up being committed. .</param>
+        public TransactionStatusResponseAllOf(TransactionStatus status = default(TransactionStatus), TransactionIntentStatus intentStatus = default(TransactionIntentStatus), string intentStatusDescription = default(string), List<TransactionStatusResponseKnownPayloadItem> knownPayloads = default(List<TransactionStatusResponseKnownPayloadItem>), long? committedStateVersion = default(long?), string errorMessage = default(string))
         {
             this.Status = status;
+            this.IntentStatus = intentStatus;
+            // to ensure "intentStatusDescription" is required (not null)
+            if (intentStatusDescription == null)
+            {
+                throw new ArgumentNullException("intentStatusDescription is a required property for TransactionStatusResponseAllOf and cannot be null");
+            }
+            this.IntentStatusDescription = intentStatusDescription;
             // to ensure "knownPayloads" is required (not null)
             if (knownPayloads == null)
             {
                 throw new ArgumentNullException("knownPayloads is a required property for TransactionStatusResponseAllOf and cannot be null");
             }
             this.KnownPayloads = knownPayloads;
+            this.CommittedStateVersion = committedStateVersion;
             this.ErrorMessage = errorMessage;
         }
+
+        /// <summary>
+        /// An additional description to clarify the intent status. 
+        /// </summary>
+        /// <value>An additional description to clarify the intent status. </value>
+        [DataMember(Name = "intent_status_description", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentStatusDescription { get; set; }
 
         /// <summary>
         /// Gets or Sets KnownPayloads
@@ -131,8 +155,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<TransactionStatusResponseKnownPayloadItem> KnownPayloads { get; set; }
 
         /// <summary>
-        /// Gets or Sets ErrorMessage
+        /// If the intent was committed, this gives the state version when this intent was committed. 
         /// </summary>
+        /// <value>If the intent was committed, this gives the state version when this intent was committed. </value>
+        [DataMember(Name = "committed_state_version", EmitDefaultValue = true)]
+        public long? CommittedStateVersion { get; set; }
+
+        /// <summary>
+        /// The most relevant error message received, due to a rejection or commit as failure. Please note that presence of an error message doesn&#39;t imply that the intent will definitely reject or fail. This could represent a temporary error (such as out of fees), or an error with a payload which doesn&#39;t end up being committed. 
+        /// </summary>
+        /// <value>The most relevant error message received, due to a rejection or commit as failure. Please note that presence of an error message doesn&#39;t imply that the intent will definitely reject or fail. This could represent a temporary error (such as out of fees), or an error with a payload which doesn&#39;t end up being committed. </value>
         [DataMember(Name = "error_message", EmitDefaultValue = true)]
         public string ErrorMessage { get; set; }
 
@@ -145,7 +177,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionStatusResponseAllOf {\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
+            sb.Append("  IntentStatus: ").Append(IntentStatus).Append("\n");
+            sb.Append("  IntentStatusDescription: ").Append(IntentStatusDescription).Append("\n");
             sb.Append("  KnownPayloads: ").Append(KnownPayloads).Append("\n");
+            sb.Append("  CommittedStateVersion: ").Append(CommittedStateVersion).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -187,10 +222,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Status.Equals(input.Status)
                 ) && 
                 (
+                    this.IntentStatus == input.IntentStatus ||
+                    this.IntentStatus.Equals(input.IntentStatus)
+                ) && 
+                (
+                    this.IntentStatusDescription == input.IntentStatusDescription ||
+                    (this.IntentStatusDescription != null &&
+                    this.IntentStatusDescription.Equals(input.IntentStatusDescription))
+                ) && 
+                (
                     this.KnownPayloads == input.KnownPayloads ||
                     this.KnownPayloads != null &&
                     input.KnownPayloads != null &&
                     this.KnownPayloads.SequenceEqual(input.KnownPayloads)
+                ) && 
+                (
+                    this.CommittedStateVersion == input.CommittedStateVersion ||
+                    (this.CommittedStateVersion != null &&
+                    this.CommittedStateVersion.Equals(input.CommittedStateVersion))
                 ) && 
                 (
                     this.ErrorMessage == input.ErrorMessage ||
@@ -209,9 +258,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
+                hashCode = (hashCode * 59) + this.IntentStatus.GetHashCode();
+                if (this.IntentStatusDescription != null)
+                {
+                    hashCode = (hashCode * 59) + this.IntentStatusDescription.GetHashCode();
+                }
                 if (this.KnownPayloads != null)
                 {
                     hashCode = (hashCode * 59) + this.KnownPayloads.GetHashCode();
+                }
+                if (this.CommittedStateVersion != null)
+                {
+                    hashCode = (hashCode * 59) + this.CommittedStateVersion.GetHashCode();
                 }
                 if (this.ErrorMessage != null)
                 {

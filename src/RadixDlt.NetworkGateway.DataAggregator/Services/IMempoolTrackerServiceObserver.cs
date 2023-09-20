@@ -70,7 +70,5 @@ public interface IMempoolTrackerServiceObserver
 
     void TransactionsReappearedCount(int count);
 
-    void TransactionsAddedDueToNodeMempoolAppearanceCount(int count);
-
     void TransactionsMarkedAsMissing();
 }

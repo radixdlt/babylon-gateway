@@ -335,14 +335,218 @@ internal class TransactionQuerier : ITransactionQuerier
         return transactions.First();
     }
 
-    public async Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(string intentHash, CancellationToken token = default)
+    private record CommittedTransactionSummary(
+        long StateVersion,
+        string PayloadHash,
+        LedgerTransactionStatus Status,
+        string? ErrorMessage);
+
+    private record PendingTransactionSummary(
+        string PayloadHash,
+        PendingTransactionHandlingStatus HandlingStatus,
+        string? HandlingStatusReason,
+        PendingTransactionPayloadLedgerStatus PayloadStatus,
+        PendingTransactionIntentLedgerStatus IntentStatus,
+        string? ExecutionErrorMessage,
+        string? LastSubmissionError);
+
+    private class PendingTransactionResponseAggregator
     {
-        var pendingTransactions = await _rwDbContext
+        private readonly GatewayModel.LedgerState _ledgerState;
+        private readonly string? _committedPayloadHash;
+        private readonly long? _committedStateVersion;
+        private List<GatewayModel.TransactionStatusResponseKnownPayloadItem> _knownPayloads = new();
+        private PendingTransactionIntentLedgerStatus _mostAccurateIntentLedgerStatus = PendingTransactionIntentLedgerStatus.Unknown;
+        private string? _errorMessageForMostAccurateIntentLedgerStatus = null;
+
+        internal PendingTransactionResponseAggregator(GatewayModel.LedgerState ledgerState, CommittedTransactionSummary? committedTransactionSummary)
+        {
+            _ledgerState = ledgerState;
+
+            if (committedTransactionSummary is null)
+            {
+                return;
+            }
+
+            _committedPayloadHash = committedTransactionSummary.PayloadHash;
+            _committedStateVersion = committedTransactionSummary.StateVersion;
+
+            var (legacyStatus, payloadStatus, intentStatus) = committedTransactionSummary.Status switch
+            {
+                LedgerTransactionStatus.Succeeded => (GatewayModel.TransactionStatus.CommittedSuccess, GatewayModel.TransactionPayloadStatus.CommittedSuccess, PendingTransactionIntentLedgerStatus.CommittedSuccess),
+                LedgerTransactionStatus.Failed => (GatewayModel.TransactionStatus.CommittedFailure, GatewayModel.TransactionPayloadStatus.CommittedFailure, PendingTransactionIntentLedgerStatus.CommittedFailure),
+            };
+
+            _mostAccurateIntentLedgerStatus = intentStatus;
+            _errorMessageForMostAccurateIntentLedgerStatus = committedTransactionSummary.ErrorMessage;
+
+            _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem
+            {
+                PayloadHash = committedTransactionSummary.PayloadHash,
+                Status = legacyStatus,
+                PayloadStatus = payloadStatus,
+                PayloadStatusDescription = GetPayloadStatusDescription(payloadStatus),
+                HandlingStatus = GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
+                HandlingStatusReason = "The transaction is committed",
+                ErrorMessage = committedTransactionSummary.ErrorMessage,
+            });
+        }
+
+        internal void AddPendingTransaction(PendingTransactionSummary pendingTransactionSummary)
+        {
+            if (pendingTransactionSummary.PayloadHash == _committedPayloadHash)
+            {
+                return;
+            }
+
+            var (legacyStatus, payloadStatus) = pendingTransactionSummary.PayloadStatus switch
+            {
+                PendingTransactionPayloadLedgerStatus.Unknown => (GatewayModel.TransactionStatus.Unknown, GatewayModel.TransactionPayloadStatus.Unknown),
+                PendingTransactionPayloadLedgerStatus.CommittedSuccess => (GatewayModel.TransactionStatus.CommittedSuccess, GatewayModel.TransactionPayloadStatus.CommittedSuccess),
+                PendingTransactionPayloadLedgerStatus.CommittedFailure => (GatewayModel.TransactionStatus.CommittedFailure, GatewayModel.TransactionPayloadStatus.CommittedFailure),
+                PendingTransactionPayloadLedgerStatus.CommitPendingOutcomeUnknown => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
+                PendingTransactionPayloadLedgerStatus.CommitOfOtherPayloadForIntentPendingOutcomeUnknown => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionPayloadStatus.PermanentlyRejected),
+                PendingTransactionPayloadLedgerStatus.PermanentlyRejected => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionPayloadStatus.PermanentlyRejected),
+                PendingTransactionPayloadLedgerStatus.TransientlyAccepted => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.Pending),
+                PendingTransactionPayloadLedgerStatus.TransientlyRejected => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.TemporarilyRejected),
+            };
+
+            var handlingStatus = pendingTransactionSummary.HandlingStatus switch
+            {
+                PendingTransactionHandlingStatus.Submitting => GatewayModel.TransactionPayloadGatewayHandlingStatus.HandlingSubmission,
+                PendingTransactionHandlingStatus.Concluded => GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
+            };
+
+            if (pendingTransactionSummary.IntentStatus.AggregationPriorityAcrossKnownPayloads() >= _mostAccurateIntentLedgerStatus.AggregationPriorityAcrossKnownPayloads())
+            {
+                _mostAccurateIntentLedgerStatus = pendingTransactionSummary.IntentStatus;
+                _errorMessageForMostAccurateIntentLedgerStatus = pendingTransactionSummary.ExecutionErrorMessage;
+            }
+
+            _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem
+            {
+                PayloadHash = pendingTransactionSummary.PayloadHash,
+                Status = legacyStatus,
+                PayloadStatus = payloadStatus,
+                PayloadStatusDescription = GetPayloadStatusDescription(payloadStatus),
+                ErrorMessage = pendingTransactionSummary.ExecutionErrorMessage,
+                HandlingStatus = handlingStatus,
+                HandlingStatusReason = pendingTransactionSummary.HandlingStatusReason,
+                SubmissionError = pendingTransactionSummary.LastSubmissionError,
+            });
+        }
+
+        internal GatewayModel.TransactionStatusResponse IntoResponse()
+        {
+            var (legacyIntentStatus, intentStatus) = _mostAccurateIntentLedgerStatus switch
+            {
+                PendingTransactionIntentLedgerStatus.Unknown => (GatewayModel.TransactionStatus.Unknown, GatewayModel.TransactionIntentStatus.Unknown),
+                PendingTransactionIntentLedgerStatus.CommittedSuccess => (GatewayModel.TransactionStatus.CommittedSuccess, GatewayModel.TransactionIntentStatus.CommittedSuccess),
+                PendingTransactionIntentLedgerStatus.CommittedFailure => (GatewayModel.TransactionStatus.CommittedFailure, GatewayModel.TransactionIntentStatus.CommittedFailure),
+                PendingTransactionIntentLedgerStatus.CommitPendingOutcomeUnknown => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown),
+                PendingTransactionIntentLedgerStatus.PermanentRejection => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionIntentStatus.PermanentlyRejected),
+                PendingTransactionIntentLedgerStatus.PossibleToCommit => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionIntentStatus.Pending),
+                PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection),
+            };
+
+            return new GatewayModel.TransactionStatusResponse
+            {
+                LedgerState = _ledgerState,
+                Status = legacyIntentStatus,
+                IntentStatus = intentStatus,
+                IntentStatusDescription = GetIntentStatusDescription(intentStatus),
+                KnownPayloads = _knownPayloads,
+                CommittedStateVersion = _committedStateVersion,
+                ErrorMessage = _errorMessageForMostAccurateIntentLedgerStatus,
+            };
+        }
+
+        private string GetPayloadStatusDescription(GatewayModel.TransactionPayloadStatus payloadStatus)
+        {
+            return payloadStatus switch
+            {
+                GatewayModel.TransactionPayloadStatus.Unknown =>
+                    "No information is known about the possible outcome of this transaction payload.",
+                GatewayModel.TransactionPayloadStatus.CommittedSuccess =>
+                    "This particular payload for this transaction has been committed to the ledger as a success. For more information, use the /transaction/committed-details endpoint.",
+                GatewayModel.TransactionPayloadStatus.CommittedFailure =>
+                    "This particular payload for this transaction has been committed to the ledger as a failure. For more information, use the /transaction/committed-details endpoint.",
+                GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown =>
+                    "This particular payload for this transaction has been committed to the ledger, but the Gateway is still waiting for further details about its result.",
+                GatewayModel.TransactionPayloadStatus.PermanentlyRejected =>
+                    "This particular payload for this transaction has been permanently rejected. See the ErrorMessage field for details. It is not possible for this particular transaction payload to be committed to this network.",
+                GatewayModel.TransactionPayloadStatus.TemporarilyRejected =>
+                    "This particular payload for this transaction was rejected at its last execution. See the ErrorMessage field for details. It may still be possible for this transaction payload to be committed to this network.",
+                GatewayModel.TransactionPayloadStatus.Pending =>
+                    "This particular payload for this transaction has been accepted into a node's mempool on the network. It's possible but not certain that it will be committed to this network.",
+            };
+        }
+
+        private string GetIntentStatusDescription(GatewayModel.TransactionIntentStatus intentStatus)
+        {
+            return intentStatus switch
+            {
+                GatewayModel.TransactionIntentStatus.Unknown =>
+                    "No information is known about the possible outcome of this transaction.",
+                GatewayModel.TransactionIntentStatus.CommittedSuccess =>
+                    "This transaction has been committed to the ledger as a success. For more information, use the /transaction/committed-details endpoint.",
+                GatewayModel.TransactionIntentStatus.CommittedFailure =>
+                    "This transaction has been committed to the ledger as a failure. For more information, use the /transaction/committed-details endpoint.",
+                GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown =>
+                    "This transaction has been committed to the ledger, but the Gateway is still waiting for further details about its result.",
+                GatewayModel.TransactionIntentStatus.PermanentlyRejected =>
+                    "This transaction is permanently rejected, so can never be committed to this network.",
+                GatewayModel.TransactionIntentStatus.Pending =>
+                    "A payload for this transaction has been accepted into a node's mempool on the network. It's possible but not certain that it will be committed to this network.",
+                GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection =>
+                    "All known payload/s for this transaction have been temporarily rejected at their last execution. It may still be possible for this transaction to be committed to this network.",
+            };
+        }
+    }
+
+    public async Task<GatewayModel.TransactionStatusResponse> ResolveTransactionStatusResponse(GatewayModel.LedgerState ledgerState, string intentHash, CancellationToken token = default)
+    {
+        var maybeCommittedTransactionSummary = await _dbContext
+            .LedgerTransactions
+            .OfType<UserLedgerTransaction>()
+            .Where(ult => ult.StateVersion <= ledgerState.StateVersion && ult.IntentHash == intentHash)
+            .Select(ult => new CommittedTransactionSummary(
+                ult.StateVersion,
+                ult.PayloadHash,
+                ult.EngineReceipt.Status,
+                ult.EngineReceipt.ErrorMessage))
+            .FirstOrDefaultAsync(token);
+
+        var aggregator = new PendingTransactionResponseAggregator(ledgerState, maybeCommittedTransactionSummary);
+
+        var pendingTransactions = await LookupPendingTransactionsByIntentHash(intentHash, token);
+
+        foreach (var pendingTransaction in pendingTransactions)
+        {
+            aggregator.AddPendingTransaction(pendingTransaction);
+        }
+
+        return aggregator.IntoResponse();
+    }
+
+    private async Task<ICollection<PendingTransactionSummary>> LookupPendingTransactionsByIntentHash(string intentHash, CancellationToken token = default)
+    {
+        return await _rwDbContext
             .PendingTransactions
             .Where(pt => pt.IntentHash == intentHash)
+            .Take(100) // Limit this just in case
+            .Select(pt =>
+                new PendingTransactionSummary(
+                    pt.PayloadHash,
+                    pt.GatewayHandling.HandlingStatus,
+                    pt.GatewayHandling.HandlingStatusReason,
+                    pt.LedgerDetails.PayloadLedgerStatus,
+                    pt.LedgerDetails.IntentLedgerStatus,
+                    pt.LedgerDetails.LastFailureReason,
+                    pt.NetworkDetails.LastSubmitErrorTitle
+                )
+            )
             .ToListAsync(token);
-
-        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash, pt.Status.ToGatewayModel(), pt.LastFailureReason)).ToArray();
     }
 
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(

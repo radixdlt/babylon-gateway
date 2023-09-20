@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -107,35 +108,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.IntentHash, GatewayModel.TransactionDetailsOptIns.Default, ledgerState, false, token);
-        var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.IntentHash, token);
-        var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHash != committedTransaction?.PayloadHash).ToList();
-
-        var status = GatewayModel.TransactionStatus.Unknown;
-        var errorMessage = (string?)null;
-        var knownPayloads = new List<GatewayModel.TransactionStatusResponseKnownPayloadItem>();
-
-        if (committedTransaction != null)
-        {
-            status = committedTransaction.TransactionStatus;
-            errorMessage = committedTransaction.ErrorMessage;
-
-            knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
-                payloadHash: committedTransaction.PayloadHash,
-                status: status,
-                errorMessage: committedTransaction.ErrorMessage));
-        }
-        else if (remainingPendingTransactions.Any())
-        {
-            status = GatewayModel.TransactionStatus.Pending;
-        }
-
-        knownPayloads.AddRange(remainingPendingTransactions.Select(pt => new GatewayModel.TransactionStatusResponseKnownPayloadItem(
-            payloadHash: pt.PayloadHash,
-            status: pt.Status,
-            errorMessage: pt.ErrorMessage)));
-
-        return new GatewayModel.TransactionStatusResponse(ledgerState, status, knownPayloads, errorMessage);
+        return await _transactionQuerier.ResolveTransactionStatusResponse(ledgerState, request.IntentHash, token);
     }
 
     public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default)
@@ -165,7 +138,8 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
     public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
-        return await _submissionService.HandleSubmitRequest(request, token);
+        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
+        return await _submissionService.HandleSubmitRequest(atLedgerState, request, token);
     }
 
     public async Task<GatewayModel.StreamTransactionsResponse> StreamTransactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token = default)
