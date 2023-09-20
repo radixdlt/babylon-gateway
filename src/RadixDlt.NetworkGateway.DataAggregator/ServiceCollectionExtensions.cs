@@ -157,7 +157,7 @@ public static class ServiceCollectionExtensions
     private static void AddNodeWorkers(IServiceCollection services)
     {
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
-        services.TryAddScoped<INodeWorker, NodeTransactionFetcherWorker>();
+        services.TryAddScoped<INodeWorker, NodeTransactionFetchWorker>();
         services.AddScoped<INodeWorker, NodeMempoolTransactionHashesReaderWorker>();
         services.AddScoped<INodeWorker, NodeMempoolFullTransactionReaderWorker>();
     }

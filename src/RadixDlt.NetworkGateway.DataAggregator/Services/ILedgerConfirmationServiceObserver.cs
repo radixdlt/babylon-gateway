@@ -69,8 +69,6 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerConfirmationServiceObserver
 {
-    void ResetQuorum();
-
     ValueTask PreHandleLedgerExtension(DateTime timestamp);
 
     void PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion);

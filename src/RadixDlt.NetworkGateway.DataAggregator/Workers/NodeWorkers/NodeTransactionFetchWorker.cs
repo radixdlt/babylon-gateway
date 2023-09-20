@@ -81,7 +81,7 @@ using GatewayModel = RadixDlt.NetworkGateway.Abstractions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
-public sealed class NodeTransactionFetcherWorker : BaseNodeWorker
+public sealed class NodeTransactionFetchWorker : BaseNodeWorker
 {
     private record struct FetchedTransactions(List<CoreModel.CommittedTransaction> Transactions, CoreModel.CommittedStateIdentifier PreviousStateIdentifiers, int ResponseSize);
 
@@ -94,7 +94,7 @@ public sealed class NodeTransactionFetcherWorker : BaseNodeWorker
             maxDelayAfterError: TimeSpan.FromSeconds(30));
 
     /* Dependencies */
-    private readonly ILogger<NodeTransactionFetcherWorker> _logger;
+    private readonly ILogger<NodeTransactionFetchWorker> _logger;
     private readonly IFetchedTransactionStore _fetchedTransactionStore;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly INodeStatusProvider _nodeStatusProvider;
@@ -108,8 +108,8 @@ public sealed class NodeTransactionFetcherWorker : BaseNodeWorker
     /* Properties */
     private string NodeName => _nodeConfigProvider.CoreApiNode.Name;
 
-    public NodeTransactionFetcherWorker(
-        ILogger<NodeTransactionFetcherWorker> logger,
+    public NodeTransactionFetchWorker(
+        ILogger<NodeTransactionFetchWorker> logger,
         IFetchedTransactionStore fetchedTransactionStore,
         INodeConfigProvider nodeConfigProvider,
         IEnumerable<INodeTransactionLogWorkerObserver> observers,

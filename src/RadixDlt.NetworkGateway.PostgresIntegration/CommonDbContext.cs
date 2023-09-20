@@ -190,7 +190,7 @@ internal abstract class CommonDbContext : DbContext
             .Properties<TokenAmount>()
             .HaveConversion<TokenAmountToBigIntegerConverter>()
             .HaveColumnType("numeric")
-            .HavePrecision(1000, 0);
+            .HavePrecision(1000);
 
         configurationBuilder
             .Properties<RadixAddress>()

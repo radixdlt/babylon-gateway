@@ -122,9 +122,6 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         _clock = clock;
         _fetchedTransactionStore = fetchedTransactionStore;
         _topOfLedgerCache = topOfLedgerCache;
-
-        _observers.ForEach(x => x.ResetQuorum());
-
         Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
 
