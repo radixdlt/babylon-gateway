@@ -69,6 +69,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -81,6 +82,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 internal class TransactionQuerier : ITransactionQuerier
 {
     private record SchemaLookup(long EntityId, ValueBytes SchemaHash);
+
+    internal record Event(string Name, string Emitter, string Data);
 
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
@@ -355,7 +358,7 @@ internal class TransactionQuerier : ITransactionQuerier
         var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
 
         var schemaLookups = transactions
-            .SelectMany(x => x.EngineReceipt.GetEventLookups())
+            .SelectMany(x => x.EngineReceipt.Events.GetEventLookups())
             .ToHashSet();
 
         Dictionary<SchemaLookup, byte[]> schemas = new Dictionary<SchemaLookup, byte[]>();
@@ -388,16 +391,17 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
             }
             else
             {
-                List<string> events = new List<string>();
+                List<Event> events = new List<Event>();
 
-                foreach (var @event in transaction.EngineReceipt.GetEvents())
+                foreach (var @event in transaction.EngineReceipt.Events.GetEvents())
                 {
                     if (!schemas.TryGetValue(new SchemaLookup(@event.EntityId, @event.SchemaHash), out var schema))
                     {
                         throw new UnreachableException($"Unable to find schema for given hash {@event.SchemaHash.ToHex()}");
                     }
 
-                    events.Add(ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId));
+                    var eventData = ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId);
+                    events.Add(new Event(@event.Name, @event.Emitter, eventData));
                 }
 
                 mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events));

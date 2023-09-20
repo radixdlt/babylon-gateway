@@ -66,6 +66,7 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -123,7 +124,7 @@ internal static class GatewayModelExtensions
         this LedgerTransaction lt,
         GatewayModel.TransactionDetailsOptIns optIns,
         Dictionary<long, string> entityIdToAddressMap,
-        List<string>? events)
+        List<TransactionQuerier.Event>? events)
     {
         string? payloadHash = null;
         string? intentHash = null;
@@ -149,7 +150,7 @@ internal static class GatewayModelExtensions
             CostingParameters = optIns.ReceiptCostingParameters ? new JRaw(lt.EngineReceipt.CostingParameters) : null,
             NextEpoch = lt.EngineReceipt.NextEpoch != null ? new JRaw(lt.EngineReceipt.NextEpoch) : null,
             StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.EngineReceipt.StateUpdates) : null,
-            Events = events?.Select(x => new JRaw(x)).ToList(),
+            Events = events?.Select(x => new GatewayModel.EventsItem(x.Name, new JRaw(x.Emitter), new JRaw(x.Data))).ToList(),
         };
 
         return new GatewayModel.CommittedTransactionInfo(
