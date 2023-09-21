@@ -109,7 +109,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="sborFormatOptions">sborFormatOptions.</param>
         /// <param name="transactionFormatOptions">transactionFormatOptions.</param>
         /// <param name="substateFormatOptions">substateFormatOptions.</param>
-        public StreamTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int), SborFormatOptions sborFormatOptions = default(SborFormatOptions), TransactionFormatOptions transactionFormatOptions = default(TransactionFormatOptions), SubstateFormatOptions substateFormatOptions = default(SubstateFormatOptions))
+        /// <param name="includeProofs">Whether to include LedgerProofs (default false).</param>
+        public StreamTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int), SborFormatOptions sborFormatOptions = default(SborFormatOptions), TransactionFormatOptions transactionFormatOptions = default(TransactionFormatOptions), SubstateFormatOptions substateFormatOptions = default(SubstateFormatOptions), bool includeProofs = default(bool))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -122,6 +123,7 @@ namespace RadixDlt.CoreApiSdk.Model
             this.SborFormatOptions = sborFormatOptions;
             this.TransactionFormatOptions = transactionFormatOptions;
             this.SubstateFormatOptions = substateFormatOptions;
+            this.IncludeProofs = includeProofs;
         }
 
         /// <summary>
@@ -163,6 +165,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public SubstateFormatOptions SubstateFormatOptions { get; set; }
 
         /// <summary>
+        /// Whether to include LedgerProofs (default false)
+        /// </summary>
+        /// <value>Whether to include LedgerProofs (default false)</value>
+        [DataMember(Name = "include_proofs", EmitDefaultValue = true)]
+        public bool IncludeProofs { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -176,6 +185,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  SborFormatOptions: ").Append(SborFormatOptions).Append("\n");
             sb.Append("  TransactionFormatOptions: ").Append(TransactionFormatOptions).Append("\n");
             sb.Append("  SubstateFormatOptions: ").Append(SubstateFormatOptions).Append("\n");
+            sb.Append("  IncludeProofs: ").Append(IncludeProofs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -238,6 +248,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SubstateFormatOptions == input.SubstateFormatOptions ||
                     (this.SubstateFormatOptions != null &&
                     this.SubstateFormatOptions.Equals(input.SubstateFormatOptions))
+                ) && 
+                (
+                    this.IncludeProofs == input.IncludeProofs ||
+                    this.IncludeProofs.Equals(input.IncludeProofs)
                 );
         }
 
@@ -268,6 +282,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.SubstateFormatOptions.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IncludeProofs.GetHashCode();
                 return hashCode;
             }
         }

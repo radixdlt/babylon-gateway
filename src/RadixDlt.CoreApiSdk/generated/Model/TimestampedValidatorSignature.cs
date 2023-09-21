@@ -90,87 +90,71 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Transaction state updates (only present if status is Succeeded or Failed)
+    /// TimestampedValidatorSignature
     /// </summary>
-    [DataContract(Name = "StateUpdates")]
-    public partial class StateUpdates : IEquatable<StateUpdates>
+    [DataContract(Name = "TimestampedValidatorSignature")]
+    public partial class TimestampedValidatorSignature : IEquatable<TimestampedValidatorSignature>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
+        /// Initializes a new instance of the <see cref="TimestampedValidatorSignature" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateUpdates() { }
+        protected TimestampedValidatorSignature() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
+        /// Initializes a new instance of the <see cref="TimestampedValidatorSignature" /> class.
         /// </summary>
-        /// <param name="deletedPartitions">deletedPartitions (required).</param>
-        /// <param name="createdSubstates">createdSubstates (required).</param>
-        /// <param name="updatedSubstates">updatedSubstates (required).</param>
-        /// <param name="deletedSubstates">deletedSubstates (required).</param>
-        /// <param name="newGlobalEntities">newGlobalEntities (required).</param>
-        public StateUpdates(List<PartitionId> deletedPartitions = default(List<PartitionId>), List<CreatedSubstate> createdSubstates = default(List<CreatedSubstate>), List<UpdatedSubstate> updatedSubstates = default(List<UpdatedSubstate>), List<DeletedSubstate> deletedSubstates = default(List<DeletedSubstate>), List<EntityReference> newGlobalEntities = default(List<EntityReference>))
+        /// <param name="validatorKey">validatorKey (required).</param>
+        /// <param name="validatorAddress">The Bech32m-encoded human readable version of the component address (required).</param>
+        /// <param name="timestampMs">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in ms. (required).</param>
+        /// <param name="signature">signature (required).</param>
+        public TimestampedValidatorSignature(EcdsaSecp256k1PublicKey validatorKey = default(EcdsaSecp256k1PublicKey), string validatorAddress = default(string), long timestampMs = default(long), EcdsaSecp256k1Signature signature = default(EcdsaSecp256k1Signature))
         {
-            // to ensure "deletedPartitions" is required (not null)
-            if (deletedPartitions == null)
+            // to ensure "validatorKey" is required (not null)
+            if (validatorKey == null)
             {
-                throw new ArgumentNullException("deletedPartitions is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("validatorKey is a required property for TimestampedValidatorSignature and cannot be null");
             }
-            this.DeletedPartitions = deletedPartitions;
-            // to ensure "createdSubstates" is required (not null)
-            if (createdSubstates == null)
+            this.ValidatorKey = validatorKey;
+            // to ensure "validatorAddress" is required (not null)
+            if (validatorAddress == null)
             {
-                throw new ArgumentNullException("createdSubstates is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("validatorAddress is a required property for TimestampedValidatorSignature and cannot be null");
             }
-            this.CreatedSubstates = createdSubstates;
-            // to ensure "updatedSubstates" is required (not null)
-            if (updatedSubstates == null)
+            this.ValidatorAddress = validatorAddress;
+            this.TimestampMs = timestampMs;
+            // to ensure "signature" is required (not null)
+            if (signature == null)
             {
-                throw new ArgumentNullException("updatedSubstates is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("signature is a required property for TimestampedValidatorSignature and cannot be null");
             }
-            this.UpdatedSubstates = updatedSubstates;
-            // to ensure "deletedSubstates" is required (not null)
-            if (deletedSubstates == null)
-            {
-                throw new ArgumentNullException("deletedSubstates is a required property for StateUpdates and cannot be null");
-            }
-            this.DeletedSubstates = deletedSubstates;
-            // to ensure "newGlobalEntities" is required (not null)
-            if (newGlobalEntities == null)
-            {
-                throw new ArgumentNullException("newGlobalEntities is a required property for StateUpdates and cannot be null");
-            }
-            this.NewGlobalEntities = newGlobalEntities;
+            this.Signature = signature;
         }
 
         /// <summary>
-        /// Gets or Sets DeletedPartitions
+        /// Gets or Sets ValidatorKey
         /// </summary>
-        [DataMember(Name = "deleted_partitions", IsRequired = true, EmitDefaultValue = true)]
-        public List<PartitionId> DeletedPartitions { get; set; }
+        [DataMember(Name = "validator_key", IsRequired = true, EmitDefaultValue = true)]
+        public EcdsaSecp256k1PublicKey ValidatorKey { get; set; }
 
         /// <summary>
-        /// Gets or Sets CreatedSubstates
+        /// The Bech32m-encoded human readable version of the component address
         /// </summary>
-        [DataMember(Name = "created_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<CreatedSubstate> CreatedSubstates { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
+        [DataMember(Name = "validator_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ValidatorAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets UpdatedSubstates
+        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in ms.
         /// </summary>
-        [DataMember(Name = "updated_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<UpdatedSubstate> UpdatedSubstates { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in ms.</value>
+        [DataMember(Name = "timestamp_ms", IsRequired = true, EmitDefaultValue = true)]
+        public long TimestampMs { get; set; }
 
         /// <summary>
-        /// Gets or Sets DeletedSubstates
+        /// Gets or Sets Signature
         /// </summary>
-        [DataMember(Name = "deleted_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<DeletedSubstate> DeletedSubstates { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NewGlobalEntities
-        /// </summary>
-        [DataMember(Name = "new_global_entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityReference> NewGlobalEntities { get; set; }
+        [DataMember(Name = "signature", IsRequired = true, EmitDefaultValue = true)]
+        public EcdsaSecp256k1Signature Signature { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -179,12 +163,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateUpdates {\n");
-            sb.Append("  DeletedPartitions: ").Append(DeletedPartitions).Append("\n");
-            sb.Append("  CreatedSubstates: ").Append(CreatedSubstates).Append("\n");
-            sb.Append("  UpdatedSubstates: ").Append(UpdatedSubstates).Append("\n");
-            sb.Append("  DeletedSubstates: ").Append(DeletedSubstates).Append("\n");
-            sb.Append("  NewGlobalEntities: ").Append(NewGlobalEntities).Append("\n");
+            sb.Append("class TimestampedValidatorSignature {\n");
+            sb.Append("  ValidatorKey: ").Append(ValidatorKey).Append("\n");
+            sb.Append("  ValidatorAddress: ").Append(ValidatorAddress).Append("\n");
+            sb.Append("  TimestampMs: ").Append(TimestampMs).Append("\n");
+            sb.Append("  Signature: ").Append(Signature).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,15 +188,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateUpdates);
+            return this.Equals(input as TimestampedValidatorSignature);
         }
 
         /// <summary>
-        /// Returns true if StateUpdates instances are equal
+        /// Returns true if TimestampedValidatorSignature instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateUpdates to be compared</param>
+        /// <param name="input">Instance of TimestampedValidatorSignature to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateUpdates input)
+        public bool Equals(TimestampedValidatorSignature input)
         {
             if (input == null)
             {
@@ -221,34 +204,23 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DeletedPartitions == input.DeletedPartitions ||
-                    this.DeletedPartitions != null &&
-                    input.DeletedPartitions != null &&
-                    this.DeletedPartitions.SequenceEqual(input.DeletedPartitions)
+                    this.ValidatorKey == input.ValidatorKey ||
+                    (this.ValidatorKey != null &&
+                    this.ValidatorKey.Equals(input.ValidatorKey))
                 ) && 
                 (
-                    this.CreatedSubstates == input.CreatedSubstates ||
-                    this.CreatedSubstates != null &&
-                    input.CreatedSubstates != null &&
-                    this.CreatedSubstates.SequenceEqual(input.CreatedSubstates)
+                    this.ValidatorAddress == input.ValidatorAddress ||
+                    (this.ValidatorAddress != null &&
+                    this.ValidatorAddress.Equals(input.ValidatorAddress))
                 ) && 
                 (
-                    this.UpdatedSubstates == input.UpdatedSubstates ||
-                    this.UpdatedSubstates != null &&
-                    input.UpdatedSubstates != null &&
-                    this.UpdatedSubstates.SequenceEqual(input.UpdatedSubstates)
+                    this.TimestampMs == input.TimestampMs ||
+                    this.TimestampMs.Equals(input.TimestampMs)
                 ) && 
                 (
-                    this.DeletedSubstates == input.DeletedSubstates ||
-                    this.DeletedSubstates != null &&
-                    input.DeletedSubstates != null &&
-                    this.DeletedSubstates.SequenceEqual(input.DeletedSubstates)
-                ) && 
-                (
-                    this.NewGlobalEntities == input.NewGlobalEntities ||
-                    this.NewGlobalEntities != null &&
-                    input.NewGlobalEntities != null &&
-                    this.NewGlobalEntities.SequenceEqual(input.NewGlobalEntities)
+                    this.Signature == input.Signature ||
+                    (this.Signature != null &&
+                    this.Signature.Equals(input.Signature))
                 );
         }
 
@@ -261,25 +233,18 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DeletedPartitions != null)
+                if (this.ValidatorKey != null)
                 {
-                    hashCode = (hashCode * 59) + this.DeletedPartitions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValidatorKey.GetHashCode();
                 }
-                if (this.CreatedSubstates != null)
+                if (this.ValidatorAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.CreatedSubstates.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValidatorAddress.GetHashCode();
                 }
-                if (this.UpdatedSubstates != null)
+                hashCode = (hashCode * 59) + this.TimestampMs.GetHashCode();
+                if (this.Signature != null)
                 {
-                    hashCode = (hashCode * 59) + this.UpdatedSubstates.GetHashCode();
-                }
-                if (this.DeletedSubstates != null)
-                {
-                    hashCode = (hashCode * 59) + this.DeletedSubstates.GetHashCode();
-                }
-                if (this.NewGlobalEntities != null)
-                {
-                    hashCode = (hashCode * 59) + this.NewGlobalEntities.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Signature.GetHashCode();
                 }
                 return hashCode;
             }

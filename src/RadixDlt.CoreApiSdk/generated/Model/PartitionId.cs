@@ -90,87 +90,68 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Transaction state updates (only present if status is Succeeded or Failed)
+    /// PartitionId
     /// </summary>
-    [DataContract(Name = "StateUpdates")]
-    public partial class StateUpdates : IEquatable<StateUpdates>
+    [DataContract(Name = "PartitionId")]
+    public partial class PartitionId : IEquatable<PartitionId>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
+        /// Gets or Sets EntityType
+        /// </summary>
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets EntityModule
+        /// </summary>
+        [DataMember(Name = "entity_module", IsRequired = true, EmitDefaultValue = true)]
+        public EntityModule EntityModule { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PartitionKind
+        /// </summary>
+        [DataMember(Name = "partition_kind", IsRequired = true, EmitDefaultValue = true)]
+        public PartitionKind PartitionKind { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PartitionId" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateUpdates() { }
+        protected PartitionId() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
+        /// Initializes a new instance of the <see cref="PartitionId" /> class.
         /// </summary>
-        /// <param name="deletedPartitions">deletedPartitions (required).</param>
-        /// <param name="createdSubstates">createdSubstates (required).</param>
-        /// <param name="updatedSubstates">updatedSubstates (required).</param>
-        /// <param name="deletedSubstates">deletedSubstates (required).</param>
-        /// <param name="newGlobalEntities">newGlobalEntities (required).</param>
-        public StateUpdates(List<PartitionId> deletedPartitions = default(List<PartitionId>), List<CreatedSubstate> createdSubstates = default(List<CreatedSubstate>), List<UpdatedSubstate> updatedSubstates = default(List<UpdatedSubstate>), List<DeletedSubstate> deletedSubstates = default(List<DeletedSubstate>), List<EntityReference> newGlobalEntities = default(List<EntityReference>))
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id) (required).</param>
+        /// <param name="entityModule">entityModule (required).</param>
+        /// <param name="partitionKind">partitionKind (required).</param>
+        /// <param name="partitionNumber">partitionNumber (required).</param>
+        public PartitionId(EntityType entityType = default(EntityType), string entityAddress = default(string), EntityModule entityModule = default(EntityModule), PartitionKind partitionKind = default(PartitionKind), int partitionNumber = default(int))
         {
-            // to ensure "deletedPartitions" is required (not null)
-            if (deletedPartitions == null)
+            this.EntityType = entityType;
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("deletedPartitions is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for PartitionId and cannot be null");
             }
-            this.DeletedPartitions = deletedPartitions;
-            // to ensure "createdSubstates" is required (not null)
-            if (createdSubstates == null)
-            {
-                throw new ArgumentNullException("createdSubstates is a required property for StateUpdates and cannot be null");
-            }
-            this.CreatedSubstates = createdSubstates;
-            // to ensure "updatedSubstates" is required (not null)
-            if (updatedSubstates == null)
-            {
-                throw new ArgumentNullException("updatedSubstates is a required property for StateUpdates and cannot be null");
-            }
-            this.UpdatedSubstates = updatedSubstates;
-            // to ensure "deletedSubstates" is required (not null)
-            if (deletedSubstates == null)
-            {
-                throw new ArgumentNullException("deletedSubstates is a required property for StateUpdates and cannot be null");
-            }
-            this.DeletedSubstates = deletedSubstates;
-            // to ensure "newGlobalEntities" is required (not null)
-            if (newGlobalEntities == null)
-            {
-                throw new ArgumentNullException("newGlobalEntities is a required property for StateUpdates and cannot be null");
-            }
-            this.NewGlobalEntities = newGlobalEntities;
+            this.EntityAddress = entityAddress;
+            this.EntityModule = entityModule;
+            this.PartitionKind = partitionKind;
+            this.PartitionNumber = partitionNumber;
         }
 
         /// <summary>
-        /// Gets or Sets DeletedPartitions
+        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
         /// </summary>
-        [DataMember(Name = "deleted_partitions", IsRequired = true, EmitDefaultValue = true)]
-        public List<PartitionId> DeletedPartitions { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets CreatedSubstates
+        /// Gets or Sets PartitionNumber
         /// </summary>
-        [DataMember(Name = "created_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<CreatedSubstate> CreatedSubstates { get; set; }
-
-        /// <summary>
-        /// Gets or Sets UpdatedSubstates
-        /// </summary>
-        [DataMember(Name = "updated_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<UpdatedSubstate> UpdatedSubstates { get; set; }
-
-        /// <summary>
-        /// Gets or Sets DeletedSubstates
-        /// </summary>
-        [DataMember(Name = "deleted_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<DeletedSubstate> DeletedSubstates { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NewGlobalEntities
-        /// </summary>
-        [DataMember(Name = "new_global_entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityReference> NewGlobalEntities { get; set; }
+        [DataMember(Name = "partition_number", IsRequired = true, EmitDefaultValue = true)]
+        public int PartitionNumber { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -179,12 +160,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateUpdates {\n");
-            sb.Append("  DeletedPartitions: ").Append(DeletedPartitions).Append("\n");
-            sb.Append("  CreatedSubstates: ").Append(CreatedSubstates).Append("\n");
-            sb.Append("  UpdatedSubstates: ").Append(UpdatedSubstates).Append("\n");
-            sb.Append("  DeletedSubstates: ").Append(DeletedSubstates).Append("\n");
-            sb.Append("  NewGlobalEntities: ").Append(NewGlobalEntities).Append("\n");
+            sb.Append("class PartitionId {\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  EntityModule: ").Append(EntityModule).Append("\n");
+            sb.Append("  PartitionKind: ").Append(PartitionKind).Append("\n");
+            sb.Append("  PartitionNumber: ").Append(PartitionNumber).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,15 +186,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateUpdates);
+            return this.Equals(input as PartitionId);
         }
 
         /// <summary>
-        /// Returns true if StateUpdates instances are equal
+        /// Returns true if PartitionId instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateUpdates to be compared</param>
+        /// <param name="input">Instance of PartitionId to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateUpdates input)
+        public bool Equals(PartitionId input)
         {
             if (input == null)
             {
@@ -221,34 +202,25 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DeletedPartitions == input.DeletedPartitions ||
-                    this.DeletedPartitions != null &&
-                    input.DeletedPartitions != null &&
-                    this.DeletedPartitions.SequenceEqual(input.DeletedPartitions)
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.CreatedSubstates == input.CreatedSubstates ||
-                    this.CreatedSubstates != null &&
-                    input.CreatedSubstates != null &&
-                    this.CreatedSubstates.SequenceEqual(input.CreatedSubstates)
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
                 ) && 
                 (
-                    this.UpdatedSubstates == input.UpdatedSubstates ||
-                    this.UpdatedSubstates != null &&
-                    input.UpdatedSubstates != null &&
-                    this.UpdatedSubstates.SequenceEqual(input.UpdatedSubstates)
+                    this.EntityModule == input.EntityModule ||
+                    this.EntityModule.Equals(input.EntityModule)
                 ) && 
                 (
-                    this.DeletedSubstates == input.DeletedSubstates ||
-                    this.DeletedSubstates != null &&
-                    input.DeletedSubstates != null &&
-                    this.DeletedSubstates.SequenceEqual(input.DeletedSubstates)
+                    this.PartitionKind == input.PartitionKind ||
+                    this.PartitionKind.Equals(input.PartitionKind)
                 ) && 
                 (
-                    this.NewGlobalEntities == input.NewGlobalEntities ||
-                    this.NewGlobalEntities != null &&
-                    input.NewGlobalEntities != null &&
-                    this.NewGlobalEntities.SequenceEqual(input.NewGlobalEntities)
+                    this.PartitionNumber == input.PartitionNumber ||
+                    this.PartitionNumber.Equals(input.PartitionNumber)
                 );
         }
 
@@ -261,26 +233,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DeletedPartitions != null)
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.DeletedPartitions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
-                if (this.CreatedSubstates != null)
-                {
-                    hashCode = (hashCode * 59) + this.CreatedSubstates.GetHashCode();
-                }
-                if (this.UpdatedSubstates != null)
-                {
-                    hashCode = (hashCode * 59) + this.UpdatedSubstates.GetHashCode();
-                }
-                if (this.DeletedSubstates != null)
-                {
-                    hashCode = (hashCode * 59) + this.DeletedSubstates.GetHashCode();
-                }
-                if (this.NewGlobalEntities != null)
-                {
-                    hashCode = (hashCode * 59) + this.NewGlobalEntities.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.EntityModule.GetHashCode();
+                hashCode = (hashCode * 59) + this.PartitionKind.GetHashCode();
+                hashCode = (hashCode * 59) + this.PartitionNumber.GetHashCode();
                 return hashCode;
             }
         }

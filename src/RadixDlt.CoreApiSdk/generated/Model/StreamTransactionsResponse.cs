@@ -108,7 +108,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="count">An integer between &#x60;0&#x60; and &#x60;10000&#x60;, giving the total count of transactions in the returned response (required).</param>
         /// <param name="maxLedgerStateVersion">maxLedgerStateVersion (required).</param>
         /// <param name="transactions">A committed transactions list starting from the &#x60;from_state_version&#x60; (inclusive). (required).</param>
-        public StreamTransactionsResponse(CommittedStateIdentifier previousStateIdentifiers = default(CommittedStateIdentifier), long fromStateVersion = default(long), int count = default(int), long maxLedgerStateVersion = default(long), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="proofs">A ledger proof list starting from &#x60;from_state_version&#x60; (inclusive) stored by this node..</param>
+        public StreamTransactionsResponse(CommittedStateIdentifier previousStateIdentifiers = default(CommittedStateIdentifier), long fromStateVersion = default(long), int count = default(int), long maxLedgerStateVersion = default(long), List<CommittedTransaction> transactions = default(List<CommittedTransaction>), List<LedgerProof> proofs = default(List<LedgerProof>))
         {
             this.FromStateVersion = fromStateVersion;
             this.Count = count;
@@ -120,6 +121,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.Transactions = transactions;
             this.PreviousStateIdentifiers = previousStateIdentifiers;
+            this.Proofs = proofs;
         }
 
         /// <summary>
@@ -155,6 +157,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<CommittedTransaction> Transactions { get; set; }
 
         /// <summary>
+        /// A ledger proof list starting from &#x60;from_state_version&#x60; (inclusive) stored by this node.
+        /// </summary>
+        /// <value>A ledger proof list starting from &#x60;from_state_version&#x60; (inclusive) stored by this node.</value>
+        [DataMember(Name = "proofs", EmitDefaultValue = true)]
+        public List<LedgerProof> Proofs { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -167,6 +176,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Count: ").Append(Count).Append("\n");
             sb.Append("  MaxLedgerStateVersion: ").Append(MaxLedgerStateVersion).Append("\n");
             sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("  Proofs: ").Append(Proofs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -224,6 +234,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Transactions != null &&
                     input.Transactions != null &&
                     this.Transactions.SequenceEqual(input.Transactions)
+                ) && 
+                (
+                    this.Proofs == input.Proofs ||
+                    this.Proofs != null &&
+                    input.Proofs != null &&
+                    this.Proofs.SequenceEqual(input.Proofs)
                 );
         }
 
@@ -246,6 +262,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Transactions != null)
                 {
                     hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                }
+                if (this.Proofs != null)
+                {
+                    hashCode = (hashCode * 59) + this.Proofs.GetHashCode();
                 }
                 return hashCode;
             }

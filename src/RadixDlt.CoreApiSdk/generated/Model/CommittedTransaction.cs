@@ -106,7 +106,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="resultantStateIdentifiers">resultantStateIdentifiers (required).</param>
         /// <param name="ledgerTransaction">ledgerTransaction (required).</param>
         /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(CommittedStateIdentifier resultantStateIdentifiers = default(CommittedStateIdentifier), LedgerTransaction ledgerTransaction = default(LedgerTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        /// <param name="proposerTimestampMs">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms. (required).</param>
+        public CommittedTransaction(CommittedStateIdentifier resultantStateIdentifiers = default(CommittedStateIdentifier), LedgerTransaction ledgerTransaction = default(LedgerTransaction), TransactionReceipt receipt = default(TransactionReceipt), long proposerTimestampMs = default(long))
         {
             // to ensure "resultantStateIdentifiers" is required (not null)
             if (resultantStateIdentifiers == null)
@@ -126,6 +127,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
             }
             this.Receipt = receipt;
+            this.ProposerTimestampMs = proposerTimestampMs;
         }
 
         /// <summary>
@@ -147,6 +149,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public TransactionReceipt Receipt { get; set; }
 
         /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms.
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms.</value>
+        [DataMember(Name = "proposer_timestamp_ms", IsRequired = true, EmitDefaultValue = true)]
+        public long ProposerTimestampMs { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -157,6 +166,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ResultantStateIdentifiers: ").Append(ResultantStateIdentifiers).Append("\n");
             sb.Append("  LedgerTransaction: ").Append(LedgerTransaction).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("  ProposerTimestampMs: ").Append(ProposerTimestampMs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -206,6 +216,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Receipt == input.Receipt ||
                     (this.Receipt != null &&
                     this.Receipt.Equals(input.Receipt))
+                ) && 
+                (
+                    this.ProposerTimestampMs == input.ProposerTimestampMs ||
+                    this.ProposerTimestampMs.Equals(input.ProposerTimestampMs)
                 );
         }
 
@@ -230,6 +244,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.ProposerTimestampMs.GetHashCode();
                 return hashCode;
             }
         }

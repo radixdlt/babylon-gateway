@@ -73,7 +73,7 @@ info:
     [Gateway API](https://docs-babylon.radixdlt.com/).
 
     ## Integration and forward compatibility guarantees
-
+  
     This version of the Core API belongs to the fourth release candidate of the Radix Babylon network ("RCnet v3.1").
 
     Integrators (such as exchanges) are recommended to use the `/lts/` endpoints - they have been designed to be clear
@@ -135,7 +135,7 @@ tags:
 
       User transactions are formed of a core "intent", which is then signed by 0+ signatories, before being notarized. The output is called a notarized payload.
       It is this notarized transaction payload which is submitted to the network.
-
+      
       For most users, this construction process will generally happen in their Radix Wallet. If you wish to construct transactions programmatically or offline,
       you will need to integrate the Radix Engine Toolkit into your application for construction and finalization.
 
@@ -159,7 +159,7 @@ tags:
       ## State Model
 
       The Radix Engine State Model can be thought of as a forest of state sub-trees.
-      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them.
+      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them. 
       These substates are typed, and can own other entities, forming a tree of ownership.
 
       Each state sub-tree has a root entity, and a single Bech32M Global Address, with a human-readable-prefix (and prefix byte) matching the root entity type.
@@ -169,7 +169,7 @@ tags:
   - name: Construction
     x-displayName: Transaction Construction
     x-traitTag: true # Don't display endpoints under this tag
-    description: |
+    description: |      
       To construct and submit a transaction using the LTS endpoints:
 
       * Query `/lts/transaction/construction` to retrieve the current epoch (according to your node).
@@ -1109,7 +1109,7 @@ components:
           description: Whether to return the raw hex-encoded bytes (default true)
           type: boolean
         programmatic_json:
-          description: Whether to return the programmatic json format (default true)
+          description: Whether to return the programmatic json format (normally default true, defaults false for streamed transactions)
           type: boolean
     TransactionFormatOptions:
       type: object
@@ -1122,7 +1122,7 @@ components:
           description: Whether to return the hex-encoded blobs (default false)
           type: boolean
         message:
-          description: Whether to return the transaction message (default false)
+          description: Whether to return the transaction message (default true)
           type: boolean
         raw_system_transaction:
           description: Whether to return the raw hex-encoded system transaction bytes (default false)
@@ -1821,11 +1821,16 @@ components:
       type: object
       description: Transaction state updates (only present if status is Succeeded or Failed)
       required:
+        - deleted_partitions
         - created_substates
         - updated_substates
         - deleted_substates
         - new_global_entities
       properties:
+        deleted_partitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PartitionId"
         created_substates:
           type: array
           items:
@@ -1931,7 +1936,7 @@ components:
           type: boolean
         entity_address:
           $ref: "#/components/schemas/EntityAddress"
-    SubstateId:
+    PartitionId:
       type: object
       required:
         - entity_type
@@ -1939,8 +1944,6 @@ components:
         - entity_module
         - partition_kind
         - partition_number
-        - substate_type
-        - substate_key
       properties:
         entity_type:
           $ref: "#/components/schemas/EntityType"
@@ -1955,10 +1958,18 @@ components:
           format: int32
           minimum: 0
           maximum: 255
-        substate_type:
-          $ref: "#/components/schemas/SubstateType"
-        substate_key:
-          $ref: "#/components/schemas/SubstateKey"
+    SubstateId:
+      allOf:
+        - $ref: "#/components/schemas/PartitionId"
+        - type: object
+          required:
+            - substate_type
+            - substate_key
+          properties:
+            substate_type:
+              $ref: "#/components/schemas/SubstateType"
+            substate_key:
+              $ref: "#/components/schemas/SubstateKey"
     EntityModule:
       type: string
       enum:
@@ -2410,7 +2421,7 @@ components:
           required:
             - public_key
             - signature
-          description: The EdDSA public key and signature
+          description: The EdDSA public key and signature 
           properties:
             public_key:
               $ref: '#/components/schemas/EddsaEd25519PublicKey'
@@ -3539,7 +3550,7 @@ components:
         mapping:
           # NOTE:
           # There is an important convention to these names, for consistency:
-          #
+          # 
           # For each distinct typed substate, form [SubstateType] = [ModuleSpecifier][SubstateSpecifier][SubstateTypeVersion]
           # - [ModuleSpecifier] is either [ModuleName]Module for non-main modules, or [EntityType] for main modules
           # - [SubstateSpecifier] is either:
@@ -3952,7 +3963,7 @@ components:
           description: |
             The generic substitution is provided remotely by a blueprint type.
             The `resolved_full_type_id` is added by the node, and is always present in the model returned from the transaction stream API.
-            Other APIs may not resolve the type from the blueprint definition.
+            Other APIs may not resolve the type from the blueprint definition. 
           required:
             - blueprint_type_identifier
           properties:
@@ -4689,7 +4700,7 @@ components:
         effective_epoch_start:
           description: |
             The effective time the epoch started. A drift-free measure, used to work out when the
-            epoch should ideally end.
+            epoch should ideally end. 
           $ref: '#/components/schemas/Instant'
         actual_epoch_start:
           description: |
@@ -5291,7 +5302,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -5597,6 +5608,7 @@ components:
       type: object
       required:
         - state_version
+        - proposer_timestamp_ms
         - accumulator_hash
         - status
         - fungible_entity_balance_changes
@@ -5606,6 +5618,12 @@ components:
         state_version:
           $ref: "#/components/schemas/StateVersion"
           description: The resultant state version after the transaction has been committed
+        proposer_timestamp_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 100000000000000
+          description: An integer between `0` and `10^14`, marking the proposer timestamp in ms.
         accumulator_hash:
           type: string
           minLength: 64
@@ -5652,7 +5670,7 @@ components:
           description: |
             If present, this field indicates the entity contributed to the payment of the fee.
             The change in balance will always be negative.
-            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in
+            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in 
             `fee_balance_changes`.
         fee_balance_changes:
           type: array
@@ -5987,6 +6005,18 @@ components:
           type: string
           description: |
             A descriptor for the current protocol version that the node is running.
+    Epoch:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 10000000000
+      description: An integer between `0` and `10^10`, marking the epoch.
+    Round:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 10000000000
+      description: An integer between `0` and `10^10`, marking the current round in an epoch
     EpochRound:
       type: object
       required:
@@ -6601,7 +6631,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -6847,6 +6877,9 @@ components:
           $ref: "#/components/schemas/TransactionFormatOptions"
         substate_format_options:
           $ref: "#/components/schemas/SubstateFormatOptions"
+        include_proofs:
+          description: Whether to include LedgerProofs (default false)
+          type: boolean
     StreamTransactionsResponse:
       type: object
       required:
@@ -6880,12 +6913,18 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CommittedTransaction"
+        proofs:
+          description: A ledger proof list starting from `from_state_version` (inclusive) stored by this node.
+          type: array
+          items:
+            $ref: "#/components/schemas/LedgerProof"
     CommittedTransaction:
       type: object
       required:
         - resultant_state_identifiers
         - ledger_transaction
         - receipt
+        - proposer_timestamp_ms
       properties:
         resultant_state_identifiers:
           $ref: "#/components/schemas/CommittedStateIdentifier"
@@ -6893,6 +6932,92 @@ components:
           $ref: "#/components/schemas/LedgerTransaction"
         receipt:
           $ref: "#/components/schemas/TransactionReceipt"
+        proposer_timestamp_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 100000000000000
+          description: An integer between `0` and `10^14`, marking the proposer timestamp in ms.
+    LedgerProof:
+      type: object
+      required:
+        - opaque_hash
+        - ledger_header
+        - timestamped_signatures
+      properties:
+        opaque_hash: 
+          $ref: "#/components/schemas/OpaqueHash"
+        ledger_header:
+          $ref: "#/components/schemas/LedgerHeader"
+        timestamped_signatures:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimestampedValidatorSignature"
+    LedgerHeader:
+      type: object
+      required:
+        - epoch
+        - round
+        - state_version
+        - hashes
+        - consensus_parent_round_timestamp_ms
+        - proposer_timestamp_ms
+      properties:
+        epoch:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 10000000000
+          description: An integer between `0` and `10^10`, marking the epoch.
+        round:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 10000000000
+          description: An integer between `0` and `10^10`, marking the current round in an epoch
+        state_version:
+          $ref: "#/components/schemas/StateVersion"
+        hashes:
+          $ref: "#/components/schemas/LedgerHashes"
+        consensus_parent_round_timestamp_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 100000000000000
+          description: An integer between `0` and `10^14`, marking the consensus parent round timestamp in ms.
+        proposer_timestamp_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 100000000000000
+          description: An integer between `0` and `10^14`, marking the proposer timestamp in ms.
+        next_epoch:
+          $ref: "#/components/schemas/NextEpoch"
+    TimestampedValidatorSignature:
+      type: object
+      required:
+        - validator_key
+        - validator_address
+        - timestamp_ms
+        - signature
+      properties:
+        validator_key:
+          $ref: "#/components/schemas/EcdsaSecp256k1PublicKey"
+        validator_address:
+          $ref: "#/components/schemas/ComponentAddress"
+        timestamp_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 100000000000000
+          description: An integer between `0` and `10^14`, marking the unix timestamp in ms.
+        signature:
+          $ref: "#/components/schemas/EcdsaSecp256k1Signature"
+    OpaqueHash:
+      type: string
+      minLength: 64
+      maxLength: 64
+      description: A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger.
     LedgerTransactionType:
       type: string
       description: The type of the ledger transaction

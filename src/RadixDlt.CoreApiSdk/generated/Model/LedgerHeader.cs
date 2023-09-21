@@ -90,87 +90,87 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Transaction state updates (only present if status is Succeeded or Failed)
+    /// LedgerHeader
     /// </summary>
-    [DataContract(Name = "StateUpdates")]
-    public partial class StateUpdates : IEquatable<StateUpdates>
+    [DataContract(Name = "LedgerHeader")]
+    public partial class LedgerHeader : IEquatable<LedgerHeader>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
+        /// Initializes a new instance of the <see cref="LedgerHeader" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateUpdates() { }
+        protected LedgerHeader() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
+        /// Initializes a new instance of the <see cref="LedgerHeader" /> class.
         /// </summary>
-        /// <param name="deletedPartitions">deletedPartitions (required).</param>
-        /// <param name="createdSubstates">createdSubstates (required).</param>
-        /// <param name="updatedSubstates">updatedSubstates (required).</param>
-        /// <param name="deletedSubstates">deletedSubstates (required).</param>
-        /// <param name="newGlobalEntities">newGlobalEntities (required).</param>
-        public StateUpdates(List<PartitionId> deletedPartitions = default(List<PartitionId>), List<CreatedSubstate> createdSubstates = default(List<CreatedSubstate>), List<UpdatedSubstate> updatedSubstates = default(List<UpdatedSubstate>), List<DeletedSubstate> deletedSubstates = default(List<DeletedSubstate>), List<EntityReference> newGlobalEntities = default(List<EntityReference>))
+        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch. (required).</param>
+        /// <param name="round">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch (required).</param>
+        /// <param name="stateVersion">stateVersion (required).</param>
+        /// <param name="hashes">hashes (required).</param>
+        /// <param name="consensusParentRoundTimestampMs">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the consensus parent round timestamp in ms. (required).</param>
+        /// <param name="proposerTimestampMs">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms. (required).</param>
+        /// <param name="nextEpoch">nextEpoch.</param>
+        public LedgerHeader(long epoch = default(long), long round = default(long), long stateVersion = default(long), LedgerHashes hashes = default(LedgerHashes), long consensusParentRoundTimestampMs = default(long), long proposerTimestampMs = default(long), NextEpoch nextEpoch = default(NextEpoch))
         {
-            // to ensure "deletedPartitions" is required (not null)
-            if (deletedPartitions == null)
+            this.Epoch = epoch;
+            this.Round = round;
+            this.StateVersion = stateVersion;
+            // to ensure "hashes" is required (not null)
+            if (hashes == null)
             {
-                throw new ArgumentNullException("deletedPartitions is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("hashes is a required property for LedgerHeader and cannot be null");
             }
-            this.DeletedPartitions = deletedPartitions;
-            // to ensure "createdSubstates" is required (not null)
-            if (createdSubstates == null)
-            {
-                throw new ArgumentNullException("createdSubstates is a required property for StateUpdates and cannot be null");
-            }
-            this.CreatedSubstates = createdSubstates;
-            // to ensure "updatedSubstates" is required (not null)
-            if (updatedSubstates == null)
-            {
-                throw new ArgumentNullException("updatedSubstates is a required property for StateUpdates and cannot be null");
-            }
-            this.UpdatedSubstates = updatedSubstates;
-            // to ensure "deletedSubstates" is required (not null)
-            if (deletedSubstates == null)
-            {
-                throw new ArgumentNullException("deletedSubstates is a required property for StateUpdates and cannot be null");
-            }
-            this.DeletedSubstates = deletedSubstates;
-            // to ensure "newGlobalEntities" is required (not null)
-            if (newGlobalEntities == null)
-            {
-                throw new ArgumentNullException("newGlobalEntities is a required property for StateUpdates and cannot be null");
-            }
-            this.NewGlobalEntities = newGlobalEntities;
+            this.Hashes = hashes;
+            this.ConsensusParentRoundTimestampMs = consensusParentRoundTimestampMs;
+            this.ProposerTimestampMs = proposerTimestampMs;
+            this.NextEpoch = nextEpoch;
         }
 
         /// <summary>
-        /// Gets or Sets DeletedPartitions
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch.
         /// </summary>
-        [DataMember(Name = "deleted_partitions", IsRequired = true, EmitDefaultValue = true)]
-        public List<PartitionId> DeletedPartitions { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch.</value>
+        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long Epoch { get; set; }
 
         /// <summary>
-        /// Gets or Sets CreatedSubstates
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch
         /// </summary>
-        [DataMember(Name = "created_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<CreatedSubstate> CreatedSubstates { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch</value>
+        [DataMember(Name = "round", IsRequired = true, EmitDefaultValue = true)]
+        public long Round { get; set; }
 
         /// <summary>
-        /// Gets or Sets UpdatedSubstates
+        /// Gets or Sets StateVersion
         /// </summary>
-        [DataMember(Name = "updated_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<UpdatedSubstate> UpdatedSubstates { get; set; }
+        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long StateVersion { get; set; }
 
         /// <summary>
-        /// Gets or Sets DeletedSubstates
+        /// Gets or Sets Hashes
         /// </summary>
-        [DataMember(Name = "deleted_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<DeletedSubstate> DeletedSubstates { get; set; }
+        [DataMember(Name = "hashes", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerHashes Hashes { get; set; }
 
         /// <summary>
-        /// Gets or Sets NewGlobalEntities
+        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the consensus parent round timestamp in ms.
         /// </summary>
-        [DataMember(Name = "new_global_entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityReference> NewGlobalEntities { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the consensus parent round timestamp in ms.</value>
+        [DataMember(Name = "consensus_parent_round_timestamp_ms", IsRequired = true, EmitDefaultValue = true)]
+        public long ConsensusParentRoundTimestampMs { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms.
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms.</value>
+        [DataMember(Name = "proposer_timestamp_ms", IsRequired = true, EmitDefaultValue = true)]
+        public long ProposerTimestampMs { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NextEpoch
+        /// </summary>
+        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
+        public NextEpoch NextEpoch { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -179,12 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateUpdates {\n");
-            sb.Append("  DeletedPartitions: ").Append(DeletedPartitions).Append("\n");
-            sb.Append("  CreatedSubstates: ").Append(CreatedSubstates).Append("\n");
-            sb.Append("  UpdatedSubstates: ").Append(UpdatedSubstates).Append("\n");
-            sb.Append("  DeletedSubstates: ").Append(DeletedSubstates).Append("\n");
-            sb.Append("  NewGlobalEntities: ").Append(NewGlobalEntities).Append("\n");
+            sb.Append("class LedgerHeader {\n");
+            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
+            sb.Append("  Round: ").Append(Round).Append("\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  Hashes: ").Append(Hashes).Append("\n");
+            sb.Append("  ConsensusParentRoundTimestampMs: ").Append(ConsensusParentRoundTimestampMs).Append("\n");
+            sb.Append("  ProposerTimestampMs: ").Append(ProposerTimestampMs).Append("\n");
+            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,15 +207,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateUpdates);
+            return this.Equals(input as LedgerHeader);
         }
 
         /// <summary>
-        /// Returns true if StateUpdates instances are equal
+        /// Returns true if LedgerHeader instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateUpdates to be compared</param>
+        /// <param name="input">Instance of LedgerHeader to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateUpdates input)
+        public bool Equals(LedgerHeader input)
         {
             if (input == null)
             {
@@ -221,34 +223,34 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DeletedPartitions == input.DeletedPartitions ||
-                    this.DeletedPartitions != null &&
-                    input.DeletedPartitions != null &&
-                    this.DeletedPartitions.SequenceEqual(input.DeletedPartitions)
+                    this.Epoch == input.Epoch ||
+                    this.Epoch.Equals(input.Epoch)
                 ) && 
                 (
-                    this.CreatedSubstates == input.CreatedSubstates ||
-                    this.CreatedSubstates != null &&
-                    input.CreatedSubstates != null &&
-                    this.CreatedSubstates.SequenceEqual(input.CreatedSubstates)
+                    this.Round == input.Round ||
+                    this.Round.Equals(input.Round)
                 ) && 
                 (
-                    this.UpdatedSubstates == input.UpdatedSubstates ||
-                    this.UpdatedSubstates != null &&
-                    input.UpdatedSubstates != null &&
-                    this.UpdatedSubstates.SequenceEqual(input.UpdatedSubstates)
+                    this.StateVersion == input.StateVersion ||
+                    this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
-                    this.DeletedSubstates == input.DeletedSubstates ||
-                    this.DeletedSubstates != null &&
-                    input.DeletedSubstates != null &&
-                    this.DeletedSubstates.SequenceEqual(input.DeletedSubstates)
+                    this.Hashes == input.Hashes ||
+                    (this.Hashes != null &&
+                    this.Hashes.Equals(input.Hashes))
                 ) && 
                 (
-                    this.NewGlobalEntities == input.NewGlobalEntities ||
-                    this.NewGlobalEntities != null &&
-                    input.NewGlobalEntities != null &&
-                    this.NewGlobalEntities.SequenceEqual(input.NewGlobalEntities)
+                    this.ConsensusParentRoundTimestampMs == input.ConsensusParentRoundTimestampMs ||
+                    this.ConsensusParentRoundTimestampMs.Equals(input.ConsensusParentRoundTimestampMs)
+                ) && 
+                (
+                    this.ProposerTimestampMs == input.ProposerTimestampMs ||
+                    this.ProposerTimestampMs.Equals(input.ProposerTimestampMs)
+                ) && 
+                (
+                    this.NextEpoch == input.NextEpoch ||
+                    (this.NextEpoch != null &&
+                    this.NextEpoch.Equals(input.NextEpoch))
                 );
         }
 
@@ -261,25 +263,18 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DeletedPartitions != null)
+                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
+                hashCode = (hashCode * 59) + this.Round.GetHashCode();
+                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                if (this.Hashes != null)
                 {
-                    hashCode = (hashCode * 59) + this.DeletedPartitions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Hashes.GetHashCode();
                 }
-                if (this.CreatedSubstates != null)
+                hashCode = (hashCode * 59) + this.ConsensusParentRoundTimestampMs.GetHashCode();
+                hashCode = (hashCode * 59) + this.ProposerTimestampMs.GetHashCode();
+                if (this.NextEpoch != null)
                 {
-                    hashCode = (hashCode * 59) + this.CreatedSubstates.GetHashCode();
-                }
-                if (this.UpdatedSubstates != null)
-                {
-                    hashCode = (hashCode * 59) + this.UpdatedSubstates.GetHashCode();
-                }
-                if (this.DeletedSubstates != null)
-                {
-                    hashCode = (hashCode * 59) + this.DeletedSubstates.GetHashCode();
-                }
-                if (this.NewGlobalEntities != null)
-                {
-                    hashCode = (hashCode * 59) + this.NewGlobalEntities.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
                 }
                 return hashCode;
             }
