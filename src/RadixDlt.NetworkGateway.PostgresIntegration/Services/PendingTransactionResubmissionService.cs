@@ -97,8 +97,8 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IClock _clock;
     private readonly IReadOnlyCollection<IPendingTransactionResubmissionServiceObserver> _observers;
-    private readonly ITopOfLedgerCache _topOfLedgerCache;
     private readonly ILogger<PendingTransactionResubmissionService> _logger;
+    private readonly ITopOfLedgerProvider _topOfLedgerProvider;
 
     public PendingTransactionResubmissionService(
         IServiceProvider services,
@@ -108,8 +108,8 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         INetworkConfigurationProvider networkConfigurationProvider,
         IClock clock,
         IEnumerable<IPendingTransactionResubmissionServiceObserver> observers,
-        ITopOfLedgerCache topOfLedgerCache,
-        ILogger<PendingTransactionResubmissionService> logger)
+        ILogger<PendingTransactionResubmissionService> logger,
+        ITopOfLedgerProvider topOfLedgerProvider)
     {
         _services = services;
         _dbContextFactory = dbContextFactory;
@@ -118,8 +118,8 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         _networkConfigurationProvider = networkConfigurationProvider;
         _clock = clock;
         _observers = observers.ToArray();
-        _topOfLedgerCache = topOfLedgerCache;
         _logger = logger;
+        _topOfLedgerProvider = topOfLedgerProvider;
     }
 
     public async Task RunBatchOfResubmissions(CancellationToken token = default)
@@ -301,7 +301,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
     private async Task<ulong> GetCurrentEpoch(CancellationToken cancellationToken)
     {
-        var topOfLedger = await _topOfLedgerCache.GetLastCommittedTransactionSummaryOrLoad(cancellationToken);
+        var topOfLedger = await _topOfLedgerProvider.GetTopOfLedger(cancellationToken);
         var signedEpoch = topOfLedger.Epoch;
         return (signedEpoch >= 0) ? (ulong)signedEpoch : throw new InvalidStateException($"Epoch was negative: {signedEpoch}");
     }

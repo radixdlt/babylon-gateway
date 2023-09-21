@@ -92,10 +92,9 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILedgerExtenderService _ledgerExtenderService;
     private readonly IEnumerable<ILedgerConfirmationServiceObserver> _observers;
+    private readonly ITopOfLedgerProvider _topOfLedgerProvider;
     private readonly IClock _clock;
-
     private readonly IFetchedTransactionStore _fetchedTransactionStore;
-    private readonly ITopOfLedgerCache _topOfLedgerCache;
 
     private IList<CoreApiNode> TransactionNodes { get; set; } = new List<CoreApiNode>();
 
@@ -109,9 +108,8 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         ILedgerExtenderService ledgerExtenderService,
         IEnumerable<ILedgerConfirmationServiceObserver> observers,
         IFetchedTransactionStore fetchedTransactionStore,
-        ITopOfLedgerCache topOfLedgerCache,
-        IClock clock
-        )
+        IClock clock,
+        ITopOfLedgerProvider topOfLedgerProvider)
     {
         _logger = logger;
         _ledgerConfirmationOptionsMonitor = ledgerConfirmationOptionsMonitor;
@@ -120,26 +118,25 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         _ledgerExtenderService = ledgerExtenderService;
         _observers = observers;
         _clock = clock;
+        _topOfLedgerProvider = topOfLedgerProvider;
         _fetchedTransactionStore = fetchedTransactionStore;
-        _topOfLedgerCache = topOfLedgerCache;
         Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
 
     public async Task ProcessTransactions(CancellationToken token)
     {
+        var lastCommittedTransactionSummary = await _topOfLedgerProvider.GetTopOfLedger(token);
         await _observers.ForEachAsync(x => x.PreHandleLedgerExtension(_clock.UtcNow));
 
-        await LoadTopOfDbLedger(token);
-
         PrepareForLedgerExtensionCheck();
-        var transactions = ConstructLedgerExtension();
+        var transactions = ConstructLedgerExtension(lastCommittedTransactionSummary);
 
         if (transactions.Count == 0)
         {
             return;
         }
 
-        var consistentLedgerExtension = GenerateConsistentLedgerExtension(transactions);
+        var consistentLedgerExtension = GenerateConsistentLedgerExtension(transactions, lastCommittedTransactionSummary);
 
         var (commitReport, totalCommitMs) = await CodeStopwatch.TimeInMs(
             () => _ledgerExtenderService.CommitTransactions(consistentLedgerExtension, token)
@@ -161,31 +158,15 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
 
-    private List<CoreModel.CommittedTransaction> ConstructLedgerExtension()
+    private List<CoreModel.CommittedTransaction> ConstructLedgerExtension(TransactionSummary topOfLedger)
     {
-        var lastCommittedStateVersion = _topOfLedgerCache.GetLastCommittedStateVersion();
-        var startStateVersion = lastCommittedStateVersion + 1;
-
+        var startStateVersion = topOfLedger.StateVersion + 1;
         var transactions = _fetchedTransactionStore.GetTransactionBatch(startStateVersion, (int)Config.MaxCommitBatchSize);
         return transactions;
     }
 
-    private async Task LoadTopOfDbLedger(CancellationToken token)
-    {
-        var (topOfLedger, readTopOfLedgerMs) = await CodeStopwatch.TimeInMs(
-            () => _topOfLedgerCache.Refresh(token)
-        );
-
-        _logger.LogDebug(
-            "Top of DB ledger is at state version {StateVersion} (read in {ReadTopOfLedgerMs}ms)",
-            topOfLedger.StateVersion,
-            readTopOfLedgerMs
-        );
-    }
-
     private void HandleLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs, CommitTransactionsReport commitReport)
     {
-        _topOfLedgerCache.Update(commitReport.FinalTransaction);
         ReportOnLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
         _fetchedTransactionStore.RemoveProcessedTransactions(commitReport.FinalTransaction.StateVersion);
     }
@@ -240,10 +221,9 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         );
     }
 
-    private ConsistentLedgerExtension GenerateConsistentLedgerExtension(List<CoreModel.CommittedTransaction> transactions)
+    private ConsistentLedgerExtension GenerateConsistentLedgerExtension(List<CoreModel.CommittedTransaction> transactions, TransactionSummary topOfLedger)
     {
-        var lastCommittedTransactionSummary = _topOfLedgerCache.GetLastCommittedTransactionSummary();
-        var previousStateVersion = lastCommittedTransactionSummary.StateVersion;
+        var previousStateVersion = topOfLedger.StateVersion;
 
         try
         {
@@ -266,6 +246,6 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
             throw;
         }
 
-        return new ConsistentLedgerExtension(lastCommittedTransactionSummary, transactions);
+        return new ConsistentLedgerExtension(topOfLedger, transactions);
     }
 }

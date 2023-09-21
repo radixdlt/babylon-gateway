@@ -103,7 +103,7 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
     private readonly ICommittedStateIdentifiersReader _committedStateIdentifiersReader;
     private readonly Func<ITransactionStreamReader> _transactionStreamReaderFactory;
     private readonly Func<INetworkStatusReader> _networkStatusReaderFactory;
-    private readonly ITopOfLedgerCache _topOfLedgerCache;
+    private readonly ITopOfLedgerProvider _topOfLedgerProvider;
 
     /* Properties */
     private string NodeName => _nodeConfigProvider.CoreApiNode.Name;
@@ -119,8 +119,8 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
         INodeStatusProvider nodeStatusProvider,
         ICommittedStateIdentifiersReader committedStateIdentifiersReader,
         Func<ITransactionStreamReader> transactionStreamReaderFactory,
-        ITopOfLedgerCache topOfLedgerCache,
-        Func<INetworkStatusReader> networkStatusReaderFactory)
+        Func<INetworkStatusReader> networkStatusReaderFactory,
+        ITopOfLedgerProvider topOfLedgerProvider)
         : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers, clock)
     {
         _logger = logger;
@@ -131,8 +131,8 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
         _nodeStatusProvider = nodeStatusProvider;
         _committedStateIdentifiersReader = committedStateIdentifiersReader;
         _transactionStreamReaderFactory = transactionStreamReaderFactory;
-        _topOfLedgerCache = topOfLedgerCache;
         _networkStatusReaderFactory = networkStatusReaderFactory;
+        _topOfLedgerProvider = topOfLedgerProvider;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -247,7 +247,7 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
 
     private async Task<(long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound)?> GetTransactionsToFetch(string nodeName, CancellationToken cancellationToken)
     {
-        var lastCommittedTransactionSummary = await _topOfLedgerCache.GetLastCommittedTransactionSummaryOrLoad(cancellationToken);
+        var lastCommittedTransactionSummary = await _topOfLedgerProvider.GetTopOfLedger(cancellationToken);
         var processTransactionFromStateVersion = lastCommittedTransactionSummary.StateVersion;
         var maxUpperLimit = processTransactionFromStateVersion + _ledgerConfirmationOptionsMonitor.CurrentValue.MaxTransactionPipelineSizePerNode;
 
