@@ -581,7 +581,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PendingTransactionPayload",
+                name: "pending_transaction_payloads",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -590,7 +590,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PendingTransactionPayload", x => x.id);
+                    table.PrimaryKey("PK_pending_transaction_payloads", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -689,7 +689,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     payload_hash = table.Column<string>(type: "text", nullable: false),
                     intent_hash = table.Column<string>(type: "text", nullable: false),
                     end_epoch_exclusive = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    PayloadId = table.Column<long>(type: "bigint", nullable: false),
+                    payload_id = table.Column<long>(type: "bigint", nullable: false),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
                     payload_status = table.Column<PendingTransactionPayloadLedgerStatus>(type: "pending_transaction_payload_ledger_status", nullable: false),
                     intent_status = table.Column<PendingTransactionIntentLedgerStatus>(type: "pending_transaction_intent_ledger_status", nullable: false),
@@ -711,9 +711,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     table.PrimaryKey("PK_pending_transactions", x => x.id);
                     table.ForeignKey(
-                        name: "FK_pending_transactions_PendingTransactionPayload_PayloadId",
-                        column: x => x.PayloadId,
-                        principalTable: "PendingTransactionPayload",
+                        name: "FK_pending_transactions_pending_transaction_payloads_payload_id",
+                        column: x => x.payload_id,
+                        principalTable: "pending_transaction_payloads",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -966,9 +966,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_pending_transactions_PayloadId",
+                name: "IX_pending_transactions_payload_id",
                 table: "pending_transactions",
-                column: "PayloadId");
+                column: "payload_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_resubmit_from_timestamp",
@@ -1123,7 +1123,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "validator_emission_statistics");
 
             migrationBuilder.DropTable(
-                name: "PendingTransactionPayload");
+                name: "pending_transaction_payloads");
 
             migrationBuilder.DropTable(
                 name: "validator_public_key_history");

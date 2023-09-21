@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230921073622_InitialCreate")]
+    [Migration("20230921082804_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1138,7 +1138,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("payload_hash");
 
                     b.Property<long>("PayloadId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("payload_id");
 
                     b.Property<uint>("VersionControl")
                         .IsConcurrencyToken()
@@ -1174,7 +1175,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PendingTransactionPayload");
+                    b.ToTable("pending_transaction_payloads");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceEntitySupplyHistory", b =>

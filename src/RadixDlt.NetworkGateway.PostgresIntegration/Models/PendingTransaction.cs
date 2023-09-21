@@ -101,11 +101,14 @@ internal class PendingTransaction
     [Column("end_epoch_exclusive")]
     public ulong EndEpochExclusive { get; private set; }
 
+    [Column("payload_id")]
+    public long PayloadId { get; private set; }
+
     /// <summary>
     /// The payload of the transaction.
     /// </summary>
-    [Column("payload")]
     [Required]
+    [ForeignKey(nameof(PayloadId))]
     [DeleteBehavior(DeleteBehavior.Cascade)]
     public PendingTransactionPayload Payload { get; private set; }
 
@@ -241,6 +244,7 @@ internal class PendingTransaction
 /// Designed to be in a separate table, so that it's only loaded when it's explicitly requested.
 /// This aims to avoid loading large blobs into memory when they're not needed.
 /// </summary>
+[Table("pending_transaction_payloads")]
 internal class PendingTransactionPayload
 {
     [Key]
