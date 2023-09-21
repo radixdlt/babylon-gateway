@@ -128,11 +128,11 @@ public class TransactionSubmitter
         }
         catch (OperationCanceledException ex) when (timeoutTokenSource.IsCancellationRequested)
         {
-            return new NodeSubmissionResult.OtherSubmissionError(ex, IsTimeout: true, $"Operation timed-out after {submitContext.SubmissionTimeout.TotalSeconds} seconds");
+            return new NodeSubmissionResult.OtherSubmissionError(ex, IsTimeout: true, $"Submission to node timed-out after {submitContext.SubmissionTimeout.TotalSeconds} seconds");
         }
         catch (OperationCanceledException ex)
         {
-            return new NodeSubmissionResult.OtherSubmissionError(ex, IsTimeout: false, "Operation cancelled (not due to timeout)");
+            return new NodeSubmissionResult.OtherSubmissionError(ex, IsTimeout: false, "Submission to node was cancelled");
         }
         catch (Exception ex)
         {

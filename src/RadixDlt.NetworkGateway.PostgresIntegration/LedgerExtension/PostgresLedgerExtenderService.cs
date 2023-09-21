@@ -158,6 +158,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         }
     }
 
+    private record CommittedTransactionKeyDetails(long StateVersion, bool WasSuccess, string? ErrorMessage);
+
     private async Task<int> UpdatePendingTransactions(ReadWriteDbContext dbContext, List<CoreModel.CommittedTransaction> committedTransactions, CancellationToken token)
     {
         /*
@@ -179,7 +181,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
          * and then simple foreach loop notifying the observers
          */
         var timestamp = _clock.UtcNow;
-        var userTransactionStateVersionAndSuccessByPayloadHash = new Dictionary<string, (long, bool, string?)>(committedTransactions.Count);
+        var userTransactionStateVersionAndSuccessByPayloadHash = new Dictionary<string, CommittedTransactionKeyDetails>(committedTransactions.Count);
 
         foreach (var committedTransaction in committedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
         {
@@ -195,7 +197,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             var errorMessage = committedTransaction.Receipt.ErrorMessage;
 
-            userTransactionStateVersionAndSuccessByPayloadHash[payloadHash] = (stateVersion, isSuccess, errorMessage);
+            userTransactionStateVersionAndSuccessByPayloadHash[payloadHash] = new CommittedTransactionKeyDetails(stateVersion, isSuccess, errorMessage);
         }
 
         var payloadHashes = userTransactionStateVersionAndSuccessByPayloadHash.Keys.ToList();
@@ -228,9 +230,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 );
             }
 
-            var (stateVersion, isSuccess, errorMessage) = userTransactionStateVersionAndSuccessByPayloadHash[pendingTransaction.PayloadHash];
+            var details = userTransactionStateVersionAndSuccessByPayloadHash[pendingTransaction.PayloadHash];
 
-            pendingTransaction.MarkAsCommitted(stateVersion, isSuccess, errorMessage, timestamp);
+            pendingTransaction.MarkAsCommitted(details.StateVersion, details.WasSuccess, details.ErrorMessage, timestamp);
         }
 
         // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider
