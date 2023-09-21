@@ -86,6 +86,14 @@ public sealed class CoreApiIntegrationOptions
 
     [ConfigurationKeyName("MaxSubmissionAttempts")]
     public int MaxSubmissionAttempts { get; set; } = 5;
+
+    [ConfigurationKeyName("BaseDelayBetweenResubmissionsSeconds")]
+    public long BaseDelayBetweenResubmissionsSeconds { get; set; } = 10;
+
+    public TimeSpan BaseDelayBetweenResubmissions => TimeSpan.FromSeconds(BaseDelayBetweenResubmissionsSeconds);
+
+    [ConfigurationKeyName("ResubmissionDelayBackoffExponent")]
+    public double ResubmissionDelayBackoffExponent { get; set; } = 2;
 }
 
 internal class CoreApiIntegrationOptionsValidator : AbstractOptionsValidator<CoreApiIntegrationOptions>

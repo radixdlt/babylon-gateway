@@ -101,9 +101,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "module_id", new[] { "main", "metadata", "royalty", "role_assignment" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "integer", "bytes", "ruid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "package_vm_type", new[] { "native", "scrypto_v1" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_handling_status", new[] { "submitting", "concluded" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_intent_ledger_status", new[] { "unknown", "committed_success", "committed_failure", "commit_pending_outcome_unknown", "permanent_rejection", "possible_to_commit", "likely_but_not_certain_rejection" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_mempool_status", new[] { "submission_pending", "in_node_mempool", "missing_from_known_mempools" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_payload_ledger_status", new[] { "unknown", "committed_success", "committed_failure", "commit_pending_outcome_unknown", "commit_of_other_payload_for_intent_pending_outcome_unknown", "permanently_rejected", "transiently_accepted", "transiently_rejected" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
@@ -2254,26 +2252,27 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                             b1.Property<long>("PendingTransactionId")
                                 .HasColumnType("bigint");
 
+                            b1.Property<int>("AttemptedSubmissionToNodesCount")
+                                .HasColumnType("integer")
+                                .HasColumnName("node_submission_count");
+
                             b1.Property<DateTime>("FirstSubmittedToGatewayTimestamp")
                                 .HasColumnType("timestamp with time zone")
                                 .HasColumnName("first_submitted_to_gateway_timestamp");
-
-                            b1.Property<PendingTransactionHandlingStatus>("HandlingStatus")
-                                .ValueGeneratedOnUpdateSometimes()
-                                .HasColumnType("pending_transaction_handling_status")
-                                .HasColumnName("handling_status");
 
                             b1.Property<string>("HandlingStatusReason")
                                 .HasColumnType("text")
                                 .HasColumnName("handling_status_reason");
 
-                            b1.Property<DateTime>("LastSubmittedToGatewayTimestamp")
+                            b1.Property<DateTime?>("ResubmitFromTimestamp")
                                 .HasColumnType("timestamp with time zone")
-                                .HasColumnName("last_submitted_to_gateway_timestamp");
+                                .HasColumnName("resubmit_from_timestamp");
 
                             b1.HasKey("PendingTransactionId");
 
-                            b1.HasIndex("LastSubmittedToGatewayTimestamp");
+                            b1.HasIndex("FirstSubmittedToGatewayTimestamp");
+
+                            b1.HasIndex("ResubmitFromTimestamp");
 
                             b1.ToTable("pending_transactions");
 
@@ -2302,13 +2301,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasColumnType("pending_transaction_intent_ledger_status")
                                 .HasColumnName("intent_status");
 
-                            b1.Property<string>("LastFailureReason")
+                            b1.Property<string>("LatestFailureReason")
                                 .HasColumnType("text")
-                                .HasColumnName("last_failure_reason");
+                                .HasColumnName("latest_failure_reason");
 
-                            b1.Property<DateTime?>("LastFailureTimestamp")
+                            b1.Property<DateTime?>("LatestFailureTimestamp")
                                 .HasColumnType("timestamp with time zone")
-                                .HasColumnName("last_failure_timestamp");
+                                .HasColumnName("latest_failure_timestamp");
 
                             b1.Property<PendingTransactionPayloadLedgerStatus>("PayloadLedgerStatus")
                                 .HasColumnType("pending_transaction_payload_ledger_status")
@@ -2327,43 +2326,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                             b1.Property<long>("PendingTransactionId")
                                 .HasColumnType("bigint");
 
-                            b1.Property<DateTime?>("FirstSeenInMempoolTimestamp")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("first_seen_in_mempool_timestamp");
-
-                            b1.Property<PendingTransactionHandlingStatus>("HandlingStatus")
-                                .ValueGeneratedOnUpdateSometimes()
-                                .HasColumnType("pending_transaction_handling_status")
-                                .HasColumnName("handling_status");
-
-                            b1.Property<DateTime?>("LastDroppedOutOfMempoolTimestamp")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("last_missing_from_mempool_timestamp");
-
-                            b1.Property<DateTime?>("LastNodeSubmissionTimestamp")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("last_node_submission_timestamp");
-
                             b1.Property<string>("LastSubmitErrorTitle")
                                 .HasColumnType("text")
                                 .HasColumnName("last_submit_error");
 
-                            b1.Property<string>("LastSubmittedToNodeName")
+                            b1.Property<DateTime?>("LatestNodeSubmissionTimestamp")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("latest_node_submission_timestamp");
+
+                            b1.Property<bool>("LatestNodeSubmissionWasAccepted")
+                                .HasColumnType("boolean")
+                                .HasColumnName("latest_node_submission_was_accepted");
+
+                            b1.Property<string>("LatestSubmittedToNodeName")
                                 .HasColumnType("text")
-                                .HasColumnName("last_submitted_to_node_name");
-
-                            b1.Property<PendingTransactionMempoolStatus>("MempoolStatus")
-                                .HasColumnType("pending_transaction_mempool_status")
-                                .HasColumnName("mempool_status");
-
-                            b1.Property<int>("SubmissionToNodesCount")
-                                .HasColumnType("integer")
-                                .HasColumnName("node_submission_count");
+                                .HasColumnName("latest_submitted_to_node_name");
 
                             b1.HasKey("PendingTransactionId");
-
-                            b1.HasIndex("MempoolStatus")
-                                .HasFilter("handling_status = 'submitting'");
 
                             b1.ToTable("pending_transactions");
 

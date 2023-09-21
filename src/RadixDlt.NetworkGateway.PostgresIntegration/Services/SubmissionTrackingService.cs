@@ -110,6 +110,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         CancellationToken token = default)
     {
         var (alreadyKnown, pendingTransaction) = await HandleObservedSubmission(
+            handlingConfig,
             _clock.UtcNow,
             notarizedTransaction,
             notarizedTransactionBytes,
@@ -134,20 +135,21 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
         if (pendingTransaction.LedgerDetails.PayloadLedgerStatus is PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
         {
-            return new SubmissionResult(AlreadyKnown: alreadyKnown, PermanentlyRejectedReason: pendingTransaction.LedgerDetails.LastFailureReason);
+            return new SubmissionResult(AlreadyKnown: alreadyKnown, PermanentlyRejectedReason: pendingTransaction.LedgerDetails.LatestFailureReason);
         }
 
         return new SubmissionResult(AlreadyKnown: alreadyKnown);
     }
 
     private async Task<TrackedSubmission> HandleObservedSubmission(
+        PendingTransactionHandlingConfig handlingConfig,
         DateTime submittedTimestamp,
         ToolkitModel.NotarizedTransaction notarizedTransaction,
         byte[] notarizedTransactionBytes,
         CancellationToken token = default
     )
     {
-        var result = await TrackSubmission(submittedTimestamp, notarizedTransaction, notarizedTransactionBytes, token);
+        var result = await TrackSubmission(handlingConfig, submittedTimestamp, notarizedTransaction, notarizedTransactionBytes, token);
         await _observers.ForEachAsync(observer => observer.OnSubmissionTrackedInDatabase(result.AlreadyKnown));
         return result;
     }
@@ -155,6 +157,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
     private record TrackedSubmission(bool AlreadyKnown, PendingTransaction PendingTransaction);
 
     private async Task<TrackedSubmission> TrackSubmission(
+        PendingTransactionHandlingConfig handlingConfig,
         DateTime submittedTimestamp,
         ToolkitModel.NotarizedTransaction notarizedTransaction,
         byte[] notarizedTransactionBytes,
@@ -170,13 +173,11 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
         if (existingPendingTransaction != null)
         {
-            // TODO(David) - avoid updating in this case, to avoid users being able to trigger infinite DB writes which could block the on commit updates
-            existingPendingTransaction.MarkResubmittedToGateway(submittedTimestamp);
-            await _dbContext.SaveChangesAsync(token);
             return new TrackedSubmission(true, existingPendingTransaction);
         }
 
         var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeToGateway(
+            handlingConfig,
             payloadHash,
             notarizedTransaction.IntentHash().AsStr(),
             notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive,

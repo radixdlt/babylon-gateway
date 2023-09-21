@@ -114,13 +114,16 @@ internal class SubmissionService : ISubmissionService
         using var parsedTransaction = await HandlePreSubmissionParseTransaction(transactionBytes);
         await CheckPendingTransactionEpochValidity(ledgerState, parsedTransaction);
 
+        var options = _coreApiIntegrationOptions.CurrentValue;
         var submissionResult = await _submissionTrackingService.ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
             _coreApiHandler.GetTransactionApi(),
             _coreApiHandler.GetNetworkName(),
             _coreApiHandler.GetCoreNodeConnectedTo().Name,
             new PendingTransactionHandlingConfig(
-                _coreApiIntegrationOptions.CurrentValue.MaxSubmissionAttempts,
-                _coreApiIntegrationOptions.CurrentValue.StopResubmittingAfter),
+                options.MaxSubmissionAttempts,
+                options.StopResubmittingAfter,
+                options.BaseDelayBetweenResubmissions,
+                options.ResubmissionDelayBackoffExponent),
             parsedTransaction,
             transactionBytes,
             _coreApiIntegrationOptions.CurrentValue.SubmitTransactionTimeout,

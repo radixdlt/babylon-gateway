@@ -343,7 +343,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     private record PendingTransactionSummary(
         string PayloadHash,
-        PendingTransactionHandlingStatus HandlingStatus,
+        DateTime? ResubmitFromTimestamp,
         string? HandlingStatusReason,
         PendingTransactionPayloadLedgerStatus PayloadStatus,
         PendingTransactionIntentLedgerStatus IntentStatus,
@@ -411,10 +411,10 @@ internal class TransactionQuerier : ITransactionQuerier
                 PendingTransactionPayloadLedgerStatus.TransientlyRejected => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.TemporarilyRejected),
             };
 
-            var handlingStatus = pendingTransactionSummary.HandlingStatus switch
+            var handlingStatus = pendingTransactionSummary.ResubmitFromTimestamp switch
             {
-                PendingTransactionHandlingStatus.Submitting => GatewayModel.TransactionPayloadGatewayHandlingStatus.HandlingSubmission,
-                PendingTransactionHandlingStatus.Concluded => GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
+                not null => GatewayModel.TransactionPayloadGatewayHandlingStatus.HandlingSubmission,
+                null => GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
             };
 
             if (pendingTransactionSummary.IntentStatus.AggregationPriorityAcrossKnownPayloads() >= _mostAccurateIntentLedgerStatus.AggregationPriorityAcrossKnownPayloads())
@@ -537,11 +537,11 @@ internal class TransactionQuerier : ITransactionQuerier
             .Select(pt =>
                 new PendingTransactionSummary(
                     pt.PayloadHash,
-                    pt.GatewayHandling.HandlingStatus,
+                    pt.GatewayHandling.ResubmitFromTimestamp,
                     pt.GatewayHandling.HandlingStatusReason,
                     pt.LedgerDetails.PayloadLedgerStatus,
                     pt.LedgerDetails.IntentLedgerStatus,
-                    pt.LedgerDetails.LastFailureReason,
+                    pt.LedgerDetails.LatestFailureReason,
                     pt.NetworkDetails.LastSubmitErrorTitle
                 )
             )

@@ -225,8 +225,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     "Transaction with payload hash {PayloadHash} which was first submitted to Gateway at {FirstGatewaySubmissionTime} was marked permanently rejected at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
                     pendingTransaction.PayloadHash,
                     pendingTransaction.GatewayHandling.FirstSubmittedToGatewayTimestamp.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LedgerDetails.LastFailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LedgerDetails.LastFailureReason
+                    pendingTransaction.LedgerDetails.LatestFailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.LedgerDetails.LatestFailureReason
                 );
             }
 

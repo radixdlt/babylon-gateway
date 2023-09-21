@@ -71,36 +71,21 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
 public sealed record MempoolOptions
 {
-    [ConfigurationKeyName("ExcludeNodeMempoolsFromUnionIfStaleForSeconds")]
-    public long ExcludeNodeMempoolsFromUnionIfStaleForSeconds { get; set; } = 10;
-
-    public TimeSpan ExcludeNodeMempoolsFromUnionIfStaleFor => TimeSpan.FromSeconds(ExcludeNodeMempoolsFromUnionIfStaleForSeconds);
-
-    // This is designed to give time for:
-    // * The request to be sent (ie the timeout on the submission request should be less than this)
-    // * The MempoolTracker to start seeing the transaction in its mempools (if the mempool is backed up) - as it can
-    //   read in stale data from nodes.
-    // After being marked missing, we still need to wait MinDelayBetweenMissingFromMempoolAndResubmissionSeconds before
-    // we can resubmit.
-    [ConfigurationKeyName("PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds")]
-    public long PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds { get; set; } = 10000;
-
-    public TimeSpan PostSubmissionGracePeriodBeforeCanBeMarkedMissing => TimeSpan.FromMilliseconds(PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds);
-
     [ConfigurationKeyName("ResubmissionNodeRequestTimeoutMilliseconds")]
     public long ResubmissionNodeRequestTimeoutMilliseconds { get; set; } = 4000;
 
     public TimeSpan ResubmissionNodeRequestTimeout => TimeSpan.FromMilliseconds(ResubmissionNodeRequestTimeoutMilliseconds);
 
-    [ConfigurationKeyName("MinDelayBetweenResubmissionsSeconds")]
-    public long MinDelayBetweenResubmissionsSeconds { get; set; } = 10;
+    [ConfigurationKeyName("BaseDelayBetweenResubmissionsSeconds")]
+    public long BaseDelayBetweenResubmissionsSeconds { get; set; } = 10;
 
-    public TimeSpan MinDelayBetweenResubmissions => TimeSpan.FromSeconds(MinDelayBetweenResubmissionsSeconds);
+    public TimeSpan BaseDelayBetweenResubmissions => TimeSpan.FromSeconds(BaseDelayBetweenResubmissionsSeconds);
 
-    [ConfigurationKeyName("MinDelayBetweenMissingFromMempoolAndResubmissionSeconds")]
-    public long MinDelayBetweenMissingFromMempoolAndResubmissionSeconds { get; set; } = 0;
+    [ConfigurationKeyName("ResubmissionDelayBackoffExponent")]
+    public double ResubmissionDelayBackoffExponent { get; set; } = 2;
 
-    public TimeSpan MinDelayBetweenMissingFromMempoolAndResubmission => TimeSpan.FromSeconds(MinDelayBetweenMissingFromMempoolAndResubmissionSeconds);
+    [ConfigurationKeyName("ResubmissionBatchSize")]
+    public int ResubmissionBatchSize { get; set; } = 30;
 
     [ConfigurationKeyName("StopResubmittingAfterSeconds")]
     public long StopResubmittingAfterSeconds { get; set; } = 5 * 60;
@@ -123,11 +108,9 @@ internal class MempoolOptionsValidator : AbstractOptionsValidator<MempoolOptions
 {
     public MempoolOptionsValidator()
     {
-        RuleFor(x => x.ExcludeNodeMempoolsFromUnionIfStaleForSeconds).GreaterThan(0);
-        RuleFor(x => x.PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds).GreaterThanOrEqualTo(0);
         RuleFor(x => x.ResubmissionNodeRequestTimeoutMilliseconds).GreaterThan(0);
-        RuleFor(x => x.MinDelayBetweenResubmissionsSeconds).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.MinDelayBetweenMissingFromMempoolAndResubmissionSeconds).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.BaseDelayBetweenResubmissionsSeconds).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.ResubmissionDelayBackoffExponent).GreaterThan(0);
         RuleFor(x => x.StopResubmittingAfterSeconds).GreaterThanOrEqualTo(0);
         RuleFor(x => x.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds).GreaterThan(0);
         RuleFor(x => x.PruneBatchSize).GreaterThan(0);

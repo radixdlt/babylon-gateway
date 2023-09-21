@@ -124,6 +124,7 @@ internal class PendingTransaction
     public uint VersionControl { get; private set; }
 
     public static PendingTransaction NewAsSubmittedForFirstTimeToGateway(
+        PendingTransactionHandlingConfig handlingConfig,
         string payloadHash,
         string intentHash,
         ulong endEpochExclusive,
@@ -141,8 +142,8 @@ internal class PendingTransaction
                 NotarizedTransactionBlob = notarizedTransaction,
             },
             LedgerDetails = PendingTransactionLedgerDetails.NewUnknown(),
-            GatewayHandling = PendingTransactionGatewayHandling.NewlySubmittedToGateway(timestamp),
-            NetworkDetails = PendingTransactionNetworkDetails.NodeSubmissionPending(timestamp),
+            GatewayHandling = PendingTransactionGatewayHandling.NewlySubmittedToGatewayWithNodeSubmissionPending(timestamp, handlingConfig),
+            NetworkDetails = PendingTransactionNetworkDetails.NewWithNodeSubmissionPending(timestamp),
         };
     }
 
@@ -167,8 +168,8 @@ internal class PendingTransaction
         DateTime markedCommittedAt
     )
     {
-        LedgerDetails.HandleCommited(stateVersion, isSuccess, failureReason, markedCommittedAt);
-        GatewayHandling.MarkAsNoLongerSubmitting("Committed");
+        LedgerDetails.HandleCommitted(stateVersion, isSuccess, failureReason, markedCommittedAt);
+        GatewayHandling.MarkAsNoLongerSubmitting("Concluded as committed");
     }
 
     /// <summary>
@@ -182,15 +183,11 @@ internal class PendingTransaction
         var retired = RetireIfNecessary(handlingConfig, currentTime, currentEpoch);
         if (!retired)
         {
-            NetworkDetails.MarkAsSubmissionPending(currentTime);
+            GatewayHandling.HandleNodeSubmissionPending(currentTime, handlingConfig);
+            NetworkDetails.HandleNodeSubmissionPending(currentTime);
         }
 
         return !retired;
-    }
-
-    public void MarkResubmittedToGateway(DateTime submittedAt)
-    {
-        GatewayHandling.MarkResubmittedToGateway(submittedAt);
     }
 
     /// <summary>
@@ -213,14 +210,14 @@ internal class PendingTransaction
             return true;
         }
 
-        var withinSubmissionCount = NetworkDetails.SubmissionToNodesCount < handlingConfig.MaxSubmissionsBeforeGivingUp;
+        var withinSubmissionCount = GatewayHandling.AttemptedSubmissionToNodesCount < handlingConfig.MaxSubmissionsBeforeGivingUp;
         if (!withinSubmissionCount)
         {
             GatewayHandling.MarkAsNoLongerSubmitting("Concluded due to exceeding max submission to node count");
             return true;
         }
 
-        var withinSubmissionCutoff = currentTime <= (GatewayHandling.LastSubmittedToGatewayTimestamp + handlingConfig.StopResubmittingAfter);
+        var withinSubmissionCutoff = currentTime <= (GatewayHandling.FirstSubmittedToGatewayTimestamp + handlingConfig.StopResubmittingAfter);
         if (!withinSubmissionCutoff)
         {
             GatewayHandling.MarkAsNoLongerSubmitting("Concluded due to exceeding max time since submission to the Gateway");
@@ -300,11 +297,11 @@ internal record PendingTransactionLedgerDetails
     [Column("first_failure_reason")]
     public string? FirstFailureReason { get; private set; }
 
-    [Column("last_failure_reason")]
-    public string? LastFailureReason { get; private set; }
+    [Column("latest_failure_reason")]
+    public string? LatestFailureReason { get; private set; }
 
-    [Column("last_failure_timestamp")]
-    public DateTime? LastFailureTimestamp { get; private set; }
+    [Column("latest_failure_timestamp")]
+    public DateTime? LatestFailureTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the Gateway discovered that the transaction was committed to the DB ledger.
@@ -322,7 +319,7 @@ internal record PendingTransactionLedgerDetails
     {
     }
 
-    public static PendingTransactionLedgerDetails NewUnknown()
+    internal static PendingTransactionLedgerDetails NewUnknown()
     {
         return new PendingTransactionLedgerDetails
         {
@@ -339,8 +336,8 @@ internal record PendingTransactionLedgerDetails
         if (!string.IsNullOrEmpty(failureReason))
         {
             FirstFailureReason ??= failureReason;
-            LastFailureReason = failureReason;
-            LastFailureTimestamp = submitResultAt;
+            LatestFailureReason = failureReason;
+            LatestFailureTimestamp = submitResultAt;
         }
 
         // ReSharper disable once InvertIf - it's clearer like this, not inverted
@@ -351,7 +348,7 @@ internal record PendingTransactionLedgerDetails
         }
     }
 
-    internal void HandleCommited(long stateVersion, bool isSuccess, string? failureReason, DateTime submitResultAt)
+    internal void HandleCommitted(long stateVersion, bool isSuccess, string? failureReason, DateTime submitResultAt)
     {
         if (isSuccess)
         {
@@ -365,10 +362,10 @@ internal record PendingTransactionLedgerDetails
             if (!string.IsNullOrEmpty(failureReason))
             {
                 FirstFailureReason ??= failureReason;
-                LastFailureReason = failureReason;
+                LatestFailureReason = failureReason;
             }
 
-            LastFailureTimestamp = submitResultAt;
+            LatestFailureTimestamp = submitResultAt;
         }
 
         CommitTimestamp = submitResultAt;
@@ -377,19 +374,21 @@ internal record PendingTransactionLedgerDetails
 }
 
 /// <summary>
-/// The part of the PendingTransaction concerning the Gateway's handling of the submission of this transaction to the network.
+/// The part of the PendingTransaction concerning the Gateway's handling of the submission of this transaction to the network,
+/// the presence of the transaction in node mempools, and submission of the transaction to nodes.
 /// </summary>
 [Owned]
 internal record PendingTransactionGatewayHandling
 {
     /// <summary>
-    /// Whether the Gateway is currently trying to submit / resubmit this transaction.
+    /// The timestamp when the transaction can next be resubmitted to nodes.
+    /// If this is null then the Gateway is not trying to resubmit this transaction.
     /// </summary>
-    [Column("handling_status")]
-    public PendingTransactionHandlingStatus HandlingStatus { get; private set; }
+    [Column("resubmit_from_timestamp")]
+    public DateTime? ResubmitFromTimestamp { get; private set; }
 
     /// <summary>
-    /// Additional details as to the current handling status.
+    /// Additional details as to the current handling status, as communicated by the ResubmitFromTimestamp.
     /// </summary>
     [Column("handling_status_reason")]
     public string? HandlingStatusReason { get; private set; }
@@ -400,26 +399,31 @@ internal record PendingTransactionGatewayHandling
     [Column("first_submitted_to_gateway_timestamp")]
     public DateTime FirstSubmittedToGatewayTimestamp { get; private set; }
 
-    /// <summary>
-    /// The timestamp when the transaction was last submitted to a node.
-    /// </summary>
-    [Column("last_submitted_to_gateway_timestamp")]
-    public DateTime LastSubmittedToGatewayTimestamp { get; internal set; }
+    [Column("node_submission_count")]
+    public int AttemptedSubmissionToNodesCount { get; private set; }
 
     private PendingTransactionGatewayHandling()
     {
     }
 
-    internal static PendingTransactionGatewayHandling NewlySubmittedToGateway(
-        DateTime submittedAt
+    internal static PendingTransactionGatewayHandling NewlySubmittedToGatewayWithNodeSubmissionPending(
+        DateTime submittedAt,
+        PendingTransactionHandlingConfig handlingConfig
     )
     {
-        return new PendingTransactionGatewayHandling
+        var handling = new PendingTransactionGatewayHandling
         {
-            HandlingStatus = PendingTransactionHandlingStatus.Submitting,
             FirstSubmittedToGatewayTimestamp = submittedAt,
-            LastSubmittedToGatewayTimestamp = submittedAt,
+            HandlingStatusReason = "Submitting to the network due to being submitted to Gateway",
         };
+        handling.HandleNodeSubmissionPending(submittedAt, handlingConfig);
+        return handling;
+    }
+
+    internal void HandleNodeSubmissionPending(DateTime submittingAt, PendingTransactionHandlingConfig handlingConfig)
+    {
+        ResubmitFromTimestamp = submittingAt + (handlingConfig.BaseTimeBetweenResubmissions * Math.Pow(handlingConfig.ResubmissionDelayBackoffExponent, AttemptedSubmissionToNodesCount));
+        AttemptedSubmissionToNodesCount += 1;
     }
 
     internal void HandleNodeSubmissionResult(
@@ -427,20 +431,14 @@ internal record PendingTransactionGatewayHandling
     {
         if (nodeSubmissionResult.ShouldStopSubmittingPermanently())
         {
-            HandlingStatus = PendingTransactionHandlingStatus.Concluded;
-            HandlingStatusReason = "Due to permanent rejection";
+            MarkAsNoLongerSubmitting("Concluded due to seeing permanent rejection.");
         }
-    }
-
-    internal void MarkResubmittedToGateway(DateTime submittedAt)
-    {
-        LastSubmittedToGatewayTimestamp = submittedAt;
     }
 
     internal void MarkAsNoLongerSubmitting(string reason)
     {
-        HandlingStatus = PendingTransactionHandlingStatus.Concluded;
         HandlingStatusReason = reason;
+        ResubmitFromTimestamp = null;
     }
 }
 
@@ -451,25 +449,19 @@ internal record PendingTransactionGatewayHandling
 internal record PendingTransactionNetworkDetails
 {
     /// <summary>
-    /// The current best knowledge about whether the transactions is in mempools of nodes the Gateway knows about.
+    /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
-    [Column("mempool_status")]
-    public PendingTransactionMempoolStatus MempoolStatus { get; internal set; }
-
-    [Column("node_submission_count")]
-    public int SubmissionToNodesCount { get; private set; }
+    [Column("latest_node_submission_timestamp")]
+    public DateTime? LatestNodeSubmissionTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
-    [Column("last_node_submission_timestamp")]
-    public DateTime? LastNodeSubmissionTimestamp { get; private set; }
+    [Column("latest_submitted_to_node_name")]
+    public string? LatestSubmittedToNodeName { get; private set; }
 
-    /// <summary>
-    /// The timestamp when the transaction was last submitted to a node.
-    /// </summary>
-    [Column("last_submitted_to_node_name")]
-    public string? LastSubmittedToNodeName { get; private set; }
+    [Column("latest_node_submission_was_accepted")]
+    public bool LatestNodeSubmissionWasAccepted { get; private set; }
 
     /// <summary>
     /// The last error when submitting to a node - eg mempool full.
@@ -477,109 +469,28 @@ internal record PendingTransactionNetworkDetails
     [Column("last_submit_error")]
     public string? LastSubmitErrorTitle { get; private set; }
 
-    /// <summary>
-    /// The timestamp when the transaction was first seen in a node's mempool.
-    /// </summary>
-    [Column("first_seen_in_mempool_timestamp")]
-    public DateTime? FirstSeenInMempoolTimestamp { get; private set; }
-
-    /// <summary>
-    /// The timestamp when the transaction was last changed to a MISSING state.
-    /// </summary>
-    [Column("last_missing_from_mempool_timestamp")]
-    public DateTime? LastDroppedOutOfMempoolTimestamp { get; private set; }
-
     private PendingTransactionNetworkDetails()
     {
     }
 
-    public static PendingTransactionNetworkDetails NodeSubmissionPending(DateTime currentTime)
+    internal static PendingTransactionNetworkDetails NewWithNodeSubmissionPending(DateTime currentTime)
     {
-        return new PendingTransactionNetworkDetails
-        {
-            MempoolStatus = PendingTransactionMempoolStatus.SubmissionPending,
-            LastNodeSubmissionTimestamp = currentTime,
-        };
+        var details = new PendingTransactionNetworkDetails();
+        details.HandleNodeSubmissionPending(currentTime);
+        return details;
     }
 
-    public static PendingTransactionNetworkDetails NewFirstSeenInMempool(DateTime firstSeenAt)
+    internal void HandleNodeSubmissionPending(DateTime timestamp)
     {
-        return new PendingTransactionNetworkDetails
-        {
-            MempoolStatus = PendingTransactionMempoolStatus.InNodeMempool,
-            FirstSeenInMempoolTimestamp = firstSeenAt,
-        };
+        LatestNodeSubmissionTimestamp = timestamp;
     }
 
     internal void HandleNodeSubmissionResult(
         string submittedToNodeName,
         NodeSubmissionResult nodeSubmissionResult)
     {
-        if (nodeSubmissionResult is NodeSubmissionResult.AcceptedIntoMempool)
-        {
-            MempoolStatus = PendingTransactionMempoolStatus.InNodeMempool;
-        }
-
+        LatestNodeSubmissionWasAccepted = nodeSubmissionResult is NodeSubmissionResult.AcceptedIntoMempool;
         LastSubmitErrorTitle ??= nodeSubmissionResult.GetApiSubmitErrorTitle();
-        LastSubmittedToNodeName = submittedToNodeName;
-        SubmissionToNodesCount += 1;
+        LatestSubmittedToNodeName = submittedToNodeName;
     }
-
-    public void MarkAsSubmissionPending(DateTime timestamp)
-    {
-        MempoolStatus = PendingTransactionMempoolStatus.SubmissionPending;
-        LastNodeSubmissionTimestamp = timestamp;
-    }
-
-    public void MarkAsMissingFromKnownMempools(DateTime timestamp)
-    {
-        MempoolStatus = PendingTransactionMempoolStatus.MissingFromKnownMempools;
-        LastDroppedOutOfMempoolTimestamp = timestamp;
-    }
-
-    public void MarkAsSeenInAMempool(DateTime timestamp)
-    {
-        MempoolStatus = PendingTransactionMempoolStatus.InNodeMempool;
-        FirstSeenInMempoolTimestamp ??= timestamp;
-    }
-}
-
-/// <summary>
-/// Tracks the submission status of the transaction, as part of managing the Gateway's resubmission capability.
-/// </summary>
-public enum PendingTransactionMempoolStatus
-{
-    /// <summary>
-    /// We have stored the transaction, but have yet to submit it to a node mempool.
-    /// </summary>
-    SubmissionPending,
-
-    /// <summary>
-    /// We believe the transaction is in at least one node mempool, or at least has entered one.
-    /// </summary>
-    InNodeMempool,
-
-    /// <summary>
-    /// A transaction which at last check, was not in any node mempool.
-    /// But was previously either InNodeMempool or in SubmissionPending but the post-submission grace period has passed.
-    ///
-    /// As such, it is potentially ready for resubmission.
-    /// </summary>
-    MissingFromKnownMempools,
-}
-
-/// <summary>
-/// Tracks the submission status of the transaction, as part of managing the Gateway's resubmission capability.
-/// </summary>
-public enum PendingTransactionHandlingStatus
-{
-    /// <summary>
-    /// The Gateway is currently attempting to submit / resubmit this transaction to the network, on behalf of the client who submitted their transaction to the Gateway.
-    /// </summary>
-    Submitting,
-
-    /// <summary>
-    /// The Gateway is not submitting this transaction - or not submitting it any more.
-    /// </summary>
-    Concluded,
 }

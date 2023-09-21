@@ -126,13 +126,11 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        const int BatchSize = 30;
-
         var instantForTransactionChoosing = _clock.UtcNow;
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
-        var handlingConfig = new PendingTransactionHandlingConfig(mempoolConfiguration.MaxSubmissionAttempts, mempoolConfiguration.StopResubmittingAfter);
+        var handlingConfig = new PendingTransactionHandlingConfig(mempoolConfiguration.MaxSubmissionAttempts, mempoolConfiguration.StopResubmittingAfter, mempoolConfiguration.BaseDelayBetweenResubmissions, mempoolConfiguration.ResubmissionDelayBackoffExponent);
 
-        var transactionsToResubmit = await SelectTransactionsToResubmit(dbContext, instantForTransactionChoosing, mempoolConfiguration, BatchSize, token);
+        var transactionsToResubmit = await SelectTransactionsToResubmit(dbContext, instantForTransactionChoosing, mempoolConfiguration.ResubmissionBatchSize, token);
 
         var submittedAt = _clock.UtcNow;
         var currentEpoch = await GetCurrentEpoch(token);
@@ -161,21 +159,20 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private async Task<List<PendingTransaction>> SelectTransactionsToResubmit(
         ReadWriteDbContext dbContext,
         DateTime instantForTransactionChoosing,
-        MempoolOptions mempoolOptions,
         int batchSize,
         CancellationToken token
     )
     {
         var transactionsToResubmit =
-            await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
-                .OrderBy(mt => mt.NetworkDetails.LastNodeSubmissionTimestamp)
+            await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, dbContext)
+                .OrderBy(mt => mt.GatewayHandling.ResubmitFromTimestamp)
                 .Include(t => t.Payload)
                 .Take(batchSize)
                 .ToListAsync(token);
 
         var totalTransactionsNeedingResubmission = transactionsToResubmit.Count < batchSize
             ? transactionsToResubmit.Count
-            : await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
+            : await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, dbContext)
                 .CountAsync(token);
 
         await _observers.ForEachAsync(x => x.ObserveResubmissionQueueSize(totalTransactionsNeedingResubmission));
@@ -232,19 +229,11 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
     private record PendingTransactionWithChosenNode(PendingTransaction PendingTransaction, CoreApiNode Node);
 
-    private IQueryable<PendingTransaction> GetPendingTransactionsNeedingResubmission(DateTime currentTimestamp, MempoolOptions mempoolOptions, ReadWriteDbContext dbContext)
+    private IQueryable<PendingTransaction> GetPendingTransactionsNeedingResubmission(DateTime currentTimestamp, ReadWriteDbContext dbContext)
     {
-        var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolOptions.MinDelayBetweenResubmissions;
-        var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolOptions.MinDelayBetweenMissingFromMempoolAndResubmission;
-
         return dbContext.PendingTransactions
             .Where(mt =>
-                mt.GatewayHandling.HandlingStatus == PendingTransactionHandlingStatus.Submitting
-                && (
-                    mt.NetworkDetails.MempoolStatus == PendingTransactionMempoolStatus.MissingFromKnownMempools
-                    || mt.NetworkDetails.MempoolStatus == PendingTransactionMempoolStatus.SubmissionPending)
-                && (mt.NetworkDetails.LastDroppedOutOfMempoolTimestamp == null || mt.NetworkDetails.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore)
-                && (mt.NetworkDetails.LastNodeSubmissionTimestamp == null || mt.NetworkDetails.LastNodeSubmissionTimestamp!.Value < allowResubmissionIfLastSubmittedBefore)
+                mt.GatewayHandling.ResubmitFromTimestamp != null && mt.GatewayHandling.ResubmitFromTimestamp < currentTimestamp
             );
     }
 

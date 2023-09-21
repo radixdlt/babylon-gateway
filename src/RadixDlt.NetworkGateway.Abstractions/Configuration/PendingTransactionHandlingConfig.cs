@@ -66,4 +66,4 @@ using System;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
-public record PendingTransactionHandlingConfig(int MaxSubmissionsBeforeGivingUp, TimeSpan StopResubmittingAfter);
+public record PendingTransactionHandlingConfig(int MaxSubmissionsBeforeGivingUp, TimeSpan StopResubmittingAfter, TimeSpan BaseTimeBetweenResubmissions, double ResubmissionDelayBackoffExponent);

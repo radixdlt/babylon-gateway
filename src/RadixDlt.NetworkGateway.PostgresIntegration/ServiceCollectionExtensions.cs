@@ -113,8 +113,6 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<PackageVmType>();
                 dataSourceBuilder.MapEnum<PendingTransactionPayloadLedgerStatus>();
                 dataSourceBuilder.MapEnum<PendingTransactionIntentLedgerStatus>();
-                dataSourceBuilder.MapEnum<PendingTransactionMempoolStatus>();
-                dataSourceBuilder.MapEnum<PendingTransactionHandlingStatus>();
                 dataSourceBuilder.MapEnum<PublicKeyType>();
                 dataSourceBuilder.MapEnum<ResourceType>();
                 dataSourceBuilder.MapEnum<ModuleId>();

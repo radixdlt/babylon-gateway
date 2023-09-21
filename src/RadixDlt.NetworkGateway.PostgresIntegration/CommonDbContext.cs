@@ -167,8 +167,6 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<PackageVmType>();
         modelBuilder.HasPostgresEnum<PendingTransactionPayloadLedgerStatus>();
         modelBuilder.HasPostgresEnum<PendingTransactionIntentLedgerStatus>();
-        modelBuilder.HasPostgresEnum<PendingTransactionMempoolStatus>();
-        modelBuilder.HasPostgresEnum<PendingTransactionHandlingStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
         modelBuilder.HasPostgresEnum<ModuleId>();
@@ -271,36 +269,15 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
     {
-        // These together need to handle the following queries:
+        // The following indices cover the following queries:
         // - LedgerExtenderService:
         //   > MarkCommitted: Lookup by PayloadHash + PayloadStatus
-        // - TrackerService:
-        //   > MarkAsMissing: HandlingStatus == Submitting && MempoolStatus == InNodeMempool && PayloadHash NOT in list && More than grace period since LastNodeSubmissionTimestamp
-        //   > NewlyDiscovered: PayloadHash
         // - ResubmissionService:
-        //   > ForResubmitting: HandlingStatus == Submitting && MempoolStatus == (MissingFromKnownMempools || Submitting) && LastDroppedOutOfMempoolTimestamp < X && LastNodeSubmissionTimestamp < Y
+        //   > ForResubmitting: ResubmitFromTimestamp < T
         // - PrunerService:
-        //   > PruneIf: LastSubmittedToGatewayTimestamp < pruneIfLastGatewaySubmissionBefore
+        //   > PruneIf: FirstSubmittedToGatewayTimestamp < pruneIfLastGatewaySubmissionBefore
         // - TransactionStatusAPI:
         //   > Lookup by intent
-        //
-        // The following indices make all these queries performant.
-
-        // First - create index on NetworkDetails.MempoolStatus (where HandlingStatus = Submitting)
-        modelBuilder
-            .Entity<PendingTransaction>()
-            .OwnsOne(
-                pt => pt.NetworkDetails,
-                builder =>
-                {
-                    // Create shadow-property as per comment here: https://github.com/dotnet/efcore/issues/11336#issuecomment-389670812
-                    builder.Property<PendingTransactionHandlingStatus>("HandlingStatus")
-                        .HasColumnName("handling_status");
-
-                    builder.HasIndex(networkDetails => networkDetails.MempoolStatus)
-                        .HasFilter($"handling_status = '{PendingTransactionHandlingStatus.Submitting.ToString().ToLowerInvariant()}'");
-                }
-            );
 
         modelBuilder
             .Entity<PendingTransaction>()
@@ -308,7 +285,8 @@ internal abstract class CommonDbContext : DbContext
                 pt => pt.GatewayHandling,
                 builder =>
                 {
-                    builder.HasIndex(gatewayHandling => gatewayHandling.LastSubmittedToGatewayTimestamp);
+                    builder.HasIndex(gatewayHandling => gatewayHandling.ResubmitFromTimestamp);
+                    builder.HasIndex(gatewayHandling => gatewayHandling.FirstSubmittedToGatewayTimestamp);
                 }
             );
 
