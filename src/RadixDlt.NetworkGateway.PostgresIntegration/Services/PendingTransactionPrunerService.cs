@@ -123,12 +123,12 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
 
         // Change to ExecuteDeleteAsync when EFCore fixes this bug: https://github.com/dotnet/efcore/issues/29690#issuecomment-1726182209
         var prunedTransactionCount = await dbContext.Database
-            .ExecuteSqlInterpolatedAsync($@"
+            .ExecuteSqlInterpolatedAsync(
+                $@"
 DELETE FROM pending_transactions
     WHERE first_submitted_to_gateway_timestamp < {pruneIfLastGatewaySubmissionBefore}
-    ORDER BY first_submitted_to_gateway_timestamp ASC
-    LIMIT {mempoolConfiguration.PruneBatchSize}
-");
+",
+                token);
 
         if (prunedTransactionCount > 0)
         {

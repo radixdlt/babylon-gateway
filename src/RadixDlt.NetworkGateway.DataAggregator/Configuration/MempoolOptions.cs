@@ -99,9 +99,6 @@ public sealed record MempoolOptions
     public long PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
 
     public TimeSpan PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission => TimeSpan.FromSeconds(PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds);
-
-    [ConfigurationKeyName("PruneBatchSize")]
-    public int PruneBatchSize { get; set; } = 10000;
 }
 
 internal class MempoolOptionsValidator : AbstractOptionsValidator<MempoolOptions>
@@ -113,6 +110,5 @@ internal class MempoolOptionsValidator : AbstractOptionsValidator<MempoolOptions
         RuleFor(x => x.ResubmissionDelayBackoffExponent).GreaterThan(0);
         RuleFor(x => x.StopResubmittingAfterSeconds).GreaterThanOrEqualTo(0);
         RuleFor(x => x.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds).GreaterThan(0);
-        RuleFor(x => x.PruneBatchSize).GreaterThan(0);
     }
 }
