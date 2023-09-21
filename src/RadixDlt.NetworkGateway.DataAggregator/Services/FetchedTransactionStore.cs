@@ -201,7 +201,7 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
             .DefaultIfEmpty(0)
             .Max(x => x);
 
-        return Math.Max(lastKnownStateVersion, lastCommittedStateVersion + 1);
+        return Math.Max(lastKnownStateVersion + 1, lastCommittedStateVersion + 1);
     }
 
     private ConcurrentDictionary<long, CommittedTransactionWithSize> GetTransactionsStoreForNode(string nodeName)
