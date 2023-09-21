@@ -96,7 +96,6 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<IAggregatorHealthCheckObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<ISystemStatusServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INodeInitializerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
-            .AddSingleton<IMempoolTrackerServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INodeTransactionLogWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INodeMempoolTransactionHashesReaderWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<ILedgerExtenderServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())

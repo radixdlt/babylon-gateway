@@ -87,7 +87,6 @@ internal class DataAggregatorMetricsObserver :
     IAggregatorHealthCheckObserver,
     ISystemStatusServiceObserver,
     INodeInitializerObserver,
-    IMempoolTrackerServiceObserver,
     INodeTransactionLogWorkerObserver,
     INodeMempoolTransactionHashesReaderWorkerObserver,
     ILedgerExtenderServiceObserver,
@@ -249,24 +248,6 @@ internal class DataAggregatorMetricsObserver :
             "ng_workers_node_initializers_error_count",
             "Number of errors in node initializers.",
             new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
-        );
-
-    private static readonly Gauge _combinedMempoolCurrentSizeTotal = Metrics
-        .CreateGauge(
-            "ng_node_mempool_combined_current_size_total",
-            "Number of transactions seen currently in any node mempool."
-        );
-
-    private static readonly Counter _dbTransactionsMarkedAsMissingCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_as_missing_count",
-            "Number of mempool transactions in the DB marked as missing"
-        );
-
-    private static readonly Counter _dbTransactionsReappearedCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_reappeared_count",
-            "Number of mempool transactions in the DB which were marked as missing but now appear in a mempool again"
         );
 
     private static readonly Counter _failedFetchLoopsUnlabeled = Metrics
@@ -490,21 +471,6 @@ internal class DataAggregatorMetricsObserver :
     {
         var errorType = isStopRequested && exception is OperationCanceledException ? "stopped" : "faulting";
         _nodeInitializersErrorsCount.WithLabels(GetType().Name, nodeName, exception.GetNameForMetricsOrLogging(), errorType).Inc();
-    }
-
-    void IMempoolTrackerServiceObserver.CombinedMempoolCurrentSizeCount(int count)
-    {
-        _combinedMempoolCurrentSizeTotal.Set(count);
-    }
-
-    void IMempoolTrackerServiceObserver.TransactionsReappearedCount(int count)
-    {
-        _dbTransactionsReappearedCount.Inc(count);
-    }
-
-    void IMempoolTrackerServiceObserver.TransactionsMarkedAsMissing()
-    {
-        _dbTransactionsMarkedAsMissingCount.Inc();
     }
 
     ValueTask INodeTransactionLogWorkerObserver.DoWorkFailed(string nodeName, Exception exception)
