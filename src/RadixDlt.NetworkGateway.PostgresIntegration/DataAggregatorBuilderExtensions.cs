@@ -103,11 +103,6 @@ public static class DataAggregatorBuilderExtensions
             .AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
             {
                 options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);
-            })
-            .AddNpgsqlDataSourceHolder<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)
-            .AddDbContextFactory<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadOnlyDbContext>>().NpgsqlDataSource);
             });
 
         return builder;
