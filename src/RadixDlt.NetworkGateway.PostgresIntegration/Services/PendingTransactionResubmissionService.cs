@@ -241,10 +241,10 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
             .Where(mt =>
                 mt.GatewayHandling.HandlingStatus == PendingTransactionHandlingStatus.Submitting
                 && (
-                    mt.MempoolStatus == PendingTransactionMempoolStatus.MissingFromKnownMempools
-                    || mt.MempoolStatus == PendingTransactionMempoolStatus.SubmissionPending)
-                && (mt.NetworkDetails.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore)
-                && (mt.NetworkDetails.LastNodeSubmissionTimestamp!.Value < allowResubmissionIfLastSubmittedBefore)
+                    mt.NetworkDetails.MempoolStatus == PendingTransactionMempoolStatus.MissingFromKnownMempools
+                    || mt.NetworkDetails.MempoolStatus == PendingTransactionMempoolStatus.SubmissionPending)
+                && (mt.NetworkDetails.LastDroppedOutOfMempoolTimestamp == null || mt.NetworkDetails.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore)
+                && (mt.NetworkDetails.LastNodeSubmissionTimestamp == null || mt.NetworkDetails.LastNodeSubmissionTimestamp!.Value < allowResubmissionIfLastSubmittedBefore)
             );
     }
 
@@ -291,7 +291,8 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
                 TransactionApi: coreApiProvider.TransactionsApi,
                 NetworkName: _networkConfigurationProvider.GetNetworkName(),
                 SubmissionTimeout: _mempoolOptionsMonitor.CurrentValue.ResubmissionNodeRequestTimeout,
-                IsResubmission: false),
+                IsResubmission: true,
+                ForceNodeToRecalculateResult: true),
             notarizedTransaction,
             _observers,
             cancellationToken

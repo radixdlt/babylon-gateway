@@ -183,7 +183,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
         var reappearedTransactions = await dbContext
             .PendingTransactions
             .Where(mt => pendingTransactionIds.Contains(mt.PayloadHash))
-            .Where(mt => mt.MempoolStatus == PendingTransactionMempoolStatus.MissingFromKnownMempools)
+            .Where(mt => mt.NetworkDetails.MempoolStatus == PendingTransactionMempoolStatus.MissingFromKnownMempools)
             .ToListAsync(token);
 
         if (reappearedTransactions.Count == 0)
@@ -228,7 +228,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             .PendingTransactions
             .Where(pt =>
                 pt.GatewayHandling.HandlingStatus == PendingTransactionHandlingStatus.Submitting
-                && pt.MempoolStatus == PendingTransactionMempoolStatus.InNodeMempool
+                && pt.NetworkDetails.MempoolStatus == PendingTransactionMempoolStatus.InNodeMempool
                 && (
                     pt.NetworkDetails.LastNodeSubmissionTimestamp == null
                     || pt.NetworkDetails.LastNodeSubmissionTimestamp < submissionGracePeriodCutOff

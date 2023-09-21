@@ -123,34 +123,6 @@ internal class PendingTransaction
     [Timestamp]
     public uint VersionControl { get; private set; }
 
-    /// <summary>
-    /// This should really be read through NetworkDetails, but has to be exposed in this parent in order for EF Core to
-    /// allow this field to be indexed.
-    /// </summary>
-    [Column("mempool_status")]
-    public PendingTransactionMempoolStatus MempoolStatus
-    {
-        get => NetworkDetails.MempoolStatus;
-        set
-        {
-            NetworkDetails.MempoolStatus = value;
-        }
-    }
-
-    /// <summary>
-    /// This should really be read through GatewayHandling, but has to be exposed in this parent in order for EF Core to
-    /// allow this field to be indexed.
-    /// </summary>
-    [Column("last_submitted_to_gateway_timestamp")]
-    public DateTime LastSubmittedToGatewayTimestamp
-    {
-        get => GatewayHandling.LastSubmittedToGatewayTimestamp;
-        set
-        {
-            GatewayHandling.LastSubmittedToGatewayTimestamp = value;
-        }
-    }
-
     public static PendingTransaction NewAsSubmittedForFirstTimeToGateway(
         string payloadHash,
         string intentHash,
@@ -231,27 +203,27 @@ internal class PendingTransaction
     {
         if (LedgerDetails.PayloadLedgerStatus.ShouldStopSubmittingTransactionToNetwork())
         {
-            GatewayHandling.MarkAsNoLongerSubmitting("Due to resolved ledger status");
+            GatewayHandling.MarkAsNoLongerSubmitting($"Concluded due to PayloadLedgerStatus of {LedgerDetails.PayloadLedgerStatus}");
             return true;
         }
 
         if (currentEpoch >= EndEpochExclusive)
         {
-            GatewayHandling.MarkAsNoLongerSubmitting("End epoch reached");
+            GatewayHandling.MarkAsNoLongerSubmitting("Concluded due to its end epoch being reached");
             return true;
         }
 
         var withinSubmissionCount = NetworkDetails.SubmissionToNodesCount < handlingConfig.MaxSubmissionsBeforeGivingUp;
         if (!withinSubmissionCount)
         {
-            GatewayHandling.MarkAsNoLongerSubmitting("Due to exceeding max submission to node count");
+            GatewayHandling.MarkAsNoLongerSubmitting("Concluded due to exceeding max submission to node count");
             return true;
         }
 
         var withinSubmissionCutoff = currentTime <= (GatewayHandling.LastSubmittedToGatewayTimestamp + handlingConfig.StopResubmittingAfter);
         if (!withinSubmissionCutoff)
         {
-            GatewayHandling.MarkAsNoLongerSubmitting("Due to exceeding max time since submission to the Gateway");
+            GatewayHandling.MarkAsNoLongerSubmitting("Concluded due to exceeding max time since submission to the Gateway");
             return true;
         }
 
@@ -431,11 +403,7 @@ internal record PendingTransactionGatewayHandling
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
-    /// <remarks>
-    /// For EF Core reasons (specifically the need to use this field in an index), please use
-    /// LastSubmittedToGatewayTimestamp on the parent PendingTransaction when writing EF Core transactions.
-    /// </remarks>
-    [NotMapped]
+    [Column("last_submitted_to_gateway_timestamp")]
     public DateTime LastSubmittedToGatewayTimestamp { get; internal set; }
 
     private PendingTransactionGatewayHandling()
@@ -485,11 +453,7 @@ internal record PendingTransactionNetworkDetails
     /// <summary>
     /// The current best knowledge about whether the transactions is in mempools of nodes the Gateway knows about.
     /// </summary>
-    /// <remarks>
-    /// For EF Core reasons (specifically the need to use this field in an index), please use MempoolStatus
-    /// on the parent PendingTransaction when writing EF Core transactions.
-    /// </remarks>
-    [NotMapped]
+    [Column("mempool_status")]
     public PendingTransactionMempoolStatus MempoolStatus { get; internal set; }
 
     [Column("node_submission_count")]

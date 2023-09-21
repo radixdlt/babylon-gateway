@@ -104,7 +104,8 @@ public class TransactionSubmitter
                 submitContext.TransactionApi.TransactionSubmitPostAsync(
                     new CoreModel.TransactionSubmitRequest(
                         network: submitContext.NetworkName,
-                        notarizedTransactionHex: notarizedTransaction.ToHex()
+                        notarizedTransactionHex: notarizedTransaction.ToHex(),
+                        forceRecalculate: submitContext.ForceNodeToRecalculateResult
                     ),
                     cancellationToken
                 ));
@@ -271,4 +272,5 @@ public record SubmitContext(
     CoreApi.TransactionApi TransactionApi,
     string NetworkName,
     TimeSpan SubmissionTimeout,
-    bool IsResubmission);
+    bool IsResubmission,
+    bool ForceNodeToRecalculateResult);

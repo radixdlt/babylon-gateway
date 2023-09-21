@@ -355,9 +355,9 @@ internal class TransactionQuerier : ITransactionQuerier
         private readonly GatewayModel.LedgerState _ledgerState;
         private readonly string? _committedPayloadHash;
         private readonly long? _committedStateVersion;
-        private List<GatewayModel.TransactionStatusResponseKnownPayloadItem> _knownPayloads = new();
+        private readonly List<GatewayModel.TransactionStatusResponseKnownPayloadItem> _knownPayloads = new();
         private PendingTransactionIntentLedgerStatus _mostAccurateIntentLedgerStatus = PendingTransactionIntentLedgerStatus.Unknown;
-        private string? _errorMessageForMostAccurateIntentLedgerStatus = null;
+        private string? _errorMessageForMostAccurateIntentLedgerStatus;
 
         internal PendingTransactionResponseAggregator(GatewayModel.LedgerState ledgerState, CommittedTransactionSummary? committedTransactionSummary)
         {
@@ -380,16 +380,16 @@ internal class TransactionQuerier : ITransactionQuerier
             _mostAccurateIntentLedgerStatus = intentStatus;
             _errorMessageForMostAccurateIntentLedgerStatus = committedTransactionSummary.ErrorMessage;
 
-            _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem
-            {
-                PayloadHash = committedTransactionSummary.PayloadHash,
-                Status = legacyStatus,
-                PayloadStatus = payloadStatus,
-                PayloadStatusDescription = GetPayloadStatusDescription(payloadStatus),
-                HandlingStatus = GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
-                HandlingStatusReason = "The transaction is committed",
-                ErrorMessage = committedTransactionSummary.ErrorMessage,
-            });
+            _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
+                payloadHash: committedTransactionSummary.PayloadHash,
+                status: legacyStatus,
+                payloadStatus: payloadStatus,
+                payloadStatusDescription: GetPayloadStatusDescription(payloadStatus),
+                errorMessage: committedTransactionSummary.ErrorMessage,
+                handlingStatus: GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
+                handlingStatusReason: "The transaction is committed",
+                submissionError: null
+            ));
         }
 
         internal void AddPendingTransaction(PendingTransactionSummary pendingTransactionSummary)
@@ -423,17 +423,16 @@ internal class TransactionQuerier : ITransactionQuerier
                 _errorMessageForMostAccurateIntentLedgerStatus = pendingTransactionSummary.ExecutionErrorMessage;
             }
 
-            _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem
-            {
-                PayloadHash = pendingTransactionSummary.PayloadHash,
-                Status = legacyStatus,
-                PayloadStatus = payloadStatus,
-                PayloadStatusDescription = GetPayloadStatusDescription(payloadStatus),
-                ErrorMessage = pendingTransactionSummary.ExecutionErrorMessage,
-                HandlingStatus = handlingStatus,
-                HandlingStatusReason = pendingTransactionSummary.HandlingStatusReason,
-                SubmissionError = pendingTransactionSummary.LastSubmissionError,
-            });
+            _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
+                payloadHash: pendingTransactionSummary.PayloadHash,
+                status: legacyStatus,
+                payloadStatus: payloadStatus,
+                payloadStatusDescription: GetPayloadStatusDescription(payloadStatus),
+                errorMessage: pendingTransactionSummary.ExecutionErrorMessage,
+                handlingStatus: handlingStatus,
+                handlingStatusReason: pendingTransactionSummary.HandlingStatusReason,
+                submissionError: pendingTransactionSummary.LastSubmissionError
+            ));
         }
 
         internal GatewayModel.TransactionStatusResponse IntoResponse()
@@ -449,16 +448,15 @@ internal class TransactionQuerier : ITransactionQuerier
                 PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection),
             };
 
-            return new GatewayModel.TransactionStatusResponse
-            {
-                LedgerState = _ledgerState,
-                Status = legacyIntentStatus,
-                IntentStatus = intentStatus,
-                IntentStatusDescription = GetIntentStatusDescription(intentStatus),
-                KnownPayloads = _knownPayloads,
-                CommittedStateVersion = _committedStateVersion,
-                ErrorMessage = _errorMessageForMostAccurateIntentLedgerStatus,
-            };
+            return new GatewayModel.TransactionStatusResponse(
+                ledgerState: _ledgerState,
+                status: legacyIntentStatus,
+                intentStatus: intentStatus,
+                intentStatusDescription: GetIntentStatusDescription(intentStatus),
+                knownPayloads: _knownPayloads,
+                committedStateVersion: _committedStateVersion,
+                errorMessage: _errorMessageForMostAccurateIntentLedgerStatus
+            );
         }
 
         private string GetPayloadStatusDescription(GatewayModel.TransactionPayloadStatus payloadStatus)
@@ -474,9 +472,9 @@ internal class TransactionQuerier : ITransactionQuerier
                 GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown =>
                     "This particular payload for this transaction has been committed to the ledger, but the Gateway is still waiting for further details about its result.",
                 GatewayModel.TransactionPayloadStatus.PermanentlyRejected =>
-                    "This particular payload for this transaction has been permanently rejected. See the ErrorMessage field for details. It is not possible for this particular transaction payload to be committed to this network.",
+                    "This particular payload for this transaction has been permanently rejected. It is not possible for this particular transaction payload to be committed to this network.",
                 GatewayModel.TransactionPayloadStatus.TemporarilyRejected =>
-                    "This particular payload for this transaction was rejected at its last execution. See the ErrorMessage field for details. It may still be possible for this transaction payload to be committed to this network.",
+                    "This particular payload for this transaction was rejected at its last execution. It may still be possible for this transaction payload to be committed to this network.",
                 GatewayModel.TransactionPayloadStatus.Pending =>
                     "This particular payload for this transaction has been accepted into a node's mempool on the network. It's possible but not certain that it will be committed to this network.",
             };
@@ -534,6 +532,7 @@ internal class TransactionQuerier : ITransactionQuerier
         return await _rwDbContext
             .PendingTransactions
             .Where(pt => pt.IntentHash == intentHash)
+            .OrderBy(pt => pt.GatewayHandling.FirstSubmittedToGatewayTimestamp)
             .Take(100) // Limit this just in case
             .Select(pt =>
                 new PendingTransactionSummary(

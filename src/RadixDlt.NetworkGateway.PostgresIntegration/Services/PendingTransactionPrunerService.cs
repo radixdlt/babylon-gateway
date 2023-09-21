@@ -109,7 +109,7 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
 
         Expression<Func<PendingTransaction, bool>> canPruneExpression = t =>
             /* Prune if it was submitted a while ago */
-            t.LastSubmittedToGatewayTimestamp < pruneIfLastGatewaySubmissionBefore;
+            t.GatewayHandling.LastSubmittedToGatewayTimestamp < pruneIfLastGatewaySubmissionBefore;
 
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 

@@ -285,14 +285,32 @@ internal abstract class CommonDbContext : DbContext
         //   > Lookup by intent
         //
         // The following indices make all these queries performant.
+
+        // First - create index on NetworkDetails.MempoolStatus (where HandlingStatus = Submitting)
         modelBuilder
             .Entity<PendingTransaction>()
-            .HasIndex(pt => pt.MempoolStatus)
-            .HasFilter($"handling_status = '{PendingTransactionHandlingStatus.Submitting.ToString().ToLowerInvariant()}'");
+            .OwnsOne(
+                pt => pt.NetworkDetails,
+                builder =>
+                {
+                    // Create shadow-property as per comment here: https://github.com/dotnet/efcore/issues/11336#issuecomment-389670812
+                    builder.Property<PendingTransactionHandlingStatus>("HandlingStatus")
+                        .HasColumnName("handling_status");
+
+                    builder.HasIndex(networkDetails => networkDetails.MempoolStatus)
+                        .HasFilter($"handling_status = '{PendingTransactionHandlingStatus.Submitting.ToString().ToLowerInvariant()}'");
+                }
+            );
 
         modelBuilder
             .Entity<PendingTransaction>()
-            .HasIndex(pt => pt.LastSubmittedToGatewayTimestamp);
+            .OwnsOne(
+                pt => pt.GatewayHandling,
+                builder =>
+                {
+                    builder.HasIndex(gatewayHandling => gatewayHandling.LastSubmittedToGatewayTimestamp);
+                }
+            );
 
         modelBuilder
             .Entity<PendingTransaction>()
