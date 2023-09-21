@@ -70,4 +70,6 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 public interface ITopOfLedgerProvider
 {
     Task<TransactionSummary> GetTopOfLedger(CancellationToken token);
+
+    Task<long> GetLastCommittedStateVersion(CancellationToken token);
 }
