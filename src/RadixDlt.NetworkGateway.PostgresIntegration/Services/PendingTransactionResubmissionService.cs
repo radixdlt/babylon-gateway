@@ -67,14 +67,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
@@ -95,8 +96,9 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IClock _clock;
-    private readonly IEnumerable<IPendingTransactionResubmissionServiceObserver> _observers;
-    private readonly ILogger _logger;
+    private readonly IReadOnlyCollection<IPendingTransactionResubmissionServiceObserver> _observers;
+    private readonly ITopOfLedgerCache _topOfLedgerCache;
+    private readonly ILogger<PendingTransactionResubmissionService> _logger;
 
     public PendingTransactionResubmissionService(
         IServiceProvider services,
@@ -106,6 +108,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         INetworkConfigurationProvider networkConfigurationProvider,
         IClock clock,
         IEnumerable<IPendingTransactionResubmissionServiceObserver> observers,
+        ITopOfLedgerCache topOfLedgerCache,
         ILogger<PendingTransactionResubmissionService> logger)
     {
         _services = services;
@@ -114,7 +117,8 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _networkConfigurationProvider = networkConfigurationProvider;
         _clock = clock;
-        _observers = observers;
+        _observers = observers.ToArray();
+        _topOfLedgerCache = topOfLedgerCache;
         _logger = logger;
     }
 
@@ -122,31 +126,32 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        const int BatchSize = 30;
-
         var instantForTransactionChoosing = _clock.UtcNow;
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
+        var handlingConfig = new PendingTransactionHandlingConfig(mempoolConfiguration.MaxSubmissionAttempts, mempoolConfiguration.StopResubmittingAfter, mempoolConfiguration.BaseDelayBetweenResubmissions, mempoolConfiguration.ResubmissionDelayBackoffExponent);
 
-        var transactionsToResubmit = await SelectTransactionsToResubmit(dbContext, instantForTransactionChoosing, mempoolConfiguration, BatchSize, token);
+        var transactionsToResubmit = await SelectTransactionsToResubmit(dbContext, instantForTransactionChoosing, mempoolConfiguration.ResubmissionBatchSize, token);
 
         var submittedAt = _clock.UtcNow;
+        var currentEpoch = await GetCurrentEpoch(token);
 
-        // The timeout should be relative to the submittedAt time we save to the DB, so needs to include the time for initial db saving (which should be very quick).
-        using var ctsWithSubmissionTimeout = CancellationTokenSource.CreateLinkedTokenSource(token);
-        ctsWithSubmissionTimeout.CancelAfter(mempoolConfiguration.ResubmissionNodeRequestTimeout);
-
-        var transactionsToResubmitWithNodes = MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
-            mempoolConfiguration,
+        var transactionsToResubmitWithNodes = UpdateTransactionsForPotentialSubmissionOrRetirement(
+            handlingConfig,
             transactionsToResubmit,
+            currentEpoch,
             submittedAt
         );
 
-        // We save as assumed successfully submitted here to lock in the fact we're resubmitting - in case we hit an
-        // exception below and fail to resubmit. By virtue of the ConcurrencyToken on the Status, this protects us
-        // against resubmitting the same transaction multiple times - even if (eg) two data aggregators are running.
+        // We save as pending submission here to lock in the fact we're resubmitting - in case we hit an exception below and fail to resubmit.
+        // By virtue of the ConcurrencyToken, this protects us against resubmitting the same transaction multiple times
+        // - even if (eg) two data aggregators are running.
         await dbContext.SaveChangesAsync(token);
 
-        await ResubmitAllAndUpdateTransactionStatusesOnFailure(transactionsToResubmitWithNodes, submittedAt, ctsWithSubmissionTimeout.Token);
+        await ResubmitAllAndUpdateTransactionStatusesOnFailure(
+            transactionsToResubmitWithNodes,
+            handlingConfig,
+            currentEpoch,
+            token);
 
         await dbContext.SaveChangesAsync(token);
     }
@@ -154,23 +159,23 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private async Task<List<PendingTransaction>> SelectTransactionsToResubmit(
         ReadWriteDbContext dbContext,
         DateTime instantForTransactionChoosing,
-        MempoolOptions mempoolOptions,
         int batchSize,
         CancellationToken token
     )
     {
         var transactionsToResubmit =
-            await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
-                .OrderBy(mt => mt.LastSubmittedToNodeTimestamp)
+            await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, dbContext)
+                .OrderBy(mt => mt.GatewayHandling.ResubmitFromTimestamp)
+                .Include(t => t.Payload)
                 .Take(batchSize)
                 .ToListAsync(token);
 
         var totalTransactionsNeedingResubmission = transactionsToResubmit.Count < batchSize
             ? transactionsToResubmit.Count
-            : await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
+            : await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, dbContext)
                 .CountAsync(token);
 
-        await _observers.ForEachAsync(x => x.TransactionsSelected(totalTransactionsNeedingResubmission));
+        await _observers.ForEachAsync(x => x.ObserveResubmissionQueueSize(totalTransactionsNeedingResubmission));
 
         if (totalTransactionsNeedingResubmission == 0)
         {
@@ -195,38 +200,27 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         return transactionsToResubmit;
     }
 
-    private List<PendingTransactionWithChosenNode> MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
-        MempoolOptions mempoolConfiguration,
+    private List<PendingTransactionWithChosenNode> UpdateTransactionsForPotentialSubmissionOrRetirement(
+        PendingTransactionHandlingConfig handlingConfig,
         List<PendingTransaction> transactionsWantingResubmission,
-        DateTime submittedAt
+        ulong currentEpoch,
+        DateTime currentTime
     )
     {
         var transactionsToResubmitWithNodes = new List<PendingTransactionWithChosenNode>();
 
         foreach (var transaction in transactionsWantingResubmission)
         {
-            var resubmissionLimit = transaction.LastSubmittedToGatewayTimestamp!.Value + mempoolConfiguration.StopResubmittingAfter;
-
-            var canResubmit = submittedAt <= resubmissionLimit;
+            var canResubmit = transaction.UpdateForPendingSubmissionOrRetirement(handlingConfig, currentTime, currentEpoch);
 
             if (canResubmit)
             {
-                var nodeToSubmitTo = GetRandomCoreApi();
-
-                _observers.ForEach(x => x.TransactionMarkedAsAssumedSuccessfullySubmittedToNode());
-
-                transaction.MarkAsAssumedSuccessfullySubmittedToNode(nodeToSubmitTo.Name, submittedAt);
-                transactionsToResubmitWithNodes.Add(new PendingTransactionWithChosenNode(transaction, nodeToSubmitTo));
+                _observers.ForEach(x => x.TransactionMarkedAsSubmissionPending());
+                transactionsToResubmitWithNodes.Add(new PendingTransactionWithChosenNode(transaction, GetRandomCoreApi()));
             }
             else
             {
-                _observers.ForEach(x => x.TransactionMarkedAsFailed());
-
-                transaction.MarkAsRejected(
-                    true,
-                    $"The transaction keeps dropping out of the mempool, so we're not resubmitting it. Initial failure reason: {transaction.LastFailureReason}",
-                    submittedAt
-                );
+                _observers.ForEach(x => x.TransactionMarkedAsNoLongerSubmitting());
             }
         }
 
@@ -235,148 +229,65 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
     private record PendingTransactionWithChosenNode(PendingTransaction PendingTransaction, CoreApiNode Node);
 
-    private IQueryable<PendingTransaction> GetPendingTransactionsNeedingResubmission(DateTime currentTimestamp, MempoolOptions mempoolOptions, ReadWriteDbContext dbContext)
+    private IQueryable<PendingTransaction> GetPendingTransactionsNeedingResubmission(DateTime currentTimestamp, ReadWriteDbContext dbContext)
     {
-        var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolOptions.MinDelayBetweenResubmissions;
-        var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolOptions.MinDelayBetweenMissingFromMempoolAndResubmission;
-
         return dbContext.PendingTransactions
             .Where(mt =>
-                mt.SubmittedByThisGateway
-                && (
-                    /* Transactions get marked Missing way by the MempoolTrackerService */
-                    mt.Status == PendingTransactionStatus.Missing
-                    /* Transactions get marked RejectedTemporarily by PendingTransactionResubmissionService */
-                    || mt.Status == PendingTransactionStatus.RejectedTemporarily
-                )
-                && (mt.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore)
-                && (mt.LastSubmittedToNodeTimestamp!.Value < allowResubmissionIfLastSubmittedBefore)
+                mt.GatewayHandling.ResubmitFromTimestamp != null && mt.GatewayHandling.ResubmitFromTimestamp < currentTimestamp
             );
     }
 
     private async Task ResubmitAllAndUpdateTransactionStatusesOnFailure(
         List<PendingTransactionWithChosenNode> transactionsToResubmitWithNodes,
-        DateTime submittedAt,
+        PendingTransactionHandlingConfig handlingConfig,
+        ulong currentEpoch,
         CancellationToken token
     )
     {
         var submissionResults = await ResubmitAll(transactionsToResubmitWithNodes, token);
+        var handledAt = _clock.UtcNow;
 
-        foreach (var (transaction, permanentError, failureReason, nodeName) in submissionResults)
+        foreach (var (transaction, nodeName, result) in submissionResults)
         {
-            if (failureReason == null)
-            {
-                continue;
-            }
-
-            await _observers.ForEachAsync(x => x.TransactionMarkedAsFailedAfterSubmittedToNode());
-
-            transaction.MarkAsFailedAfterSubmittedToNode(permanentError, nodeName, failureReason, submittedAt, _clock.UtcNow);
+            transaction.HandleNodeSubmissionResult(handlingConfig, nodeName, result, handledAt, currentEpoch);
         }
     }
 
-    private record SubmissionResult(
+    private record ContextualSubmissionResult(
         PendingTransaction PendingTransaction,
-        bool PermanentError,
-        string? FailureReason,
-        string NodeName
+        string NodeName,
+        NodeSubmissionResult NodeSubmissionResult
     );
 
-    private async Task<SubmissionResult[]> ResubmitAll(List<PendingTransactionWithChosenNode> transactionsToResubmit, CancellationToken token)
+    private async Task<ContextualSubmissionResult[]> ResubmitAll(List<PendingTransactionWithChosenNode> transactionsToResubmit, CancellationToken token)
     {
         return await Task.WhenAll(transactionsToResubmit.Select(t => Resubmit(t, token)));
     }
 
     // NB - The error handling here should mirror the resubmission in ConstructionAndSubmissionService
-    private async Task<SubmissionResult> Resubmit(PendingTransactionWithChosenNode transactionWithNode, CancellationToken cancellationToken)
+    private async Task<ContextualSubmissionResult> Resubmit(PendingTransactionWithChosenNode transactionWithNode, CancellationToken cancellationToken)
     {
         var transaction = transactionWithNode.PendingTransaction;
         var chosenNode = transactionWithNode.Node;
-        var notarizedTransaction = transaction.NotarizedTransactionBlob;
-
-        await _observers.ForEachAsync(x => x.PreResubmit(notarizedTransaction));
+        var notarizedTransaction = transaction.Payload.NotarizedTransactionBlob;
 
         using var nodeScope = _services.CreateScope();
         nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = chosenNode;
         var coreApiProvider = nodeScope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
 
-        var submitRequest = new CoreModel.TransactionSubmitRequest(
-            network: _networkConfigurationProvider.GetNetworkName(),
-            notarizedTransactionHex: notarizedTransaction.ToHex()
+        var result = await TransactionSubmitter.Submit(
+            new SubmitContext(
+                TransactionApi: coreApiProvider.TransactionsApi,
+                NetworkName: _networkConfigurationProvider.GetNetworkName(),
+                SubmissionTimeout: _mempoolOptionsMonitor.CurrentValue.ResubmissionNodeRequestTimeout,
+                IsResubmission: true,
+                ForceNodeToRecalculateResult: false),
+            notarizedTransaction,
+            _observers,
+            cancellationToken
         );
 
-        try
-        {
-            var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>(() =>
-                coreApiProvider.TransactionsApi.TransactionSubmitPostAsync(submitRequest, cancellationToken));
-
-            await _observers.ForEachAsync(x => x.PostResubmit(notarizedTransaction));
-
-            if (result.Succeeded)
-            {
-                var response = result.SuccessResponse;
-
-                if (response.Duplicate)
-                {
-                    await _observers.ForEachAsync(x => x.PostResubmitDuplicate(notarizedTransaction));
-                }
-                else
-                {
-                    await _observers.ForEachAsync(x => x.PostResubmitSucceeded(notarizedTransaction));
-                }
-
-                return new SubmissionResult(transaction, false, null, chosenNode.Name);
-            }
-
-            // TODO we need to somehow extract this common logic and share it with GatewayApi's SubmissionService
-
-            var details = result.FailureResponse.Details;
-            var isPermanent = false;
-            var message = result.FailureResponse.Message;
-            var detailedMessage = (string?)null;
-
-            switch (details)
-            {
-                case CoreModel.TransactionSubmitIntentAlreadyCommitted intentAlreadyCommitted:
-                    await _observers.ForEachAsync(x => x.ResubmitAlreadyCommitted(notarizedTransaction));
-
-                    _logger.LogInformation(
-                        "CoreAPI returned that submitted transaction with intent hash: {IntentHash} was already committed to ledger at state version: {StateVersion}",
-                        transaction.IntentHash, intentAlreadyCommitted.CommittedAs.StateVersion);
-
-                    return new SubmissionResult(transaction, false, null, chosenNode.Name);
-                case CoreModel.TransactionSubmitPriorityThresholdNotMetErrorDetails priorityThresholdNotMet:
-                    detailedMessage = $"insufficient tip percentage of {priorityThresholdNotMet.TipPercentage}; min tip percentage {priorityThresholdNotMet.MinTipPercentageRequired}";
-                    break;
-                case CoreModel.TransactionSubmitRejectedErrorDetails rejected:
-                    isPermanent = rejected.IsIntentRejectionPermanent || rejected.IsPayloadRejectionPermanent;
-                    detailedMessage = rejected.ErrorMessage;
-                    break;
-            }
-
-            if (isPermanent)
-            {
-                await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, result.FailureResponse));
-            }
-            else
-            {
-                await _observers.ForEachAsync(x => x.ResubmitFailedTemporary(notarizedTransaction, result.FailureResponse));
-            }
-
-            return new SubmissionResult(transaction, isPermanent, message + (detailedMessage != null ? " (" + detailedMessage + ")" : string.Empty), chosenNode.Name);
-        }
-        catch (OperationCanceledException ex)
-        {
-            await _observers.ForEachAsync(x => x.ResubmitFailedTimeout(notarizedTransaction, ex));
-
-            return new SubmissionResult(transaction, false, "Operation timed-out", chosenNode.Name);
-        }
-        catch (Exception ex)
-        {
-            await _observers.ForEachAsync(x => x.ResubmitFailedUnknown(notarizedTransaction, ex));
-
-            return new SubmissionResult(transaction, false, "Unknown error", chosenNode.Name);
-        }
+        return new ContextualSubmissionResult(transaction, chosenNode.Name, result);
     }
 
     private CoreApiNode GetRandomCoreApi()
@@ -386,5 +297,12 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
             .CoreApiNodes
             .Where(n => n.Enabled && !n.DisabledForConstruction)
             .GetRandomBy(n => (double)n.RequestWeighting);
+    }
+
+    private async Task<ulong> GetCurrentEpoch(CancellationToken cancellationToken)
+    {
+        var topOfLedger = await _topOfLedgerCache.GetLastCommittedTransactionSummaryOrLoad(cancellationToken);
+        var signedEpoch = topOfLedger.Epoch;
+        return (signedEpoch >= 0) ? (ulong)signedEpoch : throw new InvalidStateException($"Epoch was negative: {signedEpoch}");
     }
 }

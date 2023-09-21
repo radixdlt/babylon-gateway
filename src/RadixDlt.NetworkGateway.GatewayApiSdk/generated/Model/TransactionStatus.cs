@@ -90,8 +90,9 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines TransactionStatus
+    /// A top-level intent status, left in for backwards compatibility. It doesn&#39;t give much information. Rejected means PermanentRejection. 
     /// </summary>
+    /// <value>A top-level intent status, left in for backwards compatibility. It doesn&#39;t give much information. Rejected means PermanentRejection. </value>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum TransactionStatus
     {

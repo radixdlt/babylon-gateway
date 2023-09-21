@@ -77,6 +77,8 @@ public interface ITopOfLedgerCache
 
     long GetLastCommittedStateVersion();
 
+    Task<TransactionSummary> GetLastCommittedTransactionSummaryOrLoad(CancellationToken token);
+
     Task<TransactionSummary> Refresh(CancellationToken token);
 
     void Update(TransactionSummary transactionSummary);
@@ -101,7 +103,7 @@ public class TopOfLedgerCache : ITopOfLedgerCache
     {
         if (_knownTopOfCommittedLedger == null)
         {
-            throw new UnreachableException("Unexpected situation. Last committed state version is null");
+            throw new UnreachableException("Unexpected situation. Last committed transaction summary is null");
         }
 
         return _knownTopOfCommittedLedger;
@@ -117,6 +119,17 @@ public class TopOfLedgerCache : ITopOfLedgerCache
         return _knownTopOfCommittedLedger.StateVersion;
     }
 
+    /// <summary>
+    /// This is safe to call from any thread, as it doesn't update the cache so can't clobber values that the LedgerExtenderWorker writes.
+    /// </summary>
+    public async Task<TransactionSummary> GetLastCommittedTransactionSummaryOrLoad(CancellationToken token)
+    {
+        return _knownTopOfCommittedLedger ?? await _topOfLedgerProvider.GetTopOfLedger(token);
+    }
+
+    /// <summary>
+    /// Because of the lack of locking / intelligent updating to latest, this should only be called by the LedgerExtenderWorker thread, to avoid race conditions.
+    /// </summary>
     public async Task<TransactionSummary> Refresh(CancellationToken token)
     {
         var topOfLedger = await _topOfLedgerProvider.GetTopOfLedger(token);

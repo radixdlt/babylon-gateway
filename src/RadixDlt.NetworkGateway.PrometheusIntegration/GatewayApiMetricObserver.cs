@@ -64,6 +64,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Prometheus;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -110,19 +111,19 @@ internal class GatewayApiMetricObserver :
     private static readonly Counter _transactionSubmitRequestCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_submission_request_count",
-            "Number of transaction submission requests (including as part of a finalize request)"
+            "Number of transaction submission requests"
         );
 
     private static readonly Counter _transactionSubmitSuccessCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_submission_success_count",
-            "Number of transaction submission successes (including as part of a finalize request)"
+            "Number of transaction submission successes"
         );
 
     private static readonly Counter _transactionSubmitErrorCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_submission_error_count",
-            "Number of transaction submission errors (including as part of a finalize request)"
+            "Number of transaction submission errors"
         );
 
     private static readonly Counter _transactionPreviewRequestCount = Metrics
@@ -162,10 +163,10 @@ internal class GatewayApiMetricObserver :
             "Number of mempool transactions added to the DB due to being submitted to the gateway"
         );
 
-    private static readonly Counter _dbMempoolTransactionsMarkedAsFailedDuringInitialSubmissionCount = Metrics
+    private static readonly Counter _dbMempoolTransactionsDuplicateSubmissionsCount = Metrics
         .CreateCounter(
-            "ng_db_mempool_transactions_marked_failed_from_initial_submission_count",
-            "Number of mempool transactions marked as failed during initial submission to a node"
+            "ng_db_mempool_transactions_duplicate_submission_count",
+            "Number of mempool transactions submitted to the gateway which were already being tracked"
         );
 
     void IExceptionObserver.OnException(ActionContext actionContext, Exception exception, KnownGatewayErrorException gatewayErrorException)
@@ -212,125 +213,6 @@ internal class GatewayApiMetricObserver :
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(1);
     }
 
-    ValueTask ISubmissionServiceObserver.PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request)
-    {
-        _transactionSubmitRequestCount.Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.PostHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, GatewayModel.TransactionSubmitResponse response)
-    {
-        _transactionSubmitSuccessCount.Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.HandleSubmitRequestFailed(GatewayModel.TransactionSubmitRequest request, Exception exception)
-    {
-        _transactionSubmitErrorCount.Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.ParseTransactionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_unknown_error").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, ToolkitModel.RadixEngineToolkitException ex)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("parsed_unsupported_payload_type").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, string error)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("parsed_statically_invalid").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("already_failed").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.SubmissionAlreadySubmitted(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("already_submitted").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask ResubmitAlreadyCommitted(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_already_committed").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("success").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("invalid_transaction").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("unknown_temporary_error").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedTimeout(GatewayModel.TransactionSubmitRequest request, OperationCanceledException exception)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("request_timeout").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("unknown_error").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
     ValueTask ILedgerStateQuerierObserver.LedgerRoundTimestampClockSkew(TimeSpan difference)
     {
         _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(difference.TotalSeconds);
@@ -359,16 +241,72 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionTrackingServiceObserver.PostPendingTransactionAdded()
+    ValueTask ISubmissionTrackingServiceObserver.OnSubmissionTrackedInDatabase(bool isDuplicate)
     {
-        _dbMempoolTransactionsAddedDueToSubmissionCount.Inc();
+        if (isDuplicate)
+        {
+            _dbMempoolTransactionsDuplicateSubmissionsCount.Inc();
+        }
+        else
+        {
+            _dbMempoolTransactionsAddedDueToSubmissionCount.Inc();
+        }
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionTrackingServiceObserver.PostPendingTransactionMarkedAsFailed()
+    public ValueTask ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome outcome)
     {
-        _dbMempoolTransactionsMarkedAsFailedDuringInitialSubmissionCount.Inc();
+        var label = outcome switch
+        {
+            TransactionSubmissionOutcome.SubmittedToNetwork => "submitted_to_network",
+            TransactionSubmissionOutcome.PermanentlyRejected => "permanently_rejected",
+            TransactionSubmissionOutcome.StoppedSubmittingToNetwork => "stopped_submitting",
+            TransactionSubmissionOutcome.DuplicateSubmission => "duplicate",
+            TransactionSubmissionOutcome.ParseFailedIncorrectFormat => "parse_failed_incorrect_format",
+            TransactionSubmissionOutcome.ParseFailedStaticallyInvalid => "parse_failed_invalid_transaction",
+            TransactionSubmissionOutcome.ParseFailedOtherError => "parse_failed_other_error",
+            TransactionSubmissionOutcome.StartEpochInFuture => "start_epoch_in_future",
+            TransactionSubmissionOutcome.EndEpochInPast => "end_epoch_in_past",
+        };
+        _transactionSubmitResolutionByResultCount.WithLabels(label).Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask ObserveSubmitAttempt(SubmitContext context)
+    {
+        if (context.IsResubmission)
+        {
+            throw new Exception("The Gateway API is only supposed to handle initial transaction submissions");
+        }
+
+        _transactionSubmitRequestCount.Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Note - this parallels ObserveSubmitResult in DataAggregatorMetricsObserver.
+    /// </summary>
+    public ValueTask ObserveSubmitResult(SubmitContext context, NodeSubmissionResult nodeSubmissionResult)
+    {
+        if (context.IsResubmission)
+        {
+            throw new Exception("The Gateway API is only supposed to handle initial transaction submissions");
+        }
+
+        if (nodeSubmissionResult.IsSubmissionSuccess())
+        {
+            _transactionSubmitSuccessCount.Inc();
+        }
+
+        if (nodeSubmissionResult.IsSubmissionError())
+        {
+            _transactionSubmitErrorCount.Inc();
+        }
+
+        _transactionSubmitResolutionByResultCount.WithLabels(nodeSubmissionResult.MetricLabel()).Inc();
 
         return ValueTask.CompletedTask;
     }

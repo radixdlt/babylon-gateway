@@ -91,7 +91,6 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<ITopOfLedgerProvider, TopOfLedgerProvider>()
             .AddSingleton<ITopOfLedgerCache, TopOfLedgerCache>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
-            .AddSingleton<IPendingTransactionTrackerService, PendingTransactionTrackerService>()
             .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()
             .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>();
 

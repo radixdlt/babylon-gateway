@@ -68,7 +68,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerExtenderServiceObserver
 {
-    ValueTask TransactionsMarkedCommittedWhichWasFailed();
+    ValueTask TransactionsMarkedCommittedWhichWasPermanentlyRejected();
 
     ValueTask TransactionsMarkedCommittedCount(int count);
 }

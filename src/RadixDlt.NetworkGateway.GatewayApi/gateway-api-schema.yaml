@@ -1247,12 +1247,50 @@ components:
 
     TransactionStatus:
       type: string
+      description: |
+        A top-level intent status, left in for backwards compatibility.
+        It doesn't give much information. Rejected means PermanentRejection.
       enum:
         - Unknown
         - CommittedSuccess
         - CommittedFailure
         - Pending
         - Rejected
+
+    TransactionIntentStatus:
+      type: string
+      description: |
+        A more specific intent status. See the description field for further information.
+        Note that `CommitPendingOutcomeUnknown` can either result in `CommittedSuccess` or `CommittedFailure`.
+      enum:
+        - Unknown
+        - CommittedSuccess
+        - CommittedFailure
+        - CommitPendingOutcomeUnknown
+        - PermanentlyRejected
+        - LikelyButNotCertainRejection
+        - Pending
+
+    TransactionPayloadStatus:
+      type: string
+      description: |
+        A more specific payload status. See the description field for further information.
+      enum:
+        - Unknown
+        - CommittedSuccess
+        - CommittedFailure
+        - CommitPendingOutcomeUnknown
+        - PermanentlyRejected
+        - TemporarilyRejected
+        - Pending
+
+    TransactionPayloadGatewayHandlingStatus:
+      type: string
+      description: |
+        A status concerning the Gateway's handling status of this pending transaction.
+      enum:
+        - HandlingSubmission
+        - Concluded
 
     TransactionReceipt:
       type: object
@@ -1670,15 +1708,34 @@ components:
         - type: object
           required:
             - status
+            - intent_status
+            - intent_status_description
             - known_payloads
           properties:
             status:
               $ref: "#/components/schemas/TransactionStatus"
+            intent_status:
+              $ref: "#/components/schemas/TransactionIntentStatus"
+            intent_status_description:
+              description: |
+                An additional description to clarify the intent status.
+              type: string
             known_payloads:
               type: array
               items:
                 $ref: "#/components/schemas/TransactionStatusResponseKnownPayloadItem"
+            committed_state_version:
+              description: |
+                If the intent was committed, this gives the state version when this intent was committed.
+              type: integer
+              format: int64
+              nullable: true
             error_message:
+              description: |
+                The most relevant error message received, due to a rejection or commit as failure.
+                Please note that presence of an error message doesn't imply that the intent
+                will definitely reject or fail. This could represent a temporary error (such as out
+                of fees), or an error with a payload which doesn't end up being committed.
               type: string
               nullable: true
     TransactionStatusResponseKnownPayloadItem:
@@ -1691,7 +1748,33 @@ components:
           $ref: "#/components/schemas/HashBech32mString"
         status:
           $ref: "#/components/schemas/TransactionStatus"
+        payload_status:
+          $ref: "#/components/schemas/TransactionPayloadStatus"
+        payload_status_description:
+          description: |
+            An additional description to clarify the payload status.
+          type: string
         error_message:
+          description: |
+            An error message received for a rejection or failure during transaction execution.
+            Please note that presence of an error message doesn't imply that this payload
+            will definitely reject or fail. This could represent an error during a temporary
+            rejection (such as out of fees) which then gets resolved (e.g. by depositing money
+            to pay the fee), allowing the transaction to be committed.
+          type: string
+          nullable: true
+        handling_status:
+          $ref: "#/components/schemas/TransactionPayloadGatewayHandlingStatus"
+        handling_status_reason:
+          description: |
+            Additional reason for why the Gateway has its current handling status.
+          type: string
+          nullable: true
+        submission_error:
+          description: |
+            The most recent error message received when submitting this transaction to the network.
+            Please note that the presence of an error message doesn't imply that this transaction
+            payload will definitely reject or fail. This could be a transient error.
           type: string
           nullable: true
 

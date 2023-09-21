@@ -159,7 +159,7 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
         var nodeStatus = await _networkStatusReaderFactory().GetNetworkStatus(cancellationToken);
         _nodeStatusProvider.UpdateNodeStatus(NodeName, nodeStatus);
 
-        var transactionsToFetch = GetTransactionsToFetch(NodeName);
+        var transactionsToFetch = await GetTransactionsToFetch(NodeName, cancellationToken);
 
         if (transactionsToFetch == null)
         {
@@ -245,9 +245,9 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
         return new FetchedTransactions(transactions, apiResponse.Data.PreviousStateIdentifiers, Encoding.UTF8.GetByteCount(apiResponse.RawContent));
     }
 
-    private (long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound)? GetTransactionsToFetch(string nodeName)
+    private async Task<(long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound)?> GetTransactionsToFetch(string nodeName, CancellationToken cancellationToken)
     {
-        var lastCommittedTransactionSummary = _topOfLedgerCache.GetLastCommittedTransactionSummary();
+        var lastCommittedTransactionSummary = await _topOfLedgerCache.GetLastCommittedTransactionSummaryOrLoad(cancellationToken);
         var processTransactionFromStateVersion = lastCommittedTransactionSummary.StateVersion;
         var maxUpperLimit = processTransactionFromStateVersion + _ledgerConfirmationOptionsMonitor.CurrentValue.MaxTransactionPipelineSizePerNode;
 

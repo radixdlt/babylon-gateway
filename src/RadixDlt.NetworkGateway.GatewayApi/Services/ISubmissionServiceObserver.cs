@@ -72,37 +72,19 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ISubmissionServiceObserver
 {
-    ValueTask PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request);
+    ValueTask ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome outcome);
+}
 
-    ValueTask PostHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, GatewayModel.TransactionSubmitResponse response);
-
-    ValueTask HandleSubmitRequestFailed(GatewayModel.TransactionSubmitRequest request, Exception exception);
-
-    ValueTask ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception);
-
-    ValueTask ParseTransactionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
-
-    ValueTask ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, ToolkitModel.RadixEngineToolkitException exception);
-
-    ValueTask ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, string error);
-
-    ValueTask SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance);
-
-    ValueTask SubmissionAlreadySubmitted(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance);
-
-    ValueTask SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
-
-    ValueTask ResubmitAlreadyCommitted(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
-
-    ValueTask SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
-
-    ValueTask HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception);
-
-    ValueTask HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
-
-    ValueTask HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
-
-    ValueTask HandleSubmissionFailedTimeout(GatewayModel.TransactionSubmitRequest request, OperationCanceledException exception);
-
-    ValueTask HandleSubmissionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
+// This can be turned into an enum in future if we need this
+public enum TransactionSubmissionOutcome
+{
+    SubmittedToNetwork,
+    PermanentlyRejected,
+    StoppedSubmittingToNetwork,
+    DuplicateSubmission,
+    ParseFailedIncorrectFormat,
+    ParseFailedStaticallyInvalid,
+    ParseFailedOtherError,
+    StartEpochInFuture,
+    EndEpochInPast,
 }

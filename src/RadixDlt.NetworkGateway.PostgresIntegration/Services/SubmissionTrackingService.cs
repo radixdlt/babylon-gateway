@@ -64,7 +64,10 @@
 
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -82,7 +85,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 internal class SubmissionTrackingService : ISubmissionTrackingService
 {
     private readonly ReadWriteDbContext _dbContext;
-    private readonly IEnumerable<ISubmissionTrackingServiceObserver> _observers;
+    private readonly IReadOnlyCollection<ISubmissionTrackingServiceObserver> _observers;
     private readonly IClock _clock;
 
     public SubmissionTrackingService(
@@ -91,39 +94,94 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         IClock clock)
     {
         _dbContext = dbContext;
-        _observers = observers;
+        _observers = observers.ToArray();
         _clock = clock;
     }
 
-    public async Task<TackingGuidance> TrackInitialSubmission(
+    public async Task<SubmissionResult> ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
+        TransactionApi transactionApi,
+        string networkName,
+        string nodeName,
+        PendingTransactionHandlingConfig handlingConfig,
+        ToolkitModel.NotarizedTransaction notarizedTransaction,
+        byte[] notarizedTransactionBytes,
+        TimeSpan submissionTimeout,
+        long currentEpoch,
+        CancellationToken token = default)
+    {
+        var (alreadyKnown, pendingTransaction) = await HandleObservedSubmission(
+            handlingConfig,
+            _clock.UtcNow,
+            notarizedTransaction,
+            notarizedTransactionBytes,
+            token);
+
+        if (!alreadyKnown)
+        {
+            await SubmitToNetworkAndUpdatePendingTransaction(
+                new SubmitContext(
+                    TransactionApi: transactionApi,
+                    NetworkName: networkName,
+                    SubmissionTimeout: submissionTimeout,
+                    IsResubmission: false,
+                    ForceNodeToRecalculateResult: false),
+                nodeName,
+                handlingConfig,
+                pendingTransaction,
+                notarizedTransactionBytes,
+                currentEpoch,
+                token);
+        }
+
+        if (pendingTransaction.LedgerDetails.PayloadLedgerStatus is PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
+        {
+            return new SubmissionResult(AlreadyKnown: alreadyKnown, PermanentlyRejectedReason: pendingTransaction.LedgerDetails.LatestFailureReason);
+        }
+
+        return new SubmissionResult(AlreadyKnown: alreadyKnown);
+    }
+
+    private async Task<TrackedSubmission> HandleObservedSubmission(
+        PendingTransactionHandlingConfig handlingConfig,
         DateTime submittedTimestamp,
         ToolkitModel.NotarizedTransaction notarizedTransaction,
-        string submittedToNodeName,
+        byte[] notarizedTransactionBytes,
         CancellationToken token = default
     )
     {
-        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.Hash().AsStr(), token);
+        var result = await TrackSubmission(handlingConfig, submittedTimestamp, notarizedTransaction, notarizedTransactionBytes, token);
+        await _observers.ForEachAsync(observer => observer.OnSubmissionTrackedInDatabase(result.AlreadyKnown));
+        return result;
+    }
+
+    private record TrackedSubmission(bool AlreadyKnown, PendingTransaction PendingTransaction);
+
+    private async Task<TrackedSubmission> TrackSubmission(
+        PendingTransactionHandlingConfig handlingConfig,
+        DateTime submittedTimestamp,
+        ToolkitModel.NotarizedTransaction notarizedTransaction,
+        byte[] notarizedTransactionBytes,
+        CancellationToken token = default
+    )
+    {
+        var payloadHash = notarizedTransaction.NotarizedTransactionHash().AsStr();
+
+        var existingPendingTransaction = await _dbContext
+            .PendingTransactions
+            .Where(t => t.PayloadHash == payloadHash)
+            .SingleOrDefaultAsync(token);
 
         if (existingPendingTransaction != null)
         {
-            if (existingPendingTransaction.Status is PendingTransactionStatus.RejectedPermanently or PendingTransactionStatus.RejectedTemporarily)
-            {
-                return new TackingGuidance(ShouldSubmitToNode: false, FailureReason: existingPendingTransaction.LastFailureReason);
-            }
-
-            existingPendingTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
-
-            await _dbContext.SaveChangesAsync(token);
-
-            // It's already been submitted to a node - this will be handled by the resubmission service if appropriate
-            return new TackingGuidance(ShouldSubmitToNode: false);
+            return new TrackedSubmission(true, existingPendingTransaction);
         }
 
-        var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
-            notarizedTransaction.Hash().AsStr(),
+        var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeToGateway(
+            handlingConfig,
+            payloadHash,
             notarizedTransaction.IntentHash().AsStr(),
-            notarizedTransaction.Compile().ToArray(),
-            submittedToNodeName,
+            notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive,
+            notarizedTransactionBytes,
             submittedTimestamp
         );
 
@@ -136,42 +194,38 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         try
         {
             await _dbContext.SaveChangesAsync(token);
-            await _observers.ForEachAsync(x => x.PostPendingTransactionAdded());
-
-            return new TackingGuidance(ShouldSubmitToNode: true);
+            return new TrackedSubmission(false, pendingTransaction);
         }
         catch (DbUpdateException ex) when ((ex.InnerException is PostgresException pg) && pg.SqlState.StartsWith("23"))
         {
-            return new TackingGuidance(ShouldSubmitToNode: false);
+            return new TrackedSubmission(true, pendingTransaction);
         }
     }
 
-    public async Task MarkInitialFailure(bool permanent, string payloadHash, string failureReason, CancellationToken token = default)
+    private async Task SubmitToNetworkAndUpdatePendingTransaction(
+        SubmitContext submitContext,
+        string nodeName,
+        PendingTransactionHandlingConfig handlingConfig,
+        PendingTransaction pendingTransaction,
+        byte[] notarizedTransactionBytes,
+        long currentEpoch,
+        CancellationToken token
+    )
     {
-        var pendingTransaction = await GetPendingTransaction(payloadHash, token);
+        var nodeSubmissionResult = await TransactionSubmitter.Submit(
+            submitContext,
+            notarizedTransactionBytes,
+            _observers,
+            token
+        );
 
-        if (pendingTransaction == null)
-        {
-            throw new PendingTransactionNotFoundException($"Could not find mempool transaction {payloadHash} to mark it as failed");
-        }
+        pendingTransaction.HandleNodeSubmissionResult(
+            handlingConfig,
+            nodeName,
+            nodeSubmissionResult,
+            _clock.UtcNow,
+            currentEpoch < 0 ? null : (ulong)currentEpoch);
 
-        // TODO this is workaround needed for PendingTransactionResubmissionService to correctly pick up TXs for resubmissions
-        if (permanent == false)
-        {
-            pendingTransaction.MarkAsMissing(_clock.UtcNow);
-        }
-
-        pendingTransaction.MarkAsRejected(permanent, failureReason, _clock.UtcNow);
-
-        await _observers.ForEachAsync(x => x.PostPendingTransactionMarkedAsFailed());
         await _dbContext.SaveChangesAsync(token);
-    }
-
-    private async Task<PendingTransaction?> GetPendingTransaction(string payloadHash, CancellationToken token = default)
-    {
-        return await _dbContext
-            .PendingTransactions
-            .Where(t => t.PayloadHash == payloadHash)
-            .SingleOrDefaultAsync(token);
     }
 }

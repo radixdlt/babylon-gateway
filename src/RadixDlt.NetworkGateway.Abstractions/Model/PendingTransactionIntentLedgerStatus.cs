@@ -62,39 +62,90 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
-
-public readonly record struct PendingTransactionHashPair(string IntentHash, string PayloadHash);
-
-public sealed record PendingTransactionData(PendingTransactionHashPair Hashes, DateTime SeenAt, byte[] Payload);
-
-public sealed record NodeMempoolHashes(HashSet<PendingTransactionHashPair> TransactionHashes, DateTime AtTime);
-
-public interface IPendingTransactionTrackerService
+public static class PendingTransactionIntentLedgerStatusExtensions
 {
-    void RegisterNodeMempoolHashes(string nodeName, NodeMempoolHashes nodeMempoolHashes);
-
-    Task HandleChanges(CancellationToken token);
+    /// <summary>
+    /// A new status should overwrite an older status for a given payload only if it has >= ReplacementPriority.
+    /// </summary>
+    public static int ReplacementPriorityForSinglePayload(this PendingTransactionIntentLedgerStatus status)
+    {
+        return status switch
+        {
+            PendingTransactionIntentLedgerStatus.CommittedSuccess => 5,
+            PendingTransactionIntentLedgerStatus.CommittedFailure => 5,
+            PendingTransactionIntentLedgerStatus.CommitPendingOutcomeUnknown => 4,
+            PendingTransactionIntentLedgerStatus.PermanentRejection => 3,
+            PendingTransactionIntentLedgerStatus.PossibleToCommit => 1,
+            PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => 1,
+            PendingTransactionIntentLedgerStatus.Unknown => 0,
+        };
+    }
 
     /// <summary>
-    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
-    /// contents actually need fetching.
+    /// A new status should replace an older status when aggregating across multiple payloads only if it has >= AggregationPriority.
     /// </summary>
-    Task<HashSet<PendingTransactionHashPair>> WhichTransactionsNeedContentFetching(IEnumerable<PendingTransactionHashPair> candidates, CancellationToken cancellationToken);
+    public static int AggregationPriorityAcrossKnownPayloads(this PendingTransactionIntentLedgerStatus status)
+    {
+        return status switch
+        {
+            PendingTransactionIntentLedgerStatus.CommittedSuccess => 5,
+            PendingTransactionIntentLedgerStatus.CommittedFailure => 5,
+            PendingTransactionIntentLedgerStatus.CommitPendingOutcomeUnknown => 4,
+            PendingTransactionIntentLedgerStatus.PermanentRejection => 3,
+            PendingTransactionIntentLedgerStatus.PossibleToCommit => 2,
+            PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => 1,
+            PendingTransactionIntentLedgerStatus.Unknown => 0,
+        };
+    }
+}
 
-    bool SubmitTransactionContents(PendingTransactionData pendingTransactionData);
+/// <summary>
+/// Any additional knowledge we have about the intent.
+/// </summary>
+public enum PendingTransactionIntentLedgerStatus
+{
+    /// <summary>
+    /// We don't know anything about whether the intent could be committed or rejected.
+    /// This is first so it gets the default value of 0.
+    /// </summary>
+    Unknown,
 
     /// <summary>
-    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to check if the transaction
-    /// identifier still needs fetching. This is to try to not make a call if we've already got the transaction contents
-    /// from another node in the mean-time.
+    /// We know that the intent has been committed as a success.
     /// </summary>
-    /// <returns>If the transaction was first seen (true) or (false).</returns>
-    bool TransactionContentsStillNeedFetching(PendingTransactionHashPair hashPair);
+    CommittedSuccess,
+
+    /// <summary>
+    /// We know that the intent has been committed as a failure.
+    /// </summary>
+    CommittedFailure,
+
+    /// <summary>
+    /// We know that the intent has been committed, but don't yet know the outcome until it's synced (Success/Failure).
+    /// </summary>
+    CommitPendingOutcomeUnknown,
+
+    /// <summary>
+    /// We know that the intent is permanently rejected.
+    /// </summary>
+    PermanentRejection,
+
+    /// <summary>
+    /// The intent is known to have been submitted, and at least one payload was not rejected at last submission.
+    /// </summary>
+    PossibleToCommit,
+
+    /// <summary>
+    /// <para>All known payloads containing this intent were rejected at their last submission,
+    /// therefore the intent is likely to end up rejected, but this is not guaranteed.</para>
+    ///
+    /// <para>For example, it could have been rejected because a user didn't have enough XRD in their account
+    /// to lock their fee, and they then top up their account, and the transaction can commit.</para>
+    ///
+    /// <para>Or the payload could have been submitted with the wrong signatures, and the notary corrects
+    /// these and resubmits the intent in a new payload, which can be submitted.</para>
+    /// </summary>
+    LikelyButNotCertainRejection,
 }

@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -80,11 +81,9 @@ public interface ICoreApiHandler
 
     CoreApiNode GetCoreNodeConnectedTo();
 
-    Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
+    TransactionApi GetTransactionApi();
 
-    Task<ResponseOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>> SubmitTransaction(
-        CoreModel.TransactionSubmitRequest request,
-        CancellationToken token = default);
+    Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
 }
 
 /// <summary>
@@ -120,20 +119,17 @@ internal class CoreApiHandler : ICoreApiHandler
         return _coreApiProvider.CoreApiNode;
     }
 
+    public TransactionApi GetTransactionApi()
+    {
+        return _coreApiProvider.TransactionApi;
+    }
+
     public async Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(
         CoreModel.TransactionPreviewRequest request,
         CancellationToken token = default)
     {
         return await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() =>
             _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(request, token));
-    }
-
-    public async Task<ResponseOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>> SubmitTransaction(
-        CoreModel.TransactionSubmitRequest request,
-        CancellationToken token = default)
-    {
-        return await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>(() =>
-            _coreApiProvider.TransactionApi.TransactionSubmitPostAsync(request, token));
     }
 
     private static ICoreApiProvider ChooseCoreApiProvider(ICoreNodesSelectorService coreNodesSelectorService, HttpClient httpClient)

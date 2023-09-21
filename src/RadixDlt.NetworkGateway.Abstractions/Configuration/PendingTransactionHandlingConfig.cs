@@ -62,11 +62,8 @@
  * permissions under this License.
  */
 
-using System.Threading.Tasks;
+using System;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
+namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
-public interface INodeMempoolFullTransactionReaderWorkerObserver
-{
-    ValueTask FullTransactionsFetchedCount(string nodeName, bool wasDuplicate);
-}
+public record PendingTransactionHandlingConfig(int MaxSubmissionsBeforeGivingUp, TimeSpan StopResubmittingAfter, TimeSpan BaseTimeBetweenResubmissions, double ResubmissionDelayBackoffExponent);

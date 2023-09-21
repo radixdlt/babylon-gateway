@@ -62,34 +62,98 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
-using Xunit;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.UnitTests.DataAggregator.Services;
-
-public class PendingTransactionHashPairTests
+public static class PendingTransactionPayloadLedgerStatusExtensions
 {
-    [Fact]
-    public void GivenSameValues_ShouldBeEqual()
+    public static bool ShouldStopSubmittingTransactionToNetwork(this PendingTransactionPayloadLedgerStatus status)
     {
-        var left = new PendingTransactionHashPair("ih_1", "ph_1");
-        var right = new PendingTransactionHashPair("ih_1", "ph_1");
-
-        left.Should().NotBeSameAs(right);
-        left.Should().Be(right);
-        left.Equals(right).Should().BeTrue();
-        left.GetHashCode().Should().Be(right.GetHashCode());
+        return status switch
+        {
+            PendingTransactionPayloadLedgerStatus.CommittedSuccess => true,
+            PendingTransactionPayloadLedgerStatus.CommittedFailure => true,
+            PendingTransactionPayloadLedgerStatus.CommitPendingOutcomeUnknown => true,
+            PendingTransactionPayloadLedgerStatus.CommitOfOtherPayloadForIntentPendingOutcomeUnknown => true,
+            PendingTransactionPayloadLedgerStatus.PermanentlyRejected => true,
+            PendingTransactionPayloadLedgerStatus.TransientlyAccepted => false,
+            PendingTransactionPayloadLedgerStatus.TransientlyRejected => false,
+            PendingTransactionPayloadLedgerStatus.Unknown => false,
+        };
     }
 
-    [Fact]
-    public void GivenDifferentValues_ShouldNotBeEqual()
+    /// <summary>
+    /// A new status should overwrite an older status only if it has >= ReplacementPriority.
+    /// </summary>
+    public static int ReplacementPriority(this PendingTransactionPayloadLedgerStatus status)
     {
-        var left = new PendingTransactionHashPair("ih_1", "ph_1");
-        var right = new PendingTransactionHashPair("ih_1", "ph_2");
-
-        left.Should().NotBeSameAs(right);
-        left.Should().NotBe(right);
-        left.Equals(right).Should().BeFalse();
+        return status switch
+        {
+            PendingTransactionPayloadLedgerStatus.CommittedSuccess => 4,
+            PendingTransactionPayloadLedgerStatus.CommittedFailure => 4,
+            PendingTransactionPayloadLedgerStatus.CommitPendingOutcomeUnknown => 3,
+            PendingTransactionPayloadLedgerStatus.CommitOfOtherPayloadForIntentPendingOutcomeUnknown => 3,
+            PendingTransactionPayloadLedgerStatus.PermanentlyRejected => 2,
+            PendingTransactionPayloadLedgerStatus.TransientlyAccepted => 1,
+            PendingTransactionPayloadLedgerStatus.TransientlyRejected => 1,
+            PendingTransactionPayloadLedgerStatus.Unknown => 0,
+        };
     }
+}
+
+/// <summary>
+/// This follows the convention from the Core API.
+/// </summary>
+public enum PendingTransactionPayloadLedgerStatus
+{
+    /// <summary>
+    /// We don't know anything about whether the intent could be committed or rejected.
+    /// This is first so it gets the default value of 0.
+    /// </summary>
+    Unknown,
+
+    /// <summary>
+    /// We know that this specific payload has been committed as a success.
+    /// </summary>
+    CommittedSuccess,
+
+    /// <summary>
+    /// We know that this specific payload has been committed as a failure.
+    /// </summary>
+    CommittedFailure,
+
+    /// <summary>
+    /// We know that the payload has been committed, but don't yet know the outcome until it's synced (Success/Failure).
+    /// </summary>
+    CommitPendingOutcomeUnknown,
+
+    /// <summary>
+    /// We know that the intent has been committed with a different payload, but don't yet know the outcome
+    /// until it's synced (Success/Failure).
+    /// </summary>
+    CommitOfOtherPayloadForIntentPendingOutcomeUnknown,
+
+    /// <summary>
+    /// We know that this specific payload is permanently rejected.
+    ///
+    /// Note - this does not imply that the intent inside the payload is permanently rejected.
+    /// For example, if there are multiple payloads containing the same intent, only one payload
+    /// gets committed, and the rest get permanently rejected.
+    /// </summary>
+    PermanentlyRejected,
+
+    /// <summary>
+    /// This specific payload was accepted into the mempool at the last execution.
+    /// </summary>
+    TransientlyAccepted,
+
+    /// <summary>
+    /// This specific payload was rejected at the last execution.
+    /// </summary>
+    TransientlyRejected,
+}
+
+// Need to keep a stub around in order for the migrations to compile
+public enum PendingTransactionStatus
+{
+    Unknown,
 }

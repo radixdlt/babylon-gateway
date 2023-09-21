@@ -62,13 +62,12 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface ISubmissionTrackingServiceObserver
+public interface ISubmissionTrackingServiceObserver: ITransactionSubmitterObserver
 {
-    ValueTask PostPendingTransactionAdded();
-
-    ValueTask PostPendingTransactionMarkedAsFailed();
+    ValueTask OnSubmissionTrackedInDatabase(bool isDuplicate);
 }
