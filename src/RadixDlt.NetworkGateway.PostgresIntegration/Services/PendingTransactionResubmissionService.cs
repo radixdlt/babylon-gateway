@@ -281,7 +281,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
                 NetworkName: _networkConfigurationProvider.GetNetworkName(),
                 SubmissionTimeout: _mempoolOptionsMonitor.CurrentValue.ResubmissionNodeRequestTimeout,
                 IsResubmission: true,
-                ForceNodeToRecalculateResult: true),
+                ForceNodeToRecalculateResult: false),
             notarizedTransaction,
             _observers,
             cancellationToken
