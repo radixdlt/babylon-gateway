@@ -1131,14 +1131,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("intent_hash");
 
-                    b.Property<DateTime>("LastSubmittedToGatewayTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_submitted_to_gateway_timestamp");
-
-                    b.Property<PendingTransactionMempoolStatus>("MempoolStatus")
-                        .HasColumnType("pending_transaction_mempool_status")
-                        .HasColumnName("mempool_status");
-
                     b.Property<string>("PayloadHash")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1156,11 +1148,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("IntentHash");
-
-                    b.HasIndex("LastSubmittedToGatewayTimestamp");
-
-                    b.HasIndex("MempoolStatus")
-                        .HasFilter("handling_status = 'submitting'");
 
                     b.HasIndex("PayloadHash")
                         .IsUnique();
@@ -2272,6 +2259,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasColumnName("first_submitted_to_gateway_timestamp");
 
                             b1.Property<PendingTransactionHandlingStatus>("HandlingStatus")
+                                .ValueGeneratedOnUpdateSometimes()
                                 .HasColumnType("pending_transaction_handling_status")
                                 .HasColumnName("handling_status");
 
@@ -2279,7 +2267,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("handling_status_reason");
 
+                            b1.Property<DateTime>("LastSubmittedToGatewayTimestamp")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("last_submitted_to_gateway_timestamp");
+
                             b1.HasKey("PendingTransactionId");
+
+                            b1.HasIndex("LastSubmittedToGatewayTimestamp");
 
                             b1.ToTable("pending_transactions");
 
@@ -2337,6 +2331,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasColumnType("timestamp with time zone")
                                 .HasColumnName("first_seen_in_mempool_timestamp");
 
+                            b1.Property<PendingTransactionHandlingStatus>("HandlingStatus")
+                                .ValueGeneratedOnUpdateSometimes()
+                                .HasColumnType("pending_transaction_handling_status")
+                                .HasColumnName("handling_status");
+
                             b1.Property<DateTime?>("LastDroppedOutOfMempoolTimestamp")
                                 .HasColumnType("timestamp with time zone")
                                 .HasColumnName("last_missing_from_mempool_timestamp");
@@ -2353,11 +2352,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("last_submitted_to_node_name");
 
+                            b1.Property<PendingTransactionMempoolStatus>("MempoolStatus")
+                                .HasColumnType("pending_transaction_mempool_status")
+                                .HasColumnName("mempool_status");
+
                             b1.Property<int>("SubmissionToNodesCount")
                                 .HasColumnType("integer")
                                 .HasColumnName("node_submission_count");
 
                             b1.HasKey("PendingTransactionId");
+
+                            b1.HasIndex("MempoolStatus")
+                                .HasFilter("handling_status = 'submitting'");
 
                             b1.ToTable("pending_transactions");
 
