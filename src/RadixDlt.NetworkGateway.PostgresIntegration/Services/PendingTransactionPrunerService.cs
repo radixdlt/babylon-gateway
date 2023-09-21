@@ -121,15 +121,14 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
 
         await _observers.ForEachAsync(x => x.PrePendingTransactionPrune(countByStatus));
 
-        // TODO - replace with raw SQL query to fix this bug:
-        // https://github.com/dotnet/efcore/issues/29690#issuecomment-1726182209
-        // var prunedTransactionCount = await dbContext
-        //     .PendingTransactions
-        //     .OrderBy(pt => pt.LastSubmittedToGatewayTimestamp)
-        //     .Where(canPruneExpression)
-        //     .Take(mempoolConfiguration.PruneBatchSize)
-        //     .ExecuteDeleteAsync(token);
-        var prunedTransactionCount = (int)Math.Floor(0.1);
+        // Change to ExecuteDeleteAsync when EFCore fixes this bug: https://github.com/dotnet/efcore/issues/29690#issuecomment-1726182209
+        var prunedTransactionCount = await dbContext.Database
+            .ExecuteSqlInterpolatedAsync($@"
+DELETE FROM pending_transactions
+    WHERE first_submitted_to_gateway_timestamp < {pruneIfLastGatewaySubmissionBefore}
+    ORDER BY first_submitted_to_gateway_timestamp ASC
+    LIMIT {mempoolConfiguration.PruneBatchSize}
+");
 
         if (prunedTransactionCount > 0)
         {
