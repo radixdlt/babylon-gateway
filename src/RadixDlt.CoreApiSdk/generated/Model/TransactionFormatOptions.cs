@@ -100,7 +100,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="manifest">Whether to return the raw manifest (default true).</param>
         /// <param name="blobs">Whether to return the hex-encoded blobs (default false).</param>
-        /// <param name="message">Whether to return the transaction message (default false).</param>
+        /// <param name="message">Whether to return the transaction message (default true).</param>
         /// <param name="rawSystemTransaction">Whether to return the raw hex-encoded system transaction bytes (default false).</param>
         /// <param name="rawNotarizedTransaction">Whether to return the raw hex-encoded notarized transaction bytes (default true).</param>
         /// <param name="rawLedgerTransaction">Whether to return the raw hex-encoded ledger transaction bytes (default false).</param>
@@ -129,9 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool Blobs { get; set; }
 
         /// <summary>
-        /// Whether to return the transaction message (default false)
+        /// Whether to return the transaction message (default true)
         /// </summary>
-        /// <value>Whether to return the transaction message (default false)</value>
+        /// <value>Whether to return the transaction message (default true)</value>
         [DataMember(Name = "message", EmitDefaultValue = true)]
         public bool Message { get; set; }
 

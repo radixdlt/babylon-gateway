@@ -99,7 +99,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="SborFormatOptions" /> class.
         /// </summary>
         /// <param name="raw">Whether to return the raw hex-encoded bytes (default true).</param>
-        /// <param name="programmaticJson">Whether to return the programmatic json format (default true).</param>
+        /// <param name="programmaticJson">Whether to return the programmatic json format (normally default true, defaults false for streamed transactions).</param>
         public SborFormatOptions(bool raw = default(bool), bool programmaticJson = default(bool))
         {
             this.Raw = raw;
@@ -114,9 +114,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool Raw { get; set; }
 
         /// <summary>
-        /// Whether to return the programmatic json format (default true)
+        /// Whether to return the programmatic json format (normally default true, defaults false for streamed transactions)
         /// </summary>
-        /// <value>Whether to return the programmatic json format (default true)</value>
+        /// <value>Whether to return the programmatic json format (normally default true, defaults false for streamed transactions)</value>
         [DataMember(Name = "programmatic_json", EmitDefaultValue = true)]
         public bool ProgrammaticJson { get; set; }
 

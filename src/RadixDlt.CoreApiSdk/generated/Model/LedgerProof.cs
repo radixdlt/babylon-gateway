@@ -90,87 +90,62 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Transaction state updates (only present if status is Succeeded or Failed)
+    /// LedgerProof
     /// </summary>
-    [DataContract(Name = "StateUpdates")]
-    public partial class StateUpdates : IEquatable<StateUpdates>
+    [DataContract(Name = "LedgerProof")]
+    public partial class LedgerProof : IEquatable<LedgerProof>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
+        /// Initializes a new instance of the <see cref="LedgerProof" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateUpdates() { }
+        protected LedgerProof() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
+        /// Initializes a new instance of the <see cref="LedgerProof" /> class.
         /// </summary>
-        /// <param name="deletedPartitions">deletedPartitions (required).</param>
-        /// <param name="createdSubstates">createdSubstates (required).</param>
-        /// <param name="updatedSubstates">updatedSubstates (required).</param>
-        /// <param name="deletedSubstates">deletedSubstates (required).</param>
-        /// <param name="newGlobalEntities">newGlobalEntities (required).</param>
-        public StateUpdates(List<PartitionId> deletedPartitions = default(List<PartitionId>), List<CreatedSubstate> createdSubstates = default(List<CreatedSubstate>), List<UpdatedSubstate> updatedSubstates = default(List<UpdatedSubstate>), List<DeletedSubstate> deletedSubstates = default(List<DeletedSubstate>), List<EntityReference> newGlobalEntities = default(List<EntityReference>))
+        /// <param name="opaqueHash">A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger. (required).</param>
+        /// <param name="ledgerHeader">ledgerHeader (required).</param>
+        /// <param name="timestampedSignatures">timestampedSignatures (required).</param>
+        public LedgerProof(string opaqueHash = default(string), LedgerHeader ledgerHeader = default(LedgerHeader), List<TimestampedValidatorSignature> timestampedSignatures = default(List<TimestampedValidatorSignature>))
         {
-            // to ensure "deletedPartitions" is required (not null)
-            if (deletedPartitions == null)
+            // to ensure "opaqueHash" is required (not null)
+            if (opaqueHash == null)
             {
-                throw new ArgumentNullException("deletedPartitions is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("opaqueHash is a required property for LedgerProof and cannot be null");
             }
-            this.DeletedPartitions = deletedPartitions;
-            // to ensure "createdSubstates" is required (not null)
-            if (createdSubstates == null)
+            this.OpaqueHash = opaqueHash;
+            // to ensure "ledgerHeader" is required (not null)
+            if (ledgerHeader == null)
             {
-                throw new ArgumentNullException("createdSubstates is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("ledgerHeader is a required property for LedgerProof and cannot be null");
             }
-            this.CreatedSubstates = createdSubstates;
-            // to ensure "updatedSubstates" is required (not null)
-            if (updatedSubstates == null)
+            this.LedgerHeader = ledgerHeader;
+            // to ensure "timestampedSignatures" is required (not null)
+            if (timestampedSignatures == null)
             {
-                throw new ArgumentNullException("updatedSubstates is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("timestampedSignatures is a required property for LedgerProof and cannot be null");
             }
-            this.UpdatedSubstates = updatedSubstates;
-            // to ensure "deletedSubstates" is required (not null)
-            if (deletedSubstates == null)
-            {
-                throw new ArgumentNullException("deletedSubstates is a required property for StateUpdates and cannot be null");
-            }
-            this.DeletedSubstates = deletedSubstates;
-            // to ensure "newGlobalEntities" is required (not null)
-            if (newGlobalEntities == null)
-            {
-                throw new ArgumentNullException("newGlobalEntities is a required property for StateUpdates and cannot be null");
-            }
-            this.NewGlobalEntities = newGlobalEntities;
+            this.TimestampedSignatures = timestampedSignatures;
         }
 
         /// <summary>
-        /// Gets or Sets DeletedPartitions
+        /// A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger.
         /// </summary>
-        [DataMember(Name = "deleted_partitions", IsRequired = true, EmitDefaultValue = true)]
-        public List<PartitionId> DeletedPartitions { get; set; }
+        /// <value>A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger.</value>
+        [DataMember(Name = "opaque_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string OpaqueHash { get; set; }
 
         /// <summary>
-        /// Gets or Sets CreatedSubstates
+        /// Gets or Sets LedgerHeader
         /// </summary>
-        [DataMember(Name = "created_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<CreatedSubstate> CreatedSubstates { get; set; }
+        [DataMember(Name = "ledger_header", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerHeader LedgerHeader { get; set; }
 
         /// <summary>
-        /// Gets or Sets UpdatedSubstates
+        /// Gets or Sets TimestampedSignatures
         /// </summary>
-        [DataMember(Name = "updated_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<UpdatedSubstate> UpdatedSubstates { get; set; }
-
-        /// <summary>
-        /// Gets or Sets DeletedSubstates
-        /// </summary>
-        [DataMember(Name = "deleted_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<DeletedSubstate> DeletedSubstates { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NewGlobalEntities
-        /// </summary>
-        [DataMember(Name = "new_global_entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityReference> NewGlobalEntities { get; set; }
+        [DataMember(Name = "timestamped_signatures", IsRequired = true, EmitDefaultValue = true)]
+        public List<TimestampedValidatorSignature> TimestampedSignatures { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -179,12 +154,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateUpdates {\n");
-            sb.Append("  DeletedPartitions: ").Append(DeletedPartitions).Append("\n");
-            sb.Append("  CreatedSubstates: ").Append(CreatedSubstates).Append("\n");
-            sb.Append("  UpdatedSubstates: ").Append(UpdatedSubstates).Append("\n");
-            sb.Append("  DeletedSubstates: ").Append(DeletedSubstates).Append("\n");
-            sb.Append("  NewGlobalEntities: ").Append(NewGlobalEntities).Append("\n");
+            sb.Append("class LedgerProof {\n");
+            sb.Append("  OpaqueHash: ").Append(OpaqueHash).Append("\n");
+            sb.Append("  LedgerHeader: ").Append(LedgerHeader).Append("\n");
+            sb.Append("  TimestampedSignatures: ").Append(TimestampedSignatures).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,15 +178,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateUpdates);
+            return this.Equals(input as LedgerProof);
         }
 
         /// <summary>
-        /// Returns true if StateUpdates instances are equal
+        /// Returns true if LedgerProof instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateUpdates to be compared</param>
+        /// <param name="input">Instance of LedgerProof to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateUpdates input)
+        public bool Equals(LedgerProof input)
         {
             if (input == null)
             {
@@ -221,34 +194,20 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DeletedPartitions == input.DeletedPartitions ||
-                    this.DeletedPartitions != null &&
-                    input.DeletedPartitions != null &&
-                    this.DeletedPartitions.SequenceEqual(input.DeletedPartitions)
+                    this.OpaqueHash == input.OpaqueHash ||
+                    (this.OpaqueHash != null &&
+                    this.OpaqueHash.Equals(input.OpaqueHash))
                 ) && 
                 (
-                    this.CreatedSubstates == input.CreatedSubstates ||
-                    this.CreatedSubstates != null &&
-                    input.CreatedSubstates != null &&
-                    this.CreatedSubstates.SequenceEqual(input.CreatedSubstates)
+                    this.LedgerHeader == input.LedgerHeader ||
+                    (this.LedgerHeader != null &&
+                    this.LedgerHeader.Equals(input.LedgerHeader))
                 ) && 
                 (
-                    this.UpdatedSubstates == input.UpdatedSubstates ||
-                    this.UpdatedSubstates != null &&
-                    input.UpdatedSubstates != null &&
-                    this.UpdatedSubstates.SequenceEqual(input.UpdatedSubstates)
-                ) && 
-                (
-                    this.DeletedSubstates == input.DeletedSubstates ||
-                    this.DeletedSubstates != null &&
-                    input.DeletedSubstates != null &&
-                    this.DeletedSubstates.SequenceEqual(input.DeletedSubstates)
-                ) && 
-                (
-                    this.NewGlobalEntities == input.NewGlobalEntities ||
-                    this.NewGlobalEntities != null &&
-                    input.NewGlobalEntities != null &&
-                    this.NewGlobalEntities.SequenceEqual(input.NewGlobalEntities)
+                    this.TimestampedSignatures == input.TimestampedSignatures ||
+                    this.TimestampedSignatures != null &&
+                    input.TimestampedSignatures != null &&
+                    this.TimestampedSignatures.SequenceEqual(input.TimestampedSignatures)
                 );
         }
 
@@ -261,25 +220,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DeletedPartitions != null)
+                if (this.OpaqueHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.DeletedPartitions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OpaqueHash.GetHashCode();
                 }
-                if (this.CreatedSubstates != null)
+                if (this.LedgerHeader != null)
                 {
-                    hashCode = (hashCode * 59) + this.CreatedSubstates.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerHeader.GetHashCode();
                 }
-                if (this.UpdatedSubstates != null)
+                if (this.TimestampedSignatures != null)
                 {
-                    hashCode = (hashCode * 59) + this.UpdatedSubstates.GetHashCode();
-                }
-                if (this.DeletedSubstates != null)
-                {
-                    hashCode = (hashCode * 59) + this.DeletedSubstates.GetHashCode();
-                }
-                if (this.NewGlobalEntities != null)
-                {
-                    hashCode = (hashCode * 59) + this.NewGlobalEntities.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TimestampedSignatures.GetHashCode();
                 }
                 return hashCode;
             }

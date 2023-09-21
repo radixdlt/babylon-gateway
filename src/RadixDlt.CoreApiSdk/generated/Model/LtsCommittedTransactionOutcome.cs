@@ -110,15 +110,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="LtsCommittedTransactionOutcome" /> class.
         /// </summary>
         /// <param name="stateVersion">stateVersion (required).</param>
+        /// <param name="proposerTimestampMs">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms. (required).</param>
         /// <param name="accumulatorHash">The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; combine(ACC_N, LEDGER_HASH_{N}))&#x60; (where &#x60;combine()&#x60; is an arbitrary deterministic function we use).  (required).</param>
         /// <param name="userTransactionIdentifiers">userTransactionIdentifiers.</param>
         /// <param name="status">status (required).</param>
         /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated.  (required).</param>
         /// <param name="resultantAccountFungibleBalances">A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity.  (required).</param>
         /// <param name="totalFee">The string-encoded decimal representing the total amount of XRD payed as fee (execution, validator tip and royalties). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
-        public LtsCommittedTransactionOutcome(long stateVersion = default(long), string accumulatorHash = default(string), TransactionIdentifiers userTransactionIdentifiers = default(TransactionIdentifiers), LtsCommittedTransactionStatus status = default(LtsCommittedTransactionStatus), List<LtsEntityFungibleBalanceChanges> fungibleEntityBalanceChanges = default(List<LtsEntityFungibleBalanceChanges>), List<LtsResultantAccountFungibleBalances> resultantAccountFungibleBalances = default(List<LtsResultantAccountFungibleBalances>), string totalFee = default(string))
+        public LtsCommittedTransactionOutcome(long stateVersion = default(long), long proposerTimestampMs = default(long), string accumulatorHash = default(string), TransactionIdentifiers userTransactionIdentifiers = default(TransactionIdentifiers), LtsCommittedTransactionStatus status = default(LtsCommittedTransactionStatus), List<LtsEntityFungibleBalanceChanges> fungibleEntityBalanceChanges = default(List<LtsEntityFungibleBalanceChanges>), List<LtsResultantAccountFungibleBalances> resultantAccountFungibleBalances = default(List<LtsResultantAccountFungibleBalances>), string totalFee = default(string))
         {
             this.StateVersion = stateVersion;
+            this.ProposerTimestampMs = proposerTimestampMs;
             // to ensure "accumulatorHash" is required (not null)
             if (accumulatorHash == null)
             {
@@ -152,6 +154,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
         public long StateVersion { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms.
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms.</value>
+        [DataMember(Name = "proposer_timestamp_ms", IsRequired = true, EmitDefaultValue = true)]
+        public long ProposerTimestampMs { get; set; }
 
         /// <summary>
         /// The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; combine(ACC_N, LEDGER_HASH_{N}))&#x60; (where &#x60;combine()&#x60; is an arbitrary deterministic function we use). 
@@ -196,6 +205,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class LtsCommittedTransactionOutcome {\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  ProposerTimestampMs: ").Append(ProposerTimestampMs).Append("\n");
             sb.Append("  AccumulatorHash: ").Append(AccumulatorHash).Append("\n");
             sb.Append("  UserTransactionIdentifiers: ").Append(UserTransactionIdentifiers).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
@@ -242,6 +252,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
+                    this.ProposerTimestampMs == input.ProposerTimestampMs ||
+                    this.ProposerTimestampMs.Equals(input.ProposerTimestampMs)
+                ) && 
+                (
                     this.AccumulatorHash == input.AccumulatorHash ||
                     (this.AccumulatorHash != null &&
                     this.AccumulatorHash.Equals(input.AccumulatorHash))
@@ -284,6 +298,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.ProposerTimestampMs.GetHashCode();
                 if (this.AccumulatorHash != null)
                 {
                     hashCode = (hashCode * 59) + this.AccumulatorHash.GetHashCode();
