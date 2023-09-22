@@ -52,8 +52,8 @@ openapi: 3.0.0
 # => Hex-encoded hashes should end _hash
 # => Hex-encoded bytes/payload should end _hex and not include _bytes
 info:
-  version: '0.5.1'
-  title: 'Babylon Core API - RCnet v3.1'
+  version: '1.0.0'
+  title: 'Radix Core API - Babylon (v1.0.0)'
   license:
     name: The Radix License, Version 1.0
     url: https://www.radixfoundation.org/licenses/license-v1
@@ -63,8 +63,10 @@ info:
   description: |
     This API is exposed by the Babylon Radix node to give clients access to the Radix Engine, Mempool and State in the node.
 
-    It is intended for use by node-runners on a private network, and is not intended to be exposed publicly.
-    Very heavy load may impact the node's function.
+    The default configuration is intended for use by node-runners on a private network, and is not intended to be exposed publicly.
+    Very heavy load may impact the node's function. The node exposes a configuration flag which allows disabling certain endpoints
+    which may be problematic, but monitoring is advised. This configuration parameter is
+    `api.core.flags.enable_unbounded_endpoints` / `RADIXDLT_CORE_API_FLAGS_ENABLE_UNBOUNDED_ENDPOINTS`.
 
     This API exposes queries against the node's current state (see `/lts/state/` or `/state/`), and streams of transaction history
     (under `/lts/stream/` or `/stream`).
@@ -73,15 +75,19 @@ info:
     [Gateway API](https://docs-babylon.radixdlt.com/).
 
     ## Integration and forward compatibility guarantees
-  
-    This version of the Core API belongs to the fourth release candidate of the Radix Babylon network ("RCnet v3.1").
 
     Integrators (such as exchanges) are recommended to use the `/lts/` endpoints - they have been designed to be clear
     and simple for integrators wishing to create and monitor transactions involving fungible transfers to/from accounts.
 
-    All endpoints under `/lts/` are guaranteed to be forward compatible to Babylon mainnet launch (and beyond).
+    All endpoints under `/lts/` have high guarantees of forward compatibility in future node versions.
     We may add new fields, but existing fields will not be changed. Assuming the integrating code uses a permissive
     JSON parser which ignores unknown fields, any additions will not affect existing code.
+
+    Other endpoints may be changed with new node versions carrying protocol-updates, although any breaking changes
+    will be flagged clearly in the corresponding release notes.
+
+    All responses may have additional fields added, so clients are advised to use JSON parsers which ignore unknown
+    fields on JSON objects.
 
 servers:
   - url: 'localhost:3333/core'
@@ -135,7 +141,7 @@ tags:
 
       User transactions are formed of a core "intent", which is then signed by 0+ signatories, before being notarized. The output is called a notarized payload.
       It is this notarized transaction payload which is submitted to the network.
-      
+
       For most users, this construction process will generally happen in their Radix Wallet. If you wish to construct transactions programmatically or offline,
       you will need to integrate the Radix Engine Toolkit into your application for construction and finalization.
 
@@ -159,7 +165,7 @@ tags:
       ## State Model
 
       The Radix Engine State Model can be thought of as a forest of state sub-trees.
-      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them. 
+      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them.
       These substates are typed, and can own other entities, forming a tree of ownership.
 
       Each state sub-tree has a root entity, and a single Bech32M Global Address, with a human-readable-prefix (and prefix byte) matching the root entity type.
@@ -169,7 +175,7 @@ tags:
   - name: Construction
     x-displayName: Transaction Construction
     x-traitTag: true # Don't display endpoints under this tag
-    description: |      
+    description: |
       To construct and submit a transaction using the LTS endpoints:
 
       * Query `/lts/transaction/construction` to retrieve the current epoch (according to your node).
@@ -202,9 +208,9 @@ tags:
     x-displayName: Stream Endpoints
     description: To query the transaction stream of the ledger.
 paths:
-##################################################
-# Long Term Support backwards compatible Sub-API #
-##################################################
+  ##################################################
+  # Long Term Support backwards compatible Sub-API #
+  ##################################################
   "/lts/transaction/construction":
     post:
       summary: Get Construction Metadata
@@ -347,6 +353,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
+  "/lts/state/account-deposit-behaviour":
+    post:
+      summary: Get Account Deposit Behaviour
+      description: Returns deposit behaviour of a single account for multiple resource addresses
+      tags:
+        - LTS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LtsStateAccountDepositBehaviourRequest"
+      responses:
+        '200':
+          description: Account deposit behaviour response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LtsStateAccountDepositBehaviourResponse"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicErrorResponse"
   "/lts/stream/transaction-outcomes":
     post:
       summary: Get Transaction Outcomes
@@ -411,9 +442,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-##################
-# Status Sub-API #
-##################
+  ##################
+  # Status Sub-API #
+  ##################
   "/status/network-configuration":
     post:
       summary: Get Network Configuration
@@ -483,9 +514,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-###################
-# Mempool Sub-API #
-###################
+  ###################
+  # Mempool Sub-API #
+  ###################
   "/mempool/list":
     post:
       summary: Get Mempool List
@@ -542,9 +573,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-#######################
-# Transaction Sub-API #
-#######################
+  #######################
+  # Transaction Sub-API #
+  #######################
   "/transaction/parse":
     post:
       summary: Parse Transaction Payload
@@ -753,9 +784,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-##################
-# Stream Sub-API #
-##################
+  ##################
+  # Stream Sub-API #
+  ##################
   "/stream/transactions":
     post:
       summary: Get Committed Transactions
@@ -788,9 +819,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-#################
-# State Sub-API #
-#################
+  #################
+  # State Sub-API #
+  #################
   "/state/consensus-manager":
     post:
       summary: Get Consensus Manager Details
@@ -1094,9 +1125,9 @@ paths:
 #############################################################################################
 components:
   schemas:
-#############################################
-# GENERAL / SHARED MODELS - Request Options #
-#############################################
+    #############################################
+    # GENERAL / SHARED MODELS - Request Options #
+    #############################################
     NetworkIdentifier:
       description: The logical name of the network
       type: string
@@ -1149,17 +1180,17 @@ components:
         previous:
           description: Whether to return the previous substate value for updates and deletes (default false)
           type: boolean
-###########################################################
-# GENERAL / SHARED MODELS - General / Numeric / Utilities #
-###########################################################
+    ###########################################################
+    # GENERAL / SHARED MODELS - General / Numeric / Utilities #
+    ###########################################################
     Decimal:
       type: string
       description: |
         A string-encoded fixed-precision decimal to 18 decimal places.
         A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(192 - 1) <= m < 2^(192 - 1)`.
-##########################################
-# GENERAL / SHARED MODELS - Transactions #
-##########################################
+    ##########################################
+    # GENERAL / SHARED MODELS - Transactions #
+    ##########################################
     TransactionStatus:
       type: string
       enum:
@@ -1603,6 +1634,7 @@ components:
         - Basic
         - TransactionSubmit
         - LtsTransactionSubmit
+        - StreamTransactions
     ErrorResponse:
       type: object
       discriminator:
@@ -1612,6 +1644,7 @@ components:
           Basic: "#/components/schemas/BasicErrorResponse"
           TransactionSubmit: "#/components/schemas/TransactionSubmitErrorResponse"
           LtsTransactionSubmit: "#/components/schemas/LtsTransactionSubmitErrorResponse"
+          StreamTransactions: "#/components/schemas/StreamTransactionsErrorResponse"
       required:
         - error_type
         - code
@@ -1632,9 +1665,9 @@ components:
       allOf:
         - $ref: "#/components/schemas/ErrorResponse"
         - type: object
-######################################
-# GENERAL / SHARED MODELS - Receipts #
-######################################
+    ######################################
+    # GENERAL / SHARED MODELS - Receipts #
+    ######################################
     FeeSummary:
       type: object
       required:
@@ -2309,9 +2342,9 @@ components:
             object_module_id:
               $ref: "#/components/schemas/ModuleId"
 
-#################################################
-# GENERAL / SHARED MODELS - keys and signatures #
-#################################################
+    #################################################
+    # GENERAL / SHARED MODELS - keys and signatures #
+    #################################################
     PublicKeyType:
       type: string
       enum:
@@ -2421,15 +2454,15 @@ components:
           required:
             - public_key
             - signature
-          description: The EdDSA public key and signature 
+          description: The EdDSA public key and signature
           properties:
             public_key:
               $ref: '#/components/schemas/EddsaEd25519PublicKey'
             signature:
               $ref: '#/components/schemas/EddsaEd25519Signature'
-##########################################
-# GENERAL / SHARED MODELS - Access Rules #
-##########################################
+    ##########################################
+    # GENERAL / SHARED MODELS - Access Rules #
+    ##########################################
     AccessRuleType:
       type: string
       enum:
@@ -2651,9 +2684,9 @@ components:
         - None
         - Owner
         - Object
-#######################################
-# GENERAL / SHARED MODELS - Resources #
-#######################################
+    #######################################
+    # GENERAL / SHARED MODELS - Resources #
+    #######################################
     ResourceType:
       type: string
       enum:
@@ -2742,9 +2775,43 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/NonFungibleLocalId'
-##################################
-# GENERAL / SHARED MODELS - SBOR #
-##################################
+    PresentedBadgeType:
+      type: string
+      enum:
+        - Resource
+        - NonFungible
+    PresentedBadge:
+      type: object
+      required:
+        - type
+        - resource_address
+      properties:
+        type:
+          $ref: '#/components/schemas/PresentedBadgeType'
+        resource_address:
+          $ref: '#/components/schemas/ResourceAddress'
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match PresentedBadgeType options above
+          Resource: '#/components/schemas/ResourcePresentedBadge'
+          NonFungible: '#/components/schemas/NonFungiblePresentedBadge'
+    ResourcePresentedBadge:
+      allOf:
+        - $ref: '#/components/schemas/PresentedBadge'
+        - type: object
+    NonFungiblePresentedBadge:
+      allOf:
+        - $ref: '#/components/schemas/PresentedBadge'
+        - type: object
+          required:
+            - local_id
+          properties:
+            local_id:
+              $ref: '#/components/schemas/NonFungibleLocalIdSimpleRepresentation'
+    ##################################
+    # GENERAL / SHARED MODELS - SBOR #
+    ##################################
     DataStruct:
       type: object
       required:
@@ -2774,9 +2841,9 @@ components:
           description: The hex-encoded, raw SBOR-encoded data
         programmatic_json:
           description: The (untyped) unannotated programmatic SBOR JSON
-#####################################
-# GENERAL / SHARED MODELS - Royalty #
-#####################################
+    #####################################
+    # GENERAL / SHARED MODELS - Royalty #
+    #####################################
     BlueprintRoyaltyConfig:
       type: object
       required:
@@ -2812,9 +2879,9 @@ components:
           enum:
             - XRD
             - USD
-########################################
-# GENERAL / SHARED MODELS - validators #
-########################################
+    ########################################
+    # GENERAL / SHARED MODELS - validators #
+    ########################################
     ActiveValidator:
       type: object
       required:
@@ -2831,9 +2898,9 @@ components:
           description: |
             A string-encoded decimal representing the validator's voting power for this epoch.
             This is a snapshot of the amount of XRD staked to the validator at the start of the epoch.
-#####################################
-# GENERAL / SHARED MODELS - schemas #
-#####################################
+    #####################################
+    # GENERAL / SHARED MODELS - schemas #
+    #####################################
     ScryptoSchema:
       type: object
       required:
@@ -3492,9 +3559,9 @@ components:
           type: boolean
         direct_access:
           type: boolean
-#####################################################
-# GENERAL / SHARED MODELS - general substate models #
-#####################################################
+    #####################################################
+    # GENERAL / SHARED MODELS - general substate models #
+    #####################################################
     EntityType:
       type: string
       enum:
@@ -3550,7 +3617,7 @@ components:
         mapping:
           # NOTE:
           # There is an important convention to these names, for consistency:
-          # 
+          #
           # For each distinct typed substate, form [SubstateType] = [ModuleSpecifier][SubstateSpecifier][SubstateTypeVersion]
           # - [ModuleSpecifier] is either [ModuleName]Module for non-main modules, or [EntityType] for main modules
           # - [SubstateSpecifier] is either:
@@ -3670,9 +3737,9 @@ components:
         - MultiResourcePoolFieldState
         - TransactionTrackerFieldState
         - TransactionTrackerCollectionEntry
-################################################
-# GENERAL / SHARED MODELS - substate key types #
-################################################
+    ################################################
+    # GENERAL / SHARED MODELS - substate key types #
+    ################################################
     ObjectRoleKey:
       type: object
       required:
@@ -3812,9 +3879,9 @@ components:
         key_data:
           description: If it can be decoded as SBOR, this is the data
           $ref: '#/components/schemas/SborData'
-################################################
-# GENERAL / SHARED MODELS - specific substates #
-################################################
+    ################################################
+    # GENERAL / SHARED MODELS - specific substates #
+    ################################################
     TypeInfoModuleFieldTypeInfoSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
@@ -3963,7 +4030,7 @@ components:
           description: |
             The generic substitution is provided remotely by a blueprint type.
             The `resolved_full_type_id` is added by the node, and is always present in the model returned from the transaction stream API.
-            Other APIs may not resolve the type from the blueprint definition. 
+            Other APIs may not resolve the type from the blueprint definition.
           required:
             - blueprint_type_identifier
           properties:
@@ -4700,7 +4767,7 @@ components:
         effective_epoch_start:
           description: |
             The effective time the epoch started. A drift-free measure, used to work out when the
-            epoch should ideally end. 
+            epoch should ideally end.
           $ref: '#/components/schemas/Instant'
         actual_epoch_start:
           description: |
@@ -4941,7 +5008,7 @@ components:
         This setting has the following interpretations:
         - Allow: Allows the deposit of all resources - the deny list is honored in this state.
         - Reject: Disallows the deposit of all resources - the allow list is honored in this state.
-        - AllowExisting: Only deposits of existing resources is accepted - both allow and deny lists are honored in this mode.
+        - AllowExisting: Only deposits of existing resources *or* XRD are accepted - both allow and deny lists are honored in this mode.
       enum:
         - Accept
         - Reject
@@ -5205,9 +5272,9 @@ components:
           $ref: '#/components/schemas/EntityReference'
         resource_address:
           $ref: '#/components/schemas/ResourceAddress'
-##########################################
-# REQUEST: /lts/transaction/construction #
-##########################################
+    ##########################################
+    # REQUEST: /lts/transaction/construction #
+    ##########################################
     LtsTransactionConstructionRequest:
       type: object
       required:
@@ -5232,9 +5299,9 @@ components:
           description: |
             The latest round proposer's timestamp (rounded down to the current minute).
             This is provided so that the client can detect if the node is synced up or not.
-####################################
-# REQUEST: /lts/transaction/status #
-####################################
+    ####################################
+    # REQUEST: /lts/transaction/status #
+    ####################################
     LtsTransactionStatusRequest:
       type: object
       required:
@@ -5302,7 +5369,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -5323,9 +5390,9 @@ components:
         - TransientlyRejected
         - InMempool
         - NotInMempool
-####################################
-# REQUEST: /lts/transaction/submit #
-####################################
+    ####################################
+    # REQUEST: /lts/transaction/submit #
+    ####################################
     LtsTransactionSubmitRequest:
       type: object
       required:
@@ -5459,9 +5526,9 @@ components:
               description: |
                 An integer between `0` and `10^10`, marking the epoch from which the transaction will no longer be valid, and be permanently rejected.
                 Only present if the rejection isn't permanent.
-##############################################################
-# REQUEST: /lts/state/account-all-fungible-resource-balances #
-##############################################################
+    ##############################################################
+    # REQUEST: /lts/state/account-all-fungible-resource-balances #
+    ##############################################################
     LtsStateAccountAllFungibleResourceBalancesRequest:
       type: object
       required:
@@ -5508,9 +5575,9 @@ components:
           description: |
             The string-encoded decimal representing the amount of the fungible resource.
             A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(192 - 1) <= m < 2^(192 - 1)`.
-#########################################################
-# REQUEST: /lts/state/account-fungible-resource-balance #
-#########################################################
+    #########################################################
+    # REQUEST: /lts/state/account-fungible-resource-balance #
+    #########################################################
     LtsStateAccountFungibleResourceBalanceRequest:
       type: object
       required:
@@ -5544,9 +5611,85 @@ components:
           description: The Bech32m-encoded human readable version of the account's address
         fungible_resource_balance:
           $ref: "#/components/schemas/LtsFungibleResourceBalance"
-#############################################
-# REQUEST: /lts/stream/transaction-outcomes #
-#############################################
+    #########################################################
+    # REQUEST: /lts/state/account-deposit-behaviour #
+    #########################################################
+    LtsStateAccountDepositBehaviourRequest:
+      type: object
+      required:
+        - network
+        - account_address
+      properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
+        account_address:
+          description: The Bech32m-encoded human readable version of the account's address.
+          type: string
+        resource_addresses:
+          description: The resource addresses to check the deposit behaviours of.
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/ResourceAddress"
+        badge:
+          description: The depositor badge to check against the account's set of authorized depositors.
+          $ref: '#/components/schemas/PresentedBadge'
+    LtsStateAccountDepositBehaviourResponse:
+      type: object
+      required:
+        - state_version
+        - ledger_header_summary
+        - default_deposit_rule
+      properties:
+        state_version:
+          $ref: "#/components/schemas/StateVersion"
+          description: The state version at which the query was performed.
+        ledger_header_summary:
+          $ref: "#/components/schemas/LedgerHeaderSummary"
+          description: The excerpt from the ledger header committed at the `state_version`.
+        default_deposit_rule:
+          $ref: '#/components/schemas/DefaultDepositRule'
+        is_badge_authorized_depositor:
+          type: boolean
+          description: |
+            Whether the input `badge` belongs to the account's set of authorized depositors.
+            This field will only be present if any badge was passed in the request.
+        resource_specific_behaviours:
+          type: object
+          description: |
+            A map from one of the input `resource_addresses` to its specific deposit behavior configured for this account.
+            This field will only be present if an array of specific resource addresses was passed in the request (even if empty).
+          additionalProperties:
+            $ref: '#/components/schemas/ResourceSpecificDepositBehaviour'
+    ResourceSpecificDepositBehaviour:
+      type: object
+      required:
+        - vault_exists
+        - is_xrd
+        - allows_try_deposit
+      properties:
+        resource_preference:
+          $ref: '#/components/schemas/ResourcePreference'
+          description: Whether the resource is on the allow or the deny list (no preference when missing).
+        vault_exists:
+          type: boolean
+          description: |
+            Whether the account contains a vault for the resource (even if 0 balance).
+            This plays a role when `DefaultDepositRule` is `AllowExisting`.
+        is_xrd:
+          type: boolean
+          description: |
+            Whether the resource represents the native XRD fungible.
+            XRD is a special case which does not require `vault_exists = true` to satisfy the `AllowExisting` rule.
+        allows_try_deposit:
+          type: boolean
+          description: |
+            The fully resolved `try_deposit_*` ability of this resource (which takes all the inputs
+            into account, including the authorized depositor badge, the default deposit rule and
+            the above resource-specific circumstances).
+    #############################################
+    # REQUEST: /lts/stream/transaction-outcomes #
+    #############################################
     LtsStreamTransactionOutcomesRequest:
       description: |
         A request to retrieve a sublist of committed transactions from the ledger.
@@ -5670,7 +5813,7 @@ components:
           description: |
             If present, this field indicates the entity contributed to the payment of the fee.
             The change in balance will always be negative.
-            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in 
+            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in
             `fee_balance_changes`.
         fee_balance_changes:
           type: array
@@ -5758,9 +5901,9 @@ components:
           description: |
             The string-encoded decimal representing the resultant balance of the fungible resource.
             A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(192 - 1) <= m < 2^(192 - 1)`.
-#####################################################
-# REQUEST: /lts/stream/account-transaction-outcomes #
-#####################################################
+    #####################################################
+    # REQUEST: /lts/stream/account-transaction-outcomes #
+    #####################################################
     LtsStreamAccountTransactionOutcomesRequest:
       description: |
         A request to retrieve a sublist of committed transactions from the ledger.
@@ -5809,9 +5952,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LtsCommittedTransactionOutcome"
-##########################################
-# REQUEST: /status/network-configuration #
-##########################################
+    ##########################################
+    # REQUEST: /status/network-configuration #
+    ##########################################
     NetworkConfigurationResponse:
       type: object
       required:
@@ -5955,9 +6098,9 @@ components:
           format: int32
           minimum: 0
           maximum: 255
-###################################
-# REQUEST: /status/network-status #
-###################################
+    ###################################
+    # REQUEST: /status/network-status #
+    ###################################
     NetworkStatusRequest:
       type: object
       required:
@@ -6005,18 +6148,6 @@ components:
           type: string
           description: |
             A descriptor for the current protocol version that the node is running.
-    Epoch:
-      type: integer
-      format: int64
-      minimum: 0
-      maximum: 10000000000
-      description: An integer between `0` and `10^10`, marking the epoch.
-    Round:
-      type: integer
-      format: int64
-      minimum: 0
-      maximum: 10000000000
-      description: An integer between `0` and `10^10`, marking the current round in an epoch
     EpochRound:
       type: object
       required:
@@ -6047,9 +6178,9 @@ components:
               $ref: "#/components/schemas/StateVersion"
               description: The state version, which increments with each transaction, starting at `0` pre-genesis.
         - $ref: "#/components/schemas/LedgerHashes"
-##############################
-# REQUEST: /status/scenarios #
-##############################
+    ##############################
+    # REQUEST: /status/scenarios #
+    ##############################
     ScenariosRequest:
       type: object
       required:
@@ -6117,9 +6248,9 @@ components:
     DescribedAddress:
       type: string
       description: An arbitrary Bech32m-encoded human readable address (its type should be inferred from `logical_name`).
-##########################
-# REQUEST: /mempool/list #
-##########################
+    ##########################
+    # REQUEST: /mempool/list #
+    ##########################
     MempoolListRequest:
       type: object
       required:
@@ -6152,9 +6283,9 @@ components:
           $ref: "#/components/schemas/NotarizedTransactionHash"
         payload_hash_bech32m:
           $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
-#################################
-# REQUEST: /mempool/transaction #
-#################################
+    #################################
+    # REQUEST: /mempool/transaction #
+    #################################
     MempoolTransactionRequest:
       type: object
       required:
@@ -6201,9 +6332,9 @@ components:
                 type: string
                 description: |
                   Error message why `hex` field is missing: the transaction was not found in the mempool or the provided hash is invalid.
-###############################
-# REQUEST: /transaction/parse #
-###############################
+    ###############################
+    # REQUEST: /transaction/parse #
+    ###############################
     TransactionParseRequest:
       type: object
       required:
@@ -6420,9 +6551,9 @@ components:
           $ref: "#/components/schemas/LedgerPayloadHash"
         ledger_hash_bech32m:
           $ref: "#/components/schemas/LedgerPayloadHashBech32m"
-################################
-# REQUEST: /transaction/submit #
-################################
+    ################################
+    # REQUEST: /transaction/submit #
+    ################################
     TransactionSubmitRequest:
       type: object
       required:
@@ -6556,9 +6687,9 @@ components:
               description: |
                 An integer between `0` and `10^10`, marking the epoch from which the transaction will no longer be valid, and be permanently rejected.
                 Only present if the rejection isn't permanent.
-################################
-# REQUEST: /transaction/status #
-################################
+    ################################
+    # REQUEST: /transaction/status #
+    ################################
     TransactionStatusRequest:
       type: object
       required:
@@ -6631,7 +6762,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -6640,9 +6771,9 @@ components:
         - NotSeen
         - FateUncertain
         - FateUncertainButLikelyRejection
-#################################
-# REQUEST: /transaction/receipt #
-#################################
+    #################################
+    # REQUEST: /transaction/receipt #
+    #################################
     TransactionReceiptRequest:
       type: object
       required:
@@ -6660,9 +6791,9 @@ components:
       properties:
         committed:
           $ref: "#/components/schemas/CommittedTransaction"
-#####################################
-# REQUEST: /transaction/callpreview #
-#####################################
+    #####################################
+    # REQUEST: /transaction/callpreview #
+    #####################################
     TransactionCallPreviewRequest:
       type: object
       required:
@@ -6740,9 +6871,9 @@ components:
         error_message:
           type: string
           description: Error message (only present if status is Failed or Rejected)
-#################################
-# REQUEST: /transaction/preview #
-#################################
+    #################################
+    # REQUEST: /transaction/preview #
+    #################################
     TransactionPreviewRequest:
       type: object
       required:
@@ -6851,9 +6982,9 @@ components:
                 type: string
               message:
                 type: string
-#################################
-# REQUEST: /stream/transactions #
-#################################
+    #################################
+    # REQUEST: /stream/transactions #
+    #################################
     StreamTransactionsRequest:
       description: |
         A request to retrieve a sublist of committed transactions from the ledger.
@@ -6918,6 +7049,45 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LedgerProof"
+    StreamTransactionsErrorResponse:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponse"
+        - type: object
+          properties:
+            details:
+              $ref: "#/components/schemas/StreamTransactionsErrorDetails"
+    StreamTransactionsErrorDetailsType:
+      type: string
+      enum:
+        - RequestedStateVersionOutOfBounds
+    StreamTransactionsErrorDetails:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/StreamTransactionsErrorDetailsType"
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match StreamTransactionsErrorDetailsType
+          RequestedStateVersionOutOfBounds: '#/components/schemas/RequestedStateVersionOutOfBoundsErrorDetails'
+    RequestedStateVersionOutOfBoundsErrorDetails:
+      allOf:
+        - $ref: "#/components/schemas/StreamTransactionsErrorDetails"
+        - type: object
+          required:
+            - max_ledger_state_version
+          properties:
+            max_ledger_state_version:
+              $ref: "#/components/schemas/StateVersion"
+              description: |
+                The maximum state version currently committed on this node's ledger - the same as
+                would be returned by the `max_ledger_state_version` in a successful response.
+                *Note on the bounds:* the requested `from_state_version` cannot be greater than
+                `max_ledger_state_version + 1` (which is an edge case returning valid
+                `previous_state_identifiers` and an empty `transactions`). Any greater requested
+                value triggers this error.
     CommittedTransaction:
       type: object
       required:
@@ -6945,7 +7115,7 @@ components:
         - ledger_header
         - timestamped_signatures
       properties:
-        opaque_hash: 
+        opaque_hash:
           $ref: "#/components/schemas/OpaqueHash"
         ledger_header:
           $ref: "#/components/schemas/LedgerHeader"
@@ -7136,9 +7306,9 @@ components:
         payload_hex:
           type: string
           description: The hex-encoded system transaction payload. Only returned if enabled in TransactionFormatOptions on your request.
-#####################################
-# REQUEST: /state/consensus-manager #
-#####################################
+    #####################################
+    # REQUEST: /state/consensus-manager #
+    #####################################
     StateConsensusManagerRequest:
       type: object
       required:
@@ -7172,9 +7342,9 @@ components:
           $ref: "#/components/schemas/Substate"
         current_time_rounded_to_minutes:
           $ref: "#/components/schemas/Substate"
-###########################
-# REQUEST: /state/account #
-###########################
+    ###########################
+    # REQUEST: /state/account #
+    ###########################
     StateAccountRequest:
       type: object
       required:
@@ -7219,9 +7389,9 @@ components:
           $ref: "#/components/schemas/EntityReference"
         resource_amount:
           $ref: "#/components/schemas/ResourceAmount"
-#############################
-# REQUEST: /state/component #
-#############################
+    #############################
+    # REQUEST: /state/component #
+    #############################
     StateComponentRequest:
       type: object
       required:
@@ -7295,9 +7465,9 @@ components:
           format: int32
           minimum: 0
           maximum: 100
-#############################
-# REQUEST: /state/validator #
-#############################
+    #############################
+    # REQUEST: /state/validator #
+    #############################
     StateValidatorRequest:
       type: object
       required:
@@ -7337,9 +7507,9 @@ components:
           description: Any descendent nodes owned directly or indirectly by the component
           items:
             $ref: "#/components/schemas/StateComponentDescendentNode"
-#####################################
-# REQUEST: /state/access-controller #
-#####################################
+    #####################################
+    # REQUEST: /state/access-controller #
+    #####################################
     StateAccessControllerRequest:
       type: object
       required:
@@ -7376,9 +7546,9 @@ components:
           description: Any descendent nodes owned directly or indirectly by the component
           items:
             $ref: "#/components/schemas/StateComponentDescendentNode"
-############################
-# REQUEST: /state/resource #
-############################
+    ############################
+    # REQUEST: /state/resource #
+    ############################
     StateResourceRequest:
       type: object
       required:
@@ -7442,9 +7612,9 @@ components:
               $ref: "#/components/schemas/Substate"
             mutable_fields:
               $ref: "#/components/schemas/Substate"
-################################
-# REQUEST: /state/non-fungible #
-################################
+    ################################
+    # REQUEST: /state/non-fungible #
+    ################################
     StateNonFungibleRequest:
       type: object
       required:
@@ -7470,9 +7640,9 @@ components:
           description: A summarized state of the ledger at which the query was performed.
         non_fungible:
           $ref: "#/components/schemas/Substate"
-###########################
-# REQUEST: /state/package #
-###########################
+    ###########################
+    # REQUEST: /state/package #
+    ###########################
     StatePackageRequest:
       type: object
       required:
