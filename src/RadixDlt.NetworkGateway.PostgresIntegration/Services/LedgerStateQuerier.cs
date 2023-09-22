@@ -86,7 +86,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class LedgerStateQuerier : ILedgerStateQuerier
 {
-    private static readonly Regex _oasVersionRegex = new("Version of the API: (\\d+\\.\\d+\\.\\d+)", RegexOptions.Compiled | RegexOptions.Multiline);
+    private static readonly Regex _oasVersionRegex = new("Version of the API: ([^\n]+)", RegexOptions.Compiled | RegexOptions.Multiline);
 
     private static string _gatewayVersion;
     private static string _deployedImage;
