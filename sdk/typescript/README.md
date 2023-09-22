@@ -4,7 +4,8 @@ This SDK is a thin wrapper around the [Babylon Gateway API](https://docs-babylon
 
 ## License
 
-This library is licensed under the [Radix Software EULA](http://www.radixdlt.com/terms/genericEULA).
+The Gateway API SDK code is released under an [Apache 2.0 license](https://github.com/radixdlt/babylon-gateway/blob/main/sdk/typescript/LICENSE). The executable components are licensed under the [Radix Software EULA](http://www.radixdlt.com/terms/genericEULA).
+
 
 ## Structure
 
