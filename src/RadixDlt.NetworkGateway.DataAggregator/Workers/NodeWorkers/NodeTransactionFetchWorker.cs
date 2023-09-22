@@ -64,6 +64,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.Abstractions.Workers;
@@ -76,6 +77,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.Abstractions;
 
@@ -236,10 +238,29 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
             fromStateVersion
         );
 
-        var (apiResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(async () => await _transactionStreamReaderFactory().GetTransactionStream(fromStateVersion, count, token));
-        var transactions = apiResponse.Data.Transactions;
+        var (apiResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(async () =>
+        {
+            return await CoreApiErrorWrapper.ResultOrError<CoreClient.ApiResponse<CoreModel.StreamTransactionsResponse>, CoreModel.StreamTransactionsErrorResponse>(() =>
+            {
+                return _transactionStreamReaderFactory().GetTransactionStream(fromStateVersion, count, token);
+            });
+        });
 
-        await _observers.ForEachAsync(x => x.TransactionsFetched(NodeName, transactions, fetchTransactionsMs));
+        if (apiResponse.Failed)
+        {
+            var ex = apiResponse.FailureResponse.OriginalApiException;
+
+            if (apiResponse.FailureResponse.Details is CoreModel.RequestedStateVersionOutOfBoundsErrorDetails oob)
+            {
+                _logger.LogDebug(ex, "Requested state version past the maximal ledger state version of {MaxLedgerStateVersion}", oob.MaxLedgerStateVersion);
+
+                return new FetchedTransactions(new List<CoreModel.CommittedTransaction>(), null!, 0);
+            }
+
+            throw apiResponse.FailureResponse.OriginalApiException;
+        }
+
+        var transactions = apiResponse.SuccessResponse.Data.Transactions;
 
         if (transactions.Count > 0)
         {
@@ -251,7 +272,9 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
             );
         }
 
-        return new FetchedTransactions(transactions, apiResponse.Data.PreviousStateIdentifiers, Encoding.UTF8.GetByteCount(apiResponse.RawContent));
+        await _observers.ForEachAsync(x => x.TransactionsFetched(NodeName, transactions, fetchTransactionsMs));
+
+        return new FetchedTransactions(transactions, apiResponse.SuccessResponse.Data.PreviousStateIdentifiers, Encoding.UTF8.GetByteCount(apiResponse.SuccessResponse.RawContent));
     }
 
     private async Task<(long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound)?> GetTransactionsToFetch(string nodeName, CancellationToken cancellationToken)
