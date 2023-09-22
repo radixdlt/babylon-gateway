@@ -347,7 +347,8 @@ internal class TransactionQuerier : ITransactionQuerier
         string? HandlingStatusReason,
         PendingTransactionPayloadLedgerStatus PayloadStatus,
         PendingTransactionIntentLedgerStatus IntentStatus,
-        string? ExecutionErrorMessage,
+        string? InitialRejectionReason,
+        string? LatestRejectionReason,
         string? LastSubmissionError);
 
     private class PendingTransactionResponseAggregator
@@ -356,7 +357,8 @@ internal class TransactionQuerier : ITransactionQuerier
         private readonly string? _committedPayloadHash;
         private readonly long? _committedStateVersion;
         private readonly List<GatewayModel.TransactionStatusResponseKnownPayloadItem> _knownPayloads = new();
-        private PendingTransactionIntentLedgerStatus _mostAccurateIntentLedgerStatus = PendingTransactionIntentLedgerStatus.Unknown;
+        private readonly GatewayModel.TransactionIntentStatus? _committedIntentStatus;
+        private PendingTransactionIntentLedgerStatus _mostAccuratePendingTransactionIntentLedgerStatus = PendingTransactionIntentLedgerStatus.Unknown;
         private string? _errorMessageForMostAccurateIntentLedgerStatus;
 
         internal PendingTransactionResponseAggregator(GatewayModel.LedgerState ledgerState, CommittedTransactionSummary? committedTransactionSummary)
@@ -373,11 +375,11 @@ internal class TransactionQuerier : ITransactionQuerier
 
             var (legacyStatus, payloadStatus, intentStatus) = committedTransactionSummary.Status switch
             {
-                LedgerTransactionStatus.Succeeded => (GatewayModel.TransactionStatus.CommittedSuccess, GatewayModel.TransactionPayloadStatus.CommittedSuccess, PendingTransactionIntentLedgerStatus.CommittedSuccess),
-                LedgerTransactionStatus.Failed => (GatewayModel.TransactionStatus.CommittedFailure, GatewayModel.TransactionPayloadStatus.CommittedFailure, PendingTransactionIntentLedgerStatus.CommittedFailure),
+                LedgerTransactionStatus.Succeeded => (GatewayModel.TransactionStatus.CommittedSuccess, GatewayModel.TransactionPayloadStatus.CommittedSuccess, GatewayModel.TransactionIntentStatus.CommittedSuccess),
+                LedgerTransactionStatus.Failed => (GatewayModel.TransactionStatus.CommittedFailure, GatewayModel.TransactionPayloadStatus.CommittedFailure, GatewayModel.TransactionIntentStatus.CommittedFailure),
             };
 
-            _mostAccurateIntentLedgerStatus = intentStatus;
+            _committedIntentStatus = intentStatus;
             _errorMessageForMostAccurateIntentLedgerStatus = committedTransactionSummary.ErrorMessage;
 
             _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
@@ -402,10 +404,9 @@ internal class TransactionQuerier : ITransactionQuerier
             var (legacyStatus, payloadStatus) = pendingTransactionSummary.PayloadStatus switch
             {
                 PendingTransactionPayloadLedgerStatus.Unknown => (GatewayModel.TransactionStatus.Unknown, GatewayModel.TransactionPayloadStatus.Unknown),
-                PendingTransactionPayloadLedgerStatus.CommittedSuccess => (GatewayModel.TransactionStatus.CommittedSuccess, GatewayModel.TransactionPayloadStatus.CommittedSuccess),
-                PendingTransactionPayloadLedgerStatus.CommittedFailure => (GatewayModel.TransactionStatus.CommittedFailure, GatewayModel.TransactionPayloadStatus.CommittedFailure),
-                PendingTransactionPayloadLedgerStatus.CommitPendingOutcomeUnknown => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
-                PendingTransactionPayloadLedgerStatus.CommitOfOtherPayloadForIntentPendingOutcomeUnknown => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionPayloadStatus.PermanentlyRejected),
+                PendingTransactionPayloadLedgerStatus.Committed => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
+                PendingTransactionPayloadLedgerStatus.CommitPending => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
+                PendingTransactionPayloadLedgerStatus.ClashingCommit => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionPayloadStatus.PermanentlyRejected),
                 PendingTransactionPayloadLedgerStatus.PermanentlyRejected => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionPayloadStatus.PermanentlyRejected),
                 PendingTransactionPayloadLedgerStatus.TransientlyAccepted => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.Pending),
                 PendingTransactionPayloadLedgerStatus.TransientlyRejected => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.TemporarilyRejected),
@@ -417,18 +418,23 @@ internal class TransactionQuerier : ITransactionQuerier
                 null => GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
             };
 
-            if (pendingTransactionSummary.IntentStatus.AggregationPriorityAcrossKnownPayloads() >= _mostAccurateIntentLedgerStatus.AggregationPriorityAcrossKnownPayloads())
+            if (pendingTransactionSummary.IntentStatus.AggregationPriorityAcrossKnownPayloads() >= _mostAccuratePendingTransactionIntentLedgerStatus.AggregationPriorityAcrossKnownPayloads())
             {
-                _mostAccurateIntentLedgerStatus = pendingTransactionSummary.IntentStatus;
-                _errorMessageForMostAccurateIntentLedgerStatus = pendingTransactionSummary.ExecutionErrorMessage;
+                _mostAccuratePendingTransactionIntentLedgerStatus = pendingTransactionSummary.IntentStatus;
+                _errorMessageForMostAccurateIntentLedgerStatus = pendingTransactionSummary.LatestRejectionReason;
             }
+
+            var latestErrorMessage = pendingTransactionSummary.LatestRejectionReason == pendingTransactionSummary.InitialRejectionReason
+                ? null
+                : pendingTransactionSummary.LatestRejectionReason;
 
             _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
                 payloadHash: pendingTransactionSummary.PayloadHash,
                 status: legacyStatus,
                 payloadStatus: payloadStatus,
                 payloadStatusDescription: GetPayloadStatusDescription(payloadStatus),
-                errorMessage: pendingTransactionSummary.ExecutionErrorMessage,
+                errorMessage: pendingTransactionSummary.InitialRejectionReason,
+                latestErrorMessage: latestErrorMessage,
                 handlingStatus: handlingStatus,
                 handlingStatusReason: pendingTransactionSummary.HandlingStatusReason,
                 submissionError: pendingTransactionSummary.LastSubmissionError
@@ -437,15 +443,25 @@ internal class TransactionQuerier : ITransactionQuerier
 
         internal GatewayModel.TransactionStatusResponse IntoResponse()
         {
-            var (legacyIntentStatus, intentStatus) = _mostAccurateIntentLedgerStatus switch
+            var intentStatus = _committedIntentStatus ?? _mostAccuratePendingTransactionIntentLedgerStatus switch
             {
-                PendingTransactionIntentLedgerStatus.Unknown => (GatewayModel.TransactionStatus.Unknown, GatewayModel.TransactionIntentStatus.Unknown),
-                PendingTransactionIntentLedgerStatus.CommittedSuccess => (GatewayModel.TransactionStatus.CommittedSuccess, GatewayModel.TransactionIntentStatus.CommittedSuccess),
-                PendingTransactionIntentLedgerStatus.CommittedFailure => (GatewayModel.TransactionStatus.CommittedFailure, GatewayModel.TransactionIntentStatus.CommittedFailure),
-                PendingTransactionIntentLedgerStatus.CommitPendingOutcomeUnknown => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown),
-                PendingTransactionIntentLedgerStatus.PermanentRejection => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionIntentStatus.PermanentlyRejected),
-                PendingTransactionIntentLedgerStatus.PossibleToCommit => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionIntentStatus.Pending),
-                PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection),
+                PendingTransactionIntentLedgerStatus.Unknown => GatewayModel.TransactionIntentStatus.Unknown,
+                PendingTransactionIntentLedgerStatus.Committed => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
+                PendingTransactionIntentLedgerStatus.CommitPending => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
+                PendingTransactionIntentLedgerStatus.PermanentRejection => GatewayModel.TransactionIntentStatus.PermanentlyRejected,
+                PendingTransactionIntentLedgerStatus.PossibleToCommit => GatewayModel.TransactionIntentStatus.Pending,
+                PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection,
+            };
+
+            var legacyIntentStatus = intentStatus switch
+            {
+                GatewayModel.TransactionIntentStatus.Unknown => GatewayModel.TransactionStatus.Unknown,
+                GatewayModel.TransactionIntentStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
+                GatewayModel.TransactionIntentStatus.CommittedFailure => GatewayModel.TransactionStatus.CommittedFailure,
+                GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown => GatewayModel.TransactionStatus.Pending,
+                GatewayModel.TransactionIntentStatus.PermanentlyRejected => GatewayModel.TransactionStatus.Rejected,
+                GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection => GatewayModel.TransactionStatus.Pending,
+                GatewayModel.TransactionIntentStatus.Pending => GatewayModel.TransactionStatus.Pending,
             };
 
             return new GatewayModel.TransactionStatusResponse(
@@ -541,7 +557,8 @@ internal class TransactionQuerier : ITransactionQuerier
                     pt.GatewayHandling.HandlingStatusReason,
                     pt.LedgerDetails.PayloadLedgerStatus,
                     pt.LedgerDetails.IntentLedgerStatus,
-                    pt.LedgerDetails.LatestFailureReason,
+                    pt.LedgerDetails.InitialRejectionReason,
+                    pt.LedgerDetails.LatestRejectionReason,
                     pt.NetworkDetails.LastSubmitErrorTitle
                 )
             )

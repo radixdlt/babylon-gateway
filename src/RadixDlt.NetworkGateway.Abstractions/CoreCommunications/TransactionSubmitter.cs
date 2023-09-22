@@ -159,10 +159,10 @@ public abstract record NodeSubmissionResult
         public override bool ShouldStopSubmittingPermanently() => true;
 
         public override PendingTransactionPayloadLedgerStatus PayloadStatus() => CommittedAsDetails.IsSameTransaction
-            ? PendingTransactionPayloadLedgerStatus.CommitPendingOutcomeUnknown
-            : PendingTransactionPayloadLedgerStatus.CommitOfOtherPayloadForIntentPendingOutcomeUnknown;
+            ? PendingTransactionPayloadLedgerStatus.CommitPending
+            : PendingTransactionPayloadLedgerStatus.ClashingCommit;
 
-        public override PendingTransactionIntentLedgerStatus IntentStatus() => PendingTransactionIntentLedgerStatus.CommitPendingOutcomeUnknown;
+        public override PendingTransactionIntentLedgerStatus IntentStatus() => PendingTransactionIntentLedgerStatus.CommitPending;
 
         public override string MetricLabel() => "already_committed";
     }

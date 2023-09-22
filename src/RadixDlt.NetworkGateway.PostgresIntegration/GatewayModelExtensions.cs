@@ -94,22 +94,6 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.TransactionStatus ToGatewayModel(this PendingTransactionPayloadLedgerStatus status)
-    {
-        return status switch
-        {
-            PendingTransactionPayloadLedgerStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
-            PendingTransactionPayloadLedgerStatus.CommittedFailure => GatewayModel.TransactionStatus.CommittedFailure,
-            PendingTransactionPayloadLedgerStatus.CommitPendingOutcomeUnknown => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionPayloadLedgerStatus.CommitOfOtherPayloadForIntentPendingOutcomeUnknown => GatewayModel.TransactionStatus.Rejected,
-            PendingTransactionPayloadLedgerStatus.PermanentlyRejected => GatewayModel.TransactionStatus.Rejected,
-            PendingTransactionPayloadLedgerStatus.TransientlyAccepted => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionPayloadLedgerStatus.TransientlyRejected => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionPayloadLedgerStatus.Unknown => GatewayModel.TransactionStatus.Pending,
-            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
-        };
-    }
-
     public static GatewayModel.PublicKey ToGatewayPublicKey(this ValidatorPublicKeyHistory validatorPublicKey)
     {
         var keyHex = validatorPublicKey.Key.ToHex();

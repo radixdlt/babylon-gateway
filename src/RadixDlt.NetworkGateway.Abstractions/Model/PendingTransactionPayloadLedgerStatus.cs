@@ -70,10 +70,9 @@ public static class PendingTransactionPayloadLedgerStatusExtensions
     {
         return status switch
         {
-            PendingTransactionPayloadLedgerStatus.CommittedSuccess => true,
-            PendingTransactionPayloadLedgerStatus.CommittedFailure => true,
-            PendingTransactionPayloadLedgerStatus.CommitPendingOutcomeUnknown => true,
-            PendingTransactionPayloadLedgerStatus.CommitOfOtherPayloadForIntentPendingOutcomeUnknown => true,
+            PendingTransactionPayloadLedgerStatus.Committed => true,
+            PendingTransactionPayloadLedgerStatus.CommitPending => true,
+            PendingTransactionPayloadLedgerStatus.ClashingCommit => true,
             PendingTransactionPayloadLedgerStatus.PermanentlyRejected => true,
             PendingTransactionPayloadLedgerStatus.TransientlyAccepted => false,
             PendingTransactionPayloadLedgerStatus.TransientlyRejected => false,
@@ -88,10 +87,9 @@ public static class PendingTransactionPayloadLedgerStatusExtensions
     {
         return status switch
         {
-            PendingTransactionPayloadLedgerStatus.CommittedSuccess => 4,
-            PendingTransactionPayloadLedgerStatus.CommittedFailure => 4,
-            PendingTransactionPayloadLedgerStatus.CommitPendingOutcomeUnknown => 3,
-            PendingTransactionPayloadLedgerStatus.CommitOfOtherPayloadForIntentPendingOutcomeUnknown => 3,
+            PendingTransactionPayloadLedgerStatus.Committed => 4,
+            PendingTransactionPayloadLedgerStatus.CommitPending => 3,
+            PendingTransactionPayloadLedgerStatus.ClashingCommit => 3,
             PendingTransactionPayloadLedgerStatus.PermanentlyRejected => 2,
             PendingTransactionPayloadLedgerStatus.TransientlyAccepted => 1,
             PendingTransactionPayloadLedgerStatus.TransientlyRejected => 1,
@@ -112,25 +110,19 @@ public enum PendingTransactionPayloadLedgerStatus
     Unknown,
 
     /// <summary>
-    /// We know that this specific payload has been committed as a success.
+    /// We know that this specific payload has been committed.
     /// </summary>
-    CommittedSuccess,
+    Committed,
 
     /// <summary>
-    /// We know that this specific payload has been committed as a failure.
+    /// We know that this specific payload has been committed, but the Gateway hasn't yet seen it in the transaction stream.
     /// </summary>
-    CommittedFailure,
+    CommitPending,
 
     /// <summary>
-    /// We know that the payload has been committed, but don't yet know the outcome until it's synced (Success/Failure).
+    /// We know that the intent has been committed with a different payload. The Gateway may or may not have seen it yet in the transaction stream.
     /// </summary>
-    CommitPendingOutcomeUnknown,
-
-    /// <summary>
-    /// We know that the intent has been committed with a different payload, but don't yet know the outcome
-    /// until it's synced (Success/Failure).
-    /// </summary>
-    CommitOfOtherPayloadForIntentPendingOutcomeUnknown,
+    ClashingCommit,
 
     /// <summary>
     /// We know that this specific payload is permanently rejected.
@@ -150,10 +142,4 @@ public enum PendingTransactionPayloadLedgerStatus
     /// This specific payload was rejected at the last execution.
     /// </summary>
     TransientlyRejected,
-}
-
-// Need to keep a stub around in order for the migrations to compile
-public enum PendingTransactionStatus
-{
-    Unknown,
 }

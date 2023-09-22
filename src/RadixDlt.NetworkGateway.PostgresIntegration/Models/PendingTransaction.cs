@@ -109,18 +109,17 @@ internal class PendingTransaction
     /// </summary>
     [Required]
     [ForeignKey(nameof(PayloadId))]
+    [Column("payload_id")]
     [DeleteBehavior(DeleteBehavior.Cascade)]
     public PendingTransactionPayload Payload { get; private set; }
 
-    // TODO(David) - do we want to adjust this / change the concurrency token paradigm?
-    // We want Aggregator or anything final to still change the token, but to ignore the check / clobber on write
-
     /// <summary>
-    /// Used as optimistic locking guard where we increase this value on every significant update.
+    /// Configure EFCore to use the automatic PostgreSQL xmin column as the concurrency token. This is updated on every update.
+    /// See the <a href="https://www.npgsql.org/efcore/modeling/concurrency.html?tabs=data-annotations">ngpsql docs</a> for more information.
     /// </summary>
     /// <remarks>
-    /// The ledger extender service might update this entity without any checks as it is considered to have highest priority and it is expected that other services should detect
-    /// concurrency issues instead.
+    /// The ledger extender service updates this entity without checking this, as it is considered to have highest priority.
+    /// It is expected that other services should detect concurrency issues instead.
     /// </remarks>
     [Column("xmin")]
     [Timestamp]
@@ -164,14 +163,12 @@ internal class PendingTransaction
         RetireIfNecessary(handlingConfig, handledAt, currentEpoch);
     }
 
+    // Note - this actually happens in SQL in the LedgerExtenderService to avoid contention
     public void MarkAsCommitted(
-        long stateVersion,
-        bool isSuccess,
-        string? failureReason,
         DateTime markedCommittedAt
     )
     {
-        LedgerDetails.HandleCommitted(stateVersion, isSuccess, failureReason, markedCommittedAt);
+        LedgerDetails.HandleCommitted(markedCommittedAt);
         GatewayHandling.MarkAsNoLongerSubmitting("Concluded as committed");
     }
 
@@ -298,26 +295,20 @@ internal record PendingTransactionLedgerDetails
         }
     }
 
-    [Column("first_failure_reason")]
-    public string? FirstFailureReason { get; private set; }
+    [Column("initial_rejection_reason")]
+    public string? InitialRejectionReason { get; private set; }
 
-    [Column("latest_failure_reason")]
-    public string? LatestFailureReason { get; private set; }
+    [Column("latest_rejection_reason")]
+    public string? LatestRejectionReason { get; private set; }
 
-    [Column("latest_failure_timestamp")]
-    public DateTime? LatestFailureTimestamp { get; private set; }
+    [Column("latest_rejection_timestamp")]
+    public DateTime? LatestRejectionTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the Gateway discovered that the transaction was committed to the DB ledger.
     /// </summary>
     [Column("commit_timestamp")]
     public DateTime? CommitTimestamp { get; private set; }
-
-    /// <summary>
-    /// The state version of the transaction, if we know it has been committed.
-    /// </summary>
-    [Column("state_version")]
-    public long? CommitStateVersion { get; private set; }
 
     private PendingTransactionLedgerDetails()
     {
@@ -336,44 +327,21 @@ internal record PendingTransactionLedgerDetails
     {
         PayloadLedgerStatus = nodeSubmissionResult.PayloadStatus();
         IntentLedgerStatus = nodeSubmissionResult.IntentStatus();
-        var failureReason = nodeSubmissionResult.GetExecutionFailureReason();
-        if (!string.IsNullOrEmpty(failureReason))
-        {
-            FirstFailureReason ??= failureReason;
-            LatestFailureReason = failureReason;
-            LatestFailureTimestamp = submitResultAt;
-        }
 
-        // ReSharper disable once InvertIf - it's clearer like this, not inverted
-        if (nodeSubmissionResult is NodeSubmissionResult.IntentAlreadyCommitted { CommittedAsDetails: var details })
+        if (nodeSubmissionResult is NodeSubmissionResult.Rejection { Details: var details })
         {
-            CommitTimestamp = submitResultAt;
-            CommitStateVersion = details.StateVersion;
+            InitialRejectionReason ??= details.ErrorMessage;
+            LatestRejectionReason = details.ErrorMessage;
+            LatestRejectionTimestamp = submitResultAt;
         }
     }
 
-    internal void HandleCommitted(long stateVersion, bool isSuccess, string? failureReason, DateTime submitResultAt)
+    // Note - this actually happens in SQL in the LedgerExtenderService to avoid contention
+    internal void HandleCommitted(DateTime commitResultAt)
     {
-        if (isSuccess)
-        {
-            PayloadLedgerStatus = PendingTransactionPayloadLedgerStatus.CommittedSuccess;
-            IntentLedgerStatus = PendingTransactionIntentLedgerStatus.CommittedSuccess;
-        }
-        else
-        {
-            PayloadLedgerStatus = PendingTransactionPayloadLedgerStatus.CommittedFailure;
-            IntentLedgerStatus = PendingTransactionIntentLedgerStatus.CommittedFailure;
-            if (!string.IsNullOrEmpty(failureReason))
-            {
-                FirstFailureReason ??= failureReason;
-                LatestFailureReason = failureReason;
-            }
-
-            LatestFailureTimestamp = submitResultAt;
-        }
-
-        CommitTimestamp = submitResultAt;
-        CommitStateVersion = stateVersion;
+        PayloadLedgerStatus = PendingTransactionPayloadLedgerStatus.Committed;
+        IntentLedgerStatus = PendingTransactionIntentLedgerStatus.Committed;
+        CommitTimestamp = commitResultAt;
     }
 }
 

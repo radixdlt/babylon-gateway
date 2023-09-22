@@ -158,90 +158,65 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         }
     }
 
-    private record CommittedTransactionKeyDetails(long StateVersion, bool WasSuccess, string? ErrorMessage);
-
     private async Task<int> UpdatePendingTransactions(ReadWriteDbContext dbContext, List<CoreModel.CommittedTransaction> committedTransactions, CancellationToken token)
     {
-        /*
-         * TODO replace with something like with no version control check but with change - we want to run this query with priority and let other operations fail instead
-         *
-         * UPDATE pending_transactions pt
-         * SET
-         *    status = define committed success/failure somehow (success if part of some array?),
-         *    commit_timestamp = {utcNow or some timestamp from committedTransactions coll},
-         *    last_failure_reason = null,
-         *    last_failure_timestamp = null,
-         *    version_control = -1
-         * FROM (
-         *    SELECT * FROM pending_transactions WHERE payload_hash = ANY(...)
-         * ) ptu
-         * WHERE pt.id = ptu.id
-         * RETURNING ptu.*;
-         *
-         * and then simple foreach loop notifying the observers
-         */
         var timestamp = _clock.UtcNow;
-        var userTransactionStateVersionAndSuccessByPayloadHash = new Dictionary<string, CommittedTransactionKeyDetails>(committedTransactions.Count);
+        var payloadHashes = committedTransactions
+            .Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction)
+            .Select(ct => ((CoreModel.UserLedgerTransaction)ct.LedgerTransaction).NotarizedTransaction.HashBech32m)
+            .ToList();
 
-        foreach (var committedTransaction in committedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
-        {
-            var payloadHash = ((CoreModel.UserLedgerTransaction)committedTransaction.LedgerTransaction).NotarizedTransaction.HashBech32m;
-
-            var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
-            var isSuccess = committedTransaction.Receipt.Status switch
-            {
-                CoreModel.TransactionStatus.Succeeded => true,
-                CoreModel.TransactionStatus.Failed => false,
-                _ => throw new UnreachableException($"Didn't expect {committedTransaction.Receipt.Status} value"),
-            };
-
-            var errorMessage = committedTransaction.Receipt.ErrorMessage;
-
-            userTransactionStateVersionAndSuccessByPayloadHash[payloadHash] = new CommittedTransactionKeyDetails(stateVersion, isSuccess, errorMessage);
-        }
-
-        var payloadHashes = userTransactionStateVersionAndSuccessByPayloadHash.Keys.ToList();
-
-        var toUpdate = await dbContext
+        var pendingTransactions = await dbContext
             .PendingTransactions
-            .Where(pt =>
-                pt.LedgerDetails.PayloadLedgerStatus != PendingTransactionPayloadLedgerStatus.CommittedSuccess
-                && pt.LedgerDetails.PayloadLedgerStatus != PendingTransactionPayloadLedgerStatus.CommittedFailure)
             .Where(pt => payloadHashes.Contains(pt.PayloadHash))
+            .Where(pt => pt.LedgerDetails.PayloadLedgerStatus == PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
+            .Select(pt => new
+            {
+                pt.PayloadHash,
+                pt.LedgerDetails.PayloadLedgerStatus,
+                pt.GatewayHandling.FirstSubmittedToGatewayTimestamp,
+                pt.LedgerDetails.LatestRejectionTimestamp,
+                pt.LedgerDetails.LatestRejectionReason,
+            })
             .ToListAsync(token);
 
-        if (toUpdate.Count == 0)
+        foreach (var details in pendingTransactions)
         {
-            return 0;
-        }
-
-        foreach (var pendingTransaction in toUpdate)
-        {
-            if (pendingTransaction.LedgerDetails.PayloadLedgerStatus is PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
+            if (details.PayloadLedgerStatus == PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
             {
-                await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasPermanentlyRejected());
+                await _observers.ForEachAsync(x => x.TransactionMarkedCommittedWhichWasPermanentlyRejected());
 
                 _logger.LogError(
                     "Transaction with payload hash {PayloadHash} which was first submitted to Gateway at {FirstGatewaySubmissionTime} was marked permanently rejected at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
-                    pendingTransaction.PayloadHash,
-                    pendingTransaction.GatewayHandling.FirstSubmittedToGatewayTimestamp.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LedgerDetails.LatestFailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LedgerDetails.LatestFailureReason
+                    details.PayloadHash,
+                    details.FirstSubmittedToGatewayTimestamp.AsUtcIsoDateToSecondsForLogs(),
+                    details.LatestRejectionTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    details.LatestRejectionReason
                 );
             }
 
-            var details = userTransactionStateVersionAndSuccessByPayloadHash[pendingTransaction.PayloadHash];
-
-            pendingTransaction.MarkAsCommitted(details.StateVersion, details.WasSuccess, details.ErrorMessage, timestamp);
+            await _observers.ForEachAsync(x => x.TransactionsCommittedWithGatewayLatency(timestamp - details.FirstSubmittedToGatewayTimestamp));
         }
 
-        // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider
-        // something like: https://docs.microsoft.com/en-us/ef/core/saving/concurrency
-        var result = await dbContext.SaveChangesAsync(token);
+        // Change to UpdateAsync when EFCore fixes this bug: https://github.com/dotnet/efcore/issues/29690#issuecomment-1726182209
+        var updatedCount = await dbContext.Database
+            .ExecuteSqlInterpolatedAsync(
+                $@"
+UPDATE pending_transactions
+    SET
+        payload_status = 'committed',
+        intent_status = 'committed',
+        commit_timestamp = {timestamp},
+        resubmit_from_timestamp = NULL,
+        handling_status_reason = 'Concluded as committed'
+    WHERE
+        payload_hash IN (SELECT UNNEST({payloadHashes}))
+",
+                token);
 
-        await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedCount(toUpdate.Count));
+        await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedCount(updatedCount));
 
-        return result;
+        return updatedCount;
     }
 
     private async Task<ExtendLedgerReport> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
