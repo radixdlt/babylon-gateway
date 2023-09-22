@@ -1,27 +1,36 @@
-### TBA
+## Next release (name TBC)
 Release Date: _unreleased_
 
 ### Breaking changes
-- instead of returning only event data from `/stream/transactions` and `/transaction/committed-details`, they are now wrapped in complex object containing emitter, name and data. from  .
+_None_
 
-### What’s New?
-- fixed `epoch` in `from_state_version` forward querying for migrated environments where lowest epoch number isn't 1. 
-- fixed `validator_active_set_history` table which contains data about validator active set history. It was wrongly attached to future epoch not current one.
+### What’s new?
+_N/A_
 
+## 1.0.0-rc1 - Babylon Launch (Release Candidate 1)
+Release Date: _unreleased_
 
-### 0.5.5 RCNet v3.1 revision 4
+### Breaking changes
+- Instead of returning only the event data payload from `/stream/transactions` and `/transaction/committed-details`, the event data is now a complex object, wrapping the data payload, but also containing the emitter and event name. This allows you to properly determine which entity emitted the event.
+
+### What’s new?
+- Fixed `epoch` in `from_state_version` forward querying for migrated environments where lowest epoch number isn't 1. 
+- Fixed the `validator_active_set_history` table which contains data about validator active set history. It was wrongly attached to future epoch not current one.
+- Pending transaction handling has been reworked, and `/transaction/status` returns some additional fields with a lot more information regarding the status of the intent and submitted payloads. Check out the `intent_status` and `payload_status` fields. Each status is also associated with a description to help developers understand the meaning of the returned status.
+
+## 0.5.5 RCNet v3.1 revision 4
 Release Date: 18.09.2023
 
 - fix `/state/entity/details` endpoint when querying for multiple components with same schema.
 
-### 0.5.4 RCNet v3.1 revision 3
+## 0.5.4 RCNet v3.1 revision 3
 Release Date: 15.09.2023
 
 - Fix event schema lookup in `/stream/transactions` and `/transaction/committed-details`.
 - Add `non_fungible_id_location_history` table to improve NFID lookup performance.
 - Add missing index to `entity_vault_history` table to improve royalty vault lookup performance.
 
-### 0.5.3 RCNet v3.1 revision 2
+## 0.5.3 RCNet v3.1 revision 2
 Release Date: 13.09.2023
 
 - Fix incomplete entity type mapping.
@@ -29,7 +38,7 @@ Release Date: 13.09.2023
 - Add `key_json` property to `StateKeyValueStoreDataRequestKeyItem` enabling JSON-based KVStore lookup.
 - support remote schema assignment for generic (key value store, non fungible data) substitution.
 
-### 0.5.2 RCNet v3.1
+## 0.5.2 RCNet v3.1
 Release Date: 07.09.2023
 
 ### What’s New?
@@ -40,7 +49,7 @@ Release Date: 07.09.2023
 - Fixed virtual identity and account details.
 - Fixed how TX total fee paid is calculated.
 
-### 0.5.1 RCNet v3 revision 2
+## 0.5.1 RCNet v3 revision 2
 Release Date: 01.09.2023
 
 - Fix data aggregator processing custom events.
