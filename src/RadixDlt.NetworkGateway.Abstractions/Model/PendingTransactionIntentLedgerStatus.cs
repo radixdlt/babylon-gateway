@@ -73,9 +73,8 @@ public static class PendingTransactionIntentLedgerStatusExtensions
     {
         return status switch
         {
-            PendingTransactionIntentLedgerStatus.CommittedSuccess => 5,
-            PendingTransactionIntentLedgerStatus.CommittedFailure => 5,
-            PendingTransactionIntentLedgerStatus.CommitPendingOutcomeUnknown => 4,
+            PendingTransactionIntentLedgerStatus.Committed => 5,
+            PendingTransactionIntentLedgerStatus.CommitPending => 4,
             PendingTransactionIntentLedgerStatus.PermanentRejection => 3,
             PendingTransactionIntentLedgerStatus.PossibleToCommit => 1,
             PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => 1,
@@ -90,9 +89,8 @@ public static class PendingTransactionIntentLedgerStatusExtensions
     {
         return status switch
         {
-            PendingTransactionIntentLedgerStatus.CommittedSuccess => 5,
-            PendingTransactionIntentLedgerStatus.CommittedFailure => 5,
-            PendingTransactionIntentLedgerStatus.CommitPendingOutcomeUnknown => 4,
+            PendingTransactionIntentLedgerStatus.Committed => 5,
+            PendingTransactionIntentLedgerStatus.CommitPending => 4,
             PendingTransactionIntentLedgerStatus.PermanentRejection => 3,
             PendingTransactionIntentLedgerStatus.PossibleToCommit => 2,
             PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => 1,
@@ -113,19 +111,14 @@ public enum PendingTransactionIntentLedgerStatus
     Unknown,
 
     /// <summary>
-    /// We know that the intent has been committed as a success.
+    /// We know that the intent has been committed.
     /// </summary>
-    CommittedSuccess,
+    Committed,
 
     /// <summary>
-    /// We know that the intent has been committed as a failure.
+    /// We know that the intent has been committed, but the Gateway hasn't yet seen it in the transaction stream.
     /// </summary>
-    CommittedFailure,
-
-    /// <summary>
-    /// We know that the intent has been committed, but don't yet know the outcome until it's synced (Success/Failure).
-    /// </summary>
-    CommitPendingOutcomeUnknown,
+    CommitPending,
 
     /// <summary>
     /// We know that the intent is permanently rejected.

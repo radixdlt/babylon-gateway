@@ -94,8 +94,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,ruid")
                 .Annotation("Npgsql:Enum:package_vm_type", "native,scrypto_v1")
-                .Annotation("Npgsql:Enum:pending_transaction_intent_ledger_status", "unknown,committed_success,committed_failure,commit_pending_outcome_unknown,permanent_rejection,possible_to_commit,likely_but_not_certain_rejection")
-                .Annotation("Npgsql:Enum:pending_transaction_payload_ledger_status", "unknown,committed_success,committed_failure,commit_pending_outcome_unknown,commit_of_other_payload_for_intent_pending_outcome_unknown,permanently_rejected,transiently_accepted,transiently_rejected")
+                .Annotation("Npgsql:Enum:pending_transaction_intent_ledger_status", "unknown,committed,commit_pending,permanent_rejection,possible_to_commit,likely_but_not_certain_rejection")
+                .Annotation("Npgsql:Enum:pending_transaction_payload_ledger_status", "unknown,committed,commit_pending,clashing_commit,permanently_rejected,transiently_accepted,transiently_rejected")
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible")
                 .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
@@ -693,11 +693,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
                     payload_status = table.Column<PendingTransactionPayloadLedgerStatus>(type: "pending_transaction_payload_ledger_status", nullable: false),
                     intent_status = table.Column<PendingTransactionIntentLedgerStatus>(type: "pending_transaction_intent_ledger_status", nullable: false),
-                    first_failure_reason = table.Column<string>(type: "text", nullable: true),
-                    latest_failure_reason = table.Column<string>(type: "text", nullable: true),
-                    latest_failure_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    initial_rejection_reason = table.Column<string>(type: "text", nullable: true),
+                    latest_rejection_reason = table.Column<string>(type: "text", nullable: true),
+                    latest_rejection_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     commit_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    state_version = table.Column<long>(type: "bigint", nullable: true),
                     resubmit_from_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     handling_status_reason = table.Column<string>(type: "text", nullable: true),
                     first_submitted_to_gateway_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

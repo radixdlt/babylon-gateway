@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230921082804_InitialCreate")]
+    [Migration("20230922041840_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -104,8 +104,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "module_id", new[] { "main", "metadata", "royalty", "role_assignment" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "integer", "bytes", "ruid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "package_vm_type", new[] { "native", "scrypto_v1" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_intent_ledger_status", new[] { "unknown", "committed_success", "committed_failure", "commit_pending_outcome_unknown", "permanent_rejection", "possible_to_commit", "likely_but_not_certain_rejection" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_payload_ledger_status", new[] { "unknown", "committed_success", "committed_failure", "commit_pending_outcome_unknown", "commit_of_other_payload_for_intent_pending_outcome_unknown", "permanently_rejected", "transiently_accepted", "transiently_rejected" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_intent_ledger_status", new[] { "unknown", "committed", "commit_pending", "permanent_rejection", "possible_to_commit", "likely_but_not_certain_rejection" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_payload_ledger_status", new[] { "unknown", "committed", "commit_pending", "clashing_commit", "permanently_rejected", "transiently_accepted", "transiently_rejected" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "sbor_type_kind", new[] { "well_known", "schema_local" });
@@ -2289,29 +2289,25 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                             b1.Property<long>("PendingTransactionId")
                                 .HasColumnType("bigint");
 
-                            b1.Property<long?>("CommitStateVersion")
-                                .HasColumnType("bigint")
-                                .HasColumnName("state_version");
-
                             b1.Property<DateTime?>("CommitTimestamp")
                                 .HasColumnType("timestamp with time zone")
                                 .HasColumnName("commit_timestamp");
 
-                            b1.Property<string>("FirstFailureReason")
+                            b1.Property<string>("InitialRejectionReason")
                                 .HasColumnType("text")
-                                .HasColumnName("first_failure_reason");
+                                .HasColumnName("initial_rejection_reason");
 
                             b1.Property<PendingTransactionIntentLedgerStatus>("IntentLedgerStatus")
                                 .HasColumnType("pending_transaction_intent_ledger_status")
                                 .HasColumnName("intent_status");
 
-                            b1.Property<string>("LatestFailureReason")
+                            b1.Property<string>("LatestRejectionReason")
                                 .HasColumnType("text")
-                                .HasColumnName("latest_failure_reason");
+                                .HasColumnName("latest_rejection_reason");
 
-                            b1.Property<DateTime?>("LatestFailureTimestamp")
+                            b1.Property<DateTime?>("LatestRejectionTimestamp")
                                 .HasColumnType("timestamp with time zone")
-                                .HasColumnName("latest_failure_timestamp");
+                                .HasColumnName("latest_rejection_timestamp");
 
                             b1.Property<PendingTransactionPayloadLedgerStatus>("PayloadLedgerStatus")
                                 .HasColumnType("pending_transaction_payload_ledger_status")

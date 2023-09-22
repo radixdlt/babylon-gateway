@@ -125,11 +125,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="status">status (required).</param>
         /// <param name="payloadStatus">payloadStatus.</param>
         /// <param name="payloadStatusDescription">An additional description to clarify the payload status. .</param>
-        /// <param name="errorMessage">An error message received for a rejection or failure during transaction execution. Please note that presence of an error message doesn&#39;t imply that this payload will definitely reject or fail. This could represent an error during a temporary rejection (such as out of fees) which then gets resolved (e.g. by depositing money to pay the fee), allowing the transaction to be committed. .</param>
+        /// <param name="errorMessage">The initial error message received for a rejection or failure during transaction execution. This will typically be the useful error message, explaining the root cause of the issue. Please note that presence of an error message doesn&#39;t imply that this payload will definitely reject or fail. This could represent an error during a temporary rejection (such as out of fees) which then gets resolved (e.g. by depositing money to pay the fee), allowing the transaction to be committed. .</param>
+        /// <param name="latestErrorMessage">The latest error message received for a rejection or failure during transaction execution, this is only returned if it is different from the initial error message. This is more current than the initial error message, but may be less useful, as it could be a message regarding the expiry of the transaction at the end of its epoch validity window. Please note that presence of an error message doesn&#39;t imply that this payload will definitely reject or fail. This could represent an error during a temporary rejection (such as out of fees) which then gets resolved (e.g. by depositing money to pay the fee), allowing the transaction to be committed. .</param>
         /// <param name="handlingStatus">handlingStatus.</param>
         /// <param name="handlingStatusReason">Additional reason for why the Gateway has its current handling status. .</param>
         /// <param name="submissionError">The most recent error message received when submitting this transaction to the network. Please note that the presence of an error message doesn&#39;t imply that this transaction payload will definitely reject or fail. This could be a transient error. .</param>
-        public TransactionStatusResponseKnownPayloadItem(string payloadHash = default(string), TransactionStatus status = default(TransactionStatus), TransactionPayloadStatus? payloadStatus = default(TransactionPayloadStatus?), string payloadStatusDescription = default(string), string errorMessage = default(string), TransactionPayloadGatewayHandlingStatus? handlingStatus = default(TransactionPayloadGatewayHandlingStatus?), string handlingStatusReason = default(string), string submissionError = default(string))
+        public TransactionStatusResponseKnownPayloadItem(string payloadHash = default(string), TransactionStatus status = default(TransactionStatus), TransactionPayloadStatus? payloadStatus = default(TransactionPayloadStatus?), string payloadStatusDescription = default(string), string errorMessage = default(string), string latestErrorMessage = default(string), TransactionPayloadGatewayHandlingStatus? handlingStatus = default(TransactionPayloadGatewayHandlingStatus?), string handlingStatusReason = default(string), string submissionError = default(string))
         {
             // to ensure "payloadHash" is required (not null)
             if (payloadHash == null)
@@ -141,6 +142,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.PayloadStatus = payloadStatus;
             this.PayloadStatusDescription = payloadStatusDescription;
             this.ErrorMessage = errorMessage;
+            this.LatestErrorMessage = latestErrorMessage;
             this.HandlingStatus = handlingStatus;
             this.HandlingStatusReason = handlingStatusReason;
             this.SubmissionError = submissionError;
@@ -161,11 +163,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string PayloadStatusDescription { get; set; }
 
         /// <summary>
-        /// An error message received for a rejection or failure during transaction execution. Please note that presence of an error message doesn&#39;t imply that this payload will definitely reject or fail. This could represent an error during a temporary rejection (such as out of fees) which then gets resolved (e.g. by depositing money to pay the fee), allowing the transaction to be committed. 
+        /// The initial error message received for a rejection or failure during transaction execution. This will typically be the useful error message, explaining the root cause of the issue. Please note that presence of an error message doesn&#39;t imply that this payload will definitely reject or fail. This could represent an error during a temporary rejection (such as out of fees) which then gets resolved (e.g. by depositing money to pay the fee), allowing the transaction to be committed. 
         /// </summary>
-        /// <value>An error message received for a rejection or failure during transaction execution. Please note that presence of an error message doesn&#39;t imply that this payload will definitely reject or fail. This could represent an error during a temporary rejection (such as out of fees) which then gets resolved (e.g. by depositing money to pay the fee), allowing the transaction to be committed. </value>
+        /// <value>The initial error message received for a rejection or failure during transaction execution. This will typically be the useful error message, explaining the root cause of the issue. Please note that presence of an error message doesn&#39;t imply that this payload will definitely reject or fail. This could represent an error during a temporary rejection (such as out of fees) which then gets resolved (e.g. by depositing money to pay the fee), allowing the transaction to be committed. </value>
         [DataMember(Name = "error_message", EmitDefaultValue = true)]
         public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// The latest error message received for a rejection or failure during transaction execution, this is only returned if it is different from the initial error message. This is more current than the initial error message, but may be less useful, as it could be a message regarding the expiry of the transaction at the end of its epoch validity window. Please note that presence of an error message doesn&#39;t imply that this payload will definitely reject or fail. This could represent an error during a temporary rejection (such as out of fees) which then gets resolved (e.g. by depositing money to pay the fee), allowing the transaction to be committed. 
+        /// </summary>
+        /// <value>The latest error message received for a rejection or failure during transaction execution, this is only returned if it is different from the initial error message. This is more current than the initial error message, but may be less useful, as it could be a message regarding the expiry of the transaction at the end of its epoch validity window. Please note that presence of an error message doesn&#39;t imply that this payload will definitely reject or fail. This could represent an error during a temporary rejection (such as out of fees) which then gets resolved (e.g. by depositing money to pay the fee), allowing the transaction to be committed. </value>
+        [DataMember(Name = "latest_error_message", EmitDefaultValue = true)]
+        public string LatestErrorMessage { get; set; }
 
         /// <summary>
         /// Additional reason for why the Gateway has its current handling status. 
@@ -194,6 +203,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  PayloadStatus: ").Append(PayloadStatus).Append("\n");
             sb.Append("  PayloadStatusDescription: ").Append(PayloadStatusDescription).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("  LatestErrorMessage: ").Append(LatestErrorMessage).Append("\n");
             sb.Append("  HandlingStatus: ").Append(HandlingStatus).Append("\n");
             sb.Append("  HandlingStatusReason: ").Append(HandlingStatusReason).Append("\n");
             sb.Append("  SubmissionError: ").Append(SubmissionError).Append("\n");
@@ -256,6 +266,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ErrorMessage.Equals(input.ErrorMessage))
                 ) && 
                 (
+                    this.LatestErrorMessage == input.LatestErrorMessage ||
+                    (this.LatestErrorMessage != null &&
+                    this.LatestErrorMessage.Equals(input.LatestErrorMessage))
+                ) && 
+                (
                     this.HandlingStatus == input.HandlingStatus ||
                     this.HandlingStatus.Equals(input.HandlingStatus)
                 ) && 
@@ -293,6 +308,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.ErrorMessage != null)
                 {
                     hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                }
+                if (this.LatestErrorMessage != null)
+                {
+                    hashCode = (hashCode * 59) + this.LatestErrorMessage.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.HandlingStatus.GetHashCode();
                 if (this.HandlingStatusReason != null)

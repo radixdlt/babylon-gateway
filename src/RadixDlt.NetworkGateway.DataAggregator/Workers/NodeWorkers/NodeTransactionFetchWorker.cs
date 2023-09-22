@@ -175,6 +175,15 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
             fetchMaxBatchSize
         );
 
+        if (batchSize == 0)
+        {
+            _logger.LogDebug(
+                "No transactions need fetching, sleeping for {DelayMs}ms",
+                _delayBetweenLoopsStrategy.DelayAfterSuccess(ElapsedSinceLoopBeginning())
+            );
+            return;
+        }
+
         var batch = await FetchTransactions(
             transactionsToFetch.Value.StateVersionInclusiveLowerBound,
             batchSize,

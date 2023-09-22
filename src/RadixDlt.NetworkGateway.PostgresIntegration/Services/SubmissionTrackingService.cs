@@ -135,7 +135,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
         if (pendingTransaction.LedgerDetails.PayloadLedgerStatus is PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
         {
-            return new SubmissionResult(AlreadyKnown: alreadyKnown, PermanentlyRejectedReason: pendingTransaction.LedgerDetails.LatestFailureReason);
+            return new SubmissionResult(AlreadyKnown: alreadyKnown, PermanentlyRejectedReason: pendingTransaction.LedgerDetails.LatestRejectionReason);
         }
 
         return new SubmissionResult(AlreadyKnown: alreadyKnown);

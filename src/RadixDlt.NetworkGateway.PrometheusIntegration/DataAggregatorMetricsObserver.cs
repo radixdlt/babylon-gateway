@@ -288,6 +288,12 @@ internal class DataAggregatorMetricsObserver :
             new CounterConfiguration { LabelNames = new[] { "node" } }
         );
 
+    private static readonly Summary _transactionsGatewayCommitLatencySeconds = Metrics
+        .CreateSummary(
+            "ng_db_mempool_transactions_commit_latency_seconds",
+            "Summary of the time taken from pending transaction submission to Gateway till the Gateway observes them committed"
+        );
+
     private static readonly Counter _transactionsMarkedCommittedCount = Metrics
         .CreateCounter(
             "ng_db_mempool_transactions_marked_committed_count",
@@ -502,9 +508,16 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ILedgerExtenderServiceObserver.TransactionsMarkedCommittedWhichWasPermanentlyRejected()
+    ValueTask ILedgerExtenderServiceObserver.TransactionMarkedCommittedWhichWasPermanentlyRejected()
     {
         _transactionsMarkedCommittedWhichWerePermanentlyRejectedCount.Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask ILedgerExtenderServiceObserver.TransactionsCommittedWithGatewayLatency(TimeSpan latency)
+    {
+        _transactionsGatewayCommitLatencySeconds.Observe(latency.TotalSeconds);
 
         return ValueTask.CompletedTask;
     }
