@@ -9,7 +9,7 @@ The system is in three main parts:
 
 ## Using the Gateway API
 
-For documentation on the Gateway API, see the [RCNet V2 Gateway API docs on ReDocly](https://radix-rcnet-v2-gateway.redoc.ly/).
+For documentation on the Gateway API, see the [Gateway API docs](https://docs-babylon.radixdlt.com/main/apis/api-specification.html).
 
 ### Known Issues
 

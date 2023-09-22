@@ -27,7 +27,7 @@ Calling static `intialize` method from `GatewayApiClient` class will instantiate
 import { GatewayApiClient } from '@radixdlt/babylon-gateway-api-sdk'
 
 const gatewayApi = GatewayApiClient.initialize({
-  basePath: 'https://rcnet-v3.radixdlt.com',
+  basePath: 'https://mainnet.radixdlt.com',
   applicationName: 'Your dApp Name',
 })
 const { status, transaction, stream, state } = gatewayApi
@@ -90,7 +90,7 @@ You can always opt-out of using aggregated gateway client and instantiate sub-ap
 
 ```typescript
 import { Configuration, StateApi } from '@radixdlt/babylon-gateway-api-sdk'
-const config = new Configuration({ basePath: 'https://rcnet-v3.radixdlt.com' })
+const config = new Configuration({ basePath: 'https://mainnet.radixdlt.com' })
 const stateApi = new StateApi(config)
 const response = await stateApi.nonFungibleData({
   stateNonFungibleDataRequest: {
@@ -111,7 +111,7 @@ Starting from NodeJS 16 `fetch` is available as experimental API. You can e.g. c
 const { GatewayApiClient } = require('@radixdlt/babylon-gateway-api-sdk')
 
 const gateway = GatewayApiClient.initialize({
-  basePath: 'https://rcnet.radixdlt.com',
+  basePath: 'https://mainnet.radixdlt.com',
 })
 gateway.status.getCurrent().then(console.log)
 ```
