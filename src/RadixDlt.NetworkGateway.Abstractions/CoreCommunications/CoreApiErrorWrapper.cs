@@ -70,7 +70,6 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
-// TODO refactor into extension method?
 public static class CoreApiErrorWrapper
 {
     public static async Task<ResponseOrError<TResponse, TError>> ResultOrError<TResponse, TError>(Func<Task<TResponse>> requestAction)

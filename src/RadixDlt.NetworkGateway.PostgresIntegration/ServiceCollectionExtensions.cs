@@ -89,7 +89,6 @@ public static class ServiceCollectionExtensions
             });
     }
 
-    // TODO the moment we eliminate multiple data sources per application we could roll back to Npgsql.DependencyInjection and its AddNpgsqlDataSource
     internal static IServiceCollection AddNpgsqlDataSourceHolder<T>(this IServiceCollection services, string connectionStringName)
     {
         services.TryAdd(new ServiceDescriptor(
