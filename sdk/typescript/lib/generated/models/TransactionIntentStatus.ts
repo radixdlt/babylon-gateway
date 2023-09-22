@@ -14,29 +14,31 @@
 
 
 /**
- * A top-level intent status, left in for backwards compatibility.
- * It doesn't give much information. Rejected means PermanentRejection.
+ * A more specific intent status. See the description field for further information.
+ * Note that `CommitPendingOutcomeUnknown` can either result in `CommittedSuccess` or `CommittedFailure`.
  * @export
  */
-export const TransactionStatus = {
+export const TransactionIntentStatus = {
     Unknown: 'Unknown',
     CommittedSuccess: 'CommittedSuccess',
     CommittedFailure: 'CommittedFailure',
-    Pending: 'Pending',
-    Rejected: 'Rejected'
+    CommitPendingOutcomeUnknown: 'CommitPendingOutcomeUnknown',
+    PermanentlyRejected: 'PermanentlyRejected',
+    LikelyButNotCertainRejection: 'LikelyButNotCertainRejection',
+    Pending: 'Pending'
 } as const;
-export type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus];
+export type TransactionIntentStatus = typeof TransactionIntentStatus[keyof typeof TransactionIntentStatus];
 
 
-export function TransactionStatusFromJSON(json: any): TransactionStatus {
-    return TransactionStatusFromJSONTyped(json, false);
+export function TransactionIntentStatusFromJSON(json: any): TransactionIntentStatus {
+    return TransactionIntentStatusFromJSONTyped(json, false);
 }
 
-export function TransactionStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatus {
-    return json as TransactionStatus;
+export function TransactionIntentStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionIntentStatus {
+    return json as TransactionIntentStatus;
 }
 
-export function TransactionStatusToJSON(value?: TransactionStatus | null): any {
+export function TransactionIntentStatusToJSON(value?: TransactionIntentStatus | null): any {
     return value as any;
 }
 

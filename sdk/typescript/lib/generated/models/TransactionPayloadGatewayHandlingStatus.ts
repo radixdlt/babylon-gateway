@@ -14,29 +14,25 @@
 
 
 /**
- * A top-level intent status, left in for backwards compatibility.
- * It doesn't give much information. Rejected means PermanentRejection.
+ * A status concerning the Gateway's handling status of this pending transaction.
  * @export
  */
-export const TransactionStatus = {
-    Unknown: 'Unknown',
-    CommittedSuccess: 'CommittedSuccess',
-    CommittedFailure: 'CommittedFailure',
-    Pending: 'Pending',
-    Rejected: 'Rejected'
+export const TransactionPayloadGatewayHandlingStatus = {
+    HandlingSubmission: 'HandlingSubmission',
+    Concluded: 'Concluded'
 } as const;
-export type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus];
+export type TransactionPayloadGatewayHandlingStatus = typeof TransactionPayloadGatewayHandlingStatus[keyof typeof TransactionPayloadGatewayHandlingStatus];
 
 
-export function TransactionStatusFromJSON(json: any): TransactionStatus {
-    return TransactionStatusFromJSONTyped(json, false);
+export function TransactionPayloadGatewayHandlingStatusFromJSON(json: any): TransactionPayloadGatewayHandlingStatus {
+    return TransactionPayloadGatewayHandlingStatusFromJSONTyped(json, false);
 }
 
-export function TransactionStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatus {
-    return json as TransactionStatus;
+export function TransactionPayloadGatewayHandlingStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionPayloadGatewayHandlingStatus {
+    return json as TransactionPayloadGatewayHandlingStatus;
 }
 
-export function TransactionStatusToJSON(value?: TransactionStatus | null): any {
+export function TransactionPayloadGatewayHandlingStatusToJSON(value?: TransactionPayloadGatewayHandlingStatus | null): any {
     return value as any;
 }
 

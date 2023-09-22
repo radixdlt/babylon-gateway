@@ -13,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { TransactionIntentStatus } from './TransactionIntentStatus';
+import {
+    TransactionIntentStatusFromJSON,
+    TransactionIntentStatusFromJSONTyped,
+    TransactionIntentStatusToJSON,
+} from './TransactionIntentStatus';
 import type { TransactionStatus } from './TransactionStatus';
 import {
     TransactionStatusFromJSON,
@@ -40,12 +46,33 @@ export interface TransactionStatusResponseAllOf {
     status: TransactionStatus;
     /**
      * 
+     * @type {TransactionIntentStatus}
+     * @memberof TransactionStatusResponseAllOf
+     */
+    intent_status: TransactionIntentStatus;
+    /**
+     * An additional description to clarify the intent status.
+     * @type {string}
+     * @memberof TransactionStatusResponseAllOf
+     */
+    intent_status_description: string;
+    /**
+     * 
      * @type {Array<TransactionStatusResponseKnownPayloadItem>}
      * @memberof TransactionStatusResponseAllOf
      */
     known_payloads: Array<TransactionStatusResponseKnownPayloadItem>;
     /**
-     * 
+     * If the intent was committed, this gives the state version when this intent was committed.
+     * @type {number}
+     * @memberof TransactionStatusResponseAllOf
+     */
+    committed_state_version?: number | null;
+    /**
+     * The most relevant error message received, due to a rejection or commit as failure.
+     * Please note that presence of an error message doesn't imply that the intent
+     * will definitely reject or fail. This could represent a temporary error (such as out
+     * of fees), or an error with a payload which doesn't end up being committed.
      * @type {string}
      * @memberof TransactionStatusResponseAllOf
      */
@@ -58,6 +85,8 @@ export interface TransactionStatusResponseAllOf {
 export function instanceOfTransactionStatusResponseAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "status" in value;
+    isInstance = isInstance && "intent_status" in value;
+    isInstance = isInstance && "intent_status_description" in value;
     isInstance = isInstance && "known_payloads" in value;
 
     return isInstance;
@@ -74,7 +103,10 @@ export function TransactionStatusResponseAllOfFromJSONTyped(json: any, ignoreDis
     return {
         
         'status': TransactionStatusFromJSON(json['status']),
+        'intent_status': TransactionIntentStatusFromJSON(json['intent_status']),
+        'intent_status_description': json['intent_status_description'],
         'known_payloads': ((json['known_payloads'] as Array<any>).map(TransactionStatusResponseKnownPayloadItemFromJSON)),
+        'committed_state_version': !exists(json, 'committed_state_version') ? undefined : json['committed_state_version'],
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
 }
@@ -89,7 +121,10 @@ export function TransactionStatusResponseAllOfToJSON(value?: TransactionStatusRe
     return {
         
         'status': TransactionStatusToJSON(value.status),
+        'intent_status': TransactionIntentStatusToJSON(value.intent_status),
+        'intent_status_description': value.intent_status_description,
         'known_payloads': ((value.known_payloads as Array<any>).map(TransactionStatusResponseKnownPayloadItemToJSON)),
+        'committed_state_version': value.committed_state_version,
         'error_message': value.error_message,
     };
 }

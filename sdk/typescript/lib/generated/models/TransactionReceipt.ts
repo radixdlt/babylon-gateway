@@ -13,6 +13,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { EventsItem } from './EventsItem';
+import {
+    EventsItemFromJSON,
+    EventsItemFromJSONTyped,
+    EventsItemToJSON,
+} from './EventsItem';
+
 /**
  * 
  * @export
@@ -69,10 +76,10 @@ export interface TransactionReceipt {
     output?: object;
     /**
      * Events emitted by a transaction.
-     * @type {object}
+     * @type {Array<EventsItem>}
      * @memberof TransactionReceipt
      */
-    events?: object;
+    events?: Array<EventsItem>;
     /**
      * Error message (only present if status is `Failed` or `Rejected`)
      * @type {string}
@@ -108,7 +115,7 @@ export function TransactionReceiptFromJSONTyped(json: any, ignoreDiscriminator: 
         'state_updates': !exists(json, 'state_updates') ? undefined : json['state_updates'],
         'next_epoch': !exists(json, 'next_epoch') ? undefined : json['next_epoch'],
         'output': !exists(json, 'output') ? undefined : json['output'],
-        'events': !exists(json, 'events') ? undefined : json['events'],
+        'events': !exists(json, 'events') ? undefined : ((json['events'] as Array<any>).map(EventsItemFromJSON)),
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
 }
@@ -130,7 +137,7 @@ export function TransactionReceiptToJSON(value?: TransactionReceipt | null): any
         'state_updates': value.state_updates,
         'next_epoch': value.next_epoch,
         'output': value.output,
-        'events': value.events,
+        'events': value.events === undefined ? undefined : ((value.events as Array<any>).map(EventsItemToJSON)),
         'error_message': value.error_message,
     };
 }

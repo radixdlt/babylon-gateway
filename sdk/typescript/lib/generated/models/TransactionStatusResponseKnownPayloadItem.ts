@@ -13,6 +13,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { TransactionPayloadGatewayHandlingStatus } from './TransactionPayloadGatewayHandlingStatus';
+import {
+    TransactionPayloadGatewayHandlingStatusFromJSON,
+    TransactionPayloadGatewayHandlingStatusFromJSONTyped,
+    TransactionPayloadGatewayHandlingStatusToJSON,
+} from './TransactionPayloadGatewayHandlingStatus';
+import type { TransactionPayloadStatus } from './TransactionPayloadStatus';
+import {
+    TransactionPayloadStatusFromJSON,
+    TransactionPayloadStatusFromJSONTyped,
+    TransactionPayloadStatusToJSON,
+} from './TransactionPayloadStatus';
 import type { TransactionStatus } from './TransactionStatus';
 import {
     TransactionStatusFromJSON,
@@ -40,10 +52,46 @@ export interface TransactionStatusResponseKnownPayloadItem {
     status: TransactionStatus;
     /**
      * 
+     * @type {TransactionPayloadStatus}
+     * @memberof TransactionStatusResponseKnownPayloadItem
+     */
+    payload_status?: TransactionPayloadStatus;
+    /**
+     * An additional description to clarify the payload status.
+     * @type {string}
+     * @memberof TransactionStatusResponseKnownPayloadItem
+     */
+    payload_status_description?: string;
+    /**
+     * An error message received for a rejection or failure during transaction execution.
+     * Please note that presence of an error message doesn't imply that this payload
+     * will definitely reject or fail. This could represent an error during a temporary
+     * rejection (such as out of fees) which then gets resolved (e.g. by depositing money
+     * to pay the fee), allowing the transaction to be committed.
      * @type {string}
      * @memberof TransactionStatusResponseKnownPayloadItem
      */
     error_message?: string | null;
+    /**
+     * 
+     * @type {TransactionPayloadGatewayHandlingStatus}
+     * @memberof TransactionStatusResponseKnownPayloadItem
+     */
+    handling_status?: TransactionPayloadGatewayHandlingStatus;
+    /**
+     * Additional reason for why the Gateway has its current handling status.
+     * @type {string}
+     * @memberof TransactionStatusResponseKnownPayloadItem
+     */
+    handling_status_reason?: string | null;
+    /**
+     * The most recent error message received when submitting this transaction to the network.
+     * Please note that the presence of an error message doesn't imply that this transaction
+     * payload will definitely reject or fail. This could be a transient error.
+     * @type {string}
+     * @memberof TransactionStatusResponseKnownPayloadItem
+     */
+    submission_error?: string | null;
 }
 
 /**
@@ -69,7 +117,12 @@ export function TransactionStatusResponseKnownPayloadItemFromJSONTyped(json: any
         
         'payload_hash': json['payload_hash'],
         'status': TransactionStatusFromJSON(json['status']),
+        'payload_status': !exists(json, 'payload_status') ? undefined : TransactionPayloadStatusFromJSON(json['payload_status']),
+        'payload_status_description': !exists(json, 'payload_status_description') ? undefined : json['payload_status_description'],
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
+        'handling_status': !exists(json, 'handling_status') ? undefined : TransactionPayloadGatewayHandlingStatusFromJSON(json['handling_status']),
+        'handling_status_reason': !exists(json, 'handling_status_reason') ? undefined : json['handling_status_reason'],
+        'submission_error': !exists(json, 'submission_error') ? undefined : json['submission_error'],
     };
 }
 
@@ -84,7 +137,12 @@ export function TransactionStatusResponseKnownPayloadItemToJSON(value?: Transact
         
         'payload_hash': value.payload_hash,
         'status': TransactionStatusToJSON(value.status),
+        'payload_status': TransactionPayloadStatusToJSON(value.payload_status),
+        'payload_status_description': value.payload_status_description,
         'error_message': value.error_message,
+        'handling_status': TransactionPayloadGatewayHandlingStatusToJSON(value.handling_status),
+        'handling_status_reason': value.handling_status_reason,
+        'submission_error': value.submission_error,
     };
 }
 

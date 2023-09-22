@@ -14,29 +14,30 @@
 
 
 /**
- * A top-level intent status, left in for backwards compatibility.
- * It doesn't give much information. Rejected means PermanentRejection.
+ * A more specific payload status. See the description field for further information.
  * @export
  */
-export const TransactionStatus = {
+export const TransactionPayloadStatus = {
     Unknown: 'Unknown',
     CommittedSuccess: 'CommittedSuccess',
     CommittedFailure: 'CommittedFailure',
-    Pending: 'Pending',
-    Rejected: 'Rejected'
+    CommitPendingOutcomeUnknown: 'CommitPendingOutcomeUnknown',
+    PermanentlyRejected: 'PermanentlyRejected',
+    TemporarilyRejected: 'TemporarilyRejected',
+    Pending: 'Pending'
 } as const;
-export type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus];
+export type TransactionPayloadStatus = typeof TransactionPayloadStatus[keyof typeof TransactionPayloadStatus];
 
 
-export function TransactionStatusFromJSON(json: any): TransactionStatus {
-    return TransactionStatusFromJSONTyped(json, false);
+export function TransactionPayloadStatusFromJSON(json: any): TransactionPayloadStatus {
+    return TransactionPayloadStatusFromJSONTyped(json, false);
 }
 
-export function TransactionStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatus {
-    return json as TransactionStatus;
+export function TransactionPayloadStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionPayloadStatus {
+    return json as TransactionPayloadStatus;
 }
 
-export function TransactionStatusToJSON(value?: TransactionStatus | null): any {
+export function TransactionPayloadStatusToJSON(value?: TransactionPayloadStatus | null): any {
     return value as any;
 }
 

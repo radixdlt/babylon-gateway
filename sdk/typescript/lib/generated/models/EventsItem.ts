@@ -16,48 +16,58 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface StateKeyValueStoreDataRequestKeyItem
+ * @interface EventsItem
  */
-export interface StateKeyValueStoreDataRequestKeyItem {
+export interface EventsItem {
     /**
-     * Hex-encoded binary blob.
+     * 
      * @type {string}
-     * @memberof StateKeyValueStoreDataRequestKeyItem
+     * @memberof EventsItem
      */
-    key_hex?: string;
+    name: string;
     /**
      * 
      * @type {object}
-     * @memberof StateKeyValueStoreDataRequestKeyItem
+     * @memberof EventsItem
      */
-    key_json?: object;
+    emitter: object;
+    /**
+     * 
+     * @type {object}
+     * @memberof EventsItem
+     */
+    data: object;
 }
 
 /**
- * Check if a given object implements the StateKeyValueStoreDataRequestKeyItem interface.
+ * Check if a given object implements the EventsItem interface.
  */
-export function instanceOfStateKeyValueStoreDataRequestKeyItem(value: object): boolean {
+export function instanceOfEventsItem(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "name" in value;
+    isInstance = isInstance && "emitter" in value;
+    isInstance = isInstance && "data" in value;
 
     return isInstance;
 }
 
-export function StateKeyValueStoreDataRequestKeyItemFromJSON(json: any): StateKeyValueStoreDataRequestKeyItem {
-    return StateKeyValueStoreDataRequestKeyItemFromJSONTyped(json, false);
+export function EventsItemFromJSON(json: any): EventsItem {
+    return EventsItemFromJSONTyped(json, false);
 }
 
-export function StateKeyValueStoreDataRequestKeyItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateKeyValueStoreDataRequestKeyItem {
+export function EventsItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): EventsItem {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'key_hex': !exists(json, 'key_hex') ? undefined : json['key_hex'],
-        'key_json': !exists(json, 'key_json') ? undefined : json['key_json'],
+        'name': json['name'],
+        'emitter': json['emitter'],
+        'data': json['data'],
     };
 }
 
-export function StateKeyValueStoreDataRequestKeyItemToJSON(value?: StateKeyValueStoreDataRequestKeyItem | null): any {
+export function EventsItemToJSON(value?: EventsItem | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -66,8 +76,9 @@ export function StateKeyValueStoreDataRequestKeyItemToJSON(value?: StateKeyValue
     }
     return {
         
-        'key_hex': value.key_hex,
-        'key_json': value.key_json,
+        'name': value.name,
+        'emitter': value.emitter,
+        'data': value.data,
     };
 }
 

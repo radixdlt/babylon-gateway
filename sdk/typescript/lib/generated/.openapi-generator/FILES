@@ -20,6 +20,7 @@ models/EntityMetadataItemValueAllOf.ts
 models/EntityNotFoundError.ts
 models/EntityNotFoundErrorAllOf.ts
 models/ErrorResponse.ts
+models/EventsItem.ts
 models/FungibleResourcesCollection.ts
 models/FungibleResourcesCollectionAllOf.ts
 models/FungibleResourcesCollectionItem.ts
@@ -241,8 +242,11 @@ models/TransactionCommittedDetailsResponse.ts
 models/TransactionCommittedDetailsResponseAllOf.ts
 models/TransactionConstructionResponse.ts
 models/TransactionDetailsOptIns.ts
+models/TransactionIntentStatus.ts
 models/TransactionNotFoundError.ts
 models/TransactionNotFoundErrorAllOf.ts
+models/TransactionPayloadGatewayHandlingStatus.ts
+models/TransactionPayloadStatus.ts
 models/TransactionPreviewRequest.ts
 models/TransactionPreviewRequestFlags.ts
 models/TransactionPreviewResponse.ts
