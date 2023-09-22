@@ -2,14 +2,20 @@
 
 This system is designed to be the Radix-run publicly exposed gateway into the Babylon Radix network. It is the successor to the [Olympia Gateway](https://github.com/radixdlt/radixdlt-network-gateway).
 
-The system is in three main parts:
-* **Database Migrations** - This project has ownership of the PostgreSQL database schema migrations.
-* **Data Aggregator** - Reads from the Core API of one or more full nodes, ingesting from their Transaction Stream API and Mempool Contents API, and committing transactions to a PostgreSQL database. It also handles the pruning (and resubmission where relevant) of submitted transactions.
-* **Gateway API** - Provides the public API for Wallets and Explorers, and maps construction and submission requests to the Core API of one or more full nodes.
+## License
+
+The Babylon Gateway code is released under the [Radix License](LICENSE). Binaries/Executable components are licensed under the [Radix Software EULA](http://www.radixdlt.com/terms/genericEULA).
 
 ## Using the Gateway API
 
 For documentation on the Gateway API, see the [Gateway API docs](https://docs-babylon.radixdlt.com/main/apis/api-specification.html).
+
+## Structure
+
+The system is in three main parts:
+* **Database Migrations** - This project has ownership of the PostgreSQL database schema migrations.
+* **Data Aggregator** - Reads from the Core API of one or more full nodes, ingesting from their Transaction Stream API and Mempool Contents API, and committing transactions to a PostgreSQL database. It also handles the pruning (and resubmission where relevant) of submitted transactions.
+* **Gateway API** - Provides the public API for Wallets and Explorers, and maps construction and submission requests to the Core API of one or more full nodes.
 
 ## Technical Docs
 
