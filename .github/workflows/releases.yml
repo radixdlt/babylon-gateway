@@ -219,7 +219,7 @@ jobs:
       - docker-gateway-api-dockerhub-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
     with: 
-      image_name: private-babylon-ng-gateway-api
+      image_name: babylon-ng-gateway-api
       image_tag: ${{ needs.setup-tags.outputs.version-suffix }}
       tag_suffix_1: amd64
       tag_suffix_2: arm64
@@ -235,7 +235,7 @@ jobs:
       - docker-data-aggregator-dockerhub-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
     with: 
-      image_name: private-babylon-ng-data-aggregator
+      image_name: babylon-ng-data-aggregator
       image_tag: ${{ needs.setup-tags.outputs.version-suffix }}
       tag_suffix_1: amd64
       tag_suffix_2: arm64
@@ -251,7 +251,7 @@ jobs:
       - docker-database-migrations-dockerhub-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
     with: 
-      image_name: private-babylon-ng-database-migrations
+      image_name: babylon-ng-database-migrations
       image_tag: ${{ needs.setup-tags.outputs.version-suffix }}
       tag_suffix_1: amd64
       tag_suffix_2: arm64
