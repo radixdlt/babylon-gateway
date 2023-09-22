@@ -11,10 +11,6 @@ The system is in three main parts:
 
 For documentation on the Gateway API, see the [Gateway API docs](https://docs-babylon.radixdlt.com/main/apis/api-specification.html).
 
-### Known Issues
-
-* The returned total supply, minted and burned quantities are not accurate. This will be fixed at RCNet v3.
-
 ## Technical Docs
 
 For docs giving an overview of the Network Gateway and its place in the Radix Ecosystem - including information on the Radix-run Network Gateway, and how to run one of your own - check out [the Radix Babylon docs site](https://docs-babylon.radixdlt.com/).
