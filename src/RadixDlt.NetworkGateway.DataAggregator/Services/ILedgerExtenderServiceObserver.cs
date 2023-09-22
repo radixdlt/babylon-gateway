@@ -74,4 +74,6 @@ public interface ILedgerExtenderServiceObserver
     ValueTask TransactionsCommittedWithGatewayLatency(TimeSpan latency);
 
     ValueTask TransactionsMarkedCommittedCount(int count);
+
+    ValueTask StageCompleted(string stage, TimeSpan duration, int? quantity);
 }

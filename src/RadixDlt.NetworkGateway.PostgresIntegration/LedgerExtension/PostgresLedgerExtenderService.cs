@@ -114,14 +114,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
     public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default)
     {
-        // TODO further improvements:
-        // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
-        // - replace with proper Activity at some point to eliminate stopwatches and primitive counters
-        // - avoid dbContextFactory - just make sure we use scoped services with single dbContext (UoW) passed through .ctor
-        // - quite a few sequential database reads could be done in parallel once with ditch EF Core (dbContext)
-        // - read helpers could immediately return empty collections on empty inputs
-        // - ProcessTransactions should be divided into smaller methods invoked in chain
-
         // Create own context for ledger extension unit of work
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
         await using var tx = await dbContext.Database.BeginTransactionAsync(token);
@@ -231,8 +223,8 @@ UPDATE pending_transactions
         var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
         var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
 
-        var readHelper = new ReadHelper(dbContext);
-        var writeHelper = new WriteHelper(dbContext);
+        var readHelper = new ReadHelper(dbContext, _observers);
+        var writeHelper = new WriteHelper(dbContext, _observers);
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
 
@@ -259,10 +251,14 @@ UPDATE pending_transactions
             rowsUpdated += await UpdatePendingTransactions(dbContext, ledgerExtension.CommittedTransactions, token);
 
             dbWriteDuration += sw.Elapsed;
+
+            await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdatePendingTransactions), sw.Elapsed, null));
         }
 
         // step: scan for any referenced entities
         {
+            var sw = Stopwatch.StartNew();
+
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
@@ -561,6 +557,8 @@ UPDATE pending_transactions
                     throw;
                 }
             }
+
+            await _observers.ForEachAsync(x => x.StageCompleted("scan_for_referenced_entities", sw.Elapsed, null));
         }
 
         // step: resolve known types & optionally create missing entities
@@ -699,6 +697,8 @@ UPDATE pending_transactions
             }
 
             referencedEntities.InvokePostResolveConfiguration();
+
+            await _observers.ForEachAsync(x => x.StageCompleted("resolve_and_create_entities", sw.Elapsed, null));
         }
 
         var vaultSnapshots = new List<IVaultSnapshot>();
@@ -723,8 +723,10 @@ UPDATE pending_transactions
         var roleAssignmentChanges = new List<RoleAssignmentsChangePointerLookup>();
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
-        // step: scan all substates to figure out changes
+        // step: scan all substates & events to figure out changes
         {
+            var sw = Stopwatch.StartNew();
+
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
@@ -1337,9 +1339,11 @@ UPDATE pending_transactions
                     throw;
                 }
             }
+
+            await _observers.ForEachAsync(x => x.StageCompleted("scan_for_changes", sw.Elapsed, null));
         }
 
-        // step: now that all the fundamental data is inserted (entities & substates) we can insert some denormalized data
+        // step: now that all the fundamental data is inserted we can insert some denormalized data
         {
             var sw = Stopwatch.StartNew();
 
@@ -1855,6 +1859,8 @@ UPDATE pending_transactions
 
             var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
 
+            await _observers.ForEachAsync(x => x.StageCompleted("process_changes", sw.Elapsed, null));
+
             sw = Stopwatch.StartNew();
 
             rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
@@ -1890,6 +1896,8 @@ UPDATE pending_transactions
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;
+
+            await _observers.ForEachAsync(x => x.StageCompleted("write_all", sw.Elapsed, null));
         }
 
         var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
