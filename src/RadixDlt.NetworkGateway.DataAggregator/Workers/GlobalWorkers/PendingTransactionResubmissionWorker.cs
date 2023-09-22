@@ -76,7 +76,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 /// <summary>
 /// Responsible for keeping the db mempool pruned.
 /// </summary>
-public sealed class PendingTransactionResubmissionWorker : GlobalWorker
+public sealed class PendingTransactionResubmissionWorker : BaseGlobalWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(

@@ -92,6 +92,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
     private readonly ILogger<PostgresLedgerExtenderService> _logger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ITopOfLedgerProvider _topOfLedgerProvider;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly IClock _clock;
 
@@ -100,41 +101,28 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         INetworkConfigurationProvider networkConfigurationProvider,
         IEnumerable<ILedgerExtenderServiceObserver> observers,
-        IClock clock)
+        IClock clock,
+        ITopOfLedgerProvider topOfLedgerProvider)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _networkConfigurationProvider = networkConfigurationProvider;
         _observers = observers;
         _clock = clock;
+        _topOfLedgerProvider = topOfLedgerProvider;
     }
 
-    public async Task<TransactionSummary> GetLatestTransactionSummary(CancellationToken token = default)
+    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default)
     {
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-
-        return await GetTopOfLedger(dbContext, token);
-    }
-
-    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token = default)
-    {
-        // TODO further improvements:
-        // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
-        // - replace with proper Activity at some point to eliminate stopwatches and primitive counters
-        // - avoid dbContextFactory - just make sure we use scoped services with single dbContext (UoW) passed through .ctor
-        // - quite a few sequential database reads could be done in parallel once with ditch EF Core (dbContext)
-        // - read helpers could immediately return empty collections on empty inputs
-        // - ProcessTransactions should be divided into smaller methods invoked in chain
-
         // Create own context for ledger extension unit of work
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
         await using var tx = await dbContext.Database.BeginTransactionAsync(token);
 
         try
         {
-            var topOfLedgerSummary = await GetTopOfLedger(dbContext, token);
+            var topOfLedgerSummary = await _topOfLedgerProvider.GetTopOfLedger(token);
 
-            TransactionConsistency.AssertLatestTransactionConsistent(ledgerExtension.LatestTransactionSummary.StateVersion, topOfLedgerSummary.StateVersion);
+            TransactionConsistencyValidator.AssertLatestTransactionConsistent(ledgerExtension.LatestTransactionSummary.StateVersion, topOfLedgerSummary.StateVersion);
 
             if (topOfLedgerSummary.StateVersion == 0)
             {
@@ -164,80 +152,64 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
     private async Task<int> UpdatePendingTransactions(ReadWriteDbContext dbContext, List<CoreModel.CommittedTransaction> committedTransactions, CancellationToken token)
     {
-        /*
-         * TODO replace with something like with no version control check but with change - we want to run this query with priority and let other operations fail instead
-         *
-         * UPDATE pending_transactions pt
-         * SET
-         *    status = define committed success/failure somehow (success if part of some array?),
-         *    commit_timestamp = {utcNow or some timestamp from committedTransactions coll},
-         *    last_failure_reason = null,
-         *    last_failure_timestamp = null,
-         *    version_control = -1
-         * FROM (
-         *    SELECT * FROM pending_transactions WHERE payload_hash = ANY(...)
-         * ) ptu
-         * WHERE pt.id = ptu.id
-         * RETURNING ptu.*;
-         *
-         * and then simple foreach loop notifying the observers
-         */
+        var timestamp = _clock.UtcNow;
+        var payloadHashes = committedTransactions
+            .Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction)
+            .Select(ct => ((CoreModel.UserLedgerTransaction)ct.LedgerTransaction).NotarizedTransaction.HashBech32m)
+            .ToList();
 
-        var userTransactionStatusByPayloadHash = new Dictionary<string, PendingTransactionStatus>(committedTransactions.Count);
-
-        foreach (var committedTransaction in committedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
-        {
-            var ult = ((CoreModel.UserLedgerTransaction)committedTransaction.LedgerTransaction).NotarizedTransaction;
-
-            userTransactionStatusByPayloadHash[ult.HashBech32m] = committedTransaction.Receipt.Status switch
-            {
-                CoreModel.TransactionStatus.Succeeded => PendingTransactionStatus.CommittedSuccess,
-                CoreModel.TransactionStatus.Failed => PendingTransactionStatus.CommittedFailure,
-                _ => throw new UnreachableException($"Didn't expect {committedTransaction.Receipt.Status} value"),
-            };
-        }
-
-        var payloadHashes = userTransactionStatusByPayloadHash.Keys.ToList();
-
-        var toUpdate = await dbContext
+        var pendingTransactions = await dbContext
             .PendingTransactions
-            .Where(pt => pt.Status != PendingTransactionStatus.CommittedSuccess && pt.Status != PendingTransactionStatus.CommittedFailure)
+            .AsNoTracking()
             .Where(pt => payloadHashes.Contains(pt.PayloadHash))
+            .Where(pt => pt.LedgerDetails.PayloadLedgerStatus == PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
+            .Select(pt => new
+            {
+                pt.PayloadHash,
+                pt.LedgerDetails.PayloadLedgerStatus,
+                pt.GatewayHandling.FirstSubmittedToGatewayTimestamp,
+                pt.LedgerDetails.LatestRejectionTimestamp,
+                pt.LedgerDetails.LatestRejectionReason,
+            })
             .ToListAsync(token);
 
-        if (toUpdate.Count == 0)
+        foreach (var details in pendingTransactions)
         {
-            return 0;
-        }
-
-        foreach (var pendingTransaction in toUpdate)
-        {
-            if (pendingTransaction.Status is PendingTransactionStatus.RejectedPermanently)
+            if (details.PayloadLedgerStatus == PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
             {
-                await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
+                await _observers.ForEachAsync(x => x.TransactionMarkedCommittedWhichWasPermanentlyRejected());
 
                 _logger.LogError(
-                    "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
-                    pendingTransaction.PayloadHash,
-                    pendingTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.Status,
-                    pendingTransaction.LastFailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.LastFailureReason
+                    "Transaction with payload hash {PayloadHash} which was first submitted to Gateway at {FirstGatewaySubmissionTime} was marked permanently rejected at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
+                    details.PayloadHash,
+                    details.FirstSubmittedToGatewayTimestamp.AsUtcIsoDateToSecondsForLogs(),
+                    details.LatestRejectionTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    details.LatestRejectionReason
                 );
             }
 
-            pendingTransaction.MarkAsCommitted(userTransactionStatusByPayloadHash[pendingTransaction.PayloadHash], _clock.UtcNow);
+            await _observers.ForEachAsync(x => x.TransactionsCommittedWithGatewayLatency(timestamp - details.FirstSubmittedToGatewayTimestamp));
         }
 
-        // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider
-        // something like: https://docs.microsoft.com/en-us/ef/core/saving/concurrency
-        var result = await dbContext.SaveChangesAsync(token);
+        // Change to UpdateAsync when EFCore fixes this bug: https://github.com/dotnet/efcore/issues/29690#issuecomment-1726182209
+        var updatedCount = await dbContext.Database
+            .ExecuteSqlInterpolatedAsync(
+                $@"
+UPDATE pending_transactions
+    SET
+        payload_status = 'committed',
+        intent_status = 'committed',
+        commit_timestamp = {timestamp},
+        resubmit_from_timestamp = NULL,
+        handling_status_reason = 'Concluded as committed'
+    WHERE
+        payload_hash = ANY({payloadHashes})
+",
+                token);
 
-        await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedCount(toUpdate.Count));
+        await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedCount(updatedCount));
 
-        return result;
+        return updatedCount;
     }
 
     private async Task<ExtendLedgerReport> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
@@ -251,8 +223,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
         var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
 
-        var readHelper = new ReadHelper(dbContext);
-        var writeHelper = new WriteHelper(dbContext);
+        var readHelper = new ReadHelper(dbContext, _observers);
+        var writeHelper = new WriteHelper(dbContext, _observers);
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
 
@@ -279,10 +251,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsUpdated += await UpdatePendingTransactions(dbContext, ledgerExtension.CommittedTransactions, token);
 
             dbWriteDuration += sw.Elapsed;
+
+            await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdatePendingTransactions), sw.Elapsed, null));
         }
 
         // step: scan for any referenced entities
         {
+            var sw = Stopwatch.StartNew();
+
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
@@ -506,6 +482,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         StateVersion: stateVersion,
                         RoundTimestamp: roundTimestamp,
                         NormalizedRoundTimestamp: normalizedRoundTimestamp,
+                        TransactionTreeHash: lastTransactionSummary.TransactionTreeHash,
+                        ReceiptTreeHash: lastTransactionSummary.ReceiptTreeHash,
+                        StateTreeHash: lastTransactionSummary.StateTreeHash,
                         CreatedTimestamp: createdTimestamp,
                         Epoch: epochUpdate ?? lastTransactionSummary.Epoch,
                         RoundInEpoch: roundInEpochUpdate ?? lastTransactionSummary.RoundInEpoch,
@@ -521,12 +500,19 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.HashBech32m,
                             SignedIntentHash = ult.NotarizedTransaction.SignedIntent.HashBech32m,
                             Message = ult.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
+                            RawPayload = ult.NotarizedTransaction.GetPayloadBytes(),
                         },
                         CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
                         _ => throw new UnreachableException(),
                     };
 
                     ledgerTransaction.StateVersion = stateVersion;
+                    ledgerTransaction.LedgerHashes = new LedgerHashes
+                    {
+                        TransactionTreeHash = committedTransaction.ResultantStateIdentifiers.TransactionTreeHash,
+                        ReceiptTreeHash = committedTransaction.ResultantStateIdentifiers.ReceiptTreeHash,
+                        StateTreeHash = committedTransaction.ResultantStateIdentifiers.StateTreeHash,
+                    };
                     ledgerTransaction.Epoch = summary.Epoch;
                     ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
                     ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
@@ -537,7 +523,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                     ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                     ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
-                    ledgerTransaction.RawPayload = committedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
                     ledgerTransaction.EngineReceipt = new TransactionReceipt
                     {
                         StateUpdates = committedTransaction.Receipt.StateUpdates.ToJson(),
@@ -549,11 +534,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         CostingParameters = committedTransaction.Receipt.CostingParameters.ToJson(),
                         FeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson(),
                         FeeSource = committedTransaction.Receipt.FeeSource?.ToJson(),
-                        EventSbors = default!, // configured later on
-                        EventSchemaEntityIds = default!, // configured later on
-                        EventSchemaHashes = default!, // configured later on
-                        EventTypeIndexes = default!, // configured later on
-                        EventSborTypeKinds = default!, // configured later on
+                        Events = default!, // will be filled later on.
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
@@ -576,6 +557,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     throw;
                 }
             }
+
+            await _observers.ForEachAsync(x => x.StageCompleted("scan_for_referenced_entities", sw.Elapsed, null));
         }
 
         // step: resolve known types & optionally create missing entities
@@ -714,6 +697,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             }
 
             referencedEntities.InvokePostResolveConfiguration();
+
+            await _observers.ForEachAsync(x => x.StageCompleted("resolve_and_create_entities", sw.Elapsed, null));
         }
 
         var vaultSnapshots = new List<IVaultSnapshot>();
@@ -738,14 +723,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var roleAssignmentChanges = new List<RoleAssignmentsChangePointerLookup>();
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
-        // step: scan all substates to figure out changes
+        // step: scan all substates & events to figure out changes
         {
+            var sw = Stopwatch.StartNew();
+
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
                 var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
                 long? newEpoch = null;
+                long? passingEpoch = null;
                 var affectedGlobalEntities = new HashSet<long>();
 
                 try
@@ -896,6 +884,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             if (consensusManagerFieldStateSubstate.Value.Round == 0)
                             {
                                 newEpoch = consensusManagerFieldStateSubstate.Value.Epoch;
+                                passingEpoch = newEpoch - 1;
                             }
                         }
 
@@ -911,7 +900,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     },
                                     v => TokenAmount.FromDecimalString(v.Stake));
 
-                            validatorSetChanges.Add(new ValidatorSetChange(newEpoch!.Value, change, stateVersion));
+                            validatorSetChanges.Add(new ValidatorSetChange(passingEpoch!.Value, change, stateVersion));
                         }
 
                         if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
@@ -1185,11 +1174,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
 
                     transaction.AffectedGlobalEntities = affectedGlobalEntities.ToArray();
-                    transaction.EngineReceipt.EventSbors = events.Select(e => e.Data.GetDataBytes()).ToArray();
-                    transaction.EngineReceipt.EventSchemaEntityIds = events.Select(e => referencedEntities.Get((EntityAddress)e.Type.TypeReference.FullTypeId.EntityAddress).DatabaseId).ToArray();
-                    transaction.EngineReceipt.EventSchemaHashes = events.Select(e => e.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray();
-                    transaction.EngineReceipt.EventTypeIndexes = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray();
-                    transaction.EngineReceipt.EventSborTypeKinds = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray();
+                    transaction.EngineReceipt.Events = new ReceiptEvents
+                    {
+                        Emitters = events.Select(e => e.Type.Emitter.ToJson()).ToArray(),
+                        Names = events.Select(e => e.Type.Name).ToArray(),
+                        Sbors = events.Select(e => e.Data.GetDataBytes()).ToArray(),
+                        SchemaEntityIds = events.Select(e => referencedEntities.Get((EntityAddress)e.Type.TypeReference.FullTypeId.EntityAddress).DatabaseId).ToArray(),
+                        SchemaHashes = events.Select(e => e.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray(),
+                        TypeIndexes = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray(),
+                        SborTypeKinds = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray(),
+                    };
 
                     ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntities.Select(affectedEntity => new AffectedGlobalEntityTransactionMarker
                     {
@@ -1345,9 +1339,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     throw;
                 }
             }
+
+            await _observers.ForEachAsync(x => x.StageCompleted("scan_for_changes", sw.Elapsed, null));
         }
 
-        // step: now that all the fundamental data is inserted (entities & substates) we can insert some denormalized data
+        // step: now that all the fundamental data is inserted we can insert some denormalized data
         {
             var sw = Stopwatch.StartNew();
 
@@ -1863,6 +1859,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
 
+            await _observers.ForEachAsync(x => x.StageCompleted("process_changes", sw.Elapsed, null));
+
             sw = Stopwatch.StartNew();
 
             rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
@@ -1898,6 +1896,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;
+
+            await _observers.ForEachAsync(x => x.StageCompleted("write_all", sw.Elapsed, null));
         }
 
         var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
@@ -1916,38 +1916,5 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 _networkConfigurationProvider.GetNetworkName()
             );
         }
-    }
-
-    private async Task<TransactionSummary> GetTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)
-    {
-        var lastTransaction = await dbContext.GetTopLedgerTransaction().FirstOrDefaultAsync(token);
-
-        return lastTransaction == null
-            ? PreGenesisTransactionSummary()
-            : new TransactionSummary(
-                StateVersion: lastTransaction.StateVersion,
-                RoundTimestamp: lastTransaction.RoundTimestamp,
-                NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
-                CreatedTimestamp: lastTransaction.CreatedTimestamp,
-                Epoch: lastTransaction.Epoch,
-                RoundInEpoch: lastTransaction.RoundInEpoch,
-                IndexInEpoch: lastTransaction.IndexInEpoch,
-                IndexInRound: lastTransaction.IndexInRound
-            );
-    }
-
-    private TransactionSummary PreGenesisTransactionSummary()
-    {
-        // Nearly all of theses turn out to be unused!
-        return new TransactionSummary(
-            StateVersion: 0,
-            RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
-            NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
-            CreatedTimestamp: _clock.UtcNow,
-            Epoch: _networkConfigurationProvider.GetGenesisEpoch(),
-            RoundInEpoch: _networkConfigurationProvider.GetGenesisRound(),
-            IndexInEpoch: -1, // invalid, but we increase it by one to in ProcessTransactions
-            IndexInRound: -1 // invalid, but we increase it by one to in ProcessTransactions
-        );
     }
 }

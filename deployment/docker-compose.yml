@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   fullnode:
-    image: "radixdlt/radixdlt-core:2.0.0" # TODO not published yet
+    image: "radixdlt/babylon-node:1.0.0"
     profiles: ["fullnode"]
     init: true
     ports:
@@ -18,8 +18,7 @@ services:
       RADIX_NODE_KEYSTORE_PASSWORD: "${FULLNODE_KEY_PASSWORD}"
       JAVA_OPTS: -server -Xmx1536m -XX:+HeapDumpOnOutOfMemoryError -XX:+UseCompressedOops -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=jks -Djava.security.egd=file:/dev/urandom -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector --enable-preview
       RADIXDLT_VALIDATOR_KEY_LOCATION: "/home/radixdlt/node-keystore.ks"
-      RADIXDLT_API_PORT: 3333
-      RADIXDLT_TRANSACTIONS_API_ENABLE: "true"
+      RADIXDLT_CORE_API_PORT: 3333
     volumes:
       -  "./container-volumes/fullnode/ledger:/home/radixdlt/RADIXDB"
       -  "./container-volumes/fullnode/keystore.ks:/home/radixdlt/node-keystore.ks"
@@ -52,13 +51,13 @@ services:
       retries: 3
 
   database_migrations: # This is the base -- the _image and _built containers are defined below
-    image: "radixdlt/babylon-ng-postgres-migrations:2.0.0" # TODO not published yet
+    image: "radixdlt/babylon-ng-database-migrations:1.0.0"
     profiles: ["NONE"]
     environment:
       ConnectionStrings__NetworkGatewayMigrations: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
 
   data_aggregator: # This is the base -- the _image and _built containers are defined below
-    image: "radixdlt/babylon-ng-data-aggregator:2.0.0" # TODO not published yet
+    image: "radixdlt/babylon-ng-data-aggregator:1.0.0"
     profiles: ["NONE"]
     deploy:
       restart_policy:
@@ -103,7 +102,7 @@ services:
       - ./data-aggregator-fixed-configuration.json:/home/radixdlt/network-gateway/config.json
 
   gateway_api: # This is the base -- the _image and _built containers are defined below
-    image: "radixdlt/babylon-ng-gateway-api:2.0.0" # TODO not published yet
+    image: "radixdlt/babylon-ng-gateway-api:1.0.0"
     profiles: ["NONE"]
     ports:
       - "127.0.0.1:5308:8080" # This allows you to connect to the API at http://localhost:5308

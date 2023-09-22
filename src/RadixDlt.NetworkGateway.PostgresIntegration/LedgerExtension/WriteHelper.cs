@@ -67,11 +67,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql;
 using NpgsqlTypes;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -82,11 +85,13 @@ internal class WriteHelper
 {
     private readonly NpgsqlConnection _connection;
     private readonly IModel _model;
+    private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
 
-    public WriteHelper(ReadWriteDbContext dbContext)
+    public WriteHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers)
     {
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
         _model = dbContext.Model;
+        _observers = observers;
     }
 
     public async Task<int> CopyEntity(ICollection<Entity> entities, CancellationToken token)
@@ -95,6 +100,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync(
             "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, blueprint_version, divisibility, non_fungible_id_type, vm_type, stake_vault_entity_id, pending_xrd_withdraw_vault_entity_id, locked_owner_stake_unit_vault_entity_id, pending_owner_stake_unit_unlock_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)",
@@ -190,6 +197,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntity), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -200,8 +209,10 @@ internal class WriteHelper
             return 0;
         }
 
+        var sw = Stopwatch.GetTimestamp();
+
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY ledger_transactions (state_version, epoch, round_in_epoch, index_in_epoch, index_in_round, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_fee_source, receipt_fee_destination, receipt_costing_parameters, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_sbors, receipt_event_schema_entity_ids, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash, message) FROM STDIN (FORMAT BINARY)",
+            "COPY ledger_transactions (state_version, transaction_tree_hash, receipt_tree_hash, state_tree_hash, epoch, round_in_epoch, index_in_epoch, index_in_round, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_fee_source, receipt_fee_destination, receipt_costing_parameters, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_emitters, receipt_event_names, receipt_event_sbors, receipt_event_schema_entity_ids, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash, message, raw_payload) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var lt in entities)
@@ -210,6 +221,9 @@ internal class WriteHelper
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(lt.LedgerHashes.TransactionTreeHash, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(lt.LedgerHashes.ReceiptTreeHash, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(lt.LedgerHashes.StateTreeHash, NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.RoundInEpoch, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
@@ -220,7 +234,6 @@ internal class WriteHelper
             await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.CreatedTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
-            await writer.WriteAsync(lt.RawPayload, NpgsqlDbType.Bytea, token);
 
             await writer.WriteAsync(lt.EngineReceipt.StateUpdates, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.Status, "ledger_transaction_status", token);
@@ -231,16 +244,19 @@ internal class WriteHelper
             await writer.WriteAsync(lt.EngineReceipt.ErrorMessage, NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.EngineReceipt.Output, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.NextEpoch, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventSbors, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventSchemaEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventSchemaHashes, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventTypeIndexes, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventSborTypeKinds, "sbor_type_kind[]", token);
+            await writer.WriteAsync(lt.EngineReceipt.Events.Emitters, NpgsqlDbType.Array | NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.Events.Names, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
+            await writer.WriteAsync(lt.EngineReceipt.Events.Sbors, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(lt.EngineReceipt.Events.SchemaEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(lt.EngineReceipt.Events.SchemaHashes, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(lt.EngineReceipt.Events.TypeIndexes, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(lt.EngineReceipt.Events.SborTypeKinds, "sbor_type_kind[]", token);
             await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
 
             switch (lt)
             {
                 case GenesisLedgerTransaction:
+                    await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
@@ -251,8 +267,10 @@ internal class WriteHelper
                     await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(ult.Message, NpgsqlDbType.Jsonb, token);
+                    await writer.WriteAsync(ult.RawPayload, NpgsqlDbType.Bytea, token);
                     break;
                 case RoundUpdateLedgerTransaction:
+                    await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
@@ -265,6 +283,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyLedgerTransaction), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -274,6 +294,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -330,6 +352,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyLedgerTransactionMarkers), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -339,6 +363,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync("COPY entity_metadata_history (id, from_state_version, entity_id, key, value, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)", token);
@@ -357,6 +383,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityMetadataHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -366,6 +394,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_metadata_aggregate_history (id, from_state_version, entity_id, metadata_ids) FROM STDIN (FORMAT BINARY)", token);
 
@@ -380,6 +410,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityMetadataAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -389,6 +421,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync("COPY entity_role_assignments_owner_role_history (id, from_state_version, entity_id, role_assignments) FROM STDIN (FORMAT BINARY)", token);
@@ -404,6 +438,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityRoleAssignmentsOwnerRoleHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -413,6 +449,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -432,6 +470,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityRoleAssignmentsRulesEntryHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -441,6 +481,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync("COPY entity_role_assignments_aggregate_history (id, from_state_version, entity_id, owner_role_id, entry_ids) FROM STDIN (FORMAT BINARY)", token);
@@ -457,22 +499,26 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityRoleAssignmentsAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
-    public async Task<int> CopyStateHistory(ICollection<StateHistory> stateHistory, CancellationToken token)
+    public async Task<int> CopyStateHistory(ICollection<StateHistory> entities, CancellationToken token)
     {
-        if (!stateHistory.Any())
+        if (!entities.Any())
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
                 "COPY state_history (id, from_state_version, entity_id, discriminator, json_state, sbor_state, type_index, schema_hash, sbor_type_kind, schema_defining_entity_id) FROM STDIN (FORMAT BINARY)",
                 token);
 
-        foreach (var e in stateHistory)
+        foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -503,7 +549,9 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
-        return stateHistory.Count;
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyStateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
+        return entities.Count;
     }
 
     public async Task<int> CopyValidatorKeyHistory(ICollection<ValidatorPublicKeyHistory> entities, CancellationToken token)
@@ -512,6 +560,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync("COPY validator_public_key_history (id, from_state_version, validator_entity_id, key_type, key) FROM STDIN (FORMAT BINARY)", token);
@@ -528,6 +578,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyValidatorKeyHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -537,6 +589,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync("COPY validator_active_set_history (id, from_state_version, epoch, validator_public_key_history_id, stake) FROM STDIN (FORMAT BINARY)", token);
@@ -553,6 +607,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyValidatorActiveSetHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -562,6 +618,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -580,6 +638,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyResourceEntitySupplyHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -589,6 +649,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -617,6 +679,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityResourceAggregatedVaultsHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -626,6 +690,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -646,6 +712,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityResourceAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -655,6 +723,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -672,6 +742,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityResourceVaultAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -681,6 +753,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -717,6 +791,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityVaultHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -726,6 +802,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -744,6 +822,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyComponentMethodRoyalties), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -753,6 +833,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync("COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)", token);
@@ -768,21 +850,25 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyAccountDefaultDepositRuleHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
-    public async Task<int> CopyValidatorEmissionStatistics(ICollection<ValidatorEmissionStatistics> entries, CancellationToken token)
+    public async Task<int> CopyValidatorEmissionStatistics(ICollection<ValidatorEmissionStatistics> entities, CancellationToken token)
     {
-        if (!entries.Any())
+        if (!entities.Any())
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
                 "COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
 
-        foreach (var e in entries)
+        foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -795,7 +881,9 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
-        return entries.Count;
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyValidatorEmissionStatistics), Stopwatch.GetElapsedTime(sw), entities.Count));
+
+        return entities.Count;
     }
 
     public async Task<int> CopyAccountResourcePreferenceRuleHistory(List<AccountResourcePreferenceRuleHistory> entities, CancellationToken token)
@@ -804,6 +892,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -823,6 +913,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyAccountResourcePreferenceRuleHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -832,6 +924,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync("COPY non_fungible_id_data (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id) FROM STDIN (FORMAT BINARY)", token);
@@ -847,6 +941,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdData), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -856,6 +952,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -875,6 +973,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdDataHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -884,6 +984,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -900,6 +1002,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdStoreHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -909,6 +1013,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync("COPY non_fungible_id_location_history (id, from_state_version, non_fungible_id_data_id, vault_entity_id) FROM STDIN (FORMAT BINARY)", token);
@@ -924,6 +1030,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdLocationHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -933,6 +1041,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -957,6 +1067,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyPackageBlueprintHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -966,6 +1078,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync("COPY package_code_history (id, from_state_version, package_entity_id, code_hash, code) FROM STDIN (FORMAT BINARY)", token);
 
@@ -981,6 +1095,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyPackageCodeHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -990,6 +1106,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync("COPY schema_history (id, from_state_version, entity_id, schema_hash, schema) FROM STDIN (FORMAT BINARY)", token);
@@ -1006,6 +1124,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopySchemaHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -1015,6 +1135,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -1034,6 +1156,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyKeyValueStoreEntryHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -1043,6 +1167,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -1062,6 +1188,8 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleDataSchemaHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
@@ -1071,6 +1199,8 @@ internal class WriteHelper
         {
             return 0;
         }
+
+        var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
@@ -1095,11 +1225,15 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyKeyValueStoreSchemaHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
         return entities.Count;
     }
 
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
+        var sw = Stopwatch.GetTimestamp();
+
         var cd = new CommandDefinition(
             commandText: @"
 SELECT
@@ -1167,6 +1301,8 @@ SELECT
             cancellationToken: token);
 
         await _connection.ExecuteAsync(cd);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdateSequences), Stopwatch.GetElapsedTime(sw), null));
     }
 
     private T GetDiscriminator<T>(Type type)

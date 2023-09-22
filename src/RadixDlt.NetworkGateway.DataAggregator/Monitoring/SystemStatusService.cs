@@ -82,10 +82,6 @@ public interface ISystemStatusService
     bool IsInStartupGracePeriod();
 
     HealthReport GenerateTransactionCommitmentHealthReport();
-
-    bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan duration);
-
-    bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTime instant);
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
@@ -131,18 +127,6 @@ internal class SystemStatusService : ISystemStatusService
         _isPrimary = isPrimary;
 
         _observers.ForEach(x => x.SetIsPrimary(isPrimary));
-    }
-
-    public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan duration)
-    {
-        return _topOfLedgerNormalizedRoundTimestamp.HasValue
-               && _topOfLedgerNormalizedRoundTimestamp.Value.WithinPeriodOfNow(duration, _clock);
-    }
-
-    public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTime instant)
-    {
-        return _topOfLedgerNormalizedRoundTimestamp.HasValue
-               && _topOfLedgerNormalizedRoundTimestamp.Value + assumedBoundOnClockDrift >= instant;
     }
 
     public bool IsPrimary()

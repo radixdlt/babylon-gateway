@@ -16,3 +16,4 @@ find "src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations" -name \*.cs -e
 dotnet ef migrations add InitialCreate --project src/RadixDlt.NetworkGateway.PostgresIntegration --startup-project apps/DatabaseMigrations --context MigrationsDbContext
 
 ./generation/ensure-license-headers.sh
+./generation/regenerate-idempotent-sql-script.sh

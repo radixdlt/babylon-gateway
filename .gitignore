@@ -1,4 +1,5 @@
 # Custom gitignore
+.idea/
 .postgresdata/
 .postgresdata_backup*/
 *.overrides.json

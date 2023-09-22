@@ -79,7 +79,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 /// <summary>
 /// Responsible for reading the config, and ensuring workers are running for each node.
 /// </summary>
-public sealed class NodeConfigurationMonitorWorker : GlobalWorker
+public sealed class NodeConfigurationMonitorWorker : BaseGlobalWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(

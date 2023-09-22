@@ -253,9 +253,14 @@ csharp_preserve_single_line_blocks = true
 # > New for this project
 dotnet_diagnostic.CS1591.severity = none # Missing XML comment for publicly visible type or member 'Type_or_Member'
 
+# > Switch statements - See this comment: https://stackoverflow.com/a/71433586
+dotnet_diagnostic.CS8524.severity = none  # Allow not including fallback on switch if cover all named enum variants. This allows an "exhaustivity" check
+dotnet_diagnostic.CS8509.severity = error # Require a fallback to switch statements if not exhaustive
+
 # > Inherited from other projects
 dotnet_diagnostic.CS0612.severity = suggestion
 dotnet_diagnostic.CS0618.severity = suggestion
+
 
 # [StyleCop.Analyzers]
 

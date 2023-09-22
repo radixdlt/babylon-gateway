@@ -77,7 +77,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class ValidatorQuerier : IValidatorQuerier
 {
-    private record ValidatorUptimeViewModel(long ValidatorId, EntityAddress ValidatorAddress, long? ProposalsMadeSum, long? ProposalsMissedSum, long EpochsActiveIn);
+    private record ValidatorUptimeViewModel(long ValidatorEntityId, long? ProposalsMadeSum, long? ProposalsMissedSum, long EpochsActiveIn);
 
     private readonly ReadOnlyDbContext _dbContext;
 
@@ -92,34 +92,50 @@ internal class ValidatorQuerier : IValidatorQuerier
         GatewayModel.LedgerState? fromLedgerState,
         CancellationToken token = default)
     {
+        var addresses = validatorAddresses.Select(a => (string)a).ToHashSet().ToList();
+
+        var validators = await _dbContext
+            .Entities
+            .Where(e => addresses.Contains(e.Address) && e.FromStateVersion <= ledgerState.StateVersion)
+            .ToDictionaryAsync(e => e.Id, e => e.Address, token);
+
         var cd = new CommandDefinition(
             commandText: @"
-WITH
-    variables (validator_address) AS (SELECT UNNEST(@validatorAddresses))
 SELECT
-    e.id AS ValidatorId,
-    e.address AS ValidatorAddress,
+    validator_entity_id AS ValidatorEntityId,
     SUM(proposals_made)::bigint AS ProposalsMadeSum,
     SUM(proposals_missed)::bigint AS ProposalsMissedSum,
     COUNT(proposals_made) AS EpochsActiveIn
-FROM variables
-INNER JOIN entities e ON e.address = variables.validator_address AND e.from_state_version <= @stateVersion
-LEFT JOIN validator_emission_statistics ves on ves.validator_entity_id = e.id AND ves.epoch_number BETWEEN @epochFrom AND @epochTo
-GROUP BY (e.id, e.address)
-;",
+FROM validator_emission_statistics
+WHERE validator_entity_id = ANY(@validatorEntityIds) AND epoch_number BETWEEN @epochFrom AND @epochTo
+GROUP BY validator_entity_id;",
             parameters: new
             {
-                validatorAddresses = validatorAddresses.Select(x => x.ToString()).ToList(),
-                stateVersion = ledgerState.StateVersion,
+                validatorEntityIds = validators.Keys.ToList(),
                 epochTo = ledgerState.Epoch,
                 epochFrom = fromLedgerState?.Epoch ?? 0,
             },
             cancellationToken: token);
 
-        var validatorUptime = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorUptimeViewModel>(cd)).ToList();
+        var validatorUptime = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorUptimeViewModel>(cd))
+            .ToDictionary(e => e.ValidatorEntityId);
 
-        var items = validatorUptime
-            .Select(x => new GatewayModel.ValidatorUptimeCollectionItem(x.ValidatorAddress, x.ProposalsMadeSum, x.ProposalsMissedSum, x.EpochsActiveIn))
+        var items = validators
+            .Select(v =>
+            {
+                long? proposalsMadeSum = null;
+                long? proposalsMissedSum = null;
+                long epochsActiveIn = 0;
+
+                if (validatorUptime.TryGetValue(v.Key, out var uptime))
+                {
+                    proposalsMadeSum = uptime.ProposalsMadeSum;
+                    proposalsMissedSum = uptime.ProposalsMissedSum;
+                    epochsActiveIn = uptime.EpochsActiveIn;
+                }
+
+                return new GatewayModel.ValidatorUptimeCollectionItem(v.Value, proposalsMadeSum, proposalsMissedSum, epochsActiveIn);
+            })
             .ToList();
 
         return new GatewayModel.ValidatorsUptimeResponse(ledgerState, new GatewayModel.ValidatorUptimeCollection(items));

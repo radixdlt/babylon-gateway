@@ -86,7 +86,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.9")
+                .HasAnnotation("ProductVersion", "7.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_default_deposit_rule", new[] { "accept", "reject", "allow_existing" });
@@ -101,7 +101,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "module_id", new[] { "main", "metadata", "royalty", "role_assignment" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "integer", "bytes", "ruid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "package_vm_type", new[] { "native", "scrypto_v1" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_intent_ledger_status", new[] { "unknown", "committed", "commit_pending", "permanent_rejection", "possible_to_commit", "likely_but_not_certain_rejection" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_payload_ledger_status", new[] { "unknown", "committed", "commit_pending", "clashing_commit", "permanently_rejected", "transiently_accepted", "transiently_rejected" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "sbor_type_kind", new[] { "well_known", "schema_local" });
@@ -597,6 +598,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("OwnerEntityId", "FromStateVersion")
                         .HasFilter("is_royalty_vault = true");
 
+                    b.HasIndex("VaultEntityId", "FromStateVersion")
+                        .HasFilter("discriminator = 'non_fungible'");
+
                     b.HasIndex("GlobalEntityId", "VaultEntityId", "FromStateVersion");
 
                     b.HasIndex("Id", "ResourceEntityId", "FromStateVersion");
@@ -744,11 +748,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<DateTime>("NormalizedRoundTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("normalized_round_timestamp");
-
-                    b.Property<byte[]>("RawPayload")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("raw_payload");
 
                     b.Property<long>("RoundInEpoch")
                         .HasColumnType("bigint")
@@ -1121,68 +1120,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime?>("CommitTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("commit_timestamp");
-
-                    b.Property<DateTime?>("FirstSeenInMempoolTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("first_seen_in_mempool_timestamp");
-
-                    b.Property<DateTime?>("FirstSubmittedToGatewayTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("first_submitted_to_gateway_timestamp");
+                    b.Property<decimal>("EndEpochExclusive")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("end_epoch_exclusive");
 
                     b.Property<string>("IntentHash")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("intent_hash");
 
-                    b.Property<DateTime?>("LastDroppedOutOfMempoolTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_missing_from_mempool_timestamp");
-
-                    b.Property<string>("LastFailureReason")
-                        .HasColumnType("text")
-                        .HasColumnName("last_failure_reason");
-
-                    b.Property<DateTime?>("LastFailureTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_failure_timestamp");
-
-                    b.Property<DateTime?>("LastSubmittedToGatewayTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_submitted_to_gateway_timestamp");
-
-                    b.Property<string>("LastSubmittedToNodeName")
-                        .HasColumnType("text")
-                        .HasColumnName("last_submitted_to_node_name");
-
-                    b.Property<DateTime?>("LastSubmittedToNodeTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_submitted_to_node_timestamp");
-
-                    b.Property<byte[]>("NotarizedTransactionBlob")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("notarized_transaction_blob");
-
                     b.Property<string>("PayloadHash")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("payload_hash");
 
-                    b.Property<PendingTransactionStatus>("Status")
-                        .HasColumnType("pending_transaction_status")
-                        .HasColumnName("status");
-
-                    b.Property<int>("SubmissionToNodesCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("submission_count");
-
-                    b.Property<bool>("SubmittedByThisGateway")
-                        .HasColumnType("boolean")
-                        .HasColumnName("submitted_by_this_gateway");
+                    b.Property<long>("PayloadId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("payload_id");
 
                     b.Property<uint>("VersionControl")
                         .IsConcurrencyToken()
@@ -1197,9 +1151,28 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("PayloadHash")
                         .IsUnique();
 
-                    b.HasIndex("Status");
+                    b.HasIndex("PayloadId");
 
                     b.ToTable("pending_transactions");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransactionPayload", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<byte[]>("NotarizedTransactionBlob")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("notarized_transaction_blob");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("pending_transaction_payloads");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceEntitySupplyHistory", b =>
@@ -1978,6 +1951,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("payload_hash");
 
+                    b.Property<byte[]>("RawPayload")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("raw_payload");
+
                     b.Property<string>("SignedIntentHash")
                         .IsRequired()
                         .HasColumnType("text")
@@ -2124,6 +2102,34 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>
                 {
+                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerHashes", "LedgerHashes", b1 =>
+                        {
+                            b1.Property<long>("LedgerTransactionStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<string>("ReceiptTreeHash")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("receipt_tree_hash");
+
+                            b1.Property<string>("StateTreeHash")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("state_tree_hash");
+
+                            b1.Property<string>("TransactionTreeHash")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("transaction_tree_hash");
+
+                            b1.HasKey("LedgerTransactionStateVersion");
+
+                            b1.ToTable("ledger_transactions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LedgerTransactionStateVersion");
+                        });
+
                     b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.TransactionReceipt", "EngineReceipt", b1 =>
                         {
                             b1.Property<long>("LedgerTransactionStateVersion")
@@ -2137,31 +2143,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                             b1.Property<string>("ErrorMessage")
                                 .HasColumnType("text")
                                 .HasColumnName("receipt_error_message");
-
-                            b1.Property<SborTypeKind[]>("EventSborTypeKinds")
-                                .IsRequired()
-                                .HasColumnType("sbor_type_kind[]")
-                                .HasColumnName("receipt_event_sbor_type_kinds");
-
-                            b1.Property<byte[][]>("EventSbors")
-                                .IsRequired()
-                                .HasColumnType("bytea[]")
-                                .HasColumnName("receipt_event_sbors");
-
-                            b1.Property<long[]>("EventSchemaEntityIds")
-                                .IsRequired()
-                                .HasColumnType("bigint[]")
-                                .HasColumnName("receipt_event_schema_entity_ids");
-
-                            b1.Property<byte[][]>("EventSchemaHashes")
-                                .IsRequired()
-                                .HasColumnType("bytea[]")
-                                .HasColumnName("receipt_event_schema_hashes");
-
-                            b1.Property<long[]>("EventTypeIndexes")
-                                .IsRequired()
-                                .HasColumnType("bigint[]")
-                                .HasColumnName("receipt_event_type_indexes");
 
                             b1.Property<string>("FeeDestination")
                                 .HasColumnType("jsonb")
@@ -2199,10 +2180,183 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("LedgerTransactionStateVersion");
+
+                            b1.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.ReceiptEvents", "Events", b2 =>
+                                {
+                                    b2.Property<long>("TransactionReceiptLedgerTransactionStateVersion")
+                                        .HasColumnType("bigint");
+
+                                    b2.Property<string[]>("Emitters")
+                                        .IsRequired()
+                                        .HasColumnType("jsonb[]")
+                                        .HasColumnName("receipt_event_emitters");
+
+                                    b2.Property<string[]>("Names")
+                                        .IsRequired()
+                                        .HasColumnType("text[]")
+                                        .HasColumnName("receipt_event_names");
+
+                                    b2.Property<SborTypeKind[]>("SborTypeKinds")
+                                        .IsRequired()
+                                        .HasColumnType("sbor_type_kind[]")
+                                        .HasColumnName("receipt_event_sbor_type_kinds");
+
+                                    b2.Property<byte[][]>("Sbors")
+                                        .IsRequired()
+                                        .HasColumnType("bytea[]")
+                                        .HasColumnName("receipt_event_sbors");
+
+                                    b2.Property<long[]>("SchemaEntityIds")
+                                        .IsRequired()
+                                        .HasColumnType("bigint[]")
+                                        .HasColumnName("receipt_event_schema_entity_ids");
+
+                                    b2.Property<byte[][]>("SchemaHashes")
+                                        .IsRequired()
+                                        .HasColumnType("bytea[]")
+                                        .HasColumnName("receipt_event_schema_hashes");
+
+                                    b2.Property<long[]>("TypeIndexes")
+                                        .IsRequired()
+                                        .HasColumnType("bigint[]")
+                                        .HasColumnName("receipt_event_type_indexes");
+
+                                    b2.HasKey("TransactionReceiptLedgerTransactionStateVersion");
+
+                                    b2.ToTable("ledger_transactions");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TransactionReceiptLedgerTransactionStateVersion");
+                                });
+
+                            b1.Navigation("Events")
+                                .IsRequired();
                         });
 
                     b.Navigation("EngineReceipt")
                         .IsRequired();
+
+                    b.Navigation("LedgerHashes")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>
+                {
+                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransactionPayload", "Payload")
+                        .WithMany()
+                        .HasForeignKey("PayloadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransactionGatewayHandling", "GatewayHandling", b1 =>
+                        {
+                            b1.Property<long>("PendingTransactionId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("AttemptedSubmissionToNodesCount")
+                                .HasColumnType("integer")
+                                .HasColumnName("node_submission_count");
+
+                            b1.Property<DateTime>("FirstSubmittedToGatewayTimestamp")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("first_submitted_to_gateway_timestamp");
+
+                            b1.Property<string>("HandlingStatusReason")
+                                .HasColumnType("text")
+                                .HasColumnName("handling_status_reason");
+
+                            b1.Property<DateTime?>("ResubmitFromTimestamp")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("resubmit_from_timestamp");
+
+                            b1.HasKey("PendingTransactionId");
+
+                            b1.HasIndex("FirstSubmittedToGatewayTimestamp");
+
+                            b1.HasIndex("ResubmitFromTimestamp");
+
+                            b1.ToTable("pending_transactions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PendingTransactionId");
+                        });
+
+                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransactionLedgerDetails", "LedgerDetails", b1 =>
+                        {
+                            b1.Property<long>("PendingTransactionId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<DateTime?>("CommitTimestamp")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("commit_timestamp");
+
+                            b1.Property<string>("InitialRejectionReason")
+                                .HasColumnType("text")
+                                .HasColumnName("initial_rejection_reason");
+
+                            b1.Property<PendingTransactionIntentLedgerStatus>("IntentLedgerStatus")
+                                .HasColumnType("pending_transaction_intent_ledger_status")
+                                .HasColumnName("intent_status");
+
+                            b1.Property<string>("LatestRejectionReason")
+                                .HasColumnType("text")
+                                .HasColumnName("latest_rejection_reason");
+
+                            b1.Property<DateTime?>("LatestRejectionTimestamp")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("latest_rejection_timestamp");
+
+                            b1.Property<PendingTransactionPayloadLedgerStatus>("PayloadLedgerStatus")
+                                .HasColumnType("pending_transaction_payload_ledger_status")
+                                .HasColumnName("payload_status");
+
+                            b1.HasKey("PendingTransactionId");
+
+                            b1.ToTable("pending_transactions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PendingTransactionId");
+                        });
+
+                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransactionNetworkDetails", "NetworkDetails", b1 =>
+                        {
+                            b1.Property<long>("PendingTransactionId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<string>("LastSubmitErrorTitle")
+                                .HasColumnType("text")
+                                .HasColumnName("last_submit_error");
+
+                            b1.Property<DateTime?>("LatestNodeSubmissionTimestamp")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("latest_node_submission_timestamp");
+
+                            b1.Property<bool>("LatestNodeSubmissionWasAccepted")
+                                .HasColumnType("boolean")
+                                .HasColumnName("latest_node_submission_was_accepted");
+
+                            b1.Property<string>("LatestSubmittedToNodeName")
+                                .HasColumnType("text")
+                                .HasColumnName("latest_submitted_to_node_name");
+
+                            b1.HasKey("PendingTransactionId");
+
+                            b1.ToTable("pending_transactions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PendingTransactionId");
+                        });
+
+                    b.Navigation("GatewayHandling")
+                        .IsRequired();
+
+                    b.Navigation("LedgerDetails")
+                        .IsRequired();
+
+                    b.Navigation("NetworkDetails")
+                        .IsRequired();
+
+                    b.Navigation("Payload");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorActiveSetHistory", b =>

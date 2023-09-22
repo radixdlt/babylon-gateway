@@ -65,7 +65,7 @@ jobs:
           retention-days: 1
 
   docker-database-migrations-dockerhub:
-    name: (DatabaseMigrations) Docker
+    name: AMD DatabaseMigrations
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -74,7 +74,7 @@ jobs:
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "babylon-ng-database-migrations"
-      tag: ${{ needs.setup-tags.outputs.version-suffix }}
+      tag: ${{ needs.setup-tags.outputs.version-suffix }}-amd64
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/amd64"
@@ -84,13 +84,37 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      provenance: "false"
     secrets:
-      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
+
+  docker-database-migrations-dockerhub-arm:
+    name: ARM DatabaseMigrations
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: babylon-gateway-arm
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "babylon-ng-database-migrations"
+      tag: ${{ needs.setup-tags.outputs.version-suffix }}-arm64
+      context: "."
+      dockerfile: "./apps/DatabaseMigrations/Dockerfile"
+      platforms: "linux/arm64"
+      environment: release
+      cache_tag_suffix: "release"
+      enable_dockerhub: "true"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
+      provenance: "false"
+      disable_qemu: true
+    secrets:
       role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
 
   docker-data-aggregator-dockerhub:
-    name: (DataAggregator) Docker
+    name: AMD DataAggregator
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -99,7 +123,7 @@ jobs:
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "babylon-ng-data-aggregator"
-      tag: ${{ needs.setup-tags.outputs.version-suffix }}
+      tag: ${{ needs.setup-tags.outputs.version-suffix }}-amd64
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
       platforms: "linux/amd64"
@@ -109,13 +133,37 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      provenance: false
     secrets:
-      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
+
+  docker-data-aggregator-dockerhub-arm:
+    name: ARM DataAggregator
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: babylon-gateway-arm
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "babylon-ng-data-aggregator"
+      tag: ${{ needs.setup-tags.outputs.version-suffix }}-arm64
+      context: "."
+      dockerfile: "./apps/DataAggregator/Dockerfile"
+      platforms: "linux/arm64"
+      environment: release
+      cache_tag_suffix: "release"
+      enable_dockerhub: "true"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
+      provenance: false
+      disable_qemu: true
+    secrets:
       role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
 
   docker-gateway-api-dockerhub:
-    name: (GatewayApi) Docker
+    name: AMD GatewayApi
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -124,7 +172,7 @@ jobs:
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "babylon-ng-gateway-api"
-      tag: ${{ needs.setup-tags.outputs.version-suffix }}
+      tag: ${{ needs.setup-tags.outputs.version-suffix }}-amd64
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
       platforms: "linux/amd64"
@@ -134,11 +182,83 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      provenance: false
     secrets:
-      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
 
+  docker-gateway-api-dockerhub-arm:
+    name: ARM GatewayApi
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: babylon-gateway-arm
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "babylon-ng-gateway-api"
+      tag: ${{ needs.setup-tags.outputs.version-suffix }}-arm64
+      context: "."
+      dockerfile: "./apps/GatewayApi/Dockerfile"
+      platforms: "linux/arm64"
+      environment: release
+      cache_tag_suffix: "release"
+      enable_dockerhub: "true"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
+      provenance: false
+      disable_qemu: true
+    secrets:
+      role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
+
+  join-gateway-images:
+    name: Gateway
+    needs:
+      - setup-tags
+      - docker-gateway-api-dockerhub
+      - docker-gateway-api-dockerhub-arm
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
+    with: 
+      image_name: private-babylon-ng-gateway-api
+      image_tag: ${{ needs.setup-tags.outputs.version-suffix }}
+      tag_suffix_1: amd64
+      tag_suffix_2: arm64
+      aws_dockerhub_secret: github-actions/rdxworks/dockerhub-images/release-credentials
+    secrets:
+      role-to-assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
+
+  join-aggregator-images:
+    name: Aggregator
+    needs:
+      - setup-tags
+      - docker-data-aggregator-dockerhub
+      - docker-data-aggregator-dockerhub-arm
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
+    with: 
+      image_name: private-babylon-ng-data-aggregator
+      image_tag: ${{ needs.setup-tags.outputs.version-suffix }}
+      tag_suffix_1: amd64
+      tag_suffix_2: arm64
+      aws_dockerhub_secret: github-actions/rdxworks/dockerhub-images/release-credentials
+    secrets:
+      role-to-assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
+  
+  join-migrations-images:
+    name: Migration
+    needs:
+      - setup-tags
+      - docker-database-migrations-dockerhub
+      - docker-database-migrations-dockerhub-arm
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
+    with: 
+      image_name: private-babylon-ng-database-migrations
+      image_tag: ${{ needs.setup-tags.outputs.version-suffix }}
+      tag_suffix_1: amd64
+      tag_suffix_2: arm64
+      aws_dockerhub_secret: github-actions/rdxworks/dockerhub-images/release-credentials
+    secrets:
+      role-to-assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
+      
   snyk-container-monitor:
     name: Snyk monitor container
     runs-on: ubuntu-latest

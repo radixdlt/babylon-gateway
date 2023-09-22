@@ -70,9 +70,9 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface IPendingTransactionPrunerServiceObserver
 {
-    ValueTask PrePendingTransactionPrune(List<PendingTransactionStatusCount> mempoolCountByStatus);
+    ValueTask PrePendingTransactionPrune(List<PendingTransactionCountByPruneStatus> mempoolCountByStatus);
 
-    ValueTask PreMempoolTransactionPruned(int count);
+    ValueTask PendingTransactionsPruned(int count);
 }
 
-public sealed record PendingTransactionStatusCount(PendingTransactionStatus Status, int Count);
+public sealed record PendingTransactionCountByPruneStatus(bool CanPrune, int Count);

@@ -62,13 +62,18 @@
  * permissions under this License.
  */
 
+using System;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerExtenderServiceObserver
 {
-    ValueTask TransactionsMarkedCommittedWhichWasFailed();
+    ValueTask TransactionMarkedCommittedWhichWasPermanentlyRejected();
+
+    ValueTask TransactionsCommittedWithGatewayLatency(TimeSpan latency);
 
     ValueTask TransactionsMarkedCommittedCount(int count);
+
+    ValueTask StageCompleted(string stage, TimeSpan duration, int? quantity);
 }

@@ -104,7 +104,8 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOriginType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PackageVmType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionPayloadLedgerStatus>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionIntentLedgerStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ModuleId>();

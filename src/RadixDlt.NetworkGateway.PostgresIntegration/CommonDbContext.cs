@@ -165,7 +165,8 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PackageVmType>();
-        modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
+        modelBuilder.HasPostgresEnum<PendingTransactionPayloadLedgerStatus>();
+        modelBuilder.HasPostgresEnum<PendingTransactionIntentLedgerStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
         modelBuilder.HasPostgresEnum<ModuleId>();
@@ -268,9 +269,26 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
     {
+        // The following indices cover the following queries:
+        // - LedgerExtenderService:
+        //   > MarkCommitted: Lookup by PayloadHash + PayloadStatus
+        // - ResubmissionService:
+        //   > ForResubmitting: ResubmitFromTimestamp < T
+        // - PrunerService:
+        //   > PruneIf: FirstSubmittedToGatewayTimestamp < pruneIfLastGatewaySubmissionBefore
+        // - TransactionStatusAPI:
+        //   > Lookup by intent
+
         modelBuilder
             .Entity<PendingTransaction>()
-            .HasIndex(pt => pt.Status);
+            .OwnsOne(
+                pt => pt.GatewayHandling,
+                builder =>
+                {
+                    builder.HasIndex(gatewayHandling => gatewayHandling.ResubmitFromTimestamp);
+                    builder.HasIndex(gatewayHandling => gatewayHandling.FirstSubmittedToGatewayTimestamp);
+                }
+            );
 
         modelBuilder
             .Entity<PendingTransaction>()
@@ -385,6 +403,11 @@ internal abstract class CommonDbContext : DbContext
             .Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion })
             .HasFilter("is_royalty_vault = true");
+
+        modelBuilder
+            .Entity<EntityVaultHistory>()
+            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion })
+            .HasFilter("discriminator = 'non_fungible'");
 
         modelBuilder
             .Entity<EntityRoleAssignmentsOwnerRoleHistory>()

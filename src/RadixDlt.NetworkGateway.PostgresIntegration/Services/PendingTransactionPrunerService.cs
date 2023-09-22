@@ -67,12 +67,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -82,7 +83,6 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
 {
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
-    private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<PendingTransactionPrunerService> _logger;
     private readonly IEnumerable<IPendingTransactionPrunerServiceObserver> _observers;
     private readonly IClock _clock;
@@ -90,14 +90,12 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
     public PendingTransactionPrunerService(
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
-        ISystemStatusService systemStatusService,
         ILogger<PendingTransactionPrunerService> logger,
         IEnumerable<IPendingTransactionPrunerServiceObserver> observers,
         IClock clock)
     {
         _dbContextFactory = dbContextFactory;
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
-        _systemStatusService = systemStatusService;
         _logger = logger;
         _observers = observers;
         _clock = clock;
@@ -105,71 +103,42 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
 
     public async Task PrunePendingTransactions(CancellationToken token = default)
     {
+        var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
+
+        var pruneIfLastGatewaySubmissionBefore = _clock.UtcNow - mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission;
+
+        Expression<Func<PendingTransaction, bool>> canPruneExpression = t =>
+            /* Prune if it was submitted a while ago */
+            t.GatewayHandling.FirstSubmittedToGatewayTimestamp < pruneIfLastGatewaySubmissionBefore;
+
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var rawCountByStatus = await dbContext
+        var countByStatus = await dbContext
             .PendingTransactions
-            .GroupBy(t => t.Status)
-            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .GroupBy(canPruneExpression)
+            .Select(g => new PendingTransactionCountByPruneStatus(g.Key, g.Count()))
             .ToListAsync(token);
-
-        var countByStatus = rawCountByStatus
-            .Select(g => new PendingTransactionStatusCount(g.Status, g.Count))
-            .ToList();
 
         await _observers.ForEachAsync(x => x.PrePendingTransactionPrune(countByStatus));
 
-        var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
+        // Change to ExecuteDeleteAsync when EFCore fixes this bug: https://github.com/dotnet/efcore/issues/29690#issuecomment-1726182209
+        var prunedTransactionCount = await dbContext.Database
+            .ExecuteSqlInterpolatedAsync(
+                $@"
+DELETE FROM pending_transactions
+    WHERE first_submitted_to_gateway_timestamp < {pruneIfLastGatewaySubmissionBefore}
+",
+                token);
 
-        var currTime = _clock.UtcNow;
-        var pruneIfCommittedBefore = currTime - mempoolConfiguration.PruneCommittedAfter;
-        var pruneIfLastGatewaySubmissionBefore = currTime - mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission;
-        var pruneIfFirstSeenBefore = currTime - mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceFirstSeen;
-        var pruneIfNotSeenSince = currTime - mempoolConfiguration.PruneRequiresMissingFromMempoolFor;
-
-        var aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions = _systemStatusService.GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(
-            mempoolConfiguration.AssumedBoundOnNetworkLedgerDataAggregatorClockDrift,
-            pruneIfCommittedBefore
-        );
-
-        var transactionsToPrune = await dbContext
-            .PendingTransactions
-            .Where(mt =>
-                (
-                    /* For committed transactions, remove from the mempool if we're synced up (as a committed transaction will be on ledger) */
-                    (mt.Status == PendingTransactionStatus.CommittedSuccess || mt.Status == PendingTransactionStatus.CommittedFailure)
-                    && aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions
-                    && mt.CommitTimestamp!.Value < pruneIfCommittedBefore
-                )
-                ||
-                (
-                    /* For those submitted by this gateway, prune if it was submitted a while ago and was not seen in the mempool recently */
-                    mt.SubmittedByThisGateway
-                    && mt.LastSubmittedToGatewayTimestamp!.Value < pruneIfLastGatewaySubmissionBefore
-                    && (mt.LastDroppedOutOfMempoolTimestamp != null && mt.LastDroppedOutOfMempoolTimestamp < pruneIfNotSeenSince)
-                )
-                ||
-                (
-                    /* For those not submitted by this gateway, prune if it first appeared a while ago and was not seen in the mempool recently */
-                    !mt.SubmittedByThisGateway
-                    && mt.FirstSeenInMempoolTimestamp!.Value < pruneIfFirstSeenBefore
-                    && (mt.LastDroppedOutOfMempoolTimestamp != null && mt.LastDroppedOutOfMempoolTimestamp < pruneIfNotSeenSince)
-                )
-            )
-            .ToListAsync(token);
-
-        if (transactionsToPrune.Count > 0)
+        if (prunedTransactionCount > 0)
         {
             _logger.LogInformation(
-                "Pruning {PrunedCount} transactions from the pending list, of which {PrunedCommittedCount} were committed",
-                transactionsToPrune.Count,
-                transactionsToPrune.Count(t => t.Status is PendingTransactionStatus.CommittedSuccess or PendingTransactionStatus.CommittedFailure)
+                "Pruned {PrunedCount} transactions from the pending transactions table, which were last submitted to the Gateway over {PruneWindow} ago",
+                prunedTransactionCount,
+                mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission.FormatPositiveDurationHumanReadable()
             );
 
-            await _observers.ForEachAsync(x => x.PreMempoolTransactionPruned(transactionsToPrune.Count));
-
-            dbContext.PendingTransactions.RemoveRange(transactionsToPrune);
-            await dbContext.SaveChangesAsync(token);
+            await _observers.ForEachAsync(x => x.PendingTransactionsPruned(prunedTransactionCount));
         }
     }
 }

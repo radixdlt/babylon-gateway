@@ -62,39 +62,16 @@
  * permissions under this License.
  */
 
-using System;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public interface IPendingTransactionResubmissionServiceObserver
+public interface IPendingTransactionResubmissionServiceObserver: ITransactionSubmitterObserver
 {
-    ValueTask TransactionsSelected(int totalTransactionsNeedingResubmission);
+    ValueTask ObserveResubmissionQueueSize(int totalTransactionsNeedingResubmission);
 
-    void TransactionMarkedAsAssumedSuccessfullySubmittedToNode();
+    ValueTask TransactionMarkedAsSubmissionPending();
 
-    void TransactionMarkedAsFailed();
-
-    ValueTask TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode();
-
-    ValueTask TransactionMarkedAsFailedAfterSubmittedToNode();
-
-    ValueTask PreResubmit(byte[] notarizedTransaction);
-
-    ValueTask PostResubmit(byte[] notarizedTransaction);
-
-    ValueTask PostResubmitDuplicate(byte[] notarizedTransaction);
-
-    ValueTask ResubmitAlreadyCommitted(byte[] notarizedTransaction);
-
-    ValueTask PostResubmitSucceeded(byte[] notarizedTransaction);
-
-    ValueTask ResubmitFailedPermanently(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
-
-    ValueTask ResubmitFailedTemporary(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
-
-    ValueTask ResubmitFailedTimeout(byte[] notarizedTransaction, OperationCanceledException operationCanceledException);
-
-    ValueTask ResubmitFailedUnknown(byte[] notarizedTransaction, Exception exception);
+    ValueTask TransactionMarkedAsNoLongerSubmitting();
 }
