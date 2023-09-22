@@ -548,7 +548,7 @@ internal class DataAggregatorMetricsObserver :
             _ledgerExtenderStageCompletedEntitiesCount.WithLabels(stage).Inc(quantity.Value);
         }
 
-        _ledgerExtenderStageCompleted.WithLabels(stage).Observe(duration.TotalMilliseconds);
+        _ledgerExtenderStageCompleted.WithLabels(stage).Observe(duration.TotalSeconds);
 
         return ValueTask.CompletedTask;
     }
