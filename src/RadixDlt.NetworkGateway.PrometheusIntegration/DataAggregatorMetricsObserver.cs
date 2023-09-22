@@ -300,6 +300,18 @@ internal class DataAggregatorMetricsObserver :
             "Number of mempool transactions which are marked committed"
         );
 
+    private static readonly Counter _ledgerExtenderStageCompletedEntitiesCount = Metrics
+        .CreateCounter(
+            "ng_ledger_extender_stage_completed_entities_count",
+            "Number of entities affected in given processing stage",
+            new CounterConfiguration { LabelNames = new[] { "stage" } });
+
+    private static readonly Histogram _ledgerExtenderStageCompleted = Metrics
+        .CreateHistogram(
+            "ng_ledger_extender_stage_completed",
+            "The time to complete given processing stage",
+            new HistogramConfiguration { LabelNames = new[] { "stage" } });
+
     private static readonly Counter _transactionsMarkedCommittedWhichWerePermanentlyRejectedCount = Metrics
         .CreateCounter(
             "ng_db_mempool_transactions_marked_committed_which_were_failed_count",
@@ -525,6 +537,18 @@ internal class DataAggregatorMetricsObserver :
     ValueTask ILedgerExtenderServiceObserver.TransactionsMarkedCommittedCount(int count)
     {
         _transactionsMarkedCommittedCount.Inc(count);
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask ILedgerExtenderServiceObserver.StageCompleted(string stage, TimeSpan duration, int? quantity)
+    {
+        if (quantity.HasValue)
+        {
+            _ledgerExtenderStageCompletedEntitiesCount.WithLabels(stage).Inc(quantity.Value);
+        }
+
+        _ledgerExtenderStageCompleted.WithLabels(stage).Observe(duration.TotalMilliseconds);
 
         return ValueTask.CompletedTask;
     }

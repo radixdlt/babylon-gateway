@@ -67,9 +67,12 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -81,11 +84,13 @@ internal class ReadHelper
 {
     private readonly ReadWriteDbContext _dbContext;
     private readonly NpgsqlConnection _connection;
+    private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
 
-    public ReadHelper(ReadWriteDbContext dbContext)
+    public ReadHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers)
     {
         _dbContext = dbContext;
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
+        _observers = observers;
     }
 
     public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
@@ -95,6 +100,7 @@ internal class ReadHelper
             return new Dictionary<MetadataLookup, EntityMetadataHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var entityIds = new List<long>();
         var keys = new List<string>();
         var lookupSet = new HashSet<MetadataLookup>();
@@ -110,7 +116,7 @@ internal class ReadHelper
             keys.Add(lookup.Key);
         }
 
-        return await _dbContext
+        var result = await _dbContext
             .EntityMetadataHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, key) AS (
@@ -127,6 +133,10 @@ INNER JOIN LATERAL (
 ) emh ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => new MetadataLookup(e.EntityId, e.Key), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
@@ -136,9 +146,10 @@ INNER JOIN LATERAL (
             return new Dictionary<long, EntityMetadataAggregateHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var entityIds = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
 
-        return await _dbContext
+        var result = await _dbContext
             .EntityMetadataAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
@@ -155,6 +166,10 @@ INNER JOIN LATERAL (
 ) emah ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.EntityId, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityAggregateMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityRoleAssignmentsEntryHistoryFor(
@@ -166,6 +181,7 @@ INNER JOIN LATERAL (
             return new Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var entityIds = new List<long>();
         var keyRoles = new List<string>();
         var keyModuleIds = new List<ModuleId>();
@@ -186,7 +202,7 @@ INNER JOIN LATERAL (
             keyModuleIds.Add(lookup.KeyModule);
         }
 
-        return await _dbContext
+        var result = await _dbContext
             .EntityRoleAssignmentsEntryHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, key_role, module_id) AS (
@@ -203,6 +219,10 @@ INNER JOIN LATERAL (
 ) eareh ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => new RoleAssignmentEntryLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityRoleAssignmentsEntryHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityRoleAssignmentsAggregateHistoryFor(
@@ -214,9 +234,10 @@ INNER JOIN LATERAL (
             return new Dictionary<long, EntityRoleAssignmentsAggregateHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var entityIds = roleAssignmentChanges.Select(x => x.EntityId).Distinct().ToList();
 
-        return await _dbContext
+        var result = await _dbContext
             .EntityRoleAssignmentsAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
@@ -233,6 +254,10 @@ INNER JOIN LATERAL (
 ) earah ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.EntityId, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityRoleAssignmentsAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<IVaultSnapshot> vaultSnapshots, CancellationToken token)
@@ -242,6 +267,7 @@ INNER JOIN LATERAL (
             return new Dictionary<long, EntityResourceAggregateHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var entityIds = new HashSet<long>();
 
         foreach (var change in vaultSnapshots)
@@ -252,7 +278,7 @@ INNER JOIN LATERAL (
 
         var ids = entityIds.ToList();
 
-        return await _dbContext
+        var result = await _dbContext
             .EntityResourceAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
@@ -269,6 +295,10 @@ INNER JOIN LATERAL (
 ) erah ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.EntityId, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityResourceAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(
@@ -280,6 +310,7 @@ INNER JOIN LATERAL (
             return new Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var entityIds = new List<long>();
         var resourceEntityIds = new List<long>();
 
@@ -289,7 +320,7 @@ INNER JOIN LATERAL (
             resourceEntityIds.Add(d.ResourceEntityId);
         }
 
-        return await _dbContext
+        var result = await _dbContext
             .EntityResourceAggregatedVaultsHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, resource_entity_id) AS (
@@ -306,6 +337,10 @@ INNER JOIN LATERAL (
 ) eravh ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityResourceAggregatedVaultsHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(
@@ -317,6 +352,7 @@ INNER JOIN LATERAL (
             return new Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var data = new HashSet<EntityResourceVaultLookup>();
 
         foreach (var change in vaultSnapshots)
@@ -334,7 +370,7 @@ INNER JOIN LATERAL (
             resourceEntityIds.Add(d.ResourceEntityId);
         }
 
-        return await _dbContext
+        var result = await _dbContext
             .EntityResourceVaultAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, resource_entity_id) AS (
@@ -351,6 +387,10 @@ INNER JOIN LATERAL (
 ) ervah ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => new EntityResourceVaultLookup(e.EntityId, e.ResourceEntityId), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityResourceVaultAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<long, EntityNonFungibleVaultHistory>> MostRecentEntityNonFungibleVaultHistory(List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots, CancellationToken token)
@@ -360,9 +400,10 @@ INNER JOIN LATERAL (
             return new Dictionary<long, EntityNonFungibleVaultHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var vaultIds = nonFungibleVaultSnapshots.Select(x => x.ReferencedVault.DatabaseId).ToHashSet().ToList();
 
-        return await _dbContext
+        var result = await _dbContext
             .EntityVaultHistory
             .FromSqlInterpolated(@$"
 WITH variables (vault_entity_id) AS (
@@ -379,6 +420,10 @@ INNER JOIN LATERAL (
 ) evh ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.VaultEntityId, e => (EntityNonFungibleVaultHistory)e, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityNonFungibleVaultHistory), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     // public async Task<> MostRecentPackageDefinitionHistory(List<PackageChange> packageChanges, CancellationToken token)
@@ -395,9 +440,10 @@ INNER JOIN LATERAL (
             return new Dictionary<long, NonFungibleIdStoreHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var ids = nonFungibleIdStoreChanges.Select(x => x.ReferencedResource.DatabaseId).Distinct().ToList();
 
-        return await _dbContext
+        var result = await _dbContext
             .NonFungibleIdStoreHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
@@ -414,6 +460,10 @@ INNER JOIN LATERAL (
 ) emh ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.NonFungibleResourceEntityId, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentNonFungibleIdStoreHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<long, ResourceEntitySupplyHistory>> MostRecentResourceEntitySupplyHistoryFor(List<ResourceSupplyChange> resourceSupplyChanges, CancellationToken token)
@@ -423,9 +473,10 @@ INNER JOIN LATERAL (
             return new Dictionary<long, ResourceEntitySupplyHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var ids = resourceSupplyChanges.Select(c => c.ResourceEntityId).Distinct().ToList();
 
-        return await _dbContext
+        var result = await _dbContext
             .ResourceEntitySupplyHistory
             .FromSqlInterpolated(@$"
 WITH variables (resource_entity_id) AS (
@@ -442,10 +493,15 @@ INNER JOIN LATERAL (
 ) rmesh ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.ResourceEntityId, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentResourceEntitySupplyHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<EntityAddress, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token)
     {
+        var sw = Stopwatch.GetTimestamp();
         var entityAddressesToLoad = referencedEntities.Addresses.Select(x => (string)x).ToList();
         var knownAddressesToLoad = referencedEntities.KnownAddresses.Select(x => (string)x).ToList();
         var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Text)
@@ -453,7 +509,7 @@ INNER JOIN LATERAL (
             Value = entityAddressesToLoad.Concat(knownAddressesToLoad).ToArray(),
         };
 
-        return await _dbContext
+        var result = await _dbContext
             .Entities
             .FromSqlInterpolated($@"
 SELECT *
@@ -465,6 +521,10 @@ WHERE id IN(
 )")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.Address, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingEntitiesFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
@@ -477,6 +537,7 @@ WHERE id IN(
             return new Dictionary<NonFungibleIdLookup, NonFungibleIdData>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var nonFungibles = new HashSet<NonFungibleIdLookup>();
         var resourceEntityIds = new List<long>();
         var nonFungibleIds = new List<string>();
@@ -497,7 +558,7 @@ WHERE id IN(
             nonFungibleIds.Add(nf.NonFungibleId);
         }
 
-        return await _dbContext
+        var result = await _dbContext
             .NonFungibleIdData
             .FromSqlInterpolated(@$"
 SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_fungible_id) IN (
@@ -505,6 +566,10 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
 )")
             .AsNoTracking()
             .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceEntityId, e.NonFungibleId), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingNonFungibleIdDataFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token)
@@ -514,6 +579,7 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
             return new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
         }
 
+        var sw = Stopwatch.GetTimestamp();
         var validatorEntityIds = new List<long>();
         var validatorKeyTypes = new List<PublicKeyType>();
         var validatorKeys = new List<byte[]>();
@@ -532,7 +598,7 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
             validatorKeys.Add(lookup.PublicKey);
         }
 
-        return await _dbContext
+        var result = await _dbContext
             .ValidatorKeyHistory
             .FromSqlInterpolated(@$"
 WITH variables (validator_entity_id, key_type, key) AS (
@@ -550,10 +616,15 @@ INNER JOIN LATERAL (
 ")
             .AsNoTracking()
             .ToDictionaryAsync(e => new ValidatorKeyLookup(e.ValidatorEntityId, e.KeyType, e.Key), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingValidatorKeysFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<SequencesHolder> LoadSequences(CancellationToken token)
     {
+        var sw = Stopwatch.GetTimestamp();
         var cd = new CommandDefinition(
             commandText: @"
 SELECT
@@ -588,6 +659,10 @@ SELECT
     nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence",
             cancellationToken: token);
 
-        return await _connection.QueryFirstAsync<SequencesHolder>(cd);
+        var result = await _connection.QueryFirstAsync<SequencesHolder>(cd);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(LoadSequences), Stopwatch.GetElapsedTime(sw), null));
+
+        return result;
     }
 }

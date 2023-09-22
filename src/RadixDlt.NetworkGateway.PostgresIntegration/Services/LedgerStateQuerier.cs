@@ -265,31 +265,16 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerTransaction> GetTopLedgerTransaction(CancellationToken token)
     {
-        try
+        var topLedgerTransaction = await _dbContext
+            .GetTopLedgerTransaction()
+            .FirstOrDefaultAsync(token);
+
+        if (topLedgerTransaction == null)
         {
-            var topLedgerTransaction = await _dbContext
-                .GetTopLedgerTransaction()
-                .FirstOrDefaultAsync(token);
-
-            if (topLedgerTransaction == null)
-            {
-                throw new InvalidStateException("There are no transactions in the database");
-            }
-
-            return topLedgerTransaction;
+            throw new InvalidStateException("There are no transactions in the database");
         }
-        catch (Exception ex)
-        {
-            // TODO NG-256 fix it permanently
-            if (ex.Message.Contains("Can't cast"))
-            {
-                await _dbContext.Database.OpenConnectionAsync(token);
-                await ((NpgsqlConnection)_dbContext.Database.GetDbConnection()).ReloadTypesAsync();
-                await _dbContext.Database.CloseConnectionAsync();
-            }
 
-            throw;
-        }
+        return topLedgerTransaction;
     }
 
     private record LedgerStateReport(GatewayModel.LedgerState LedgerState, DateTime RoundTimestamp, bool TopOfLedgerResolved);
