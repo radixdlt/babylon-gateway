@@ -168,6 +168,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         var pendingTransactions = await dbContext
             .PendingTransactions
+            .AsNoTracking()
             .Where(pt => payloadHashes.Contains(pt.PayloadHash))
             .Where(pt => pt.LedgerDetails.PayloadLedgerStatus == PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
             .Select(pt => new
@@ -210,7 +211,7 @@ UPDATE pending_transactions
         resubmit_from_timestamp = NULL,
         handling_status_reason = 'Concluded as committed'
     WHERE
-        payload_hash IN (SELECT UNNEST({payloadHashes}))
+        payload_hash = ANY({payloadHashes})
 ",
                 token);
 
