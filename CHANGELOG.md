@@ -7,8 +7,8 @@ _None_
 ### What’s new?
 _N/A_
 
-## 1.0.0-rc1 - Babylon Launch (Release Candidate 1)
-Release Date: _unreleased_
+## 1.0.0-rc3 - Babylon Launch (Release Candidate 3)
+Release Date: Friday 22nd September 2023
 
 ### Breaking changes
 - Instead of returning only the event data payload from `/stream/transactions` and `/transaction/committed-details`, the event data is now a complex object, wrapping the data payload, but also containing the emitter and event name. This allows you to properly determine which entity emitted the event.
