@@ -4,20 +4,20 @@ export const RadixNetwork = {
   Alphanet: 0x0a,
   Betanet: 0x0b,
   Kisharnet: 0x0c,
+  RCnetV1: 0x0c,
   Ansharnet: 0x0d,
+  RCnetV2: 0x0d,
+  Zabanet: 0x0e,
+  RCnetV3: 0x0e,
   Gilganet: 0x20,
   Enkinet: 0x21,
   Hammunet: 0x22,
   Nergalnet: 0x23,
   Mardunet: 0x24,
+  Dumunet: 0x25,
   LocalNet: 0xf0,
-  Zabanet: 0x0e,
   InternalTestNet: 0xf1,
   Simulator: 0xf2,
-
-  RCnetV1: 0x0c,
-  RCnetV2: 0x0d,
-  RCnetV3: 0x0e,
 } as const
 
 export type NetworkConfig = {
@@ -38,7 +38,7 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
     networkName: 'Stokenet',
     networkId: RadixNetwork.Stokenet,
     gatewayUrl: 'https://babylon-stokenet-gateway.radixdlt.com',
-    dashboardUrl: 'https://dashboard-stokenet.radixdlt.com',
+    dashboardUrl: 'https://stokenet-dashboard.radixdlt.com',
   },
   Kisharnet: {
     networkName: 'Kisharnet',
@@ -46,11 +46,35 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
     gatewayUrl: 'https://kisharnet-gateway.radixdlt.com',
     dashboardUrl: 'https://kisharnet-dashboard.radixdlt.com',
   },
+  RCnetV1: {
+    networkName: 'RCnetV1',
+    networkId: RadixNetwork.RCnetV1,
+    gatewayUrl: 'https://rcnet.radixdlt.com',
+    dashboardUrl: 'https://rcnet-dashboard.radixdlt.com',
+  },
   Ansharnet: {
     networkName: 'Ansharnet',
     networkId: RadixNetwork.Ansharnet,
     gatewayUrl: 'https://ansharnet-gateway.radixdlt.com',
     dashboardUrl: 'https://ansharnet-dashboard.radixdlt.com',
+  },
+  RCnetV2: {
+    networkName: 'RCNetV2',
+    networkId: RadixNetwork.RCnetV2,
+    gatewayUrl: 'https://ansharnet-gateway.radixdlt.com',
+    dashboardUrl: 'https://rcnet-v2-dashboard.radixdlt.com',
+  },
+  Zabanet: {
+    networkName: 'Zabanet',
+    networkId: RadixNetwork.Zabanet,
+    gatewayUrl: 'https://zabanet-gateway.radixdlt.com',
+    dashboardUrl: 'https://rcnet-v3-dashboard.radixdlt.com',
+  },
+  RCnetV3: {
+    networkName: 'RCNetV3',
+    networkId: RadixNetwork.RCnetV3,
+    gatewayUrl: 'https://zabanet-gateway.radixdlt.com',
+    dashboardUrl: 'https://rcnet-v3-dashboard.radixdlt.com',
   },
   Gilganet: {
     networkName: 'Gilganet',
@@ -67,33 +91,15 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
   Hammunet: {
     networkName: 'Hammunet',
     networkId: RadixNetwork.Hammunet,
-    gatewayUrl: 'https://hammunet-gateway.radixdlt.com:443',
+    gatewayUrl: 'https://hammunet-gateway.radixdlt.com',
     dashboardUrl: 'https://hammunet-dashboard.rdx-works-main.extratools.works',
   },
-  Zabanet: {
-    networkName: 'Zabanet',
-    networkId: RadixNetwork.RCnetV3,
-    gatewayUrl: 'https://zabanet-gateway.radixdlt.com',
-    dashboardUrl: 'https://rcnet-v3-dashboard.radixdlt.com',
+  Dumunet: {
+    networkName: 'Dumunet',
+    networkId: RadixNetwork.Dumunet,
+    gatewayUrl: 'https://dumunet-gateway.radixdlt.com',
+    dashboardUrl: 'https://dumunet-dashboard.rdx-works-main.extratools.works',
   },
-  RCnetV1: {
-    networkName: 'RCnetV1',
-    networkId: RadixNetwork.RCnetV1,
-    gatewayUrl: 'https://rcnet.radixdlt.com',
-    dashboardUrl: 'https://rcnet-dashboard.radixdlt.com',
-  },
-  RCnetV2: {
-    networkName: 'RCNetV2',
-    networkId: RadixNetwork.RCnetV2,
-    gatewayUrl: 'https://ansharnet-gateway.radixdlt.com',
-    dashboardUrl: 'https://rcnet-v2-dashboard.radixdlt.com',
-  },
-  RCnetV3: {
-    networkName: 'RCNetV3',
-    networkId: RadixNetwork.RCnetV3,
-    gatewayUrl: 'https://zabanet-gateway.radixdlt.com',
-    dashboardUrl: 'https://rcnet-v3-dashboard.radixdlt.com',
-  }
 }
 
 export const RadixNetworkConfigById = Object.values(RadixNetworkConfig).reduce(
