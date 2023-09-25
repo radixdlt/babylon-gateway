@@ -64,18 +64,15 @@
 
 using GatewayApi.SlowRequestLogging;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
 using System;
-using System.Globalization;
 
 namespace GatewayApi;
 

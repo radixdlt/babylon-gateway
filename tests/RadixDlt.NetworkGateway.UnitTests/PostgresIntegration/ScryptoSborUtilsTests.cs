@@ -63,7 +63,6 @@
  */
 
 using FluentAssertions;
-using Microsoft.Extensions.Logging.Abstractions;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System;
 using System.Collections.Generic;
