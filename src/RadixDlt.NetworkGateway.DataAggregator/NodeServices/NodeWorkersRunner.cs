@@ -64,9 +64,11 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 using System;
 using System.Collections.Generic;
@@ -107,6 +109,7 @@ public sealed class NodeWorkersRunner : IDisposable
     private readonly object _statusLock = new();
     private readonly ILogger<NodeWorkersRunner> _logger;
     private readonly IClock _clock;
+    private readonly IOptionsMonitor<NodeWorkersOptions> _nodeWorkersOptions;
 
     private IServiceScope? _nodeDependencyInjectionScope;
 
@@ -119,12 +122,13 @@ public sealed class NodeWorkersRunner : IDisposable
     private IDisposable? _logScope;
     private NodeWorkersRunnerStatus _status;
 
-    public NodeWorkersRunner(ILogger<NodeWorkersRunner> logger, IServiceScope nodeDependencyInjectionScope, IDisposable logScope, IClock clock)
+    public NodeWorkersRunner(ILogger<NodeWorkersRunner> logger, IServiceScope nodeDependencyInjectionScope, IDisposable logScope, IClock clock, IOptionsMonitor<NodeWorkersOptions> nodeWorkersOptions)
     {
         _logger = logger;
         _nodeDependencyInjectionScope = nodeDependencyInjectionScope;
         _logScope = logScope;
         _clock = clock;
+        _nodeWorkersOptions = nodeWorkersOptions;
         _cancellationTokenSource = new CancellationTokenSource();
         _initializers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeInitializer>().ToList();
         _workers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeWorker>().ToList();
@@ -136,16 +140,16 @@ public sealed class NodeWorkersRunner : IDisposable
     /// </summary>
     public bool IsHealthy()
     {
-        const int GraceSecondsBeforeMarkingStalled = 10;
+        var graceSecondsBeforeMarkingStalled = _nodeWorkersOptions.CurrentValue.GraceSecondsBeforeMarkingStalled;
 
-        var isRunningOrNotStalled = Status == NodeWorkersRunnerStatus.Running || _lastStatusChange.WithinPeriodOfNow(TimeSpan.FromSeconds(GraceSecondsBeforeMarkingStalled), _clock);
+        var isRunningOrNotStalled = Status == NodeWorkersRunnerStatus.Running || _lastStatusChange.WithinPeriodOfNow(TimeSpan.FromSeconds(graceSecondsBeforeMarkingStalled), _clock);
         if (!isRunningOrNotStalled)
         {
             _logger.LogWarning(
                 "Marked as unhealthy because current status is {Status} and last status changes was at {LastStatusChange}, longer than {GracePeriod}s ago - suggesting that the WorkersRegistry hasn't properly handled something, and these NodeWorkers should be restarted",
                 Status,
                 _lastStatusChange,
-                GraceSecondsBeforeMarkingStalled
+                graceSecondsBeforeMarkingStalled
             );
             return false;
         }
