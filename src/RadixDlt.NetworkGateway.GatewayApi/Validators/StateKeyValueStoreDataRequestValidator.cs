@@ -63,7 +63,6 @@
  */
 
 using FluentValidation;
-using FluentValidation.Validators;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;

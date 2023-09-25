@@ -74,6 +74,12 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("MaxPageSize")]
     public int MaxPageSize { get; set; } = 100;
 
+    [ConfigurationKeyName("DefaultTransactionsStreamPageSize")]
+    public int DefaultTransactionsStreamPageSize { get; set; } = 10;
+
+    [ConfigurationKeyName("DefaultNonFungibleIdsPageSize")]
+    public int DefaultNonFungibleIdsPageSize { get; set; } = 100;
+
     [ConfigurationKeyName("RequestTimeout")]
     public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
@@ -98,6 +104,8 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
     public EndpointOptionsValidator()
     {
         RuleFor(x => x.MaxPageSize).GreaterThan(0);
+        RuleFor(x => x.DefaultNonFungibleIdsPageSize).GreaterThan(0);
+        RuleFor(x => x.DefaultTransactionsStreamPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
         RuleFor(x => x.DefaultPageSize).GreaterThan(0);
         RuleFor(x => x.ValidatorsPageSize).GreaterThan(0);

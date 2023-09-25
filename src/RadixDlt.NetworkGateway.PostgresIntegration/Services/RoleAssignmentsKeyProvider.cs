@@ -62,15 +62,9 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.Abstractions.Model;
 
