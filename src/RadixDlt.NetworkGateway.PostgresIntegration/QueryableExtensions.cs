@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -14,8 +13,7 @@ public static class QueryableExtensions
         [CallerFilePath] string filePath = "",
         [CallerMemberName] string methodName = "")
     {
-        var queryNameValue = SqlQueryMetricsHelper.GetQueryNameValue(operationName, filePath, methodName);
-        var queryName = MetricsInterceptor.GetQueryNameTag(queryNameValue);
-        return source.TagWith(queryName);
+        var queryNameTag = SqlQueryMetricsHelper.GenerateQueryNameTag(operationName, filePath, methodName);
+        return source.TagWith(queryNameTag);
     }
 }

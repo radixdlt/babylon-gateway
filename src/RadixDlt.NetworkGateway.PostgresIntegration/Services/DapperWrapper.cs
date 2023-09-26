@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;

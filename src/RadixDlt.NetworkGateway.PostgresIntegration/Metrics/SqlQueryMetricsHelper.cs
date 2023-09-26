@@ -1,12 +1,12 @@
-﻿using Prometheus;
-using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
-using System;
+﻿using System;
 using System.IO;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
 
-internal class SqlQueryMetricsHelper
+public static class SqlQueryMetricsHelper
 {
+    public const string QueryNameTag = "QueryName";
+
     public static string GetQueryNameValue(
         string operationName = "",
         string filePath = "",
@@ -23,5 +23,11 @@ internal class SqlQueryMetricsHelper
         {
             return $"{fileName}_{methodName}";
         }
+    }
+
+    public static string GenerateQueryNameTag(string operationName = "", string filePath = "", string methodName = "")
+    {
+        var queryName = GetQueryNameValue(operationName, filePath, methodName);
+        return $"{QueryNameTag}={queryName};";
     }
 }

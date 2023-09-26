@@ -15,9 +15,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 
 internal class MetricsInterceptor : DbCommandInterceptor
 {
-    private const string QueryNameTag = "QueryName";
     private const string UnknownQueryName = "UNKNOWN";
-
     private readonly IOptionsMonitor<SlowQueriesLoggingOptions> _slowQueriesLoggingOptions;
     private readonly ILogger<MetricsInterceptor> _logger;
     private readonly ISqlQueryObserver _sqlQueryObserver;
@@ -27,11 +25,6 @@ internal class MetricsInterceptor : DbCommandInterceptor
         _slowQueriesLoggingOptions = slowQueriesLoggingOptions;
         _sqlQueryObserver = sqlQueryObserver;
         _logger = loggerFactory.CreateLogger<MetricsInterceptor>();
-    }
-
-    public static string GetQueryNameTag(string queryName)
-    {
-        return $"{QueryNameTag}={queryName};";
     }
 
     public override DbDataReader ReaderExecuted(DbCommand command, CommandExecutedEventData eventData, DbDataReader result)
@@ -74,7 +67,7 @@ internal class MetricsInterceptor : DbCommandInterceptor
     private string? GetQueryName(DbCommand dbCommand)
     {
         const string QueryNameGroup = "queryName";
-        var matches = Regex.Matches(dbCommand.CommandText, $"(?:{QueryNameTag}=)(?<{QueryNameGroup}>\\b.*?\\b);");
+        var matches = Regex.Matches(dbCommand.CommandText, $"(?:{SqlQueryMetricsHelper.QueryNameTag}=)(?<{QueryNameGroup}>\\b.*?\\b);");
 
         switch (matches.Count)
         {
