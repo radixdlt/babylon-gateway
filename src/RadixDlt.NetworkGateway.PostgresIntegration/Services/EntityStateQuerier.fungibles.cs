@@ -167,7 +167,7 @@ ORDER BY vah.resource_order, vah.vault_order;
 
         var resources = new Dictionary<EntityAddress, GatewayModel.FungibleResourcesCollectionItemVaultAggregated>();
 
-        foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<FungibleAggregatedPerVaultViewModel>(cd))
+        foreach (var vm in await _dapperWrapper.QueryAsync<FungibleAggregatedPerVaultViewModel>(_dbContext.Database.GetDbConnection(), cd))
         {
             resourcesTotalCount = vm.ResourceTotalCount;
 
@@ -250,7 +250,7 @@ ORDER BY vah.ord;
             },
             cancellationToken: token);
 
-        var result = (await _dbContext.Database.GetDbConnection().QueryAsync<FungibleResourceVaultsViewModel>(cd)).ToList();
+        var result = (await _dapperWrapper.QueryAsync<FungibleResourceVaultsViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
         var vaultsTotalCount = result.FirstOrDefault()?.VaultTotalCount ?? 0;
         var castedResult = result
             .Select(x =>

@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -109,6 +110,7 @@ INNER JOIN package_blueprint_history pbh
 ON pbh.name = v.blueprint_name AND pbh.version = v.blueprint_version and pbh.package_entity_id = v.package_entity_id
 WHERE from_state_version <= {ledgerState.StateVersion}
 ")
+            .WithQueryName()
             .ToDictionaryAsync(
                 x => new BlueprintDefinitionIdentifier(x.Name, x.Version, x.PackageEntityId),
                 x => x,

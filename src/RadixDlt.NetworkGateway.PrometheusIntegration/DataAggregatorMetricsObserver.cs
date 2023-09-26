@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -92,8 +93,13 @@ internal class DataAggregatorMetricsObserver :
     ILedgerExtenderServiceObserver,
     INetworkConfigurationReaderObserver,
     INetworkStatusReaderObserver,
-    ITransactionStreamReaderObserver
+    ITransactionStreamReaderObserver,
+    ISqlQueryObserver
 {
+    private static readonly Histogram _sqlQueryDuration = Prometheus.Metrics
+        .CreateHistogram("sql_query_duration", "The duration of SQL queries processed by this app.",
+            new HistogramConfiguration { LabelNames = new[] { "query_name" } });
+
     private static readonly Counter _globalWorkerErrorsCount = Metrics
         .CreateCounter(
             "ng_workers_global_error_count",
@@ -572,5 +578,10 @@ internal class DataAggregatorMetricsObserver :
         _failedTransactionsFetchCounterUnScoped.WithLabels(nodeName).Inc();
 
         return ValueTask.CompletedTask;
+    }
+
+    public void OnSqlQueryExecuted(string queryName, TimeSpan duration)
+    {
+        _sqlQueryDuration.WithLabels(queryName).Observe(duration.TotalMilliseconds);
     }
 }

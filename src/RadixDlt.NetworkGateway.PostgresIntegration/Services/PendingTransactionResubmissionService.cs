@@ -168,6 +168,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
                 .OrderBy(mt => mt.GatewayHandling.ResubmitFromTimestamp)
                 .Include(t => t.Payload)
                 .Take(batchSize)
+                .WithQueryName()
                 .ToListAsync(token);
 
         var totalTransactionsNeedingResubmission = transactionsToResubmit.Count < batchSize

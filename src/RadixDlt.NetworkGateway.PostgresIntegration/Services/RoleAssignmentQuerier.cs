@@ -64,6 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -116,12 +117,14 @@ internal class RoleAssignmentQuerier : IRoleAssignmentQuerier
         var ownerRoles = await _dbContext
             .EntityRoleAssignmentsOwnerHistory
             .Where(e => ownerRoleIds.Contains(e.Id))
+            .WithQueryName("GetOwnerRoles")
             .ToListAsync(token);
 
         var entries = await _dbContext
             .EntityRoleAssignmentsEntryHistory
             .Where(e => roleAssignmentsHistory.Contains(e.Id))
             .Where(e => !e.IsDeleted)
+            .WithQueryName("GetRoleEntires")
             .ToListAsync(token);
 
         return _roleAssignmentsMapper.GetEffectiveRoleAssignments(componentEntities, blueprintAuthConfigs, ownerRoles, entries);
@@ -172,6 +175,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) earah ON TRUE;")
+            .WithQueryName()
             .ToListAsync(token);
 
         return aggregates;

@@ -159,7 +159,7 @@ order by ah.ord;
 
         var items = new List<GatewayModel.NonFungibleResourcesCollectionItem>();
 
-        foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleViewModel>(cd))
+        foreach (var vm in await _dapperWrapper.QueryAsync<NonFungibleViewModel>(_dbContext.Database.GetDbConnection(), cd))
         {
             totalCount = vm.ResourcesTotalCount;
 
@@ -249,7 +249,7 @@ ORDER BY vah.resource_order, vah.vault_order;
             },
             cancellationToken: token);
 
-        return (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleAggregatedPerVaultViewModel>(cd)).ToList();
+        return (await _dapperWrapper.QueryAsync<NonFungibleAggregatedPerVaultViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
     }
 
     private async Task<List<NonFungibleResourceVaultsViewModel>> GetNonFungibleResourceVaults(
@@ -314,7 +314,7 @@ ORDER BY vah.ord;
             },
             cancellationToken: token);
 
-        return (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleResourceVaultsViewModel>(cd)).ToList();
+        return (await _dapperWrapper.QueryAsync<NonFungibleResourceVaultsViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
     }
 
     private async Task<GatewayModel.NonFungibleIdsCollection> GetNonFungibleIdsSlice(
@@ -357,7 +357,7 @@ order by ord
 
         var totalCount = 0;
 
-        var items = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdViewModel>(cd))
+        var items = (await _dapperWrapper.QueryAsync<NonFungibleIdViewModel>(_dbContext.Database.GetDbConnection(), cd))
             .ToList()
             .Select(vm =>
             {
@@ -435,7 +435,7 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = un.unnested_non_fungible_id
             },
             cancellationToken: token);
 
-        var result = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdWithOwnerDataViewModel>(cd)).ToList();
+        var result = (await _dapperWrapper.QueryAsync<NonFungibleIdWithOwnerDataViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
 
         return result;
     }

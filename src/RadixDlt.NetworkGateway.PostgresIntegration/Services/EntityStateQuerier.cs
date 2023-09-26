@@ -73,6 +73,7 @@ using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
@@ -117,20 +118,22 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IVirtualEntityDataProvider _virtualEntityDataProvider;
     private readonly IRoleAssignmentQuerier _roleAssignmentQuerier;
+    private readonly IDapperWrapper _dapperWrapper;
 
     public EntityStateQuerier(
         INetworkConfigurationProvider networkConfigurationProvider,
         ReadOnlyDbContext dbContext,
         IOptionsSnapshot<EndpointOptions> endpointConfiguration,
         IVirtualEntityDataProvider virtualEntityDataProvider,
-        IRoleAssignmentsMapper roleAssignmentsMapper,
-        IRoleAssignmentQuerier roleAssignmentQuerier)
+        IRoleAssignmentQuerier roleAssignmentQuerier,
+        IDapperWrapper dapperWrapper)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
         _endpointConfiguration = endpointConfiguration;
         _virtualEntityDataProvider = virtualEntityDataProvider;
         _roleAssignmentQuerier = roleAssignmentQuerier;
+        _dapperWrapper = dapperWrapper;
     }
 
     public async Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(
@@ -530,7 +533,7 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
 
         long totalCount = 0;
 
-        var items = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdViewModel>(cd))
+        var items = (await _dapperWrapper.QueryAsync<NonFungibleIdViewModel>(_dbContext.Database.GetDbConnection(), cd))
             .ToList()
             .Select(vm =>
             {
@@ -574,7 +577,9 @@ ORDER BY nfsh.from_state_version DESC",
             },
             cancellationToken: token);
 
-        var nonFungibleDataSchema = await _dbContext.Database.GetDbConnection().QueryFirstOrDefaultAsync<NonFungibleDataSchemaModel>(nonFungibleDataSchemaQuery);
+        var nonFungibleDataSchema = await _dapperWrapper.QueryFirstOrDefaultAsync<NonFungibleDataSchemaModel>(
+            _dbContext.Database.GetDbConnection(), nonFungibleDataSchemaQuery, "GetNonFungibleDataSchema"
+        );
 
         if (nonFungibleDataSchema == null)
         {
@@ -605,7 +610,12 @@ ORDER BY nfid.from_state_version DESC
 
         var items = new List<GatewayModel.StateNonFungibleDetailsResponseItem>();
 
-        foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdDataViewModel>(cd))
+        var result = await _dapperWrapper.QueryAsync<NonFungibleIdDataViewModel>(
+            _dbContext.Database.GetDbConnection(),
+            cd,
+            "GetNonFungibleData");
+
+        foreach (var vm in result)
         {
             var programmaticJson = !vm.IsDeleted
                 ? ScryptoSborUtils.DataToProgrammaticJson(vm.Data, nonFungibleDataSchema.Schema,
@@ -676,7 +686,7 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
             },
             cancellationToken: token);
 
-        var result = await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdLocationViewModel>(cd);
+        var result = await _dapperWrapper.QueryAsync<NonFungibleIdLocationViewModel>(_dbContext.Database.GetDbConnection(), cd);
 
         return new GatewayModel.StateNonFungibleLocationResponse(
             ledgerState: ledgerState,
@@ -707,6 +717,7 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
             .OrderBy(e => e.FromStateVersion)
             .ThenBy(e => e.Id)
             .Take(validatorsPageSize + 1)
+            .WithQueryName("GetValidators")
             .ToListAsync(token);
 
         var findEpochSubquery = _dbContext
@@ -721,6 +732,7 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
             .ValidatorActiveSetHistory
             .Include(e => e.PublicKey)
             .Where(e => e.Epoch == findEpochSubquery.First())
+            .WithQueryName("GetValidatorActiveSet")
             .ToDictionaryAsync(e => e.PublicKey.ValidatorEntityId, token);
 
         var totalStake = activeSetById
@@ -801,11 +813,15 @@ INNER JOIN LATERAL (
             },
             cancellationToken: token);
 
-        var validatorsDetails = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorCurrentStakeViewModel>(cd)).ToList();
+        var validatorsDetails = (await _dapperWrapper.QueryAsync<ValidatorCurrentStakeViewModel>(
+                _dbContext.Database.GetDbConnection(), cd, "GetValidatorDetails")
+            ).ToList();
+
         var vaultAddresses = await _dbContext
             .Entities
             .Where(e => validatorVaultIds.Contains(e.Id))
             .Select(e => new { e.Id, e.Address })
+            .WithQueryName("GetVaultAddresses")
             .ToDictionaryAsync(e => e.Id, e => e.Address, token);
 
         var metadataById = await GetMetadataSlices(validatorIds, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
@@ -887,7 +903,9 @@ ORDER BY kvssh.from_state_version DESC
             },
             cancellationToken: token);
 
-        var keyValueStoreSchema = await _dbContext.Database.GetDbConnection().QueryFirstOrDefaultAsync<KeyValueStoreSchemaModel>(keyValueStoreSchemaQuery);
+        var keyValueStoreSchema = await _dapperWrapper.QueryFirstOrDefaultAsync<KeyValueStoreSchemaModel>(
+            _dbContext.Database.GetDbConnection(), keyValueStoreSchemaQuery, "GetKeyValueStoreSchema"
+        );
 
         if (keyValueStoreSchema == null)
         {
@@ -911,6 +929,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) kvseh ON TRUE;")
+            .WithQueryName("GetKeyValueStores")
             .ToListAsync(token);
 
         var items = new List<GatewayModel.StateKeyValueStoreDataResponseItem>();
@@ -964,8 +983,7 @@ INNER JOIN LATERAL (
             },
             cancellationToken: token);
 
-        var result = await _dbContext.Database.GetDbConnection().QueryAsync<RoyaltyVaultBalanceViewModel>(cd);
-
+        var result = await _dapperWrapper.QueryAsync<RoyaltyVaultBalanceViewModel>(_dbContext.Database.GetDbConnection(), cd);
         return result.ToList();
     }
 
@@ -1008,7 +1026,7 @@ ORDER BY metadata_join.ordinality ASC;",
             },
             cancellationToken: token);
 
-        foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<MetadataViewModel>(cd))
+        foreach (var vm in await _dapperWrapper.QueryAsync<MetadataViewModel>(_dbContext.Database.GetDbConnection(), cd))
         {
             if (!result.ContainsKey(vm.EntityId))
             {
@@ -1070,6 +1088,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON TRUE;")
+            .WithQueryName()
             .ToListAsync(token);
 
         var result = new Dictionary<long, GatewayModel.EntityMetadataCollection>();
@@ -1153,7 +1172,7 @@ order by ah.ord
 
         var items = new List<GatewayModel.FungibleResourcesCollectionItem>();
 
-        foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<FungibleViewModel>(cd))
+        foreach (var vm in await _dapperWrapper.QueryAsync<FungibleViewModel>(_dbContext.Database.GetDbConnection(), cd))
         {
             totalCount = vm.ResourcesTotalCount;
 
@@ -1186,6 +1205,7 @@ INNER JOIN LATERAL(
     ORDER BY from_state_version DESC
     LIMIT 1
 ) resh ON true")
+            .WithQueryName()
             .ToDictionaryAsync(e => e.ResourceEntityId, token);
 
         foreach (var missing in entityIds.Except(result.Keys))
@@ -1247,6 +1267,7 @@ INNER JOIN LATERAL(
         var entities = await _dbContext
             .Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
+            .WithQueryName()
             .ToListAsync(token);
 
         foreach (var address in addresses)
@@ -1291,6 +1312,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) esh ON TRUE;")
+            .WithQueryName("GetStateHistory")
             .ToListAsync(token);
 
         var schemasToLoad = states
@@ -1320,6 +1342,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) esh ON TRUE;
 ")
+                .WithQueryName("GetSchemas")
                 .ToDictionaryAsync(
                     x => new SchemaIdentifier(x.SchemaHash, x.EntityId),
                     x => x.Schema,
@@ -1378,6 +1401,7 @@ INNER JOIN LATERAL(
     FROM package_blueprint_history
     WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
 ) pbh ON true")
+                .WithQueryName()
                 .ToListAsync(token))
             .GroupBy(b => b.PackageEntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
@@ -1403,6 +1427,7 @@ INNER JOIN LATERAL(
     ORDER BY from_state_version DESC
     LIMIT 1
 ) pch ON true")
+            .WithQueryName()
             .ToDictionaryAsync(e => e.PackageEntityId, token);
     }
 
@@ -1424,6 +1449,7 @@ INNER JOIN LATERAL(
     FROM schema_history
     WHERE entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
 ) psh ON true")
+                .WithQueryName()
                 .ToListAsync(token))
             .GroupBy(b => b.EntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
@@ -1464,6 +1490,7 @@ INNER JOIN LATERAL(
             .Entities
             .Where(e => ids.Contains(e.Id) && e.FromStateVersion <= ledgerState.StateVersion)
             .Select(e => new { e.Id, GlobalAddress = e.Address })
+            .WithQueryName()
             .ToDictionaryAsync(e => e.Id, e => e.GlobalAddress, token);
     }
 
@@ -1488,6 +1515,7 @@ INNER JOIN LATERAL(
             .Entities
             .Where(e => addresses.Contains(e.Address))
             .Select(e => new { e.Id, e.Address })
+            .WithQueryName()
             .ToDictionaryAsync(e => e.Address, e => e.Id, token);
     }
 

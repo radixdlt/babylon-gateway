@@ -132,6 +132,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) emh ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => new MetadataLookup(e.EntityId, e.Key), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -165,6 +166,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) emah ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => e.EntityId, token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityAggregateMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -218,6 +220,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) eareh ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => new RoleAssignmentEntryLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityRoleAssignmentsEntryHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -253,6 +256,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) earah ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => e.EntityId, token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityRoleAssignmentsAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -294,6 +298,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) erah ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => e.EntityId, token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityResourceAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -336,6 +341,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) eravh ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityResourceAggregatedVaultsHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -386,6 +392,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) ervah ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => new EntityResourceVaultLookup(e.EntityId, e.ResourceEntityId), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityResourceVaultAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -419,19 +426,13 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) evh ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => e.VaultEntityId, e => (EntityNonFungibleVaultHistory)e, token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityNonFungibleVaultHistory), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }
-
-    // public async Task<> MostRecentPackageDefinitionHistory(List<PackageChange> packageChanges, CancellationToken token)
-    // {
-    //     var packageIds = packageChanges.Select(x => x.PackageEntityId).Distinct().ToList();
-    //
-    //     return await _dbContext.
-    // }
 
     public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
     {
@@ -459,6 +460,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) emh ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => e.NonFungibleResourceEntityId, token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentNonFungibleIdStoreHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -492,6 +494,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) rmesh ON true;")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => e.ResourceEntityId, token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentResourceEntitySupplyHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -520,6 +523,7 @@ WHERE id IN(
     WHERE address = ANY({entityAddressesParameter})
 )")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => e.Address, token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingEntitiesFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -565,6 +569,7 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
     SELECT UNNEST({resourceEntityIds}), UNNEST({nonFungibleIds})
 )")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceEntityId, e.NonFungibleId), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingNonFungibleIdDataFor), Stopwatch.GetElapsedTime(sw), result.Count));
@@ -615,6 +620,7 @@ INNER JOIN LATERAL (
 ) vpkh ON true;
 ")
             .AsNoTracking()
+            .WithQueryName()
             .ToDictionaryAsync(e => new ValidatorKeyLookup(e.ValidatorEntityId, e.KeyType, e.Key), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingValidatorKeysFor), Stopwatch.GetElapsedTime(sw), result.Count));

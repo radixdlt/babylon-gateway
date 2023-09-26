@@ -300,6 +300,7 @@ internal class TransactionQuerier : ITransactionQuerier
         var stateVersions = await searchQuery
             .TagWith(ForceDistinctInterceptor.Apply)
             .Take(request.PageSize + 1)
+            .WithQueryName("GetTransactionsStateVersions")
             .ToListAsync(token);
 
         var transactions = await GetTransactions(stateVersions.Take(request.PageSize).ToList(), request.OptIns, token);
@@ -562,6 +563,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     pt.NetworkDetails.LastSubmitErrorTitle
                 )
             )
+            .WithQueryName()
             .ToListAsync(token);
     }
 
@@ -573,6 +575,7 @@ internal class TransactionQuerier : ITransactionQuerier
         var transactions = await _dbContext
             .LedgerTransactions
             .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
+            .WithQueryName("GetTransactions")
             .ToListAsync(token);
 
         var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
@@ -597,6 +600,7 @@ WITH variables (entity_id, schema_hash) AS (
 SELECT sh.*
 FROM variables var
 INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash = var.schema_hash")
+                .WithQueryName("GetEventSchemas")
                 .ToDictionaryAsync(x => new SchemaLookup(x.EntityId, x.SchemaHash), x => x.Schema, token);
         }
 
@@ -642,6 +646,7 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
             .Entities
             .Where(e => addresses.Contains(e.Address))
             .Select(e => new { e.Id, e.Address })
+            .WithQueryName()
             .ToDictionaryAsync(e => e.Address.ToString(), e => e.Id, token);
     }
 
@@ -656,6 +661,7 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
             .Entities
             .Where(e => entityIds.Contains(e.Id))
             .Select(e => new { e.Id, e.Address })
+            .WithQueryName()
             .ToDictionaryAsync(e => e.Id, e => e.Address.ToString(), token);
     }
 }

@@ -99,6 +99,7 @@ public static class ServiceCollectionExtensions
 
         services
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
+            .AddValidatableOptionsAtSection<SlowQueriesLoggingOptions, SlowQueriesLoggingOptionsValidator>("GatewayApi:SlowQueriesLogging")
             .AddValidatableOptionsAtSection<CoreApiIntegrationOptions, CoreApiIntegrationOptionsValidator>("GatewayApi:CoreApiIntegration")
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("GatewayApi:Network")
             .AddValidatableOptionsAtSection<AcceptableLedgerLagOptions, AcceptableLedgerLagOptionsValidator>("GatewayApi:AcceptableLedgerLag");

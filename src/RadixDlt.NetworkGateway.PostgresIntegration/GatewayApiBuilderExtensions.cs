@@ -63,9 +63,15 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
+using RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -94,7 +100,9 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<IValidatorQuerier, ValidatorQuerier>()
             .AddScoped<IVirtualEntityDataProvider, VirtualEntityDataProvider>()
             .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>()
+            .AddSingleton<IDapperWrapper, DapperWrapper>()
+            .AddSingleton<MetricsInterceptor>();
 
         CustomTypes.EnsureConfigured();
 
@@ -104,11 +112,15 @@ public static class GatewayApiBuilderExtensions
             .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
             {
                 options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadOnlyDbContext>>().NpgsqlDataSource);
+                options.AddInterceptors(serviceProvider.GetRequiredService<MetricsInterceptor>());
+                options.AddInterceptors(new ForceDistinctInterceptor());
             })
             .AddNpgsqlDataSourceHolder<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
             .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
             {
                 options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);
+                options.AddInterceptors(serviceProvider.GetRequiredService<MetricsInterceptor>());
+                options.AddInterceptors(new ForceDistinctInterceptor());
             });
 
         return builder;

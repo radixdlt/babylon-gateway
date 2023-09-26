@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
@@ -171,6 +172,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 pt.LedgerDetails.LatestRejectionTimestamp,
                 pt.LedgerDetails.LatestRejectionReason,
             })
+            .WithQueryName()
             .ToListAsync(token);
 
         foreach (var details in pendingTransactions)

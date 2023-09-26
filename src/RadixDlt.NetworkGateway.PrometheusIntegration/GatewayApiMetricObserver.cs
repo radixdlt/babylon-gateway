@@ -85,8 +85,13 @@ internal class GatewayApiMetricObserver :
     ISubmissionServiceObserver,
     IPreviewServiceObserver,
     ILedgerStateQuerierObserver,
-    ISubmissionTrackingServiceObserver
+    ISubmissionTrackingServiceObserver,
+    ISqlQueryObserver
 {
+    private static readonly Histogram _sqlQueryDuration = Metrics
+        .CreateHistogram("sql_query_duration", "The duration of SQL queries processed by this app.",
+            new HistogramConfiguration { LabelNames = new[] { "query_name" } });
+
     private static readonly Counter _apiResponseErrorCount = Metrics
         .CreateCounter(
             "ng_gateway_response_error_count",
@@ -168,6 +173,11 @@ internal class GatewayApiMetricObserver :
             "ng_db_mempool_transactions_duplicate_submission_count",
             "Number of mempool transactions submitted to the gateway which were already being tracked"
         );
+
+    public void OnSqlQueryExecuted(string queryName, TimeSpan duration)
+    {
+        _sqlQueryDuration.WithLabels(queryName).Observe(duration.TotalMilliseconds);
+    }
 
     void IExceptionObserver.OnException(ActionContext actionContext, Exception exception, KnownGatewayErrorException gatewayErrorException)
     {
