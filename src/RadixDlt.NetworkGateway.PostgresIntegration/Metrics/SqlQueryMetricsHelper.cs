@@ -12,14 +12,14 @@ public static class SqlQueryMetricsHelper
         string operationName,
         string methodName)
     {
-        if (!operationName.All(char.IsLetterOrDigit))
+        if (!IsValidTagPart(operationName))
         {
-            throw new ArgumentException($"{nameof(operationName)} is expected to be alphanumeric. Got: {operationName}");
+            throw new ArgumentException("Expected alphanumeric, got: {operationName}", nameof(operationName));
         }
 
-        if (!methodName.All(char.IsLetterOrDigit))
+        if (!IsValidTagPart(methodName))
         {
-            throw new ArgumentException($"{nameof(methodName)} is expected to be alphanumeric. Got: {operationName}");
+            throw new ArgumentException("Expected alphanumeric, got: {operationName}", nameof(methodName));
         }
 
         if (!string.IsNullOrEmpty(operationName) &&
@@ -37,5 +37,10 @@ public static class SqlQueryMetricsHelper
     {
         var queryName = GetQueryNameValue(operationName, methodName);
         return $"{QueryNameTag}<{queryName}>;";
+    }
+
+    private static bool IsValidTagPart(string value)
+    {
+        return value.All(c => char.IsLetterOrDigit(c) || c == '_' || c == '_');
     }
 }

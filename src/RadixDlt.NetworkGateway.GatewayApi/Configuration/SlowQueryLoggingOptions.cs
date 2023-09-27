@@ -6,13 +6,13 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
 public sealed class SlowQueryLoggingOptions
 {
-    public TimeSpan SlowQueriesThreshold { get; set; } = TimeSpan.FromMilliseconds(250);
+    public TimeSpan SlowQueryThreshold { get; set; } = TimeSpan.FromMilliseconds(250);
 }
 
 internal class SlowQueryLoggingValidator : AbstractOptionsValidator<SlowQueryLoggingOptions>
 {
     public SlowQueryLoggingValidator()
     {
-        RuleFor(x => x.SlowQueriesThreshold).GreaterThan(TimeSpan.Zero);
+        RuleFor(x => x.SlowQueryThreshold).GreaterThan(TimeSpan.Zero);
     }
 }

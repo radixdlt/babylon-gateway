@@ -49,7 +49,7 @@ internal class MetricsInterceptor : DbCommandInterceptor
 
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, eventData.Duration);
 
-        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueriesThreshold;
+        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueryThreshold;
         if (eventData.Duration > logQueriesLongerThan)
         {
 #pragma warning disable EF1001
