@@ -77,7 +77,7 @@ internal static class DbQueryExtensions
             .LedgerTransactions
             .OrderByDescending(lt => lt.StateVersion)
             .Take(1)
-            .WithQueryName();
+            .AnnotateMetricName();
     }
 
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeStateVersion<TDbContext>(this TDbContext dbContext, long beforeStateVersion)
@@ -88,7 +88,7 @@ internal static class DbQueryExtensions
             .Where(lt => lt.StateVersion <= beforeStateVersion)
             .OrderByDescending(lt => lt.StateVersion)
             .Take(1)
-            .WithQueryName();
+            .AnnotateMetricName();
     }
 
     public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterStateVersion<TDbContext>(this TDbContext dbContext, long afterStateVersion)
@@ -99,7 +99,7 @@ internal static class DbQueryExtensions
             .Where(lt => lt.StateVersion >= afterStateVersion)
             .OrderBy(lt => lt.StateVersion)
             .Take(1)
-            .WithQueryName();
+            .AnnotateMetricName();
     }
 
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
@@ -111,7 +111,7 @@ internal static class DbQueryExtensions
             .OrderByDescending(lt => lt.RoundTimestamp)
             .ThenByDescending(lt => lt.StateVersion)
             .Take(1)
-            .WithQueryName();
+            .AnnotateMetricName();
     }
 
     public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
@@ -123,7 +123,7 @@ internal static class DbQueryExtensions
             .OrderBy(lt => lt.RoundTimestamp)
             .ThenBy(lt => lt.StateVersion)
             .Take(1)
-            .WithQueryName();
+            .AnnotateMetricName();
     }
 
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
@@ -134,7 +134,7 @@ internal static class DbQueryExtensions
             .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
             .OrderByDescending(lt => lt.StateVersion)
             .Take(1)
-            .WithQueryName();
+            .AnnotateMetricName();
     }
 
     public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext,  long epoch, long round)
@@ -145,6 +145,6 @@ internal static class DbQueryExtensions
             .Where(lt => lt.Epoch >= epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
             .OrderBy(lt => lt.StateVersion)
             .Take(1)
-            .WithQueryName();
+            .AnnotateMetricName();
     }
 }

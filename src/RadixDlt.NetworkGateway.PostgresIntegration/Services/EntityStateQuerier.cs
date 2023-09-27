@@ -716,7 +716,7 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
             .OrderBy(e => e.FromStateVersion)
             .ThenBy(e => e.Id)
             .Take(validatorsPageSize + 1)
-            .WithQueryName("GetValidators")
+            .AnnotateMetricName("GetValidators")
             .ToListAsync(token);
 
         var findEpochSubquery = _dbContext
@@ -731,7 +731,7 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
             .ValidatorActiveSetHistory
             .Include(e => e.PublicKey)
             .Where(e => e.Epoch == findEpochSubquery.First())
-            .WithQueryName("GetValidatorActiveSet")
+            .AnnotateMetricName("GetValidatorActiveSet")
             .ToDictionaryAsync(e => e.PublicKey.ValidatorEntityId, token);
 
         var totalStake = activeSetById
@@ -820,7 +820,7 @@ INNER JOIN LATERAL (
             .Entities
             .Where(e => validatorVaultIds.Contains(e.Id))
             .Select(e => new { e.Id, e.Address })
-            .WithQueryName("GetVaultAddresses")
+            .AnnotateMetricName("GetVaultAddresses")
             .ToDictionaryAsync(e => e.Id, e => e.Address, token);
 
         var metadataById = await GetMetadataSlices(validatorIds, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
@@ -928,7 +928,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) kvseh ON TRUE;")
-            .WithQueryName("GetKeyValueStores")
+            .AnnotateMetricName("GetKeyValueStores")
             .ToListAsync(token);
 
         var items = new List<GatewayModel.StateKeyValueStoreDataResponseItem>();
@@ -1087,7 +1087,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON TRUE;")
-            .WithQueryName()
+            .AnnotateMetricName()
             .ToListAsync(token);
 
         var result = new Dictionary<long, GatewayModel.EntityMetadataCollection>();
@@ -1204,7 +1204,7 @@ INNER JOIN LATERAL(
     ORDER BY from_state_version DESC
     LIMIT 1
 ) resh ON true")
-            .WithQueryName()
+            .AnnotateMetricName()
             .ToDictionaryAsync(e => e.ResourceEntityId, token);
 
         foreach (var missing in entityIds.Except(result.Keys))
@@ -1221,7 +1221,7 @@ INNER JOIN LATERAL(
         var entity = await _dbContext
             .Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .WithQueryName()
+            .AnnotateMetricName()
             .FirstOrDefaultAsync(e => e.Address == address, token);
 
         if (entity == null)
@@ -1267,7 +1267,7 @@ INNER JOIN LATERAL(
         var entities = await _dbContext
             .Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
-            .WithQueryName()
+            .AnnotateMetricName()
             .ToListAsync(token);
 
         foreach (var address in addresses)
@@ -1312,7 +1312,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) esh ON TRUE;")
-            .WithQueryName("GetStateHistory")
+            .AnnotateMetricName("GetStateHistory")
             .ToListAsync(token);
 
         var schemasToLoad = states
@@ -1342,7 +1342,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) esh ON TRUE;
 ")
-                .WithQueryName("GetSchemas")
+                .AnnotateMetricName("GetSchemas")
                 .ToDictionaryAsync(
                     x => new SchemaIdentifier(x.SchemaHash, x.EntityId),
                     x => x.Schema,
@@ -1401,7 +1401,7 @@ INNER JOIN LATERAL(
     FROM package_blueprint_history
     WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
 ) pbh ON true")
-                .WithQueryName()
+                .AnnotateMetricName()
                 .ToListAsync(token))
             .GroupBy(b => b.PackageEntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
@@ -1427,7 +1427,7 @@ INNER JOIN LATERAL(
     ORDER BY from_state_version DESC
     LIMIT 1
 ) pch ON true")
-            .WithQueryName()
+            .AnnotateMetricName()
             .ToDictionaryAsync(e => e.PackageEntityId, token);
     }
 
@@ -1449,7 +1449,7 @@ INNER JOIN LATERAL(
     FROM schema_history
     WHERE entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
 ) psh ON true")
-                .WithQueryName()
+                .AnnotateMetricName()
                 .ToListAsync(token))
             .GroupBy(b => b.EntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
@@ -1490,7 +1490,7 @@ INNER JOIN LATERAL(
             .Entities
             .Where(e => ids.Contains(e.Id) && e.FromStateVersion <= ledgerState.StateVersion)
             .Select(e => new { e.Id, GlobalAddress = e.Address })
-            .WithQueryName()
+            .AnnotateMetricName()
             .ToDictionaryAsync(e => e.Id, e => e.GlobalAddress, token);
     }
 
@@ -1515,7 +1515,7 @@ INNER JOIN LATERAL(
             .Entities
             .Where(e => addresses.Contains(e.Address))
             .Select(e => new { e.Id, e.Address })
-            .WithQueryName()
+            .AnnotateMetricName()
             .ToDictionaryAsync(e => e.Address, e => e.Id, token);
     }
 

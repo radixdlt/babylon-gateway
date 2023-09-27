@@ -171,7 +171,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 pt.LedgerDetails.LatestRejectionTimestamp,
                 pt.LedgerDetails.LatestRejectionReason,
             })
-            .WithQueryName()
+            .AnnotateMetricName()
             .ToListAsync(token);
 
         foreach (var details in pendingTransactions)

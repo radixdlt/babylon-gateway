@@ -7,13 +7,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class QueryableExtensions
 {
-    public static IQueryable<T> WithQueryName<T>(
+    public static IQueryable<T> AnnotateMetricName<T>(
         this IQueryable<T> source,
         string operationName = "",
-        [CallerFilePath] string filePath = "",
         [CallerMemberName] string methodName = "")
     {
-        var queryNameTag = SqlQueryMetricsHelper.GenerateQueryNameTag(operationName, filePath, methodName);
+        var queryNameTag = SqlQueryMetricsHelper.GenerateQueryNameTag(operationName, methodName);
         return source.TagWith(queryNameTag);
     }
 }

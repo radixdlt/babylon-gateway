@@ -5,9 +5,8 @@ using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
+using System;
 using System.Data.Common;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,16 +14,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 
 internal class MetricsInterceptor : DbCommandInterceptor
 {
-    private const string UnknownQueryName = "UNKNOWN";
-    private readonly IOptionsMonitor<SlowQueriesLoggingOptions> _slowQueriesLoggingOptions;
+    private readonly IOptionsMonitor<SlowQueryLoggingOptions> _slowQueriesLoggingOptions;
     private readonly ILogger<MetricsInterceptor> _logger;
     private readonly ISqlQueryObserver _sqlQueryObserver;
 
-    public MetricsInterceptor(ILoggerFactory loggerFactory, IOptionsMonitor<SlowQueriesLoggingOptions> slowQueriesLoggingOptions, ISqlQueryObserver sqlQueryObserver)
+    public MetricsInterceptor(ILogger<MetricsInterceptor> logger, IOptionsMonitor<SlowQueryLoggingOptions> slowQueriesLoggingOptions, ISqlQueryObserver sqlQueryObserver)
     {
         _slowQueriesLoggingOptions = slowQueriesLoggingOptions;
         _sqlQueryObserver = sqlQueryObserver;
-        _logger = loggerFactory.CreateLogger<MetricsInterceptor>();
+        _logger = logger;
     }
 
     public override DbDataReader ReaderExecuted(DbCommand command, CommandExecutedEventData eventData, DbDataReader result)
@@ -47,7 +45,7 @@ internal class MetricsInterceptor : DbCommandInterceptor
         DbCommand command,
         CommandExecutedEventData eventData)
     {
-        var queryName = GetQueryName(command) ?? UnknownQueryName;
+        var queryName = GetQueryName(command);
 
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, eventData.Duration);
 
@@ -64,36 +62,26 @@ internal class MetricsInterceptor : DbCommandInterceptor
         }
     }
 
-    private string? GetQueryName(DbCommand dbCommand)
+    private string GetQueryName(DbCommand dbCommand)
     {
-        const string QueryNameGroup = "queryName";
-        var matches = Regex.Matches(dbCommand.CommandText, $"(?:{SqlQueryMetricsHelper.QueryNameTag}=)(?<{QueryNameGroup}>\\b.*?\\b);");
+        const string UnknownQueryName = "UNKNOWN";
 
-        switch (matches.Count)
+        var startOfTag = dbCommand.CommandText.IndexOf($"{SqlQueryMetricsHelper.QueryNameTag}<", StringComparison.InvariantCultureIgnoreCase);
+        var endOfTag = dbCommand.CommandText.IndexOf(">", StringComparison.InvariantCultureIgnoreCase);
+
+        if (startOfTag < 0 || endOfTag < 0)
         {
-            case 0:
-                _logger.LogDebug("Missing query name for: {commandText}", dbCommand.CommandText);
-                return null;
-            case 1:
-            {
-                var hasQueryName = matches.First().Groups.TryGetValue(QueryNameGroup, out var queryName);
-
-                if (!hasQueryName || string.IsNullOrEmpty(queryName?.Value))
-                {
-                    _logger.LogDebug("Missing query name for: {commandText}", dbCommand.CommandText);
-                }
-
-                return queryName!.Value;
-            }
-
-            case > 1:
-            {
-                var foundTags = string.Join(',', matches.Select(x => x.Groups.Values.ToString()));
-                _logger.LogDebug("Query name provided multiple times: {foundTags}, in query: {commandText}", foundTags, dbCommand.CommandText);
-                return null;
-            }
-
-            default: return null;
+            _logger.LogDebug("Missing query name for: {commandText}", dbCommand.CommandText);
+            return UnknownQueryName;
         }
+
+        var queryName = dbCommand.CommandText.Substring(startOfTag, endOfTag);
+
+        if (string.IsNullOrEmpty(queryName))
+        {
+            throw new ArgumentNullException(queryName, "Query name extracted from query tag is empty.");
+        }
+
+        return queryName;
     }
 }

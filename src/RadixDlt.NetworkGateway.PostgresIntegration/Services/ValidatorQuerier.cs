@@ -99,7 +99,7 @@ internal class ValidatorQuerier : IValidatorQuerier
         var validators = await _dbContext
             .Entities
             .Where(e => addresses.Contains(e.Address) && e.FromStateVersion <= ledgerState.StateVersion)
-            .WithQueryName("GetValidators")
+            .AnnotateMetricName("GetValidators")
             .ToDictionaryAsync(e => e.Id, e => e.Address, token);
 
         var cd = new CommandDefinition(

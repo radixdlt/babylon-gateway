@@ -16,28 +16,26 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 public interface IDapperWrapper
 {
     Task<IEnumerable<T>> QueryAsync<T>(
-        IDbConnection cnn,
+        IDbConnection connection,
         CommandDefinition command,
         string operationName = "",
-        [CallerFilePath] string filePath = "",
         [CallerMemberName] string methodName = "");
 
     Task<T> QueryFirstOrDefaultAsync<T>(
-        IDbConnection cnn,
+        IDbConnection connection,
         CommandDefinition command,
         string operationName = "",
-        [CallerFilePath] string filePath = "",
         [CallerMemberName] string methodName = "");
 }
 
 public class DapperWrapper : IDapperWrapper
 {
-    private readonly IOptionsMonitor<SlowQueriesLoggingOptions> _slowQueriesLoggingOptions;
+    private readonly IOptionsMonitor<SlowQueryLoggingOptions> _slowQueriesLoggingOptions;
     private readonly ILogger<DapperWrapper> _logger;
     private readonly ISqlQueryObserver _sqlQueryObserver;
 
     public DapperWrapper(
-        IOptionsMonitor<SlowQueriesLoggingOptions> slowQueriesLoggingOptions,
+        IOptionsMonitor<SlowQueryLoggingOptions> slowQueriesLoggingOptions,
         ILogger<DapperWrapper> logger,
         ISqlQueryObserver sqlQueryObserver)
     {
@@ -47,18 +45,17 @@ public class DapperWrapper : IDapperWrapper
     }
 
     public async Task<IEnumerable<T>> QueryAsync<T>(
-        IDbConnection cnn,
+        IDbConnection connection,
         CommandDefinition command,
         string operationName = "",
-        [CallerFilePath] string filePath = "",
         [CallerMemberName] string methodName = "")
     {
         var stopwatch = Stopwatch.StartNew();
 
-        var result = await cnn.QueryAsync<T>(command);
+        var result = await connection.QueryAsync<T>(command);
 
         var elapsed = stopwatch.Elapsed;
-        var queryName = SqlQueryMetricsHelper.GetQueryNameValue(operationName, filePath, methodName);
+        var queryName = SqlQueryMetricsHelper.GetQueryNameValue(operationName, methodName);
 
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, elapsed);
 
@@ -67,7 +64,7 @@ public class DapperWrapper : IDapperWrapper
         {
             var parameters = JsonConvert.SerializeObject(command.Parameters);
             _logger.LogWarning(
-                "Long running query: {query}, parameters: {queryParameters} duration: {queryDuration} milliseconds",
+                "Long running query: {query}, parameters: {queryParameters} duration: {queryDuration} seconds",
                 command.CommandText, parameters, elapsed);
         }
 
@@ -75,18 +72,17 @@ public class DapperWrapper : IDapperWrapper
     }
 
     public async Task<T> QueryFirstOrDefaultAsync<T>(
-        IDbConnection cnn,
+        IDbConnection connection,
         CommandDefinition command,
         string operationName = "",
-        [CallerFilePath] string filePath = "",
         [CallerMemberName] string methodName = "")
     {
         var stopwatch = Stopwatch.StartNew();
 
-        var result = await cnn.QueryFirstOrDefaultAsync<T>(command);
+        var result = await connection.QueryFirstOrDefaultAsync<T>(command);
 
         var elapsed = stopwatch.Elapsed;
-        var queryName = SqlQueryMetricsHelper.GetQueryNameValue(operationName, filePath, methodName);
+        var queryName = SqlQueryMetricsHelper.GetQueryNameValue(operationName, methodName);
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, elapsed);
 
         var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueriesThreshold;

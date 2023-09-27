@@ -176,7 +176,7 @@ internal class GatewayApiMetricObserver :
 
     public void OnSqlQueryExecuted(string queryName, TimeSpan duration)
     {
-        _sqlQueryDuration.WithLabels(queryName).Observe(duration.TotalMilliseconds);
+        _sqlQueryDuration.WithLabels(queryName).Observe(duration.TotalSeconds);
     }
 
     void IExceptionObserver.OnException(ActionContext actionContext, Exception exception, KnownGatewayErrorException gatewayErrorException)

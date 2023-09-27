@@ -4,14 +4,14 @@ using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
-public sealed class SlowQueriesLoggingOptions
+public sealed class SlowQueryLoggingOptions
 {
     public TimeSpan SlowQueriesThreshold { get; set; } = TimeSpan.FromMilliseconds(250);
 }
 
-internal class SlowQueriesLoggingOptionsValidator : AbstractOptionsValidator<SlowQueriesLoggingOptions>
+internal class SlowQueryLoggingOptionsValidator : AbstractOptionsValidator<SlowQueryLoggingOptions>
 {
-    public SlowQueriesLoggingOptionsValidator()
+    public SlowQueryLoggingOptionsValidator()
     {
         RuleFor(x => x.SlowQueriesThreshold).GreaterThan(TimeSpan.Zero);
     }

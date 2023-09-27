@@ -96,7 +96,7 @@ internal class DataAggregatorMetricsObserver :
     ITransactionStreamReaderObserver,
     ISqlQueryObserver
 {
-    private static readonly Histogram _sqlQueryDuration = Prometheus.Metrics
+    private static readonly Histogram _sqlQueryDuration = Metrics
         .CreateHistogram("sql_query_duration", "The duration of SQL queries processed by this app.",
             new HistogramConfiguration { LabelNames = new[] { "query_name" } });
 
@@ -582,6 +582,6 @@ internal class DataAggregatorMetricsObserver :
 
     public void OnSqlQueryExecuted(string queryName, TimeSpan duration)
     {
-        _sqlQueryDuration.WithLabels(queryName).Observe(duration.TotalMilliseconds);
+        _sqlQueryDuration.WithLabels(queryName).Observe(duration.TotalSeconds);
     }
 }
