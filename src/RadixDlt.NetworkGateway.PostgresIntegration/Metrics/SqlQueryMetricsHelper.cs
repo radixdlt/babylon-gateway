@@ -1,13 +1,11 @@
-﻿using System;
-using System.IO;
+﻿using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
+using System;
 using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
 
 public static class SqlQueryMetricsHelper
 {
-    public const string QueryNameTag = "gcmKFRVsi3IDgKuTQT2z";
-
     public static string GetQueryNameValue(
         string operationName,
         string methodName)
@@ -36,7 +34,7 @@ public static class SqlQueryMetricsHelper
     public static string GenerateQueryNameTag(string operationName, string methodName)
     {
         var queryName = GetQueryNameValue(operationName, methodName);
-        return $"{QueryNameTag}<{queryName}>;";
+        return $"{MetricsInterceptor.QueryNameStartTag}{queryName}{MetricsInterceptor.QueryNameEndTag}";
     }
 
     private static bool IsValidTagPart(string value)

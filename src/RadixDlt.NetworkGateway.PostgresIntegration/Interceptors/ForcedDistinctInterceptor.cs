@@ -72,9 +72,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 
 internal class ForceDistinctInterceptor : DbCommandInterceptor
 {
-    /// <summary>Query marked used to trigger interceptor.</summary>
+    /// <summary>Query marker used to trigger interceptor.</summary>
     /// <remarks>Value has no meaning at all, it should be understood as opaque query marker.</remarks>
-    public const string Apply = nameof(ForceDistinctInterceptor) + ":3c49f785-0598-462a-ba88-bcdbed969709-f66acff3-fd40-4fbd-8eb9-151aefcc5711";
+    public const string Apply = nameof(ForceDistinctInterceptor) + ":MelTww0Ylh4NEfxO0huHwXzbSmy1ymcQtbq0mRuy9zLFjIY6wP8dO1AVziGvI2if";
 
     public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)
     {
