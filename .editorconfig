@@ -276,6 +276,7 @@ dotnet_diagnostic.SA1024.severity = none # SA1024ColonsMustBeSpacedCorrectly - b
 dotnet_diagnostic.SA1600.severity = none # SA1600ElementsMustBeDocumented - Duplicates CS1591 - let's just use CS1591 instead
 dotnet_diagnostic.SA1615.severity = none # SA1615ElementReturnValueMustBeDocumented
 dotnet_diagnostic.SA1611.severity = none # SA1611ElementParametersMustBeDocumented
+dotnet_diagnostic.SA1618.severity = none # SA1618GenericTypeParametersMustBeDocumented
 dotnet_diagnostic.SA1602.severity = none # SA1602EnumerationItemsMustBeDocumented
 dotnet_diagnostic.SA1601.severity = none # SA1601PartialElementsMustBeDocumented
 

@@ -62,15 +62,14 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -79,23 +78,24 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 internal class DefaultTransactionHandler : ITransactionHandler
 {
-    private const int DefaultPageLimit = 10; // TODO make it configurable
-
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly IPreviewService _previewService;
     private readonly ISubmissionService _submissionService;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
     public DefaultTransactionHandler(
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
         IPreviewService previewService,
-        ISubmissionService submissionService)
+        ISubmissionService submissionService,
+        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _transactionQuerier = transactionQuerier;
         _previewService = previewService;
         _submissionService = submissionService;
+        _endpointConfiguration = endpointConfiguration;
     }
 
     public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token = default)
@@ -186,7 +186,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var transactionsPageRequest = new TransactionStreamPageRequest(
             FromStateVersion: fromLedgerState?.StateVersion,
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
-            PageSize: request.LimitPerPage ?? DefaultPageLimit,
+            PageSize: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
             SearchCriteria: searchCriteria,
             OptIns: request.OptIns ?? GatewayModel.TransactionDetailsOptIns.Default

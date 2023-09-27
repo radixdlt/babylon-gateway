@@ -70,15 +70,30 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class DbQueryExtensions
 {
+    /// <summary>
+    /// Returns most recently committed ledger transaction.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetTopLedgerTransaction<TDbContext>(this TDbContext dbContext)
         where TDbContext : CommonDbContext
     {
         return dbContext
             .LedgerTransactions
             .OrderByDescending(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
+    /// <summary>
+    /// Returns most recently committed ledger transaction at or before given state version.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeStateVersion<TDbContext>(this TDbContext dbContext, long beforeStateVersion)
         where TDbContext : CommonDbContext
     {
@@ -86,9 +101,17 @@ internal static class DbQueryExtensions
             .LedgerTransactions
             .Where(lt => lt.StateVersion <= beforeStateVersion)
             .OrderByDescending(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
+    /// <summary>
+    /// Returns the first committed ledger transaction at or after given state version.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterStateVersion<TDbContext>(this TDbContext dbContext, long afterStateVersion)
         where TDbContext : CommonDbContext
     {
@@ -96,9 +119,17 @@ internal static class DbQueryExtensions
             .LedgerTransactions
             .Where(lt => lt.StateVersion >= afterStateVersion)
             .OrderBy(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
+    /// <summary>
+    /// Returns most recently committed ledger transaction at or before given timestamp.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
         where TDbContext : CommonDbContext
     {
@@ -107,9 +138,17 @@ internal static class DbQueryExtensions
             .Where(lt => lt.RoundTimestamp <= timestamp)
             .OrderByDescending(lt => lt.RoundTimestamp)
             .ThenByDescending(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
+    /// <summary>
+    /// Returns the first committed ledger transaction at or after given timestamp.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
         where TDbContext : CommonDbContext
     {
@@ -118,9 +157,17 @@ internal static class DbQueryExtensions
             .Where(lt => lt.RoundTimestamp >= timestamp)
             .OrderBy(lt => lt.RoundTimestamp)
             .ThenBy(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
+    /// <summary>
+    /// Returns most recently committed ledger transaction at or before given epoch and round.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
         where TDbContext : CommonDbContext
     {
@@ -128,16 +175,25 @@ internal static class DbQueryExtensions
             .LedgerTransactions
             .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
             .OrderByDescending(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext,  long epoch, long round)
+    /// <summary>
+    /// Returns the first committed ledger transaction at or after given epoch and round.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
+    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
         where TDbContext : CommonDbContext
     {
         return dbContext
             .LedgerTransactions
             .Where(lt => lt.Epoch >= epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
             .OrderBy(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 }

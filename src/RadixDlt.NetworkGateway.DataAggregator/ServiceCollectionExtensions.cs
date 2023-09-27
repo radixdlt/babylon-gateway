@@ -99,8 +99,10 @@ public static class ServiceCollectionExtensions
 
         services
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("DataAggregator:Network")
+            .AddValidatableOptionsAtSection<SlowQueryLoggingOptions, SlowQueryLoggingOptionsValidator>("DataAggregator:SlowQueryLogging")
             .AddValidatableOptionsAtSection<MonitoringOptions, MonitoringOptionsValidator>("DataAggregator:Monitoring")
             .AddValidatableOptionsAtSection<MempoolOptions, MempoolOptionsValidator>("DataAggregator:Mempool")
+            .AddValidatableOptionsAtSection<NodeWorkersOptions, NodeWorkersOptionsValidator>("DataAggregator:NodeWorkers")
             .AddValidatableOptionsAtSection<LedgerConfirmationOptions, LedgerConfirmationOptionsValidator>("DataAggregator:LedgerConfirmation")
             .AddValidatableOptionsAtSection<TransactionAssertionsOptions, TransactionAssertionsOptionsValidator>("DataAggregator:TransactionAssertions");
 

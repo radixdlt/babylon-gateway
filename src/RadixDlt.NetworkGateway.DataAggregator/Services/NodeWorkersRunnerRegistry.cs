@@ -63,6 +63,7 @@
  */
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
@@ -83,18 +84,18 @@ public interface INodeWorkersRunnerRegistry
 
 internal class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
 {
-    private const int ErrorStartupBlockTimeSeconds = 20;
-
     private readonly ILogger<INodeWorkersRunnerRegistry> _logger;
+    private readonly IOptionsMonitor<NodeWorkersOptions> _nodeWorkersOptions;
     private readonly INodeWorkersRunnerFactory _nodeWorkersRunnerFactory;
     private readonly Dictionary<CoreApiNode, NodeWorkersRunner> _servicesMap = new();
     private readonly Dictionary<string, Task> _startupBlocklist = new();
     private readonly object _servicesMapLock = new();
 
-    public NodeWorkersRunnerRegistry(ILogger<NodeWorkersRunnerRegistry> logger, INodeWorkersRunnerFactory nodeWorkersRunnerFactory)
+    public NodeWorkersRunnerRegistry(ILogger<NodeWorkersRunnerRegistry> logger, INodeWorkersRunnerFactory nodeWorkersRunnerFactory, IOptionsMonitor<NodeWorkersOptions> nodeWorkersOptions)
     {
         _logger = logger;
         _nodeWorkersRunnerFactory = nodeWorkersRunnerFactory;
+        _nodeWorkersOptions = nodeWorkersOptions;
     }
 
     public async Task EnsureCorrectNodeServicesRunning(List<CoreApiNode> enabledNodes, CancellationToken cancellationToken)
@@ -185,16 +186,18 @@ internal class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
                 throw;
             }
 
+            var errorStartupBlockTimeSeconds = _nodeWorkersOptions.CurrentValue.ErrorStartupBlockTimeSeconds;
+
             _logger.LogError(
                 ex,
                 "Error initializing or starting up services for node: {NodeName}. We won't try again for {ErrorStartupBlockTimeSeconds} seconds. Now clearing up...",
                 coreApiNode.Name,
-                ErrorStartupBlockTimeSeconds
+                errorStartupBlockTimeSeconds
             );
 
             lock (_servicesMapLock)
             {
-                _startupBlocklist[coreApiNode.Name] = Task.Delay(TimeSpan.FromSeconds(ErrorStartupBlockTimeSeconds), cancellationToken);
+                _startupBlocklist[coreApiNode.Name] = Task.Delay(TimeSpan.FromSeconds(errorStartupBlockTimeSeconds), cancellationToken);
             }
 
             await StopNodeWorkers(coreApiNode, cancellationToken);

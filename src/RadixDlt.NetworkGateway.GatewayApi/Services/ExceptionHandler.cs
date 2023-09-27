@@ -108,7 +108,7 @@ internal class ExceptionHandler : IExceptionHandler
             traceId: traceId
         ))
         {
-            StatusCode = (int)HttpStatusCode.InternalServerError,
+            StatusCode = gatewayErrorException.StatusCode,
         };
     }
 
