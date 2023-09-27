@@ -70,7 +70,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class DbQueryExtensions
 {
-    public static IQueryable<LedgerTransaction> GetTopLedgerTransaction<TDbContext>(this TDbContext dbContext)
+    /// <summary>
+    /// The long/horrible/verbose name is on purpose, to draw your attention and prevent people foot-gunning themselves.
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </summary>
+    public static IQueryable<LedgerTransaction> GetTopLedgerTransaction__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig<TDbContext>(this TDbContext dbContext)
         where TDbContext : CommonDbContext
     {
         return dbContext
@@ -79,7 +84,12 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeStateVersion<TDbContext>(this TDbContext dbContext, long beforeStateVersion)
+    /// <summary>
+    /// The long/horrible/verbose name is on purpose, to draw your attention and prevent people foot-gunning themselves.
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </summary>
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeStateVersion__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig<TDbContext>(this TDbContext dbContext, long beforeStateVersion)
         where TDbContext : CommonDbContext
     {
         return dbContext
@@ -89,7 +99,12 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterStateVersion<TDbContext>(this TDbContext dbContext, long afterStateVersion)
+    /// <summary>
+    /// The long/horrible/verbose name is on purpose, to draw your attention and prevent people foot-gunning themselves.
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </summary>
+    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterStateVersion__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig<TDbContext>(this TDbContext dbContext, long afterStateVersion)
         where TDbContext : CommonDbContext
     {
         return dbContext
@@ -99,7 +114,12 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
+    /// <summary>
+    /// The long/horrible/verbose name is on purpose, to draw your attention and prevent people foot-gunning themselves.
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </summary>
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig<TDbContext>(this TDbContext dbContext, DateTime timestamp)
         where TDbContext : CommonDbContext
     {
         return dbContext
@@ -110,7 +130,12 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
+    /// <summary>
+    /// The long/horrible/verbose name is on purpose, to draw your attention and prevent people foot-gunning themselves.
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </summary>
+    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig<TDbContext>(this TDbContext dbContext, DateTime timestamp)
         where TDbContext : CommonDbContext
     {
         return dbContext
@@ -121,7 +146,12 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
+    /// <summary>
+    /// The long/horrible/verbose name is on purpose, to draw your attention and prevent people foot-gunning themselves.
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </summary>
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionAtEpochRound__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig<TDbContext>(this TDbContext dbContext, long epoch, long round)
         where TDbContext : CommonDbContext
     {
         return dbContext
@@ -131,7 +161,12 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext,  long epoch, long round)
+    /// <summary>
+    /// The long/horrible/verbose name is on purpose, to draw your attention and prevent people foot-gunning themselves.
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </summary>
+    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAtEpochRound__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig<TDbContext>(this TDbContext dbContext,  long epoch, long round)
         where TDbContext : CommonDbContext
     {
         return dbContext

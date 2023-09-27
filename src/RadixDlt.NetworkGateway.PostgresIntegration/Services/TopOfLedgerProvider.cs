@@ -65,6 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -87,16 +88,31 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
     {
         var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var lastTransaction = await dbContext.GetTopLedgerTransaction().FirstOrDefaultAsync(token);
-
-        return lastTransaction?.StateVersion ?? 0;
+        return await dbContext.GetTopLedgerTransaction__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig()
+            .AsNoTracking()
+            .Select(t => t.StateVersion)
+            .FirstOrDefaultAsync(token); // Defaults to 0, which is perfect
     }
 
     public async Task<TransactionSummary> GetTopOfLedger(CancellationToken token)
     {
         var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var lastTransaction = await dbContext.GetTopLedgerTransaction().FirstOrDefaultAsync(token);
+        var lastTransaction = await dbContext.GetTopLedgerTransaction__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig()
+            .AsNoTracking()
+            .Select(lt => new
+            {
+                lt.StateVersion,
+                lt.LedgerHashes,
+                lt.RoundTimestamp,
+                lt.NormalizedRoundTimestamp,
+                lt.CreatedTimestamp,
+                lt.Epoch,
+                lt.RoundInEpoch,
+                lt.IndexInEpoch,
+                lt.IndexInRound,
+            })
+            .FirstOrDefaultAsync(token);
 
         return lastTransaction == null
             ? PreGenesisTransactionSummary()
