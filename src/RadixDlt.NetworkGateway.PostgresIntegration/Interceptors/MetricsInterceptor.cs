@@ -66,8 +66,9 @@ internal class MetricsInterceptor : DbCommandInterceptor
     {
         const string UnknownQueryName = "UNKNOWN";
 
-        var startOfTag = dbCommand.CommandText.IndexOf($"{SqlQueryMetricsHelper.QueryNameTag}<", StringComparison.InvariantCultureIgnoreCase);
-        var endOfTag = dbCommand.CommandText.IndexOf(">", StringComparison.InvariantCultureIgnoreCase);
+        var queryNameStartTag = $"{SqlQueryMetricsHelper.QueryNameTag}<";
+        var startOfTag = dbCommand.CommandText.IndexOf(queryNameStartTag, StringComparison.InvariantCultureIgnoreCase);
+        var endOfTag = dbCommand.CommandText.IndexOf(">;", StringComparison.InvariantCultureIgnoreCase);
 
         if (startOfTag < 0 || endOfTag < 0)
         {
@@ -75,7 +76,8 @@ internal class MetricsInterceptor : DbCommandInterceptor
             return UnknownQueryName;
         }
 
-        var queryName = dbCommand.CommandText.Substring(startOfTag, endOfTag);
+        var from = startOfTag + queryNameStartTag.Length;
+        var queryName = dbCommand.CommandText[from..endOfTag];
 
         if (string.IsNullOrEmpty(queryName))
         {
