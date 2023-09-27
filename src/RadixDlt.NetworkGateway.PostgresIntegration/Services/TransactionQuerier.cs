@@ -581,8 +581,6 @@ internal class TransactionQuerier : ITransactionQuerier
         return await _rwDbContext
             .PendingTransactions
             .Where(pt => pt.IntentHash == intentHash)
-            .OrderBy(pt => pt.GatewayHandling.FirstSubmittedToGatewayTimestamp)
-            .Take(100) // Limit this just in case
             .Select(pt =>
                 new PendingTransactionSummary(
                     pt.PayloadHash,
@@ -597,6 +595,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 )
             )
             .AnnotateMetricName()
+            .AsNoTracking()
             .ToListAsync(token);
     }
 
