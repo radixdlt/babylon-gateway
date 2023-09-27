@@ -343,6 +343,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     private record PendingTransactionSummary(
         string PayloadHash,
+        ulong EndEpochExclusive,
         DateTime? ResubmitFromTimestamp,
         string? HandlingStatusReason,
         PendingTransactionPayloadLedgerStatus PayloadStatus,
@@ -358,8 +359,9 @@ internal class TransactionQuerier : ITransactionQuerier
         private readonly long? _committedStateVersion;
         private readonly List<GatewayModel.TransactionStatusResponseKnownPayloadItem> _knownPayloads = new();
         private readonly GatewayModel.TransactionIntentStatus? _committedIntentStatus;
+        private readonly string? _committedErrorMessage;
         private PendingTransactionIntentLedgerStatus _mostAccuratePendingTransactionIntentLedgerStatus = PendingTransactionIntentLedgerStatus.Unknown;
-        private string? _errorMessageForMostAccurateIntentLedgerStatus;
+        private string? _rejectionReasonForMostAccurateIntentLedgerStatus;
 
         internal PendingTransactionResponseAggregator(GatewayModel.LedgerState ledgerState, CommittedTransactionSummary? committedTransactionSummary)
         {
@@ -380,7 +382,7 @@ internal class TransactionQuerier : ITransactionQuerier
             };
 
             _committedIntentStatus = intentStatus;
-            _errorMessageForMostAccurateIntentLedgerStatus = committedTransactionSummary.ErrorMessage;
+            _committedErrorMessage = committedTransactionSummary.ErrorMessage;
 
             _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
                 payloadHash: committedTransactionSummary.PayloadHash,
@@ -421,20 +423,43 @@ internal class TransactionQuerier : ITransactionQuerier
             if (pendingTransactionSummary.IntentStatus.AggregationPriorityAcrossKnownPayloads() >= _mostAccuratePendingTransactionIntentLedgerStatus.AggregationPriorityAcrossKnownPayloads())
             {
                 _mostAccuratePendingTransactionIntentLedgerStatus = pendingTransactionSummary.IntentStatus;
-                _errorMessageForMostAccurateIntentLedgerStatus = pendingTransactionSummary.LatestRejectionReason;
+                _rejectionReasonForMostAccurateIntentLedgerStatus = pendingTransactionSummary.LatestRejectionReason;
             }
 
-            var latestErrorMessage = pendingTransactionSummary.LatestRejectionReason == pendingTransactionSummary.InitialRejectionReason
-                ? null
-                : pendingTransactionSummary.LatestRejectionReason;
+            var initialRejectionReason = pendingTransactionSummary.InitialRejectionReason;
+            var latestRejectionReason = pendingTransactionSummary.LatestRejectionReason;
+
+            // If the intent's EndEpochExclusive has been reached, then the payload and intent must be permanently rejected (assuming they're not already committed).
+            if ((ulong)_ledgerState.Epoch >= pendingTransactionSummary.EndEpochExclusive)
+            {
+                // The if statement is defence-in-depth to avoid replacing a Committed status with PermanentlyRejected.
+                // This shouldn't matter, because we'd see a committed transaction in this case, which would trump the _mostAccuratePendingTransactionIntentLedgerStatus when we
+                // resolve the status. But best to be defensive anyway.
+                if (PendingTransactionIntentLedgerStatus.PermanentRejection.AggregationPriorityAcrossKnownPayloads() >=
+                    _mostAccuratePendingTransactionIntentLedgerStatus.AggregationPriorityAcrossKnownPayloads())
+                {
+                    _mostAccuratePendingTransactionIntentLedgerStatus = PendingTransactionIntentLedgerStatus.PermanentRejection;
+                    _rejectionReasonForMostAccurateIntentLedgerStatus = $"Transaction has expired, as its expiry epoch of {pendingTransactionSummary.EndEpochExclusive} has been reached.";
+                }
+
+                // The if statement is defence-in-depth to avoid replacing a Committed status with PermanentlyRejected.
+                // (Even though this shouldn't be possible because of the early return if pendingTransactionSummary.PayloadHash == _committedPayloadHash)
+                if (PendingTransactionPayloadLedgerStatus.PermanentlyRejected.ReplacementPriority() >= pendingTransactionSummary.PayloadStatus.ReplacementPriority())
+                {
+                    payloadStatus = GatewayModel.TransactionPayloadStatus.PermanentlyRejected;
+                    legacyStatus = GatewayModel.TransactionStatus.Rejected;
+                    latestRejectionReason = $"Transaction has expired, as its expiry epoch of {pendingTransactionSummary.EndEpochExclusive} has been reached.";
+                    initialRejectionReason ??= latestRejectionReason;
+                }
+            }
 
             _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
                 payloadHash: pendingTransactionSummary.PayloadHash,
                 status: legacyStatus,
                 payloadStatus: payloadStatus,
                 payloadStatusDescription: GetPayloadStatusDescription(payloadStatus),
-                errorMessage: pendingTransactionSummary.InitialRejectionReason,
-                latestErrorMessage: latestErrorMessage,
+                errorMessage: initialRejectionReason,
+                latestErrorMessage: latestRejectionReason == initialRejectionReason ? null : latestRejectionReason,
                 handlingStatus: handlingStatus,
                 handlingStatusReason: pendingTransactionSummary.HandlingStatusReason,
                 submissionError: pendingTransactionSummary.LastSubmissionError
@@ -443,15 +468,20 @@ internal class TransactionQuerier : ITransactionQuerier
 
         internal GatewayModel.TransactionStatusResponse IntoResponse()
         {
-            var intentStatus = _committedIntentStatus ?? _mostAccuratePendingTransactionIntentLedgerStatus switch
-            {
-                PendingTransactionIntentLedgerStatus.Unknown => GatewayModel.TransactionIntentStatus.Unknown,
-                PendingTransactionIntentLedgerStatus.Committed => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
-                PendingTransactionIntentLedgerStatus.CommitPending => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
-                PendingTransactionIntentLedgerStatus.PermanentRejection => GatewayModel.TransactionIntentStatus.PermanentlyRejected,
-                PendingTransactionIntentLedgerStatus.PossibleToCommit => GatewayModel.TransactionIntentStatus.Pending,
-                PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection,
-            };
+            var (intentStatus, errorMessage) = _committedIntentStatus != null
+                ? (_committedIntentStatus.Value, _committedErrorMessage)
+                : (
+                    _mostAccuratePendingTransactionIntentLedgerStatus switch
+                    {
+                        PendingTransactionIntentLedgerStatus.Unknown => GatewayModel.TransactionIntentStatus.Unknown,
+                        PendingTransactionIntentLedgerStatus.Committed => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
+                        PendingTransactionIntentLedgerStatus.CommitPending => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
+                        PendingTransactionIntentLedgerStatus.PermanentRejection => GatewayModel.TransactionIntentStatus.PermanentlyRejected,
+                        PendingTransactionIntentLedgerStatus.PossibleToCommit => GatewayModel.TransactionIntentStatus.Pending,
+                        PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection,
+                    },
+                    _rejectionReasonForMostAccurateIntentLedgerStatus
+                );
 
             var legacyIntentStatus = intentStatus switch
             {
@@ -467,11 +497,11 @@ internal class TransactionQuerier : ITransactionQuerier
             return new GatewayModel.TransactionStatusResponse(
                 ledgerState: _ledgerState,
                 status: legacyIntentStatus,
-                intentStatus: intentStatus,
+                intentStatus,
                 intentStatusDescription: GetIntentStatusDescription(intentStatus),
                 knownPayloads: _knownPayloads,
                 committedStateVersion: _committedStateVersion,
-                errorMessage: _errorMessageForMostAccurateIntentLedgerStatus
+                errorMessage
             );
         }
 
@@ -553,6 +583,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .Select(pt =>
                 new PendingTransactionSummary(
                     pt.PayloadHash,
+                    pt.EndEpochExclusive,
                     pt.GatewayHandling.ResubmitFromTimestamp,
                     pt.GatewayHandling.HandlingStatusReason,
                     pt.LedgerDetails.PayloadLedgerStatus,

@@ -70,6 +70,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class DbQueryExtensions
 {
+    /// <summary>
+    /// Returns most recently committed ledger transaction.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetTopLedgerTransaction<TDbContext>(this TDbContext dbContext)
         where TDbContext : CommonDbContext
     {
@@ -79,6 +86,13 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
+    /// <summary>
+    /// Returns most recently committed ledger transaction at or before given state version.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeStateVersion<TDbContext>(this TDbContext dbContext, long beforeStateVersion)
         where TDbContext : CommonDbContext
     {
@@ -89,6 +103,13 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
+    /// <summary>
+    /// Returns the first committed ledger transaction at or after given state version.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterStateVersion<TDbContext>(this TDbContext dbContext, long afterStateVersion)
         where TDbContext : CommonDbContext
     {
@@ -99,6 +120,13 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
+    /// <summary>
+    /// Returns most recently committed ledger transaction at or before given timestamp.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
         where TDbContext : CommonDbContext
     {
@@ -110,6 +138,13 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
+    /// <summary>
+    /// Returns the first committed ledger transaction at or after given timestamp.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
         where TDbContext : CommonDbContext
     {
@@ -121,6 +156,13 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
+    /// <summary>
+    /// Returns most recently committed ledger transaction at or before given epoch and round.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
         where TDbContext : CommonDbContext
     {
@@ -131,7 +173,14 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext,  long epoch, long round)
+    /// <summary>
+    /// Returns the first committed ledger transaction at or after given epoch and round.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
+    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
         where TDbContext : CommonDbContext
     {
         return dbContext

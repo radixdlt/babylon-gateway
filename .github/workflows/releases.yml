@@ -264,9 +264,9 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - setup-tags
-      - docker-database-migrations-dockerhub
-      - docker-data-aggregator-dockerhub
-      - docker-gateway-api-dockerhub
+      - join-gateway-images
+      - join-aggregator-images
+      - join-migrations-images
     permissions:
       id-token: write
       pull-requests: read
