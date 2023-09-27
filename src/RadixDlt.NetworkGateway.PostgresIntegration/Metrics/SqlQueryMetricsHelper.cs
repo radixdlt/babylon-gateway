@@ -6,7 +6,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
 
 public static class SqlQueryMetricsHelper
 {
-    public const string QueryNameTag = "QueryName";
+    public const string QueryNameTag = "gcmKFRVsi3IDgKuTQT2z";
 
     public static string GetQueryNameValue(
         string operationName,

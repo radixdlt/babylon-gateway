@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
@@ -30,16 +31,16 @@ public interface IDapperWrapper
 
 public class DapperWrapper : IDapperWrapper
 {
-    private readonly IOptionsMonitor<SlowQueryLoggingOptions> _slowQueriesLoggingOptions;
+    private readonly SlowQueryLoggingOptions _slowQueriesLoggingOptions;
     private readonly ILogger<DapperWrapper> _logger;
     private readonly ISqlQueryObserver _sqlQueryObserver;
 
     public DapperWrapper(
-        IOptionsMonitor<SlowQueryLoggingOptions> slowQueriesLoggingOptions,
+        IOptionsSnapshot<SlowQueryLoggingOptions> slowQueriesLoggingOptions,
         ILogger<DapperWrapper> logger,
         ISqlQueryObserver sqlQueryObserver)
     {
-        _slowQueriesLoggingOptions = slowQueriesLoggingOptions;
+        _slowQueriesLoggingOptions = slowQueriesLoggingOptions.Value;
         _logger = logger;
         _sqlQueryObserver = sqlQueryObserver;
     }
@@ -59,7 +60,7 @@ public class DapperWrapper : IDapperWrapper
 
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, elapsed);
 
-        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueryThreshold;
+        var logQueriesLongerThan = _slowQueriesLoggingOptions.SlowQueryThreshold;
         if (elapsed > logQueriesLongerThan)
         {
             var parameters = JsonConvert.SerializeObject(command.Parameters);
@@ -85,7 +86,7 @@ public class DapperWrapper : IDapperWrapper
         var queryName = SqlQueryMetricsHelper.GetQueryNameValue(operationName, methodName);
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, elapsed);
 
-        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueryThreshold;
+        var logQueriesLongerThan = _slowQueriesLoggingOptions.SlowQueryThreshold;
         if (elapsed > logQueriesLongerThan)
         {
             var parameters = JsonConvert.SerializeObject(command.Parameters);

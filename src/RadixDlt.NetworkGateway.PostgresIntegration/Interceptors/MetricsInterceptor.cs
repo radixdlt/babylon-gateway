@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
@@ -14,13 +15,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 
 internal class MetricsInterceptor : DbCommandInterceptor
 {
-    private readonly IOptionsMonitor<SlowQueryLoggingOptions> _slowQueriesLoggingOptions;
+    private readonly SlowQueryLoggingOptions _slowQueriesLoggingOptions;
     private readonly ILogger<MetricsInterceptor> _logger;
     private readonly ISqlQueryObserver _sqlQueryObserver;
 
-    public MetricsInterceptor(ILogger<MetricsInterceptor> logger, IOptionsMonitor<SlowQueryLoggingOptions> slowQueriesLoggingOptions, ISqlQueryObserver sqlQueryObserver)
+    public MetricsInterceptor(ILogger<MetricsInterceptor> logger, IOptionsSnapshot<SlowQueryLoggingOptions> slowQueriesLoggingOptions, ISqlQueryObserver sqlQueryObserver)
     {
-        _slowQueriesLoggingOptions = slowQueriesLoggingOptions;
+        _slowQueriesLoggingOptions = slowQueriesLoggingOptions.Value;
         _sqlQueryObserver = sqlQueryObserver;
         _logger = logger;
     }
@@ -49,7 +50,7 @@ internal class MetricsInterceptor : DbCommandInterceptor
 
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, eventData.Duration);
 
-        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueryThreshold;
+        var logQueriesLongerThan = _slowQueriesLoggingOptions.SlowQueryThreshold;
         if (eventData.Duration > logQueriesLongerThan)
         {
 #pragma warning disable EF1001

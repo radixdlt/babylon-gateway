@@ -96,8 +96,8 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<IVirtualEntityDataProvider, VirtualEntityDataProvider>()
             .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
             .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>()
-            .AddSingleton<IDapperWrapper, DapperWrapper>()
-            .AddSingleton<MetricsInterceptor>();
+            .AddScoped<IDapperWrapper, DapperWrapper>()
+            .AddScoped<MetricsInterceptor>();
 
         CustomTypes.EnsureConfigured();
 
