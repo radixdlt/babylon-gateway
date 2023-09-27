@@ -80,10 +80,12 @@ internal class ValidatorQuerier : IValidatorQuerier
     private record ValidatorUptimeViewModel(long ValidatorEntityId, long? ProposalsMadeSum, long? ProposalsMissedSum, long EpochsActiveIn);
 
     private readonly ReadOnlyDbContext _dbContext;
+    private readonly IDapperWrapper _dapperWrapper;
 
-    public ValidatorQuerier(ReadOnlyDbContext dbContext)
+    public ValidatorQuerier(ReadOnlyDbContext dbContext, IDapperWrapper dapperWrapper)
     {
         _dbContext = dbContext;
+        _dapperWrapper = dapperWrapper;
     }
 
     public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(
@@ -97,6 +99,7 @@ internal class ValidatorQuerier : IValidatorQuerier
         var validators = await _dbContext
             .Entities
             .Where(e => addresses.Contains(e.Address) && e.FromStateVersion <= ledgerState.StateVersion)
+            .AnnotateMetricName("GetValidators")
             .ToDictionaryAsync(e => e.Id, e => e.Address, token);
 
         var cd = new CommandDefinition(
@@ -117,7 +120,7 @@ GROUP BY validator_entity_id;",
             },
             cancellationToken: token);
 
-        var validatorUptime = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorUptimeViewModel>(cd))
+        var validatorUptime = (await _dapperWrapper.QueryAsync<ValidatorUptimeViewModel>(_dbContext.Database.GetDbConnection(), cd, "GetValidatorEmissionStatistics"))
             .ToDictionary(e => e.ValidatorEntityId);
 
         var items = validators

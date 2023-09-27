@@ -169,6 +169,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         var existingPendingTransaction = await _dbContext
             .PendingTransactions
             .Where(t => t.PayloadHash == payloadHash)
+            .AnnotateMetricName()
             .SingleOrDefaultAsync(token);
 
         if (existingPendingTransaction != null)

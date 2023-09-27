@@ -62,13 +62,14 @@
  * permissions under this License.
  */
 
+using System.Net;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
 public abstract class ValidationException : KnownGatewayErrorException
 {
-    private const int ValidationErrorStatusCode = 400;
+    private const int ValidationErrorStatusCode = (int)HttpStatusCode.BadRequest;
 
     public ValidationException(GatewayModel.GatewayError gatewayError, string userFacingMessage, string internalMessage)
         : base(ValidationErrorStatusCode, gatewayError, userFacingMessage, internalMessage)

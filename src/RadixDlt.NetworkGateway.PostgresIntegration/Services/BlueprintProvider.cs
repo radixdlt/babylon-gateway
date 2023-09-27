@@ -109,6 +109,7 @@ INNER JOIN package_blueprint_history pbh
 ON pbh.name = v.blueprint_name AND pbh.version = v.blueprint_version and pbh.package_entity_id = v.package_entity_id
 WHERE from_state_version <= {ledgerState.StateVersion}
 ")
+            .AnnotateMetricName()
             .ToDictionaryAsync(
                 x => new BlueprintDefinitionIdentifier(x.Name, x.Version, x.PackageEntityId),
                 x => x,

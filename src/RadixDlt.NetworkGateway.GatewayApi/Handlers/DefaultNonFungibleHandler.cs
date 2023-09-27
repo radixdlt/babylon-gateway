@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Threading;
 using System.Threading.Tasks;
@@ -72,15 +74,15 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 internal class DefaultNonFungibleHandler : INonFungibleHandler
 {
-    private const int DefaultPageLimit = 100; // TODO make it configurable
-
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IEntityStateQuerier _entityStateQuerier;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
-    public DefaultNonFungibleHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
+    public DefaultNonFungibleHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _entityStateQuerier = entityStateQuerier;
+        _endpointConfiguration = endpointConfiguration;
     }
 
     public async Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token = default)
@@ -91,7 +93,7 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (EntityAddress)request.ResourceAddress,
             Offset: cursor?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? DefaultPageLimit
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultNonFungibleIdsPageSize
         );
 
         return await _entityStateQuerier.NonFungibleIds(pageRequest, ledgerState, token);

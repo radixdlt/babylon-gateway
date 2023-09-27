@@ -1,11 +1,12 @@
-## Next release (name TBC)
+## 1.0.0 - Babylon Launch
 Release Date: _unreleased_
 
 ### Breaking changes
 _None_
 
 ### What’s new?
-_N/A_
+- log warning if sql query takes longer than configured threshold (default to 250ms) for both entity framework and dapper queries.
+- gather execution time metrics for all sql queries (both entity framework and dapper).
 
 ## 1.0.0-rc3 - Babylon Launch (Release Candidate 3)
 Release Date: Friday 22nd September 2023

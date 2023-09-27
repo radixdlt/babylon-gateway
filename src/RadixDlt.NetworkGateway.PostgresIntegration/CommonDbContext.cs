@@ -66,7 +66,6 @@ using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
@@ -83,6 +82,13 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 
+    /// <summary>
+    /// Gets LedgerTransactions.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
     public DbSet<LedgerTransactionMarker> LedgerTransactionMarkers => Set<LedgerTransactionMarker>();
@@ -178,11 +184,6 @@ internal abstract class CommonDbContext : DbContext
         HookupEntities(modelBuilder);
         HookupHistory(modelBuilder);
         HookupStatistics(modelBuilder);
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.AddInterceptors(new ForceDistinctInterceptor());
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

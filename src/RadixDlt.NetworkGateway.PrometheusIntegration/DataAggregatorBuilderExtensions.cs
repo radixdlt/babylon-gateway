@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
@@ -101,7 +102,8 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<ILedgerExtenderServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INetworkConfigurationReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INetworkStatusReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
-            .AddSingleton<ITransactionStreamReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>());
+            .AddSingleton<ITransactionStreamReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<ISqlQueryObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>());
 
         return builder;
     }
