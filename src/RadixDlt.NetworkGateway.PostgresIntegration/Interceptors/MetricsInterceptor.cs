@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
 using System;
 using System.Data.Common;
 using System.Threading;
@@ -14,6 +13,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 
 internal class MetricsInterceptor : DbCommandInterceptor
 {
+    public const string QueryNameStartTag = $"{nameof(MetricsInterceptor)}:{QueryNameTag}<";
+    public const string QueryNameEndTag = $">{nameof(MetricsInterceptor)}:{QueryNameTag}";
+
+    /// <summary>EF tag used to provide query name for further metrics usage.</summary>
+    /// <remarks>Value has no meaning at all, it should be understood as opaque query marker.</remarks>
+    private const string QueryNameTag = "uSWntehehitXgROv7bzwhy2w8olWjn45ig1einU8sAHM75NbdkLUTn6xuChuzPBu";
+
     private readonly IOptionsMonitor<SlowQueryLoggingOptions> _slowQueriesLoggingOptions;
     private readonly ILogger<MetricsInterceptor> _logger;
     private readonly ISqlQueryObserver _sqlQueryObserver;
@@ -66,9 +72,10 @@ internal class MetricsInterceptor : DbCommandInterceptor
     {
         const string UnknownQueryName = "UNKNOWN";
 
-        var queryNameStartTag = $"{SqlQueryMetricsHelper.QueryNameTag}<";
-        var startOfTag = dbCommand.CommandText.IndexOf(queryNameStartTag, StringComparison.InvariantCultureIgnoreCase);
-        var endOfTag = dbCommand.CommandText.IndexOf(">;", StringComparison.InvariantCultureIgnoreCase);
+        var startOfTag = dbCommand.CommandText.IndexOf(QueryNameStartTag, StringComparison.InvariantCultureIgnoreCase);
+
+        var searchForEndTagFrom = startOfTag + QueryNameStartTag.Length;
+        var endOfTag = dbCommand.CommandText.IndexOf(QueryNameEndTag, searchForEndTagFrom, StringComparison.InvariantCultureIgnoreCase);
 
         if (startOfTag < 0 || endOfTag < 0)
         {
@@ -76,7 +83,7 @@ internal class MetricsInterceptor : DbCommandInterceptor
             return UnknownQueryName;
         }
 
-        var from = startOfTag + queryNameStartTag.Length;
+        var from = startOfTag + QueryNameStartTag.Length;
         var queryName = dbCommand.CommandText[from..endOfTag];
 
         if (string.IsNullOrEmpty(queryName))
