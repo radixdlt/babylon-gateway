@@ -324,6 +324,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .OfType<UserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion && ult.IntentHash == intentHash)
             .Select(ult => ult.StateVersion)
+            .WithQueryName()
             .FirstOrDefaultAsync(token);
 
         if (stateVersion == default)
@@ -530,6 +531,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 ult.PayloadHash,
                 ult.EngineReceipt.Status,
                 ult.EngineReceipt.ErrorMessage))
+            .WithQueryName()
             .FirstOrDefaultAsync(token);
 
         var aggregator = new PendingTransactionResponseAggregator(ledgerState, maybeCommittedTransactionSummary);

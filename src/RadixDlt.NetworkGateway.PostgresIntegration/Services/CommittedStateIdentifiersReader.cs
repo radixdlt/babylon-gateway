@@ -84,6 +84,7 @@ internal sealed class CommittedStateIdentifiersReader : ICommittedStateIdentifie
         var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         var transaction = await dbContext.LedgerTransactions
+            .WithQueryName()
             .FirstOrDefaultAsync(x => x.StateVersion == stateVersion, cancellationToken);
 
         if (transaction == null)

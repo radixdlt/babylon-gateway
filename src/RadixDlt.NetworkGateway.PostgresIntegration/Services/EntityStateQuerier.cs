@@ -1221,6 +1221,7 @@ INNER JOIN LATERAL(
         var entity = await _dbContext
             .Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
+            .WithQueryName()
             .FirstOrDefaultAsync(e => e.Address == address, token);
 
         if (entity == null)

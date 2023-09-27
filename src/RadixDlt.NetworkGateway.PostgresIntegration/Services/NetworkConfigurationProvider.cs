@@ -141,7 +141,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        if (await dbContext.NetworkConfiguration.AsNoTracking().AnyAsync(token))
+        if (await dbContext.NetworkConfiguration.AsNoTracking().WithQueryName().AnyAsync(token))
         {
             return false;
         }

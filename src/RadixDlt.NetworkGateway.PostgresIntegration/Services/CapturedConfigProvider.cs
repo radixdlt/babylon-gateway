@@ -81,7 +81,7 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
 
     public async Task<CapturedConfig> CaptureConfiguration()
     {
-        var networkConfiguration = await _dbContext.NetworkConfiguration.AsNoTracking().SingleOrDefaultAsync();
+        var networkConfiguration = await _dbContext.NetworkConfiguration.AsNoTracking().WithQueryName().SingleOrDefaultAsync();
 
         if (networkConfiguration == null)
         {
