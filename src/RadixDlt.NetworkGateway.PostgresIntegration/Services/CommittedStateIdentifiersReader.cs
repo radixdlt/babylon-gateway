@@ -64,6 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.Abstractions;
@@ -84,7 +85,14 @@ internal sealed class CommittedStateIdentifiersReader : ICommittedStateIdentifie
         var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         var transaction = await dbContext.LedgerTransactions
-            .FirstOrDefaultAsync(x => x.StateVersion == stateVersion, cancellationToken);
+            .Where(e => e.StateVersion == stateVersion)
+            .Select(e => new
+            {
+                e.StateVersion,
+                e.LedgerHashes,
+            })
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (transaction == null)
         {

@@ -404,7 +404,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 lt.Epoch,
                 lt.RoundInEpoch,
             })
-            .SingleOrDefaultAsync(token);
+            .FirstOrDefaultAsync(token);
 
         return lt == null
             ? null
