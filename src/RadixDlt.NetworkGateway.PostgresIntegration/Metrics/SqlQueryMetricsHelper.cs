@@ -41,6 +41,6 @@ public static class SqlQueryMetricsHelper
 
     private static bool IsValidTagPart(string value)
     {
-        return value.All(c => char.IsLetterOrDigit(c) || c == '_' || c == '_');
+        return value.All(c => char.IsLetterOrDigit(c) || c == '_' || c == '-');
     }
 }
