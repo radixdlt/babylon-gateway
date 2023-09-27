@@ -84,7 +84,7 @@ public interface IFetchedTransactionStore
 
     void StoreNodeTransactions(string nodeName, List<CoreModel.CommittedTransaction> transactions, int responseSize);
 
-    bool ShouldFetchNewTransactions(string nodeName, long fromStateVersion);
+    bool ShouldFetchNewTransactions(string nodeName, long committedStateVersion);
 
     long GetFirstStateVersionToFetch(string nodeName, long lastCommittedStateVersion);
 }
@@ -172,12 +172,12 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
             .ToList();
     }
 
-    public bool ShouldFetchNewTransactions(string nodeName, long fromStateVersion)
+    public bool ShouldFetchNewTransactions(string nodeName, long committedStateVersion)
     {
         var transactionStore = GetTransactionsStoreForNode(nodeName);
 
         var storedTransactionsSize = transactionStore
-            .Where(x => x.Key >= fromStateVersion)
+            .Where(x => x.Key > committedStateVersion)
             .Aggregate(0, (sum, current) => sum + current.Value.EstimatedSize);
 
         var shouldFetchTransactions = storedTransactionsSize < Config.MaxEstimatedTransactionPipelineByteSizePerNode;
