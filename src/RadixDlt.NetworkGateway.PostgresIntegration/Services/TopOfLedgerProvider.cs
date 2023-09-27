@@ -88,7 +88,7 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
     {
         var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        return await dbContext.GetTopLedgerTransaction__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig()
+        return await dbContext.GetTopLedgerTransaction()
             .AsNoTracking()
             .Select(t => t.StateVersion)
             .FirstOrDefaultAsync(token); // Defaults to 0, which is perfect
@@ -98,7 +98,7 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
     {
         var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var lastTransaction = await dbContext.GetTopLedgerTransaction__EnsureYouSelectRequiredFieldsAsRowsCanBeVeryBig()
+        var lastTransaction = await dbContext.GetTopLedgerTransaction()
             .AsNoTracking()
             .Select(lt => new
             {
