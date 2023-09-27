@@ -83,7 +83,8 @@ internal static class DbQueryExtensions
         return dbContext
             .LedgerTransactions
             .OrderByDescending(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
     /// <summary>
@@ -100,7 +101,8 @@ internal static class DbQueryExtensions
             .LedgerTransactions
             .Where(lt => lt.StateVersion <= beforeStateVersion)
             .OrderByDescending(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
     /// <summary>
@@ -117,7 +119,8 @@ internal static class DbQueryExtensions
             .LedgerTransactions
             .Where(lt => lt.StateVersion >= afterStateVersion)
             .OrderBy(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
     /// <summary>
@@ -135,7 +138,8 @@ internal static class DbQueryExtensions
             .Where(lt => lt.RoundTimestamp <= timestamp)
             .OrderByDescending(lt => lt.RoundTimestamp)
             .ThenByDescending(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
     /// <summary>
@@ -153,7 +157,8 @@ internal static class DbQueryExtensions
             .Where(lt => lt.RoundTimestamp >= timestamp)
             .OrderBy(lt => lt.RoundTimestamp)
             .ThenBy(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
     /// <summary>
@@ -170,7 +175,8 @@ internal static class DbQueryExtensions
             .LedgerTransactions
             .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
             .OrderByDescending(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 
     /// <summary>
@@ -187,6 +193,7 @@ internal static class DbQueryExtensions
             .LedgerTransactions
             .Where(lt => lt.Epoch >= epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
             .OrderBy(lt => lt.StateVersion)
-            .Take(1);
+            .Take(1)
+            .AnnotateMetricName();
     }
 }

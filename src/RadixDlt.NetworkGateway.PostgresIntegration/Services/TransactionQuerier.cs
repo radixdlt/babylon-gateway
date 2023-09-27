@@ -300,6 +300,7 @@ internal class TransactionQuerier : ITransactionQuerier
         var stateVersions = await searchQuery
             .TagWith(ForceDistinctInterceptor.Apply)
             .Take(request.PageSize + 1)
+            .AnnotateMetricName("GetTransactionsStateVersions")
             .ToListAsync(token);
 
         var transactions = await GetTransactions(stateVersions.Take(request.PageSize).ToList(), request.OptIns, token);
@@ -323,6 +324,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .OfType<UserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion && ult.IntentHash == intentHash)
             .Select(ult => ult.StateVersion)
+            .AnnotateMetricName()
             .FirstOrDefaultAsync(token);
 
         if (stateVersion == default)
@@ -559,6 +561,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 ult.PayloadHash,
                 ult.EngineReceipt.Status,
                 ult.EngineReceipt.ErrorMessage))
+            .AnnotateMetricName()
             .FirstOrDefaultAsync(token);
 
         var aggregator = new PendingTransactionResponseAggregator(ledgerState, maybeCommittedTransactionSummary);
@@ -593,6 +596,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     pt.NetworkDetails.LastSubmitErrorTitle
                 )
             )
+            .AnnotateMetricName()
             .ToListAsync(token);
     }
 
@@ -604,6 +608,7 @@ internal class TransactionQuerier : ITransactionQuerier
         var transactions = await _dbContext
             .LedgerTransactions
             .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
+            .AnnotateMetricName("GetTransactions")
             .ToListAsync(token);
 
         var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
@@ -628,6 +633,7 @@ WITH variables (entity_id, schema_hash) AS (
 SELECT sh.*
 FROM variables var
 INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash = var.schema_hash")
+                .AnnotateMetricName("GetEventSchemas")
                 .ToDictionaryAsync(x => new SchemaLookup(x.EntityId, x.SchemaHash), x => x.Schema, token);
         }
 
@@ -673,6 +679,7 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
             .Entities
             .Where(e => addresses.Contains(e.Address))
             .Select(e => new { e.Id, e.Address })
+            .AnnotateMetricName()
             .ToDictionaryAsync(e => e.Address.ToString(), e => e.Id, token);
     }
 
@@ -687,6 +694,7 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
             .Entities
             .Where(e => entityIds.Contains(e.Id))
             .Select(e => new { e.Id, e.Address })
+            .AnnotateMetricName()
             .ToDictionaryAsync(e => e.Id, e => e.Address.ToString(), token);
     }
 }

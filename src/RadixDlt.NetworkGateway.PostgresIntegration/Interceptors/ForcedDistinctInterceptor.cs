@@ -97,7 +97,7 @@ internal class ForceDistinctInterceptor : DbCommandInterceptor
     private static void ModifyCommand(DbCommand command)
     {
         // something slightly more sophisticated needed as this is going to fail if multiple tags were applied or query with more than one SELECT clause was used
-        if (command.CommandText.StartsWith($"-- {Apply}", StringComparison.Ordinal))
+        if (command.CommandText.Contains($"-- {Apply}", StringComparison.Ordinal))
         {
             command.CommandText = command.CommandText.Replace("SELECT ", "SELECT DISTINCT ");
         }

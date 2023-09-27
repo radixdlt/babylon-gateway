@@ -92,6 +92,7 @@ internal sealed class CommittedStateIdentifiersReader : ICommittedStateIdentifie
                 e.LedgerHashes,
             })
             .AsNoTracking()
+            .AnnotateMetricName()
             .FirstOrDefaultAsync(cancellationToken);
 
         if (transaction == null)

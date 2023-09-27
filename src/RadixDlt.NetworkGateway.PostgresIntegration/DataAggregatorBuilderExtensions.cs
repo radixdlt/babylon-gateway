@@ -66,6 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -91,7 +92,9 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<ITopOfLedgerProvider, TopOfLedgerProvider>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
             .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()
-            .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>();
+            .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>()
+            .AddSingleton<MetricsInterceptor>()
+            .AddScoped<IDapperWrapper, DapperWrapper>();
 
         CustomTypes.EnsureConfigured();
 
@@ -101,6 +104,7 @@ public static class DataAggregatorBuilderExtensions
             .AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
             {
                 options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);
+                options.AddInterceptors(serviceProvider.GetRequiredService<MetricsInterceptor>());
             });
 
         return builder;

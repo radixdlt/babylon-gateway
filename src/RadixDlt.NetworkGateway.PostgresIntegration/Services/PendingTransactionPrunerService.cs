@@ -117,6 +117,7 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
             .PendingTransactions
             .GroupBy(canPruneExpression)
             .Select(g => new PendingTransactionCountByPruneStatus(g.Key, g.Count()))
+            .AnnotateMetricName("GetTransactionsToPrune")
             .ToListAsync(token);
 
         await _observers.ForEachAsync(x => x.PrePendingTransactionPrune(countByStatus));
