@@ -31,7 +31,7 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
   Mainnet: {
     networkName: 'Mainnet',
     networkId: RadixNetwork.Mainnet,
-    gatewayUrl: 'https://mainnet.radixdlt.com',
+    gatewayUrl: 'https://babylon-gateway.radixdlt.com',
     dashboardUrl: 'https://dashboard.radixdlt.com',
   },
   Stokenet: {
