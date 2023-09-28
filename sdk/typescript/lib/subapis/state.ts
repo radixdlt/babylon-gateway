@@ -191,41 +191,6 @@ export class State {
   }
 
   /**
-   * Get paged list of fungibles for given entity
-   *
-   * @param entity
-   * @param nextCursor
-   * @param ledgerState
-   * @returns
-   */
-  async getEntityFungiblesPageVaultAggregated(
-    entity: string,
-    nextCursor?: string | undefined,
-    ledgerState?: LedgerStateSelector
-  ): Promise<
-    ReplaceProperty<
-      StateEntityFungiblesPageResponse,
-      'items',
-      FungibleResourcesCollectionItemVaultAggregated[]
-    >
-  > {
-    return this.innerClient.entityFungiblesPage({
-      stateEntityFungiblesPageRequest: {
-        address: entity,
-        cursor: nextCursor,
-        aggregation_level: 'Vault',
-        at_ledger_state: ledgerState,
-      },
-    }) as Promise<
-      ReplaceProperty<
-        StateEntityFungiblesPageResponse,
-        'items',
-        FungibleResourcesCollectionItemVaultAggregated[]
-      >
-    >
-  }
-
-  /**
    * Get list of all metadata items for given entity. This will iterate over returned cursors and aggregate all responses,
    * which is why multiple API requests can be made.
    *
@@ -382,6 +347,33 @@ export class State {
     return isArray
       ? (non_fungible_ids as StateNonFungibleDetailsResponseItem[])
       : (non_fungible_ids[0] as StateNonFungibleDetailsResponseItem)
+  }
+
+  private async getEntityFungiblesPageVaultAggregated(
+    entity: string,
+    nextCursor?: string | undefined,
+    ledgerState?: LedgerStateSelector
+  ): Promise<
+    ReplaceProperty<
+      StateEntityFungiblesPageResponse,
+      'items',
+      FungibleResourcesCollectionItemVaultAggregated[]
+    >
+  > {
+    return this.innerClient.entityFungiblesPage({
+      stateEntityFungiblesPageRequest: {
+        address: entity,
+        cursor: nextCursor,
+        aggregation_level: 'Vault',
+        at_ledger_state: ledgerState,
+      },
+    }) as Promise<
+      ReplaceProperty<
+        StateEntityFungiblesPageResponse,
+        'items',
+        FungibleResourcesCollectionItemVaultAggregated[]
+      >
+    >
   }
 
   private async queryAllFungibles(
