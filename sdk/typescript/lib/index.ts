@@ -27,6 +27,11 @@ export type GatewayApiClientSettings = ConfigurationParameters & {
   maxNftIdsCount?: number
 
   /**
+   * Maximum number of validator addresses that can be queried when using /statistics/validators/uptime endpoint
+   */
+  maxValidatorsUptimeCount?: number
+
+  /**
    * Application name required for statistics purposes.
    */
   applicationName: string
@@ -95,6 +100,6 @@ export class GatewayApiClient {
     this.stream = new Stream(this.lowLevel.stream)
     this.status = new Status(this.lowLevel.status)
     this.transaction = new Transaction(this.lowLevel.transaction)
-    this.statistics = new Statistics(this.lowLevel.statistics)
+    this.statistics = new Statistics(this.lowLevel.statistics, configuration)
   }
 }

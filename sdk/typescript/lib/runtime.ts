@@ -1,5 +1,9 @@
 import { GatewayApiClientSettings } from '.'
-import { MAX_ADDRESSES_COUNT, MAX_NFT_IDS_COUNT } from './constants'
+import {
+  MAX_ADDRESSES_COUNT,
+  MAX_NFT_IDS_COUNT,
+  MAX_VALIDATORS_UPTIME_COUNT,
+} from './constants'
 import { Configuration as GeneratedConfiguration } from './generated'
 
 export class RuntimeConfiguration extends GeneratedConfiguration {
@@ -16,5 +20,12 @@ export class RuntimeConfiguration extends GeneratedConfiguration {
 
   get maxNftIdsCount() {
     return this.extendedConfiguration.maxNftIdsCount || MAX_NFT_IDS_COUNT
+  }
+
+  get maxValidatorsUptimeCount() {
+    return (
+      this.extendedConfiguration.maxValidatorsUptimeCount ||
+      MAX_VALIDATORS_UPTIME_COUNT
+    )
   }
 }
