@@ -14,9 +14,11 @@ import {
   ResourceAggregationLevel,
   StateApi,
   StateEntityDetailsResponseItem,
+  StateEntityFungiblesPageResponse,
   StateEntityMetadataPageResponse,
   StateNonFungibleDetailsResponseItem,
   StateNonFungibleIdsResponse,
+  StateNonFungibleLocationResponseItem,
   ValidatorCollection,
   ValidatorCollectionItem,
 } from '../generated'
@@ -65,7 +67,11 @@ export class State {
    * Get detailed information about entities together with vault aggregated fungible and non-fungible resources.
    * Returns an array or single item depending on input value. If array is passed, it will be split into chunks of 20 addresses
    * which will be requested separately and returned only if all requests are successful.
+   *
+   * Calling this function will exhaust list of all fungible resources for each entity.
    * If any of the requests fail, the whole operation will fail.
+   *
+   * You can change limit by passing `maxAddressesCount` during gateway instantiation.
    *
    * @example
    * const entityDetails = await gatewayApi.state.getEntityDetailsVaultAggregated('account_tdx_21_1p823h2sq7nsefkdharvvh5')
@@ -103,7 +109,7 @@ export class State {
       ).then((results) => results.flat())
     }
 
-    const { items } = await this.innerClient.stateEntityDetails({
+    const { items, ledger_state } = await this.innerClient.stateEntityDetails({
       stateEntityDetailsRequest: {
         addresses: isArray ? addresses : [addresses],
         aggregation_level: ResourceAggregationLevel.Vault,
@@ -119,9 +125,24 @@ export class State {
         at_ledger_state: ledgerState,
       },
     })
+
     return isArray
-      ? (items as StateEntityDetailsVaultResponseItem[])
-      : (items[0] as StateEntityDetailsVaultResponseItem)
+      ? Promise.all(
+          (items as StateEntityDetailsVaultResponseItem[]).map((item) =>
+            this.queryAllFungibles(
+              item,
+              ledgerState || {
+                state_version: ledger_state.state_version,
+              }
+            )
+          )
+        )
+      : this.queryAllFungibles(
+          items[0] as StateEntityDetailsVaultResponseItem,
+          ledgerState || {
+            state_version: ledger_state.state_version,
+          }
+        )
   }
 
   /**
@@ -139,6 +160,69 @@ export class State {
         cursor,
       },
     })
+  }
+
+  /**
+   * Get list of fungibles location for given resource and ids. If ids array is larger than configured limit, it will be split into chunks and multiple requests will be made.
+   * You can change limit by passing `maxNftIdsCount` during gateway instantiation.
+   * @param resource - non fungible resource address
+   * @param ids - non fungible resource ids to get location for
+   * @returns list of non fungible location response items
+   */
+  async getNonFungibleLocation(
+    resource: string,
+    ids: string[]
+  ): Promise<StateNonFungibleLocationResponseItem[]> {
+    if (ids.length > this.configuration.maxNftIdsCount) {
+      const chunks = chunk(ids, this.configuration.maxNftIdsCount)
+      return Promise.all(
+        chunks.map((chunk) => this.getNonFungibleLocation(resource, chunk))
+      ).then((results) => results.flat())
+    }
+
+    return this.innerClient
+      .nonFungibleLocation({
+        stateNonFungibleLocationRequest: {
+          resource_address: resource,
+          non_fungible_ids: ids,
+        },
+      })
+      .then((data) => data.non_fungible_ids)
+  }
+
+  /**
+   * Get paged list of fungibles for given entity
+   *
+   * @param entity
+   * @param nextCursor
+   * @param ledgerState
+   * @returns
+   */
+  async getEntityFungiblesPageVaultAggregated(
+    entity: string,
+    nextCursor?: string | undefined,
+    ledgerState?: LedgerStateSelector
+  ): Promise<
+    ReplaceProperty<
+      StateEntityFungiblesPageResponse,
+      'items',
+      FungibleResourcesCollectionItemVaultAggregated[]
+    >
+  > {
+    return this.innerClient.entityFungiblesPage({
+      stateEntityFungiblesPageRequest: {
+        address: entity,
+        cursor: nextCursor,
+        aggregation_level: 'Vault',
+        at_ledger_state: ledgerState,
+      },
+    }) as Promise<
+      ReplaceProperty<
+        StateEntityFungiblesPageResponse,
+        'items',
+        FungibleResourcesCollectionItemVaultAggregated[]
+      >
+    >
   }
 
   /**
@@ -298,5 +382,34 @@ export class State {
     return isArray
       ? (non_fungible_ids as StateNonFungibleDetailsResponseItem[])
       : (non_fungible_ids[0] as StateNonFungibleDetailsResponseItem)
+  }
+
+  private async queryAllFungibles(
+    stateEntityDetails: StateEntityDetailsVaultResponseItem,
+    ledgerState?: LedgerStateSelector
+  ): Promise<StateEntityDetailsVaultResponseItem> {
+    const nextCursor = stateEntityDetails.fungible_resources.next_cursor
+
+    if (!nextCursor) return Promise.resolve(stateEntityDetails)
+
+    const allFungibles = await exhaustPaginationWithLedgerState(
+      (cursor) =>
+        this.getEntityFungiblesPageVaultAggregated(
+          stateEntityDetails.address,
+          cursor,
+          ledgerState
+        ),
+      nextCursor
+    )
+
+    return Promise.resolve({
+      ...stateEntityDetails,
+      fungible_resources: {
+        items: [
+          ...stateEntityDetails.fungible_resources.items,
+          ...allFungibles.aggregatedEntities,
+        ],
+      },
+    })
   }
 }
