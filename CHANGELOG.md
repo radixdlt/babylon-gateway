@@ -1,8 +1,10 @@
-## 1.0.0 - Babylon Launch
+## 1.0.1 - Babylon 
 Release Date: _unreleased_
 
-### Breaking changes
-_None_
+- Fixed missing `RecordTopOfDbLedger` observer call in `LedgerTransactionsProcessor`.
+
+## 1.0.0 - Babylon Launch
+Release Date: 28.09.2023
 
 ### What’s new?
 - log warning if sql query takes longer than configured threshold (default to 250ms) for both entity framework and dapper queries.
