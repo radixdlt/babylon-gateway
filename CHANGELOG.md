@@ -2,6 +2,7 @@
 Release Date: _unreleased_
 
 - Fixed missing `RecordTopOfDbLedger` observer call in `LedgerTransactionsProcessor`.
+- Fixed invalid response model for HTTP 400 Bad Request responses on input parameter validation failure.
 
 ## 1.0.0 - Babylon Launch
 Release Date: 28.09.2023
