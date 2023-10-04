@@ -64,12 +64,14 @@
 
 using GatewayApi.SlowRequestLogging;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
 using System;
@@ -106,10 +108,14 @@ public class GatewayApiStartup
         services
             .AddControllers()
             .AddControllersAsServices()
-            .AddNewtonsoftJson(o =>
+            .AddNewtonsoftJson(options =>
             {
-                o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                o.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+            })
+            .ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = ctx => ctx.HttpContext.RequestServices.GetRequiredService<IValidationErrorHandler>().GetClientError(ctx);
             });
 
         services
