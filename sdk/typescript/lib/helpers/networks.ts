@@ -5,8 +5,6 @@ export const RadixNetwork = {
   Betanet: 0x0b,
   Kisharnet: 0x0c,
   RCnetV1: 0x0c,
-  Ansharnet: 0x0d,
-  RCnetV2: 0x0d,
   Zabanet: 0x0e,
   RCnetV3: 0x0e,
   Gilganet: 0x20,
@@ -51,18 +49,6 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
     networkId: RadixNetwork.RCnetV1,
     gatewayUrl: 'https://rcnet.radixdlt.com',
     dashboardUrl: 'https://rcnet-dashboard.radixdlt.com',
-  },
-  Ansharnet: {
-    networkName: 'Ansharnet',
-    networkId: RadixNetwork.Ansharnet,
-    gatewayUrl: 'https://ansharnet-gateway.radixdlt.com',
-    dashboardUrl: 'https://ansharnet-dashboard.radixdlt.com',
-  },
-  RCnetV2: {
-    networkName: 'RCNetV2',
-    networkId: RadixNetwork.RCnetV2,
-    gatewayUrl: 'https://ansharnet-gateway.radixdlt.com',
-    dashboardUrl: 'https://rcnet-v2-dashboard.radixdlt.com',
   },
   Zabanet: {
     networkName: 'Zabanet',
