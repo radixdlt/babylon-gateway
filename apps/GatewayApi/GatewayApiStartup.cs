@@ -126,7 +126,7 @@ public class GatewayApiStartup
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
     {
         application
-            .UseCustomExceptionHandler()
+            .UseGatewayExceptionHandler()
             .UseSlowRequestLogging()
             .UseRequestTimeout()
             .UseCors()

@@ -86,15 +86,12 @@ internal sealed class ExceptionHandlingMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger _logger;
     private readonly IEnumerable<IExceptionObserver> _observers;
-    private readonly LogLevel _knownGatewayErrorLogLevel;
 
-    public ExceptionHandlingMiddleware(RequestDelegate next, IHostEnvironment env, ILogger<ExceptionHandlingMiddleware> logger,
-        IEnumerable<IExceptionObserver> observers)
+    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger, IEnumerable<IExceptionObserver> observers)
     {
         _next = next;
         _logger = logger;
         _observers = observers;
-        _knownGatewayErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -135,8 +132,8 @@ internal sealed class ExceptionHandlingMiddleware
         switch (exception)
         {
             case BadHttpRequestException badHttpRequestException :
-                _logger.LogInformation(exception, "Bad http request. [RequestTrace={TraceId}]", traceId);
-                return new BadRequestException("Bad http request", badHttpRequestException.Message);
+                _logger.LogWarning(exception, "Bad http request. [RequestTrace={TraceId}]", traceId);
+                return new GenericBadRequestException("Bad http request", badHttpRequestException.Message);
 
             case OperationCanceledException:
                 var requestTimeoutFeature = httpContext.Features.Get<IRequestTimeoutFeature>();
@@ -144,14 +141,14 @@ internal sealed class ExceptionHandlingMiddleware
 
                 if (requestTimeoutFeature?.CancellationToken.IsCancellationRequested == true)
                 {
-                    _logger.LogError(exception, "Request timed out after={Timeout} seconds, [RequestTrace={TraceId}]", requestTimeoutFeature.TimeoutAfter.TotalSeconds, traceId);
+                    _logger.LogError(exception, "Request timed out after={Timeout} seconds, [RequestTrace={TraceId}]", requestTimeoutFeature.Timeout.TotalSeconds, traceId);
                     return InternalServerException.OfRequestTimeoutException(exception, traceId);
                 }
 
                 if (requestAbortedFeature?.CancellationToken.IsCancellationRequested == true)
                 {
-                    _logger.LogWarning(exception, "Request aborted by user. [RequestTrace={TraceId}]", traceId);
-                    return new ClientClosedConnectionException("Client closed connection", "Client closed connection");
+                    _logger.LogWarning(exception, "Request aborted by API client. [RequestTrace={TraceId}]", traceId);
+                    return new ClientConnectionClosedException("Client closed connection", "Client closed connection");
                 }
 
                 _logger.LogWarning(
@@ -162,8 +159,7 @@ internal sealed class ExceptionHandlingMiddleware
 
                 return InternalServerException.OfHiddenException(exception, traceId);
             case KnownGatewayErrorException knownGatewayErrorException:
-                _logger.Log(
-                    _knownGatewayErrorLogLevel,
+                _logger.LogDebug(
                     exception,
                     "Known exception with http response code [RequestTrace={TraceId}]",
                     traceId

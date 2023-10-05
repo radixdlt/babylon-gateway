@@ -66,9 +66,9 @@ using Microsoft.AspNetCore.Builder;
 
 namespace GatewayApi.ExceptionHandlingMiddleware;
 
-public static class Extensions
+public static class ApplicationBuilderExtension
 {
-    public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder app)
+    public static IApplicationBuilder UseGatewayExceptionHandler(this IApplicationBuilder app)
     {
         return app.UseMiddleware<ExceptionHandlingMiddleware>();
     }

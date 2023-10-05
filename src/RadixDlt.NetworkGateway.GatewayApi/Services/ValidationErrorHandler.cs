@@ -84,13 +84,11 @@ internal class ValidationErrorHandler : IValidationErrorHandler
 {
     private readonly ILogger<ValidationErrorHandler> _logger;
     private readonly IEnumerable<IExceptionObserver> _observers;
-    private readonly LogLevel _knownGatewayErrorLogLevel;
 
-    public ValidationErrorHandler(IHostEnvironment env, ILogger<ValidationErrorHandler> logger, IEnumerable<IExceptionObserver> observers)
+    public ValidationErrorHandler(ILogger<ValidationErrorHandler> logger, IEnumerable<IExceptionObserver> observers)
     {
         _logger = logger;
         _observers = observers;
-        _knownGatewayErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
     }
 
     public IActionResult GetClientError(ActionContext actionContext)
@@ -117,7 +115,7 @@ internal class ValidationErrorHandler : IValidationErrorHandler
         const int StatusCode = (int)HttpStatusCode.BadRequest;
         var gatewayError = new GatewayModel.InvalidRequestError(validationErrors);
 
-        _logger.Log(_knownGatewayErrorLogLevel, "Validation error occured. Error: {error}, [RequestTrace={TraceId}]", JsonConvert.SerializeObject(validationErrors), traceId);
+        _logger.LogDebug("Validation error occured. Error: {error}, [RequestTrace={TraceId}]", JsonConvert.SerializeObject(validationErrors), traceId);
 
         var errorResponse = new GatewayModel.ErrorResponse(
             code: StatusCode,
