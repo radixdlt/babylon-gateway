@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Prometheus;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -116,44 +118,50 @@ internal class GatewayApiMetricObserver :
     private static readonly Counter _transactionSubmitRequestCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_submission_request_count",
-            "Number of transaction submission requests"
+            "Number of transaction submission requests",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
     private static readonly Counter _transactionSubmitSuccessCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_submission_success_count",
-            "Number of transaction submission successes"
+            "Number of transaction submission successes",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
     private static readonly Counter _transactionSubmitErrorCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_submission_error_count",
-            "Number of transaction submission errors"
+            "Number of transaction submission errors",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
     private static readonly Counter _transactionPreviewRequestCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_preview_request_count",
-            "Number of transaction preview requests"
+            "Number of transaction preview requests",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
     private static readonly Counter _transactionPreviewSuccessCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_preview_success_count",
-            "Number of transaction preview successes"
+            "Number of transaction preview successes",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
     private static readonly Counter _transactionPreviewErrorCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_preview_error_count",
-            "Number of transaction preview errors"
+            "Number of transaction preview errors",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
     private static readonly Counter _transactionSubmitResolutionByResultCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_submission_resolution_count",
             "Number of various resolutions at transaction submission time",
-            new CounterConfiguration { LabelNames = new[] { "result" } }
+            new CounterConfiguration { LabelNames = new[] { "result", "target_node" } }
         );
 
     private static readonly Gauge _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds = Metrics
@@ -230,23 +238,23 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request)
+    ValueTask IPreviewServiceObserver.PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, string targetNode)
     {
-        _transactionPreviewRequestCount.Inc();
+        _transactionPreviewRequestCount.WithLabels(targetNode).Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, GatewayModel.TransactionPreviewResponse response)
+    ValueTask IPreviewServiceObserver.PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, string targetNode, GatewayModel.TransactionPreviewResponse response)
     {
-        _transactionPreviewSuccessCount.Inc();
+        _transactionPreviewSuccessCount.WithLabels(targetNode).Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, Exception exception)
+    ValueTask IPreviewServiceObserver.HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, string targetNode, Exception exception)
     {
-        _transactionPreviewErrorCount.Inc();
+        _transactionPreviewErrorCount.WithLabels(targetNode).Inc();
 
         return ValueTask.CompletedTask;
     }
@@ -291,7 +299,7 @@ internal class GatewayApiMetricObserver :
             throw new Exception("The Gateway API is only supposed to handle initial transaction submissions");
         }
 
-        _transactionSubmitRequestCount.Inc();
+        _transactionSubmitRequestCount.WithLabels(context.TargetNode).Inc();
 
         return ValueTask.CompletedTask;
     }
@@ -308,15 +316,15 @@ internal class GatewayApiMetricObserver :
 
         if (nodeSubmissionResult.IsSubmissionSuccess())
         {
-            _transactionSubmitSuccessCount.Inc();
+            _transactionSubmitSuccessCount.WithLabels(context.TargetNode).Inc();
         }
 
         if (nodeSubmissionResult.IsSubmissionError())
         {
-            _transactionSubmitErrorCount.Inc();
+            _transactionSubmitErrorCount.WithLabels(context.TargetNode).Inc();
         }
 
-        _transactionSubmitResolutionByResultCount.WithLabels(nodeSubmissionResult.MetricLabel()).Inc();
+        _transactionSubmitResolutionByResultCount.WithLabels(nodeSubmissionResult.MetricLabel(), context.TargetNode).Inc();
 
         return ValueTask.CompletedTask;
     }

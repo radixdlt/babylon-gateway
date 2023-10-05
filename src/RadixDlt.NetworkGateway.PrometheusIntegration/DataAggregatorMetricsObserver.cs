@@ -448,7 +448,7 @@ internal class DataAggregatorMetricsObserver :
             throw new Exception("Aggregator is only supposed to handle resubmissions");
         }
 
-        _transactionResubmissionAttemptCount.Inc();
+        _transactionResubmissionAttemptCount.WithLabels(context.TargetNode).Inc();
 
         return ValueTask.CompletedTask;
     }
@@ -465,15 +465,15 @@ internal class DataAggregatorMetricsObserver :
 
         if (nodeSubmissionResult.IsSubmissionSuccess())
         {
-            _transactionResubmissionSuccessCount.Inc();
+            _transactionResubmissionSuccessCount.WithLabels(context.TargetNode).Inc();
         }
 
         if (nodeSubmissionResult.IsSubmissionError())
         {
-            _transactionResubmissionErrorCount.Inc();
+            _transactionResubmissionErrorCount.WithLabels(context.TargetNode).Inc();
         }
 
-        _transactionResubmissionResolutionByResultCount.WithLabels(nodeSubmissionResult.MetricLabel()).Inc();
+        _transactionResubmissionResolutionByResultCount.WithLabels(nodeSubmissionResult.MetricLabel(), context.TargetNode).Inc();
 
         return ValueTask.CompletedTask;
     }
