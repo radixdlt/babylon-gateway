@@ -66,6 +66,7 @@ using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -93,7 +94,7 @@ public interface ICoreApiHandler
 internal class CoreApiHandler : ICoreApiHandler
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ICoreApiProvider _coreApiProvider;
+    private readonly Lazy<ICoreApiProvider> _coreApiProvider;
 
     public CoreApiHandler(
         INetworkConfigurationProvider networkConfigurationProvider,
@@ -101,7 +102,7 @@ internal class CoreApiHandler : ICoreApiHandler
         HttpClient httpClient)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _coreApiProvider = ChooseCoreApiProvider(coreNodesSelectorService, httpClient);
+        _coreApiProvider = new Lazy<ICoreApiProvider>(() => ChooseCoreApiProvider(coreNodesSelectorService, httpClient));
     }
 
     public byte GetNetworkId()
@@ -116,12 +117,12 @@ internal class CoreApiHandler : ICoreApiHandler
 
     public CoreApiNode GetCoreNodeConnectedTo()
     {
-        return _coreApiProvider.CoreApiNode;
+        return _coreApiProvider.Value.CoreApiNode;
     }
 
     public TransactionApi GetTransactionApi()
     {
-        return _coreApiProvider.TransactionApi;
+        return _coreApiProvider.Value.TransactionApi;
     }
 
     public async Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(
@@ -129,7 +130,7 @@ internal class CoreApiHandler : ICoreApiHandler
         CancellationToken token = default)
     {
         return await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() =>
-            _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(request, token));
+            _coreApiProvider.Value.TransactionApi.TransactionPreviewPostAsync(request, token));
     }
 
     private static ICoreApiProvider ChooseCoreApiProvider(ICoreNodesSelectorService coreNodesSelectorService, HttpClient httpClient)
