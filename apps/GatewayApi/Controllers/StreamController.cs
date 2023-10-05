@@ -63,16 +63,10 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-// ReSharper disable HeuristicUnreachableCode
-#pragma warning disable CS0162 // Unreachable code detected
 
 namespace GatewayApi.Controllers;
 

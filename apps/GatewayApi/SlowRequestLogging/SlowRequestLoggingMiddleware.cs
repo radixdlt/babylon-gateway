@@ -66,7 +66,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace GatewayApi.SlowRequestLogging;

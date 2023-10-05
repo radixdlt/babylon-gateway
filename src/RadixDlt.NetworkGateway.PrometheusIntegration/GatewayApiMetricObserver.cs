@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Prometheus;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;

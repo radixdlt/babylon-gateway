@@ -65,7 +65,6 @@
 using GatewayApi.ExceptionHandlingMiddleware;
 using GatewayApi.SlowRequestLogging;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -76,8 +75,6 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace GatewayApi;
 

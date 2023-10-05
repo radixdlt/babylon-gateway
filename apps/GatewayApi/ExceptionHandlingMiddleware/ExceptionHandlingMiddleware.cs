@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -139,7 +138,7 @@ internal sealed class ExceptionHandlingMiddleware
                 _logger.LogInformation(exception, "Bad http request. [RequestTrace={TraceId}]", traceId);
                 return new BadRequestException("Bad http request", badHttpRequestException.Message);
 
-            case OperationCanceledException operationCanceledException:
+            case OperationCanceledException:
                 var requestTimeoutFeature = httpContext.Features.Get<IRequestTimeoutFeature>();
                 var requestAbortedFeature = httpContext.Features.Get<IRequestAbortedFeature>();
 
