@@ -187,21 +187,41 @@ internal class GatewayApiMetricObserver :
         _sqlQueryDuration.WithLabels(queryName).Observe(duration.TotalSeconds);
     }
 
-    void IExceptionObserver.OnException(ActionContext actionContext, Exception exception, KnownGatewayErrorException gatewayErrorException)
+    void IExceptionObserver.OnValidationError(HttpContext httpContext, GatewayModel.GatewayError gatewayError, int statusCode)
     {
         // actionContext.HttpContext.Request.Method - GET or POST
-        var routeValueDictionary = actionContext.RouteData.Values;
+        var routeValueDictionary = httpContext.GetRouteData().Values;
 
         // This is a lot of labels, but the rest depend on the action and exception, so the cardinality isn't massive / worrying
         // Method/Controller/Action align with the prometheus-net http metrics
         // https://github.com/prometheus-net/prometheus-net/blob/master/Prometheus.AspNetCore/HttpMetrics/HttpRequestMiddlewareBase.cs
         _apiResponseErrorCount
             .WithLabels(
-                actionContext.HttpContext.Request.Method, // method (GET or POST)
+                httpContext.Request.Method, // method (GET or POST)
+                routeValueDictionary.GetValueOrDefault("Controller") as string ?? string.Empty, // controller
+                routeValueDictionary.GetValueOrDefault("Action") as string ?? string.Empty, // action
+                string.Empty, // exception
+                gatewayError.GetType().Name, // gateway_error
+                statusCode.ToString(CultureInfo.InvariantCulture) // status_code
+            )
+            .Inc();
+    }
+
+    void IExceptionObserver.OnException(HttpContext httpContext, Exception exception, KnownGatewayErrorException gatewayErrorException)
+    {
+        // actionContext.HttpContext.Request.Method - GET or POST
+        var routeValueDictionary = httpContext.GetRouteData().Values;
+
+        // This is a lot of labels, but the rest depend on the action and exception, so the cardinality isn't massive / worrying
+        // Method/Controller/Action align with the prometheus-net http metrics
+        // https://github.com/prometheus-net/prometheus-net/blob/master/Prometheus.AspNetCore/HttpMetrics/HttpRequestMiddlewareBase.cs
+        _apiResponseErrorCount
+            .WithLabels(
+                httpContext.Request.Method, // method (GET or POST)
                 routeValueDictionary.GetValueOrDefault("Controller") as string ?? string.Empty, // controller
                 routeValueDictionary.GetValueOrDefault("Action") as string ?? string.Empty, // action
                 exception.GetNameForMetricsOrLogging(), // exception
-                gatewayErrorException.GatewayError.GetType().Name, // gateway_error
+                gatewayErrorException.GatewayError?.GetType().Name ?? string.Empty, // gateway_error
                 gatewayErrorException.StatusCode.ToString(CultureInfo.InvariantCulture) // status_code
             )
             .Inc();

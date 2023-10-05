@@ -73,8 +73,6 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("transaction")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
 public sealed class TransactionController : ControllerBase
 {
     private readonly ITransactionHandler _transactionHandler;

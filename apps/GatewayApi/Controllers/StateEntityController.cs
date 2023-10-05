@@ -73,8 +73,6 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("state/entity")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
 public class StateController : ControllerBase
 {
     private readonly IEntityHandler _entityHandler;

@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using GatewayApi.ExceptionHandlingMiddleware;
 using GatewayApi.SlowRequestLogging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -75,6 +76,8 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GatewayApi;
 
@@ -126,6 +129,7 @@ public class GatewayApiStartup
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
     {
         application
+            .UseCustomExceptionHandler()
             .UseSlowRequestLogging()
             .UseRequestTimeout()
             .UseCors()

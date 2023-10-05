@@ -73,8 +73,6 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("state/validators")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
 public class ValidatorController : ControllerBase
 {
     private readonly IValidatorStateHandler _validatorStateHandler;

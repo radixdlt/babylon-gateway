@@ -73,8 +73,6 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("state/key-value-store")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
 public class StateKeyValueStoreController : ControllerBase
 {
     private readonly IKeyValueStoreHandler _keyValueStoreHandler;

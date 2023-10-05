@@ -62,11 +62,18 @@
  * permissions under this License.
  */
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -78,16 +85,20 @@ public interface IValidationErrorHandler
 
 internal class ValidationErrorHandler : IValidationErrorHandler
 {
-    private readonly IExceptionHandler _exceptionHandler;
+    private readonly ILogger<ValidationErrorHandler> _logger;
+    private readonly IEnumerable<IExceptionObserver> _observers;
+    private readonly LogLevel _knownGatewayErrorLogLevel;
 
-    public ValidationErrorHandler(IExceptionHandler exceptionHandler)
+    public ValidationErrorHandler(IHostEnvironment env, ILogger<ValidationErrorHandler> logger, IEnumerable<IExceptionObserver> observers)
     {
-        _exceptionHandler = exceptionHandler;
+        _logger = logger;
+        _observers = observers;
+        _knownGatewayErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
     }
 
     public IActionResult GetClientError(ActionContext actionContext)
     {
-        var errors = new List<GatewayModel.ValidationErrorsAtPath>();
+        var validationErrors = new List<GatewayModel.ValidationErrorsAtPath>();
         foreach (var (path, modelValue) in actionContext.ModelState)
         {
             var errorMessagesToShow = modelValue
@@ -98,15 +109,28 @@ internal class ValidationErrorHandler : IValidationErrorHandler
 
             if (errorMessagesToShow.Count > 0)
             {
-                errors.Add(new GatewayModel.ValidationErrorsAtPath(path, errorMessagesToShow));
+                validationErrors.Add(new GatewayModel.ValidationErrorsAtPath(path, errorMessagesToShow));
             }
         }
-
-        var invalidRequestError = InvalidRequestException.FromValidationErrors(errors);
 
         // See https://github.com/dotnet/aspnetcore/blob/ae1a6cbe225b99c0bf38b7e31bf60cb653b73a52/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs#L92
         var traceId = Activity.Current?.Id ?? actionContext.HttpContext.TraceIdentifier;
 
-        return _exceptionHandler.CreateAndLogApiResultFromException(actionContext, invalidRequestError, traceId);
+        const string UserFacingMessage = "One or more validation errors occurred";
+        const int StatusCode = (int)HttpStatusCode.BadRequest;
+        var gatewayError = new GatewayModel.InvalidRequestError(validationErrors);
+
+        _logger.Log(_knownGatewayErrorLogLevel, "Validation error occured. Error: {error}, [RequestTrace={TraceId}]", JsonConvert.SerializeObject(validationErrors), traceId);
+
+        var errorResponse = new GatewayModel.ErrorResponse(
+            code: StatusCode,
+            message: UserFacingMessage,
+            details: gatewayError,
+            traceId: traceId
+        );
+
+        _observers.ForEach(x => x.OnValidationError(actionContext.HttpContext, gatewayError, StatusCode));
+
+        return new JsonResult(errorResponse);
     }
 }

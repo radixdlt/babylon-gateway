@@ -73,8 +73,6 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("state/non-fungible")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
 public class StateNonFungibleController : ControllerBase
 {
     private readonly INonFungibleHandler _nonFungibleHandler;
