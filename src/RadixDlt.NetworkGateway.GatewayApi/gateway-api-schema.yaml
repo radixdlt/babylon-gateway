@@ -699,9 +699,69 @@ components:
       type: string
 
     LastUpdatedAtStateVersion:
-      description: TBD # TODO describe
+      description: The most recent state version underlying object was modified at.
       type: integer
-      format: int64 # TODO define min/max using CoreApi as a reference
+      format: int64
+      minimum: 1
+      maximum: 100000000000000
+
+    SborProgrammaticJson: # TODO $ref RET OAS file for strongly-typed definition with detailed documentation
+      description: |
+        Arbitrary SBOR value represented as programmatic JSON with optional property name annotations.
+        This is a polymorphic JSON object where `kind` property discriminates underlying value type.
+
+        List of all supported `kind` types:
+          *  `Bool`,
+          *  `I8`,
+          *  `I16`,
+          *  `I32`,
+          *  `I64`,
+          *  `I128`,
+          *  `U8`,
+          *  `U16`,
+          *  `U32`,
+          *  `U64`,
+          *  `U128`,
+          *  `String`,
+          *  `Enum`,
+          *  `Array`,
+          *  `Tuple`,
+          *  `Map`,
+          *  `Reference`,
+          *  `Own`,
+          *  `Decimal`,
+          *  `PreciseDecimal`,
+          *  `NonFungibleLocalId`,
+
+        All scalar types (`Bool`, `I*`, `U*`, `String`, `Reference`, `Own`, `Decimal`, `PreciseDecimal`, `NonFungibleLocalId`)
+        convey their value via `value` string property with notable exception of `Bool` type that uses regular JSON boolean type.
+
+        Common properties represented as nullable strings:
+          * `type_name` is only output when a schema is present and the type has a name,
+          * `field_name` is only output when the value is a child of a `Tuple` or `Enum`, which has a type with named fields,
+          * `variant_name` is only output when a schema is present and the type is an `Enum`
+
+        The following is a non-normative example annotated `Tuple` value with `String` and `U32` fields:
+
+        ```
+        {
+          "kind": "Tuple",
+          "type_name": "CustomStructure",
+          "fields": [
+            {
+              "kind": "String",
+              "field_name": "favorite_color",
+              "value": "Blue"
+            },
+            {
+              "kind": "U32",
+              "field_name": "usage_counter",
+              "value": "462231"
+            }
+          ]
+        }
+        ```
+      type: object
 
     #
     # Keys
@@ -810,6 +870,8 @@ components:
           nullable: true
           type: integer
           format: int64
+          minimum: 1
+          maximum: 100000000000000
         timestamp:
           description: If provided, the latest ledger state lower than or equal to the given round timestamp is returned.
           nullable: true
@@ -820,11 +882,15 @@ components:
           nullable: true
           type: integer
           format: int64
+          minimum: 0
+          maximum: 10000000000
         round:
           description: If provided must be accompanied with `epoch`, the ledger state lower than or equal to the given epoch and round is returned.
           nullable: true
           type: integer
           format: int64
+          minimum: 0
+          maximum: 10000000000
 
     CursorLimitMixin:
       type: object
@@ -933,9 +999,9 @@ components:
         - programmatic_json
       properties:
         raw_hex:
-          type: string
+          $ref: "#/components/schemas/HexString"
         programmatic_json:
-          type: object
+          $ref: "#/components/schemas/SborProgrammaticJson"
 
     EntityMetadataCollection:
       description: Entity metadata collection.
@@ -1144,7 +1210,7 @@ components:
             - last_updated_at_state_version
           properties:
             amount:
-              description: TBA # TODO describe
+              description: The total amount of non-fungible IDs across all vaults.
               type: integer
               format: int64
             last_updated_at_state_version:
@@ -1635,8 +1701,8 @@ components:
           type: integer
           format: int32
           minimum: 0
-          maximum: 255
-          description: An integer between `0` and `255`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
+          maximum: 65535
+          description: An integer between `0` and `65535`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
         nonce:
           type: integer
           format: int64
@@ -2534,12 +2600,15 @@ components:
                 - kind: "U32"
                   value: "1"
     StateKeyValueStoreDataRequestKeyItem:
+      description: |
+        Specifies a KVStore key to lookup either as `key_hex` or `key_json`.
+        In case both properties are present `key_hex` takes precedence.
       type: object
       properties:
         key_hex:
           $ref: "#/components/schemas/HexString"
         key_json:
-          type: object
+          $ref: "#/components/schemas/SborProgrammaticJson"
     StateKeyValueStoreDataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
