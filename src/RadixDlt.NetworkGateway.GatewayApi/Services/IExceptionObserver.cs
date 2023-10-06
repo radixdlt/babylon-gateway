@@ -62,13 +62,16 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IExceptionObserver
 {
-    void OnException(ActionContext actionContext, Exception exception, KnownGatewayErrorException gatewayErrorException);
+    void OnException(HttpContext httpContext, Exception exception, KnownGatewayErrorException gatewayErrorException);
+
+    void OnValidationError(HttpContext httpContext, GatewayModel.GatewayError gatewayError, int statusCode);
 }

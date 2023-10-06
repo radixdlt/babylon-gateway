@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
+using GatewayApi.ExceptionHandlingMiddleware;
 using GatewayApi.SlowRequestLogging;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -126,6 +126,7 @@ public class GatewayApiStartup
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
     {
         application
+            .UseGatewayExceptionHandler()
             .UseSlowRequestLogging()
             .UseRequestTimeout()
             .UseCors()

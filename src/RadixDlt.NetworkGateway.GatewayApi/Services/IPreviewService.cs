@@ -97,17 +97,19 @@ internal class PreviewService : IPreviewService
     {
         try
         {
-            await _observers.ForEachAsync(x => x.PreHandlePreviewRequest(request));
+            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
+            await _observers.ForEachAsync(x => x.PreHandlePreviewRequest(request, selectedNode.Name));
 
             var response = await HandlePreviewAndCreateResponse(request, token);
 
-            await _observers.ForEachAsync(x => x.PostHandlePreviewRequest(request, response));
+            await _observers.ForEachAsync(x => x.PostHandlePreviewRequest(request, selectedNode.Name, response));
 
             return response;
         }
         catch (Exception ex)
         {
-            await _observers.ForEachAsync(x => x.HandlePreviewRequestFailed(request, ex));
+            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
+            await _observers.ForEachAsync(x => x.HandlePreviewRequestFailed(request, selectedNode.Name, ex));
 
             throw;
         }

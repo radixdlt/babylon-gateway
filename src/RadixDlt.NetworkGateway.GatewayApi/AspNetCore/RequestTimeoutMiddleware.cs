@@ -82,11 +82,13 @@ internal class RequestTimeoutMiddleware : IMiddleware
 
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        using var timeoutSource = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
-
+        using var timeoutSource = new CancellationTokenSource();
         timeoutSource.CancelAfter(_timeout);
+        context.Features.Set<IRequestAbortedFeature>(new RequestAbortedFeature(context.RequestAborted));
+        context.Features.Set<IRequestTimeoutFeature>(new RequestTimeoutFeature(timeoutSource.Token, _timeout));
 
-        context.RequestAborted = timeoutSource.Token;
+        using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, timeoutSource.Token);
+        context.RequestAborted = linkedSource.Token;
 
         await next(context);
     }

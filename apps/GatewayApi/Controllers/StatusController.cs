@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Threading;
@@ -74,8 +73,6 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("status")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
 public sealed class StatusController : ControllerBase
 {
     private readonly IStatusHandler _statusHandler;
