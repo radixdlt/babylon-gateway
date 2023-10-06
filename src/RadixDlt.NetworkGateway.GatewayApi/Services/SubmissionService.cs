@@ -179,15 +179,16 @@ internal class SubmissionService : ISubmissionService
             await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.ParseFailedStaticallyInvalid));
             throw InvalidTransactionException.FromStaticallyInvalid(ex.error);
         }
-        catch (ToolkitModel.RadixEngineToolkitException)
+        catch (ToolkitModel.RadixEngineToolkitException ex)
         {
             await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.ParseFailedIncorrectFormat));
+            _logger.LogWarning(ex, "Corrupted notarized tx bytes");
             throw InvalidTransactionException.FromUnsupportedPayloadType();
         }
         catch (Exception ex)
         {
             await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.ParseFailedOtherError));
-            _logger.LogWarning(ex, "Unexpected exception when parsing / validating submitted transaction");
+            _logger.LogWarning(ex, "Exception when parsing / validating submitted transaction");
             throw;
         }
     }
