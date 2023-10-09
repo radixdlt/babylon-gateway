@@ -5,7 +5,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-bookworm-slim AS base
 WORKDIR /app
 
-// Fixes CVE-2023-4911 can be removed when we update the base OS image to include this fix
+# Fixes CVE-2023-4911 can be removed when we update the base OS image to include this fix
 RUN apt-get update -y \
   && apt-get -y --no-install-recommends install \    
     libc6=2.36-9+deb12u3 \
