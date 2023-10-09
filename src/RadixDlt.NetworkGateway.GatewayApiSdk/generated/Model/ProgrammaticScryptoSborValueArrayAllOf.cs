@@ -100,7 +100,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets ElementKind
         /// </summary>
         [DataMember(Name = "element_kind", IsRequired = true, EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValueTypeKind ElementKind { get; set; }
+        public ProgrammaticScryptoSborValueKind ElementKind { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueArrayAllOf" /> class.
         /// </summary>
@@ -112,7 +112,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="elementKind">elementKind (required).</param>
         /// <param name="elementTypeName">elementTypeName.</param>
         /// <param name="elements">elements (required).</param>
-        public ProgrammaticScryptoSborValueArrayAllOf(ProgrammaticScryptoSborValueTypeKind elementKind = default(ProgrammaticScryptoSborValueTypeKind), string elementTypeName = default(string), List<ProgrammaticScryptoSborValue> elements = default(List<ProgrammaticScryptoSborValue>))
+        public ProgrammaticScryptoSborValueArrayAllOf(ProgrammaticScryptoSborValueKind elementKind = default(ProgrammaticScryptoSborValueKind), string elementTypeName = default(string), List<ProgrammaticScryptoSborValue> elements = default(List<ProgrammaticScryptoSborValue>))
         {
             this.ElementKind = elementKind;
             // to ensure "elements" is required (not null)

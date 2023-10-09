@@ -97,6 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
@@ -110,6 +111,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValuePreciseDecimal), "PreciseDecimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "ProgrammaticScryptoSborValueArray")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "ProgrammaticScryptoSborValueBool")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "ProgrammaticScryptoSborValueBytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "ProgrammaticScryptoSborValueDecimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "ProgrammaticScryptoSborValueEnum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "ProgrammaticScryptoSborValueI128")]
@@ -144,7 +146,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Kind
         /// </summary>
         [DataMember(Name = "kind", IsRequired = true, EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValueTypeKind Kind { get; set; }
+        public ProgrammaticScryptoSborValueKind Kind { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValue" /> class.
         /// </summary>
@@ -156,7 +158,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="kind">kind (required).</param>
         /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
         /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
-        public ProgrammaticScryptoSborValue(ProgrammaticScryptoSborValueTypeKind kind = default(ProgrammaticScryptoSborValueTypeKind), string typeName = default(string), string fieldName = default(string))
+        public ProgrammaticScryptoSborValue(ProgrammaticScryptoSborValueKind kind = default(ProgrammaticScryptoSborValueKind), string typeName = default(string), string fieldName = default(string))
         {
             this.Kind = kind;
             this.TypeName = typeName;

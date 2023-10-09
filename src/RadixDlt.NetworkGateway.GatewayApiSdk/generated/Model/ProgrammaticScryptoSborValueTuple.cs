@@ -97,6 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
@@ -127,10 +128,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueTuple" /> class.
         /// </summary>
         /// <param name="fields">fields (required).</param>
-        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueTypeKind.Tuple).</param>
+        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Tuple).</param>
         /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
         /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
-        public ProgrammaticScryptoSborValueTuple(List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueTypeKind kind = ProgrammaticScryptoSborValueTypeKind.Tuple, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
+        public ProgrammaticScryptoSborValueTuple(List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Tuple, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
             // to ensure "fields" is required (not null)
             if (fields == null)

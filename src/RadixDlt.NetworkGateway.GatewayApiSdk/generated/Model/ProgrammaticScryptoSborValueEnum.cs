@@ -97,6 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
@@ -126,32 +127,35 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueEnum" /> class.
         /// </summary>
-        /// <param name="discriminator">discriminator (required).</param>
+        /// <param name="variantId">variantId (required).</param>
+        /// <param name="variantName">variantName.</param>
         /// <param name="fields">fields (required).</param>
-        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueTypeKind.Enum).</param>
+        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Enum).</param>
         /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
         /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
-        public ProgrammaticScryptoSborValueEnum(string discriminator = default(string), List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueTypeKind kind = ProgrammaticScryptoSborValueTypeKind.Enum, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
+        public ProgrammaticScryptoSborValueEnum(int variantId = default(int), string variantName = default(string), List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Enum, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
-            // to ensure "discriminator" is required (not null)
-            if (discriminator == null)
-            {
-                throw new ArgumentNullException("discriminator is a required property for ProgrammaticScryptoSborValueEnum and cannot be null");
-            }
-            this.Discriminator = discriminator;
+            this.VariantId = variantId;
             // to ensure "fields" is required (not null)
             if (fields == null)
             {
                 throw new ArgumentNullException("fields is a required property for ProgrammaticScryptoSborValueEnum and cannot be null");
             }
             this.Fields = fields;
+            this.VariantName = variantName;
         }
 
         /// <summary>
-        /// Gets or Sets Discriminator
+        /// Gets or Sets VariantId
         /// </summary>
-        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
-        public string Discriminator { get; set; }
+        [DataMember(Name = "variant_id", IsRequired = true, EmitDefaultValue = true)]
+        public int VariantId { get; set; }
+
+        /// <summary>
+        /// Gets or Sets VariantName
+        /// </summary>
+        [DataMember(Name = "variant_name", EmitDefaultValue = true)]
+        public string VariantName { get; set; }
 
         /// <summary>
         /// Gets or Sets Fields
@@ -168,7 +172,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ProgrammaticScryptoSborValueEnum {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("  VariantId: ").Append(VariantId).Append("\n");
+            sb.Append("  VariantName: ").Append(VariantName).Append("\n");
             sb.Append("  Fields: ").Append(Fields).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -206,9 +211,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Discriminator == input.Discriminator ||
-                    (this.Discriminator != null &&
-                    this.Discriminator.Equals(input.Discriminator))
+                    this.VariantId == input.VariantId ||
+                    this.VariantId.Equals(input.VariantId)
+                ) && base.Equals(input) && 
+                (
+                    this.VariantName == input.VariantName ||
+                    (this.VariantName != null &&
+                    this.VariantName.Equals(input.VariantName))
                 ) && base.Equals(input) && 
                 (
                     this.Fields == input.Fields ||
@@ -227,9 +236,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Discriminator != null)
+                hashCode = (hashCode * 59) + this.VariantId.GetHashCode();
+                if (this.VariantName != null)
                 {
-                    hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VariantName.GetHashCode();
                 }
                 if (this.Fields != null)
                 {

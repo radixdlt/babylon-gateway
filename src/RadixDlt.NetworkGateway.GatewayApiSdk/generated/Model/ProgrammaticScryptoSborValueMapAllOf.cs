@@ -97,16 +97,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     {
 
         /// <summary>
-        /// Gets or Sets KeyValueKind
+        /// Gets or Sets KeyKind
         /// </summary>
-        [DataMember(Name = "key_value_kind", IsRequired = true, EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValueTypeKind KeyValueKind { get; set; }
+        [DataMember(Name = "key_kind", IsRequired = true, EmitDefaultValue = true)]
+        public ProgrammaticScryptoSborValueKind KeyKind { get; set; }
 
         /// <summary>
-        /// Gets or Sets ValueValueKind
+        /// Gets or Sets ValueKind
         /// </summary>
-        [DataMember(Name = "value_value_kind", IsRequired = true, EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValueTypeKind ValueValueKind { get; set; }
+        [DataMember(Name = "value_kind", IsRequired = true, EmitDefaultValue = true)]
+        public ProgrammaticScryptoSborValueKind ValueKind { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueMapAllOf" /> class.
         /// </summary>
@@ -115,20 +115,36 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueMapAllOf" /> class.
         /// </summary>
-        /// <param name="keyValueKind">keyValueKind (required).</param>
-        /// <param name="valueValueKind">valueValueKind (required).</param>
+        /// <param name="keyKind">keyKind (required).</param>
+        /// <param name="keyTypeName">keyTypeName.</param>
+        /// <param name="valueKind">valueKind (required).</param>
+        /// <param name="valueTypeName">valueTypeName.</param>
         /// <param name="entries">entries (required).</param>
-        public ProgrammaticScryptoSborValueMapAllOf(ProgrammaticScryptoSborValueTypeKind keyValueKind = default(ProgrammaticScryptoSborValueTypeKind), ProgrammaticScryptoSborValueTypeKind valueValueKind = default(ProgrammaticScryptoSborValueTypeKind), List<ProgrammaticScryptoSborValueMapEntry> entries = default(List<ProgrammaticScryptoSborValueMapEntry>))
+        public ProgrammaticScryptoSborValueMapAllOf(ProgrammaticScryptoSborValueKind keyKind = default(ProgrammaticScryptoSborValueKind), string keyTypeName = default(string), ProgrammaticScryptoSborValueKind valueKind = default(ProgrammaticScryptoSborValueKind), string valueTypeName = default(string), List<ProgrammaticScryptoSborValueMapEntry> entries = default(List<ProgrammaticScryptoSborValueMapEntry>))
         {
-            this.KeyValueKind = keyValueKind;
-            this.ValueValueKind = valueValueKind;
+            this.KeyKind = keyKind;
+            this.ValueKind = valueKind;
             // to ensure "entries" is required (not null)
             if (entries == null)
             {
                 throw new ArgumentNullException("entries is a required property for ProgrammaticScryptoSborValueMapAllOf and cannot be null");
             }
             this.Entries = entries;
+            this.KeyTypeName = keyTypeName;
+            this.ValueTypeName = valueTypeName;
         }
+
+        /// <summary>
+        /// Gets or Sets KeyTypeName
+        /// </summary>
+        [DataMember(Name = "key_type_name", EmitDefaultValue = true)]
+        public string KeyTypeName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ValueTypeName
+        /// </summary>
+        [DataMember(Name = "value_type_name", EmitDefaultValue = true)]
+        public string ValueTypeName { get; set; }
 
         /// <summary>
         /// Gets or Sets Entries
@@ -144,8 +160,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ProgrammaticScryptoSborValueMapAllOf {\n");
-            sb.Append("  KeyValueKind: ").Append(KeyValueKind).Append("\n");
-            sb.Append("  ValueValueKind: ").Append(ValueValueKind).Append("\n");
+            sb.Append("  KeyKind: ").Append(KeyKind).Append("\n");
+            sb.Append("  KeyTypeName: ").Append(KeyTypeName).Append("\n");
+            sb.Append("  ValueKind: ").Append(ValueKind).Append("\n");
+            sb.Append("  ValueTypeName: ").Append(ValueTypeName).Append("\n");
             sb.Append("  Entries: ").Append(Entries).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -183,12 +201,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.KeyValueKind == input.KeyValueKind ||
-                    this.KeyValueKind.Equals(input.KeyValueKind)
+                    this.KeyKind == input.KeyKind ||
+                    this.KeyKind.Equals(input.KeyKind)
                 ) && 
                 (
-                    this.ValueValueKind == input.ValueValueKind ||
-                    this.ValueValueKind.Equals(input.ValueValueKind)
+                    this.KeyTypeName == input.KeyTypeName ||
+                    (this.KeyTypeName != null &&
+                    this.KeyTypeName.Equals(input.KeyTypeName))
+                ) && 
+                (
+                    this.ValueKind == input.ValueKind ||
+                    this.ValueKind.Equals(input.ValueKind)
+                ) && 
+                (
+                    this.ValueTypeName == input.ValueTypeName ||
+                    (this.ValueTypeName != null &&
+                    this.ValueTypeName.Equals(input.ValueTypeName))
                 ) && 
                 (
                     this.Entries == input.Entries ||
@@ -207,8 +235,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.KeyValueKind.GetHashCode();
-                hashCode = (hashCode * 59) + this.ValueValueKind.GetHashCode();
+                hashCode = (hashCode * 59) + this.KeyKind.GetHashCode();
+                if (this.KeyTypeName != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyTypeName.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.ValueKind.GetHashCode();
+                if (this.ValueTypeName != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValueTypeName.GetHashCode();
+                }
                 if (this.Entries != null)
                 {
                     hashCode = (hashCode * 59) + this.Entries.GetHashCode();

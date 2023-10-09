@@ -90,10 +90,11 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines ProgrammaticScryptoSborValueTypeKind
+    /// These are the Scrypto SBOR &#x60;ValueKind&#x60;s, but with &#x60;Bytes&#x60; added as an alias for &#x60;Vec&#x60;, to display such values as hex-encoded strings. 
     /// </summary>
+    /// <value>These are the Scrypto SBOR &#x60;ValueKind&#x60;s, but with &#x60;Bytes&#x60; added as an alias for &#x60;Vec&#x60;, to display such values as hex-encoded strings. </value>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum ProgrammaticScryptoSborValueTypeKind
+    public enum ProgrammaticScryptoSborValueKind
     {
         /// <summary>
         /// Enum Bool for value: Bool
@@ -180,10 +181,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         Array = 14,
 
         /// <summary>
-        /// Enum Tuple for value: Tuple
+        /// Enum Bytes for value: Bytes
         /// </summary>
-        [EnumMember(Value = "Tuple")]
-        Tuple = 15,
+        [EnumMember(Value = "Bytes")]
+        Bytes = 15,
 
         /// <summary>
         /// Enum Map for value: Map
@@ -192,34 +193,40 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         Map = 16,
 
         /// <summary>
+        /// Enum Tuple for value: Tuple
+        /// </summary>
+        [EnumMember(Value = "Tuple")]
+        Tuple = 17,
+
+        /// <summary>
         /// Enum Reference for value: Reference
         /// </summary>
         [EnumMember(Value = "Reference")]
-        Reference = 17,
+        Reference = 18,
 
         /// <summary>
         /// Enum Own for value: Own
         /// </summary>
         [EnumMember(Value = "Own")]
-        Own = 18,
+        Own = 19,
 
         /// <summary>
         /// Enum Decimal for value: Decimal
         /// </summary>
         [EnumMember(Value = "Decimal")]
-        Decimal = 19,
+        Decimal = 20,
 
         /// <summary>
         /// Enum PreciseDecimal for value: PreciseDecimal
         /// </summary>
         [EnumMember(Value = "PreciseDecimal")]
-        PreciseDecimal = 20,
+        PreciseDecimal = 21,
 
         /// <summary>
         /// Enum NonFungibleLocalId for value: NonFungibleLocalId
         /// </summary>
         [EnumMember(Value = "NonFungibleLocalId")]
-        NonFungibleLocalId = 21
+        NonFungibleLocalId = 22
 
     }
 

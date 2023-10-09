@@ -97,6 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
@@ -123,7 +124,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets ElementKind
         /// </summary>
         [DataMember(Name = "element_kind", IsRequired = true, EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValueTypeKind ElementKind { get; set; }
+        public ProgrammaticScryptoSborValueKind ElementKind { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueArray" /> class.
         /// </summary>
@@ -135,10 +136,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="elementKind">elementKind (required).</param>
         /// <param name="elementTypeName">elementTypeName.</param>
         /// <param name="elements">elements (required).</param>
-        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueTypeKind.Array).</param>
+        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Array).</param>
         /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
         /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
-        public ProgrammaticScryptoSborValueArray(ProgrammaticScryptoSborValueTypeKind elementKind = default(ProgrammaticScryptoSborValueTypeKind), string elementTypeName = default(string), List<ProgrammaticScryptoSborValue> elements = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueTypeKind kind = ProgrammaticScryptoSborValueTypeKind.Array, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
+        public ProgrammaticScryptoSborValueArray(ProgrammaticScryptoSborValueKind elementKind = default(ProgrammaticScryptoSborValueKind), string elementTypeName = default(string), List<ProgrammaticScryptoSborValue> elements = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Array, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
             this.ElementKind = elementKind;
             // to ensure "elements" is required (not null)

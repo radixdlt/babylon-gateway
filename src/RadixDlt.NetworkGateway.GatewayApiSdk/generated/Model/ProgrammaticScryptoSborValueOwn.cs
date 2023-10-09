@@ -97,6 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
@@ -127,10 +128,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueOwn" /> class.
         /// </summary>
         /// <param name="value">value (required).</param>
-        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueTypeKind.Own).</param>
+        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Own).</param>
         /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
         /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
-        public ProgrammaticScryptoSborValueOwn(string value = default(string), ProgrammaticScryptoSborValueTypeKind kind = ProgrammaticScryptoSborValueTypeKind.Own, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
+        public ProgrammaticScryptoSborValueOwn(string value = default(string), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Own, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
             // to ensure "value" is required (not null)
             if (value == null)

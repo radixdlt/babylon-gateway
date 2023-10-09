@@ -3343,7 +3343,9 @@ components:
     # Programmatic Scrypto SBOR Values
     #
 
-    ProgrammaticScryptoSborValueTypeKind:
+    ProgrammaticScryptoSborValueKind:
+      description: |
+        These are the Scrypto SBOR `ValueKind`s, but with `Bytes` added as an alias for `Vec`, to display such values as hex-encoded strings.
       type: string
       enum:
         - Bool
@@ -3360,8 +3362,9 @@ components:
         - String
         - Enum
         - Array
-        - Tuple
+        - Bytes
         - Map
+        - Tuple
         - Reference
         - Own
         - Decimal
@@ -3405,7 +3408,7 @@ components:
         - kind
       properties:
         kind:
-          $ref: "#/components/schemas/ProgrammaticScryptoSborValueTypeKind"
+          $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
         type_name:
           description: Object type name; available only when a schema is present and the type has a name.
           type: string
@@ -3431,8 +3434,9 @@ components:
           String: "#/components/schemas/ProgrammaticScryptoSborValueString"
           Enum: "#/components/schemas/ProgrammaticScryptoSborValueEnum"
           Array: "#/components/schemas/ProgrammaticScryptoSborValueArray"
-          Tuple: "#/components/schemas/ProgrammaticScryptoSborValueTuple"
+          Bytes: "#/components/schemas/ProgrammaticScryptoSborValueBytes"
           Map: "#/components/schemas/ProgrammaticScryptoSborValueMap"
+          Tuple: "#/components/schemas/ProgrammaticScryptoSborValueTuple"
           Reference: "#/components/schemas/ProgrammaticScryptoSborValueReference"
           Own: "#/components/schemas/ProgrammaticScryptoSborValueOwn"
           Decimal: "#/components/schemas/ProgrammaticScryptoSborValueDecimal"
@@ -3551,10 +3555,14 @@ components:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
         - type: object
           required:
-            - discriminator
+            - variant_id
             - fields
           properties:
-            discriminator:
+            variant_id:
+              type: integer
+              minimum: 0
+              maximum: 255
+            variant_name:
               type: string
             fields:
               type: array
@@ -3569,37 +3577,45 @@ components:
             - elements
           properties:
             element_kind:
-              $ref: "#/components/schemas/ProgrammaticScryptoSborValueTypeKind"
+              $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
             element_type_name:
               type: string
             elements:
               type: array
               items:
                 $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
-    ProgrammaticScryptoSborValueTuple:
+    ProgrammaticScryptoSborValueBytes:
       allOf:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
         - type: object
           required:
-            - fields
+            - element_kind
+            - elements
+            - hex
           properties:
-            fields:
-              type: array
-              items:
-                $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+            element_kind:
+              $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
+            element_type_name:
+              type: string
+            hex:
+              $ref: "#/components/schemas/HexString"
     ProgrammaticScryptoSborValueMap:
       allOf:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
         - type: object
           required:
-            - key_value_kind
-            - value_value_kind
+            - key_kind
+            - value_kind
             - entries
           properties:
-            key_value_kind:
-              $ref: "#/components/schemas/ProgrammaticScryptoSborValueTypeKind"
-            value_value_kind:
-              $ref: "#/components/schemas/ProgrammaticScryptoSborValueTypeKind"
+            key_kind:
+              $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
+            key_type_name:
+              type: string
+            value_kind:
+              $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
+            value_type_name:
+              type: string
             entries:
               type: array
               items:
@@ -3614,6 +3630,17 @@ components:
           $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
         value:
           $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+    ProgrammaticScryptoSborValueTuple:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - fields
+          properties:
+            fields:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
     ProgrammaticScryptoSborValueReference:
       allOf:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"

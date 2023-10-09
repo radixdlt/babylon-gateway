@@ -103,29 +103,32 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueEnumAllOf" /> class.
         /// </summary>
-        /// <param name="discriminator">discriminator (required).</param>
+        /// <param name="variantId">variantId (required).</param>
+        /// <param name="variantName">variantName.</param>
         /// <param name="fields">fields (required).</param>
-        public ProgrammaticScryptoSborValueEnumAllOf(string discriminator = default(string), List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>))
+        public ProgrammaticScryptoSborValueEnumAllOf(int variantId = default(int), string variantName = default(string), List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>))
         {
-            // to ensure "discriminator" is required (not null)
-            if (discriminator == null)
-            {
-                throw new ArgumentNullException("discriminator is a required property for ProgrammaticScryptoSborValueEnumAllOf and cannot be null");
-            }
-            this.Discriminator = discriminator;
+            this.VariantId = variantId;
             // to ensure "fields" is required (not null)
             if (fields == null)
             {
                 throw new ArgumentNullException("fields is a required property for ProgrammaticScryptoSborValueEnumAllOf and cannot be null");
             }
             this.Fields = fields;
+            this.VariantName = variantName;
         }
 
         /// <summary>
-        /// Gets or Sets Discriminator
+        /// Gets or Sets VariantId
         /// </summary>
-        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
-        public string Discriminator { get; set; }
+        [DataMember(Name = "variant_id", IsRequired = true, EmitDefaultValue = true)]
+        public int VariantId { get; set; }
+
+        /// <summary>
+        /// Gets or Sets VariantName
+        /// </summary>
+        [DataMember(Name = "variant_name", EmitDefaultValue = true)]
+        public string VariantName { get; set; }
 
         /// <summary>
         /// Gets or Sets Fields
@@ -141,7 +144,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ProgrammaticScryptoSborValueEnumAllOf {\n");
-            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("  VariantId: ").Append(VariantId).Append("\n");
+            sb.Append("  VariantName: ").Append(VariantName).Append("\n");
             sb.Append("  Fields: ").Append(Fields).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -179,9 +183,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Discriminator == input.Discriminator ||
-                    (this.Discriminator != null &&
-                    this.Discriminator.Equals(input.Discriminator))
+                    this.VariantId == input.VariantId ||
+                    this.VariantId.Equals(input.VariantId)
+                ) && 
+                (
+                    this.VariantName == input.VariantName ||
+                    (this.VariantName != null &&
+                    this.VariantName.Equals(input.VariantName))
                 ) && 
                 (
                     this.Fields == input.Fields ||
@@ -200,9 +208,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Discriminator != null)
+                hashCode = (hashCode * 59) + this.VariantId.GetHashCode();
+                if (this.VariantName != null)
                 {
-                    hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VariantName.GetHashCode();
                 }
                 if (this.Fields != null)
                 {

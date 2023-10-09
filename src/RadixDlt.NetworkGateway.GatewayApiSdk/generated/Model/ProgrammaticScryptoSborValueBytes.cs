@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ProgrammaticScryptoSborValueReference
+    /// ProgrammaticScryptoSborValueBytes
     /// </summary>
-    [DataContract(Name = "ProgrammaticScryptoSborValueReference")]
+    [DataContract(Name = "ProgrammaticScryptoSborValueBytes")]
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
@@ -117,35 +117,52 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU32), "U32")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "U64")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU8), "U8")]
-    public partial class ProgrammaticScryptoSborValueReference : ProgrammaticScryptoSborValue, IEquatable<ProgrammaticScryptoSborValueReference>
+    public partial class ProgrammaticScryptoSborValueBytes : ProgrammaticScryptoSborValue, IEquatable<ProgrammaticScryptoSborValueBytes>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueReference" /> class.
+        /// Gets or Sets ElementKind
+        /// </summary>
+        [DataMember(Name = "element_kind", IsRequired = true, EmitDefaultValue = true)]
+        public ProgrammaticScryptoSborValueKind ElementKind { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueBytes" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ProgrammaticScryptoSborValueReference() { }
+        protected ProgrammaticScryptoSborValueBytes() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueReference" /> class.
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueBytes" /> class.
         /// </summary>
-        /// <param name="value">value (required).</param>
-        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Reference).</param>
+        /// <param name="elementKind">elementKind (required).</param>
+        /// <param name="elementTypeName">elementTypeName.</param>
+        /// <param name="hex">Hex-encoded binary blob. (required).</param>
+        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Bytes).</param>
         /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
         /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
-        public ProgrammaticScryptoSborValueReference(string value = default(string), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Reference, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
+        public ProgrammaticScryptoSborValueBytes(ProgrammaticScryptoSborValueKind elementKind = default(ProgrammaticScryptoSborValueKind), string elementTypeName = default(string), string hex = default(string), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Bytes, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
-            // to ensure "value" is required (not null)
-            if (value == null)
+            this.ElementKind = elementKind;
+            // to ensure "hex" is required (not null)
+            if (hex == null)
             {
-                throw new ArgumentNullException("value is a required property for ProgrammaticScryptoSborValueReference and cannot be null");
+                throw new ArgumentNullException("hex is a required property for ProgrammaticScryptoSborValueBytes and cannot be null");
             }
-            this.Value = value;
+            this.Hex = hex;
+            this.ElementTypeName = elementTypeName;
         }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// Gets or Sets ElementTypeName
         /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public string Value { get; set; }
+        [DataMember(Name = "element_type_name", EmitDefaultValue = true)]
+        public string ElementTypeName { get; set; }
+
+        /// <summary>
+        /// Hex-encoded binary blob.
+        /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "hex", IsRequired = true, EmitDefaultValue = true)]
+        public string Hex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,9 +171,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ProgrammaticScryptoSborValueReference {\n");
+            sb.Append("class ProgrammaticScryptoSborValueBytes {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("  ElementKind: ").Append(ElementKind).Append("\n");
+            sb.Append("  ElementTypeName: ").Append(ElementTypeName).Append("\n");
+            sb.Append("  Hex: ").Append(Hex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -177,15 +196,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ProgrammaticScryptoSborValueReference);
+            return this.Equals(input as ProgrammaticScryptoSborValueBytes);
         }
 
         /// <summary>
-        /// Returns true if ProgrammaticScryptoSborValueReference instances are equal
+        /// Returns true if ProgrammaticScryptoSborValueBytes instances are equal
         /// </summary>
-        /// <param name="input">Instance of ProgrammaticScryptoSborValueReference to be compared</param>
+        /// <param name="input">Instance of ProgrammaticScryptoSborValueBytes to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ProgrammaticScryptoSborValueReference input)
+        public bool Equals(ProgrammaticScryptoSborValueBytes input)
         {
             if (input == null)
             {
@@ -193,9 +212,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.ElementKind == input.ElementKind ||
+                    this.ElementKind.Equals(input.ElementKind)
+                ) && base.Equals(input) && 
+                (
+                    this.ElementTypeName == input.ElementTypeName ||
+                    (this.ElementTypeName != null &&
+                    this.ElementTypeName.Equals(input.ElementTypeName))
+                ) && base.Equals(input) && 
+                (
+                    this.Hex == input.Hex ||
+                    (this.Hex != null &&
+                    this.Hex.Equals(input.Hex))
                 );
         }
 
@@ -208,9 +236,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Value != null)
+                hashCode = (hashCode * 59) + this.ElementKind.GetHashCode();
+                if (this.ElementTypeName != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ElementTypeName.GetHashCode();
+                }
+                if (this.Hex != null)
+                {
+                    hashCode = (hashCode * 59) + this.Hex.GetHashCode();
                 }
                 return hashCode;
             }
