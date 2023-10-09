@@ -292,7 +292,7 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome outcome)
+    public ValueTask ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome outcome, string? targetNode = null)
     {
         var label = outcome switch
         {
@@ -306,7 +306,10 @@ internal class GatewayApiMetricObserver :
             TransactionSubmissionOutcome.StartEpochInFuture => "start_epoch_in_future",
             TransactionSubmissionOutcome.EndEpochInPast => "end_epoch_in_past",
         };
-        _transactionSubmitResolutionByResultCount.WithLabels(label).Inc();
+
+        targetNode ??= "n/a";
+
+        _transactionSubmitResolutionByResultCount.WithLabels(label, targetNode).Inc();
 
         return ValueTask.CompletedTask;
     }

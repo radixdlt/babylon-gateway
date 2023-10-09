@@ -114,11 +114,12 @@ internal class SubmissionService : ISubmissionService
         using var parsedTransaction = await HandlePreSubmissionParseTransaction(transactionBytes);
         await CheckPendingTransactionEpochValidity(ledgerState, parsedTransaction);
 
+        var targetNode = _coreApiHandler.GetCoreNodeConnectedTo();
         var options = _coreApiIntegrationOptions.CurrentValue;
         var submissionResult = await _submissionTrackingService.ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
             _coreApiHandler.GetTransactionApi(),
             _coreApiHandler.GetNetworkName(),
-            _coreApiHandler.GetCoreNodeConnectedTo().Name,
+            targetNode.Name,
             new PendingTransactionHandlingConfig(
                 options.MaxSubmissionAttempts,
                 options.StopResubmittingAfter,
@@ -134,17 +135,17 @@ internal class SubmissionService : ISubmissionService
         // Note: I'm not sure this is the correct choice of what should be an API error here, but I don't want to change the API errors that are thrown this close to launch
         if (submissionResult.PermanentlyRejectedReason != null)
         {
-            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.PermanentlyRejected));
+            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.PermanentlyRejected, targetNode.Name));
             throw InvalidTransactionException.FromPermanentlyRejectedTransactionError(submissionResult.PermanentlyRejectedReason);
         }
 
         if (submissionResult.AlreadyKnown)
         {
-            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.DuplicateSubmission));
+            await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.DuplicateSubmission, targetNode.Name));
             return new GatewayModel.TransactionSubmitResponse(duplicate: true);
         }
 
-        await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.SubmittedToNetwork));
+        await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.SubmittedToNetwork, targetNode.Name));
         return new GatewayModel.TransactionSubmitResponse(duplicate: false);
     }
 
