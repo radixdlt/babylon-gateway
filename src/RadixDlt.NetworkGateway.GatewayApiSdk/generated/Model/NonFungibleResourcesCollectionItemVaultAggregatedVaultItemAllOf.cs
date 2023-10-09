@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="vaultAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="totalCount">totalCount (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
         public NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf(string vaultAddress = default(string), long totalCount = default(long), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "vaultAddress" is required (not null)
@@ -132,9 +132,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public long TotalCount { get; set; }
 
         /// <summary>
-        /// TBD
+        /// The most recent state version underlying object was modified at.
         /// </summary>
-        /// <value>TBD</value>
+        /// <value>The most recent state version underlying object was modified at.</value>
         [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long LastUpdatedAtStateVersion { get; set; }
 

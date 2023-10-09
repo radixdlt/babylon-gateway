@@ -97,7 +97,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
@@ -115,16 +114,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU128), "U128")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU16), "U16")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU32), "U32")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "U64")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU8), "U8")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "u64")]
     public partial class ProgrammaticScryptoSborValueArray : ProgrammaticScryptoSborValue, IEquatable<ProgrammaticScryptoSborValueArray>
     {
 
         /// <summary>
-        /// Gets or Sets ElementValueKind
+        /// Gets or Sets ElementKind
         /// </summary>
-        [DataMember(Name = "element_value_kind", IsRequired = true, EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValueTypeKind ElementValueKind { get; set; }
+        [DataMember(Name = "element_kind", IsRequired = true, EmitDefaultValue = true)]
+        public ProgrammaticScryptoSborValueTypeKind ElementKind { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueArray" /> class.
         /// </summary>
@@ -133,21 +132,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueArray" /> class.
         /// </summary>
-        /// <param name="elementValueKind">elementValueKind (required).</param>
+        /// <param name="elementKind">elementKind (required).</param>
+        /// <param name="elementTypeName">elementTypeName.</param>
         /// <param name="elements">elements (required).</param>
         /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueTypeKind.Array).</param>
-        /// <param name="typeName">TBD.</param>
-        /// <param name="fieldName">TBD.</param>
-        public ProgrammaticScryptoSborValueArray(ProgrammaticScryptoSborValueTypeKind elementValueKind = default(ProgrammaticScryptoSborValueTypeKind), List<ProgrammaticScryptoSborValue> elements = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueTypeKind kind = ProgrammaticScryptoSborValueTypeKind.Array, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
+        /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
+        /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
+        public ProgrammaticScryptoSborValueArray(ProgrammaticScryptoSborValueTypeKind elementKind = default(ProgrammaticScryptoSborValueTypeKind), string elementTypeName = default(string), List<ProgrammaticScryptoSborValue> elements = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueTypeKind kind = ProgrammaticScryptoSborValueTypeKind.Array, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
-            this.ElementValueKind = elementValueKind;
+            this.ElementKind = elementKind;
             // to ensure "elements" is required (not null)
             if (elements == null)
             {
                 throw new ArgumentNullException("elements is a required property for ProgrammaticScryptoSborValueArray and cannot be null");
             }
             this.Elements = elements;
+            this.ElementTypeName = elementTypeName;
         }
+
+        /// <summary>
+        /// Gets or Sets ElementTypeName
+        /// </summary>
+        [DataMember(Name = "element_type_name", EmitDefaultValue = true)]
+        public string ElementTypeName { get; set; }
 
         /// <summary>
         /// Gets or Sets Elements
@@ -164,7 +171,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ProgrammaticScryptoSborValueArray {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ElementValueKind: ").Append(ElementValueKind).Append("\n");
+            sb.Append("  ElementKind: ").Append(ElementKind).Append("\n");
+            sb.Append("  ElementTypeName: ").Append(ElementTypeName).Append("\n");
             sb.Append("  Elements: ").Append(Elements).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -202,8 +210,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.ElementValueKind == input.ElementValueKind ||
-                    this.ElementValueKind.Equals(input.ElementValueKind)
+                    this.ElementKind == input.ElementKind ||
+                    this.ElementKind.Equals(input.ElementKind)
+                ) && base.Equals(input) && 
+                (
+                    this.ElementTypeName == input.ElementTypeName ||
+                    (this.ElementTypeName != null &&
+                    this.ElementTypeName.Equals(input.ElementTypeName))
                 ) && base.Equals(input) && 
                 (
                     this.Elements == input.Elements ||
@@ -222,7 +235,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.ElementValueKind.GetHashCode();
+                hashCode = (hashCode * 59) + this.ElementKind.GetHashCode();
+                if (this.ElementTypeName != null)
+                {
+                    hashCode = (hashCode * 59) + this.ElementTypeName.GetHashCode();
+                }
                 if (this.Elements != null)
                 {
                     hashCode = (hashCode * 59) + this.Elements.GetHashCode();

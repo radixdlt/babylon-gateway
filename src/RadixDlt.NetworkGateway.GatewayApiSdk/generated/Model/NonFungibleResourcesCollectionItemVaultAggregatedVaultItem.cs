@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items.</param>
         /// <param name="vaultAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
         public NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(long totalCount = default(long), string nextCursor = default(string), List<string> items = default(List<string>), string vaultAddress = default(string), long lastUpdatedAtStateVersion = default(long))
         {
             this.TotalCount = totalCount;
@@ -149,9 +149,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string VaultAddress { get; set; }
 
         /// <summary>
-        /// TBD
+        /// The most recent state version underlying object was modified at.
         /// </summary>
-        /// <value>TBD</value>
+        /// <value>The most recent state version underlying object was modified at.</value>
         [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long LastUpdatedAtStateVersion { get; set; }
 

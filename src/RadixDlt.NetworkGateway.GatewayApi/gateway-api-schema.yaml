@@ -725,9 +725,11 @@ components:
       type: string
 
     LastUpdatedAtStateVersion:
-      description: TBD # TODO describe
+      description: The most recent state version underlying object was modified at.
       type: integer
-      format: int64 # TODO define min/max using CoreApi as a reference
+      format: int64
+      minimum: 1
+      maximum: 100000000000000
 
     #
     # Keys
@@ -844,6 +846,8 @@ components:
           nullable: true
           type: integer
           format: int64
+          minimum: 1
+          maximum: 100000000000000
         timestamp:
           description: If provided, the latest ledger state lower than or equal to the given round timestamp is returned.
           nullable: true
@@ -854,11 +858,15 @@ components:
           nullable: true
           type: integer
           format: int64
+          minimum: 0
+          maximum: 10000000000
         round:
           description: If provided must be accompanied with `epoch`, the ledger state lower than or equal to the given epoch and round is returned.
           nullable: true
           type: integer
           format: int64
+          minimum: 0
+          maximum: 10000000000
 
     CursorLimitMixin:
       type: object
@@ -967,7 +975,7 @@ components:
         - programmatic_json
       properties:
         raw_hex:
-          type: string
+          $ref: "#/components/schemas/HexString"
         programmatic_json:
           $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
 
@@ -1178,7 +1186,7 @@ components:
             - last_updated_at_state_version
           properties:
             amount:
-              description: TBA # TODO describe
+              description: The total amount of non-fungible IDs across all vaults.
               type: integer
               format: int64
             last_updated_at_state_version:
@@ -1672,8 +1680,8 @@ components:
           type: integer
           format: int32
           minimum: 0
-          maximum: 255
-          description: An integer between `0` and `255`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
+          maximum: 65535
+          description: An integer between `0` and `65535`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
         nonce:
           type: integer
           format: int64
@@ -3418,7 +3426,7 @@ components:
           U8: "#/components/schemas/ProgrammaticScryptoSborValueU8"
           U16: "#/components/schemas/ProgrammaticScryptoSborValueU16"
           U32: "#/components/schemas/ProgrammaticScryptoSborValueU32"
-          u64: "#/components/schemas/ProgrammaticScryptoSborValueU64"
+          U64: "#/components/schemas/ProgrammaticScryptoSborValueU64"
           U128: "#/components/schemas/ProgrammaticScryptoSborValueU128"
           String: "#/components/schemas/ProgrammaticScryptoSborValueString"
           Enum: "#/components/schemas/ProgrammaticScryptoSborValueEnum"
@@ -3430,7 +3438,6 @@ components:
           Decimal: "#/components/schemas/ProgrammaticScryptoSborValueDecimal"
           PreciseDecimal: "#/components/schemas/ProgrammaticScryptoSborValuePreciseDecimal"
           NonFungibleLocalId: "#/components/schemas/ProgrammaticScryptoSborValueNonFungibleLocalId"
-          Bytes: "#/components/schemas/ProgrammaticScryptoSborValueBytes"
     ProgrammaticScryptoSborValueBool:
       allOf:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
@@ -3558,11 +3565,13 @@ components:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
         - type: object
           required:
-            - element_value_kind
+            - element_kind
             - elements
           properties:
-            element_value_kind:
+            element_kind:
               $ref: "#/components/schemas/ProgrammaticScryptoSborValueTypeKind"
+            element_type_name:
+              type: string
             elements:
               type: array
               items:
@@ -3650,16 +3659,3 @@ components:
           properties:
             value:
               type: string
-    ProgrammaticScryptoSborValueBytes:
-      allOf:
-        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
-        - type: object
-          required:
-            - element_value_kind
-            - hex
-          properties:
-            element_value_kind:
-              $ref: "#/components/schemas/ProgrammaticScryptoSborValueTypeKind"
-            hex:
-              $ref: "#/components/schemas/HexString"
-

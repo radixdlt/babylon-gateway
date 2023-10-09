@@ -107,8 +107,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemGloballyAggregated" /> class.
         /// </summary>
-        /// <param name="amount">TBA (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        /// <param name="amount">The total amount of non-fungible IDs across all vaults. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
         /// <param name="aggregationLevel">aggregationLevel (required) (default to ResourceAggregationLevel.Global).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="explicitMetadata">explicitMetadata.</param>
@@ -119,16 +119,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// TBA
+        /// The total amount of non-fungible IDs across all vaults.
         /// </summary>
-        /// <value>TBA</value>
+        /// <value>The total amount of non-fungible IDs across all vaults.</value>
         [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
         public long Amount { get; set; }
 
         /// <summary>
-        /// TBD
+        /// The most recent state version underlying object was modified at.
         /// </summary>
-        /// <value>TBD</value>
+        /// <value>The most recent state version underlying object was modified at.</value>
         [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long LastUpdatedAtStateVersion { get; set; }
 

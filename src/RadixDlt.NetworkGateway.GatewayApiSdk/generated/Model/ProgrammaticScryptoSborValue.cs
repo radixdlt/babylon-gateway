@@ -91,13 +91,12 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ProgrammaticScryptoSborValue
+    /// Arbitrary SBOR value represented as programmatic JSON with optional property name annotations.  All scalar types (&#x60;Bool&#x60;, &#x60;I*&#x60;, &#x60;U*&#x60;, &#x60;String&#x60;, &#x60;Reference&#x60;, &#x60;Own&#x60;, &#x60;Decimal&#x60;, &#x60;PreciseDecimal&#x60;, &#x60;NonFungibleLocalId&#x60;) convey their value via &#x60;value&#x60; string property with notable exception of &#x60;Bool&#x60; type that uses regular JSON boolean type. Numeric values as string-encoded to preserve accuracy and simplify implementation on platforms with no native support for 64-bit long numerical values.  Common properties represented as nullable strings:   * &#x60;type_name&#x60; is only output when a schema is present and the type has a name,   * &#x60;field_name&#x60; is only output when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields,   * &#x60;variant_name&#x60; is only output when a schema is present and the type is an &#x60;Enum&#x60;.  The following is a non-normative example annotated &#x60;Tuple&#x60; value with &#x60;String&#x60; and &#x60;U32&#x60; fields: &#x60;&#x60;&#x60; {   \&quot;kind\&quot;: \&quot;Tuple\&quot;,   \&quot;type_name\&quot;: \&quot;CustomStructure\&quot;,   \&quot;fields\&quot;: [     {       \&quot;kind\&quot;: \&quot;String\&quot;,       \&quot;field_name\&quot;: \&quot;favorite_color\&quot;,       \&quot;value\&quot;: \&quot;Blue\&quot;     },     {       \&quot;kind\&quot;: \&quot;U32\&quot;,       \&quot;field_name\&quot;: \&quot;usage_counter\&quot;,       \&quot;value\&quot;: \&quot;462231\&quot;     }   ] } &#x60;&#x60;&#x60; 
     /// </summary>
     [DataContract(Name = "ProgrammaticScryptoSborValue")]
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
@@ -111,7 +110,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValuePreciseDecimal), "PreciseDecimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "ProgrammaticScryptoSborValueArray")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "ProgrammaticScryptoSborValueBool")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "ProgrammaticScryptoSborValueBytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "ProgrammaticScryptoSborValueDecimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "ProgrammaticScryptoSborValueEnum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "ProgrammaticScryptoSborValueI128")]
@@ -137,8 +135,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU128), "U128")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU16), "U16")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU32), "U32")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "U64")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU8), "U8")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "u64")]
     public partial class ProgrammaticScryptoSborValue : IEquatable<ProgrammaticScryptoSborValue>
     {
 
@@ -156,8 +154,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValue" /> class.
         /// </summary>
         /// <param name="kind">kind (required).</param>
-        /// <param name="typeName">TBD.</param>
-        /// <param name="fieldName">TBD.</param>
+        /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
+        /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
         public ProgrammaticScryptoSborValue(ProgrammaticScryptoSborValueTypeKind kind = default(ProgrammaticScryptoSborValueTypeKind), string typeName = default(string), string fieldName = default(string))
         {
             this.Kind = kind;
@@ -166,16 +164,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// TBD
+        /// Object type name; available only when a schema is present and the type has a name.
         /// </summary>
-        /// <value>TBD</value>
+        /// <value>Object type name; available only when a schema is present and the type has a name.</value>
         [DataMember(Name = "type_name", EmitDefaultValue = true)]
         public string TypeName { get; set; }
 
         /// <summary>
-        /// TBD
+        /// Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields.
         /// </summary>
-        /// <value>TBD</value>
+        /// <value>Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields.</value>
         [DataMember(Name = "field_name", EmitDefaultValue = true)]
         public string FieldName { get; set; }
 

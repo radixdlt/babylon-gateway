@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityMetadataItemValue" /> class.
         /// </summary>
-        /// <param name="rawHex">rawHex (required).</param>
+        /// <param name="rawHex">Hex-encoded binary blob. (required).</param>
         /// <param name="programmaticJson">programmaticJson (required).</param>
         /// <param name="typed">typed (required).</param>
         public EntityMetadataItemValue(string rawHex = default(string), ProgrammaticScryptoSborValue programmaticJson = default(ProgrammaticScryptoSborValue), MetadataTypedValue typed = default(MetadataTypedValue))
@@ -129,8 +129,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets RawHex
+        /// Hex-encoded binary blob.
         /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
         [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
         public string RawHex { get; set; }
 

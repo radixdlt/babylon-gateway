@@ -97,10 +97,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     {
 
         /// <summary>
-        /// Gets or Sets ElementValueKind
+        /// Gets or Sets ElementKind
         /// </summary>
-        [DataMember(Name = "element_value_kind", IsRequired = true, EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValueTypeKind ElementValueKind { get; set; }
+        [DataMember(Name = "element_kind", IsRequired = true, EmitDefaultValue = true)]
+        public ProgrammaticScryptoSborValueTypeKind ElementKind { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueArrayAllOf" /> class.
         /// </summary>
@@ -109,18 +109,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueArrayAllOf" /> class.
         /// </summary>
-        /// <param name="elementValueKind">elementValueKind (required).</param>
+        /// <param name="elementKind">elementKind (required).</param>
+        /// <param name="elementTypeName">elementTypeName.</param>
         /// <param name="elements">elements (required).</param>
-        public ProgrammaticScryptoSborValueArrayAllOf(ProgrammaticScryptoSborValueTypeKind elementValueKind = default(ProgrammaticScryptoSborValueTypeKind), List<ProgrammaticScryptoSborValue> elements = default(List<ProgrammaticScryptoSborValue>))
+        public ProgrammaticScryptoSborValueArrayAllOf(ProgrammaticScryptoSborValueTypeKind elementKind = default(ProgrammaticScryptoSborValueTypeKind), string elementTypeName = default(string), List<ProgrammaticScryptoSborValue> elements = default(List<ProgrammaticScryptoSborValue>))
         {
-            this.ElementValueKind = elementValueKind;
+            this.ElementKind = elementKind;
             // to ensure "elements" is required (not null)
             if (elements == null)
             {
                 throw new ArgumentNullException("elements is a required property for ProgrammaticScryptoSborValueArrayAllOf and cannot be null");
             }
             this.Elements = elements;
+            this.ElementTypeName = elementTypeName;
         }
+
+        /// <summary>
+        /// Gets or Sets ElementTypeName
+        /// </summary>
+        [DataMember(Name = "element_type_name", EmitDefaultValue = true)]
+        public string ElementTypeName { get; set; }
 
         /// <summary>
         /// Gets or Sets Elements
@@ -136,7 +144,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ProgrammaticScryptoSborValueArrayAllOf {\n");
-            sb.Append("  ElementValueKind: ").Append(ElementValueKind).Append("\n");
+            sb.Append("  ElementKind: ").Append(ElementKind).Append("\n");
+            sb.Append("  ElementTypeName: ").Append(ElementTypeName).Append("\n");
             sb.Append("  Elements: ").Append(Elements).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -174,8 +183,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.ElementValueKind == input.ElementValueKind ||
-                    this.ElementValueKind.Equals(input.ElementValueKind)
+                    this.ElementKind == input.ElementKind ||
+                    this.ElementKind.Equals(input.ElementKind)
+                ) && 
+                (
+                    this.ElementTypeName == input.ElementTypeName ||
+                    (this.ElementTypeName != null &&
+                    this.ElementTypeName.Equals(input.ElementTypeName))
                 ) && 
                 (
                     this.Elements == input.Elements ||
@@ -194,7 +208,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ElementValueKind.GetHashCode();
+                hashCode = (hashCode * 59) + this.ElementKind.GetHashCode();
+                if (this.ElementTypeName != null)
+                {
+                    hashCode = (hashCode * 59) + this.ElementTypeName.GetHashCode();
+                }
                 if (this.Elements != null)
                 {
                     hashCode = (hashCode * 59) + this.Elements.GetHashCode();

@@ -97,7 +97,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
@@ -115,8 +114,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU128), "U128")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU16), "U16")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU32), "U32")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "U64")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU8), "U8")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "u64")]
     public partial class ProgrammaticScryptoSborValueNonFungibleLocalId : ProgrammaticScryptoSborValue, IEquatable<ProgrammaticScryptoSborValueNonFungibleLocalId>
     {
         /// <summary>
@@ -129,8 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="value">value (required).</param>
         /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueTypeKind.NonFungibleLocalId).</param>
-        /// <param name="typeName">TBD.</param>
-        /// <param name="fieldName">TBD.</param>
+        /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
+        /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
         public ProgrammaticScryptoSborValueNonFungibleLocalId(string value = default(string), ProgrammaticScryptoSborValueTypeKind kind = ProgrammaticScryptoSborValueTypeKind.NonFungibleLocalId, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
             // to ensure "value" is required (not null)

@@ -104,7 +104,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregatedAllOf" /> class.
         /// </summary>
         /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
         public FungibleResourcesCollectionItemGloballyAggregatedAllOf(string amount = default(string), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "amount" is required (not null)
@@ -124,9 +124,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Amount { get; set; }
 
         /// <summary>
-        /// TBD
+        /// The most recent state version underlying object was modified at.
         /// </summary>
-        /// <value>TBD</value>
+        /// <value>The most recent state version underlying object was modified at.</value>
         [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long LastUpdatedAtStateVersion { get; set; }
 
