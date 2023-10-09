@@ -207,26 +207,29 @@ internal class DataAggregatorMetricsObserver :
     private static readonly Counter _transactionResubmissionAttemptCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_resubmission_attempt_count",
-            "Number of transaction resubmission attempts"
+            "Number of transaction resubmission attempts",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
     private static readonly Counter _transactionResubmissionSuccessCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_resubmission_success_count",
-            "Number of transaction resubmission successes"
+            "Number of transaction resubmission successes",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
     private static readonly Counter _transactionResubmissionErrorCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_resubmission_error_count",
-            "Number of transaction resubmission errors"
+            "Number of transaction resubmission errors",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
     private static readonly Counter _transactionResubmissionResolutionByResultCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_resubmission_resolution_count",
             "Number of various resolutions of transaction resubmissions",
-            new CounterConfiguration { LabelNames = new[] { "result" } }
+            new CounterConfiguration { LabelNames = new[] { "result", "target_node" } }
         );
 
     private static readonly Gauge _aggregatorIsUnhealthy = Metrics

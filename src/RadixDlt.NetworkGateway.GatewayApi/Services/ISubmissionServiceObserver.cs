@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ISubmissionServiceObserver
 {
-    ValueTask ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome outcome);
+    ValueTask ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome outcome, string? targetNode = null);
 }
 
 // This can be turned into an enum in future if we need this
