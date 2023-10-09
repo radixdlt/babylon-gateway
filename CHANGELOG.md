@@ -12,6 +12,7 @@ Release Date: 10.10.2023
 - Fixed missing `RecordTopOfDbLedger` observer call in `LedgerTransactionsProcessor`.
 - Fixed invalid response model for HTTP 400 Bad Request responses on input parameter validation failure.
 - Return 400 with validation error instead of 500 if `from_ledger_state` `state_version` is beyond known ledger tip.
+- Added strongly-typed OAS definition for `programmatic_json`.
 
 ## 1.0.0 - Babylon Launch
 Release Date: 28.09.2023
