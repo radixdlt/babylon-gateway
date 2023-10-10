@@ -62,63 +62,104 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Collections.Generic;
-using System.Net;
+using System.Diagnostics;
 using System.Net.Http;
+using System.Threading.Tasks;
 using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace GatewayApi.ExceptionHandlingMiddleware;
 
-public interface IExceptionHandler
+internal sealed class ExceptionHandlingMiddleware
 {
-    ActionResult CreateAndLogApiResultFromException(ActionContext actionContext, Exception exception, string traceId);
-}
-
-internal class ExceptionHandler : IExceptionHandler
-{
-    private readonly ILogger<ExceptionHandler> _logger;
-    private readonly LogLevel _knownGatewayErrorLogLevel;
+    private readonly RequestDelegate _next;
+    private readonly ILogger _logger;
     private readonly IEnumerable<IExceptionObserver> _observers;
 
-    public ExceptionHandler(ILogger<ExceptionHandler> logger, IHostEnvironment env, IEnumerable<IExceptionObserver> observers)
+    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger, IEnumerable<IExceptionObserver> observers)
     {
+        _next = next;
         _logger = logger;
         _observers = observers;
-        _knownGatewayErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
     }
 
-    public ActionResult CreateAndLogApiResultFromException(ActionContext actionContext, Exception exception, string traceId)
+    public async Task InvokeAsync(HttpContext context)
     {
-        var gatewayErrorException = LogAndConvertToKnownGatewayErrorException(exception, traceId);
-
-        _observers.ForEach(x => x.OnException(actionContext, exception, gatewayErrorException));
-
-        return new JsonResult(new GatewayModel.ErrorResponse(
-            code: gatewayErrorException.StatusCode,
-            message: gatewayErrorException.UserFacingMessage,
-            details: gatewayErrorException.GatewayError,
-            traceId: traceId
-        ))
+        try
         {
-            StatusCode = gatewayErrorException.StatusCode,
-        };
+            await _next(context);
+        }
+        catch (Exception exception)
+        {
+            var traceId = Activity.Current?.Id ?? context.TraceIdentifier;
+
+            var gatewayErrorException = HandleException(context, exception, traceId);
+
+            var errorResponse = new GatewayModel.ErrorResponse(
+                code: gatewayErrorException.StatusCode,
+                message: gatewayErrorException.UserFacingMessage,
+                details: gatewayErrorException.GatewayError,
+                traceId: traceId
+            );
+
+            _observers.ForEach(x => x.OnException(context, exception, gatewayErrorException));
+
+            if (context.Response.HasStarted)
+            {
+                _logger.LogWarning("Response already started. Can't modify status code and response body");
+            }
+            else
+            {
+                var jsonErrorResponse = JsonConvert.SerializeObject(errorResponse);
+                await WriteResponseAsync(context, jsonErrorResponse, gatewayErrorException.StatusCode);
+            }
+        }
     }
 
-    private KnownGatewayErrorException LogAndConvertToKnownGatewayErrorException(Exception exception, string traceId)
+    private KnownGatewayErrorException HandleException(HttpContext httpContext, Exception exception, string traceId)
     {
         switch (exception)
         {
+            case BadHttpRequestException badHttpRequestException :
+                _logger.LogWarning(exception, "Bad http request. [RequestTrace={TraceId}]", traceId);
+                return new GenericBadRequestException("Bad http request", badHttpRequestException.Message);
+
+            case OperationCanceledException:
+                var requestTimeoutFeature = httpContext.Features.Get<IRequestTimeoutFeature>();
+                var requestAbortedFeature = httpContext.Features.Get<IRequestAbortedFeature>();
+
+                if (requestTimeoutFeature?.CancellationToken.IsCancellationRequested == true)
+                {
+                    _logger.LogError(exception, "Request timed out after={Timeout} seconds, [RequestTrace={TraceId}]", requestTimeoutFeature.Timeout.TotalSeconds, traceId);
+                    return InternalServerException.OfRequestTimeoutException(exception, traceId);
+                }
+
+                if (requestAbortedFeature?.CancellationToken.IsCancellationRequested == true)
+                {
+                    _logger.LogWarning(exception, "Request aborted by API client. [RequestTrace={TraceId}]", traceId);
+                    return new ClientConnectionClosedException("Client closed connection", "Client closed connection");
+                }
+
+                _logger.LogWarning(
+                    exception,
+                    "Unknown exception [RequestTrace={TraceId}]",
+                    traceId
+                );
+
+                return InternalServerException.OfHiddenException(exception, traceId);
             case KnownGatewayErrorException knownGatewayErrorException:
-                _logger.Log(
-                    _knownGatewayErrorLogLevel,
+                _logger.LogDebug(
                     exception,
                     "Known exception with http response code [RequestTrace={TraceId}]",
                     traceId
@@ -127,8 +168,7 @@ internal class ExceptionHandler : IExceptionHandler
 
             // HttpRequestException is returned from the Core API if we can't connect
             case HttpRequestException:
-                _logger.Log(
-                    LogLevel.Information,
+                _logger.LogInformation(
                     exception,
                     "Error relaying request to upstream server [RequestTrace={TraceId}]",
                     traceId
@@ -137,20 +177,18 @@ internal class ExceptionHandler : IExceptionHandler
 
             // CoreClient.ApiException is returned if we get a 500 from upstream but couldn't extract a WrappedCoreApiException
             case CoreClient.ApiException coreApiException:
-                _logger.Log(
-                    LogLevel.Warning,
+                _logger.LogWarning(
                     exception,
                     "Unhandled error response from upstream core API, which didn't parse correctly into a known ErrorType we could wrap or unexpected ErrorType [RequestTrace={TraceId}]",
                     traceId
                 );
                 return InternalServerException.OfUnhandledCoreApiException(
-                    coreApiException.ErrorContent.ToString() ?? string.Empty,
+                    coreApiException.ErrorContent?.ToString() ?? string.Empty,
                     traceId
                 );
 
             case InvalidCoreApiResponseException invalidCoreApiResponseException:
-                _logger.Log(
-                    LogLevel.Warning,
+                _logger.LogWarning(
                     exception,
                     "Invalid Core API response [RequestTrace={TraceId}]",
                     traceId
@@ -161,13 +199,20 @@ internal class ExceptionHandler : IExceptionHandler
                 );
 
             default:
-                _logger.Log(
-                    LogLevel.Warning,
+                _logger.LogWarning(
                     exception,
                     "Unknown exception [RequestTrace={TraceId}]",
                     traceId
                 );
                 return InternalServerException.OfHiddenException(exception, traceId);
         }
+    }
+
+    private async Task WriteResponseAsync(HttpContext context, string jsonResponse, int statusCode)
+    {
+        var response = context.Response;
+        response.ContentType = "application/json";
+        response.StatusCode = statusCode;
+        await response.WriteAsync(jsonResponse);
     }
 }

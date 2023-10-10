@@ -193,9 +193,10 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
 
         var currentTimestamp = _clock.UtcNow;
         var committedTransactionSummary = commitReport.FinalTransaction;
+        var roundTimestampDiff = currentTimestamp - ledgerExtension.LatestTransactionSummary.RoundTimestamp;
 
-        _observers.ForEach(x =>
-            x.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.LatestTransactionSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount));
+        _observers.ForEach(x => x.RecordTopOfDbLedger(ledgerExtension.LatestTransactionSummary.StateVersion, ledgerExtension.LatestTransactionSummary.RoundTimestamp));
+        _observers.ForEach(x => x.ReportOnLedgerExtensionSuccess(currentTimestamp, roundTimestampDiff, totalCommitMs, commitReport.TransactionsCommittedCount));
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten}]",

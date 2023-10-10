@@ -62,28 +62,14 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using Microsoft.AspNetCore.Builder;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+namespace GatewayApi.ExceptionHandlingMiddleware;
 
-public sealed class InvalidModelStateFilter : IActionFilter, IOrderedFilter
+public static class ApplicationBuilderExtension
 {
-    public int Order => -3000;
-
-    public void OnActionExecuting(ActionExecutingContext context)
+    public static IApplicationBuilder UseGatewayExceptionHandler(this IApplicationBuilder app)
     {
-        if (context.Result == null && !context.ModelState.IsValid)
-        {
-            var validationErrorHandler = context.HttpContext.RequestServices.GetRequiredService<IValidationErrorHandler>();
-
-            context.Result = validationErrorHandler.GetClientError(context);
-        }
-    }
-
-    public void OnActionExecuted(ActionExecutedContext context)
-    {
-        // no-op
+        return app.UseMiddleware<ExceptionHandlingMiddleware>();
     }
 }

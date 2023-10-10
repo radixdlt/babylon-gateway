@@ -1,8 +1,12 @@
-## 1.0.0 - Babylon Launch
+## 1.0.1 - Babylon 
 Release Date: _unreleased_
 
-### Breaking changes
-_None_
+- Fixed missing `RecordTopOfDbLedger` observer call in `LedgerTransactionsProcessor`.
+- Fixed invalid response model for HTTP 400 Bad Request responses on input parameter validation failure.
+- Return 400 with validation error instead of 500 if `from_ledger_state` `state_version` is beyond known ledger tip.
+
+## 1.0.0 - Babylon Launch
+Release Date: 28.09.2023
 
 ### What’s new?
 - log warning if sql query takes longer than configured threshold (default to 250ms) for both entity framework and dapper queries.

@@ -72,13 +72,13 @@ public abstract class KnownGatewayErrorException : Exception
 {
     public int StatusCode { get; }
 
-    public GatewayModel.GatewayError GatewayError { get; }
+    public GatewayModel.GatewayError? GatewayError { get; }
 
     public string? UserFacingMessage { get; }
 
     public string? InternalMessage { get; }
 
-    public KnownGatewayErrorException(int statusCode, GatewayModel.GatewayError gatewayError, string userFacingMessage, string internalMessage)
+    public KnownGatewayErrorException(int statusCode, GatewayModel.GatewayError? gatewayError, string userFacingMessage, string internalMessage)
         : base($"{userFacingMessage} ({internalMessage})")
     {
         StatusCode = statusCode;

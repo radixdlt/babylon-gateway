@@ -340,7 +340,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
         if (ledgerState == null)
         {
-            throw new InvalidStateException("State version is beyond the end of the known ledger");
+            throw InvalidRequestException.FromOtherError("State version is beyond the end of the known ledger");
         }
 
         return ledgerState;

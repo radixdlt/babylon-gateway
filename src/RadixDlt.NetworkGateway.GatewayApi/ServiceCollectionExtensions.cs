@@ -131,7 +131,6 @@ public static class ServiceCollectionExtensions
         // semi-regularly
         services.TryAddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.TryAddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
-        services.TryAddSingleton<IExceptionHandler, ExceptionHandler>();
         services.TryAddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.TryAddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
         services.TryAddSingleton<RequestTimeoutMiddleware>();
@@ -139,10 +138,6 @@ public static class ServiceCollectionExtensions
 
     private static void AddRequestServices(IServiceCollection services)
     {
-        services
-            .AddScoped<ExceptionFilter>()
-            .AddScoped<InvalidModelStateFilter>();
-
         services.TryAddScoped<IEntityHandler, DefaultEntityHandler>();
         services.TryAddScoped<IValidatorHandler, DefaultValidatorHandler>();
         services.TryAddScoped<IStatusHandler, DefaultStatusHandler>();

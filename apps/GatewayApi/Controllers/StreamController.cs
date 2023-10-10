@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,8 +72,6 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("stream")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
 public sealed class StreamController : ControllerBase
 {
     private readonly ITransactionHandler _transactionHandler;
