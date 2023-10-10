@@ -24,3 +24,27 @@ For docs giving an overview of the Network Gateway and its place in the Radix Ec
 For docs related to development on the Network Gateway, see the [docs folder](./docs).
 
 For docs related to running a Network Gateway locally, see the instructions about running a local toy deployment in the [deployment folder](./deployment).
+
+## Database Migrations & Application Deployment
+
+While all three main system parts are technically independent of each other it is assumed that during overall stack deployment the following order is preserved:
+
+1. Deploy Database Migrations. This is a short-lived container that executes new database migrations, if any, and exists successfully with `0` exit code. Should this container fail to apply database migrations (non-successful exit code) deployment procedure must be aborted. 
+2. Deploy Data Aggregator. Wait until application healthcheck endpoints report `Healthy` status. 
+3. Deploy Gateway API. 
+
+**Hint:** For Kubernetes cluster deployments it is recommended to set up Database Migrations as init container of Data Aggregator.
+
+**Note:** Babylon Network Gateway is **NOT** compatible with previous Olympia version. Brand-new, clean database must be used. 
+If you're upgrading from Olympia and deploying for the very first time you may want to run Database Migrations application with `WIPE_DATABASE=true` configuration parameter to drop existing database and recreate it. This is irreversible operation. **Proceed with caution!**  
+
+## Dependencies
+
+Mandatory dependencies:
+
+* Connection to at least one RadixDLT Node - source of network transactions,
+* PostgreSQL version 15.2 or newer - primary storage.
+
+Optional dependencies:
+
+* Prometheus - for metrics collection.
