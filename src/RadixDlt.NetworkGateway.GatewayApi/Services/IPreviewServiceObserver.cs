@@ -71,9 +71,9 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IPreviewServiceObserver
 {
-    ValueTask PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request);
+    ValueTask PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, string targetNode);
 
-    ValueTask PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, GatewayModel.TransactionPreviewResponse response);
+    ValueTask PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, string targetNode, GatewayModel.TransactionPreviewResponse response);
 
-    ValueTask HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, Exception exception);
+    ValueTask HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, string targetNode, Exception exception);
 }

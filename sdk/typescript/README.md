@@ -49,6 +49,7 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 - `getEntityMetadata(entity: string, cursor?: string)` - get paged metadata about given entity
 - `getValidators(cursor?: string)` - get paged validators
 - `getAllValidators()` - get all validators
+- `getNonFungibleLocation(resource: string, ids: string[])` - get list of NFT location for given resource and ids
 - `getNonFungibleIds(address:string, ledgerState, cursor?: string)` - get paged non fungible ids for given address
 - `getAllNonFungibleIds(address: string)` - get all non fungible ids for given address
 - `getNonFungibleData(address: string, ids: string | string[])` - get non fungible data
@@ -66,6 +67,11 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 ### Stream
 
 - `getTransactionsList(affectedEntities?: string[], cursor?: string)` - get transaction list for given list of entities
+
+### Statistics
+
+- `getValidatorsUptimeFromTo(addresses: string[], from, to)` - get uptime statistics for validators for given period 
+- `getValidatorsUptime(addresses: string[])` - get uptime statistics for validators
 
 ## Low Level APIs
 

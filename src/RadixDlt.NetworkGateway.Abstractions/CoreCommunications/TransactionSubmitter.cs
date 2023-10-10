@@ -270,6 +270,7 @@ public interface ITransactionSubmitterObserver
 
 public record SubmitContext(
     CoreApi.TransactionApi TransactionApi,
+    string TargetNode,
     string NetworkName,
     TimeSpan SubmissionTimeout,
     bool IsResubmission,

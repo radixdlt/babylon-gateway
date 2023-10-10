@@ -74,16 +74,6 @@ public sealed class InvalidRequestException : ValidationException
     {
     }
 
-    public static InvalidRequestException FromValidationErrors(List<GatewayModel.ValidationErrorsAtPath> validationErrors)
-    {
-        return new InvalidRequestException(
-            new GatewayModel.InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
     public static InvalidRequestException FromOtherError(string error)
     {
         return new InvalidRequestException(

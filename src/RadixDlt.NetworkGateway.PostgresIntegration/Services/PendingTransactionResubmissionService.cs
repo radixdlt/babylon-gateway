@@ -279,6 +279,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         var result = await TransactionSubmitter.Submit(
             new SubmitContext(
                 TransactionApi: coreApiProvider.TransactionsApi,
+                TargetNode: chosenNode.Name,
                 NetworkName: _networkConfigurationProvider.GetNetworkName(),
                 SubmissionTimeout: _mempoolOptionsMonitor.CurrentValue.ResubmissionNodeRequestTimeout,
                 IsResubmission: true,

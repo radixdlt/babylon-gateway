@@ -121,6 +121,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             await SubmitToNetworkAndUpdatePendingTransaction(
                 new SubmitContext(
                     TransactionApi: transactionApi,
+                    TargetNode: nodeName,
                     NetworkName: networkName,
                     SubmissionTimeout: submissionTimeout,
                     IsResubmission: false,
