@@ -129,14 +129,14 @@ internal static class GatewayModelExtensions
         {
             ErrorMessage = lt.EngineReceipt.ErrorMessage,
             Status = ToGatewayModel(lt.EngineReceipt.Status),
-            Output = lt.EngineReceipt.Output != null ? new JRaw(lt.EngineReceipt.Output) : null,
+            Output = optIns.ReceiptOutput && lt.EngineReceipt.Output != null ? new JRaw(lt.EngineReceipt.Output) : null,
             FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.EngineReceipt.FeeSummary) : null,
             FeeDestination = optIns.ReceiptFeeDestination && lt.EngineReceipt.FeeDestination != null ? new JRaw(lt.EngineReceipt.FeeDestination) : null,
             FeeSource = optIns.ReceiptFeeSource && lt.EngineReceipt.FeeSource != null ? new JRaw(lt.EngineReceipt.FeeSource) : null,
             CostingParameters = optIns.ReceiptCostingParameters ? new JRaw(lt.EngineReceipt.CostingParameters) : null,
             NextEpoch = lt.EngineReceipt.NextEpoch != null ? new JRaw(lt.EngineReceipt.NextEpoch) : null,
             StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.EngineReceipt.StateUpdates) : null,
-            Events = events?.Select(x => new GatewayModel.EventsItem(x.Name, new JRaw(x.Emitter), new JRaw(x.Data))).ToList(),
+            Events = optIns.ReceiptEvents ? events?.Select(x => new GatewayModel.EventsItem(x.Name, new JRaw(x.Emitter), new JRaw(x.Data))).ToList() : null,
         };
 
         return new GatewayModel.CommittedTransactionInfo(

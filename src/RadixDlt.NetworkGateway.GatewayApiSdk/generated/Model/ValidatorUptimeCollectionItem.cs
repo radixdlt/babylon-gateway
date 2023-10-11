@@ -104,9 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="ValidatorUptimeCollectionItem" /> class.
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="proposalsMade">proposalsMade.</param>
-        /// <param name="proposalsMissed">proposalsMissed.</param>
-        /// <param name="epochsActiveIn">epochsActiveIn (required).</param>
+        /// <param name="proposalsMade">number of proposals made..</param>
+        /// <param name="proposalsMissed">number of proposals missed..</param>
+        /// <param name="epochsActiveIn">number of epochs validator was active in. (required).</param>
         public ValidatorUptimeCollectionItem(string address = default(string), long? proposalsMade = default(long?), long? proposalsMissed = default(long?), long epochsActiveIn = default(long))
         {
             // to ensure "address" is required (not null)
@@ -128,20 +128,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets ProposalsMade
+        /// number of proposals made.
         /// </summary>
+        /// <value>number of proposals made.</value>
         [DataMember(Name = "proposals_made", EmitDefaultValue = true)]
         public long? ProposalsMade { get; set; }
 
         /// <summary>
-        /// Gets or Sets ProposalsMissed
+        /// number of proposals missed.
         /// </summary>
+        /// <value>number of proposals missed.</value>
         [DataMember(Name = "proposals_missed", EmitDefaultValue = true)]
         public long? ProposalsMissed { get; set; }
 
         /// <summary>
-        /// Gets or Sets EpochsActiveIn
+        /// number of epochs validator was active in.
         /// </summary>
+        /// <value>number of epochs validator was active in.</value>
         [DataMember(Name = "epochs_active_in", IsRequired = true, EmitDefaultValue = true)]
         public long EpochsActiveIn { get; set; }
 

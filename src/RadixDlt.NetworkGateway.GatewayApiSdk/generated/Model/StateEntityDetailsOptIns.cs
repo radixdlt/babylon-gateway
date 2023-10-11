@@ -98,11 +98,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsOptIns" /> class.
         /// </summary>
-        /// <param name="ancestorIdentities">ancestorIdentities.</param>
-        /// <param name="componentRoyaltyVaultBalance">componentRoyaltyVaultBalance.</param>
-        /// <param name="packageRoyaltyVaultBalance">packageRoyaltyVaultBalance.</param>
-        /// <param name="nonFungibleIncludeNfids">nonFungibleIncludeNfids.</param>
-        /// <param name="explicitMetadata">explicitMetadata.</param>
+        /// <param name="ancestorIdentities">(false by default) if set to true, ancestor addresses - parent_address, owner_address and global_address for entities are returned..</param>
+        /// <param name="componentRoyaltyVaultBalance">(false by default) if set to true, royalty vault balance for component entities is returned..</param>
+        /// <param name="packageRoyaltyVaultBalance">(false by default) if set to true, royalty vault balance for package entities is returned..</param>
+        /// <param name="nonFungibleIncludeNfids">(false by default) if set to true, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint..</param>
+        /// <param name="explicitMetadata">(empty by default) allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items..</param>
         public StateEntityDetailsOptIns(bool ancestorIdentities = default(bool), bool componentRoyaltyVaultBalance = default(bool), bool packageRoyaltyVaultBalance = default(bool), bool nonFungibleIncludeNfids = default(bool), List<string> explicitMetadata = default(List<string>))
         {
             this.AncestorIdentities = ancestorIdentities;
@@ -113,32 +113,37 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets AncestorIdentities
+        /// (false by default) if set to true, ancestor addresses - parent_address, owner_address and global_address for entities are returned.
         /// </summary>
+        /// <value>(false by default) if set to true, ancestor addresses - parent_address, owner_address and global_address for entities are returned.</value>
         [DataMember(Name = "ancestor_identities", EmitDefaultValue = true)]
         public bool AncestorIdentities { get; set; }
 
         /// <summary>
-        /// Gets or Sets ComponentRoyaltyVaultBalance
+        /// (false by default) if set to true, royalty vault balance for component entities is returned.
         /// </summary>
+        /// <value>(false by default) if set to true, royalty vault balance for component entities is returned.</value>
         [DataMember(Name = "component_royalty_vault_balance", EmitDefaultValue = true)]
         public bool ComponentRoyaltyVaultBalance { get; set; }
 
         /// <summary>
-        /// Gets or Sets PackageRoyaltyVaultBalance
+        /// (false by default) if set to true, royalty vault balance for package entities is returned.
         /// </summary>
+        /// <value>(false by default) if set to true, royalty vault balance for package entities is returned.</value>
         [DataMember(Name = "package_royalty_vault_balance", EmitDefaultValue = true)]
         public bool PackageRoyaltyVaultBalance { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIncludeNfids
+        /// (false by default) if set to true, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.
         /// </summary>
+        /// <value>(false by default) if set to true, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.</value>
         [DataMember(Name = "non_fungible_include_nfids", EmitDefaultValue = true)]
         public bool NonFungibleIncludeNfids { get; set; }
 
         /// <summary>
-        /// Gets or Sets ExplicitMetadata
+        /// (empty by default) allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.
         /// </summary>
+        /// <value>(empty by default) allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.</value>
         [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
         public List<string> ExplicitMetadata { get; set; }
 

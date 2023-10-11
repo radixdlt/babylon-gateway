@@ -98,8 +98,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityNonFungiblesPageRequestOptIns" /> class.
         /// </summary>
-        /// <param name="nonFungibleIncludeNfids">nonFungibleIncludeNfids.</param>
-        /// <param name="explicitMetadata">explicitMetadata.</param>
+        /// <param name="nonFungibleIncludeNfids">(false by default) if set to true, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint..</param>
+        /// <param name="explicitMetadata">(empty by default) allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items..</param>
         public StateEntityNonFungiblesPageRequestOptIns(bool nonFungibleIncludeNfids = default(bool), List<string> explicitMetadata = default(List<string>))
         {
             this.NonFungibleIncludeNfids = nonFungibleIncludeNfids;
@@ -107,14 +107,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIncludeNfids
+        /// (false by default) if set to true, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.
         /// </summary>
+        /// <value>(false by default) if set to true, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.</value>
         [DataMember(Name = "non_fungible_include_nfids", EmitDefaultValue = true)]
         public bool NonFungibleIncludeNfids { get; set; }
 
         /// <summary>
-        /// Gets or Sets ExplicitMetadata
+        /// (empty by default) allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.
         /// </summary>
+        /// <value>(empty by default) allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.</value>
         [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
         public List<string> ExplicitMetadata { get; set; }
 
