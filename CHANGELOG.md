@@ -1,3 +1,8 @@
+## 1.0.2 - Babylon
+Release Date: _unreleased_
+
+- Changed default configuration value of MaxPageSize for endpoints to 100. Validate if max page size is higher than DefaultPageSize.
+
 ## 1.0.1 - Babylon 
 Release Date: _unreleased_
 
