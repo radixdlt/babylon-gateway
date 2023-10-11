@@ -624,7 +624,7 @@ ORDER BY nfid.from_state_version DESC
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
                 nonFungibleId: vm.NonFungibleId,
                 isBurned: vm.IsDeleted,
-                data: !vm.IsDeleted ? new GatewayModel.ScryptoSborValue(vm.Data.ToHex(), new JRaw(programmaticJson)) : null,
+                data: !vm.IsDeleted ? new GatewayModel.ScryptoSborValue(vm.Data.ToHex(), new JRaw(programmaticJson).ToObject<GatewayModel.ProgrammaticScryptoSborValue>()) : null,
                 lastUpdatedAtStateVersion: vm.DataLastUpdatedAtStateVersion));
         }
 
@@ -947,8 +947,8 @@ INNER JOIN LATERAL (
                 keyValueStoreSchema.ValueTypeIndex, _networkConfigurationProvider.GetNetworkId());
 
             items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(
-                key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), new JRaw(keyJson)),
-                value: new GatewayModel.ScryptoSborValue(e.Value.ToHex(), new JRaw(valueJson)),
+                key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), new JRaw(keyJson).ToObject<GatewayModel.ProgrammaticScryptoSborValue>()),
+                value: new GatewayModel.ScryptoSborValue(e.Value.ToHex(), new JRaw(valueJson).ToObject<GatewayModel.ProgrammaticScryptoSborValue>()),
                 lastUpdatedAtStateVersion: e.FromStateVersion,
                 isLocked: e.IsLocked));
         }
@@ -1035,7 +1035,7 @@ ORDER BY metadata_join.ordinality ASC;",
             var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
             var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(vm.Value, ToolkitModel.SerializationMode.PROGRAMMATIC,
                 _networkConfigurationProvider.GetNetworkId(), null);
-            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), new JRaw(stringRepresentation), value);
+            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), new JRaw(stringRepresentation).ToObject<GatewayModel.ProgrammaticScryptoSborValue>(), value);
 
             result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
         }
@@ -1107,7 +1107,7 @@ INNER JOIN LATERAL (
             var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId());
             var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(mh.Value, ToolkitModel.SerializationMode.PROGRAMMATIC,
                 _networkConfigurationProvider.GetNetworkId(), null);
-            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), new JRaw(stringRepresentation), value);
+            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), new JRaw(stringRepresentation).ToObject<GatewayModel.ProgrammaticScryptoSborValue>(), value);
 
             result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, entityMetadataItemValue, mh.IsLocked, mh.FromStateVersion));
             result[mh.EntityId].TotalCount = result[mh.EntityId].TotalCount.HasValue ? result[mh.EntityId].TotalCount + 1 : 1;

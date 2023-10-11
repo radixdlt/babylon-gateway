@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
         /// <param name="owningVaultAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="isBurned">isBurned (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
         public StateNonFungibleLocationResponseItem(string nonFungibleId = default(string), string owningVaultAddress = default(string), bool isBurned = default(bool), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "nonFungibleId" is required (not null)
@@ -141,9 +141,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool IsBurned { get; set; }
 
         /// <summary>
-        /// TBD
+        /// The most recent state version underlying object was modified at.
         /// </summary>
-        /// <value>TBD</value>
+        /// <value>The most recent state version underlying object was modified at.</value>
         [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long LastUpdatedAtStateVersion { get; set; }
 

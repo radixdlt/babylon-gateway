@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="isBurned">isBurned (required).</param>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
         /// <param name="data">data.</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
         public StateNonFungibleDetailsResponseItem(bool isBurned = default(bool), string nonFungibleId = default(string), ScryptoSborValue data = default(ScryptoSborValue), long lastUpdatedAtStateVersion = default(long))
         {
             this.IsBurned = isBurned;
@@ -140,9 +140,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public ScryptoSborValue Data { get; set; }
 
         /// <summary>
-        /// TBD
+        /// The most recent state version underlying object was modified at.
         /// </summary>
-        /// <value>TBD</value>
+        /// <value>The most recent state version underlying object was modified at.</value>
         [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long LastUpdatedAtStateVersion { get; set; }
 

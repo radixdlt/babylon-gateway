@@ -103,10 +103,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityMetadataItemValue" /> class.
         /// </summary>
-        /// <param name="rawHex">rawHex (required).</param>
+        /// <param name="rawHex">Hex-encoded binary blob. (required).</param>
         /// <param name="programmaticJson">programmaticJson (required).</param>
         /// <param name="typed">typed (required).</param>
-        public EntityMetadataItemValue(string rawHex = default(string), Object programmaticJson = default(Object), MetadataTypedValue typed = default(MetadataTypedValue))
+        public EntityMetadataItemValue(string rawHex = default(string), ProgrammaticScryptoSborValue programmaticJson = default(ProgrammaticScryptoSborValue), MetadataTypedValue typed = default(MetadataTypedValue))
         {
             // to ensure "rawHex" is required (not null)
             if (rawHex == null)
@@ -129,8 +129,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets RawHex
+        /// Hex-encoded binary blob.
         /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
         [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
         public string RawHex { get; set; }
 
@@ -138,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets ProgrammaticJson
         /// </summary>
         [DataMember(Name = "programmatic_json", IsRequired = true, EmitDefaultValue = true)]
-        public Object ProgrammaticJson { get; set; }
+        public ProgrammaticScryptoSborValue ProgrammaticJson { get; set; }
 
         /// <summary>
         /// Gets or Sets Typed

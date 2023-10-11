@@ -84,58 +84,57 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// FungibleResourcesCollectionItemGloballyAggregated
+    /// ProgrammaticScryptoSborValueArrayAllOf
     /// </summary>
-    [DataContract(Name = "FungibleResourcesCollectionItemGloballyAggregated")]
-    [JsonConverter(typeof(JsonSubtypes), "aggregation_level")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemGloballyAggregated), "Global")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemVaultAggregated), "Vault")]
-    public partial class FungibleResourcesCollectionItemGloballyAggregated : FungibleResourcesCollectionItem, IEquatable<FungibleResourcesCollectionItemGloballyAggregated>
+    [DataContract(Name = "ProgrammaticScryptoSborValueArray_allOf")]
+    public partial class ProgrammaticScryptoSborValueArrayAllOf : IEquatable<ProgrammaticScryptoSborValueArrayAllOf>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregated" /> class.
+        /// Gets or Sets ElementKind
+        /// </summary>
+        [DataMember(Name = "element_kind", IsRequired = true, EmitDefaultValue = true)]
+        public ProgrammaticScryptoSborValueKind ElementKind { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueArrayAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FungibleResourcesCollectionItemGloballyAggregated() { }
+        protected ProgrammaticScryptoSborValueArrayAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregated" /> class.
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueArrayAllOf" /> class.
         /// </summary>
-        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        /// <param name="aggregationLevel">aggregationLevel (required) (default to ResourceAggregationLevel.Global).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="explicitMetadata">explicitMetadata.</param>
-        public FungibleResourcesCollectionItemGloballyAggregated(string amount = default(string), long lastUpdatedAtStateVersion = default(long), ResourceAggregationLevel aggregationLevel = ResourceAggregationLevel.Global, string resourceAddress = default(string), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection)) : base(aggregationLevel, resourceAddress, explicitMetadata)
+        /// <param name="elementKind">elementKind (required).</param>
+        /// <param name="elementTypeName">elementTypeName.</param>
+        /// <param name="elements">elements (required).</param>
+        public ProgrammaticScryptoSborValueArrayAllOf(ProgrammaticScryptoSborValueKind elementKind = default(ProgrammaticScryptoSborValueKind), string elementTypeName = default(string), List<ProgrammaticScryptoSborValue> elements = default(List<ProgrammaticScryptoSborValue>))
         {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
+            this.ElementKind = elementKind;
+            // to ensure "elements" is required (not null)
+            if (elements == null)
             {
-                throw new ArgumentNullException("amount is a required property for FungibleResourcesCollectionItemGloballyAggregated and cannot be null");
+                throw new ArgumentNullException("elements is a required property for ProgrammaticScryptoSborValueArrayAllOf and cannot be null");
             }
-            this.Amount = amount;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.Elements = elements;
+            this.ElementTypeName = elementTypeName;
         }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// Gets or Sets ElementTypeName
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
+        [DataMember(Name = "element_type_name", EmitDefaultValue = true)]
+        public string ElementTypeName { get; set; }
 
         /// <summary>
-        /// The most recent state version underlying object was modified at.
+        /// Gets or Sets Elements
         /// </summary>
-        /// <value>The most recent state version underlying object was modified at.</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [DataMember(Name = "elements", IsRequired = true, EmitDefaultValue = true)]
+        public List<ProgrammaticScryptoSborValue> Elements { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,10 +143,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FungibleResourcesCollectionItemGloballyAggregated {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("class ProgrammaticScryptoSborValueArrayAllOf {\n");
+            sb.Append("  ElementKind: ").Append(ElementKind).Append("\n");
+            sb.Append("  ElementTypeName: ").Append(ElementTypeName).Append("\n");
+            sb.Append("  Elements: ").Append(Elements).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -156,7 +155,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -168,29 +167,35 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FungibleResourcesCollectionItemGloballyAggregated);
+            return this.Equals(input as ProgrammaticScryptoSborValueArrayAllOf);
         }
 
         /// <summary>
-        /// Returns true if FungibleResourcesCollectionItemGloballyAggregated instances are equal
+        /// Returns true if ProgrammaticScryptoSborValueArrayAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of FungibleResourcesCollectionItemGloballyAggregated to be compared</param>
+        /// <param name="input">Instance of ProgrammaticScryptoSborValueArrayAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FungibleResourcesCollectionItemGloballyAggregated input)
+        public bool Equals(ProgrammaticScryptoSborValueArrayAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
-                ) && base.Equals(input) && 
+                    this.ElementKind == input.ElementKind ||
+                    this.ElementKind.Equals(input.ElementKind)
+                ) && 
                 (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.ElementTypeName == input.ElementTypeName ||
+                    (this.ElementTypeName != null &&
+                    this.ElementTypeName.Equals(input.ElementTypeName))
+                ) && 
+                (
+                    this.Elements == input.Elements ||
+                    this.Elements != null &&
+                    input.Elements != null &&
+                    this.Elements.SequenceEqual(input.Elements)
                 );
         }
 
@@ -202,12 +207,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Amount != null)
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.ElementKind.GetHashCode();
+                if (this.ElementTypeName != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ElementTypeName.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
+                if (this.Elements != null)
+                {
+                    hashCode = (hashCode * 59) + this.Elements.GetHashCode();
+                }
                 return hashCode;
             }
         }

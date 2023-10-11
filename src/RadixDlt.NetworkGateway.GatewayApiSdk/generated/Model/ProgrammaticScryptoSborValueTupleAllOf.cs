@@ -84,58 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// FungibleResourcesCollectionItemGloballyAggregated
+    /// ProgrammaticScryptoSborValueTupleAllOf
     /// </summary>
-    [DataContract(Name = "FungibleResourcesCollectionItemGloballyAggregated")]
-    [JsonConverter(typeof(JsonSubtypes), "aggregation_level")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemGloballyAggregated), "Global")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemVaultAggregated), "Vault")]
-    public partial class FungibleResourcesCollectionItemGloballyAggregated : FungibleResourcesCollectionItem, IEquatable<FungibleResourcesCollectionItemGloballyAggregated>
+    [DataContract(Name = "ProgrammaticScryptoSborValueTuple_allOf")]
+    public partial class ProgrammaticScryptoSborValueTupleAllOf : IEquatable<ProgrammaticScryptoSborValueTupleAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregated" /> class.
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueTupleAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FungibleResourcesCollectionItemGloballyAggregated() { }
+        protected ProgrammaticScryptoSborValueTupleAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregated" /> class.
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueTupleAllOf" /> class.
         /// </summary>
-        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        /// <param name="aggregationLevel">aggregationLevel (required) (default to ResourceAggregationLevel.Global).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="explicitMetadata">explicitMetadata.</param>
-        public FungibleResourcesCollectionItemGloballyAggregated(string amount = default(string), long lastUpdatedAtStateVersion = default(long), ResourceAggregationLevel aggregationLevel = ResourceAggregationLevel.Global, string resourceAddress = default(string), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection)) : base(aggregationLevel, resourceAddress, explicitMetadata)
+        /// <param name="fields">fields (required).</param>
+        public ProgrammaticScryptoSborValueTupleAllOf(List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>))
         {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
+            // to ensure "fields" is required (not null)
+            if (fields == null)
             {
-                throw new ArgumentNullException("amount is a required property for FungibleResourcesCollectionItemGloballyAggregated and cannot be null");
+                throw new ArgumentNullException("fields is a required property for ProgrammaticScryptoSborValueTupleAllOf and cannot be null");
             }
-            this.Amount = amount;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.Fields = fields;
         }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// Gets or Sets Fields
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
-
-        /// <summary>
-        /// The most recent state version underlying object was modified at.
-        /// </summary>
-        /// <value>The most recent state version underlying object was modified at.</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [DataMember(Name = "fields", IsRequired = true, EmitDefaultValue = true)]
+        public List<ProgrammaticScryptoSborValue> Fields { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,10 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FungibleResourcesCollectionItemGloballyAggregated {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("class ProgrammaticScryptoSborValueTupleAllOf {\n");
+            sb.Append("  Fields: ").Append(Fields).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -156,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -168,29 +149,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FungibleResourcesCollectionItemGloballyAggregated);
+            return this.Equals(input as ProgrammaticScryptoSborValueTupleAllOf);
         }
 
         /// <summary>
-        /// Returns true if FungibleResourcesCollectionItemGloballyAggregated instances are equal
+        /// Returns true if ProgrammaticScryptoSborValueTupleAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of FungibleResourcesCollectionItemGloballyAggregated to be compared</param>
+        /// <param name="input">Instance of ProgrammaticScryptoSborValueTupleAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FungibleResourcesCollectionItemGloballyAggregated input)
+        public bool Equals(ProgrammaticScryptoSborValueTupleAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
-                ) && base.Equals(input) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.Fields == input.Fields ||
+                    this.Fields != null &&
+                    input.Fields != null &&
+                    this.Fields.SequenceEqual(input.Fields)
                 );
         }
 
@@ -202,12 +180,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Amount != null)
+                int hashCode = 41;
+                if (this.Fields != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Fields.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

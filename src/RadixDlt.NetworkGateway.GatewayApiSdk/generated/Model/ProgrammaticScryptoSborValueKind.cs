@@ -84,133 +84,149 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// FungibleResourcesCollectionItemGloballyAggregated
+    /// These are the Scrypto SBOR &#x60;ValueKind&#x60;s, but with &#x60;Bytes&#x60; added as an alias for &#x60;Vec&#x60;, to display such values as hex-encoded strings. 
     /// </summary>
-    [DataContract(Name = "FungibleResourcesCollectionItemGloballyAggregated")]
-    [JsonConverter(typeof(JsonSubtypes), "aggregation_level")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemGloballyAggregated), "Global")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemVaultAggregated), "Vault")]
-    public partial class FungibleResourcesCollectionItemGloballyAggregated : FungibleResourcesCollectionItem, IEquatable<FungibleResourcesCollectionItemGloballyAggregated>
+    /// <value>These are the Scrypto SBOR &#x60;ValueKind&#x60;s, but with &#x60;Bytes&#x60; added as an alias for &#x60;Vec&#x60;, to display such values as hex-encoded strings. </value>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum ProgrammaticScryptoSborValueKind
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregated" /> class.
+        /// Enum Bool for value: Bool
         /// </summary>
-        [JsonConstructorAttribute]
-        protected FungibleResourcesCollectionItemGloballyAggregated() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregated" /> class.
-        /// </summary>
-        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        /// <param name="aggregationLevel">aggregationLevel (required) (default to ResourceAggregationLevel.Global).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="explicitMetadata">explicitMetadata.</param>
-        public FungibleResourcesCollectionItemGloballyAggregated(string amount = default(string), long lastUpdatedAtStateVersion = default(long), ResourceAggregationLevel aggregationLevel = ResourceAggregationLevel.Global, string resourceAddress = default(string), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection)) : base(aggregationLevel, resourceAddress, explicitMetadata)
-        {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
-            {
-                throw new ArgumentNullException("amount is a required property for FungibleResourcesCollectionItemGloballyAggregated and cannot be null");
-            }
-            this.Amount = amount;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
-        }
+        [EnumMember(Value = "Bool")]
+        Bool = 1,
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// Enum I8 for value: I8
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
+        [EnumMember(Value = "I8")]
+        I8 = 2,
 
         /// <summary>
-        /// The most recent state version underlying object was modified at.
+        /// Enum I16 for value: I16
         /// </summary>
-        /// <value>The most recent state version underlying object was modified at.</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [EnumMember(Value = "I16")]
+        I16 = 3,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum I32 for value: I32
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class FungibleResourcesCollectionItemGloballyAggregated {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
+        [EnumMember(Value = "I32")]
+        I32 = 4,
 
         /// <summary>
-        /// Returns the JSON string presentation of the object
+        /// Enum I64 for value: I64
         /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
+        [EnumMember(Value = "I64")]
+        I64 = 5,
 
         /// <summary>
-        /// Returns true if objects are equal
+        /// Enum I128 for value: I128
         /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as FungibleResourcesCollectionItemGloballyAggregated);
-        }
+        [EnumMember(Value = "I128")]
+        I128 = 6,
 
         /// <summary>
-        /// Returns true if FungibleResourcesCollectionItemGloballyAggregated instances are equal
+        /// Enum U8 for value: U8
         /// </summary>
-        /// <param name="input">Instance of FungibleResourcesCollectionItemGloballyAggregated to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(FungibleResourcesCollectionItemGloballyAggregated input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return base.Equals(input) && 
-                (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
-                ) && base.Equals(input) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
-                );
-        }
+        [EnumMember(Value = "U8")]
+        U8 = 7,
 
         /// <summary>
-        /// Gets the hash code
+        /// Enum U16 for value: U16
         /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = base.GetHashCode();
-                if (this.Amount != null)
-                {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "U16")]
+        U16 = 8,
+
+        /// <summary>
+        /// Enum U32 for value: U32
+        /// </summary>
+        [EnumMember(Value = "U32")]
+        U32 = 9,
+
+        /// <summary>
+        /// Enum U64 for value: U64
+        /// </summary>
+        [EnumMember(Value = "U64")]
+        U64 = 10,
+
+        /// <summary>
+        /// Enum U128 for value: U128
+        /// </summary>
+        [EnumMember(Value = "U128")]
+        U128 = 11,
+
+        /// <summary>
+        /// Enum String for value: String
+        /// </summary>
+        [EnumMember(Value = "String")]
+        String = 12,
+
+        /// <summary>
+        /// Enum Enum for value: Enum
+        /// </summary>
+        [EnumMember(Value = "Enum")]
+        Enum = 13,
+
+        /// <summary>
+        /// Enum Array for value: Array
+        /// </summary>
+        [EnumMember(Value = "Array")]
+        Array = 14,
+
+        /// <summary>
+        /// Enum Bytes for value: Bytes
+        /// </summary>
+        [EnumMember(Value = "Bytes")]
+        Bytes = 15,
+
+        /// <summary>
+        /// Enum Map for value: Map
+        /// </summary>
+        [EnumMember(Value = "Map")]
+        Map = 16,
+
+        /// <summary>
+        /// Enum Tuple for value: Tuple
+        /// </summary>
+        [EnumMember(Value = "Tuple")]
+        Tuple = 17,
+
+        /// <summary>
+        /// Enum Reference for value: Reference
+        /// </summary>
+        [EnumMember(Value = "Reference")]
+        Reference = 18,
+
+        /// <summary>
+        /// Enum Own for value: Own
+        /// </summary>
+        [EnumMember(Value = "Own")]
+        Own = 19,
+
+        /// <summary>
+        /// Enum Decimal for value: Decimal
+        /// </summary>
+        [EnumMember(Value = "Decimal")]
+        Decimal = 20,
+
+        /// <summary>
+        /// Enum PreciseDecimal for value: PreciseDecimal
+        /// </summary>
+        [EnumMember(Value = "PreciseDecimal")]
+        PreciseDecimal = 21,
+
+        /// <summary>
+        /// Enum NonFungibleLocalId for value: NonFungibleLocalId
+        /// </summary>
+        [EnumMember(Value = "NonFungibleLocalId")]
+        NonFungibleLocalId = 22
 
     }
 

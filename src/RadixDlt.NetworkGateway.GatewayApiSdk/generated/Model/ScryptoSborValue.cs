@@ -103,9 +103,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ScryptoSborValue" /> class.
         /// </summary>
-        /// <param name="rawHex">rawHex (required).</param>
+        /// <param name="rawHex">Hex-encoded binary blob. (required).</param>
         /// <param name="programmaticJson">programmaticJson (required).</param>
-        public ScryptoSborValue(string rawHex = default(string), Object programmaticJson = default(Object))
+        public ScryptoSborValue(string rawHex = default(string), ProgrammaticScryptoSborValue programmaticJson = default(ProgrammaticScryptoSborValue))
         {
             // to ensure "rawHex" is required (not null)
             if (rawHex == null)
@@ -122,8 +122,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets RawHex
+        /// Hex-encoded binary blob.
         /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
         [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
         public string RawHex { get; set; }
 
@@ -131,7 +132,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets ProgrammaticJson
         /// </summary>
         [DataMember(Name = "programmatic_json", IsRequired = true, EmitDefaultValue = true)]
-        public Object ProgrammaticJson { get; set; }
+        public ProgrammaticScryptoSborValue ProgrammaticJson { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

@@ -91,51 +91,93 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// FungibleResourcesCollectionItemGloballyAggregated
+    /// ProgrammaticScryptoSborValueMap
     /// </summary>
-    [DataContract(Name = "FungibleResourcesCollectionItemGloballyAggregated")]
-    [JsonConverter(typeof(JsonSubtypes), "aggregation_level")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemGloballyAggregated), "Global")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemVaultAggregated), "Vault")]
-    public partial class FungibleResourcesCollectionItemGloballyAggregated : FungibleResourcesCollectionItem, IEquatable<FungibleResourcesCollectionItemGloballyAggregated>
+    [DataContract(Name = "ProgrammaticScryptoSborValueMap")]
+    [JsonConverter(typeof(JsonSubtypes), "kind")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI16), "I16")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI32), "I32")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI64), "I64")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI8), "I8")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueMap), "Map")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueNonFungibleLocalId), "NonFungibleLocalId")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueOwn), "Own")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValuePreciseDecimal), "PreciseDecimal")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueReference), "Reference")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueString), "String")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueTuple), "Tuple")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU128), "U128")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU16), "U16")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU32), "U32")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "U64")]
+    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU8), "U8")]
+    public partial class ProgrammaticScryptoSborValueMap : ProgrammaticScryptoSborValue, IEquatable<ProgrammaticScryptoSborValueMap>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregated" /> class.
+        /// Gets or Sets KeyKind
+        /// </summary>
+        [DataMember(Name = "key_kind", IsRequired = true, EmitDefaultValue = true)]
+        public ProgrammaticScryptoSborValueKind KeyKind { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ValueKind
+        /// </summary>
+        [DataMember(Name = "value_kind", IsRequired = true, EmitDefaultValue = true)]
+        public ProgrammaticScryptoSborValueKind ValueKind { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueMap" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FungibleResourcesCollectionItemGloballyAggregated() { }
+        protected ProgrammaticScryptoSborValueMap() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregated" /> class.
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueMap" /> class.
         /// </summary>
-        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        /// <param name="aggregationLevel">aggregationLevel (required) (default to ResourceAggregationLevel.Global).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="explicitMetadata">explicitMetadata.</param>
-        public FungibleResourcesCollectionItemGloballyAggregated(string amount = default(string), long lastUpdatedAtStateVersion = default(long), ResourceAggregationLevel aggregationLevel = ResourceAggregationLevel.Global, string resourceAddress = default(string), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection)) : base(aggregationLevel, resourceAddress, explicitMetadata)
+        /// <param name="keyKind">keyKind (required).</param>
+        /// <param name="keyTypeName">keyTypeName.</param>
+        /// <param name="valueKind">valueKind (required).</param>
+        /// <param name="valueTypeName">valueTypeName.</param>
+        /// <param name="entries">entries (required).</param>
+        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Map).</param>
+        /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
+        /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
+        public ProgrammaticScryptoSborValueMap(ProgrammaticScryptoSborValueKind keyKind = default(ProgrammaticScryptoSborValueKind), string keyTypeName = default(string), ProgrammaticScryptoSborValueKind valueKind = default(ProgrammaticScryptoSborValueKind), string valueTypeName = default(string), List<ProgrammaticScryptoSborValueMapEntry> entries = default(List<ProgrammaticScryptoSborValueMapEntry>), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Map, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
+            this.KeyKind = keyKind;
+            this.ValueKind = valueKind;
+            // to ensure "entries" is required (not null)
+            if (entries == null)
             {
-                throw new ArgumentNullException("amount is a required property for FungibleResourcesCollectionItemGloballyAggregated and cannot be null");
+                throw new ArgumentNullException("entries is a required property for ProgrammaticScryptoSborValueMap and cannot be null");
             }
-            this.Amount = amount;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.Entries = entries;
+            this.KeyTypeName = keyTypeName;
+            this.ValueTypeName = valueTypeName;
         }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// Gets or Sets KeyTypeName
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
+        [DataMember(Name = "key_type_name", EmitDefaultValue = true)]
+        public string KeyTypeName { get; set; }
 
         /// <summary>
-        /// The most recent state version underlying object was modified at.
+        /// Gets or Sets ValueTypeName
         /// </summary>
-        /// <value>The most recent state version underlying object was modified at.</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [DataMember(Name = "value_type_name", EmitDefaultValue = true)]
+        public string ValueTypeName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Entries
+        /// </summary>
+        [DataMember(Name = "entries", IsRequired = true, EmitDefaultValue = true)]
+        public List<ProgrammaticScryptoSborValueMapEntry> Entries { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,10 +186,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FungibleResourcesCollectionItemGloballyAggregated {\n");
+            sb.Append("class ProgrammaticScryptoSborValueMap {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("  KeyKind: ").Append(KeyKind).Append("\n");
+            sb.Append("  KeyTypeName: ").Append(KeyTypeName).Append("\n");
+            sb.Append("  ValueKind: ").Append(ValueKind).Append("\n");
+            sb.Append("  ValueTypeName: ").Append(ValueTypeName).Append("\n");
+            sb.Append("  Entries: ").Append(Entries).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,15 +213,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FungibleResourcesCollectionItemGloballyAggregated);
+            return this.Equals(input as ProgrammaticScryptoSborValueMap);
         }
 
         /// <summary>
-        /// Returns true if FungibleResourcesCollectionItemGloballyAggregated instances are equal
+        /// Returns true if ProgrammaticScryptoSborValueMap instances are equal
         /// </summary>
-        /// <param name="input">Instance of FungibleResourcesCollectionItemGloballyAggregated to be compared</param>
+        /// <param name="input">Instance of ProgrammaticScryptoSborValueMap to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FungibleResourcesCollectionItemGloballyAggregated input)
+        public bool Equals(ProgrammaticScryptoSborValueMap input)
         {
             if (input == null)
             {
@@ -184,13 +229,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
+                    this.KeyKind == input.KeyKind ||
+                    this.KeyKind.Equals(input.KeyKind)
                 ) && base.Equals(input) && 
                 (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.KeyTypeName == input.KeyTypeName ||
+                    (this.KeyTypeName != null &&
+                    this.KeyTypeName.Equals(input.KeyTypeName))
+                ) && base.Equals(input) && 
+                (
+                    this.ValueKind == input.ValueKind ||
+                    this.ValueKind.Equals(input.ValueKind)
+                ) && base.Equals(input) && 
+                (
+                    this.ValueTypeName == input.ValueTypeName ||
+                    (this.ValueTypeName != null &&
+                    this.ValueTypeName.Equals(input.ValueTypeName))
+                ) && base.Equals(input) && 
+                (
+                    this.Entries == input.Entries ||
+                    this.Entries != null &&
+                    input.Entries != null &&
+                    this.Entries.SequenceEqual(input.Entries)
                 );
         }
 
@@ -203,11 +263,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Amount != null)
+                hashCode = (hashCode * 59) + this.KeyKind.GetHashCode();
+                if (this.KeyTypeName != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyTypeName.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.ValueKind.GetHashCode();
+                if (this.ValueTypeName != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValueTypeName.GetHashCode();
+                }
+                if (this.Entries != null)
+                {
+                    hashCode = (hashCode * 59) + this.Entries.GetHashCode();
+                }
                 return hashCode;
             }
         }

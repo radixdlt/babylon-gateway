@@ -187,13 +187,23 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
                 roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, effectiveRoleAssignmentEntries),
                 royaltyVaultBalance: null);
 
+        var ownerKeys = new GatewayModel.EntityMetadataItemValue(
+            ownerKeysRawHex,
+            new JRaw(ownerKeysJson).ToObject<GatewayModel.ProgrammaticScryptoSborValue>(),
+            ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem));
+
+        var ownerBadge = new GatewayModel.EntityMetadataItemValue(
+            ownerBadgeRawHex,
+            new JRaw(ownerBadgeJson).ToObject<GatewayModel.ProgrammaticScryptoSborValue>(),
+            ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem));
+
         var metadata = new GatewayModel.EntityMetadataCollection(
             totalCount: 2,
             nextCursor: null,
             items: new List<GatewayModel.EntityMetadataItem>
             {
-                new("owner_keys", new GatewayModel.EntityMetadataItemValue(ownerKeysRawHex, new JRaw(ownerKeysJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem))),
-                new("owner_badge", new GatewayModel.EntityMetadataItemValue(ownerBadgeRawHex, new JRaw(ownerBadgeJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem)), true),
+                new("owner_keys", ownerKeys),
+                new("owner_badge", ownerBadge, true),
             }
         );
 

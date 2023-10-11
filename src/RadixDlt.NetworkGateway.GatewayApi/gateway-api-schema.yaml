@@ -725,9 +725,11 @@ components:
       type: string
 
     LastUpdatedAtStateVersion:
-      description: TBD # TODO describe
+      description: The most recent state version underlying object was modified at.
       type: integer
-      format: int64 # TODO define min/max using CoreApi as a reference
+      format: int64
+      minimum: 1
+      maximum: 100000000000000
 
     #
     # Keys
@@ -844,6 +846,8 @@ components:
           nullable: true
           type: integer
           format: int64
+          minimum: 1
+          maximum: 100000000000000
         timestamp:
           description: If provided, the latest ledger state lower than or equal to the given round timestamp is returned.
           nullable: true
@@ -854,11 +858,15 @@ components:
           nullable: true
           type: integer
           format: int64
+          minimum: 0
+          maximum: 10000000000
         round:
           description: If provided must be accompanied with `epoch`, the ledger state lower than or equal to the given epoch and round is returned.
           nullable: true
           type: integer
           format: int64
+          minimum: 0
+          maximum: 10000000000
 
     CursorLimitMixin:
       type: object
@@ -967,9 +975,9 @@ components:
         - programmatic_json
       properties:
         raw_hex:
-          type: string
+          $ref: "#/components/schemas/HexString"
         programmatic_json:
-          type: object
+          $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
 
     EntityMetadataCollection:
       description: Entity metadata collection.
@@ -1178,7 +1186,7 @@ components:
             - last_updated_at_state_version
           properties:
             amount:
-              description: TBA # TODO describe
+              description: The total amount of non-fungible IDs across all vaults.
               type: integer
               format: int64
             last_updated_at_state_version:
@@ -1672,8 +1680,8 @@ components:
           type: integer
           format: int32
           minimum: 0
-          maximum: 255
-          description: An integer between `0` and `255`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
+          maximum: 65535
+          description: An integer between `0` and `65535`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
         nonce:
           type: integer
           format: int64
@@ -3331,3 +3339,350 @@ components:
               items:
                 $ref: "#/components/schemas/PublicKeyHash"
 
+    #
+    # Programmatic Scrypto SBOR Values
+    #
+
+    ProgrammaticScryptoSborValueKind:
+      description: |
+        These are the Scrypto SBOR `ValueKind`s, but with `Bytes` added as an alias for `Vec`, to display such values as hex-encoded strings.
+      type: string
+      enum:
+        - Bool
+        - I8
+        - I16
+        - I32
+        - I64
+        - I128
+        - U8
+        - U16
+        - U32
+        - U64
+        - U128
+        - String
+        - Enum
+        - Array
+        - Bytes
+        - Map
+        - Tuple
+        - Reference
+        - Own
+        - Decimal
+        - PreciseDecimal
+        - NonFungibleLocalId
+    ProgrammaticScryptoSborValue:
+      description: |
+        Arbitrary SBOR value represented as programmatic JSON with optional property name annotations.
+
+        All scalar types (`Bool`, `I*`, `U*`, `String`, `Reference`, `Own`, `Decimal`, `PreciseDecimal`, `NonFungibleLocalId`)
+        convey their value via `value` string property with notable exception of `Bool` type that uses regular JSON boolean type.
+        Numeric values as string-encoded to preserve accuracy and simplify implementation on platforms with no native support
+        for 64-bit long numerical values.
+
+        Common properties represented as nullable strings:
+          * `type_name` is only output when a schema is present and the type has a name,
+          * `field_name` is only output when the value is a child of a `Tuple` or `Enum`, which has a type with named fields,
+          * `variant_name` is only output when a schema is present and the type is an `Enum`.
+
+        The following is a non-normative example annotated `Tuple` value with `String` and `U32` fields:
+        ```
+        {
+          "kind": "Tuple",
+          "type_name": "CustomStructure",
+          "fields": [
+            {
+              "kind": "String",
+              "field_name": "favorite_color",
+              "value": "Blue"
+            },
+            {
+              "kind": "U32",
+              "field_name": "usage_counter",
+              "value": "462231"
+            }
+          ]
+        }
+        ```
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
+        type_name:
+          description: Object type name; available only when a schema is present and the type has a name.
+          type: string
+          nullable: true
+        field_name:
+          description: Field name; available only when the value is a child of a `Tuple` or `Enum`, which has a type with named fields.
+          type: string
+          nullable: true
+      discriminator:
+        propertyName: kind
+        mapping:
+          Bool: "#/components/schemas/ProgrammaticScryptoSborValueBool"
+          I8: "#/components/schemas/ProgrammaticScryptoSborValueI8"
+          I16: "#/components/schemas/ProgrammaticScryptoSborValueI16"
+          I32: "#/components/schemas/ProgrammaticScryptoSborValueI32"
+          I64: "#/components/schemas/ProgrammaticScryptoSborValueI64"
+          I128: "#/components/schemas/ProgrammaticScryptoSborValueI128"
+          U8: "#/components/schemas/ProgrammaticScryptoSborValueU8"
+          U16: "#/components/schemas/ProgrammaticScryptoSborValueU16"
+          U32: "#/components/schemas/ProgrammaticScryptoSborValueU32"
+          U64: "#/components/schemas/ProgrammaticScryptoSborValueU64"
+          U128: "#/components/schemas/ProgrammaticScryptoSborValueU128"
+          String: "#/components/schemas/ProgrammaticScryptoSborValueString"
+          Enum: "#/components/schemas/ProgrammaticScryptoSborValueEnum"
+          Array: "#/components/schemas/ProgrammaticScryptoSborValueArray"
+          Bytes: "#/components/schemas/ProgrammaticScryptoSborValueBytes"
+          Map: "#/components/schemas/ProgrammaticScryptoSborValueMap"
+          Tuple: "#/components/schemas/ProgrammaticScryptoSborValueTuple"
+          Reference: "#/components/schemas/ProgrammaticScryptoSborValueReference"
+          Own: "#/components/schemas/ProgrammaticScryptoSborValueOwn"
+          Decimal: "#/components/schemas/ProgrammaticScryptoSborValueDecimal"
+          PreciseDecimal: "#/components/schemas/ProgrammaticScryptoSborValuePreciseDecimal"
+          NonFungibleLocalId: "#/components/schemas/ProgrammaticScryptoSborValueNonFungibleLocalId"
+    ProgrammaticScryptoSborValueBool:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: boolean
+    ProgrammaticScryptoSborValueI8:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueI16:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueI32:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueI64:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueI128:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueU8:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueU16:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueU32:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueU64:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueU128:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueString:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueEnum:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - variant_id
+            - fields
+          properties:
+            variant_id:
+              type: integer
+              minimum: 0
+              maximum: 255
+            variant_name:
+              type: string
+            fields:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+    ProgrammaticScryptoSborValueArray:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - element_kind
+            - elements
+          properties:
+            element_kind:
+              $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
+            element_type_name:
+              type: string
+            elements:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+    ProgrammaticScryptoSborValueBytes:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - element_kind
+            - elements
+            - hex
+          properties:
+            element_kind:
+              $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
+            element_type_name:
+              type: string
+            hex:
+              $ref: "#/components/schemas/HexString"
+    ProgrammaticScryptoSborValueMap:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - key_kind
+            - value_kind
+            - entries
+          properties:
+            key_kind:
+              $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
+            key_type_name:
+              type: string
+            value_kind:
+              $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
+            value_type_name:
+              type: string
+            entries:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProgrammaticScryptoSborValueMapEntry"
+    ProgrammaticScryptoSborValueMapEntry:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        value:
+          $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+    ProgrammaticScryptoSborValueTuple:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - fields
+          properties:
+            fields:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+    ProgrammaticScryptoSborValueReference:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueOwn:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueDecimal:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValuePreciseDecimal:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    ProgrammaticScryptoSborValueNonFungibleLocalId:
+      allOf:
+        - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
