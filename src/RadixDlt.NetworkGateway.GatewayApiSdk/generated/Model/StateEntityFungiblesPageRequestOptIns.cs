@@ -98,15 +98,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityFungiblesPageRequestOptIns" /> class.
         /// </summary>
-        /// <param name="explicitMetadata">explicitMetadata.</param>
+        /// <param name="explicitMetadata">allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items..</param>
         public StateEntityFungiblesPageRequestOptIns(List<string> explicitMetadata = default(List<string>))
         {
             this.ExplicitMetadata = explicitMetadata;
         }
 
         /// <summary>
-        /// Gets or Sets ExplicitMetadata
+        /// allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.
         /// </summary>
+        /// <value>allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.</value>
         [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
         public List<string> ExplicitMetadata { get; set; }
 

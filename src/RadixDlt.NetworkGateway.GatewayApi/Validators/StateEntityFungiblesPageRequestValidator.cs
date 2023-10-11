@@ -74,7 +74,8 @@ internal class StateEntityFungiblesPageRequestValidator : AbstractValidator<Gate
     public StateEntityFungiblesPageRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        PaginableRequestValidator paginableRequestValidator)
+        PaginableRequestValidator paginableRequestValidator,
+        StateEntityFungiblesPageRequestOptInsValidator entityFungiblesPageRequestOptInsValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
@@ -95,5 +96,8 @@ internal class StateEntityFungiblesPageRequestValidator : AbstractValidator<Gate
         RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)
             .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+
+        RuleFor(x => x.OptIns)
+            .SetValidator(entityFungiblesPageRequestOptInsValidator);
     }
 }

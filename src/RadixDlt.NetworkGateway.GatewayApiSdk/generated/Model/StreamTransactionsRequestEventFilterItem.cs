@@ -132,13 +132,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="_event">_event (required).</param>
         /// <param name="emitterAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address..</param>
-        /// <param name="quantity">String-encoded decimal representing the amount of a related fungible resource..</param>
-        public StreamTransactionsRequestEventFilterItem(EventEnum _event = default(EventEnum), string emitterAddress = default(string), string resourceAddress = default(string), string quantity = default(string))
+        public StreamTransactionsRequestEventFilterItem(EventEnum _event = default(EventEnum), string emitterAddress = default(string), string resourceAddress = default(string))
         {
             this.Event = _event;
             this.EmitterAddress = emitterAddress;
             this.ResourceAddress = resourceAddress;
-            this.Quantity = quantity;
         }
 
         /// <summary>
@@ -156,13 +154,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "quantity", EmitDefaultValue = true)]
-        public string Quantity { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -173,7 +164,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  Event: ").Append(Event).Append("\n");
             sb.Append("  EmitterAddress: ").Append(EmitterAddress).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  Quantity: ").Append(Quantity).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -222,11 +212,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
                     this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && 
-                (
-                    this.Quantity == input.Quantity ||
-                    (this.Quantity != null &&
-                    this.Quantity.Equals(input.Quantity))
                 );
         }
 
@@ -247,10 +232,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
-                }
-                if (this.Quantity != null)
-                {
-                    hashCode = (hashCode * 59) + this.Quantity.GetHashCode();
                 }
                 return hashCode;
             }

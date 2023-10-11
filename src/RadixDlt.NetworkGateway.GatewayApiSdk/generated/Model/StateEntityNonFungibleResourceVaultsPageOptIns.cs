@@ -98,15 +98,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityNonFungibleResourceVaultsPageOptIns" /> class.
         /// </summary>
-        /// <param name="nonFungibleIncludeNfids">nonFungibleIncludeNfids.</param>
+        /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint..</param>
         public StateEntityNonFungibleResourceVaultsPageOptIns(bool nonFungibleIncludeNfids = default(bool))
         {
             this.NonFungibleIncludeNfids = nonFungibleIncludeNfids;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIncludeNfids
+        /// if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.</value>
         [DataMember(Name = "non_fungible_include_nfids", EmitDefaultValue = true)]
         public bool NonFungibleIncludeNfids { get; set; }
 

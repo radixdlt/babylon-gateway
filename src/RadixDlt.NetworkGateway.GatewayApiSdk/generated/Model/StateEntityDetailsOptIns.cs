@@ -98,11 +98,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsOptIns" /> class.
         /// </summary>
-        /// <param name="ancestorIdentities">ancestorIdentities.</param>
-        /// <param name="componentRoyaltyVaultBalance">componentRoyaltyVaultBalance.</param>
-        /// <param name="packageRoyaltyVaultBalance">packageRoyaltyVaultBalance.</param>
-        /// <param name="nonFungibleIncludeNfids">nonFungibleIncludeNfids.</param>
-        /// <param name="explicitMetadata">explicitMetadata.</param>
+        /// <param name="ancestorIdentities">if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned..</param>
+        /// <param name="componentRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned..</param>
+        /// <param name="packageRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned..</param>
+        /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint..</param>
+        /// <param name="explicitMetadata">allows specifying explicitly metadata properties which should be returned in response..</param>
         public StateEntityDetailsOptIns(bool ancestorIdentities = default(bool), bool componentRoyaltyVaultBalance = default(bool), bool packageRoyaltyVaultBalance = default(bool), bool nonFungibleIncludeNfids = default(bool), List<string> explicitMetadata = default(List<string>))
         {
             this.AncestorIdentities = ancestorIdentities;
@@ -113,32 +113,37 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets AncestorIdentities
+        /// if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned.</value>
         [DataMember(Name = "ancestor_identities", EmitDefaultValue = true)]
         public bool AncestorIdentities { get; set; }
 
         /// <summary>
-        /// Gets or Sets ComponentRoyaltyVaultBalance
+        /// if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned.</value>
         [DataMember(Name = "component_royalty_vault_balance", EmitDefaultValue = true)]
         public bool ComponentRoyaltyVaultBalance { get; set; }
 
         /// <summary>
-        /// Gets or Sets PackageRoyaltyVaultBalance
+        /// if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned.</value>
         [DataMember(Name = "package_royalty_vault_balance", EmitDefaultValue = true)]
         public bool PackageRoyaltyVaultBalance { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIncludeNfids
+        /// if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.</value>
         [DataMember(Name = "non_fungible_include_nfids", EmitDefaultValue = true)]
         public bool NonFungibleIncludeNfids { get; set; }
 
         /// <summary>
-        /// Gets or Sets ExplicitMetadata
+        /// allows specifying explicitly metadata properties which should be returned in response.
         /// </summary>
+        /// <value>allows specifying explicitly metadata properties which should be returned in response.</value>
         [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
         public List<string> ExplicitMetadata { get; set; }
 

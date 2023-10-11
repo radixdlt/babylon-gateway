@@ -98,15 +98,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionDetailsOptIns" /> class.
         /// </summary>
-        /// <param name="rawHex">rawHex.</param>
-        /// <param name="receiptStateChanges">receiptStateChanges.</param>
-        /// <param name="receiptFeeSummary">receiptFeeSummary.</param>
-        /// <param name="receiptFeeSource">receiptFeeSource.</param>
-        /// <param name="receiptFeeDestination">receiptFeeDestination.</param>
-        /// <param name="receiptCostingParameters">receiptCostingParameters.</param>
-        /// <param name="receiptEvents">receiptEvents.</param>
-        /// <param name="affectedGlobalEntities">affectedGlobalEntities.</param>
-        public TransactionDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptFeeSource = default(bool), bool receiptFeeDestination = default(bool), bool receiptCostingParameters = default(bool), bool receiptEvents = default(bool), bool affectedGlobalEntities = default(bool))
+        /// <param name="rawHex">if set to &#x60;true&#x60;, raw transaction hex is returned..</param>
+        /// <param name="receiptStateChanges">if set to &#x60;true&#x60;, state changes inside receipt object are returned..</param>
+        /// <param name="receiptFeeSummary">if set to &#x60;true&#x60;, fee summary inside receipt object is returned..</param>
+        /// <param name="receiptFeeSource">if set to &#x60;true&#x60;, fee source inside receipt object is returned..</param>
+        /// <param name="receiptFeeDestination">if set to &#x60;true&#x60;, fee destination inside receipt object is returned..</param>
+        /// <param name="receiptCostingParameters">if set to &#x60;true&#x60;, costing parameters inside receipt object is returned..</param>
+        /// <param name="receiptEvents">if set to &#x60;true&#x60;, events inside receipt object is returned..</param>
+        /// <param name="receiptOutput">(true by default) if set to &#x60;true&#x60;, transaction receipt output is returned..</param>
+        /// <param name="affectedGlobalEntities">if set to &#x60;true&#x60;, all affected global entities by given transaction are returned..</param>
+        public TransactionDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptFeeSource = default(bool), bool receiptFeeDestination = default(bool), bool receiptCostingParameters = default(bool), bool receiptEvents = default(bool), bool receiptOutput = default(bool), bool affectedGlobalEntities = default(bool))
         {
             this.RawHex = rawHex;
             this.ReceiptStateChanges = receiptStateChanges;
@@ -115,54 +116,70 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.ReceiptFeeDestination = receiptFeeDestination;
             this.ReceiptCostingParameters = receiptCostingParameters;
             this.ReceiptEvents = receiptEvents;
+            this.ReceiptOutput = receiptOutput;
             this.AffectedGlobalEntities = affectedGlobalEntities;
         }
 
         /// <summary>
-        /// Gets or Sets RawHex
+        /// if set to &#x60;true&#x60;, raw transaction hex is returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, raw transaction hex is returned.</value>
         [DataMember(Name = "raw_hex", EmitDefaultValue = true)]
         public bool RawHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReceiptStateChanges
+        /// if set to &#x60;true&#x60;, state changes inside receipt object are returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, state changes inside receipt object are returned.</value>
         [DataMember(Name = "receipt_state_changes", EmitDefaultValue = true)]
         public bool ReceiptStateChanges { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReceiptFeeSummary
+        /// if set to &#x60;true&#x60;, fee summary inside receipt object is returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, fee summary inside receipt object is returned.</value>
         [DataMember(Name = "receipt_fee_summary", EmitDefaultValue = true)]
         public bool ReceiptFeeSummary { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReceiptFeeSource
+        /// if set to &#x60;true&#x60;, fee source inside receipt object is returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, fee source inside receipt object is returned.</value>
         [DataMember(Name = "receipt_fee_source", EmitDefaultValue = true)]
         public bool ReceiptFeeSource { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReceiptFeeDestination
+        /// if set to &#x60;true&#x60;, fee destination inside receipt object is returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, fee destination inside receipt object is returned.</value>
         [DataMember(Name = "receipt_fee_destination", EmitDefaultValue = true)]
         public bool ReceiptFeeDestination { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReceiptCostingParameters
+        /// if set to &#x60;true&#x60;, costing parameters inside receipt object is returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, costing parameters inside receipt object is returned.</value>
         [DataMember(Name = "receipt_costing_parameters", EmitDefaultValue = true)]
         public bool ReceiptCostingParameters { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReceiptEvents
+        /// if set to &#x60;true&#x60;, events inside receipt object is returned.
         /// </summary>
+        /// <value>if set to &#x60;true&#x60;, events inside receipt object is returned.</value>
         [DataMember(Name = "receipt_events", EmitDefaultValue = true)]
         public bool ReceiptEvents { get; set; }
 
         /// <summary>
-        /// Gets or Sets AffectedGlobalEntities
+        /// (true by default) if set to &#x60;true&#x60;, transaction receipt output is returned.
         /// </summary>
+        /// <value>(true by default) if set to &#x60;true&#x60;, transaction receipt output is returned.</value>
+        [DataMember(Name = "receipt_output", EmitDefaultValue = true)]
+        public bool ReceiptOutput { get; set; }
+
+        /// <summary>
+        /// if set to &#x60;true&#x60;, all affected global entities by given transaction are returned.
+        /// </summary>
+        /// <value>if set to &#x60;true&#x60;, all affected global entities by given transaction are returned.</value>
         [DataMember(Name = "affected_global_entities", EmitDefaultValue = true)]
         public bool AffectedGlobalEntities { get; set; }
 
@@ -181,6 +198,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ReceiptFeeDestination: ").Append(ReceiptFeeDestination).Append("\n");
             sb.Append("  ReceiptCostingParameters: ").Append(ReceiptCostingParameters).Append("\n");
             sb.Append("  ReceiptEvents: ").Append(ReceiptEvents).Append("\n");
+            sb.Append("  ReceiptOutput: ").Append(ReceiptOutput).Append("\n");
             sb.Append("  AffectedGlobalEntities: ").Append(AffectedGlobalEntities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -246,6 +264,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ReceiptEvents.Equals(input.ReceiptEvents)
                 ) && 
                 (
+                    this.ReceiptOutput == input.ReceiptOutput ||
+                    this.ReceiptOutput.Equals(input.ReceiptOutput)
+                ) && 
+                (
                     this.AffectedGlobalEntities == input.AffectedGlobalEntities ||
                     this.AffectedGlobalEntities.Equals(input.AffectedGlobalEntities)
                 );
@@ -267,6 +289,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 hashCode = (hashCode * 59) + this.ReceiptFeeDestination.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptCostingParameters.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptEvents.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptOutput.GetHashCode();
                 hashCode = (hashCode * 59) + this.AffectedGlobalEntities.GetHashCode();
                 return hashCode;
             }

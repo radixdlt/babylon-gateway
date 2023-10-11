@@ -161,9 +161,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StreamTransactionsRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="fromLedgerState">fromLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limitPerPage">The page size requested..</param>
-        /// <param name="fromLedgerState">fromLedgerState.</param>
         /// <param name="kindFilter">Limit returned transactions by their kind. Defaults to &#x60;user&#x60;..</param>
         /// <param name="manifestAccountsWithdrawnFromFilter">manifestAccountsWithdrawnFromFilter.</param>
         /// <param name="manifestAccountsDepositedIntoFilter">manifestAccountsDepositedIntoFilter.</param>
@@ -172,12 +172,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="eventsFilter">eventsFilter.</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
         /// <param name="optIns">optIns.</param>
-        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
+        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
         {
             this.AtLedgerState = atLedgerState;
+            this.FromLedgerState = fromLedgerState;
             this.Cursor = cursor;
             this.LimitPerPage = limitPerPage;
-            this.FromLedgerState = fromLedgerState;
             this.KindFilter = kindFilter;
             this.ManifestAccountsWithdrawnFromFilter = manifestAccountsWithdrawnFromFilter;
             this.ManifestAccountsDepositedIntoFilter = manifestAccountsDepositedIntoFilter;
@@ -195,6 +195,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
+        /// Gets or Sets FromLedgerState
+        /// </summary>
+        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector FromLedgerState { get; set; }
+
+        /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
         /// </summary>
         /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
@@ -207,12 +213,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>The page size requested.</value>
         [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
         public int? LimitPerPage { get; set; }
-
-        /// <summary>
-        /// Gets or Sets FromLedgerState
-        /// </summary>
-        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets ManifestAccountsWithdrawnFromFilter
@@ -259,9 +259,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StreamTransactionsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
-            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
             sb.Append("  KindFilter: ").Append(KindFilter).Append("\n");
             sb.Append("  ManifestAccountsWithdrawnFromFilter: ").Append(ManifestAccountsWithdrawnFromFilter).Append("\n");
             sb.Append("  ManifestAccountsDepositedIntoFilter: ").Append(ManifestAccountsDepositedIntoFilter).Append("\n");
@@ -311,6 +311,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
+                    this.FromLedgerState == input.FromLedgerState ||
+                    (this.FromLedgerState != null &&
+                    this.FromLedgerState.Equals(input.FromLedgerState))
+                ) && 
+                (
                     this.Cursor == input.Cursor ||
                     (this.Cursor != null &&
                     this.Cursor.Equals(input.Cursor))
@@ -319,11 +324,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LimitPerPage == input.LimitPerPage ||
                     (this.LimitPerPage != null &&
                     this.LimitPerPage.Equals(input.LimitPerPage))
-                ) && 
-                (
-                    this.FromLedgerState == input.FromLedgerState ||
-                    (this.FromLedgerState != null &&
-                    this.FromLedgerState.Equals(input.FromLedgerState))
                 ) && 
                 (
                     this.KindFilter == input.KindFilter ||
@@ -383,6 +383,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
+                if (this.FromLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
+                }
                 if (this.Cursor != null)
                 {
                     hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
@@ -390,10 +394,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.LimitPerPage != null)
                 {
                     hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
-                }
-                if (this.FromLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.KindFilter.GetHashCode();
                 if (this.ManifestAccountsWithdrawnFromFilter != null)

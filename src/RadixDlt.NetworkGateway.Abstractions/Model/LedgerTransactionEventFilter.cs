@@ -79,6 +79,4 @@ public class LedgerTransactionEventFilter
     public EntityAddress? EmitterEntityAddress { get; set; }
 
     public EntityAddress? ResourceAddress { get; set; }
-
-    public TokenAmount? Qunatity { get; set; }
 }

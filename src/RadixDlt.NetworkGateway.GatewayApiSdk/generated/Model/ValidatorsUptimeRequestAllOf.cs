@@ -98,19 +98,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorsUptimeRequestAllOf" /> class.
         /// </summary>
-        /// <param name="fromLedgerState">fromLedgerState.</param>
         /// <param name="validatorAddresses">validatorAddresses.</param>
-        public ValidatorsUptimeRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), List<string> validatorAddresses = default(List<string>))
+        public ValidatorsUptimeRequestAllOf(List<string> validatorAddresses = default(List<string>))
         {
-            this.FromLedgerState = fromLedgerState;
             this.ValidatorAddresses = validatorAddresses;
         }
-
-        /// <summary>
-        /// Gets or Sets FromLedgerState
-        /// </summary>
-        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets ValidatorAddresses
@@ -126,7 +118,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorsUptimeRequestAllOf {\n");
-            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
             sb.Append("  ValidatorAddresses: ").Append(ValidatorAddresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -164,11 +155,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.FromLedgerState == input.FromLedgerState ||
-                    (this.FromLedgerState != null &&
-                    this.FromLedgerState.Equals(input.FromLedgerState))
-                ) && 
-                (
                     this.ValidatorAddresses == input.ValidatorAddresses ||
                     this.ValidatorAddresses != null &&
                     input.ValidatorAddresses != null &&
@@ -185,10 +171,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.FromLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
-                }
                 if (this.ValidatorAddresses != null)
                 {
                     hashCode = (hashCode * 59) + this.ValidatorAddresses.GetHashCode();
