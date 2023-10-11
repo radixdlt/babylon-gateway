@@ -5,7 +5,7 @@ Release Date: _unreleased_
 - added new optIn `receipt_output` to `/stream/transactions`, and `/transaction/committed-details` endpoints. Temporarily set by default to true, to allow client's migration.
 
 ## 1.0.1 - Babylon 
-Release Date: _unreleased_
+Release Date: 10.10.2023
 
 - Fixed missing `RecordTopOfDbLedger` observer call in `LedgerTransactionsProcessor`.
 - Fixed invalid response model for HTTP 400 Bad Request responses on input parameter validation failure.

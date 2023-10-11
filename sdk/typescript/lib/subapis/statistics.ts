@@ -1,3 +1,4 @@
+import { MAX_VALIDATORS_UPTIME_COUNT } from '../constants'
 import {
   StatisticsApi,
   ValidatorUptimeCollectionItem,
@@ -9,7 +10,7 @@ import { RuntimeConfiguration } from '../runtime'
 export class Statistics {
   constructor(
     public innerClient: StatisticsApi,
-    public configuration: RuntimeConfiguration
+    public configuration?: RuntimeConfiguration
   ) {}
 
   /**
@@ -26,10 +27,15 @@ export class Statistics {
     from?: Date | number,
     to?: Date | number
   ): Promise<ValidatorUptimeCollectionItem[]> {
-    if (addresses.length > this.configuration.maxValidatorsUptimeCount) {
+    if (
+      addresses.length >
+      (this.configuration?.maxValidatorsUptimeCount ||
+        MAX_VALIDATORS_UPTIME_COUNT)
+    ) {
       const chunks = chunkFn(
         addresses,
-        this.configuration.maxValidatorsUptimeCount
+        this.configuration?.maxValidatorsUptimeCount ||
+          MAX_VALIDATORS_UPTIME_COUNT
       )
       return Promise.all(
         chunks.map((chunk) => this.getValidatorsUptimeFromTo(chunk, from, to))
