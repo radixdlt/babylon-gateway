@@ -145,7 +145,8 @@ public static class ServiceCollectionExtensions
         services.TryAddScoped<IValidatorStateHandler, DefaultValidatorStateHandler>();
         services.TryAddScoped<INonFungibleHandler, DefaultNonFungibleHandler>();
         services.TryAddScoped<IKeyValueStoreHandler, DefaultKeyValueStoreHandler>();
-        services.TryAddScoped<IPreviewService, PreviewService>();
+        services.TryAddScoped<ITransactionPreviewService, TransactionPreviewService>();
+        services.TryAddScoped<ITransactionOutcomeService, TransactionOutcomeService>();
         services.TryAddScoped<ISubmissionService, SubmissionService>();
     }
 

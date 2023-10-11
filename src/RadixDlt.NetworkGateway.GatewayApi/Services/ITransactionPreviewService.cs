@@ -62,18 +62,99 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface IPreviewServiceObserver
+public interface ITransactionPreviewService
 {
-    ValueTask PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, string targetNode);
+    Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default);
+}
 
-    ValueTask PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, string targetNode, GatewayModel.TransactionPreviewResponse response);
+internal class TransactionPreviewService : ITransactionPreviewService
+{
+    private readonly ICoreApiHandler _coreApiHandler;
+    private readonly IEnumerable<ITransactionPreviewServiceObserver> _observers;
 
-    ValueTask HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, string targetNode, Exception exception);
+    public TransactionPreviewService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionPreviewServiceObserver> observers)
+    {
+        _coreApiHandler = coreApiHandler;
+        _observers = observers;
+    }
+
+    public async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
+    {
+        try
+        {
+            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
+            await _observers.ForEachAsync(x => x.PreHandlePreviewRequest(request, selectedNode.Name));
+
+            var response = await HandlePreviewAndCreateResponse(request, token);
+
+            await _observers.ForEachAsync(x => x.PostHandlePreviewRequest(request, selectedNode.Name, response));
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
+            await _observers.ForEachAsync(x => x.HandlePreviewRequestFailed(request, selectedNode.Name, ex));
+
+            throw;
+        }
+    }
+
+    private async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewAndCreateResponse(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
+    {
+        CoreModel.PublicKey ToCoreModel(GatewayModel.PublicKey publicKey) => publicKey switch
+        {
+            GatewayModel.PublicKeyEcdsaSecp256k1 ecdsaSecp256K1 => new CoreModel.EcdsaSecp256k1PublicKey(ecdsaSecp256K1.KeyHex),
+            GatewayModel.PublicKeyEddsaEd25519 eddsaEd25519 => new CoreModel.EddsaEd25519PublicKey(eddsaEd25519.KeyHex),
+            _ => throw new UnreachableException($"Didn't expect {publicKey.GetType().Name} type"),
+        };
+
+        var coreRequestFlags = new CoreModel.TransactionPreviewRequestFlags(
+            useFreeCredit: request.Flags.UseFreeCredit,
+            assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
+            skipEpochCheck: request.Flags.SkipEpochCheck);
+
+        var coreRequest = new CoreModel.TransactionPreviewRequest(
+            network: _coreApiHandler.GetNetworkName(),
+            manifest: request.Manifest,
+            blobsHex: request.BlobsHex,
+            startEpochInclusive: request.StartEpochInclusive,
+            endEpochExclusive: request.EndEpochExclusive,
+            notaryPublicKey: request.NotaryPublicKey != null ? ToCoreModel(request.NotaryPublicKey) : null,
+            notaryIsSignatory: request.NotaryIsSignatory,
+            tipPercentage: request.TipPercentage,
+            nonce: request.Nonce,
+            signerPublicKeys: request.SignerPublicKeys.Select(ToCoreModel).ToList(),
+            flags: coreRequestFlags);
+
+        var result = await _coreApiHandler.TransactionPreview(coreRequest, token);
+
+        if (result.Succeeded)
+        {
+            var coreResponse = result.SuccessResponse;
+
+            return new GatewayModel.TransactionPreviewResponse(
+                encodedReceipt: coreResponse.EncodedReceipt,
+                receipt: coreResponse.Receipt,
+                resourceChanges: coreResponse.InstructionResourceChanges.Cast<object>().ToList(),
+                logs: coreResponse.Logs.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
+        }
+
+        throw InvalidRequestException.FromOtherError(result.FailureResponse.Message);
+    }
 }

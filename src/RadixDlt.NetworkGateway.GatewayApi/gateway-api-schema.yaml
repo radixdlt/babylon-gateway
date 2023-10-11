@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.0.0
+  version: v1.1.0
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
@@ -280,6 +280,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TransactionCommittedDetailsResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+  "/transaction/committed-outcome":
+    post:
+      operationId: TransactionCommittedOutcome
+      summary: Get Committed Transaction Outcome
+      description: |
+        Returns the committed outcome of the transaction for a given transaction identifier.
+        Transaction identifiers which don't correspond to a committed transaction will return a `TransactionNotFoundError`.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionCommittedOutcomeRequest"
+      responses:
+        "200":
+          description: Transaction Outcome
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionCommittedOutcomeResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
   "/transaction/status":
@@ -1870,6 +1894,119 @@ components:
           properties:
             transaction:
               $ref: "#/components/schemas/CommittedTransactionInfo"
+
+    TransactionCommittedOutcomeRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          required:
+            - intent_hash
+          properties:
+            intent_hash:
+              $ref: "#/components/schemas/HashBech32mString"
+      example:
+        intent_hash: "<transaction-intent-hash>"
+    TransactionCommittedOutcomeResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - fungible_entity_balance_changes
+            - non_fungible_entity_balance_changes
+          properties:
+            fungible_entity_balance_changes:
+              description: |
+                A list of all fungible balance changes per entity.
+              type: array
+              items:
+                $ref: "#/components/schemas/TransactionCommittedOutcomeResponseFungibleChanges"
+            non_fungible_entity_balance_changes:
+              description: |
+                A list of all non-fungible changes per entity and resource.
+              type: array
+              items:
+                $ref: "#/components/schemas/TransactionCommittedOutcomeResponseNonFungibleChanges"
+    TransactionCommittedOutcomeResponseFungibleChanges:
+      type: object
+      required:
+        - entity_address
+        - fee_balance_changes
+        - non_fee_balance_changes
+      properties:
+        entity_address:
+          $ref: "#/components/schemas/Address"
+        fee_balance_changes:
+          type: array
+          description: |
+            If present, this field indicates fee-related balance changes, for example:
+
+            - Payment of the fee (including tip and royalty)
+            - Distribution of royalties
+            - Distribution of the fee and tip to the consensus-manager, for distributing to the relevant
+              validator/s at end of epoch
+
+            See https://www.radixdlt.com/blog/how-fees-work-in-babylon for further information on how
+            fee payment works at Babylon.
+          items:
+            $ref: "#/components/schemas/TransactionCommittedOutcomeResponseFungibleFeeBalanceChange"
+        non_fee_balance_changes:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionCommittedOutcomeResponseFungibleBalanceChange"
+    TransactionCommittedOutcomeResponseFungibleFeeBalanceChange:
+      type: object
+      required:
+        - type
+        - resource_address
+        - balance_change
+      properties:
+        type:
+          $ref: "#/components/schemas/LtsFeeFungibleResourceBalanceChangeType"
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        balance_change:
+          type: string
+          description: |
+            The string-encoded decimal representing the amount of change for the fungible resource.
+    LtsFeeFungibleResourceBalanceChangeType:
+      type: string
+      enum:
+        - FeePayment
+        - FeeDistributed
+        - TipDistributed
+        - RoyaltyDistributed
+    TransactionCommittedOutcomeResponseFungibleBalanceChange:
+      type: object
+      required:
+        - resource_address
+        - balance_change
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        balance_change:
+          type: string
+          description: |
+            The string-encoded decimal representing the amount of change for the fungible resource.
+    TransactionCommittedOutcomeResponseNonFungibleChanges:
+      type: object
+      required:
+        - entity_address
+        - resource_address
+        - added
+        - removed
+      properties:
+        entity_address:
+          $ref: "#/components/schemas/Address"
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        added:
+          type: array
+          items:
+            $ref: "#/components/schemas/NonFungibleId"
+        removed:
+          type: array
+          items:
+            $ref: "#/components/schemas/NonFungibleId"
 
     #
     # /stream/* Request & Response Types

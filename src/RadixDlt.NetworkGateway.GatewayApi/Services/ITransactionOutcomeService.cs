@@ -67,7 +67,6 @@ using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,82 +76,70 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface IPreviewService
+public interface ITransactionOutcomeService
 {
-    Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionCommittedOutcomeResponse> HandleOutcomeRequest(
+        GatewayModel.LedgerState ledgerState,
+        long stateVersion,
+        CancellationToken token = default);
 }
 
-internal class PreviewService : IPreviewService
+internal class TransactionOutcomeService : ITransactionOutcomeService
 {
     private readonly ICoreApiHandler _coreApiHandler;
-    private readonly IEnumerable<IPreviewServiceObserver> _observers;
+    private readonly IEnumerable<ITransactionOutcomeServiceObserver> _observers;
 
-    public PreviewService(ICoreApiHandler coreApiHandler, IEnumerable<IPreviewServiceObserver> observers)
+    public TransactionOutcomeService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionOutcomeServiceObserver> observers)
     {
         _coreApiHandler = coreApiHandler;
         _observers = observers;
     }
 
-    public async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionCommittedOutcomeResponse> HandleOutcomeRequest(
+        GatewayModel.LedgerState ledgerState,
+        long stateVersion,
+        CancellationToken token = default)
     {
         try
         {
             var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-            await _observers.ForEachAsync(x => x.PreHandlePreviewRequest(request, selectedNode.Name));
+            await _observers.ForEachAsync(x => x.PreHandleOutcomeRequest(stateVersion, selectedNode.Name));
 
-            var response = await HandlePreviewAndCreateResponse(request, token);
+            var response = await HandleOutcomesAndCreateResponse(ledgerState, stateVersion, token);
 
-            await _observers.ForEachAsync(x => x.PostHandlePreviewRequest(request, selectedNode.Name, response));
+            await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(stateVersion, selectedNode.Name, response));
 
             return response;
         }
         catch (Exception ex)
         {
             var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-            await _observers.ForEachAsync(x => x.HandlePreviewRequestFailed(request, selectedNode.Name, ex));
+            await _observers.ForEachAsync(x => x.HandleOutcomeRequestFailed(stateVersion, selectedNode.Name, ex));
 
             throw;
         }
     }
 
-    private async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewAndCreateResponse(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
+    private async Task<GatewayModel.TransactionCommittedOutcomeResponse> HandleOutcomesAndCreateResponse(
+        GatewayModel.LedgerState ledgerState,
+        long stateVersion,
+        CancellationToken token)
     {
-        CoreModel.PublicKey ToCoreModel(GatewayModel.PublicKey publicKey) => publicKey switch
-        {
-            GatewayModel.PublicKeyEcdsaSecp256k1 ecdsaSecp256K1 => new CoreModel.EcdsaSecp256k1PublicKey(ecdsaSecp256K1.KeyHex),
-            GatewayModel.PublicKeyEddsaEd25519 eddsaEd25519 => new CoreModel.EddsaEd25519PublicKey(eddsaEd25519.KeyHex),
-            _ => throw new UnreachableException($"Didn't expect {publicKey.GetType().Name} type"),
-        };
-
-        var coreRequestFlags = new CoreModel.TransactionPreviewRequestFlags(
-            useFreeCredit: request.Flags.UseFreeCredit,
-            assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
-            skipEpochCheck: request.Flags.SkipEpochCheck);
-
-        var coreRequest = new CoreModel.TransactionPreviewRequest(
+        var coreRequest = new CoreModel.LtsStreamTransactionOutcomesRequest(
             network: _coreApiHandler.GetNetworkName(),
-            manifest: request.Manifest,
-            blobsHex: request.BlobsHex,
-            startEpochInclusive: request.StartEpochInclusive,
-            endEpochExclusive: request.EndEpochExclusive,
-            notaryPublicKey: request.NotaryPublicKey != null ? ToCoreModel(request.NotaryPublicKey) : null,
-            notaryIsSignatory: request.NotaryIsSignatory,
-            tipPercentage: request.TipPercentage,
-            nonce: request.Nonce,
-            signerPublicKeys: request.SignerPublicKeys.Select(ToCoreModel).ToList(),
-            flags: coreRequestFlags);
+            fromStateVersion: stateVersion,
+            limit: 1);
 
-        var result = await _coreApiHandler.PreviewTransaction(coreRequest, token);
+        var result = await _coreApiHandler.TransactionOutcome(coreRequest, token);
 
         if (result.Succeeded)
         {
-            var coreResponse = result.SuccessResponse;
+            var coreResponse = result.SuccessResponse.CommittedTransactionOutcomes.Single();
 
-            return new GatewayModel.TransactionPreviewResponse(
-                encodedReceipt: coreResponse.EncodedReceipt,
-                receipt: coreResponse.Receipt,
-                resourceChanges: coreResponse.InstructionResourceChanges.Cast<object>().ToList(),
-                logs: coreResponse.Logs.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
+            var fungibleEntityBalanceChanges = coreResponse.FungibleEntityBalanceChanges.Select(x => x.ToGatewayModel()).ToList();
+            var nonFungibleEntityBalanceChanges = coreResponse.NonFungibleEntityBalanceChanges.Select(x => x.ToGatewayModel()).ToList();
+
+            return new GatewayModel.TransactionCommittedOutcomeResponse(ledgerState, fungibleEntityBalanceChanges, nonFungibleEntityBalanceChanges);
         }
 
         throw InvalidRequestException.FromOtherError(result.FailureResponse.Message);
