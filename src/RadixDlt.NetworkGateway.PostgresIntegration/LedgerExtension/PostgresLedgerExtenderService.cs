@@ -508,12 +508,9 @@ UPDATE pending_transactions
                     };
 
                     ledgerTransaction.StateVersion = stateVersion;
-                    ledgerTransaction.LedgerHashes = new LedgerHashes
-                    {
-                        TransactionTreeHash = committedTransaction.ResultantStateIdentifiers.TransactionTreeHash,
-                        ReceiptTreeHash = committedTransaction.ResultantStateIdentifiers.ReceiptTreeHash,
-                        StateTreeHash = committedTransaction.ResultantStateIdentifiers.StateTreeHash,
-                    };
+                    ledgerTransaction.TransactionTreeHash = committedTransaction.ResultantStateIdentifiers.TransactionTreeHash;
+                    ledgerTransaction.ReceiptTreeHash = committedTransaction.ResultantStateIdentifiers.ReceiptTreeHash;
+                    ledgerTransaction.StateTreeHash = committedTransaction.ResultantStateIdentifiers.StateTreeHash;
                     ledgerTransaction.Epoch = summary.Epoch;
                     ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
                     ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
@@ -524,20 +521,14 @@ UPDATE pending_transactions
                     ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                     ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                     ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
-                    ledgerTransaction.EngineReceipt = new TransactionReceipt
-                    {
-                        StateUpdates = committedTransaction.Receipt.StateUpdates.ToJson(),
-                        Status = committedTransaction.Receipt.Status.ToModel(),
-                        FeeSummary = committedTransaction.Receipt.FeeSummary.ToJson(),
-                        ErrorMessage = committedTransaction.Receipt.ErrorMessage,
-                        Output = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
-                        NextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson(),
-                        CostingParameters = committedTransaction.Receipt.CostingParameters.ToJson(),
-                        FeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson(),
-                        FeeSource = committedTransaction.Receipt.FeeSource?.ToJson(),
-                        Events = default!, // will be filled later on.
-                    };
-
+                    ledgerTransaction.ReceiptStateUpdates = committedTransaction.Receipt.StateUpdates.ToJson();
+                    ledgerTransaction.ReceiptStatus = committedTransaction.Receipt.Status.ToModel();
+                    ledgerTransaction.ReceiptFeeSummary = committedTransaction.Receipt.FeeSummary.ToJson();
+                    ledgerTransaction.ReceiptErrorMessage = committedTransaction.Receipt.ErrorMessage;
+                    ledgerTransaction.ReceiptOutput = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null;
+                    ledgerTransaction.ReceiptNextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson();
+                    ledgerTransaction.ReceiptCostingParameters = committedTransaction.Receipt.CostingParameters.ToJson();
+                    ledgerTransaction.ReceiptFeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson();
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
 
                     if (committedTransaction.Receipt.NextEpoch != null)
@@ -1175,16 +1166,13 @@ UPDATE pending_transactions
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
 
                     transaction.AffectedGlobalEntities = affectedGlobalEntities.ToArray();
-                    transaction.EngineReceipt.Events = new ReceiptEvents
-                    {
-                        Emitters = events.Select(e => e.Type.Emitter.ToJson()).ToArray(),
-                        Names = events.Select(e => e.Type.Name).ToArray(),
-                        Sbors = events.Select(e => e.Data.GetDataBytes()).ToArray(),
-                        SchemaEntityIds = events.Select(e => referencedEntities.Get((EntityAddress)e.Type.TypeReference.FullTypeId.EntityAddress).DatabaseId).ToArray(),
-                        SchemaHashes = events.Select(e => e.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray(),
-                        TypeIndexes = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray(),
-                        SborTypeKinds = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray(),
-                    };
+                    transaction.ReceiptEventEmitters = events.Select(e => e.Type.Emitter.ToJson()).ToArray();
+                    transaction.ReceiptEventNames = events.Select(e => e.Type.Name).ToArray();
+                    transaction.ReceiptEventSbors = events.Select(e => e.Data.GetDataBytes()).ToArray();
+                    transaction.ReceiptEventSchemaEntityIds = events.Select(e => referencedEntities.Get((EntityAddress)e.Type.TypeReference.FullTypeId.EntityAddress).DatabaseId).ToArray();
+                    transaction.ReceiptEventSchemaHashes = events.Select(e => e.Type.TypeReference.FullTypeId.SchemaHash.ConvertFromHex()).ToArray();
+                    transaction.ReceiptEventTypeIndexes = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray();
+                    transaction.ReceiptEventSborTypeKinds = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray();
 
                     ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntities.Select(affectedEntity => new AffectedGlobalEntityTransactionMarker
                     {

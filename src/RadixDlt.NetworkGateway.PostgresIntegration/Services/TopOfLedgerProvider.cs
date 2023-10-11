@@ -103,7 +103,9 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
             .Select(lt => new
             {
                 lt.StateVersion,
-                lt.LedgerHashes,
+                lt.StateTreeHash,
+                lt.TransactionTreeHash,
+                lt.ReceiptTreeHash,
                 lt.RoundTimestamp,
                 lt.NormalizedRoundTimestamp,
                 lt.CreatedTimestamp,
@@ -118,9 +120,9 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
             ? PreGenesisTransactionSummary()
             : new TransactionSummary(
                 StateVersion: lastTransaction.StateVersion,
-                TransactionTreeHash: lastTransaction.LedgerHashes.TransactionTreeHash,
-                ReceiptTreeHash: lastTransaction.LedgerHashes.ReceiptTreeHash,
-                StateTreeHash: lastTransaction.LedgerHashes.StateTreeHash,
+                TransactionTreeHash: lastTransaction.TransactionTreeHash,
+                ReceiptTreeHash: lastTransaction.ReceiptTreeHash,
+                StateTreeHash: lastTransaction.StateTreeHash,
                 RoundTimestamp: lastTransaction.RoundTimestamp,
                 NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
                 CreatedTimestamp: lastTransaction.CreatedTimestamp,

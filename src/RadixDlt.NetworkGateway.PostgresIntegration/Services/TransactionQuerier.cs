@@ -606,11 +606,43 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         var transactions = await _dbContext
             .LedgerTransactions
-            .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
+            .FromSqlInterpolated(@$"
+WITH configuration AS (
+    SELECT
+        {optIns.RawHex} AS with_raw_payload,
+        true AS with_receipt_costing_parameters,
+        true AS with_receipt_fee_summary,
+        true AS with_receipt_next_epoch,
+        true AS with_receipt_output,
+        {optIns.ReceiptStateChanges} AS with_receipt_state_updates,
+        {optIns.ReceiptEvents} AS with_receipt_events
+)
+SELECT
+    state_version, epoch, round_in_epoch, index_in_epoch,
+    index_in_round, fee_paid, tip_paid, affected_global_entities,
+    round_timestamp, created_timestamp, normalized_round_timestamp,
+    receipt_status, receipt_fee_source, receipt_fee_destination, receipt_error_message,
+    transaction_tree_hash, receipt_tree_hash, state_tree_hash,
+    discriminator, payload_hash, intent_hash, signed_intent_hash, message,
+    CASE WHEN configuration.with_raw_payload THEN raw_payload ELSE ''::bytea END AS raw_payload,
+    CASE WHEN configuration.with_receipt_costing_parameters THEN receipt_costing_parameters ELSE '{{}}'::jsonb END AS receipt_costing_parameters,
+    CASE WHEN configuration.with_receipt_fee_summary THEN receipt_fee_summary ELSE '{{}}'::jsonb END AS receipt_fee_summary,
+    CASE WHEN configuration.with_receipt_next_epoch THEN receipt_next_epoch ELSE '{{}}'::jsonb END AS receipt_next_epoch,
+    CASE WHEN configuration.with_receipt_output THEN receipt_output ELSE '{{}}'::jsonb END AS receipt_output,
+    CASE WHEN configuration.with_receipt_state_updates THEN receipt_state_updates ELSE '{{}}'::jsonb END AS receipt_state_updates,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_emitters ELSE '{{}}'::jsonb[] END AS receipt_event_emitters,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_names ELSE '{{}}'::text[] END AS receipt_event_names,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_sbors ELSE '{{}}'::bytea[] END AS receipt_event_sbors,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_entity_ids ELSE '{{}}'::bigint[] END AS receipt_event_schema_entity_ids,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_hashes ELSE '{{}}'::bytea[] END AS receipt_event_schema_hashes,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_type_indexes ELSE '{{}}'::bigint[] END AS receipt_event_type_indexes,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_sbor_type_kinds ELSE '{{}}'::sbor_type_kind[] END AS receipt_event_sbor_type_kinds
+FROM ledger_transactions, configuration
+WHERE state_version = ANY({transactionStateVersions})")
             .AnnotateMetricName("GetTransactions")
             .ToListAsync(token);
 
-        var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
+        var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToHashSet().ToList(), token);
 
         var schemaLookups = transactions
             .SelectMany(x => x.EngineReceipt.Events.GetEventLookups())

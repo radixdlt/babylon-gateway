@@ -89,7 +89,9 @@ internal sealed class CommittedStateIdentifiersReader : ICommittedStateIdentifie
             .Select(e => new
             {
                 e.StateVersion,
-                e.LedgerHashes,
+                e.StateTreeHash,
+                e.TransactionTreeHash,
+                e.ReceiptTreeHash,
             })
             .AsNoTracking()
             .AnnotateMetricName()
@@ -102,8 +104,8 @@ internal sealed class CommittedStateIdentifiersReader : ICommittedStateIdentifie
 
         return new GatewayModel.CommittedStateIdentifiers(
             transaction.StateVersion,
-            transaction.LedgerHashes.StateTreeHash,
-            transaction.LedgerHashes.TransactionTreeHash,
-            transaction.LedgerHashes.ReceiptTreeHash);
+            transaction.StateTreeHash,
+            transaction.TransactionTreeHash,
+            transaction.ReceiptTreeHash);
     }
 }
