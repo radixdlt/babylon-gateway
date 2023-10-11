@@ -2,6 +2,7 @@
 Release Date: _unreleased_
 
 - Changed default configuration value of MaxPageSize for endpoints to 100. Validate if max page size is higher than DefaultPageSize.
+- added new optIn `receipt_output` to `/stream/transactions`, and `/transaction/committed-details` endpoints. Temporarily set by default to true, to allow client's migration.
 
 ## 1.0.1 - Babylon 
 Release Date: _unreleased_
