@@ -95,7 +95,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Validators Uptime
         /// </summary>
         /// <remarks>
-        /// Returns validators uptime data for time range limited by from_state_version and at_state_version. &#x60;at_state_version&#x60; defines upper boundary (inclusive) for queried data. i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from genesis till 10. &#x60;from_state_version&#x60; defines lower boundary (inclusive) for queried data. i.e &#x60;{ from_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from epoch 10 till current max ledger tip. it&#39;s possible to define both at once i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10}, from_state_version &#x3D; {epoch &#x3D; 25} }&#x60; will return uptime statistics for epochs from 10 till 25. you can use one of &#x60;state_version&#x60;, &#x60;epoch&#x60;, &#x60;epoch&#x60; and &#x60;round&#x60;, or &#x60;timestamp&#x60; to define from/at state version parameter, but then ongoing epoch will be selected and used for querying data. i.e for request with &#x60;{ from_state_version &#x3D; { state_version &#x3D; 100 000}, at_state_version &#x3D; { state_version &#x3D; 300 000} }&#x60; gateway api will check in which epoch transactions with state version 100 000 and 300 000 and then use that as inclusive boundary for request. 
+        /// Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="validatorsUptimeRequest"></param>
@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Validators Uptime
         /// </summary>
         /// <remarks>
-        /// Returns validators uptime data for time range limited by from_state_version and at_state_version. &#x60;at_state_version&#x60; defines upper boundary (inclusive) for queried data. i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from genesis till 10. &#x60;from_state_version&#x60; defines lower boundary (inclusive) for queried data. i.e &#x60;{ from_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from epoch 10 till current max ledger tip. it&#39;s possible to define both at once i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10}, from_state_version &#x3D; {epoch &#x3D; 25} }&#x60; will return uptime statistics for epochs from 10 till 25. you can use one of &#x60;state_version&#x60;, &#x60;epoch&#x60;, &#x60;epoch&#x60; and &#x60;round&#x60;, or &#x60;timestamp&#x60; to define from/at state version parameter, but then ongoing epoch will be selected and used for querying data. i.e for request with &#x60;{ from_state_version &#x3D; { state_version &#x3D; 100 000}, at_state_version &#x3D; { state_version &#x3D; 300 000} }&#x60; gateway api will check in which epoch transactions with state version 100 000 and 300 000 and then use that as inclusive boundary for request. 
+        /// Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="validatorsUptimeRequest"></param>
@@ -125,7 +125,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Validators Uptime
         /// </summary>
         /// <remarks>
-        /// Returns validators uptime data for time range limited by from_state_version and at_state_version. &#x60;at_state_version&#x60; defines upper boundary (inclusive) for queried data. i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from genesis till 10. &#x60;from_state_version&#x60; defines lower boundary (inclusive) for queried data. i.e &#x60;{ from_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from epoch 10 till current max ledger tip. it&#39;s possible to define both at once i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10}, from_state_version &#x3D; {epoch &#x3D; 25} }&#x60; will return uptime statistics for epochs from 10 till 25. you can use one of &#x60;state_version&#x60;, &#x60;epoch&#x60;, &#x60;epoch&#x60; and &#x60;round&#x60;, or &#x60;timestamp&#x60; to define from/at state version parameter, but then ongoing epoch will be selected and used for querying data. i.e for request with &#x60;{ from_state_version &#x3D; { state_version &#x3D; 100 000}, at_state_version &#x3D; { state_version &#x3D; 300 000} }&#x60; gateway api will check in which epoch transactions with state version 100 000 and 300 000 and then use that as inclusive boundary for request. 
+        /// Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="validatorsUptimeRequest"></param>
@@ -137,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Validators Uptime
         /// </summary>
         /// <remarks>
-        /// Returns validators uptime data for time range limited by from_state_version and at_state_version. &#x60;at_state_version&#x60; defines upper boundary (inclusive) for queried data. i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from genesis till 10. &#x60;from_state_version&#x60; defines lower boundary (inclusive) for queried data. i.e &#x60;{ from_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from epoch 10 till current max ledger tip. it&#39;s possible to define both at once i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10}, from_state_version &#x3D; {epoch &#x3D; 25} }&#x60; will return uptime statistics for epochs from 10 till 25. you can use one of &#x60;state_version&#x60;, &#x60;epoch&#x60;, &#x60;epoch&#x60; and &#x60;round&#x60;, or &#x60;timestamp&#x60; to define from/at state version parameter, but then ongoing epoch will be selected and used for querying data. i.e for request with &#x60;{ from_state_version &#x3D; { state_version &#x3D; 100 000}, at_state_version &#x3D; { state_version &#x3D; 300 000} }&#x60; gateway api will check in which epoch transactions with state version 100 000 and 300 000 and then use that as inclusive boundary for request. 
+        /// Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="validatorsUptimeRequest"></param>
@@ -358,7 +358,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Validators Uptime Returns validators uptime data for time range limited by from_state_version and at_state_version. &#x60;at_state_version&#x60; defines upper boundary (inclusive) for queried data. i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from genesis till 10. &#x60;from_state_version&#x60; defines lower boundary (inclusive) for queried data. i.e &#x60;{ from_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from epoch 10 till current max ledger tip. it&#39;s possible to define both at once i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10}, from_state_version &#x3D; {epoch &#x3D; 25} }&#x60; will return uptime statistics for epochs from 10 till 25. you can use one of &#x60;state_version&#x60;, &#x60;epoch&#x60;, &#x60;epoch&#x60; and &#x60;round&#x60;, or &#x60;timestamp&#x60; to define from/at state version parameter, but then ongoing epoch will be selected and used for querying data. i.e for request with &#x60;{ from_state_version &#x3D; { state_version &#x3D; 100 000}, at_state_version &#x3D; { state_version &#x3D; 300 000} }&#x60; gateway api will check in which epoch transactions with state version 100 000 and 300 000 and then use that as inclusive boundary for request. 
+        /// Get Validators Uptime Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="validatorsUptimeRequest"></param>
@@ -370,7 +370,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Validators Uptime Returns validators uptime data for time range limited by from_state_version and at_state_version. &#x60;at_state_version&#x60; defines upper boundary (inclusive) for queried data. i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from genesis till 10. &#x60;from_state_version&#x60; defines lower boundary (inclusive) for queried data. i.e &#x60;{ from_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from epoch 10 till current max ledger tip. it&#39;s possible to define both at once i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10}, from_state_version &#x3D; {epoch &#x3D; 25} }&#x60; will return uptime statistics for epochs from 10 till 25. you can use one of &#x60;state_version&#x60;, &#x60;epoch&#x60;, &#x60;epoch&#x60; and &#x60;round&#x60;, or &#x60;timestamp&#x60; to define from/at state version parameter, but then ongoing epoch will be selected and used for querying data. i.e for request with &#x60;{ from_state_version &#x3D; { state_version &#x3D; 100 000}, at_state_version &#x3D; { state_version &#x3D; 300 000} }&#x60; gateway api will check in which epoch transactions with state version 100 000 and 300 000 and then use that as inclusive boundary for request. 
+        /// Get Validators Uptime Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="validatorsUptimeRequest"></param>
@@ -414,7 +414,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Validators Uptime Returns validators uptime data for time range limited by from_state_version and at_state_version. &#x60;at_state_version&#x60; defines upper boundary (inclusive) for queried data. i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from genesis till 10. &#x60;from_state_version&#x60; defines lower boundary (inclusive) for queried data. i.e &#x60;{ from_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from epoch 10 till current max ledger tip. it&#39;s possible to define both at once i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10}, from_state_version &#x3D; {epoch &#x3D; 25} }&#x60; will return uptime statistics for epochs from 10 till 25. you can use one of &#x60;state_version&#x60;, &#x60;epoch&#x60;, &#x60;epoch&#x60; and &#x60;round&#x60;, or &#x60;timestamp&#x60; to define from/at state version parameter, but then ongoing epoch will be selected and used for querying data. i.e for request with &#x60;{ from_state_version &#x3D; { state_version &#x3D; 100 000}, at_state_version &#x3D; { state_version &#x3D; 300 000} }&#x60; gateway api will check in which epoch transactions with state version 100 000 and 300 000 and then use that as inclusive boundary for request. 
+        /// Get Validators Uptime Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="validatorsUptimeRequest"></param>
@@ -427,7 +427,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Validators Uptime Returns validators uptime data for time range limited by from_state_version and at_state_version. &#x60;at_state_version&#x60; defines upper boundary (inclusive) for queried data. i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from genesis till 10. &#x60;from_state_version&#x60; defines lower boundary (inclusive) for queried data. i.e &#x60;{ from_state_version &#x3D; {epoch &#x3D; 10} }&#x60;, will return uptime statistics from epoch 10 till current max ledger tip. it&#39;s possible to define both at once i.e &#x60;{ at_state_version &#x3D; {epoch &#x3D; 10}, from_state_version &#x3D; {epoch &#x3D; 25} }&#x60; will return uptime statistics for epochs from 10 till 25. you can use one of &#x60;state_version&#x60;, &#x60;epoch&#x60;, &#x60;epoch&#x60; and &#x60;round&#x60;, or &#x60;timestamp&#x60; to define from/at state version parameter, but then ongoing epoch will be selected and used for querying data. i.e for request with &#x60;{ from_state_version &#x3D; { state_version &#x3D; 100 000}, at_state_version &#x3D; { state_version &#x3D; 300 000} }&#x60; gateway api will check in which epoch transactions with state version 100 000 and 300 000 and then use that as inclusive boundary for request. 
+        /// Get Validators Uptime Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="validatorsUptimeRequest"></param>

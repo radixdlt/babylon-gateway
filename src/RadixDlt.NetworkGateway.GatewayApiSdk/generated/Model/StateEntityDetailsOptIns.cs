@@ -98,11 +98,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsOptIns" /> class.
         /// </summary>
-        /// <param name="ancestorIdentities">(false by default) if set to true, ancestor addresses - parent_address, owner_address and global_address for entities are returned..</param>
-        /// <param name="componentRoyaltyVaultBalance">(false by default) if set to true, royalty vault balance for component entities is returned..</param>
-        /// <param name="packageRoyaltyVaultBalance">(false by default) if set to true, royalty vault balance for package entities is returned..</param>
-        /// <param name="nonFungibleIncludeNfids">(false by default) if set to true, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint..</param>
-        /// <param name="explicitMetadata">(empty by default) allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items..</param>
+        /// <param name="ancestorIdentities">if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned..</param>
+        /// <param name="componentRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned..</param>
+        /// <param name="packageRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned..</param>
+        /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint..</param>
+        /// <param name="explicitMetadata">allows specifying explicitly metadata properties which should be returned in response..</param>
         public StateEntityDetailsOptIns(bool ancestorIdentities = default(bool), bool componentRoyaltyVaultBalance = default(bool), bool packageRoyaltyVaultBalance = default(bool), bool nonFungibleIncludeNfids = default(bool), List<string> explicitMetadata = default(List<string>))
         {
             this.AncestorIdentities = ancestorIdentities;
@@ -113,37 +113,37 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// (false by default) if set to true, ancestor addresses - parent_address, owner_address and global_address for entities are returned.
+        /// if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned.
         /// </summary>
-        /// <value>(false by default) if set to true, ancestor addresses - parent_address, owner_address and global_address for entities are returned.</value>
+        /// <value>if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned.</value>
         [DataMember(Name = "ancestor_identities", EmitDefaultValue = true)]
         public bool AncestorIdentities { get; set; }
 
         /// <summary>
-        /// (false by default) if set to true, royalty vault balance for component entities is returned.
+        /// if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned.
         /// </summary>
-        /// <value>(false by default) if set to true, royalty vault balance for component entities is returned.</value>
+        /// <value>if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned.</value>
         [DataMember(Name = "component_royalty_vault_balance", EmitDefaultValue = true)]
         public bool ComponentRoyaltyVaultBalance { get; set; }
 
         /// <summary>
-        /// (false by default) if set to true, royalty vault balance for package entities is returned.
+        /// if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned.
         /// </summary>
-        /// <value>(false by default) if set to true, royalty vault balance for package entities is returned.</value>
+        /// <value>if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned.</value>
         [DataMember(Name = "package_royalty_vault_balance", EmitDefaultValue = true)]
         public bool PackageRoyaltyVaultBalance { get; set; }
 
         /// <summary>
-        /// (false by default) if set to true, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.
+        /// if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.
         /// </summary>
-        /// <value>(false by default) if set to true, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.</value>
+        /// <value>if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.</value>
         [DataMember(Name = "non_fungible_include_nfids", EmitDefaultValue = true)]
         public bool NonFungibleIncludeNfids { get; set; }
 
         /// <summary>
-        /// (empty by default) allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.
+        /// allows specifying explicitly metadata properties which should be returned in response.
         /// </summary>
-        /// <value>(empty by default) allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.</value>
+        /// <value>allows specifying explicitly metadata properties which should be returned in response.</value>
         [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
         public List<string> ExplicitMetadata { get; set; }
 

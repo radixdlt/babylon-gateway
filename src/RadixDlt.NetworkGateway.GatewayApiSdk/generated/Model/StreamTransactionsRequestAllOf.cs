@@ -160,7 +160,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamTransactionsRequestAllOf" /> class.
         /// </summary>
-        /// <param name="fromLedgerState">fromLedgerState.</param>
         /// <param name="kindFilter">Limit returned transactions by their kind. Defaults to &#x60;user&#x60;..</param>
         /// <param name="manifestAccountsWithdrawnFromFilter">manifestAccountsWithdrawnFromFilter.</param>
         /// <param name="manifestAccountsDepositedIntoFilter">manifestAccountsDepositedIntoFilter.</param>
@@ -169,9 +168,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="eventsFilter">eventsFilter.</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
         /// <param name="optIns">optIns.</param>
-        public StreamTransactionsRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
+        public StreamTransactionsRequestAllOf(KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
         {
-            this.FromLedgerState = fromLedgerState;
             this.KindFilter = kindFilter;
             this.ManifestAccountsWithdrawnFromFilter = manifestAccountsWithdrawnFromFilter;
             this.ManifestAccountsDepositedIntoFilter = manifestAccountsDepositedIntoFilter;
@@ -181,12 +179,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.Order = order;
             this.OptIns = optIns;
         }
-
-        /// <summary>
-        /// Gets or Sets FromLedgerState
-        /// </summary>
-        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets ManifestAccountsWithdrawnFromFilter
@@ -232,7 +224,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StreamTransactionsRequestAllOf {\n");
-            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
             sb.Append("  KindFilter: ").Append(KindFilter).Append("\n");
             sb.Append("  ManifestAccountsWithdrawnFromFilter: ").Append(ManifestAccountsWithdrawnFromFilter).Append("\n");
             sb.Append("  ManifestAccountsDepositedIntoFilter: ").Append(ManifestAccountsDepositedIntoFilter).Append("\n");
@@ -276,11 +267,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 return false;
             }
             return 
-                (
-                    this.FromLedgerState == input.FromLedgerState ||
-                    (this.FromLedgerState != null &&
-                    this.FromLedgerState.Equals(input.FromLedgerState))
-                ) && 
                 (
                     this.KindFilter == input.KindFilter ||
                     this.KindFilter.Equals(input.KindFilter)
@@ -335,10 +321,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.FromLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
-                }
                 hashCode = (hashCode * 59) + this.KindFilter.GetHashCode();
                 if (this.ManifestAccountsWithdrawnFromFilter != null)
                 {
