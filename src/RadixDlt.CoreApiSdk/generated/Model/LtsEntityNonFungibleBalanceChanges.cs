@@ -90,49 +90,76 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// MultiResourcePoolFieldStateValue
+    /// LtsEntityNonFungibleBalanceChanges
     /// </summary>
-    [DataContract(Name = "MultiResourcePoolFieldStateValue")]
-    public partial class MultiResourcePoolFieldStateValue : IEquatable<MultiResourcePoolFieldStateValue>
+    [DataContract(Name = "LtsEntityNonFungibleBalanceChanges")]
+    public partial class LtsEntityNonFungibleBalanceChanges : IEquatable<LtsEntityNonFungibleBalanceChanges>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MultiResourcePoolFieldStateValue" /> class.
+        /// Initializes a new instance of the <see cref="LtsEntityNonFungibleBalanceChanges" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MultiResourcePoolFieldStateValue() { }
+        protected LtsEntityNonFungibleBalanceChanges() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MultiResourcePoolFieldStateValue" /> class.
+        /// Initializes a new instance of the <see cref="LtsEntityNonFungibleBalanceChanges" /> class.
         /// </summary>
-        /// <param name="vaults">vaults (required).</param>
-        /// <param name="poolUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        public MultiResourcePoolFieldStateValue(List<PoolVault> vaults = default(List<PoolVault>), string poolUnitResourceAddress = default(string))
+        /// <param name="entityAddress">The Bech32m-encoded human readable version of the entity&#39;s address (required).</param>
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the non-fungible resource&#39;s address  (required).</param>
+        /// <param name="added">added (required).</param>
+        /// <param name="removed">removed (required).</param>
+        public LtsEntityNonFungibleBalanceChanges(string entityAddress = default(string), string resourceAddress = default(string), List<string> added = default(List<string>), List<string> removed = default(List<string>))
         {
-            // to ensure "vaults" is required (not null)
-            if (vaults == null)
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("vaults is a required property for MultiResourcePoolFieldStateValue and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for LtsEntityNonFungibleBalanceChanges and cannot be null");
             }
-            this.Vaults = vaults;
-            // to ensure "poolUnitResourceAddress" is required (not null)
-            if (poolUnitResourceAddress == null)
+            this.EntityAddress = entityAddress;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("poolUnitResourceAddress is a required property for MultiResourcePoolFieldStateValue and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for LtsEntityNonFungibleBalanceChanges and cannot be null");
             }
-            this.PoolUnitResourceAddress = poolUnitResourceAddress;
+            this.ResourceAddress = resourceAddress;
+            // to ensure "added" is required (not null)
+            if (added == null)
+            {
+                throw new ArgumentNullException("added is a required property for LtsEntityNonFungibleBalanceChanges and cannot be null");
+            }
+            this.Added = added;
+            // to ensure "removed" is required (not null)
+            if (removed == null)
+            {
+                throw new ArgumentNullException("removed is a required property for LtsEntityNonFungibleBalanceChanges and cannot be null");
+            }
+            this.Removed = removed;
         }
 
         /// <summary>
-        /// Gets or Sets Vaults
+        /// The Bech32m-encoded human readable version of the entity&#39;s address
         /// </summary>
-        [DataMember(Name = "vaults", IsRequired = true, EmitDefaultValue = true)]
-        public List<PoolVault> Vaults { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s address</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the resource address
+        /// The Bech32m-encoded human readable version of the non-fungible resource&#39;s address 
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "pool_unit_resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string PoolUnitResourceAddress { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the non-fungible resource&#39;s address </value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Added
+        /// </summary>
+        [DataMember(Name = "added", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Added { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Removed
+        /// </summary>
+        [DataMember(Name = "removed", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Removed { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +168,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MultiResourcePoolFieldStateValue {\n");
-            sb.Append("  Vaults: ").Append(Vaults).Append("\n");
-            sb.Append("  PoolUnitResourceAddress: ").Append(PoolUnitResourceAddress).Append("\n");
+            sb.Append("class LtsEntityNonFungibleBalanceChanges {\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  Added: ").Append(Added).Append("\n");
+            sb.Append("  Removed: ").Append(Removed).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +193,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MultiResourcePoolFieldStateValue);
+            return this.Equals(input as LtsEntityNonFungibleBalanceChanges);
         }
 
         /// <summary>
-        /// Returns true if MultiResourcePoolFieldStateValue instances are equal
+        /// Returns true if LtsEntityNonFungibleBalanceChanges instances are equal
         /// </summary>
-        /// <param name="input">Instance of MultiResourcePoolFieldStateValue to be compared</param>
+        /// <param name="input">Instance of LtsEntityNonFungibleBalanceChanges to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MultiResourcePoolFieldStateValue input)
+        public bool Equals(LtsEntityNonFungibleBalanceChanges input)
         {
             if (input == null)
             {
@@ -180,15 +209,26 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Vaults == input.Vaults ||
-                    this.Vaults != null &&
-                    input.Vaults != null &&
-                    this.Vaults.SequenceEqual(input.Vaults)
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
                 ) && 
                 (
-                    this.PoolUnitResourceAddress == input.PoolUnitResourceAddress ||
-                    (this.PoolUnitResourceAddress != null &&
-                    this.PoolUnitResourceAddress.Equals(input.PoolUnitResourceAddress))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
+                    this.Added == input.Added ||
+                    this.Added != null &&
+                    input.Added != null &&
+                    this.Added.SequenceEqual(input.Added)
+                ) && 
+                (
+                    this.Removed == input.Removed ||
+                    this.Removed != null &&
+                    input.Removed != null &&
+                    this.Removed.SequenceEqual(input.Removed)
                 );
         }
 
@@ -201,13 +241,21 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Vaults != null)
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Vaults.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
-                if (this.PoolUnitResourceAddress != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.PoolUnitResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                if (this.Added != null)
+                {
+                    hashCode = (hashCode * 59) + this.Added.GetHashCode();
+                }
+                if (this.Removed != null)
+                {
+                    hashCode = (hashCode * 59) + this.Removed.GetHashCode();
                 }
                 return hashCode;
             }
