@@ -154,7 +154,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
             throw new TransactionNotFoundException(request.IntentHash);
         }
 
-        return await _transactionOutcomeService.HandleOutcomeRequest(atLedgerState, committedTransaction.StateVersion, token);
+        return await _transactionOutcomeService.HandleOutcomeRequest(atLedgerState, committedTransaction, token);
     }
 
     public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)

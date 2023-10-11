@@ -104,9 +104,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="transaction">transaction (required).</param>
         /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance changes per entity.  (required).</param>
         /// <param name="nonFungibleEntityBalanceChanges">A list of all non-fungible changes per entity and resource.  (required).</param>
-        public TransactionCommittedOutcomeResponse(LedgerState ledgerState = default(LedgerState), List<TransactionCommittedOutcomeResponseFungibleChanges> fungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseFungibleChanges>), List<TransactionCommittedOutcomeResponseNonFungibleChanges> nonFungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseNonFungibleChanges>))
+        public TransactionCommittedOutcomeResponse(LedgerState ledgerState = default(LedgerState), CommittedTransactionInfo transaction = default(CommittedTransactionInfo), List<TransactionCommittedOutcomeResponseFungibleChanges> fungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseFungibleChanges>), List<TransactionCommittedOutcomeResponseNonFungibleChanges> nonFungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseNonFungibleChanges>))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -114,6 +115,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("ledgerState is a required property for TransactionCommittedOutcomeResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
+            // to ensure "transaction" is required (not null)
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction is a required property for TransactionCommittedOutcomeResponse and cannot be null");
+            }
+            this.Transaction = transaction;
             // to ensure "fungibleEntityBalanceChanges" is required (not null)
             if (fungibleEntityBalanceChanges == null)
             {
@@ -133,6 +140,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
         public LedgerState LedgerState { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Transaction
+        /// </summary>
+        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
+        public CommittedTransactionInfo Transaction { get; set; }
 
         /// <summary>
         /// A list of all fungible balance changes per entity. 
@@ -157,6 +170,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionCommittedOutcomeResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
             sb.Append("  FungibleEntityBalanceChanges: ").Append(FungibleEntityBalanceChanges).Append("\n");
             sb.Append("  NonFungibleEntityBalanceChanges: ").Append(NonFungibleEntityBalanceChanges).Append("\n");
             sb.Append("}\n");
@@ -200,6 +214,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
+                    this.Transaction == input.Transaction ||
+                    (this.Transaction != null &&
+                    this.Transaction.Equals(input.Transaction))
+                ) && 
+                (
                     this.FungibleEntityBalanceChanges == input.FungibleEntityBalanceChanges ||
                     this.FungibleEntityBalanceChanges != null &&
                     input.FungibleEntityBalanceChanges != null &&
@@ -225,6 +244,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.LedgerState != null)
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                }
+                if (this.Transaction != null)
+                {
+                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
                 }
                 if (this.FungibleEntityBalanceChanges != null)
                 {

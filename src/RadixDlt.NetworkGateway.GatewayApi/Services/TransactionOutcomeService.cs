@@ -80,7 +80,7 @@ public interface ITransactionOutcomeService
 {
     Task<GatewayModel.TransactionCommittedOutcomeResponse> HandleOutcomeRequest(
         GatewayModel.LedgerState ledgerState,
-        long stateVersion,
+        GatewayModel.CommittedTransactionInfo committedTransaction,
         CancellationToken token = default);
 }
 
@@ -97,24 +97,24 @@ internal class TransactionOutcomeService : ITransactionOutcomeService
 
     public async Task<GatewayModel.TransactionCommittedOutcomeResponse> HandleOutcomeRequest(
         GatewayModel.LedgerState ledgerState,
-        long stateVersion,
+        GatewayModel.CommittedTransactionInfo committedTransaction,
         CancellationToken token = default)
     {
         try
         {
             var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-            await _observers.ForEachAsync(x => x.PreHandleOutcomeRequest(stateVersion, selectedNode.Name));
+            await _observers.ForEachAsync(x => x.PreHandleOutcomeRequest(committedTransaction.StateVersion, selectedNode.Name));
 
-            var response = await HandleOutcomesAndCreateResponse(ledgerState, stateVersion, token);
+            var response = await HandleOutcomesAndCreateResponse(ledgerState, committedTransaction, token);
 
-            await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(stateVersion, selectedNode.Name, response));
+            await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(committedTransaction.StateVersion, selectedNode.Name, response));
 
             return response;
         }
         catch (Exception ex)
         {
             var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-            await _observers.ForEachAsync(x => x.HandleOutcomeRequestFailed(stateVersion, selectedNode.Name, ex));
+            await _observers.ForEachAsync(x => x.HandleOutcomeRequestFailed(committedTransaction.StateVersion, selectedNode.Name, ex));
 
             throw;
         }
@@ -122,12 +122,12 @@ internal class TransactionOutcomeService : ITransactionOutcomeService
 
     private async Task<GatewayModel.TransactionCommittedOutcomeResponse> HandleOutcomesAndCreateResponse(
         GatewayModel.LedgerState ledgerState,
-        long stateVersion,
+        GatewayModel.CommittedTransactionInfo committedTransaction,
         CancellationToken token)
     {
         var coreRequest = new CoreModel.LtsStreamTransactionOutcomesRequest(
             network: _coreApiHandler.GetNetworkName(),
-            fromStateVersion: stateVersion,
+            fromStateVersion: committedTransaction.StateVersion,
             limit: 1);
 
         var result = await _coreApiHandler.TransactionOutcome(coreRequest, token);
@@ -139,7 +139,7 @@ internal class TransactionOutcomeService : ITransactionOutcomeService
             var fungibleEntityBalanceChanges = coreResponse.FungibleEntityBalanceChanges.Select(x => x.ToGatewayModel()).ToList();
             var nonFungibleEntityBalanceChanges = coreResponse.NonFungibleEntityBalanceChanges.Select(x => x.ToGatewayModel()).ToList();
 
-            return new GatewayModel.TransactionCommittedOutcomeResponse(ledgerState, fungibleEntityBalanceChanges, nonFungibleEntityBalanceChanges);
+            return new GatewayModel.TransactionCommittedOutcomeResponse(ledgerState, committedTransaction, fungibleEntityBalanceChanges, nonFungibleEntityBalanceChanges);
         }
 
         throw InvalidRequestException.FromOtherError(result.FailureResponse.Message);

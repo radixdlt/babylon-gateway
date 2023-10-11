@@ -103,10 +103,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeResponseAllOf" /> class.
         /// </summary>
+        /// <param name="transaction">transaction (required).</param>
         /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance changes per entity.  (required).</param>
         /// <param name="nonFungibleEntityBalanceChanges">A list of all non-fungible changes per entity and resource.  (required).</param>
-        public TransactionCommittedOutcomeResponseAllOf(List<TransactionCommittedOutcomeResponseFungibleChanges> fungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseFungibleChanges>), List<TransactionCommittedOutcomeResponseNonFungibleChanges> nonFungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseNonFungibleChanges>))
+        public TransactionCommittedOutcomeResponseAllOf(CommittedTransactionInfo transaction = default(CommittedTransactionInfo), List<TransactionCommittedOutcomeResponseFungibleChanges> fungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseFungibleChanges>), List<TransactionCommittedOutcomeResponseNonFungibleChanges> nonFungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseNonFungibleChanges>))
         {
+            // to ensure "transaction" is required (not null)
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction is a required property for TransactionCommittedOutcomeResponseAllOf and cannot be null");
+            }
+            this.Transaction = transaction;
             // to ensure "fungibleEntityBalanceChanges" is required (not null)
             if (fungibleEntityBalanceChanges == null)
             {
@@ -120,6 +127,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.NonFungibleEntityBalanceChanges = nonFungibleEntityBalanceChanges;
         }
+
+        /// <summary>
+        /// Gets or Sets Transaction
+        /// </summary>
+        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
+        public CommittedTransactionInfo Transaction { get; set; }
 
         /// <summary>
         /// A list of all fungible balance changes per entity. 
@@ -143,6 +156,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionCommittedOutcomeResponseAllOf {\n");
+            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
             sb.Append("  FungibleEntityBalanceChanges: ").Append(FungibleEntityBalanceChanges).Append("\n");
             sb.Append("  NonFungibleEntityBalanceChanges: ").Append(NonFungibleEntityBalanceChanges).Append("\n");
             sb.Append("}\n");
@@ -181,6 +195,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.Transaction == input.Transaction ||
+                    (this.Transaction != null &&
+                    this.Transaction.Equals(input.Transaction))
+                ) && 
+                (
                     this.FungibleEntityBalanceChanges == input.FungibleEntityBalanceChanges ||
                     this.FungibleEntityBalanceChanges != null &&
                     input.FungibleEntityBalanceChanges != null &&
@@ -203,6 +222,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.Transaction != null)
+                {
+                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
+                }
                 if (this.FungibleEntityBalanceChanges != null)
                 {
                     hashCode = (hashCode * 59) + this.FungibleEntityBalanceChanges.GetHashCode();

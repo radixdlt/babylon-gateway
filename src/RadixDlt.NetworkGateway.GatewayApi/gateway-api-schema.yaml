@@ -1911,9 +1911,12 @@ components:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
           required:
+            - transaction
             - fungible_entity_balance_changes
             - non_fungible_entity_balance_changes
           properties:
+            transaction:
+              $ref: "#/components/schemas/CommittedTransactionInfo"
             fungible_entity_balance_changes:
               description: |
                 A list of all fungible balance changes per entity.
