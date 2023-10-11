@@ -179,7 +179,6 @@ internal class DefaultTransactionHandler : ITransactionHandler
                 Event = eventType,
                 EmitterEntityAddress = ef.EmitterAddress != null ? (EntityAddress)ef.EmitterAddress : null,
                 ResourceAddress = ef.ResourceAddress != null ? (EntityAddress)ef.ResourceAddress : null,
-                Qunatity = ef.Quantity != null ? TokenAmount.FromDecimalString(ef.Quantity) : null,
             });
         });
 

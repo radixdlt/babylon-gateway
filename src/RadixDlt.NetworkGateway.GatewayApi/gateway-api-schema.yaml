@@ -1931,8 +1931,6 @@ components:
           $ref: "#/components/schemas/Address"
         resource_address:
           $ref: "#/components/schemas/Address"
-        quantity:
-          $ref: "#/components/schemas/BigDecimal"
     StreamTransactionsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
