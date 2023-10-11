@@ -78,6 +78,8 @@ public interface ITransactionHandler
 
     Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default);
 
+    Task<GatewayModel.TransactionCommittedOutcomeResponse> Outcome(GatewayModel.TransactionCommittedOutcomeRequest request, CancellationToken token = default);
+
     Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
 
     Task<GatewayModel.StreamTransactionsResponse> StreamTransactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token = default);

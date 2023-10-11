@@ -1,8 +1,9 @@
-## 1.0.2 - Babylon
+## 1.1.0 - Babylon
 Release Date: _unreleased_
 
 - Changed default configuration value of MaxPageSize for endpoints to 100. Validate if max page size is higher than DefaultPageSize.
-- Added new optIn `receipt_output` to `/stream/transactions`, and `/transaction/committed-details` endpoints. Temporarily set by default to true, to allow client's migration.
+- Added `/transaction/committed-outcomes` endpoint returning fungible and non-fungible balance changes for a given transaction.
+- Added new opt-in `receipt_output` to `/stream/transactions`, and `/transaction/committed-details` endpoints. Temporarily set by default to true, to allow client's migration.
 - Optimized `TransactionQuerier.GetTransactions` not to fetch unnecessary data from underlying database.
 
 ## 1.0.1 - Babylon 

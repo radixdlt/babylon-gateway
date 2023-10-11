@@ -88,6 +88,8 @@ public static class GatewayApiBuilderExtensions
             .AddSingleton<ISubmissionServiceObserver>(provider => provider.GetRequiredService<GatewayApiMetricObserver>())
             .AddSingleton<ILedgerStateQuerierObserver>(provider => provider.GetRequiredService<GatewayApiMetricObserver>())
             .AddSingleton<ISubmissionTrackingServiceObserver>(provider => provider.GetRequiredService<GatewayApiMetricObserver>())
+            .AddSingleton<ITransactionPreviewServiceObserver>(provider => provider.GetRequiredService<GatewayApiMetricObserver>())
+            .AddSingleton<ITransactionOutcomeServiceObserver>(provider => provider.GetRequiredService<GatewayApiMetricObserver>())
             .AddSingleton<ISqlQueryObserver>(provider => provider.GetRequiredService<GatewayApiMetricObserver>());
 
         return builder;

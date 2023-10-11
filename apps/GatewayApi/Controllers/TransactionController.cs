@@ -99,6 +99,12 @@ public sealed class TransactionController : ControllerBase
         return await _transactionHandler.CommittedDetails(request, token);
     }
 
+    [HttpPost("committed-outcome")]
+    public async Task<GatewayModel.TransactionCommittedOutcomeResponse> Outcome(GatewayModel.TransactionCommittedOutcomeRequest request, CancellationToken token)
+    {
+        return await _transactionHandler.Outcome(request, token);
+    }
+
     [HttpPost("preview")]
     public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
     {

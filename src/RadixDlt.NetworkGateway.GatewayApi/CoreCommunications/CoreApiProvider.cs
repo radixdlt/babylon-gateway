@@ -76,6 +76,8 @@ public interface ICoreApiProvider
     public CoreApi.StatusApi StatusApi { get; }
 
     public CoreApi.TransactionApi TransactionApi { get; }
+
+    public CoreApi.LTSApi LtsApi { get; }
 }
 
 internal class CoreApiProvider : ICoreApiProvider
@@ -85,6 +87,8 @@ internal class CoreApiProvider : ICoreApiProvider
     public CoreApi.StatusApi StatusApi { get; }
 
     public CoreApi.TransactionApi TransactionApi { get; }
+
+    public CoreApi.LTSApi LtsApi { get; }
 
     public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
     {
@@ -96,5 +100,6 @@ internal class CoreApiProvider : ICoreApiProvider
         CoreApiNode = coreApiNode;
         StatusApi = new CoreApi.StatusApi(httpClient, coreApiNode.CoreApiAddress);
         TransactionApi = new CoreApi.TransactionApi(httpClient, coreApiNode.CoreApiAddress);
+        LtsApi = new CoreApi.LTSApi(httpClient, coreApiNode.CoreApiAddress);
     }
 }
