@@ -90,76 +90,64 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionCommittedOutcomeResponse
+    /// TransactionBalanceChanges
     /// </summary>
-    [DataContract(Name = "TransactionCommittedOutcomeResponse")]
-    public partial class TransactionCommittedOutcomeResponse : IEquatable<TransactionCommittedOutcomeResponse>
+    [DataContract(Name = "TransactionBalanceChanges")]
+    public partial class TransactionBalanceChanges : IEquatable<TransactionBalanceChanges>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionBalanceChanges" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionCommittedOutcomeResponse() { }
+        protected TransactionBalanceChanges() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionBalanceChanges" /> class.
         /// </summary>
-        /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="transaction">transaction (required).</param>
-        /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance changes per entity.  (required).</param>
-        /// <param name="nonFungibleEntityBalanceChanges">A list of all non-fungible changes per entity and resource.  (required).</param>
-        public TransactionCommittedOutcomeResponse(LedgerState ledgerState = default(LedgerState), CommittedTransactionInfo transaction = default(CommittedTransactionInfo), List<TransactionCommittedOutcomeResponseFungibleChanges> fungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseFungibleChanges>), List<TransactionCommittedOutcomeResponseNonFungibleChanges> nonFungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseNonFungibleChanges>))
+        /// <param name="fungibleFeeBalanceChanges">A list of all fee-related fungible balance changes per entity and resource.  (required).</param>
+        /// <param name="fungibleBalanceChanges">A list of all non-fee-related fungible balance changes per entity and resource.  (required).</param>
+        /// <param name="nonFungibleBalanceChanges">A list of all non-fungible changes per entity and resource.  (required).</param>
+        public TransactionBalanceChanges(List<TransactionFungibleFeeBalanceChanges> fungibleFeeBalanceChanges = default(List<TransactionFungibleFeeBalanceChanges>), List<TransactionFungibleBalanceChanges> fungibleBalanceChanges = default(List<TransactionFungibleBalanceChanges>), List<TransactionNonFungibleBalanceChanges> nonFungibleBalanceChanges = default(List<TransactionNonFungibleBalanceChanges>))
         {
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
+            // to ensure "fungibleFeeBalanceChanges" is required (not null)
+            if (fungibleFeeBalanceChanges == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for TransactionCommittedOutcomeResponse and cannot be null");
+                throw new ArgumentNullException("fungibleFeeBalanceChanges is a required property for TransactionBalanceChanges and cannot be null");
             }
-            this.LedgerState = ledgerState;
-            // to ensure "transaction" is required (not null)
-            if (transaction == null)
+            this.FungibleFeeBalanceChanges = fungibleFeeBalanceChanges;
+            // to ensure "fungibleBalanceChanges" is required (not null)
+            if (fungibleBalanceChanges == null)
             {
-                throw new ArgumentNullException("transaction is a required property for TransactionCommittedOutcomeResponse and cannot be null");
+                throw new ArgumentNullException("fungibleBalanceChanges is a required property for TransactionBalanceChanges and cannot be null");
             }
-            this.Transaction = transaction;
-            // to ensure "fungibleEntityBalanceChanges" is required (not null)
-            if (fungibleEntityBalanceChanges == null)
+            this.FungibleBalanceChanges = fungibleBalanceChanges;
+            // to ensure "nonFungibleBalanceChanges" is required (not null)
+            if (nonFungibleBalanceChanges == null)
             {
-                throw new ArgumentNullException("fungibleEntityBalanceChanges is a required property for TransactionCommittedOutcomeResponse and cannot be null");
+                throw new ArgumentNullException("nonFungibleBalanceChanges is a required property for TransactionBalanceChanges and cannot be null");
             }
-            this.FungibleEntityBalanceChanges = fungibleEntityBalanceChanges;
-            // to ensure "nonFungibleEntityBalanceChanges" is required (not null)
-            if (nonFungibleEntityBalanceChanges == null)
-            {
-                throw new ArgumentNullException("nonFungibleEntityBalanceChanges is a required property for TransactionCommittedOutcomeResponse and cannot be null");
-            }
-            this.NonFungibleEntityBalanceChanges = nonFungibleEntityBalanceChanges;
+            this.NonFungibleBalanceChanges = nonFungibleBalanceChanges;
         }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// A list of all fee-related fungible balance changes per entity and resource. 
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
+        /// <value>A list of all fee-related fungible balance changes per entity and resource. </value>
+        [DataMember(Name = "fungible_fee_balance_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<TransactionFungibleFeeBalanceChanges> FungibleFeeBalanceChanges { get; set; }
 
         /// <summary>
-        /// Gets or Sets Transaction
+        /// A list of all non-fee-related fungible balance changes per entity and resource. 
         /// </summary>
-        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
-        public CommittedTransactionInfo Transaction { get; set; }
-
-        /// <summary>
-        /// A list of all fungible balance changes per entity. 
-        /// </summary>
-        /// <value>A list of all fungible balance changes per entity. </value>
-        [DataMember(Name = "fungible_entity_balance_changes", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionCommittedOutcomeResponseFungibleChanges> FungibleEntityBalanceChanges { get; set; }
+        /// <value>A list of all non-fee-related fungible balance changes per entity and resource. </value>
+        [DataMember(Name = "fungible_balance_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<TransactionFungibleBalanceChanges> FungibleBalanceChanges { get; set; }
 
         /// <summary>
         /// A list of all non-fungible changes per entity and resource. 
         /// </summary>
         /// <value>A list of all non-fungible changes per entity and resource. </value>
-        [DataMember(Name = "non_fungible_entity_balance_changes", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionCommittedOutcomeResponseNonFungibleChanges> NonFungibleEntityBalanceChanges { get; set; }
+        [DataMember(Name = "non_fungible_balance_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<TransactionNonFungibleBalanceChanges> NonFungibleBalanceChanges { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -168,11 +156,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionCommittedOutcomeResponse {\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
-            sb.Append("  FungibleEntityBalanceChanges: ").Append(FungibleEntityBalanceChanges).Append("\n");
-            sb.Append("  NonFungibleEntityBalanceChanges: ").Append(NonFungibleEntityBalanceChanges).Append("\n");
+            sb.Append("class TransactionBalanceChanges {\n");
+            sb.Append("  FungibleFeeBalanceChanges: ").Append(FungibleFeeBalanceChanges).Append("\n");
+            sb.Append("  FungibleBalanceChanges: ").Append(FungibleBalanceChanges).Append("\n");
+            sb.Append("  NonFungibleBalanceChanges: ").Append(NonFungibleBalanceChanges).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -193,15 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionCommittedOutcomeResponse);
+            return this.Equals(input as TransactionBalanceChanges);
         }
 
         /// <summary>
-        /// Returns true if TransactionCommittedOutcomeResponse instances are equal
+        /// Returns true if TransactionBalanceChanges instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionCommittedOutcomeResponse to be compared</param>
+        /// <param name="input">Instance of TransactionBalanceChanges to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionCommittedOutcomeResponse input)
+        public bool Equals(TransactionBalanceChanges input)
         {
             if (input == null)
             {
@@ -209,26 +196,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
+                    this.FungibleFeeBalanceChanges == input.FungibleFeeBalanceChanges ||
+                    this.FungibleFeeBalanceChanges != null &&
+                    input.FungibleFeeBalanceChanges != null &&
+                    this.FungibleFeeBalanceChanges.SequenceEqual(input.FungibleFeeBalanceChanges)
                 ) && 
                 (
-                    this.Transaction == input.Transaction ||
-                    (this.Transaction != null &&
-                    this.Transaction.Equals(input.Transaction))
+                    this.FungibleBalanceChanges == input.FungibleBalanceChanges ||
+                    this.FungibleBalanceChanges != null &&
+                    input.FungibleBalanceChanges != null &&
+                    this.FungibleBalanceChanges.SequenceEqual(input.FungibleBalanceChanges)
                 ) && 
                 (
-                    this.FungibleEntityBalanceChanges == input.FungibleEntityBalanceChanges ||
-                    this.FungibleEntityBalanceChanges != null &&
-                    input.FungibleEntityBalanceChanges != null &&
-                    this.FungibleEntityBalanceChanges.SequenceEqual(input.FungibleEntityBalanceChanges)
-                ) && 
-                (
-                    this.NonFungibleEntityBalanceChanges == input.NonFungibleEntityBalanceChanges ||
-                    this.NonFungibleEntityBalanceChanges != null &&
-                    input.NonFungibleEntityBalanceChanges != null &&
-                    this.NonFungibleEntityBalanceChanges.SequenceEqual(input.NonFungibleEntityBalanceChanges)
+                    this.NonFungibleBalanceChanges == input.NonFungibleBalanceChanges ||
+                    this.NonFungibleBalanceChanges != null &&
+                    input.NonFungibleBalanceChanges != null &&
+                    this.NonFungibleBalanceChanges.SequenceEqual(input.NonFungibleBalanceChanges)
                 );
         }
 
@@ -241,21 +224,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.LedgerState != null)
+                if (this.FungibleFeeBalanceChanges != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FungibleFeeBalanceChanges.GetHashCode();
                 }
-                if (this.Transaction != null)
+                if (this.FungibleBalanceChanges != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FungibleBalanceChanges.GetHashCode();
                 }
-                if (this.FungibleEntityBalanceChanges != null)
+                if (this.NonFungibleBalanceChanges != null)
                 {
-                    hashCode = (hashCode * 59) + this.FungibleEntityBalanceChanges.GetHashCode();
-                }
-                if (this.NonFungibleEntityBalanceChanges != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibleEntityBalanceChanges.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleBalanceChanges.GetHashCode();
                 }
                 return hashCode;
             }

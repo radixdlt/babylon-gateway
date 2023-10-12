@@ -62,42 +62,63 @@
  * permissions under this License.
  */
 
-using System.Diagnostics;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi;
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-internal static class GatewayModelExtensions
+public interface ITransactionBalanceChangesService
 {
-    public static GatewayModel.TransactionCommittedOutcomeResponseFungibleChanges ToGatewayModel(this CoreModel.LtsEntityFungibleBalanceChanges input)
+    Task<CoreModel.LtsCommittedTransactionOutcome?> GetTransactionBalanceChanges(long stateVersion, CancellationToken token = default);
+}
+
+internal class TransactionBalanceChangesService : ITransactionBalanceChangesService
+{
+    private readonly ICoreApiHandler _coreApiHandler;
+    private readonly IEnumerable<ITransactionOutcomeServiceObserver> _observers;
+
+    public TransactionBalanceChangesService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionOutcomeServiceObserver> observers)
     {
-        var feeBalanceChanges = input.FeeBalanceChanges
-            .Select(x => new GatewayModel.TransactionCommittedOutcomeResponseFungibleFeeBalanceChange(x.Type.ToGatewayModel(), x.ResourceAddress, x.BalanceChange))
-            .ToList();
-
-        var nonFeeBalanceChanges = input.NonFeeBalanceChanges
-            .Select(x => new GatewayModel.TransactionCommittedOutcomeResponseFungibleBalanceChange(x.ResourceAddress, x.BalanceChange))
-            .ToList();
-
-        return new GatewayModel.TransactionCommittedOutcomeResponseFungibleChanges(input.EntityAddress, feeBalanceChanges, nonFeeBalanceChanges);
+        _coreApiHandler = coreApiHandler;
+        _observers = observers;
     }
 
-    public static GatewayModel.TransactionCommittedOutcomeResponseNonFungibleChanges ToGatewayModel(this CoreModel.LtsEntityNonFungibleBalanceChanges input)
+    public async Task<CoreModel.LtsCommittedTransactionOutcome?> GetTransactionBalanceChanges(long stateVersion, CancellationToken token = default)
     {
-        return new GatewayModel.TransactionCommittedOutcomeResponseNonFungibleChanges(input.EntityAddress, input.ResourceAddress, input.Added, input.Removed);
-    }
-
-    private static GatewayModel.LtsFeeFungibleResourceBalanceChangeType ToGatewayModel(this CoreModel.LtsFeeFungibleResourceBalanceChangeType input)
-    {
-        return input switch
+        try
         {
-            CoreModel.LtsFeeFungibleResourceBalanceChangeType.FeePayment => GatewayModel.LtsFeeFungibleResourceBalanceChangeType.FeePayment,
-            CoreModel.LtsFeeFungibleResourceBalanceChangeType.FeeDistributed => GatewayModel.LtsFeeFungibleResourceBalanceChangeType.FeeDistributed,
-            CoreModel.LtsFeeFungibleResourceBalanceChangeType.TipDistributed => GatewayModel.LtsFeeFungibleResourceBalanceChangeType.TipDistributed,
-            CoreModel.LtsFeeFungibleResourceBalanceChangeType.RoyaltyDistributed => GatewayModel.LtsFeeFungibleResourceBalanceChangeType.RoyaltyDistributed,
-            _ => throw new UnreachableException($"Didn't expect {input} value"),
-        };
+            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
+            await _observers.ForEachAsync(x => x.PreHandleOutcomeRequest(stateVersion, selectedNode.Name));
+
+            var coreRequest = new CoreModel.LtsStreamTransactionOutcomesRequest(
+                network: _coreApiHandler.GetNetworkName(),
+                fromStateVersion: stateVersion,
+                limit: 1);
+
+            var result = await _coreApiHandler.TransactionOutcome(coreRequest, token);
+
+            var response = result.Succeeded ?
+                result.SuccessResponse.CommittedTransactionOutcomes.Single()
+                : throw result.FailureResponse.OriginalApiException;
+
+            await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(stateVersion, selectedNode.Name));
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
+            await _observers.ForEachAsync(x => x.HandleOutcomeRequestFailed(stateVersion, selectedNode.Name, ex));
+
+            return null;
+        }
     }
 }

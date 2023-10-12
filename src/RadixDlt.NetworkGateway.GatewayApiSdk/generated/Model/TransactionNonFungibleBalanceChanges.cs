@@ -90,63 +90,76 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionCommittedOutcomeResponseAllOf
+    /// TransactionNonFungibleBalanceChanges
     /// </summary>
-    [DataContract(Name = "TransactionCommittedOutcomeResponse_allOf")]
-    public partial class TransactionCommittedOutcomeResponseAllOf : IEquatable<TransactionCommittedOutcomeResponseAllOf>
+    [DataContract(Name = "TransactionNonFungibleBalanceChanges")]
+    public partial class TransactionNonFungibleBalanceChanges : IEquatable<TransactionNonFungibleBalanceChanges>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionNonFungibleBalanceChanges" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionCommittedOutcomeResponseAllOf() { }
+        protected TransactionNonFungibleBalanceChanges() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionNonFungibleBalanceChanges" /> class.
         /// </summary>
-        /// <param name="transaction">transaction (required).</param>
-        /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance changes per entity.  (required).</param>
-        /// <param name="nonFungibleEntityBalanceChanges">A list of all non-fungible changes per entity and resource.  (required).</param>
-        public TransactionCommittedOutcomeResponseAllOf(CommittedTransactionInfo transaction = default(CommittedTransactionInfo), List<TransactionCommittedOutcomeResponseFungibleChanges> fungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseFungibleChanges>), List<TransactionCommittedOutcomeResponseNonFungibleChanges> nonFungibleEntityBalanceChanges = default(List<TransactionCommittedOutcomeResponseNonFungibleChanges>))
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="added">added (required).</param>
+        /// <param name="removed">removed (required).</param>
+        public TransactionNonFungibleBalanceChanges(string entityAddress = default(string), string resourceAddress = default(string), List<string> added = default(List<string>), List<string> removed = default(List<string>))
         {
-            // to ensure "transaction" is required (not null)
-            if (transaction == null)
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("transaction is a required property for TransactionCommittedOutcomeResponseAllOf and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for TransactionNonFungibleBalanceChanges and cannot be null");
             }
-            this.Transaction = transaction;
-            // to ensure "fungibleEntityBalanceChanges" is required (not null)
-            if (fungibleEntityBalanceChanges == null)
+            this.EntityAddress = entityAddress;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("fungibleEntityBalanceChanges is a required property for TransactionCommittedOutcomeResponseAllOf and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for TransactionNonFungibleBalanceChanges and cannot be null");
             }
-            this.FungibleEntityBalanceChanges = fungibleEntityBalanceChanges;
-            // to ensure "nonFungibleEntityBalanceChanges" is required (not null)
-            if (nonFungibleEntityBalanceChanges == null)
+            this.ResourceAddress = resourceAddress;
+            // to ensure "added" is required (not null)
+            if (added == null)
             {
-                throw new ArgumentNullException("nonFungibleEntityBalanceChanges is a required property for TransactionCommittedOutcomeResponseAllOf and cannot be null");
+                throw new ArgumentNullException("added is a required property for TransactionNonFungibleBalanceChanges and cannot be null");
             }
-            this.NonFungibleEntityBalanceChanges = nonFungibleEntityBalanceChanges;
+            this.Added = added;
+            // to ensure "removed" is required (not null)
+            if (removed == null)
+            {
+                throw new ArgumentNullException("removed is a required property for TransactionNonFungibleBalanceChanges and cannot be null");
+            }
+            this.Removed = removed;
         }
 
         /// <summary>
-        /// Gets or Sets Transaction
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
-        public CommittedTransactionInfo Transaction { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
-        /// A list of all fungible balance changes per entity. 
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>A list of all fungible balance changes per entity. </value>
-        [DataMember(Name = "fungible_entity_balance_changes", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionCommittedOutcomeResponseFungibleChanges> FungibleEntityBalanceChanges { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// A list of all non-fungible changes per entity and resource. 
+        /// Gets or Sets Added
         /// </summary>
-        /// <value>A list of all non-fungible changes per entity and resource. </value>
-        [DataMember(Name = "non_fungible_entity_balance_changes", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionCommittedOutcomeResponseNonFungibleChanges> NonFungibleEntityBalanceChanges { get; set; }
+        [DataMember(Name = "added", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Added { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Removed
+        /// </summary>
+        [DataMember(Name = "removed", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Removed { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,10 +168,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionCommittedOutcomeResponseAllOf {\n");
-            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
-            sb.Append("  FungibleEntityBalanceChanges: ").Append(FungibleEntityBalanceChanges).Append("\n");
-            sb.Append("  NonFungibleEntityBalanceChanges: ").Append(NonFungibleEntityBalanceChanges).Append("\n");
+            sb.Append("class TransactionNonFungibleBalanceChanges {\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  Added: ").Append(Added).Append("\n");
+            sb.Append("  Removed: ").Append(Removed).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,15 +193,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionCommittedOutcomeResponseAllOf);
+            return this.Equals(input as TransactionNonFungibleBalanceChanges);
         }
 
         /// <summary>
-        /// Returns true if TransactionCommittedOutcomeResponseAllOf instances are equal
+        /// Returns true if TransactionNonFungibleBalanceChanges instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionCommittedOutcomeResponseAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionNonFungibleBalanceChanges to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionCommittedOutcomeResponseAllOf input)
+        public bool Equals(TransactionNonFungibleBalanceChanges input)
         {
             if (input == null)
             {
@@ -195,21 +209,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Transaction == input.Transaction ||
-                    (this.Transaction != null &&
-                    this.Transaction.Equals(input.Transaction))
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
                 ) && 
                 (
-                    this.FungibleEntityBalanceChanges == input.FungibleEntityBalanceChanges ||
-                    this.FungibleEntityBalanceChanges != null &&
-                    input.FungibleEntityBalanceChanges != null &&
-                    this.FungibleEntityBalanceChanges.SequenceEqual(input.FungibleEntityBalanceChanges)
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.NonFungibleEntityBalanceChanges == input.NonFungibleEntityBalanceChanges ||
-                    this.NonFungibleEntityBalanceChanges != null &&
-                    input.NonFungibleEntityBalanceChanges != null &&
-                    this.NonFungibleEntityBalanceChanges.SequenceEqual(input.NonFungibleEntityBalanceChanges)
+                    this.Added == input.Added ||
+                    this.Added != null &&
+                    input.Added != null &&
+                    this.Added.SequenceEqual(input.Added)
+                ) && 
+                (
+                    this.Removed == input.Removed ||
+                    this.Removed != null &&
+                    input.Removed != null &&
+                    this.Removed.SequenceEqual(input.Removed)
                 );
         }
 
@@ -222,17 +241,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Transaction != null)
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
-                if (this.FungibleEntityBalanceChanges != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.FungibleEntityBalanceChanges.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.NonFungibleEntityBalanceChanges != null)
+                if (this.Added != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleEntityBalanceChanges.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Added.GetHashCode();
+                }
+                if (this.Removed != null)
+                {
+                    hashCode = (hashCode * 59) + this.Removed.GetHashCode();
                 }
                 return hashCode;
             }

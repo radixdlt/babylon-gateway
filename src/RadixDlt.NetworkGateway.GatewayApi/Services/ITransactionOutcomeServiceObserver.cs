@@ -73,7 +73,7 @@ public interface ITransactionOutcomeServiceObserver
 {
     ValueTask PreHandleOutcomeRequest(long stateVersion, string targetNode);
 
-    ValueTask PostHandleOutcomeRequest(long stateVersion, string targetNode, GatewayModel.TransactionCommittedOutcomeResponse response);
+    ValueTask PostHandleOutcomeRequest(long stateVersion, string targetNode);
 
     ValueTask HandleOutcomeRequestFailed(long stateVersion, string targetNode, Exception exception);
 }

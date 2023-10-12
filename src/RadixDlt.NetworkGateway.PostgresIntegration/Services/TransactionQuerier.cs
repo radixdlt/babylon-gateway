@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -88,12 +89,21 @@ internal class TransactionQuerier : ITransactionQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ITransactionBalanceChangesService _transactionBalanceChangesService;
+    private readonly ILogger _logger;
 
-    public TransactionQuerier(ReadOnlyDbContext dbContext, ReadWriteDbContext rwDbContext, INetworkConfigurationProvider networkConfigurationProvider)
+    public TransactionQuerier(
+        ReadOnlyDbContext dbContext,
+        ReadWriteDbContext rwDbContext,
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ITransactionBalanceChangesService transactionBalanceChangesService,
+        ILogger<TransactionQuerier> logger)
     {
         _dbContext = dbContext;
         _rwDbContext = rwDbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _transactionBalanceChangesService = transactionBalanceChangesService;
+        _logger = logger;
     }
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
@@ -673,9 +683,25 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
 
         foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)))
         {
+            GatewayModel.TransactionBalanceChanges? balanceChanges = null;
+
+            if (optIns.BalanceChanges)
+            {
+                var coreBalanceChanges = await _transactionBalanceChangesService.GetTransactionBalanceChanges(transaction.StateVersion, token);
+
+                if (coreBalanceChanges == null)
+                {
+                    _logger.LogError("Failed to load transaction balance changes for {StateVersion}", transaction.StateVersion);
+                }
+                else
+                {
+                    balanceChanges = coreBalanceChanges.ToGatewayModel();
+                }
+            }
+
             if (!optIns.ReceiptEvents || schemaLookups?.Any() == false)
             {
-                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null));
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null, balanceChanges));
             }
             else
             {
@@ -692,7 +718,7 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
                     events.Add(new Event(@event.Name, @event.Emitter, eventData));
                 }
 
-                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events));
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events, balanceChanges));
             }
         }
 
