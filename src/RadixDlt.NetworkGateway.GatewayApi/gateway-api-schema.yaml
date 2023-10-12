@@ -288,7 +288,10 @@ paths:
       summary: Get Committed Transaction Outcome
       description: |
         Returns the committed outcome of the transaction for a given transaction identifier.
-        Transaction identifiers which don't correspond to a committed transaction will return a `TransactionNotFoundError`.
+        Transaction identifiers which don't correspond to a committed transaction will return a `TransactionNotFoundError`
+        however it is possible for this endpoint to incorrectly return such erroneous response. In such case a retry the request.
+
+        **Warning!** This is a temporary endpoint that's expected be be obsoleted by regular `/transaction/committed-details` and opt-in flag.
       tags:
         - Transaction
       requestBody:
