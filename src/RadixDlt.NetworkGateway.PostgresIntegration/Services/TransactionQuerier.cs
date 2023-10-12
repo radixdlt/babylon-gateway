@@ -613,7 +613,7 @@ WITH configuration AS (
         true AS with_receipt_costing_parameters,
         true AS with_receipt_fee_summary,
         true AS with_receipt_next_epoch,
-        true AS with_receipt_output,
+        {optIns.ReceiptOutput} AS with_receipt_output,
         {optIns.ReceiptStateChanges} AS with_receipt_state_updates,
         {optIns.ReceiptEvents} AS with_receipt_events
 )
