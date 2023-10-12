@@ -71,6 +71,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using LedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction;
 using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
@@ -110,7 +111,8 @@ internal static class GatewayModelExtensions
         this LedgerTransaction lt,
         GatewayModel.TransactionDetailsOptIns optIns,
         Dictionary<long, string> entityIdToAddressMap,
-        List<TransactionQuerier.Event>? events)
+        List<TransactionQuerier.Event>? events,
+        GatewayModel.TransactionBalanceChanges? transactionBalanceChanges)
     {
         string? payloadHash = null;
         string? intentHash = null;
@@ -153,7 +155,8 @@ internal static class GatewayModelExtensions
             errorMessage: lt.EngineReceipt.ErrorMessage,
             rawHex: rawHex,
             receipt: receipt,
-            message: message
+            message: message,
+            balanceChanges: optIns.BalanceChanges ? transactionBalanceChanges : null
         );
     }
 
@@ -177,6 +180,18 @@ internal static class GatewayModelExtensions
         };
     }
 
+    public static GatewayModel.ObjectModuleId ToGatewayModel(this ModuleId moduleId)
+    {
+        return moduleId switch
+        {
+            ModuleId.Main => GatewayModel.ObjectModuleId.Main,
+            ModuleId.Metadata => GatewayModel.ObjectModuleId.Metadata,
+            ModuleId.Royalty => GatewayModel.ObjectModuleId.Royalty,
+            ModuleId.RoleAssignment => GatewayModel.ObjectModuleId.RoleAssignment,
+            _ => throw new UnreachableException($"Didn't expect {moduleId} value"),
+        };
+    }
+
     public static GatewayModel.PublicKey ToGatewayModel(this ToolkitModel.PublicKey publicKey)
     {
         return publicKey switch
@@ -197,15 +212,36 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.ObjectModuleId ToGatewayModel(this ModuleId moduleId)
+    public static GatewayModel.TransactionBalanceChanges ToGatewayModel(this CoreModel.LtsCommittedTransactionOutcome input)
     {
-        return moduleId switch
+        var fungibleFeeBalanceChanges = new List<GatewayModel.TransactionFungibleFeeBalanceChanges>();
+        var fungibleBalanceChanges = new List<GatewayModel.TransactionFungibleBalanceChanges>();
+
+        foreach (var f in input.FungibleEntityBalanceChanges)
         {
-            ModuleId.Main => GatewayModel.ObjectModuleId.Main,
-            ModuleId.Metadata => GatewayModel.ObjectModuleId.Metadata,
-            ModuleId.Royalty => GatewayModel.ObjectModuleId.Royalty,
-            ModuleId.RoleAssignment => GatewayModel.ObjectModuleId.RoleAssignment,
-            _ => throw new UnreachableException($"Didn't expect {moduleId} value"),
+            fungibleFeeBalanceChanges.AddRange(f.FeeBalanceChanges
+                .Select(x => new GatewayModel.TransactionFungibleFeeBalanceChanges(x.Type.ToGatewayModel(), f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
+            fungibleBalanceChanges.AddRange(f.NonFeeBalanceChanges
+                .Select(x => new GatewayModel.TransactionFungibleBalanceChanges(f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
+        }
+
+        var nonFungibleBalanceChanges = input
+            .NonFungibleEntityBalanceChanges
+            .Select(x => new GatewayModel.TransactionNonFungibleBalanceChanges(x.EntityAddress, x.ResourceAddress, x.Added, x.Removed))
+            .ToList();
+
+        return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
+    }
+
+    private static GatewayModel.TransactionFungibleFeeBalanceChangeType ToGatewayModel(this CoreModel.LtsFeeFungibleResourceBalanceChangeType input)
+    {
+        return input switch
+        {
+            CoreModel.LtsFeeFungibleResourceBalanceChangeType.FeePayment => GatewayModel.TransactionFungibleFeeBalanceChangeType.FeePayment,
+            CoreModel.LtsFeeFungibleResourceBalanceChangeType.FeeDistributed => GatewayModel.TransactionFungibleFeeBalanceChangeType.FeeDistributed,
+            CoreModel.LtsFeeFungibleResourceBalanceChangeType.TipDistributed => GatewayModel.TransactionFungibleFeeBalanceChangeType.TipDistributed,
+            CoreModel.LtsFeeFungibleResourceBalanceChangeType.RoyaltyDistributed => GatewayModel.TransactionFungibleFeeBalanceChangeType.RoyaltyDistributed,
+            _ => throw new UnreachableException($"Didn't expect {input} value"),
         };
     }
 }

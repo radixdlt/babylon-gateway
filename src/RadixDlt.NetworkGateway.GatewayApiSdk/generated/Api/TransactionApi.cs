@@ -113,27 +113,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of TransactionCommittedDetailsResponse</returns>
         ApiResponse<TransactionCommittedDetailsResponse> TransactionCommittedDetailsWithHttpInfo(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest);
         /// <summary>
-        /// Get Committed Transaction Outcome
-        /// </summary>
-        /// <remarks>
-        /// Returns the committed outcome of the transaction for a given transaction identifier. Transaction identifiers which don&#39;t correspond to a committed transaction will return a &#x60;TransactionNotFoundError&#x60;. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionCommittedOutcomeRequest"></param>
-        /// <returns>TransactionCommittedOutcomeResponse</returns>
-        TransactionCommittedOutcomeResponse TransactionCommittedOutcome(TransactionCommittedOutcomeRequest transactionCommittedOutcomeRequest);
-
-        /// <summary>
-        /// Get Committed Transaction Outcome
-        /// </summary>
-        /// <remarks>
-        /// Returns the committed outcome of the transaction for a given transaction identifier. Transaction identifiers which don&#39;t correspond to a committed transaction will return a &#x60;TransactionNotFoundError&#x60;. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionCommittedOutcomeRequest"></param>
-        /// <returns>ApiResponse of TransactionCommittedOutcomeResponse</returns>
-        ApiResponse<TransactionCommittedOutcomeResponse> TransactionCommittedOutcomeWithHttpInfo(TransactionCommittedOutcomeRequest transactionCommittedOutcomeRequest);
-        /// <summary>
         /// Get Construction Metadata
         /// </summary>
         /// <remarks>
@@ -247,29 +226,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (TransactionCommittedDetailsResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<TransactionCommittedDetailsResponse>> TransactionCommittedDetailsWithHttpInfoAsync(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
-        /// Get Committed Transaction Outcome
-        /// </summary>
-        /// <remarks>
-        /// Returns the committed outcome of the transaction for a given transaction identifier. Transaction identifiers which don&#39;t correspond to a committed transaction will return a &#x60;TransactionNotFoundError&#x60;. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionCommittedOutcomeRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionCommittedOutcomeResponse</returns>
-        System.Threading.Tasks.Task<TransactionCommittedOutcomeResponse> TransactionCommittedOutcomeAsync(TransactionCommittedOutcomeRequest transactionCommittedOutcomeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Get Committed Transaction Outcome
-        /// </summary>
-        /// <remarks>
-        /// Returns the committed outcome of the transaction for a given transaction identifier. Transaction identifiers which don&#39;t correspond to a committed transaction will return a &#x60;TransactionNotFoundError&#x60;. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionCommittedOutcomeRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionCommittedOutcomeResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<TransactionCommittedOutcomeResponse>> TransactionCommittedOutcomeWithHttpInfoAsync(TransactionCommittedOutcomeRequest transactionCommittedOutcomeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Construction Metadata
         /// </summary>
@@ -684,123 +640,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("TransactionCommittedDetails", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Committed Transaction Outcome Returns the committed outcome of the transaction for a given transaction identifier. Transaction identifiers which don&#39;t correspond to a committed transaction will return a &#x60;TransactionNotFoundError&#x60;. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionCommittedOutcomeRequest"></param>
-        /// <returns>TransactionCommittedOutcomeResponse</returns>
-        public TransactionCommittedOutcomeResponse TransactionCommittedOutcome(TransactionCommittedOutcomeRequest transactionCommittedOutcomeRequest)
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionCommittedOutcomeResponse> localVarResponse = TransactionCommittedOutcomeWithHttpInfo(transactionCommittedOutcomeRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Committed Transaction Outcome Returns the committed outcome of the transaction for a given transaction identifier. Transaction identifiers which don&#39;t correspond to a committed transaction will return a &#x60;TransactionNotFoundError&#x60;. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionCommittedOutcomeRequest"></param>
-        /// <returns>ApiResponse of TransactionCommittedOutcomeResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionCommittedOutcomeResponse> TransactionCommittedOutcomeWithHttpInfo(TransactionCommittedOutcomeRequest transactionCommittedOutcomeRequest)
-        {
-            // verify the required parameter 'transactionCommittedOutcomeRequest' is set
-            if (transactionCommittedOutcomeRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionCommittedOutcomeRequest' when calling TransactionApi->TransactionCommittedOutcome");
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionCommittedOutcomeRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<TransactionCommittedOutcomeResponse>("/transaction/committed-outcome", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionCommittedOutcome", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Committed Transaction Outcome Returns the committed outcome of the transaction for a given transaction identifier. Transaction identifiers which don&#39;t correspond to a committed transaction will return a &#x60;TransactionNotFoundError&#x60;. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionCommittedOutcomeRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionCommittedOutcomeResponse</returns>
-        public async System.Threading.Tasks.Task<TransactionCommittedOutcomeResponse> TransactionCommittedOutcomeAsync(TransactionCommittedOutcomeRequest transactionCommittedOutcomeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionCommittedOutcomeResponse> localVarResponse = await TransactionCommittedOutcomeWithHttpInfoAsync(transactionCommittedOutcomeRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Committed Transaction Outcome Returns the committed outcome of the transaction for a given transaction identifier. Transaction identifiers which don&#39;t correspond to a committed transaction will return a &#x60;TransactionNotFoundError&#x60;. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionCommittedOutcomeRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionCommittedOutcomeResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionCommittedOutcomeResponse>> TransactionCommittedOutcomeWithHttpInfoAsync(TransactionCommittedOutcomeRequest transactionCommittedOutcomeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'transactionCommittedOutcomeRequest' is set
-            if (transactionCommittedOutcomeRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionCommittedOutcomeRequest' when calling TransactionApi->TransactionCommittedOutcome");
-
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionCommittedOutcomeRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionCommittedOutcomeResponse>("/transaction/committed-outcome", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionCommittedOutcome", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

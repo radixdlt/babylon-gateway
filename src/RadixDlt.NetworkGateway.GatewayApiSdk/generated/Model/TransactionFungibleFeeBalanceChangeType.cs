@@ -90,10 +90,11 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines LtsFeeFungibleResourceBalanceChangeType
+    /// Indicates fee-related balance changes, for example:  - payment of the fee including tip and royalty, - distribution of royalties, - distribution of the fee and tip to the consensus-manager, for distributing to the relevant validator/s at end of epoch.  See https://www.radixdlt.com/blog/how-fees-work-in-babylon for further information on how fee payment works at Babylon. 
     /// </summary>
+    /// <value>Indicates fee-related balance changes, for example:  - payment of the fee including tip and royalty, - distribution of royalties, - distribution of the fee and tip to the consensus-manager, for distributing to the relevant validator/s at end of epoch.  See https://www.radixdlt.com/blog/how-fees-work-in-babylon for further information on how fee payment works at Babylon. </value>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum LtsFeeFungibleResourceBalanceChangeType
+    public enum TransactionFungibleFeeBalanceChangeType
     {
         /// <summary>
         /// Enum FeePayment for value: FeePayment

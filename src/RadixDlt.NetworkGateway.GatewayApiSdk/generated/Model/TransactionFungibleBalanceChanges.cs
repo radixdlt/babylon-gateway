@@ -90,44 +90,64 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionCommittedOutcomeRequest
+    /// TransactionFungibleBalanceChanges
     /// </summary>
-    [DataContract(Name = "TransactionCommittedOutcomeRequest")]
-    public partial class TransactionCommittedOutcomeRequest : IEquatable<TransactionCommittedOutcomeRequest>
+    [DataContract(Name = "TransactionFungibleBalanceChanges")]
+    public partial class TransactionFungibleBalanceChanges : IEquatable<TransactionFungibleBalanceChanges>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionFungibleBalanceChanges" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionCommittedOutcomeRequest() { }
+        protected TransactionFungibleBalanceChanges() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionFungibleBalanceChanges" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="intentHash">Bech32m-encoded hash. (required).</param>
-        public TransactionCommittedOutcomeRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHash = default(string))
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="balanceChange">The string-encoded decimal representing the amount of change for the fungible resource.  (required).</param>
+        public TransactionFungibleBalanceChanges(string entityAddress = default(string), string resourceAddress = default(string), string balanceChange = default(string))
         {
-            // to ensure "intentHash" is required (not null)
-            if (intentHash == null)
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("intentHash is a required property for TransactionCommittedOutcomeRequest and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for TransactionFungibleBalanceChanges and cannot be null");
             }
-            this.IntentHash = intentHash;
-            this.AtLedgerState = atLedgerState;
+            this.EntityAddress = entityAddress;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for TransactionFungibleBalanceChanges and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
+            // to ensure "balanceChange" is required (not null)
+            if (balanceChange == null)
+            {
+                throw new ArgumentNullException("balanceChange is a required property for TransactionFungibleBalanceChanges and cannot be null");
+            }
+            this.BalanceChange = balanceChange;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded hash.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded hash.</value>
-        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHash { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// The string-encoded decimal representing the amount of change for the fungible resource. 
+        /// </summary>
+        /// <value>The string-encoded decimal representing the amount of change for the fungible resource. </value>
+        [DataMember(Name = "balance_change", IsRequired = true, EmitDefaultValue = true)]
+        public string BalanceChange { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +156,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionCommittedOutcomeRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("class TransactionFungibleBalanceChanges {\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  BalanceChange: ").Append(BalanceChange).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,15 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionCommittedOutcomeRequest);
+            return this.Equals(input as TransactionFungibleBalanceChanges);
         }
 
         /// <summary>
-        /// Returns true if TransactionCommittedOutcomeRequest instances are equal
+        /// Returns true if TransactionFungibleBalanceChanges instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionCommittedOutcomeRequest to be compared</param>
+        /// <param name="input">Instance of TransactionFungibleBalanceChanges to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionCommittedOutcomeRequest input)
+        public bool Equals(TransactionFungibleBalanceChanges input)
         {
             if (input == null)
             {
@@ -175,14 +196,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
                 ) && 
                 (
-                    this.IntentHash == input.IntentHash ||
-                    (this.IntentHash != null &&
-                    this.IntentHash.Equals(input.IntentHash))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
+                    this.BalanceChange == input.BalanceChange ||
+                    (this.BalanceChange != null &&
+                    this.BalanceChange.Equals(input.BalanceChange))
                 );
         }
 
@@ -195,13 +221,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
-                if (this.IntentHash != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                if (this.BalanceChange != null)
+                {
+                    hashCode = (hashCode * 59) + this.BalanceChange.GetHashCode();
                 }
                 return hashCode;
             }

@@ -107,7 +107,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="receiptEvents">if set to &#x60;true&#x60;, events inside receipt object is returned..</param>
         /// <param name="receiptOutput">(true by default) if set to &#x60;true&#x60;, transaction receipt output is returned..</param>
         /// <param name="affectedGlobalEntities">if set to &#x60;true&#x60;, all affected global entities by given transaction are returned..</param>
-        public TransactionDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptFeeSource = default(bool), bool receiptFeeDestination = default(bool), bool receiptCostingParameters = default(bool), bool receiptEvents = default(bool), bool receiptOutput = default(bool), bool affectedGlobalEntities = default(bool))
+        /// <param name="balanceChanges">if set to &#x60;true&#x60;, returns the fungible and non-fungible balance changes.  **Warning!** This opt-in might be missing for recently committed transactions, in that case a &#x60;null&#x60; value will be returned. Retry the request until non-null value is returned. .</param>
+        public TransactionDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptFeeSource = default(bool), bool receiptFeeDestination = default(bool), bool receiptCostingParameters = default(bool), bool receiptEvents = default(bool), bool receiptOutput = default(bool), bool affectedGlobalEntities = default(bool), bool balanceChanges = default(bool))
         {
             this.RawHex = rawHex;
             this.ReceiptStateChanges = receiptStateChanges;
@@ -118,6 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.ReceiptEvents = receiptEvents;
             this.ReceiptOutput = receiptOutput;
             this.AffectedGlobalEntities = affectedGlobalEntities;
+            this.BalanceChanges = balanceChanges;
         }
 
         /// <summary>
@@ -184,6 +186,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool AffectedGlobalEntities { get; set; }
 
         /// <summary>
+        /// if set to &#x60;true&#x60;, returns the fungible and non-fungible balance changes.  **Warning!** This opt-in might be missing for recently committed transactions, in that case a &#x60;null&#x60; value will be returned. Retry the request until non-null value is returned. 
+        /// </summary>
+        /// <value>if set to &#x60;true&#x60;, returns the fungible and non-fungible balance changes.  **Warning!** This opt-in might be missing for recently committed transactions, in that case a &#x60;null&#x60; value will be returned. Retry the request until non-null value is returned. </value>
+        [DataMember(Name = "balance_changes", EmitDefaultValue = true)]
+        public bool BalanceChanges { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -200,6 +209,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ReceiptEvents: ").Append(ReceiptEvents).Append("\n");
             sb.Append("  ReceiptOutput: ").Append(ReceiptOutput).Append("\n");
             sb.Append("  AffectedGlobalEntities: ").Append(AffectedGlobalEntities).Append("\n");
+            sb.Append("  BalanceChanges: ").Append(BalanceChanges).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -270,6 +280,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.AffectedGlobalEntities == input.AffectedGlobalEntities ||
                     this.AffectedGlobalEntities.Equals(input.AffectedGlobalEntities)
+                ) && 
+                (
+                    this.BalanceChanges == input.BalanceChanges ||
+                    this.BalanceChanges.Equals(input.BalanceChanges)
                 );
         }
 
@@ -291,6 +305,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 hashCode = (hashCode * 59) + this.ReceiptEvents.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptOutput.GetHashCode();
                 hashCode = (hashCode * 59) + this.AffectedGlobalEntities.GetHashCode();
+                hashCode = (hashCode * 59) + this.BalanceChanges.GetHashCode();
                 return hashCode;
             }
         }

@@ -65,7 +65,6 @@
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -81,7 +80,6 @@ internal class DefaultTransactionHandler : ITransactionHandler
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly ITransactionPreviewService _transactionPreviewService;
-    private readonly ITransactionOutcomeService _transactionOutcomeService;
     private readonly ISubmissionService _submissionService;
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
@@ -89,14 +87,12 @@ internal class DefaultTransactionHandler : ITransactionHandler
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
         ITransactionPreviewService transactionPreviewService,
-        ITransactionOutcomeService transactionOutcomeService,
         ISubmissionService submissionService,
         IOptionsSnapshot<EndpointOptions> endpointConfiguration)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _transactionQuerier = transactionQuerier;
         _transactionPreviewService = transactionPreviewService;
-        _transactionOutcomeService = transactionOutcomeService;
         _submissionService = submissionService;
         _endpointConfiguration = endpointConfiguration;
     }
@@ -137,24 +133,6 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
     {
         return await _transactionPreviewService.HandlePreviewRequest(request, token);
-    }
-
-    public async Task<GatewayModel.TransactionCommittedOutcomeResponse> Outcome(GatewayModel.TransactionCommittedOutcomeRequest request, CancellationToken token = default)
-    {
-        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(
-            request.IntentHash,
-            GatewayModel.TransactionDetailsOptIns.Default,
-            atLedgerState,
-            false,
-            token);
-
-        if (committedTransaction == null)
-        {
-            throw new TransactionNotFoundException(request.IntentHash);
-        }
-
-        return await _transactionOutcomeService.HandleOutcomeRequest(atLedgerState, committedTransaction, token);
     }
 
     public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)

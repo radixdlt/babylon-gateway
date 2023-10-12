@@ -307,7 +307,7 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ITransactionOutcomeServiceObserver.PostHandleOutcomeRequest(long stateVersion, string targetNode, GatewayModel.TransactionCommittedOutcomeResponse response)
+    ValueTask ITransactionOutcomeServiceObserver.PostHandleOutcomeRequest(long stateVersion, string targetNode)
     {
         _transactionOutcomeSuccessCount.WithLabels(targetNode).Inc();
 

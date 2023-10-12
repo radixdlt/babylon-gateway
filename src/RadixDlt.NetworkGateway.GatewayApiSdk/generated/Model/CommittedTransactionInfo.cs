@@ -123,7 +123,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="rawHex">Hex-encoded binary blob..</param>
         /// <param name="receipt">receipt.</param>
         /// <param name="message">defined in core api specs..</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHash = default(string), string intentHash = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), Object message = default(Object))
+        /// <param name="balanceChanges">balanceChanges.</param>
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHash = default(string), string intentHash = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), Object message = default(Object), TransactionBalanceChanges balanceChanges = default(TransactionBalanceChanges))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
@@ -144,6 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.RawHex = rawHex;
             this.Receipt = receipt;
             this.Message = message;
+            this.BalanceChanges = balanceChanges;
         }
 
         /// <summary>
@@ -230,6 +232,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object Message { get; set; }
 
         /// <summary>
+        /// Gets or Sets BalanceChanges
+        /// </summary>
+        [DataMember(Name = "balance_changes", EmitDefaultValue = true)]
+        public TransactionBalanceChanges BalanceChanges { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -251,6 +259,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
             sb.Append("  Message: ").Append(Message).Append("\n");
+            sb.Append("  BalanceChanges: ").Append(BalanceChanges).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -352,6 +361,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Message == input.Message ||
                     (this.Message != null &&
                     this.Message.Equals(input.Message))
+                ) && 
+                (
+                    this.BalanceChanges == input.BalanceChanges ||
+                    (this.BalanceChanges != null &&
+                    this.BalanceChanges.Equals(input.BalanceChanges))
                 );
         }
 
@@ -407,6 +421,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Message != null)
                 {
                     hashCode = (hashCode * 59) + this.Message.GetHashCode();
+                }
+                if (this.BalanceChanges != null)
+                {
+                    hashCode = (hashCode * 59) + this.BalanceChanges.GetHashCode();
                 }
                 return hashCode;
             }

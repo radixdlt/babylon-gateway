@@ -90,36 +90,58 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionCommittedOutcomeResponseFungibleBalanceChange
+    /// TransactionFungibleFeeBalanceChanges
     /// </summary>
-    [DataContract(Name = "TransactionCommittedOutcomeResponseFungibleBalanceChange")]
-    public partial class TransactionCommittedOutcomeResponseFungibleBalanceChange : IEquatable<TransactionCommittedOutcomeResponseFungibleBalanceChange>
+    [DataContract(Name = "TransactionFungibleFeeBalanceChanges")]
+    public partial class TransactionFungibleFeeBalanceChanges : IEquatable<TransactionFungibleFeeBalanceChanges>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeResponseFungibleBalanceChange" /> class.
+        /// Gets or Sets Type
+        /// </summary>
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionFungibleFeeBalanceChangeType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionFungibleFeeBalanceChanges" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionCommittedOutcomeResponseFungibleBalanceChange() { }
+        protected TransactionFungibleFeeBalanceChanges() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedOutcomeResponseFungibleBalanceChange" /> class.
+        /// Initializes a new instance of the <see cref="TransactionFungibleFeeBalanceChanges" /> class.
         /// </summary>
+        /// <param name="type">type (required).</param>
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="balanceChange">The string-encoded decimal representing the amount of change for the fungible resource.  (required).</param>
-        public TransactionCommittedOutcomeResponseFungibleBalanceChange(string resourceAddress = default(string), string balanceChange = default(string))
+        public TransactionFungibleFeeBalanceChanges(TransactionFungibleFeeBalanceChangeType type = default(TransactionFungibleFeeBalanceChangeType), string entityAddress = default(string), string resourceAddress = default(string), string balanceChange = default(string))
         {
+            this.Type = type;
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
+            {
+                throw new ArgumentNullException("entityAddress is a required property for TransactionFungibleFeeBalanceChanges and cannot be null");
+            }
+            this.EntityAddress = entityAddress;
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for TransactionCommittedOutcomeResponseFungibleBalanceChange and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for TransactionFungibleFeeBalanceChanges and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
             // to ensure "balanceChange" is required (not null)
             if (balanceChange == null)
             {
-                throw new ArgumentNullException("balanceChange is a required property for TransactionCommittedOutcomeResponseFungibleBalanceChange and cannot be null");
+                throw new ArgumentNullException("balanceChange is a required property for TransactionFungibleFeeBalanceChanges and cannot be null");
             }
             this.BalanceChange = balanceChange;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the address.
@@ -142,7 +164,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionCommittedOutcomeResponseFungibleBalanceChange {\n");
+            sb.Append("class TransactionFungibleFeeBalanceChanges {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  BalanceChange: ").Append(BalanceChange).Append("\n");
             sb.Append("}\n");
@@ -165,21 +189,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionCommittedOutcomeResponseFungibleBalanceChange);
+            return this.Equals(input as TransactionFungibleFeeBalanceChanges);
         }
 
         /// <summary>
-        /// Returns true if TransactionCommittedOutcomeResponseFungibleBalanceChange instances are equal
+        /// Returns true if TransactionFungibleFeeBalanceChanges instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionCommittedOutcomeResponseFungibleBalanceChange to be compared</param>
+        /// <param name="input">Instance of TransactionFungibleFeeBalanceChanges to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionCommittedOutcomeResponseFungibleBalanceChange input)
+        public bool Equals(TransactionFungibleFeeBalanceChanges input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
+                (
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
+                ) && 
+                (
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
+                ) && 
                 (
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
@@ -201,6 +234,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.EntityAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                }
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
