@@ -84,41 +84,32 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponseFungibleVaultDetails
+    /// StateEntityDetailsResponseFungibleVaultDetailsAllOf
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponseFungibleVaultDetails")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseComponentDetails), "Component")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleResourceDetails), "FungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleVaultDetails), "FungibleVault")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleResourceDetails), "NonFungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleVaultDetails), "NonFungibleVault")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "Package")]
-    public partial class StateEntityDetailsResponseFungibleVaultDetails : StateEntityDetailsResponseItemDetails, IEquatable<StateEntityDetailsResponseFungibleVaultDetails>
+    [DataContract(Name = "StateEntityDetailsResponseFungibleVaultDetails_allOf")]
+    public partial class StateEntityDetailsResponseFungibleVaultDetailsAllOf : IEquatable<StateEntityDetailsResponseFungibleVaultDetailsAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseFungibleVaultDetails" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseFungibleVaultDetailsAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponseFungibleVaultDetails() { }
+        protected StateEntityDetailsResponseFungibleVaultDetailsAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseFungibleVaultDetails" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseFungibleVaultDetailsAllOf" /> class.
         /// </summary>
         /// <param name="balance">balance (required).</param>
-        /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.FungibleVault).</param>
-        public StateEntityDetailsResponseFungibleVaultDetails(FungibleResourcesCollectionItemVaultAggregatedVaultItem balance = default(FungibleResourcesCollectionItemVaultAggregatedVaultItem), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.FungibleVault) : base(type)
+        public StateEntityDetailsResponseFungibleVaultDetailsAllOf(FungibleResourcesCollectionItemVaultAggregatedVaultItem balance = default(FungibleResourcesCollectionItemVaultAggregatedVaultItem))
         {
             // to ensure "balance" is required (not null)
             if (balance == null)
             {
-                throw new ArgumentNullException("balance is a required property for StateEntityDetailsResponseFungibleVaultDetails and cannot be null");
+                throw new ArgumentNullException("balance is a required property for StateEntityDetailsResponseFungibleVaultDetailsAllOf and cannot be null");
             }
             this.Balance = balance;
         }
@@ -136,8 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponseFungibleVaultDetails {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("class StateEntityDetailsResponseFungibleVaultDetailsAllOf {\n");
             sb.Append("  Balance: ").Append(Balance).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -147,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -159,21 +149,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponseFungibleVaultDetails);
+            return this.Equals(input as StateEntityDetailsResponseFungibleVaultDetailsAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponseFungibleVaultDetails instances are equal
+        /// Returns true if StateEntityDetailsResponseFungibleVaultDetailsAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponseFungibleVaultDetails to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseFungibleVaultDetailsAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponseFungibleVaultDetails input)
+        public bool Equals(StateEntityDetailsResponseFungibleVaultDetailsAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
                     this.Balance == input.Balance ||
                     (this.Balance != null &&
@@ -189,7 +179,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
+                int hashCode = 41;
                 if (this.Balance != null)
                 {
                     hashCode = (hashCode * 59) + this.Balance.GetHashCode();

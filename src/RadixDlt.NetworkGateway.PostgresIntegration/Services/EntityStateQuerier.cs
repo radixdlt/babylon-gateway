@@ -144,19 +144,23 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     {
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
-        var roleAssignmentPossibleComponentEntities = componentEntities.Where(x => x.IsGlobal).ToList();
+        var globalComponentEntities = componentEntities.Where(x => x.IsGlobal).ToList();
         var resourceEntities = entities.OfType<ResourceEntity>().ToList();
         var packageEntities = entities.OfType<GlobalPackageEntity>().ToList();
+        var fungibleVaultEntities = entities.OfType<InternalFungibleVaultEntity>().ToList();
+        var nonFungibleVaultEntities = entities.OfType<InternalNonFungibleVaultEntity>().ToList();
 
         // TODO ideally we'd like to run those in parallel
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var roleAssignmentsHistory = await _roleAssignmentQuerier.GetRoleAssignmentsHistory(roleAssignmentPossibleComponentEntities, ledgerState, token);
+        var roleAssignmentsHistory = await _roleAssignmentQuerier.GetRoleAssignmentsHistory(globalComponentEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
 
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
         var packageBlueprintHistory = await GetPackageBlueprintHistory(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
         var packageCodeHistory = await GetPackageCodeHistory(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
         var packageSchemaHistory = await GetPackageSchemaHistory(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
+        var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
+        var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, packageBlueprintHistory, ledgerState, token);
 
         var royaltyVaultsBalance = componentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
@@ -164,8 +168,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             : null;
 
         var fungibleResources =
-            await EntityFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var nonFungibleResources = await EntityNonFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, optIns.NonFungibleIncludeNfids, 0,
+            await EntityFungibleResourcesPageSlice(globalComponentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
+        var nonFungibleResources = await EntityNonFungibleResourcesPageSlice(globalComponentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, optIns.NonFungibleIncludeNfids, 0,
             _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
         var resourceAddressToEntityId = await ResolveResourceEntityIds(fungibleResources.Values, nonFungibleResources.Values, token);
 
@@ -248,6 +252,36 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
                     details = virtualEntityData.Details;
                     metadata[entity.Id] = virtualEntityData.Metadata;
+                    break;
+
+                case InternalFungibleVaultEntity:
+                    var fungibleVaultHistory = fungibleVaultsHistory[entity.Id];
+
+                    details = new GatewayModel.StateEntityDetailsResponseFungibleVaultDetails(
+                        balance: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                            vaultAddress: entity.Address,
+                            amount: TokenAmount.FromSubUnitsString(fungibleVaultHistory.Balance).ToString(),
+                            lastUpdatedAtStateVersion: fungibleVaultHistory.LastUpdatedAtStateVersion));
+                    break;
+                case InternalNonFungibleVaultEntity:
+                    var nonFungibleVaultHistory = nonFungibleVaultsHistory[entity.Id];
+
+                    List<string>? nfItems = null;
+                    string? nfNextCursor = null;
+
+                    if (optIns.NonFungibleIncludeNfids && nonFungibleVaultHistory.NonFungibleIdsAndOneMore.Any())
+                    {
+                        nfItems = nonFungibleVaultHistory.NonFungibleIdsAndOneMore.Take(_endpointConfiguration.Value.DefaultPageSize).ToList();
+                        nfNextCursor = GenerateOffsetCursor(0, _endpointConfiguration.Value.DefaultPageSize, nonFungibleVaultHistory.NonFungibleIdsCount);
+                    }
+
+                    details = new GatewayModel.StateEntityDetailsResponseNonFungibleVaultDetails(
+                        balance: new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                            totalCount: nonFungibleVaultHistory.NonFungibleIdsCount,
+                            nextCursor: nfNextCursor,
+                            items: nfItems,
+                            vaultAddress: entity.Address,
+                            lastUpdatedAtStateVersion: nonFungibleVaultHistory.LastUpdatedAtStateVersion));
                     break;
 
                 case ComponentEntity ce:
@@ -1400,6 +1434,8 @@ INNER JOIN LATERAL(
     SELECT *
     FROM package_blueprint_history
     WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
+    ORDER BY from_state_version DESC
+    LIMIT 1
 ) pbh ON true")
                 .AnnotateMetricName()
                 .ToListAsync(token))
@@ -1448,6 +1484,8 @@ INNER JOIN LATERAL(
     SELECT *
     FROM schema_history
     WHERE entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
+    ORDER BY from_state_version DESC
+    LIMIT 1
 ) psh ON true")
                 .AnnotateMetricName()
                 .ToListAsync(token))
