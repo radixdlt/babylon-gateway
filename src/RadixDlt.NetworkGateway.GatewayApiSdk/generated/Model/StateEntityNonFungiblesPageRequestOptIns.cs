@@ -98,9 +98,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityNonFungiblesPageRequestOptIns" /> class.
         /// </summary>
-        /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint..</param>
+        /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint. (default to false).</param>
         /// <param name="explicitMetadata">allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items..</param>
-        public StateEntityNonFungiblesPageRequestOptIns(bool nonFungibleIncludeNfids = default(bool), List<string> explicitMetadata = default(List<string>))
+        public StateEntityNonFungiblesPageRequestOptIns(bool nonFungibleIncludeNfids = false, List<string> explicitMetadata = default(List<string>))
         {
             this.NonFungibleIncludeNfids = nonFungibleIncludeNfids;
             this.ExplicitMetadata = explicitMetadata;

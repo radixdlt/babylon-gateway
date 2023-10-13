@@ -1846,36 +1846,46 @@ components:
         raw_hex:
           description: if set to `true`, raw transaction hex is returned.
           type: boolean
+          default: false
         receipt_state_changes:
           description: if set to `true`, state changes inside receipt object are returned.
           type: boolean
+          default: false
         receipt_fee_summary:
           description: if set to `true`, fee summary inside receipt object is returned.
           type: boolean
+          default: false
         receipt_fee_source:
           description: if set to `true`, fee source inside receipt object is returned.
           type: boolean
+          default: false
         receipt_fee_destination:
           description: if set to `true`, fee destination inside receipt object is returned.
           type: boolean
+          default: false
         receipt_costing_parameters:
           description: if set to `true`, costing parameters inside receipt object is returned.
           type: boolean
+          default: false
         receipt_events:
           description: if set to `true`, events inside receipt object is returned.
           type: boolean
+          default: false
         receipt_output:
           description: (true by default) if set to `true`, transaction receipt output is returned.
           type: boolean
+          default: true
         affected_global_entities:
           description: if set to `true`, all affected global entities by given transaction are returned.
           type: boolean
+          default: false
         balance_changes:
           description: |
             if set to `true`, returns the fungible and non-fungible balance changes.
 
             **Warning!** This opt-in might be missing for recently committed transactions, in that case a `null` value will be returned. Retry the request until non-null value is returned.
           type: boolean
+          default: false
 
     TransactionCommittedDetailsResponse:
       allOf:
@@ -2095,15 +2105,19 @@ components:
         ancestor_identities:
           description: if set to `true`, ancestor addresses - `parent_address`, `owner_address` and `global_address` for entities are returned.
           type: boolean
+          default: false
         component_royalty_vault_balance:
           description: if set to `true`, `royalty_vault_balance` for component entities is returned.
           type: boolean
+          default: false
         package_royalty_vault_balance:
           description: if set to `true`, `royalty_vault_balance` for package entities is returned.
           type: boolean
+          default: false
         non_fungible_include_nfids:
           description: if set to `true`, first page of non fungible ids are returned for each non fungible resource, with `next_cursor` which can be later used at `/state/entity/page/non-fungible-vault/ids` endpoint.
           type: boolean
+          default: false
         explicit_metadata:
           description: allows specifying explicitly metadata properties which should be returned in response.
           type: array
@@ -2436,6 +2450,7 @@ components:
         non_fungible_include_nfids:
           description: if set to `true`, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at `/state/entity/page/non-fungible-vault/ids` endpoint.
           type: boolean
+          default: false
         explicit_metadata:
           description: allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.
           type: array

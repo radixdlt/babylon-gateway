@@ -98,17 +98,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionDetailsOptIns" /> class.
         /// </summary>
-        /// <param name="rawHex">if set to &#x60;true&#x60;, raw transaction hex is returned..</param>
-        /// <param name="receiptStateChanges">if set to &#x60;true&#x60;, state changes inside receipt object are returned..</param>
-        /// <param name="receiptFeeSummary">if set to &#x60;true&#x60;, fee summary inside receipt object is returned..</param>
-        /// <param name="receiptFeeSource">if set to &#x60;true&#x60;, fee source inside receipt object is returned..</param>
-        /// <param name="receiptFeeDestination">if set to &#x60;true&#x60;, fee destination inside receipt object is returned..</param>
-        /// <param name="receiptCostingParameters">if set to &#x60;true&#x60;, costing parameters inside receipt object is returned..</param>
-        /// <param name="receiptEvents">if set to &#x60;true&#x60;, events inside receipt object is returned..</param>
-        /// <param name="receiptOutput">(true by default) if set to &#x60;true&#x60;, transaction receipt output is returned..</param>
-        /// <param name="affectedGlobalEntities">if set to &#x60;true&#x60;, all affected global entities by given transaction are returned..</param>
-        /// <param name="balanceChanges">if set to &#x60;true&#x60;, returns the fungible and non-fungible balance changes.  **Warning!** This opt-in might be missing for recently committed transactions, in that case a &#x60;null&#x60; value will be returned. Retry the request until non-null value is returned. .</param>
-        public TransactionDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptFeeSource = default(bool), bool receiptFeeDestination = default(bool), bool receiptCostingParameters = default(bool), bool receiptEvents = default(bool), bool receiptOutput = default(bool), bool affectedGlobalEntities = default(bool), bool balanceChanges = default(bool))
+        /// <param name="rawHex">if set to &#x60;true&#x60;, raw transaction hex is returned. (default to false).</param>
+        /// <param name="receiptStateChanges">if set to &#x60;true&#x60;, state changes inside receipt object are returned. (default to false).</param>
+        /// <param name="receiptFeeSummary">if set to &#x60;true&#x60;, fee summary inside receipt object is returned. (default to false).</param>
+        /// <param name="receiptFeeSource">if set to &#x60;true&#x60;, fee source inside receipt object is returned. (default to false).</param>
+        /// <param name="receiptFeeDestination">if set to &#x60;true&#x60;, fee destination inside receipt object is returned. (default to false).</param>
+        /// <param name="receiptCostingParameters">if set to &#x60;true&#x60;, costing parameters inside receipt object is returned. (default to false).</param>
+        /// <param name="receiptEvents">if set to &#x60;true&#x60;, events inside receipt object is returned. (default to false).</param>
+        /// <param name="receiptOutput">(true by default) if set to &#x60;true&#x60;, transaction receipt output is returned. (default to true).</param>
+        /// <param name="affectedGlobalEntities">if set to &#x60;true&#x60;, all affected global entities by given transaction are returned. (default to false).</param>
+        /// <param name="balanceChanges">if set to &#x60;true&#x60;, returns the fungible and non-fungible balance changes.  **Warning!** This opt-in might be missing for recently committed transactions, in that case a &#x60;null&#x60; value will be returned. Retry the request until non-null value is returned.  (default to false).</param>
+        public TransactionDetailsOptIns(bool rawHex = false, bool receiptStateChanges = false, bool receiptFeeSummary = false, bool receiptFeeSource = false, bool receiptFeeDestination = false, bool receiptCostingParameters = false, bool receiptEvents = false, bool receiptOutput = true, bool affectedGlobalEntities = false, bool balanceChanges = false)
         {
             this.RawHex = rawHex;
             this.ReceiptStateChanges = receiptStateChanges;

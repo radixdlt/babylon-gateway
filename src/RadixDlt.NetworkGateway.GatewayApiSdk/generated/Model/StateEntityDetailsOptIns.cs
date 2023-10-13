@@ -98,12 +98,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsOptIns" /> class.
         /// </summary>
-        /// <param name="ancestorIdentities">if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned..</param>
-        /// <param name="componentRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned..</param>
-        /// <param name="packageRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned..</param>
-        /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint..</param>
+        /// <param name="ancestorIdentities">if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned. (default to false).</param>
+        /// <param name="componentRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned. (default to false).</param>
+        /// <param name="packageRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned. (default to false).</param>
+        /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint. (default to false).</param>
         /// <param name="explicitMetadata">allows specifying explicitly metadata properties which should be returned in response..</param>
-        public StateEntityDetailsOptIns(bool ancestorIdentities = default(bool), bool componentRoyaltyVaultBalance = default(bool), bool packageRoyaltyVaultBalance = default(bool), bool nonFungibleIncludeNfids = default(bool), List<string> explicitMetadata = default(List<string>))
+        public StateEntityDetailsOptIns(bool ancestorIdentities = false, bool componentRoyaltyVaultBalance = false, bool packageRoyaltyVaultBalance = false, bool nonFungibleIncludeNfids = false, List<string> explicitMetadata = default(List<string>))
         {
             this.AncestorIdentities = ancestorIdentities;
             this.ComponentRoyaltyVaultBalance = componentRoyaltyVaultBalance;
