@@ -5,6 +5,7 @@ Release Date: _unreleased_
 - Changed default configuration value of MaxPageSize for endpoints to 100. Validate if max page size is higher than DefaultPageSize.
 - Added new opt-in `balance_changes` to `/transaction/committed-details` returning resource balance changes for a given transaction.
 - Added new opt-in `receipt_output` to `/stream/transactions`, and `/transaction/committed-details` endpoints. Temporarily set by default to true, to allow client's migration.
+- Added vault-related details to lookups in `/state/entity/details` endpoint.  
 - Optimized `TransactionQuerier.GetTransactions` not to fetch unnecessary data from underlying database.
 - Added strongly-typed OAS definition for `programmatic_json`.
 - Tuned documentation and constraints of various OAS type definitions.

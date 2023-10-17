@@ -2236,10 +2236,20 @@ components:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
+          required:
+            - balance
+          properties:
+            balance:
+              $ref: "#/components/schemas/FungibleResourcesCollectionItemVaultAggregatedVaultItem"
     StateEntityDetailsResponseNonFungibleVaultDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
+          required:
+            - balance
+          properties:
+            balance:
+              $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
     StateEntityDetailsResponsePackageDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
