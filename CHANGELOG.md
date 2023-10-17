@@ -1,6 +1,7 @@
 ## 1.1.0 - Babylon
 Release Date: _unreleased_
 
+- Fixed invalid HTTP status code on input validation failure.
 - Changed default configuration value of MaxPageSize for endpoints to 100. Validate if max page size is higher than DefaultPageSize.
 - Added new opt-in `balance_changes` to `/transaction/committed-details` returning resource balance changes for a given transaction.
 - Added new opt-in `receipt_output` to `/stream/transactions`, and `/transaction/committed-details` endpoints. Temporarily set by default to true, to allow client's migration.
