@@ -1,5 +1,17 @@
-## 1.0.1 - Babylon 
+## 1.1.0 - Babylon
 Release Date: _unreleased_
+
+- Fixed invalid HTTP status code on input validation failure.
+- Changed default configuration value of MaxPageSize for endpoints to 100. Validate if max page size is higher than DefaultPageSize.
+- Added new opt-in `balance_changes` to `/transaction/committed-details` returning resource balance changes for a given transaction.
+- Added new opt-in `receipt_output` to `/stream/transactions`, and `/transaction/committed-details` endpoints. Temporarily set by default to true, to allow client's migration.
+- Added vault-related details to lookups in `/state/entity/details` endpoint.  
+- Optimized `TransactionQuerier.GetTransactions` not to fetch unnecessary data from underlying database.
+- Added strongly-typed OAS definition for `programmatic_json`.
+- Tuned documentation and constraints of various OAS type definitions.
+
+## 1.0.1 - Babylon 
+Release Date: 10.10.2023
 
 - Fixed missing `RecordTopOfDbLedger` observer call in `LedgerTransactionsProcessor`.
 - Fixed invalid response model for HTTP 400 Bad Request responses on input parameter validation failure.

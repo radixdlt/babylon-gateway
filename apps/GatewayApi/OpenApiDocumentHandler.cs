@@ -154,7 +154,7 @@ public static class OpenApiDocumentHandler
         {
             var wellKnownAddresses = networkConfigurationProvider.GetWellKnownAddresses();
             placeholderReplacements.ResourceAddress = wellKnownAddresses.Xrd;
-            placeholderReplacements.ComponentAddress = wellKnownAddresses.Faucet;
+            placeholderReplacements.ComponentAddress = wellKnownAddresses.ConsensusManager;
             placeholderReplacements.NetworkId = networkConfigurationProvider.GetNetworkId();
             placeholderReplacements.NetworkName = networkConfigurationProvider.GetNetworkName();
         }

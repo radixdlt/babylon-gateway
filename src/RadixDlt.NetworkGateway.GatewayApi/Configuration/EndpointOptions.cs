@@ -104,6 +104,9 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
     public EndpointOptionsValidator()
     {
         RuleFor(x => x.MaxPageSize).GreaterThan(0);
+        RuleFor(x => x.MaxPageSize)
+            .GreaterThanOrEqualTo(x => x.DefaultPageSize)
+            .WithMessage("{PropertyName} has to be bigger than {ComparisonProperty}. {PropertyName}:{PropertyValue}, {ComparisonProperty}:{ComparisonValue}");
         RuleFor(x => x.DefaultNonFungibleIdsPageSize).GreaterThan(0);
         RuleFor(x => x.DefaultTransactionsStreamPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);

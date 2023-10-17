@@ -221,9 +221,9 @@ internal class WriteHelper
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.LedgerHashes.TransactionTreeHash, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(lt.LedgerHashes.ReceiptTreeHash, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(lt.LedgerHashes.StateTreeHash, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(lt.TransactionTreeHash, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(lt.ReceiptTreeHash, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(lt.StateTreeHash, NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.RoundInEpoch, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);

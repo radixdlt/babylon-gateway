@@ -145,11 +145,11 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
 
         var ownerKeysBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownedKeysItem);
         var ownerKeysRawHex = ownerKeysBytes.ToArray().ToHex();
-        var ownerKeysJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerKeysBytes, ToolkitModel.SerializationMode.PROGRAMMATIC, _networkId, null);
+        var ownerKeysProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(ownerKeysBytes, _networkId);
 
         var ownerBadgeBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownerBadgeItem);
         var ownerBadgeRawHex = ownerBadgeBytes.ToArray().ToHex();
-        var ownerBadgeJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, ToolkitModel.SerializationMode.PROGRAMMATIC, _networkId, null);
+        var ownerBadgeProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(ownerBadgeBytes, _networkId);
 
         var roleAssignmentOwnerProofLocalId = new CoreModel.NonFungibleLocalId(
             simpleRep: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes)),
@@ -187,13 +187,16 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
                 roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, effectiveRoleAssignmentEntries),
                 royaltyVaultBalance: null);
 
+        var ownerKeys = new GatewayModel.EntityMetadataItemValue(ownerKeysRawHex, ownerKeysProgrammaticJson, ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem));
+        var ownerBadge = new GatewayModel.EntityMetadataItemValue(ownerBadgeRawHex, ownerBadgeProgrammaticJson, ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem));
+
         var metadata = new GatewayModel.EntityMetadataCollection(
             totalCount: 2,
             nextCursor: null,
             items: new List<GatewayModel.EntityMetadataItem>
             {
-                new("owner_keys", new GatewayModel.EntityMetadataItemValue(ownerKeysRawHex, new JRaw(ownerKeysJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem))),
-                new("owner_badge", new GatewayModel.EntityMetadataItemValue(ownerBadgeRawHex, new JRaw(ownerBadgeJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem)), true),
+                new("owner_keys", ownerKeys),
+                new("owner_badge", ownerBadge, true),
             }
         );
 

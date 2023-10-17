@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
@@ -80,7 +81,7 @@ internal static class ScryptoSborUtils
         return stringNfid;
     }
 
-    public static string DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, long schemaIndex, byte networkId)
+    public static string DataToProgrammaticJsonString(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, long schemaIndex, byte networkId)
     {
         ToolkitModel.LocalTypeId typeIndex = keyTypeKind switch
         {
@@ -91,13 +92,21 @@ internal static class ScryptoSborUtils
 
         var schema = new ToolkitModel.Schema(typeIndex, schemaBytes);
 
-        var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(
-            data,
-            ToolkitModel.SerializationMode.PROGRAMMATIC,
-            networkId,
-            schema);
+        return ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(data, ToolkitModel.SerializationMode.PROGRAMMATIC, networkId, schema);
+    }
 
-        return stringRepresentation;
+    public static GatewayModel.ProgrammaticScryptoSborValue DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, long schemaIndex, byte networkId)
+    {
+        var json = DataToProgrammaticJsonString(data, schemaBytes, keyTypeKind, schemaIndex, networkId);
+
+        return JsonConvert.DeserializeObject<GatewayModel.ProgrammaticScryptoSborValue>(json) ?? throw new ArgumentException("Invalid input Scrypto SBOR and/or schema");
+    }
+
+    public static GatewayModel.ProgrammaticScryptoSborValue DataToProgrammaticJson(byte[] rawScryptoSbor, byte networkId)
+    {
+        var json = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(rawScryptoSbor, ToolkitModel.SerializationMode.PROGRAMMATIC, networkId, null);
+
+        return JsonConvert.DeserializeObject<GatewayModel.ProgrammaticScryptoSborValue>(json) ?? throw new ArgumentException("Invalid input Scrypto SBOR");
     }
 
     public static GatewayModel.MetadataTypedValue DecodeToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)

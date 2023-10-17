@@ -84,7 +84,13 @@ public interface ICoreApiHandler
 
     TransactionApi GetTransactionApi();
 
-    Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
+    Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> TransactionPreview(
+        CoreModel.TransactionPreviewRequest request,
+        CancellationToken token = default);
+
+    Task<ResponseOrError<CoreModel.LtsStreamTransactionOutcomesResponse, CoreModel.BasicErrorResponse>> TransactionOutcome(
+        CoreModel.LtsStreamTransactionOutcomesRequest request,
+        CancellationToken token = default);
 }
 
 /// <summary>
@@ -125,12 +131,20 @@ internal class CoreApiHandler : ICoreApiHandler
         return _coreApiProvider.Value.TransactionApi;
     }
 
-    public async Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(
+    public async Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> TransactionPreview(
         CoreModel.TransactionPreviewRequest request,
         CancellationToken token = default)
     {
         return await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() =>
             _coreApiProvider.Value.TransactionApi.TransactionPreviewPostAsync(request, token));
+    }
+
+    public async Task<ResponseOrError<CoreModel.LtsStreamTransactionOutcomesResponse, CoreModel.BasicErrorResponse>> TransactionOutcome(
+        CoreModel.LtsStreamTransactionOutcomesRequest request,
+        CancellationToken token = default)
+    {
+        return await CoreApiErrorWrapper.ResultOrError<CoreModel.LtsStreamTransactionOutcomesResponse, CoreModel.BasicErrorResponse>(() =>
+            _coreApiProvider.Value.LtsApi.LtsStreamTransactionOutcomesPostAsync(request, token));
     }
 
     private static ICoreApiProvider ChooseCoreApiProvider(ICoreNodesSelectorService coreNodesSelectorService, HttpClient httpClient)

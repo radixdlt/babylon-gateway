@@ -62,18 +62,25 @@
  * permissions under this License.
  */
 
-using System;
-using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public interface IPreviewServiceObserver
+internal class StateEntityNonFungiblesPageRequestOptInsValidator : AbstractValidator<StateEntityNonFungiblesPageRequestOptIns>
 {
-    ValueTask PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, string targetNode);
-
-    ValueTask PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, string targetNode, GatewayModel.TransactionPreviewResponse response);
-
-    ValueTask HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, string targetNode, Exception exception);
+    public StateEntityNonFungiblesPageRequestOptInsValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
+    {
+        RuleFor(x => x.ExplicitMetadata)
+            .Must(x => x == null || x.Count <= endpointOptionsSnapshot.Value.ExplicitMetadataMaxItems)
+            .WithMessage($"Maximum {endpointOptionsSnapshot.Value.ExplicitMetadataMaxItems} explicit metadata properties are allowed.")
+            .ForEach(emRule =>
+            {
+                emRule
+                    .NotEmpty()
+                    .MaximumLength(100);
+            });
+    }
 }
