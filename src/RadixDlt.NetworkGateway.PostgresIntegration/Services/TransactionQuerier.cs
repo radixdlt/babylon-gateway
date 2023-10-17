@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -88,12 +89,21 @@ internal class TransactionQuerier : ITransactionQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ITransactionBalanceChangesService _transactionBalanceChangesService;
+    private readonly ILogger _logger;
 
-    public TransactionQuerier(ReadOnlyDbContext dbContext, ReadWriteDbContext rwDbContext, INetworkConfigurationProvider networkConfigurationProvider)
+    public TransactionQuerier(
+        ReadOnlyDbContext dbContext,
+        ReadWriteDbContext rwDbContext,
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ITransactionBalanceChangesService transactionBalanceChangesService,
+        ILogger<TransactionQuerier> logger)
     {
         _dbContext = dbContext;
         _rwDbContext = rwDbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _transactionBalanceChangesService = transactionBalanceChangesService;
+        _logger = logger;
     }
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
@@ -606,11 +616,43 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         var transactions = await _dbContext
             .LedgerTransactions
-            .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
+            .FromSqlInterpolated(@$"
+WITH configuration AS (
+    SELECT
+        {optIns.RawHex} AS with_raw_payload,
+        true AS with_receipt_costing_parameters,
+        true AS with_receipt_fee_summary,
+        true AS with_receipt_next_epoch,
+        {optIns.ReceiptOutput} AS with_receipt_output,
+        {optIns.ReceiptStateChanges} AS with_receipt_state_updates,
+        {optIns.ReceiptEvents} AS with_receipt_events
+)
+SELECT
+    state_version, epoch, round_in_epoch, index_in_epoch,
+    index_in_round, fee_paid, tip_paid, affected_global_entities,
+    round_timestamp, created_timestamp, normalized_round_timestamp,
+    receipt_status, receipt_fee_source, receipt_fee_destination, receipt_error_message,
+    transaction_tree_hash, receipt_tree_hash, state_tree_hash,
+    discriminator, payload_hash, intent_hash, signed_intent_hash, message,
+    CASE WHEN configuration.with_raw_payload THEN raw_payload ELSE ''::bytea END AS raw_payload,
+    CASE WHEN configuration.with_receipt_costing_parameters THEN receipt_costing_parameters ELSE '{{}}'::jsonb END AS receipt_costing_parameters,
+    CASE WHEN configuration.with_receipt_fee_summary THEN receipt_fee_summary ELSE '{{}}'::jsonb END AS receipt_fee_summary,
+    CASE WHEN configuration.with_receipt_next_epoch THEN receipt_next_epoch ELSE '{{}}'::jsonb END AS receipt_next_epoch,
+    CASE WHEN configuration.with_receipt_output THEN receipt_output ELSE '{{}}'::jsonb END AS receipt_output,
+    CASE WHEN configuration.with_receipt_state_updates THEN receipt_state_updates ELSE '{{}}'::jsonb END AS receipt_state_updates,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_emitters ELSE '{{}}'::jsonb[] END AS receipt_event_emitters,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_names ELSE '{{}}'::text[] END AS receipt_event_names,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_sbors ELSE '{{}}'::bytea[] END AS receipt_event_sbors,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_entity_ids ELSE '{{}}'::bigint[] END AS receipt_event_schema_entity_ids,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_hashes ELSE '{{}}'::bytea[] END AS receipt_event_schema_hashes,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_type_indexes ELSE '{{}}'::bigint[] END AS receipt_event_type_indexes,
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_sbor_type_kinds ELSE '{{}}'::sbor_type_kind[] END AS receipt_event_sbor_type_kinds
+FROM ledger_transactions, configuration
+WHERE state_version = ANY({transactionStateVersions})")
             .AnnotateMetricName("GetTransactions")
             .ToListAsync(token);
 
-        var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
+        var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToHashSet().ToList(), token);
 
         var schemaLookups = transactions
             .SelectMany(x => x.EngineReceipt.Events.GetEventLookups())
@@ -641,9 +683,25 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
 
         foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)))
         {
+            GatewayModel.TransactionBalanceChanges? balanceChanges = null;
+
+            if (optIns.BalanceChanges)
+            {
+                var coreBalanceChanges = await _transactionBalanceChangesService.GetTransactionBalanceChanges(transaction.StateVersion, token);
+
+                if (coreBalanceChanges == null)
+                {
+                    _logger.LogError("Failed to load transaction balance changes for {StateVersion}", transaction.StateVersion);
+                }
+                else
+                {
+                    balanceChanges = coreBalanceChanges.ToGatewayModel();
+                }
+            }
+
             if (!optIns.ReceiptEvents || schemaLookups?.Any() == false)
             {
-                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null));
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null, balanceChanges));
             }
             else
             {
@@ -656,11 +714,11 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
                         throw new UnreachableException($"Unable to find schema for given hash {@event.SchemaHash.ToHex()}");
                     }
 
-                    var eventData = ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId);
+                    var eventData = ScryptoSborUtils.DataToProgrammaticJsonString(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId);
                     events.Add(new Event(@event.Name, @event.Emitter, eventData));
                 }
 
-                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events));
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events, balanceChanges));
             }
         }
 

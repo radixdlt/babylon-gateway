@@ -77,17 +77,17 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface IPreviewService
+public interface ITransactionPreviewService
 {
     Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default);
 }
 
-internal class PreviewService : IPreviewService
+internal class TransactionPreviewService : ITransactionPreviewService
 {
     private readonly ICoreApiHandler _coreApiHandler;
-    private readonly IEnumerable<IPreviewServiceObserver> _observers;
+    private readonly IEnumerable<ITransactionPreviewServiceObserver> _observers;
 
-    public PreviewService(ICoreApiHandler coreApiHandler, IEnumerable<IPreviewServiceObserver> observers)
+    public TransactionPreviewService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionPreviewServiceObserver> observers)
     {
         _coreApiHandler = coreApiHandler;
         _observers = observers;
@@ -142,7 +142,7 @@ internal class PreviewService : IPreviewService
             signerPublicKeys: request.SignerPublicKeys.Select(ToCoreModel).ToList(),
             flags: coreRequestFlags);
 
-        var result = await _coreApiHandler.PreviewTransaction(coreRequest, token);
+        var result = await _coreApiHandler.TransactionPreview(coreRequest, token);
 
         if (result.Succeeded)
         {

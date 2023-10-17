@@ -65,7 +65,6 @@
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -80,20 +79,20 @@ internal class DefaultTransactionHandler : ITransactionHandler
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
-    private readonly IPreviewService _previewService;
+    private readonly ITransactionPreviewService _transactionPreviewService;
     private readonly ISubmissionService _submissionService;
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
     public DefaultTransactionHandler(
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
-        IPreviewService previewService,
+        ITransactionPreviewService transactionPreviewService,
         ISubmissionService submissionService,
         IOptionsSnapshot<EndpointOptions> endpointConfiguration)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _transactionQuerier = transactionQuerier;
-        _previewService = previewService;
+        _transactionPreviewService = transactionPreviewService;
         _submissionService = submissionService;
         _endpointConfiguration = endpointConfiguration;
     }
@@ -133,7 +132,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
     public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
     {
-        return await _previewService.HandlePreviewRequest(request, token);
+        return await _transactionPreviewService.HandlePreviewRequest(request, token);
     }
 
     public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
@@ -179,7 +178,6 @@ internal class DefaultTransactionHandler : ITransactionHandler
                 Event = eventType,
                 EmitterEntityAddress = ef.EmitterAddress != null ? (EntityAddress)ef.EmitterAddress : null,
                 ResourceAddress = ef.ResourceAddress != null ? (EntityAddress)ef.ResourceAddress : null,
-                Qunatity = ef.Quantity != null ? TokenAmount.FromDecimalString(ef.Quantity) : null,
             });
         });
 

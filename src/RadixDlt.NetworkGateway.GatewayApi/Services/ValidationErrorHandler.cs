@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -126,6 +125,6 @@ internal class ValidationErrorHandler : IValidationErrorHandler
 
         _observers.ForEach(x => x.OnValidationError(actionContext.HttpContext, gatewayError, StatusCode));
 
-        return new JsonResult(errorResponse);
+        return new BadRequestObjectResult(errorResponse);
     }
 }

@@ -74,7 +74,9 @@ internal class StateEntityNonFungiblesPageRequestValidator : AbstractValidator<G
     public StateEntityNonFungiblesPageRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        PaginableRequestValidator paginableRequestValidator)
+        PaginableRequestValidator paginableRequestValidator,
+        StateEntityNonFungiblesPageRequestOptInsValidator nonFungiblesPageRequestOptInsValidator
+            )
     {
         RuleFor(x => x.Address)
             .NotEmpty()
@@ -88,6 +90,9 @@ internal class StateEntityNonFungiblesPageRequestValidator : AbstractValidator<G
 
         RuleFor(x => x.Cursor)
             .Base64();
+
+        RuleFor(x => x.OptIns)
+            .SetValidator(nonFungiblesPageRequestOptInsValidator);
 
         RuleFor(x => x)
             .SetValidator(paginableRequestValidator);

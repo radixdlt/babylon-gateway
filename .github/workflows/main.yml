@@ -96,7 +96,6 @@ jobs:
     name: AMD Migration
     needs:
       - setup-tags
-      - snyk-scan
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -138,7 +137,6 @@ jobs:
     name: AMD Aggregator
     needs:
       - setup-tags
-      - snyk-scan
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -180,7 +178,6 @@ jobs:
     name: AMD Gateway
     needs:
       - setup-tags
-      - snyk-scan
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04

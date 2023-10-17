@@ -66,7 +66,9 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,6 +78,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal partial class EntityStateQuerier
 {
+    private record FungibleVaultViewModel(long VaultEntityId, string Balance, long LastUpdatedAtStateVersion);
+
     private record FungibleViewModel(EntityAddress ResourceEntityAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
     private record FungibleResourceVaultsViewModel(EntityAddress ResourceEntityAddress, EntityAddress VaultAddress, string Balance, int VaultTotalCount, long LastUpdatedAtStateVersion);
@@ -261,5 +265,48 @@ ORDER BY vah.ord;
             .ToList();
 
         return new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(vaultsTotalCount, GenerateOffsetCursor(offset, limit, vaultsTotalCount), castedResult);
+    }
+
+    private async Task<Dictionary<long, FungibleVaultViewModel>> GetFungibleVaultsHistory(List<InternalFungibleVaultEntity> fungibleVaultEntities, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        if (!fungibleVaultEntities.Any())
+        {
+            return new Dictionary<long, FungibleVaultViewModel>();
+        }
+
+        var globalEntityIds = new List<long>();
+        var vaultEntityIds = new List<long>();
+
+        foreach (var e in fungibleVaultEntities)
+        {
+            globalEntityIds.Add(e.GlobalAncestorId ?? throw new UnreachableException("Vault entities must have global ancestor"));
+            vaultEntityIds.Add(e.Id);
+        }
+
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH variables (global_entity_id, vault_entity_id) AS (SELECT UNNEST(@globalEntityIds), UNNEST(@vaultEntityIds))
+SELECT
+    evh.vault_entity_id AS VaultEntityId,
+    CAST(evh.balance as text) AS Balance,
+    evh.from_state_version AS LastUpdatedAtStateVersion
+FROM variables
+INNER JOIN LATERAL(
+    SELECT *
+    FROM entity_vault_history
+    WHERE global_entity_id = variables.global_entity_id AND vault_entity_id = variables.vault_entity_id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) evh ON true",
+            parameters: new
+            {
+                globalEntityIds = globalEntityIds,
+                vaultEntityIds = vaultEntityIds,
+                stateVersion = ledgerState.StateVersion,
+            },
+            cancellationToken: token);
+
+        return (await _dapperWrapper.QueryAsync<FungibleVaultViewModel>(_dbContext.Database.GetDbConnection(), cd))
+            .ToDictionary(e => e.VaultEntityId);
     }
 }
