@@ -1,7 +1,7 @@
 ## 1.1.1 - Babylon
 Release Date: _unreleased_
 
-- Optimized `epoch` and `epoch + round` based ledger state lookups.
+- Fixed `epoch [+ round]` based ledger state lookups.
 
 ## 1.1.0 - Babylon
 Release Date: _unreleased_
