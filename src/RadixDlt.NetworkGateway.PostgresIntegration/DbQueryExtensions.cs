@@ -174,7 +174,8 @@ internal static class DbQueryExtensions
         return dbContext
             .LedgerTransactions
             .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
-            .OrderByDescending(lt => lt.StateVersion)
+            .OrderByDescending(lt => lt.Epoch)
+            .ThenByDescending(lt => lt.RoundInEpoch)
             .Take(1)
             .AnnotateMetricName();
     }
@@ -192,7 +193,8 @@ internal static class DbQueryExtensions
         return dbContext
             .LedgerTransactions
             .Where(lt => lt.Epoch >= epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
-            .OrderBy(lt => lt.StateVersion)
+            .OrderBy(lt => lt.Epoch)
+            .ThenBy(lt => lt.RoundInEpoch)
             .Take(1)
             .AnnotateMetricName();
     }
