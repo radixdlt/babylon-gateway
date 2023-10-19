@@ -53,8 +53,8 @@ export type StateEntityDetailsVaultResponseItem = Omit<
   StateEntityDetailsResponseItem,
   'fungible_resources' | 'non_fungible_resources'
 > & {
-  fungible_resources: FungibleResourcesVaultCollection
-  non_fungible_resources: NonFungibleResourcesVaultCollection
+  fungible_resources?: FungibleResourcesVaultCollection
+  non_fungible_resources?: NonFungibleResourcesVaultCollection
 }
 
 export class State {
@@ -380,7 +380,7 @@ export class State {
     stateEntityDetails: StateEntityDetailsVaultResponseItem,
     ledgerState?: LedgerStateSelector
   ): Promise<StateEntityDetailsVaultResponseItem> {
-    const nextCursor = stateEntityDetails.fungible_resources.next_cursor
+    const nextCursor = stateEntityDetails?.fungible_resources?.next_cursor
 
     if (!nextCursor) return Promise.resolve(stateEntityDetails)
 
@@ -398,7 +398,7 @@ export class State {
       ...stateEntityDetails,
       fungible_resources: {
         items: [
-          ...stateEntityDetails.fungible_resources.items,
+          ...(stateEntityDetails?.fungible_resources?.items || []),
           ...allFungibles.aggregatedEntities,
         ],
       },
