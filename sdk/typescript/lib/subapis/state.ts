@@ -13,6 +13,7 @@ import {
   NonFungibleResourcesCollectionItemVaultAggregated,
   ResourceAggregationLevel,
   StateApi,
+  StateEntityDetailsResponse,
   StateEntityDetailsResponseItem,
   StateEntityFungiblesPageResponse,
   StateEntityMetadataPageResponse,
@@ -53,8 +54,8 @@ export type StateEntityDetailsVaultResponseItem = Omit<
   StateEntityDetailsResponseItem,
   'fungible_resources' | 'non_fungible_resources'
 > & {
-  fungible_resources?: FungibleResourcesVaultCollection
-  non_fungible_resources?: NonFungibleResourcesVaultCollection
+  fungible_resources: FungibleResourcesVaultCollection
+  non_fungible_resources: NonFungibleResourcesVaultCollection
 }
 
 export class State {
@@ -70,6 +71,9 @@ export class State {
    *
    * Calling this function will exhaust list of all fungible resources for each entity.
    * If any of the requests fail, the whole operation will fail.
+   *
+   * When requesting details for `internal_vault` entity, `non_fungible_resources` and `fungible_resources` will be defaulted to objects with empty arrays
+   * in order to keep backward compatibility. You should look up balances inside `details` object.
    *
    * You can change limit by passing `maxAddressesCount` during gateway instantiation.
    *
@@ -109,22 +113,25 @@ export class State {
       ).then((results) => results.flat())
     }
 
-    const { items, ledger_state } = await this.innerClient.stateEntityDetails({
-      stateEntityDetailsRequest: {
-        addresses: isArray ? addresses : [addresses],
-        aggregation_level: ResourceAggregationLevel.Vault,
-        opt_ins: {
-          ancestor_identities: options?.ancestorIdentities ?? false,
-          component_royalty_vault_balance:
-            options?.componentRoyaltyVaultBalance ?? false,
-          package_royalty_vault_balance:
-            options?.packageRoyaltyVaultBalance ?? false,
-          non_fungible_include_nfids: options?.nonFungibleIncludeNfids ?? true,
-          explicit_metadata: options?.explicitMetadata ?? [],
+    const { items, ledger_state } = await this.innerClient
+      .stateEntityDetails({
+        stateEntityDetailsRequest: {
+          addresses: isArray ? addresses : [addresses],
+          aggregation_level: ResourceAggregationLevel.Vault,
+          opt_ins: {
+            ancestor_identities: options?.ancestorIdentities ?? false,
+            component_royalty_vault_balance:
+              options?.componentRoyaltyVaultBalance ?? false,
+            package_royalty_vault_balance:
+              options?.packageRoyaltyVaultBalance ?? false,
+            non_fungible_include_nfids:
+              options?.nonFungibleIncludeNfids ?? true,
+            explicit_metadata: options?.explicitMetadata ?? [],
+          },
+          at_ledger_state: ledgerState,
         },
-        at_ledger_state: ledgerState,
-      },
-    })
+      })
+      .then((response) => this.ensureResourcesProperties(response))
 
     return isArray
       ? Promise.all(
@@ -403,5 +410,28 @@ export class State {
         ],
       },
     })
+  }
+
+  private ensureResourcesProperties(
+    response: StateEntityDetailsResponse
+  ): ReplaceProperty<
+    StateEntityDetailsResponse,
+    'items',
+    StateEntityDetailsVaultResponseItem[]
+  > {
+    return {
+      ...response,
+      items: response.items.map((item) => ({
+        ...item,
+        fungible_resources: item.fungible_resources || {
+          total_count: 0,
+          items: [],
+        },
+        non_fungible_resources: item.non_fungible_resources || {
+          total_count: 0,
+          items: [],
+        },
+      })) as StateEntityDetailsVaultResponseItem[],
+    }
   }
 }
