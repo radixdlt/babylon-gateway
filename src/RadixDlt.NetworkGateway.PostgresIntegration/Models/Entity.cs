@@ -260,6 +260,7 @@ internal class VirtualAccountComponentEntity : GlobalAccountEntity
     public VirtualAccountComponentEntity(EntityAddress address)
     {
         Address = address;
+        IsGlobal = true;
     }
 }
 
@@ -269,6 +270,7 @@ internal class VirtualIdentityEntity : GlobalIdentityEntity
     public VirtualIdentityEntity(EntityAddress address)
     {
         Address = address;
+        IsGlobal = true;
     }
 }
 
