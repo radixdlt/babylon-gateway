@@ -4,7 +4,7 @@ Release Date: _unreleased_
 - Fixed `epoch [+ round]` based ledger state lookups.
 
 ## 1.1.0 - Babylon
-Release Date: _unreleased_
+Release Date: 20.10.2023
 
 - Fixed invalid HTTP status code on input validation failure.
 - Changed default configuration value of MaxPageSize for endpoints to 100. Validate if max page size is higher than DefaultPageSize.
