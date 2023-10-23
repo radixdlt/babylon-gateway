@@ -100,7 +100,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="keyHex">Hex-encoded binary blob..</param>
         /// <param name="keyJson">keyJson.</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), Object keyJson = default(Object))
+        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
         {
             this.KeyHex = keyHex;
             this.KeyJson = keyJson;
@@ -117,7 +117,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets KeyJson
         /// </summary>
         [DataMember(Name = "key_json", EmitDefaultValue = true)]
-        public Object KeyJson { get; set; }
+        public ProgrammaticScryptoSborValue KeyJson { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
