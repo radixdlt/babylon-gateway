@@ -2237,8 +2237,11 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
+            - resource_address
             - balance
           properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
             balance:
               $ref: "#/components/schemas/FungibleResourcesCollectionItemVaultAggregatedVaultItem"
     StateEntityDetailsResponseNonFungibleVaultDetails:
@@ -2246,8 +2249,11 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
+            - resource_address
             - balance
           properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
             balance:
               $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
     StateEntityDetailsResponsePackageDetails:

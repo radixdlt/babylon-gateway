@@ -162,7 +162,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var packageSchemaHistory = await GetPackageSchemaHistory(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
-        var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, packageBlueprintHistory, ledgerState, token);
+        var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
 
         var royaltyVaultsBalance = componentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
             ? await RoyaltyVaultBalance(componentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
@@ -255,16 +255,17 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     metadata[entity.Id] = virtualEntityData.Metadata;
                     break;
 
-                case InternalFungibleVaultEntity:
+                case InternalFungibleVaultEntity ifve:
                     var fungibleVaultHistory = fungibleVaultsHistory[entity.Id];
 
                     details = new GatewayModel.StateEntityDetailsResponseFungibleVaultDetails(
+                        resourceAddress: correlatedAddresses[ifve.ResourceEntityId],
                         balance: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
                             vaultAddress: entity.Address,
                             amount: TokenAmount.FromSubUnitsString(fungibleVaultHistory.Balance).ToString(),
                             lastUpdatedAtStateVersion: fungibleVaultHistory.LastUpdatedAtStateVersion));
                     break;
-                case InternalNonFungibleVaultEntity:
+                case InternalNonFungibleVaultEntity infve:
                     var nonFungibleVaultHistory = nonFungibleVaultsHistory[entity.Id];
 
                     List<string>? nfItems = null;
@@ -277,6 +278,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponseNonFungibleVaultDetails(
+                        resourceAddress: correlatedAddresses[infve.ResourceEntityId],
                         balance: new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
                             totalCount: nonFungibleVaultHistory.NonFungibleIdsCount,
                             nextCursor: nfNextCursor,
@@ -1494,7 +1496,6 @@ INNER JOIN LATERAL(
 
     private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(
         ICollection<Entity> entities,
-        ICollection<ComponentEntity> componentEntities,
         Dictionary<long, PackageBlueprintHistory[]> packageBlueprints,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
@@ -1509,11 +1510,16 @@ INNER JOIN LATERAL(
                 lookup.Add(entity.OwnerAncestorId.Value);
                 lookup.Add(entity.GlobalAncestorId.Value);
             }
-        }
 
-        foreach (var componentEntity in componentEntities)
-        {
-            lookup.Add(componentEntity.PackageId);
+            if (entity is ComponentEntity componentEntity)
+            {
+                lookup.Add(componentEntity.PackageId);
+            }
+
+            if (entity is VaultEntity vaultEntity)
+            {
+                lookup.Add(vaultEntity.ResourceEntityId);
+            }
         }
 
         foreach (var dependantEntityId in packageBlueprints.Values.SelectMany(x => x).SelectMany(x => x.DependantEntityIds?.ToArray() ?? Array.Empty<long>()))

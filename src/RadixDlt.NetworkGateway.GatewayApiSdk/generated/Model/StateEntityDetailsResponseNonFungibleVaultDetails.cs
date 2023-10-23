@@ -111,10 +111,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseNonFungibleVaultDetails" /> class.
         /// </summary>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="balance">balance (required).</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.NonFungibleVault).</param>
-        public StateEntityDetailsResponseNonFungibleVaultDetails(NonFungibleResourcesCollectionItemVaultAggregatedVaultItem balance = default(NonFungibleResourcesCollectionItemVaultAggregatedVaultItem), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleVault) : base(type)
+        public StateEntityDetailsResponseNonFungibleVaultDetails(string resourceAddress = default(string), NonFungibleResourcesCollectionItemVaultAggregatedVaultItem balance = default(NonFungibleResourcesCollectionItemVaultAggregatedVaultItem), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleVault) : base(type)
         {
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for StateEntityDetailsResponseNonFungibleVaultDetails and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
             // to ensure "balance" is required (not null)
             if (balance == null)
             {
@@ -122,6 +129,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Balance = balance;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Gets or Sets Balance
@@ -138,6 +152,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponseNonFungibleVaultDetails {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  Balance: ").Append(Balance).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -175,6 +190,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && base.Equals(input) && 
+                (
                     this.Balance == input.Balance ||
                     (this.Balance != null &&
                     this.Balance.Equals(input.Balance))
@@ -190,6 +210,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
                 if (this.Balance != null)
                 {
                     hashCode = (hashCode * 59) + this.Balance.GetHashCode();

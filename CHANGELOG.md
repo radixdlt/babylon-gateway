@@ -1,6 +1,7 @@
 ## 1.1.1 - Babylon
 Release Date: _unreleased_
 
+- Added `resource_address` to fungible and non-fungible vault entity details in `/state/entity/details` endpoint.
 - Fixed `epoch [+ round]` based ledger state lookups.
 
 ## 1.1.0 - Babylon
