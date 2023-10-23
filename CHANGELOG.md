@@ -2,6 +2,9 @@
 Release Date: _unreleased_
 
 - Fixed `epoch [+ round]` based ledger state lookups.
+- Fixed vault collection ordering for newly ingested data. Database wipe might be required, see information below.
+
+*Warning* This release contains a fix for non-critical bug in data ingestion mechanism where resource vaults were not ordered correctly. Already ingested data will remain with the old ordering, i.e. bugfix will affect only newly ingested data.
 
 ## 1.1.0 - Babylon
 Release Date: 20.10.2023
