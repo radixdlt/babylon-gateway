@@ -145,16 +145,16 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     {
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
-        var globalComponentEntities = componentEntities.Where(x => x.IsGlobal).ToList();
         var resourceEntities = entities.OfType<ResourceEntity>().ToList();
         var packageEntities = entities.OfType<GlobalPackageEntity>().ToList();
         var fungibleVaultEntities = entities.OfType<InternalFungibleVaultEntity>().ToList();
         var nonFungibleVaultEntities = entities.OfType<InternalNonFungibleVaultEntity>().ToList();
+        var globalPersistedComponentEntities = componentEntities.Where(x => x.IsGlobal && x.Id != default).ToList();
 
         // TODO ideally we'd like to run those in parallel
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var roleAssignmentsHistory = await _roleAssignmentQuerier.GetRoleAssignmentsHistory(globalComponentEntities, ledgerState, token);
-        var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
+        var roleAssignmentsHistory = await _roleAssignmentQuerier.GetRoleAssignmentsHistory(globalPersistedComponentEntities, ledgerState, token);
+        var stateHistory = await GetStateHistory(globalPersistedComponentEntities, ledgerState, token);
 
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
         var packageBlueprintHistory = await GetPackageBlueprintHistory(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
@@ -164,13 +164,13 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
 
-        var royaltyVaultsBalance = componentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
-            ? await RoyaltyVaultBalance(componentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
+        var royaltyVaultsBalance = globalPersistedComponentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
+            ? await RoyaltyVaultBalance(globalPersistedComponentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
             : null;
 
         var fungibleResources =
-            await EntityFungibleResourcesPageSlice(globalComponentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var nonFungibleResources = await EntityNonFungibleResourcesPageSlice(globalComponentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, optIns.NonFungibleIncludeNfids, 0,
+            await EntityFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
+        var nonFungibleResources = await EntityNonFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, optIns.NonFungibleIncludeNfids, 0,
             _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
         var resourceAddressToEntityId = await ResolveResourceEntityIds(fungibleResources.Values, nonFungibleResources.Values, token);
 
