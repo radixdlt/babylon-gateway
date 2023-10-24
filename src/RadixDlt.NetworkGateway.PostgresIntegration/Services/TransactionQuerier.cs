@@ -84,7 +84,7 @@ internal class TransactionQuerier : ITransactionQuerier
 {
     private record SchemaLookup(long EntityId, ValueBytes SchemaHash);
 
-    internal record Event(string Name, string Emitter, string Data);
+    internal record Event(string Name, string Emitter, GatewayModel.ProgrammaticScryptoSborValue Data);
 
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
@@ -714,7 +714,7 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
                         throw new UnreachableException($"Unable to find schema for given hash {@event.SchemaHash.ToHex()}");
                     }
 
-                    var eventData = ScryptoSborUtils.DataToProgrammaticJsonString(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId);
+                    var eventData = ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId);
                     events.Add(new Event(@event.Name, @event.Emitter, eventData));
                 }
 
