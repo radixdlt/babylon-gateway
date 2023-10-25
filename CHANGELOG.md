@@ -1,13 +1,13 @@
 ## 1.2.0 - Babylon
 Release Date: _unreleased_
 
-- Added more strongly-typed OAS definition for `programmatic_json` and types derived from Core API.
-- Added `resource_address` to fungible and non-fungible vault entity details in `/state/entity/details` endpoint.
+- Added more strongly-typed OAS definitions for `programmatic_json` and types derived from the Core API.
+- Added `resource_address` to fungible and non-fungible vault entity details in the `/state/entity/details` endpoint.
 - Fixed `epoch [+ round]` based ledger state lookups.
-- Fixed vault collection ordering for newly ingested data. Database wipe might be required, see information below.
+- Fixed vault collection ordering for newly ingested data. A database wipe might be required, see information below.
 - Fixed non-persisted identity/account lookups.
 
-*Warning* This release contains a fix for non-critical bug in data ingestion mechanism where resource vaults were not ordered correctly. Already ingested data will remain with the old ordering, i.e. bugfix will affect only newly ingested data.
+*Warning* This release contains a fix for a non-critical bug in the data ingestion mechanism where resource vaults were not ordered correctly by last change descending. Already ingested data will remain with the old ordering, i.e. the bugfix will only affect newly ingested data. If this matters to you, you will need to resync your database from scratch.
 
 ## 1.1.0 - Babylon
 Release Date: ~20.10.2023~ (scrapped)
