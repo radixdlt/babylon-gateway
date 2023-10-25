@@ -1,4 +1,4 @@
-## 1.1.1 - Babylon
+## 1.2.0 - Babylon
 Release Date: _unreleased_
 
 - Added more strongly-typed OAS definition for `programmatic_json` and types derived from Core API.

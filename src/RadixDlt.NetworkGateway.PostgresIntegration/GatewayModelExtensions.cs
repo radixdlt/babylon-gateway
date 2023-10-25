@@ -164,8 +164,8 @@ internal static class GatewayModelExtensions
     {
         return status switch
         {
-            LedgerTransactionStatus.Succeeded => GatewayModel.LedgerTransactionStatus.CommittedSuccess,
-            LedgerTransactionStatus.Failed => GatewayModel.LedgerTransactionStatus.CommittedFailure,
+            LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.CommittedSuccess,
+            LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
             _ => throw new UnreachableException($"Didn't expect {status} value"),
         };
     }

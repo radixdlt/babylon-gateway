@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.1.0
+  version: v1.2.0
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
@@ -1284,13 +1284,6 @@ components:
         balance_changes:
           $ref: "#/components/schemas/TransactionBalanceChanges"
 
-    LedgerTransactionStatus:
-      type: string
-      description: The status of the ledger transaction
-      enum:
-        - CommittedSuccess
-        - CommittedFailure
-
     TransactionStatus:
       type: string
       description: |
@@ -1342,7 +1335,7 @@ components:
       type: object
       properties:
         status:
-          $ref: "#/components/schemas/LedgerTransactionStatus"
+          $ref: "#/components/schemas/TransactionStatus"
         fee_summary:
           type: object
           description: |
