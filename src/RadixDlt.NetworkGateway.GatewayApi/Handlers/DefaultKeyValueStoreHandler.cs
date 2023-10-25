@@ -111,7 +111,7 @@ internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
             {
                 try
                 {
-                    var rawJson = item.KeyJson.ToString();
+                    var rawJson = item.KeyJson.ToJson();
 
                     if (rawJson != null)
                     {

@@ -162,37 +162,18 @@ internal static class DbQueryExtensions
     }
 
     /// <summary>
-    /// Returns most recently committed ledger transaction at or before given epoch and round.
+    /// Returns ledger transaction committed at given epoch and round.
     /// </summary>
     /// <remarks>
     /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
     /// ledger transaction row, to avoid possible performance issues.
     /// </remarks>
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
+    public static IQueryable<LedgerTransaction> GetLedgerTransactionAtEpochAndRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
         where TDbContext : CommonDbContext
     {
         return dbContext
             .LedgerTransactions
-            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
-            .OrderByDescending(lt => lt.StateVersion)
-            .Take(1)
-            .AnnotateMetricName();
-    }
-
-    /// <summary>
-    /// Returns the first committed ledger transaction at or after given epoch and round.
-    /// </summary>
-    /// <remarks>
-    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
-    /// ledger transaction row, to avoid possible performance issues.
-    /// </remarks>
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
-        where TDbContext : CommonDbContext
-    {
-        return dbContext
-            .LedgerTransactions
-            .Where(lt => lt.Epoch >= epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
-            .OrderBy(lt => lt.StateVersion)
+            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch == round && lt.IndexInRound == 0)
             .Take(1)
             .AnnotateMetricName();
     }
