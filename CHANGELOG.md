@@ -1,7 +1,7 @@
 ## 1.1.1 - Babylon
 Release Date: _unreleased_
 
-- Added more strongly-typed OAS definition for `programmatic_json`.
+- Added more strongly-typed OAS definition for `programmatic_json` and types derived from Core API.
 - Added `resource_address` to fungible and non-fungible vault entity details in `/state/entity/details` endpoint.
 - Fixed `epoch [+ round]` based ledger state lookups.
 - Fixed vault collection ordering for newly ingested data. Database wipe might be required, see information below.

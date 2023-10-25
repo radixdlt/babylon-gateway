@@ -217,7 +217,7 @@ paths:
       summary: Preview Transaction
       description: |
         Previews transaction against the network.
-        This endpoint is effectively a proxy towards CoreApi's `/v0/transaction/preview` endpoint. See CoreApi's documentation for more details.
+        This endpoint is effectively a proxy towards Core API `/v0/transaction/preview` endpoint. See Core API documentation for more details.
       tags:
         - Transaction
       requestBody:
@@ -1003,6 +1003,8 @@ components:
       properties:
         owner:
           type: object
+          description: |
+            This type is defined in Core API as `OwnerRole`. See Core API documentation for more details.
         entries:
           type: array
           items:
@@ -1025,6 +1027,8 @@ components:
               $ref: "#/components/schemas/RoleAssignmentResolution"
             explicit_rule:
               type: object
+              description: |
+                This type is defined in Core API as `AccessRule`. See Core API documentation for more details.
         updater_roles:
           type: array
           items:
@@ -1274,9 +1278,18 @@ components:
           $ref: "#/components/schemas/TransactionReceipt"
         message:
           type: object
-          description: defined in core api specs.
+          description: |
+            The optional transaction message.
+            This type is defined in Core API as `TransactionMessage`. See Core API documentation for more details.
         balance_changes:
           $ref: "#/components/schemas/TransactionBalanceChanges"
+
+    LedgerTransactionStatus:
+      type: string
+      description: The status of the ledger transaction
+      enum:
+        - CommittedSuccess
+        - CommittedFailure
 
     TransactionStatus:
       type: string
@@ -1329,28 +1342,35 @@ components:
       type: object
       properties:
         status:
-          description: The status of the transaction.
-          type: object
+          $ref: "#/components/schemas/LedgerTransactionStatus"
         fee_summary:
-          description: Fees paid, Only present if the `status` is not `Rejected`.
           type: object
+          description: |
+            This type is defined in Core API as `FeeSummary`. See Core API documentation for more details.
         costing_parameters:
           type: object
         fee_destination:
-          description: Only present if the `status` is not `Rejected`.
           type: object
+          description: |
+            This type is defined in Core API as `FeeDestination`. See Core API documentation for more details.
         fee_source:
-          description: Only present if the `status` is not `Rejected`.
           type: object
+          description: |
+            This type is defined in Core API as `FeeSource`. See Core API documentation for more details.
         state_updates:
-          description: Transaction state updates (only present if status is Succeeded or Failed).
           type: object
+          description: |
+            This type is defined in Core API as `StateUpdates`. See Core API documentation for more details.
         next_epoch:
-          description: Information (number and active validator list) about new epoch if occured.
           type: object
+          description: |
+            Information (number and active validator list) about new epoch if occured.
+            This type is defined in Core API as `NextEpoch`. See Core API documentation for more details.
         output:
-          description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`).
           type: object
+          description: |
+            The manifest line-by-line engine return data (only present if `status` is `CommittedSuccess`).
+            This type is defined in Core API as `SborData`. See Core API documentation for more details.
         events:
           description: Events emitted by a transaction.
           type: array
@@ -1373,6 +1393,8 @@ components:
           type: string
         emitter:
           type: object
+          description: |
+            This type is defined in Core API as `EventEmitterIdentifier`. See Core API documentation for more details.
         data:
           $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
 
@@ -1456,6 +1478,9 @@ components:
         state:
           type: object
           nullable: true
+          description: |
+            Validator inner state representation.
+            This type is defined in Core API as `ValidatorFieldStateValue`. See Core API documentation for more details.
         active_in_epoch:
           $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpoch"
         metadata:
@@ -1695,10 +1720,14 @@ components:
           $ref: "#/components/schemas/HexString"
         receipt:
           type: object
+          description: |
+            This type is defined in Core API as `TransactionReceipt`. See Core API documentation for more details.
         resource_changes:
           type: array
           items:
             type: object
+            description: |
+              This type is defined in Core API as `InstructionResourceChanges`. See Core API documentation for more details.
         logs:
           type: array
           items:
@@ -2301,17 +2330,23 @@ components:
           type: string
         definition:
           type: object
+          description: |
+            This type is defined in Core API as `BlueprintDefinition`. See Core API documentation for more details.
         dependant_entities:
           type: array
           items:
             $ref: "#/components/schemas/Address"
         auth_template:
           type: object
+          description: |
+            This type is defined in Core API as `AuthConfig`. See Core API documentation for more details.
         auth_template_is_locked:
           type: boolean
           nullable: true
         royalty_config:
           type: object
+          description: |
+            This type is defined in Core API as `BlueprintRoyaltyConfig`. See Core API documentation for more details.
         royalty_config_is_locked:
           type: boolean
           nullable: true
@@ -2352,6 +2387,11 @@ components:
               type: string
             state:
               type: object
+              description: |
+                Component inner state representation. Depending on entity type this field might be either a programmatic JSON
+                structure (see `ProgrammaticScryptoSborValue`) or custom JSON model defined in Core API. Former is used only for
+                `GenericComponent` while latter is used for all "native" components such as `Account`, `Validator`,
+                `AccessController`, `OneResourcePool`, `TwoResourcePool`, and `MultiResourcePool`.
             role_assignments:
               $ref: "#/components/schemas/ComponentEntityRoleAssignments"
             royalty_vault_balance:

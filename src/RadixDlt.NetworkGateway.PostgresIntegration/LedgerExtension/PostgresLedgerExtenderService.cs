@@ -973,16 +973,15 @@ UPDATE pending_transactions
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
 
                             packageBlueprintHistoryToAdd
-                                    .GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                                    {
-                                        Id = sequences.PackageBlueprintHistorySequence++,
-                                        FromStateVersion = stateVersion,
-                                        PackageEntityId = referencedEntity.DatabaseId,
-                                        Name = lookup.Name,
-                                        Version = lookup.BlueprintVersion,
-                                    })
-                                    .DependantEntityIds =
-                                packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
+                                {
+                                    Id = sequences.PackageBlueprintHistorySequence++,
+                                    FromStateVersion = stateVersion,
+                                    PackageEntityId = referencedEntity.DatabaseId,
+                                    Name = lookup.Name,
+                                    Version = lookup.BlueprintVersion,
+                                })
+                                .DependantEntityIds = packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
                         }
 
                         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
