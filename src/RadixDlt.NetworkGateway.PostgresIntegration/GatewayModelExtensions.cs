@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -112,7 +113,8 @@ internal static class GatewayModelExtensions
         GatewayModel.TransactionDetailsOptIns optIns,
         Dictionary<long, string> entityIdToAddressMap,
         List<TransactionQuerier.Event>? events,
-        GatewayModel.TransactionBalanceChanges? transactionBalanceChanges)
+        GatewayModel.TransactionBalanceChanges? transactionBalanceChanges,
+        byte networkId)
     {
         string? payloadHash = null;
         string? intentHash = null;
@@ -131,7 +133,7 @@ internal static class GatewayModelExtensions
         {
             ErrorMessage = lt.EngineReceipt.ErrorMessage,
             Status = ToGatewayModel(lt.EngineReceipt.Status),
-            Output = optIns.ReceiptOutput && lt.EngineReceipt.Output != null ? new JRaw(lt.EngineReceipt.Output) : null,
+            Output = optIns.ReceiptOutput && lt.EngineReceipt.Output != null ? FixOutputProgrammaticJson(lt.EngineReceipt.Output, networkId) : null,
             FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.EngineReceipt.FeeSummary) : null,
             FeeDestination = optIns.ReceiptFeeDestination && lt.EngineReceipt.FeeDestination != null ? new JRaw(lt.EngineReceipt.FeeDestination) : null,
             FeeSource = optIns.ReceiptFeeSource && lt.EngineReceipt.FeeSource != null ? new JRaw(lt.EngineReceipt.FeeSource) : null,
@@ -231,6 +233,29 @@ internal static class GatewayModelExtensions
             .ToList();
 
         return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
+    }
+
+    internal static JRaw FixOutputProgrammaticJson(string raw, byte networkId)
+    {
+        var output = JsonConvert.DeserializeObject(raw);
+
+        if (output is JArray array)
+        {
+            foreach (var element in array)
+            {
+                if (element is JObject obj)
+                {
+                    if (obj.Count == 2 && obj.ContainsKey("hex") && obj.ContainsKey("programmatic_json") && obj["programmatic_json"] is JValue { Type: JTokenType.Null })
+                    {
+                        var programmaticJson = ScryptoSborUtils.DataToProgrammaticJsonString(obj["hex"]!.ToString().ConvertFromHex(), networkId);
+
+                        obj["programmatic_json"] = new JRaw(programmaticJson);
+                    }
+                }
+            }
+        }
+
+        return new JRaw(output);
     }
 
     private static GatewayModel.TransactionFungibleFeeBalanceChangeType ToGatewayModel(this CoreModel.LtsFeeFungibleResourceBalanceChangeType input)

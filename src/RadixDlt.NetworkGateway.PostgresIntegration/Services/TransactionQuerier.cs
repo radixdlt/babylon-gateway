@@ -701,7 +701,7 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
 
             if (!optIns.ReceiptEvents || schemaLookups?.Any() == false)
             {
-                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null, balanceChanges));
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null, balanceChanges, _networkConfigurationProvider.GetNetworkId()));
             }
             else
             {
@@ -718,7 +718,7 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
                     events.Add(new Event(@event.Name, @event.Emitter, eventData));
                 }
 
-                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events, balanceChanges));
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events, balanceChanges, _networkConfigurationProvider.GetNetworkId()));
             }
         }
 

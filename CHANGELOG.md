@@ -6,7 +6,7 @@ Release Date: _unreleased_
 - Fixed `epoch [+ round]` based ledger state lookups.
 - Fixed non-persisted identity/account lookups.
 - Fixed vault collection ordering for newly ingested data. A database wipe might be required, see information below.
-- Fixed missing `programmatic_json` property of the transaction output in the `/stream/transactions` endpoint. A database wipe might be required, see information below.
+- Fixed missing `programmatic_json` property of the transaction output in the `/stream/transactions` endpoint.
 
 *Warning* This release contains fixes for non-critical bugs in the data ingestion mechanism. Already ingested data won't be altered, i.e. bugfixes will only affect newly ingested data. If this matters to you, you will need to resync your database from scratch.
 

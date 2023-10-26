@@ -95,6 +95,17 @@ internal static class ScryptoSborUtils
         return ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(data, ToolkitModel.SerializationMode.PROGRAMMATIC, networkId, schema);
     }
 
+    public static string DataToProgrammaticJsonString(byte[] rawScryptoSbor, byte networkId)
+    {
+        var result = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(
+            rawScryptoSbor,
+            ToolkitModel.SerializationMode.PROGRAMMATIC,
+            networkId,
+            null);
+
+        return result ?? throw new ArgumentException("Invalid input Scrypto SBOR");
+    }
+
     public static GatewayModel.ProgrammaticScryptoSborValue DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, long schemaIndex, byte networkId)
     {
         var json = DataToProgrammaticJsonString(data, schemaBytes, keyTypeKind, schemaIndex, networkId);
@@ -104,7 +115,7 @@ internal static class ScryptoSborUtils
 
     public static GatewayModel.ProgrammaticScryptoSborValue DataToProgrammaticJson(byte[] rawScryptoSbor, byte networkId)
     {
-        var json = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(rawScryptoSbor, ToolkitModel.SerializationMode.PROGRAMMATIC, networkId, null);
+        var json = DataToProgrammaticJsonString(rawScryptoSbor, networkId) ?? throw new ArgumentException("Invalid input Scrypto SBOR");
 
         return JsonConvert.DeserializeObject<GatewayModel.ProgrammaticScryptoSborValue>(json) ?? throw new ArgumentException("Invalid input Scrypto SBOR");
     }
