@@ -973,16 +973,15 @@ UPDATE pending_transactions
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
 
                             packageBlueprintHistoryToAdd
-                                    .GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                                    {
-                                        Id = sequences.PackageBlueprintHistorySequence++,
-                                        FromStateVersion = stateVersion,
-                                        PackageEntityId = referencedEntity.DatabaseId,
-                                        Name = lookup.Name,
-                                        Version = lookup.BlueprintVersion,
-                                    })
-                                    .DependantEntityIds =
-                                packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
+                                {
+                                    Id = sequences.PackageBlueprintHistorySequence++,
+                                    FromStateVersion = stateVersion,
+                                    PackageEntityId = referencedEntity.DatabaseId,
+                                    Name = lookup.Name,
+                                    Version = lookup.BlueprintVersion,
+                                })
+                                .DependantEntityIds = packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
                         }
 
                         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
@@ -1355,7 +1354,7 @@ UPDATE pending_transactions
             var entityMetadataAggregateHistoryToAdd = new List<EntityMetadataAggregateHistory>();
             var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
             var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
-            var entityResourceVaultAggregateHistoryToAdd = new List<EntityResourceVaultAggregateHistory>();
+            var entityResourceVaultAggregateHistoryCandidates = new List<EntityResourceVaultAggregateHistory>();
             var entityAccessRulesOwnerRoleHistoryToAdd = new List<EntityRoleAssignmentsOwnerRoleHistory>();
             var entityAccessRulesEntryHistoryToAdd = new List<EntityRoleAssignmentsEntryHistory>();
             var entityAccessRulesAggregateHistoryToAdd = new List<EntityRoleAssignmentsAggregateHistory>();
@@ -1620,32 +1619,19 @@ UPDATE pending_transactions
                 {
                     var lookup = new EntityResourceVaultLookup(entityId, resourceEntityId);
 
-                    if (mostRecentEntityResourceVaultAggregateHistory.TryGetValue(lookup, out var existingAggregate))
-                    {
-                        if (existingAggregate.VaultEntityIds.Contains(resourceVaultEntityId))
-                        {
-                            return;
-                        }
-                    }
-
-                    var aggregate = existingAggregate;
+                    mostRecentEntityResourceVaultAggregateHistory.TryGetValue(lookup, out var aggregate);
 
                     if (aggregate == null || aggregate.FromStateVersion != stateVersion)
                     {
-                        aggregate = new EntityResourceVaultAggregateHistory
-                        {
-                            Id = sequences.EntityResourceVaultAggregateHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = entityId,
-                            ResourceEntityId = resourceEntityId,
-                            VaultEntityIds = new List<long>(existingAggregate?.VaultEntityIds.ToArray() ?? Array.Empty<long>()),
-                        };
+                        aggregate = aggregate == null
+                            ? EntityResourceVaultAggregateHistory.Create(sequences.EntityResourceVaultAggregateHistorySequence++, entityId, resourceEntityId, stateVersion)
+                            : EntityResourceVaultAggregateHistory.CopyOf(sequences.EntityResourceVaultAggregateHistorySequence++, aggregate, stateVersion);
 
-                        entityResourceVaultAggregateHistoryToAdd.Add(aggregate);
+                        entityResourceVaultAggregateHistoryCandidates.Add(aggregate);
                         mostRecentEntityResourceVaultAggregateHistory[lookup] = aggregate;
                     }
 
-                    aggregate.VaultEntityIds.Add(resourceVaultEntityId);
+                    aggregate.TryUpsert(resourceVaultEntityId);
                 }
             }
 
@@ -1847,6 +1833,7 @@ UPDATE pending_transactions
                 .ToList();
 
             var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
+            var entityResourceVaultAggregateHistoryToAdd = entityResourceVaultAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
 
             await _observers.ForEachAsync(x => x.StageCompleted("process_changes", sw.Elapsed, null));
 

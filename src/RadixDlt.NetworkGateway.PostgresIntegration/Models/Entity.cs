@@ -255,20 +255,24 @@ internal class GlobalPackageEntity : ComponentEntity
 }
 
 // This is transient model, not stored in database
+// "virtual" should be understood as un-instantiated, pre-allocated entity
 internal class VirtualAccountComponentEntity : GlobalAccountEntity
 {
     public VirtualAccountComponentEntity(EntityAddress address)
     {
         Address = address;
+        IsGlobal = true;
     }
 }
 
 // This is transient model, not stored in database
+// "virtual" should be understood as un-instantiated, pre-allocated entity
 internal class VirtualIdentityEntity : GlobalIdentityEntity
 {
     public VirtualIdentityEntity(EntityAddress address)
     {
         Address = address;
+        IsGlobal = true;
     }
 }
 

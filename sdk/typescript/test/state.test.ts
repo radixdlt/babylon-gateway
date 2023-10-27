@@ -62,6 +62,96 @@ describe('State Subapi', () => {
         })
       )
     })
+
+    it('should default fungible_resources and non_fungible_resources', async () => {
+      // Arrange
+      const spy = jest.fn().mockImplementation(
+        fetchResponseFactory({
+          items: [
+            {
+              address: 'address',
+            },
+          ],
+          ledger_state: {
+            state_version: 1,
+          },
+        })
+      )
+      const gatewayApi = GatewayApiClient.initialize({
+        fetchApi: spy,
+        basePath: 'https://just-for-test.com',
+        maxAddressesCount: 1,
+      })
+
+      // Act
+      const response = await gatewayApi.state.getEntityDetailsVaultAggregated([
+        'address',
+      ])
+
+      // Assert
+      expect(response).toEqual([
+        {
+          address: 'address',
+          fungible_resources: {
+            items: [],
+            total_count: 0,
+          },
+          non_fungible_resources: {
+            items: [],
+            total_count: 0,
+          },
+        },
+      ])
+    })
+
+    it('should not override exisintg fungible_resources and non_fungible_resources', async () => {
+      // Arrange
+      const spy = jest.fn().mockImplementation(
+        fetchResponseFactory({
+          items: [
+            {
+              address: 'address',
+              fungible_resources: {
+                items: [{ aggregation_level: 'Vault' }],
+                total_count: 1,
+              },
+              non_fungible_resources: {
+                items: [{ aggregation_level: 'Vault' }],
+                total_count: 1,
+              },
+            },
+          ],
+          ledger_state: {
+            state_version: 1,
+          },
+        })
+      )
+      const gatewayApi = GatewayApiClient.initialize({
+        fetchApi: spy,
+        basePath: 'https://just-for-test.com',
+        maxAddressesCount: 1,
+      })
+
+      // Act
+      const response = await gatewayApi.state.getEntityDetailsVaultAggregated([
+        'address',
+      ])
+
+      // Assert
+      expect(response).toEqual([
+        {
+          address: 'address',
+          fungible_resources: {
+            items: [{ aggregation_level: 'Vault' }],
+            total_count: 1,
+          },
+          non_fungible_resources: {
+            items: [{ aggregation_level: 'Vault' }],
+            total_count: 1,
+          },
+        },
+      ])
+    })
   })
 
   describe('getNonFungibleData', () => {

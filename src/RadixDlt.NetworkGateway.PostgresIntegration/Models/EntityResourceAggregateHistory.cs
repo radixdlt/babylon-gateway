@@ -87,25 +87,25 @@ internal class EntityResourceAggregateHistory
     public long EntityId { get; set; }
 
     /// <summary>
-    /// Contains the aggregate list of all related fungible resources ordered by most recent updated.
+    /// The aggregate list of all related fungible resources ordered by most recently updated.
     /// </summary>
     [Column("fungible_resource_entity_ids")]
     public List<long> FungibleResourceEntityIds { get; set; }
 
     /// <summary>
-    /// Contains the last significant update state_version for resources stored in <see cref="FungibleResourceEntityIds"/>.
+    /// The last significant update state version for resources stored in <see cref="FungibleResourceEntityIds"/>.
     /// </summary>
     [Column("fungible_resource_significant_update_state_versions")]
     public List<long> FungibleResourceSignificantUpdateStateVersions { get; set; }
 
     /// <summary>
-    /// Contains the aggregate list of all related non-fungible resources ordered by most recent updated.
+    /// The aggregate list of all related non-fungible resources ordered by most recently updated.
     /// </summary>
     [Column("non_fungible_resource_entity_ids")]
     public List<long> NonFungibleResourceEntityIds { get; set; }
 
     /// <summary>
-    /// Contains the last significant update state_version for resources stored in <see cref="NonFungibleResourceEntityIds"/>.
+    /// The last significant update state version for resources stored in <see cref="NonFungibleResourceEntityIds"/>.
     /// </summary>
     [Column("non_fungible_resource_significant_update_state_versions")]
     public List<long> NonFungibleResourceSignificantUpdateStateVersions { get; set; }
@@ -121,14 +121,14 @@ internal class EntityResourceAggregateHistory
     }
 
     /// <summary>
-    /// Attempts to add new or update existing fungible resource unless it is already the most recently modified one.
+    /// Attempts to add new or update existing fungible resource unless it already is the most recently modified one.
     /// </summary>
     /// <returns>true if added or modified, otherwise false.</returns>
     public bool TryUpsertFungible(long resourceId, long stateVersion)
     {
         var currentIndex = FungibleResourceEntityIds.IndexOf(resourceId);
 
-        // we're already the most recent one and there's no point potential second resource with same state_version
+        // we're already the most recent one and there's no point potential second resource with the same state version
         if (currentIndex == 0 && FungibleResourceEntityIds.Count == 1)
         {
             return false;
@@ -155,14 +155,14 @@ internal class EntityResourceAggregateHistory
     }
 
     /// <summary>
-    /// Attempts to add new or update existing non-fungible resource unless it is already the most recently modified one.
+    /// Attempts to add new or update existing non-fungible resource unless it already is the most recently modified one.
     /// </summary>
     /// <returns>true if added or modified, otherwise false.</returns>
     public bool TryUpsertNonFungible(long resourceId, long stateVersion)
     {
         var currentIndex = NonFungibleResourceEntityIds.IndexOf(resourceId);
 
-        // we're already the most recent one and there's no point potential second resource with same state_version
+        // we're already the most recent one and there's no point potential second resource with the same state version
         if (currentIndex == 0 && NonFungibleResourceEntityIds.Count == 1)
         {
             return false;

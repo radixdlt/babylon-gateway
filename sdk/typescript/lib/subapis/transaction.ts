@@ -42,6 +42,8 @@ export class Transaction {
       receiptCostingParameters: false
       receiptStateChanges: false
       affectedGlobalEntities: false
+      balanceChanges: false
+      receiptOutput: false
     }
   ): Promise<TransactionCommittedDetailsResponse> {
     return this.innerClient.transactionCommittedDetails({
@@ -56,6 +58,8 @@ export class Transaction {
           receipt_fee_summary: options?.receiptFeeSummary ?? true,
           receipt_state_changes: options?.receiptStateChanges ?? true,
           affected_global_entities: options?.affectedGlobalEntities ?? true,
+          balance_changes: options?.balanceChanges ?? true,
+          receipt_output: options?.receiptOutput ?? true,
         },
       },
     })
