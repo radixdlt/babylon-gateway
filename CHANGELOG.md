@@ -1,5 +1,10 @@
-## 1.2.0 - Babylon
+## 1.2.1 
 Release Date: _unreleased_
+
+TBA
+
+## 1.2.0
+Release Date: 27.10.2023
 
 - Added more strongly-typed OAS definitions for `programmatic_json` and types derived from the Core API.
 - Added `resource_address` to fungible and non-fungible vault entity details in the `/state/entity/details` endpoint.
@@ -9,7 +14,7 @@ Release Date: _unreleased_
 
 *Warning* This release contains a fix for a non-critical bug in the data ingestion mechanism where resource vaults were not ordered correctly by last change descending. Already ingested data will remain with the old ordering, i.e. the bugfix will only affect newly ingested data. If this matters to you, you will need to resync your database from scratch.
 
-## 1.1.0 - Babylon
+## 1.1.0
 Release Date: ~20.10.2023~ (scrapped)
 
 - Fixed invalid HTTP status code on input validation failure.
@@ -21,7 +26,7 @@ Release Date: ~20.10.2023~ (scrapped)
 - Added strongly-typed OAS definition for `programmatic_json`.
 - Tuned documentation and constraints of various OAS type definitions.
 
-## 1.0.1 - Babylon 
+## 1.0.1 
 Release Date: 10.10.2023
 
 - Fixed missing `RecordTopOfDbLedger` observer call in `LedgerTransactionsProcessor`.
