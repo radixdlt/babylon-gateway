@@ -1,7 +1,7 @@
 ## 1.2.1 
 Release Date: _unreleased_
 
-TBA
+- Fixed local development environment setup.
 
 ## 1.2.0
 Release Date: 27.10.2023

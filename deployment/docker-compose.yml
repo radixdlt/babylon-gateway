@@ -1,11 +1,11 @@
 version: "3.8"
 services:
   fullnode:
-    image: "radixdlt/babylon-node:1.0.4"
+    image: "radixdlt/babylon-node:v1.0.4"
     profiles: ["fullnode"]
     init: true
     ports:
-      - "127.0.0.1:3333:3333" # This allows you to connect to the Core API on localhost:3333
+      - "127.0.0.1:3333:3333"
     cap_add:
       - NET_ADMIN
     deploy:
@@ -16,7 +16,7 @@ services:
       RADIXDLT_NETWORK_ID: "${FULLNODE_NETWORK_ID}"
       RADIXDLT_NETWORK_SEEDS_REMOTE: "${FULLNODE_NETWORK_BOOTSTRAP_NODE}"
       RADIX_NODE_KEYSTORE_PASSWORD: "${FULLNODE_KEY_PASSWORD}"
-      JAVA_OPTS: -server -Xmx1536m -XX:+HeapDumpOnOutOfMemoryError -XX:+UseCompressedOops -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=jks -Djava.security.egd=file:/dev/urandom -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector --enable-preview
+      JAVA_OPTS: --enable-preview -server -Xms8g -Xmx8g  -XX:MaxDirectMemorySize=2048m -XX:+HeapDumpOnOutOfMemoryError -XX:+UseCompressedOops -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=jks -Djava.security.egd=file:/dev/urandom -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
       RADIXDLT_VALIDATOR_KEY_LOCATION: "/home/radixdlt/node-keystore.ks"
       RADIXDLT_CORE_API_PORT: 3333
     volumes:
