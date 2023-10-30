@@ -11,7 +11,7 @@ if [[ ! -f "$keystore_folder$keystore_filename" ]]; then
     echo
 
     export $(grep -v '^#' ../.env | xargs) # Import variables from ../.env
-    docker run --rm -v "$keystore_folder:/keygen/node" radixdlt/keygen:1.0.0 --keystore="/keygen/node/$keystore_filename" --password="$FULLNODE_KEY_PASSWORD" --keypair-name=node
+    docker run --rm -v "$keystore_folder:/keygen/node" radixdlt/keygen:1.5.0 --keystore="/keygen/node/$keystore_filename" --password="$FULLNODE_KEY_PASSWORD" --keypair-name=node
 
     echo
     echo "Key store created successfully"
