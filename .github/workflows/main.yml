@@ -112,7 +112,7 @@ jobs:
       provenance: "false"
       scan_image: true
       snyk_target_ref: ${{ github.ref_name }}
-  
+
   docker-database-migrations-private-arm:
     name: ARM Migration
     needs:
@@ -194,7 +194,7 @@ jobs:
       provenance: "false"
       scan_image: true
       snyk_target_ref: ${{ github.ref_name }}
-      
+
   docker-gateway-api-private-arm:
     name: ARM Gateway
     needs:
@@ -222,7 +222,7 @@ jobs:
       - docker-gateway-api-private
       - docker-gateway-api-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: private-babylon-ng-gateway-api
       image_tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
       tag_suffix_1: amd64
@@ -238,7 +238,7 @@ jobs:
       - docker-data-aggregator-private
       - docker-data-aggregator-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: private-babylon-ng-data-aggregator
       image_tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
       tag_suffix_1: amd64
@@ -246,7 +246,7 @@ jobs:
       aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
-  
+
   join-migrations-images:
     name: Migration
     needs:
@@ -254,7 +254,7 @@ jobs:
       - docker-database-migrations-private
       - docker-database-migrations-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: private-babylon-ng-database-migrations
       image_tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
       tag_suffix_1: amd64
@@ -353,7 +353,7 @@ jobs:
           jenkins_url: "${{ env.JENKINS_URL }}"
           jenkins_user: ${{ env.JENKINS_USER }}
           jenkins_token: ${{ env.JENKINS_TOKEN }}
-          job_name: "ephemeral-deployments/job/ephemeral-env-gateway-benchmark"
+          job_name: "babylon-testing/job/ephemeral-deployments/job/ephemeral-env-gateway-benchmark"
           job_params: |
             {
               "gatewayDockerTag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
@@ -441,7 +441,7 @@ jobs:
           jenkins_url: "${{ env.JENKINS_URL }}"
           jenkins_user: ${{ env.JENKINS_USER }}
           jenkins_token: ${{ env.JENKINS_TOKEN }}
-          job_name: "ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
+          job_name: "babylon-testing/job/ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
           job_params: |
             {
               "gatewayDockerTag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
