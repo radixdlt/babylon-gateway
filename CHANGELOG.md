@@ -2,6 +2,7 @@
 Release Date: _unreleased_
 
 - Fixed local development environment setup.
+- Fixed missing `state` property on non-global entity state details.
 
 ## 1.2.0
 Release Date: 27.10.2023

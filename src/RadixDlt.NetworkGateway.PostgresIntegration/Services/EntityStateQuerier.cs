@@ -149,7 +149,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var packageEntities = entities.OfType<GlobalPackageEntity>().ToList();
         var fungibleVaultEntities = entities.OfType<InternalFungibleVaultEntity>().ToList();
         var nonFungibleVaultEntities = entities.OfType<InternalNonFungibleVaultEntity>().ToList();
-        var globalPersistedComponentEntities = componentEntities.Where(x => x.IsGlobal && x.Id != default).ToList();
+        var persistedComponentEntities = componentEntities.Where(x => x.Id != default).ToList();
+        var globalPersistedComponentEntities = persistedComponentEntities.Where(x => x.IsGlobal).ToList();
 
         // TODO ideally we'd like to run all those in parallel
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
@@ -164,7 +165,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)
-        var stateHistory = await GetStateHistory(globalPersistedComponentEntities, ledgerState, token);
+        var stateHistory = await GetStateHistory(persistedComponentEntities, ledgerState, token);
         var royaltyVaultsBalance = globalPersistedComponentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
             ? await RoyaltyVaultBalance(globalPersistedComponentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
             : null;
