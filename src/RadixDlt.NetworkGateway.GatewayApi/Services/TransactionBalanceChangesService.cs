@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
@@ -84,11 +85,13 @@ internal class TransactionBalanceChangesService : ITransactionBalanceChangesServ
 {
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly IEnumerable<ITransactionOutcomeServiceObserver> _observers;
+    private readonly ILogger _logger;
 
-    public TransactionBalanceChangesService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionOutcomeServiceObserver> observers)
+    public TransactionBalanceChangesService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionOutcomeServiceObserver> observers, ILogger logger)
     {
         _coreApiHandler = coreApiHandler;
         _observers = observers;
+        _logger = logger;
     }
 
     public async Task<CoreModel.LtsCommittedTransactionOutcome?> GetTransactionBalanceChanges(long stateVersion, CancellationToken token = default)
@@ -115,6 +118,8 @@ internal class TransactionBalanceChangesService : ITransactionBalanceChangesServ
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to load transaction balance changes for {StateVersion}", stateVersion);
+
             var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
             await _observers.ForEachAsync(x => x.HandleOutcomeRequestFailed(stateVersion, selectedNode.Name, ex));
 
