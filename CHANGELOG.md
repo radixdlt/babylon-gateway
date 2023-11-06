@@ -1,5 +1,10 @@
-## 1.2.1 
+## 1.2.2
 Release Date: _unreleased_
+
+TBA
+
+## 1.2.1 
+Release Date: 06.11.2023
 
 - Fixed local development environment setup.
 - Fixed missing `state` property on non-global entity state details.
