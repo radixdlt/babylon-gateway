@@ -87,7 +87,7 @@ internal class TransactionBalanceChangesService : ITransactionBalanceChangesServ
     private readonly IEnumerable<ITransactionOutcomeServiceObserver> _observers;
     private readonly ILogger _logger;
 
-    public TransactionBalanceChangesService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionOutcomeServiceObserver> observers, ILogger logger)
+    public TransactionBalanceChangesService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionOutcomeServiceObserver> observers, ILogger<TransactionBalanceChangesService> logger)
     {
         _coreApiHandler = coreApiHandler;
         _observers = observers;
