@@ -1066,7 +1066,7 @@ paths:
       summary: Get Transactions Stream
       description: |
         Returns transactions which have been committed to the ledger.
-        (Check detailed documentation for brief explanation)[#Using-transactionstream-endpoint]
+        [Check detailed documentation for brief explanation](#Using-transactionstream-endpoint)
       tags:
         - Stream
       requestBody:
@@ -1338,7 +1338,7 @@ paths:
       summary: Get KeyValueStore Data
       description: |
         Returns data (value) associated with a given key of a given key-value store.
-        (Check detailed documentation for explanation)[#How-to-query-content-of-KeyValueStore-inside-component]
+        [Check detailed documentation for explanation](#How-to-query-content-of-KeyValueStore-inside-component)
       tags:
         - State
       requestBody:
