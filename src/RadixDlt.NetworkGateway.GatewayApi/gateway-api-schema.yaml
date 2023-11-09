@@ -147,11 +147,6 @@ tags:
       - `total_count` *(optional)* if present specifies the overall size of the underlying collection,
       - `next_cursor` *(optional)* if present indicates that the next chunk (page) exists and can be fetched using collection-specific endpoint and cursor value,
       - `items` a chunk (page) of unerlying collection items.
-  - name: Examples
-    x-displayName: Examples
-    x-traitTag: true
-    description: |
-      # How to use Gateway
 
       ## State information in response
       All endpoints return `ledger_state` data, it defines ledger state which was used by gateway to generate response.
@@ -192,126 +187,6 @@ tags:
       }
       ```
       Will return state as it was at state version 1000 for entity with address: `resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd`
-
-
-
-      ## Querying for entity data, including fungible and non fungible resources.
-      Gateway API has different entry points which can be used to fetch entity data.
-
-      * `/state/entity/details` &rarr; returns basic entity details, which differs per entity type. Check OpenAPI specs for exact details.
-
-      * `/state/entity/metadata` &rarr; returns entity metadata, can be used as entry point or for further pagination with cursor returned from `/state/entity/details`
-
-      * `/state/entity/page/fungibles/` &rarr; can be used as entry point to fetch fungible resources for given entity or for further pagination with cursor returned from `/state/entity/details`
-
-      * `/state/entity/page/fungible-vaults/` &rarr; can be used as entry point to fetch fungible vaults for given entity and resource type or for further pagination with cursor returned from `/state/entity/details`
-
-      * `/state/entity/page/non-fungibles/` &rarr; can be used as entry point to fetch non fungible resources for given entity or for further pagination with cursor returned from `/state/entity/details`
-
-      * `/state/entity/page/non-fungible-vaults/` &rarr; can be used as entry point to fetch non fungible vaults for given entity and resource type or for further pagination with cursor returned from `/state/entity/details`
-
-      * `/state/entity/page/non-fungible-vault/ids` &rarr; can be used as entry point to fetch non fungible ids for given entity, vault and resource type or for further pagination with cursor returned from `/state/entity/details`
-
-      ### Metadata
-      `/state/entity/details` endpoint returns only first page of metadata. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/metadata` endpoint to fetch next pages.
-
-      You can also specify explicitly list of metadata keys in which you're interested in response. You can do that by filling `explicit_metadata` opt-in.
-
-      i.e:
-      ```
-      /state/entity/details
-
-      {
-        "addresses": [
-          "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-        ],
-        "opt_ins": {
-          "explicit_metadata": [
-            "name",
-            "description"
-          ]
-        }
-      }
-      ```
-
-      Will return regular `metadata` property in response but will also contain `explicit_metadata` with all queried items `name`, `description` (if they are defined for entity)
-
-      ```
-      ...
-      "explicit_metadata": {
-        "total_count": 2,
-        "items": [
-          {
-            "key": "name",
-            "value": {
-              "raw_hex": "5c2200010c055261646978",
-              "programmatic_json": {
-                "kind": "Enum",
-                "variant_id": "0",
-                "fields": [
-                  {
-                    "kind": "String",
-                    "value": "Radix"
-                  }
-                ]
-              },
-              "typed": {
-                "value": "Radix",
-                "type": "String"
-              }
-            },
-            "is_locked": true,
-            "last_updated_at_state_version": 2
-          },
-          {
-            "key": "description",
-            "value": {
-              "raw_hex": "5c2200010c9e01546865205261646978205075626c6963204e6574776f726b2773206e617469766520746f6b656e2c207573656420746f2070617920746865206e6574776f726b2773207265717569726564207472616e73616374696f6e206665657320616e6420746f2073656375726520746865206e6574776f726b207468726f756768207374616b696e6720746f206974732076616c696461746f72206e6f6465732e",
-              "programmatic_json": {
-                "kind": "Enum",
-                "variant_id": "0",
-                "fields": [
-                  {
-                    "kind": "String",
-                    "value": "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes."
-                  }
-                ]
-              },
-              "typed": {
-                "value": "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes.",
-                "type": "String"
-              }
-            },
-            "is_locked": true,
-            "last_updated_at_state_version": 2
-          }
-        ]
-      },
-      ...
-      ```
-
-      ### Resource aggregation
-      Both fungible and non fungible resources can be aggregated globally or per vault.
-      It's controlled by `aggregation_level` request field.
-
-      `Global` - if entity contains multiple vaults of same resource, or nested components contains vaults of same resources they will be sumed and returned as total balance.
-
-      `Vault` - each vault is returned separately, regardless if they are of same resource.
-
-      ### Fungible resources
-
-      Endpoint returns only first page of fungible resources. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/fungibles/` endpoint.
-
-      If you aggregated per vault. Endpoint returns only first page of vaults for each resource. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/fungible-vaults/` endpoint.
-
-      ### Non Fungible Resources
-
-      Endpoint returns only first page of non fungible resources. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/non-fungibles/` endpoint.
-
-      If you aggregated per vault. Endpoint returns only first page of vaults for each resource. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/non-fungible-vaults/` endpoint.
-
-      If `non_fungible_include_nfids` opt-in was set to true, response will contain first page of non fungible ids for each vault. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/non-fungible-vault/ids` endpoint.
-
 
       ## Using endpoints with OptIns feature
 
@@ -443,6 +318,130 @@ tags:
       }
       ```
 
+  - name: Examples
+    x-displayName: Examples
+    x-traitTag: true
+    description: |
+      ## Querying for entity data, including fungible and non fungible resources.
+
+      Gateway API has different entry points which can be used to fetch entity data.
+
+      * `/state/entity/details` &rarr; returns basic entity details, which differs per entity type. Check OpenAPI specs for exact details.
+
+      * `/state/entity/metadata` &rarr; returns entity metadata, can be used as entry point or for further pagination with cursor returned from `/state/entity/details`
+
+      * `/state/entity/page/fungibles/` &rarr; can be used as entry point to fetch fungible resources for given entity or for further pagination with cursor returned from `/state/entity/details`
+
+      * `/state/entity/page/fungible-vaults/` &rarr; can be used as entry point to fetch fungible vaults for given entity and resource type or for further pagination with cursor returned from `/state/entity/details`
+
+      * `/state/entity/page/non-fungibles/` &rarr; can be used as entry point to fetch non fungible resources for given entity or for further pagination with cursor returned from `/state/entity/details`
+
+      * `/state/entity/page/non-fungible-vaults/` &rarr; can be used as entry point to fetch non fungible vaults for given entity and resource type or for further pagination with cursor returned from `/state/entity/details`
+
+      * `/state/entity/page/non-fungible-vault/ids` &rarr; can be used as entry point to fetch non fungible ids for given entity, vault and resource type or for further pagination with cursor returned from `/state/entity/details`
+
+      ### Metadata
+
+      `/state/entity/details` endpoint returns only first page of metadata. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/metadata` endpoint to fetch next pages.
+
+      You can also specify explicitly list of metadata keys in which you're interested in response. You can do that by filling `explicit_metadata` opt-in.
+
+      i.e:
+      ```
+      /state/entity/details
+
+      {
+        "addresses": [
+          "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+        ],
+        "opt_ins": {
+          "explicit_metadata": [
+            "name",
+            "description"
+          ]
+        }
+      }
+      ```
+
+      Will return regular `metadata` property in response but will also contain `explicit_metadata` with all queried items `name`, `description` (if they are defined for entity)
+
+      ```
+      ...
+      "explicit_metadata": {
+        "total_count": 2,
+        "items": [
+          {
+            "key": "name",
+            "value": {
+              "raw_hex": "5c2200010c055261646978",
+              "programmatic_json": {
+                "kind": "Enum",
+                "variant_id": "0",
+                "fields": [
+                  {
+                    "kind": "String",
+                    "value": "Radix"
+                  }
+                ]
+              },
+              "typed": {
+                "value": "Radix",
+                "type": "String"
+              }
+            },
+            "is_locked": true,
+            "last_updated_at_state_version": 2
+          },
+          {
+            "key": "description",
+            "value": {
+              "raw_hex": "5c2200010c9e01546865205261646978205075626c6963204e6574776f726b2773206e617469766520746f6b656e2c207573656420746f2070617920746865206e6574776f726b2773207265717569726564207472616e73616374696f6e206665657320616e6420746f2073656375726520746865206e6574776f726b207468726f756768207374616b696e6720746f206974732076616c696461746f72206e6f6465732e",
+              "programmatic_json": {
+                "kind": "Enum",
+                "variant_id": "0",
+                "fields": [
+                  {
+                    "kind": "String",
+                    "value": "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes."
+                  }
+                ]
+              },
+              "typed": {
+                "value": "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes.",
+                "type": "String"
+              }
+            },
+            "is_locked": true,
+            "last_updated_at_state_version": 2
+          }
+        ]
+      },
+      ...
+      ```
+
+      ### Resource aggregation
+
+      Both fungible and non fungible resources can be aggregated globally or per vault.
+      It's controlled by `aggregation_level` request field.
+
+      `Global` - if entity contains multiple vaults of same resource, or nested components contains vaults of same resources they will be sumed and returned as total balance.
+
+      `Vault` - each vault is returned separately, regardless if they are of same resource.
+
+      ### Fungible resources
+
+      Endpoint returns only first page of fungible resources. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/fungibles/` endpoint.
+
+      If you aggregated per vault. Endpoint returns only first page of vaults for each resource. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/fungible-vaults/` endpoint.
+
+      ### Non Fungible Resources
+
+      Endpoint returns only first page of non fungible resources. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/non-fungibles/` endpoint.
+
+      If you aggregated per vault. Endpoint returns only first page of vaults for each resource. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/non-fungible-vaults/` endpoint.
+
+      If `non_fungible_include_nfids` opt-in was set to true, response will contain first page of non fungible ids for each vault. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/non-fungible-vault/ids` endpoint.
+
       ## Using /transaction/stream endpoint
 
       ### State version
@@ -561,6 +560,7 @@ tags:
       ```
 
       ### Ordering
+
       By default ordering in that endpoint is **descending** (highest state version first), so when using cursor you'll fetch newest first and with each page you'll fetch older transactions.
 
       You can change default behaviour by seting `order` parameter to `Asc`
@@ -575,13 +575,88 @@ tags:
       Keep in mind that if order is ascending you'll start fetching transactions from oldest first and with each page you'll fetch newer transactions.
 
       ### Reading events to find out what happened in certain dApp.
-      ### TODO PP:
+ 
+      Currently gateway support filtering by `withdrawal` and `deposit` events only. So if you want to get all transactions and events that affected certain dApp you can use `affected_global_entities_filter`.
 
-      Let's imagine real life scenario that we have created some dApp and we want to get list of all transactions and events 
+      i.e 
+      ```
+      /stream/transactions
 
-      To do that we can
+      {
+        "kind_filter": "All",
+        "affected_global_entities_filter": ["component_rdx1cq4ugccz6pg89w83ujanqlycw566kd9c9vxxuc9r45p7vues2649t4"],
+        "opt_ins":{ "receipt_events": true }
+      }
+      ```
 
+      Will return us first page of all transactions including receipt events (note enabled `receipt_events` optIn) that affected `component_rdx1cq4ugccz6pg89w83ujanqlycw566kd9c9vxxuc9r45p7vues2649t4` component.
+
+      ```
+      {
+        "transaction_status": "CommittedSuccess",
+        "state_version": 14614370,
+        "epoch": 44797,
+        "round": 655,
+        "round_timestamp": "2023-11-09T13:29:32.27Z",
+        "payload_hash": "notarizedtransaction_rdx1dmjjaww667cq388hpx4jv895yj42l7ezynqycdr97ht9s4mkhzssejpcxz",
+        "intent_hash": "txid_rdx1l0y5gw45aup7r8ex863s2ahhfwz9vdfv8jktqhcypegcf3vlk6zqhnmj9a",
+        "fee_paid": "0.57054833978",
+        "confirmed_at": "2023-11-09T13:29:32.27Z",
+        "receipt": {
+          "status": "CommittedSuccess",
+          "events": [
+            {
+              "name": "LockFeeEvent",
+              "emitter": {
+                "type": "Method",
+                "entity": {
+                  "is_global": false,
+                  "entity_type": "InternalFungibleVault",
+                  "entity_address": "internal_vault_rdx1tzst8p8vvagnyyev8eu209h6fhmdvk334vhx0vhk4em02p89hlaluu"
+                },
+                "object_module_id": "Main"
+              },
+              "data": {
+                "fields": [
+                  {
+                    "value": "0.713902721272999997",
+                    "kind": "Decimal",
+                    "field_name": "amount"
+                  }
+                ],
+                "kind": "Tuple",
+                "type_name": "LockFeeEvent"
+              }
+            },
+            {
+              "name": "WithdrawEvent",
+              "emitter": {
+                "type": "Method",
+                "entity": {
+                  "is_global": false,
+                  "entity_type": "InternalFungibleVault",
+                  "entity_address": "internal_vault_rdx1tpl4g48ul8tz8agtll35m7f936f2vuj4f8up9wlcgu6lj566vmashl"
+                },
+                "object_module_id": "Main"
+              },
+              "data": {
+                "fields": [
+                  {
+                    "value": "20",
+                    "kind": "Decimal",
+                    "field_name": "amount"
+                  }
+                ],
+                "kind": "Tuple",
+                "type_name": "WithdrawEvent"
+              }
+            },
+            ...
+      },
+      ...
+      ```
       ## How role assignment works
+
       Global components define list of different roles which controlls access to their features. To get list of role assignment definition use `/state/entity/details` endpoint.
 
       i.e let's take a look at XRD resource.
@@ -609,6 +684,7 @@ tags:
       ```
 
       ### Owner
+
       ```
         "owner": {
           "rule": {
@@ -639,6 +715,7 @@ tags:
       `updater` - defines updater role for certain role. In short words what role can update `Owner` role. In above example `None` which means it can't be changed.
 
       ### Entries 
+
       list of all role assignment keys. 
 
       Let's take a look at one of the items:
@@ -688,6 +765,7 @@ tags:
       ## How to query content of KeyValueStore inside component
 
       ### Creating component
+
       Imagine a component with two XRD vaults - parse state and determine value of each vault
       Let's say we created MultiVault which holds multiple vaults inside internal `KeyValueStore`. To make it clear, let's say we instantiated component that using below blueprint:
       ```
@@ -763,7 +841,10 @@ tags:
       ```
 
       ### Querying for each Key content
+
       After that you can use `/state/key-value-store/data` endpoint to query each key content. To do that you can either use key in form of `json` or `hex`.
+
+      Unfortunately currently gateway doesn't support iterating over all keys. So user need to keep track on their own of all created keys or use lower level API's to extract that data.
 
       Assuming keys in our `KeyValueStore` are strings, each key is identified as simple JSON with two properties, `kind` and `value`:
 
@@ -784,13 +865,8 @@ tags:
         "keys": [
           {
             "key_json": {
-              "kind": "Tuple",
-              "fields": [
-                {
-                  "kind": "string",
-                  "value": "1"
-                }
-              ]
+                "kind": "String",
+                "value": "1"
             }
           }
         ]
@@ -990,6 +1066,7 @@ paths:
       summary: Get Transactions Stream
       description: |
         Returns transactions which have been committed to the ledger.
+        (Check detailed documentation for brief explanation)[#Using-transactionstream-endpoint]
       tags:
         - Stream
       requestBody:
@@ -1261,6 +1338,7 @@ paths:
       summary: Get KeyValueStore Data
       description: |
         Returns data (value) associated with a given key of a given key-value store.
+        (Check detailed documentation for explanation)[#How-to-query-content-of-KeyValueStore-inside-component]
       tags:
         - State
       requestBody:
@@ -2769,6 +2847,7 @@ components:
             - description
     StateEntityDetailsOptIns:
       type: object
+      description: Check detailed [OptIns](#Using-endpoints-with-OptIns-feature) documentation for more details
       properties:
         ancestor_identities:
           description: if set to `true`, ancestor addresses - `parent_address`, `owner_address` and `global_address` for entities are returned.
@@ -3046,6 +3125,7 @@ components:
         address: "<component-entity-address>"
     StateEntityFungiblesPageRequestOptIns:
       type: object
+      description: Check detailed [OptIns](#Using-endpoints-with-OptIns-feature) documentation for more details
       properties:
         explicit_metadata:
           description: allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.
@@ -3110,6 +3190,7 @@ components:
         address: "<component-entity-address>"
     StateEntityNonFungiblesPageRequestOptIns:
       type: object
+      description: Check detailed [OptIns](#Using-endpoints-with-OptIns-feature) documentation for more details
       properties:
         non_fungible_include_nfids:
           description: if set to `true`, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at `/state/entity/page/non-fungible-vault/ids` endpoint.
@@ -3150,6 +3231,7 @@ components:
         resource_address: "<resource_address>"
     StateEntityNonFungibleResourceVaultsPageOptIns:
       type: object
+      description: Check detailed [OptIns](#Using-endpoints-with-OptIns-feature) documentation for more details
       properties:
         non_fungible_include_nfids:
           description: if set to `true`, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at `/state/entity/page/non-fungible-vault/ids` endpoint.
