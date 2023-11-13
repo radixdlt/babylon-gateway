@@ -1066,7 +1066,7 @@ paths:
       summary: Get Transactions Stream
       description: |
         Returns transactions which have been committed to the ledger.
-        [Check detailed documentation for brief explanation](#Using-transactionstream-endpoint)
+        [Check detailed documentation for brief explanation](#section/Using-transactionstream-endpoint)
       tags:
         - Stream
       requestBody:
@@ -1338,7 +1338,7 @@ paths:
       summary: Get KeyValueStore Data
       description: |
         Returns data (value) associated with a given key of a given key-value store.
-        [Check detailed documentation for explanation](#How-to-query-content-of-KeyValueStore-inside-component)
+        [Check detailed documentation for explanation](#section/How-to-query-content-of-KeyValueStore-inside-component)
       tags:
         - State
       requestBody:
@@ -2847,7 +2847,7 @@ components:
             - description
     StateEntityDetailsOptIns:
       type: object
-      description: Check detailed [OptIns](#Using-endpoints-with-OptIns-feature) documentation for more details
+      description: Check detailed [OptIns](#section/Using-endpoints-with-OptIns-feature) documentation for more details
       properties:
         ancestor_identities:
           description: if set to `true`, ancestor addresses - `parent_address`, `owner_address` and `global_address` for entities are returned.
@@ -3125,7 +3125,7 @@ components:
         address: "<component-entity-address>"
     StateEntityFungiblesPageRequestOptIns:
       type: object
-      description: Check detailed [OptIns](#Using-endpoints-with-OptIns-feature) documentation for more details
+      description: Check detailed [OptIns](#section/Using-endpoints-with-OptIns-feature) documentation for more details
       properties:
         explicit_metadata:
           description: allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.
@@ -3190,7 +3190,7 @@ components:
         address: "<component-entity-address>"
     StateEntityNonFungiblesPageRequestOptIns:
       type: object
-      description: Check detailed [OptIns](#Using-endpoints-with-OptIns-feature) documentation for more details
+      description: Check detailed [OptIns](#section/Using-endpoints-with-OptIns-feature) documentation for more details
       properties:
         non_fungible_include_nfids:
           description: if set to `true`, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at `/state/entity/page/non-fungible-vault/ids` endpoint.
@@ -3231,7 +3231,7 @@ components:
         resource_address: "<resource_address>"
     StateEntityNonFungibleResourceVaultsPageOptIns:
       type: object
-      description: Check detailed [OptIns](#Using-endpoints-with-OptIns-feature) documentation for more details
+      description: Check detailed [OptIns](#section/Using-endpoints-with-OptIns-feature) documentation for more details
       properties:
         non_fungible_include_nfids:
           description: if set to `true`, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at `/state/entity/page/non-fungible-vault/ids` endpoint.
