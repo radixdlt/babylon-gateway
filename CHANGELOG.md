@@ -1,7 +1,7 @@
 ## 1.2.2
 Release Date: _unreleased_
 
-TBA
+- Fixed invalid foreign key between `pending_transactions` and `pending_transaction_payloads` tables.
 
 ## 1.2.1 
 Release Date: 06.11.2023

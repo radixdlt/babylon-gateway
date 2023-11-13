@@ -101,17 +101,14 @@ internal class PendingTransaction
     [Column("end_epoch_exclusive")]
     public ulong EndEpochExclusive { get; private set; }
 
+    [Obsolete($"Use {nameof(PendingTransactionPayload.PendingTransaction)} to navigate.")]
     [Column("payload_id")]
-    public long PayloadId { get; private set; }
+    public long? PayloadId { get; private set; }
 
     /// <summary>
     /// The payload of the transaction.
     /// </summary>
-    [Required]
-    [ForeignKey(nameof(PayloadId))]
-    [Column("payload_id")]
-    [DeleteBehavior(DeleteBehavior.Cascade)]
-    public PendingTransactionPayload Payload { get; private set; }
+    public PendingTransactionPayload? Payload { get; private set; }
 
     /// <summary>
     /// Configure EFCore to use the automatic PostgreSQL xmin column as the concurrency token. This is updated on every update.
@@ -247,6 +244,13 @@ internal class PendingTransactionPayload
     [Key]
     [Column("id")]
     public long Id { get; set; }
+
+    [Column("pending_transaction_id")]
+    public long? PendingTransactionId { get; set; }
+
+    [ForeignKey(nameof(PendingTransactionId))]
+    [DeleteBehavior(DeleteBehavior.Cascade)]
+    public PendingTransaction? PendingTransaction { get; set; }
 
     [Column("notarized_transaction_blob")]
     public byte[] NotarizedTransactionBlob { get; set; }

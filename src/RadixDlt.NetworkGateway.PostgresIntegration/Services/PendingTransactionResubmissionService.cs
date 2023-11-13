@@ -270,7 +270,14 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     {
         var transaction = transactionWithNode.PendingTransaction;
         var chosenNode = transactionWithNode.Node;
-        var notarizedTransaction = transaction.Payload.NotarizedTransactionBlob;
+        var notarizedTransaction = transaction.Payload?.NotarizedTransactionBlob;
+
+        if (notarizedTransaction == null)
+        {
+            var ntLost = new NodeSubmissionResult.OtherSubmissionError(new Exception("Notarized Transaction Payload Lost"), false, "Notarized Transaction Payload Lost");
+
+            return new ContextualSubmissionResult(transaction, chosenNode.Name, ntLost);
+        }
 
         using var nodeScope = _services.CreateScope();
         nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = chosenNode;
