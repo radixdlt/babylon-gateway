@@ -123,7 +123,7 @@ tags:
       ## Request-Response Format
 
       The API is designed in a JSON-RPC-like style, using HTTP as a transport layer, which means that:
-      - Requests always use HTTP POST method.
+      - Requests always use the HTTP POST method.
       - There is no HTTP cache involved.
       - Client-originated errors result in HTTP 4xx error responses.
       - Server-originated errors result in HTTP 5xx error responses:
@@ -132,9 +132,9 @@ tags:
 
       ## Pagination Model
 
-      Collections can grow in size therefore every dynamic-length collection is a subject to pagination where a generic data struct is used to represent a chunk (page) of
-      underlying data. Gateway API uses cursor-based pagination model where the sole existence of the cursor indicates that next chunk (page) of the underlying collection is
-      available.
+      Many collections have dynamic length, so these are exposed through a pagination model.
+      The Gateway API uses cursor-based pagination model where the existence of the cursor indicates that next chunk (page) of the underlying collection is
+      available, and can be used in a subsequent request to query for it.
 
       ```
       collection {
@@ -144,25 +144,32 @@ tags:
       }
       ```
 
-      - `total_count` *(optional)* if present specifies the overall size of the underlying collection,
+      - `total_count` *(optional)* if present indicates the overall size of the underlying collection,
       - `next_cursor` *(optional)* if present indicates that the next chunk (page) exists and can be fetched using collection-specific endpoint and cursor value,
-      - `items` a chunk (page) of unerlying collection items.
+      - `items` a chunk (page) of underlying collection items.
 
-      ## State information in response
-      All endpoints return `ledger_state` data, it defines ledger state which was used by gateway to generate response.
+      ## State consistency and versioning
 
-      Because state of entities constantly changes that data makes it clear which state was used to generate response.
+      Each response from a state endpoint returns data from a single "snapshot" of the ledger. By default, the latest available ledger version is used.
+      All state responses include a `ledger_state` property in their root object, which captures which ledger version was used by the gateway to generate the response.
+
+      Because the state of entities constantly changes, the `ledger_state` object makes it clear which state was used to generate the response.
+      The `ledger_state` object includes the `state_version` (ie the unique ID of that state version, which can also be used to uniquely identify the last transaction which brought the
+      ledger to that state version), the `timestamp` (which may be shared by neighbouring transactions, but does not decrease) and the epoch and round in that epoch
+      when the transaction was committed (again, the pair `(epoch, round)` may be shared by neighbouring transactions).
 
       ## Browsing historical data
-      All endpoints with `at_ledger_state` parameter allows you to browse historical state and get how it looked like at given point of time.
+
+      All endpoints with an `at_ledger_state` parameter allow you to request a particular snapshot is used for generating the response. In this way, you can browse historical state at a given point in time.
 
       You can specify one of:
       - `state_version`
-      - `timestamp` (it'll basically find first state version before that timestamp and query against it)
-      - `epoch` (it'll query against first tx in that epoch)
-      - pair of (`epoch` and `round` pair) it'll query against first tx in that epoch and round
+      - `timestamp` - which will query against the nearest state version before that timestamp
+      - `epoch` - which will query against the result of the first transaction in that epoch
+      - A pair of `epoch` and `round` - which will query against the result of the first transaction in that epoch and round
 
-      i.e: 
+      For example, the following request will return the current state (at the current tip of the ledger) for the entity with address: `resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd` (ie XRD).
+
       ```
       /state/entity/details
 
@@ -172,8 +179,8 @@ tags:
         ]
       }
       ```
-      Will return current state (for current tip of the ledger) for entity with address: `resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd`
-
+      
+      Whereas the following request will return the state of XRD as it was at state version 1000, near the start of the Babylon ledger:
       ```
       /state/entity/details
 
@@ -186,13 +193,16 @@ tags:
         }
       }
       ```
-      Will return state as it was at state version 1000 for entity with address: `resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd`
 
-      ## Using endpoints with OptIns feature
+      ## Using endpoints with opt-in features
 
-      To reduce bandwith some properties in certain endpoints are optional. You can ask for them explicitly by setting opt-in property to true.
+      To reduce bandwith and wasted work, some properties in certain endpoints are optional.
+      
+      Most opt-ins default to `false` if not provided, and you can ask for the supplementary data by explicitly setting the corresponding opt-in property to `true`.
 
-      Endpoints that currently support OptIns feature:
+      Some opt-ins for backwards-compatibility default to `true`. In these cases, explicitly providing a value of `false` will opt out of the data and save bandwidth.
+
+      Endpoints that currently support opt-ins include the following. Check out the request schemas under the endpoints themselves for more detail on how to request opt-ins:
 
       ```
       /transaction/committed-details
@@ -203,8 +213,7 @@ tags:
       /state/entity/page/non-fungible-vaults/
       ```
 
-      ### Example usage
-      #### Request without opt-ins
+      For example, the following request will return a simple, short response with opt-ins disabled:
 
       ```
       /transaction/committed-details
@@ -213,9 +222,8 @@ tags:
         "intent_hash": "txid_rdx1t44y7lrqtrmn0pq4gxgsmn035lh5glws273h0lsff37jnzj2ylls3aeumn"
       }
       ```
-
-      Will return simple, short response with optins disabled.
       ```
+      // Response
       {
         "ledger_state": {
           "network": "mainnet",
@@ -259,8 +267,8 @@ tags:
       }
       ```
 
-      #### Request with opt-ins:
-      Let's say we're interested in transaction raw hex. We can enable it in response like that:
+      Or, if we're interested in the raw transaction payload, we can enable it in the response by requesting the `"raw_hex"` opt-in,
+      which will result in the `raw_hex` property being returned:
 
       ```
       /transaction/committed-details
@@ -271,9 +279,8 @@ tags:
         }
       }
       ```
-
-      As you can see in response raw hex is now returned:
       ```
+      // Response
       {
         "ledger_state": {
           "network": "mainnet",
@@ -322,31 +329,33 @@ tags:
     x-displayName: Examples
     x-traitTag: true
     description: |
-      ## Querying for entity data, including fungible and non fungible resources.
+      ## Querying for entity data, including fungible and non-fungible resources.
 
-      Gateway API has different entry points which can be used to fetch entity data.
+      The Gateway API has different entry points which can be used to fetch entity data.
 
-      * `/state/entity/details` &rarr; returns basic entity details, which differs per entity type. Check OpenAPI specs for exact details.
+      The `/state/entity/details` is the main endpoint - it takes a list of entity addresses, and returns various details for those entities, which differs per entity type. A detailed specification of the response model for each entity is given in the response schema for the endpoint later in this doc. The endpoint also also supports a number of opt-ins detailed below. Many of these opt-ins return a "first page" of related data for each entity. Further pages can be requested from the `/page/` endpoints.
 
-      * `/state/entity/metadata` &rarr; returns entity metadata, can be used as entry point or for further pagination with cursor returned from `/state/entity/details`
+      The entity details endpoint is supplemented by various paged endpoints, which return collections:
 
-      * `/state/entity/page/fungibles/` &rarr; can be used as entry point to fetch fungible resources for given entity or for further pagination with cursor returned from `/state/entity/details`
+      * `/state/entity/page/metadata` &rarr; returns entity metadata, and can be used as entry point for further pagination with the cursor returned from `/state/entity/details`
 
-      * `/state/entity/page/fungible-vaults/` &rarr; can be used as entry point to fetch fungible vaults for given entity and resource type or for further pagination with cursor returned from `/state/entity/details`
+      * `/state/entity/page/fungibles/` &rarr; can be used as an entry point to fetch fungible resources under a given global entity or for further pagination with the cursor returned from `/state/entity/details`
 
-      * `/state/entity/page/non-fungibles/` &rarr; can be used as entry point to fetch non fungible resources for given entity or for further pagination with cursor returned from `/state/entity/details`
+      * `/state/entity/page/fungible-vaults/` &rarr; can be used as an entry point to fetch fungible vaults of a given resource under a given global entity or for further pagination with a cursor returned from `/state/entity/details`
 
-      * `/state/entity/page/non-fungible-vaults/` &rarr; can be used as entry point to fetch non fungible vaults for given entity and resource type or for further pagination with cursor returned from `/state/entity/details`
+      * `/state/entity/page/non-fungibles/` &rarr; can be used as an entry point to fetch non-fungible resources under a given global entity or for further pagination with a cursor returned from `/state/entity/details`
 
-      * `/state/entity/page/non-fungible-vault/ids` &rarr; can be used as entry point to fetch non fungible ids for given entity, vault and resource type or for further pagination with cursor returned from `/state/entity/details`
+      * `/state/entity/page/non-fungible-vaults/` &rarr; can be used as an entry point to fetch non-fungible vaults of a given resource under a given global entity or for further pagination with a cursor returned from `/state/entity/details`
+
+      * `/state/entity/page/non-fungible-vault/ids` &rarr; can be used as  an entry point to fetch non fungible-ids in a given vault or for further pagination from a cursor returned from `/state/entity/details`
 
       ### Metadata
 
-      `/state/entity/details` endpoint returns only first page of metadata. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/metadata` endpoint to fetch next pages.
+      `/state/entity/details` endpoint returns only the first page of metadata. If the queried entity contains more than one page of metadata items, a `next_cursor` will be returned, which can be used as `cursor` in the `/state/entity/page/metadata` endpoint to fetch further pages.
 
-      You can also specify explicitly list of metadata keys in which you're interested in response. You can do that by filling `explicit_metadata` opt-in.
+      You can also explicitly specify a list of metadata keys which you wish to be included on any returned objects. You can do that by filling the `explicit_metadata` opt-in with the metadata keys you wish to load.
 
-      i.e:
+      For example, the following request will return the regular `metadata` property in the response, but will also contain an `explicit_metadata` section containing `name` and `description` for each returned entity (if they are defined for that entity).
       ```
       /state/entity/details
 
@@ -362,11 +371,9 @@ tags:
         }
       }
       ```
-
-      Will return regular `metadata` property in response but will also contain `explicit_metadata` with all queried items `name`, `description` (if they are defined for entity)
-
       ```
-      ...
+      // Response
+      // ...
       "explicit_metadata": {
         "total_count": 2,
         "items": [
@@ -416,66 +423,61 @@ tags:
           }
         ]
       },
-      ...
+      // ...
       ```
 
       ### Resource aggregation
 
-      Both fungible and non fungible resources can be aggregated globally or per vault.
-      It's controlled by `aggregation_level` request field.
+      Both fungible and non-fungible resources can be aggregated globally or per vault.
+      This is controlled by the `aggregation_level` request field.
 
-      `Global` - if entity contains multiple vaults of same resource, or nested components contains vaults of same resources they will be sumed and returned as total balance.
+      * `Global` - If the entity contains multiple vaults of the same resource, or nested components which contains vaults of the same resource, the total balance across all these vaults will be returned. This mode is useful for TVL style calculations.
+      
+      * `Vault` - Each vault is returned separately. This mode is useful for non-fungibles, because you get the vault ids which you can use to paginated ids from a vault.
 
-      `Vault` - each vault is returned separately, regardless if they are of same resource.
+      ### Fungible resources opt-in
 
-      ### Fungible resources
+      This opt-in returns only the first page of fungible resources under the entity. If the queried entity contains more resources, a `next_cursor` will be returned, which can be used with the `/state/entity/page/fungibles/` endpoint for requesting further pages.
 
-      Endpoint returns only first page of fungible resources. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/fungibles/` endpoint.
+      If you requested vault aggregation, only the first page of vaults are returned for each resource. If a `next_cursor` is returned, further vaults for that resource can be fetched using that cursor with the `/state/entity/page/fungible-vaults/` endpoint.
 
-      If you aggregated per vault. Endpoint returns only first page of vaults for each resource. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/fungible-vaults/` endpoint.
+      ### Non-fungible resources opt-in
 
-      ### Non Fungible Resources
+      This opt-in returns only the first page of non-fungible resources under the entity. If the queried entity contains more resources, a `next_cursor` will be returned, which can be used with the `/state/entity/page/non-fungibles/` endpoint for requesting further pages.
 
-      Endpoint returns only first page of non fungible resources. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/non-fungibles/` endpoint.
+      If you requested vault aggregation, only the first page of vaults are returned for each resource . If a `next_cursor` is returned, further vaults for that resource can be fetched using that cursor with the `/state/entity/page/non-fungible-vaults/` endpoint.
 
-      If you aggregated per vault. Endpoint returns only first page of vaults for each resource. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/non-fungible-vaults/` endpoint.
+      If the `non_fungible_include_nfids` opt-in is set to true AND vault aggregation was requested, the response will also contain the first page of non-fungible ids in each returned vault. If the vault contains more than one page of ids, a `next_cursor` is returned, which can be used with the `/state/entity/page/non-fungible-vault/ids` endpoint to load further non-fungible ids in the vault.
 
-      If `non_fungible_include_nfids` opt-in was set to true, response will contain first page of non fungible ids for each vault. If queried entity contains more items `next_cursor` will be returned, which can be used as `cursor` in `/state/entity/page/non-fungible-vault/ids` endpoint.
+      ## Using the /transaction/stream endpoint
 
-      ## Using /transaction/stream endpoint
+      The transaction stream endpoint can be used to read a filtered stream of transaction results.
 
       ### State version
 
-      You can narrow range of transactions by specifying ledger state boundaries with `at_ledger_state` and `from_ledger_state` filters.
+      You can narrow the range of transactions by specifying ledger state boundaries with the `at_ledger_state` and `from_ledger_state` filters.
 
-      `at_ledger_state` let's you specify under which state version you want to query. It's same for almost all endpoints where you can basically travel in time on ledger. Let's say it's currently state version 347 062 but for any reason you'd like to check how ledger looked like at state version `100`  If not specified it'll always query against current tip of the ledger.
+      `at_ledger_state` lets you specify at which state version you want to query. It's same for almost all endpoints where you can basically travel in time on ledger. Let's say it's currently state version 347 062 but for any reason you'd like to check how ledger looked like at state version `100`  If not specified it'll always query against current tip of the ledger.
 
-      i.e 
+      For example, the following request will return the transaction stream as it was for state version `100` (by default all user transactions before state version `100`, from latest to oldest)
       ```
       /stream/transactions
       {
         "at_ledger_state": {"state_version": 100 }
       }
       ```
-      
-      will return transaction stream as it was for state version `100`  (by default all user transactions in desceding order)
 
-      `from_ledger_state` let's you specify lower boundary of state versions.
+      By contrast, `from_ledger_state` lets you specify a lower boundary of state versions. This can be used to "page forward" through the transaction stream (although by default only user transactions will be returned, and they will be in descending order):
 
-      i.e
       ```
       /stream/transactions
 
       {
-        "from_ledger_state": {"state_version": 100 },
+        "from_ledger_state": {"state_version": 50 },
       }
       ```
 
-
-      Will return transaction stream starting from tip of the ledger till state version `300` (by default all user transactions in desceding order)
-
-      You can combine these two
-      I.e
+      You can combine these two, for example the following request will return all user transactions with state version `s` between `100` and `300` inclusive (in desceding order).
       ```
       /stream/transactions
 
@@ -486,41 +488,43 @@ tags:
 
       ```
 
-      Will return all user transactions transactions between state version `100` and `300` in desceding order.
-
-
       ### Supported filters
 
-      Endpoint allows to get transaction stream based on specified filters. Transaction has to satisfy all filters in order to be returned. 
+      The transaction stream endpoint allows additional filters. A transaction has to satisfy all filters in order to be returned. 
 
-      Currently supported filters:
+      The currently supported filters are:
 
-      `kind_filter` - one of `User`, `EpochChange`, `All`. You can use that filter to query for certain kinds of transactions. Defaults to `User`.
+      * `kind_filter` - one of `User`, `EpochChange`, `All`. You can use that filter to query for certain kinds of transactions. Defaults to `User`.
 
-      `manifest_accounts_withdrawn_from_filter` - allows to specify array of addresses. If specified, response will contain only transactions with manifest containing withdraw from given addresses.
+      * `manifest_accounts_withdrawn_from_filter` - allows specifying an array of account addresses. If specified, the response will contain only transactions with a manifest containing withdrawals from the given accounts.
 
-      `manifest_accounts_deposited_into_filter` - similar to withdrawn, but will return only transactions with manifest containing deposit to given addresses. 
+      * `manifest_accounts_deposited_into_filter` - similar to withdrawn, but will return only transactions with a manifest containing deposits to the given accounts. 
 
-      `manifest_resources_filter` - allows to specify array of addresses. If specified, response will contain only transactions containing given resources in manifest. Regardless of their usage.
+      * `manifest_resources_filter` - allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
 
-      `affected_global_entities_filter` - allows to specify array of addresses. If specified response will contain transactions that affected all of given global entities. Affected global entities are defined by substates published as result of transaction. Each substate references entity, if that entity is global it's considered affected global entity, if it's not global then it's global ancestor is treated as affected global entity.
+      * `affected_global_entities_filter` - allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as "affected" by a transaction if any of its state (or its descendents' state) was modified as a result of the transaction.
 
-      `events_filter` - allows to filter transaction stream based on published events. Currently only deposit and withdrawal events are supported. 
+      * `events_filter` - allows filtering the transaction stream to transactions which emitted at least one event matching each filter. Currently only vault deposit and withdrawal events are supported. 
 
-      It's complex object where you can specify:
-      - `event` - type of event (required)  i.e `{"event": "withdrawal"}` 
-      - `emitter_address` - will return all transactions where given entity emitted event. i.e `{"emitter_address" : "consensusmanager_rdx1scxxxxxxxxxxcnsmgrxxxxxxxxx000999665565xxxxxxxxxcnsmgr"}` 
-      - `resource_address` - only transactions deposit/withdrawal events for given resource will be returned i.e `{"resource_address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"}` 
-
-      You can combine multiple event filters, it'll look for transactions that satisfies all conditions. i.e you can query for all transactions, where given entity emitted deposit event for specified resource:
+      Each filter is a complex object where you can specify:
+      - `event` (required) - the type of event, e.g. `{"event": "withdrawal"}` 
+      - `emitter_address` (optional) - require that the given global or internal entity emitted the event, e.g. `{"emitter_address" : "consensusmanager_rdx1scxxxxxxxxxxcnsmgrxxxxxxxxx000999665565xxxxxxxxxcnsmgr" }` 
+      - `resource_address` (optional) - require that the event concerned the given resource, e.g. `{"resource_address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"}` 
+      
+      As an example, the following query selects all transactions where the first account withdrew XRD and the second account deposited XRD:
 
       ```
       {
         "events_filter": [
           {
-          "event": "Deposit",
-          "emitter_address": "consensusmanager_rdx1scxxxxxxxxxxcnsmgrxxxxxxxxx000999665565xxxxxxxxxcnsmgr",
-          "resource_address": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+            "event": "Withdraw",
+            "emitter_address": "account_rdx1_TODO_account1",
+            "resource_address": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+          },
+          {
+            "event": "Deposit",
+            "emitter_address": "account_rdx2_TODO_account2",
+            "resource_address": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
           }
         ]
       }
@@ -528,70 +532,83 @@ tags:
 
       ### Pagination
 
-      If `limit_per_page` request parameter is lower than number of transactions to be returned, `next_cursor` will be returned. Use it in next request as `cursor` parameter to fetch further pages.
+      If the `limit_per_page` request parameter is lower than the number of transactions to be returned, a `next_cursor` will be returned. It can be used in subsequent requests as the `cursor` parameter to fetch further pages.
 
-      i.e:
+      For example, the following request will return a cursor:
       ```
+      /stream/transactions
+
       {
-        "kind_filter":"All",
-        "from_ledger_state": {"state_version": 100 },
-        "at_ledger_state": {"state_version": 300 },
-        "limit_per_page":1
+        "kind_filter": "All",
+        "from_ledger_state": { "state_version": 100 },
+        "at_ledger_state": { "state_version": 300 },
+        "limit_per_page": 1
       }
       ```
-      will return 
       ```
+      // Returns
       {
-      ...
-      "next_cursor": "eyJ2IjoyOTl9",
-      ...
+        // ...
+        "next_cursor": "eyJ2IjoyOTl9",
+        // ...
       }
       ```
 
-      use that in next query to fetch next pages:
+      Which can be used in the next query to fetch further pages:
       ```
+      /stream/transactions
+
       {
-        "kind_filter":"All",
-        "from_ledger_state": {"state_version": 100 },
-        "at_ledger_state": {"state_version": 300 },
-        "limit_per_page":1,
+        "kind_filter": "All",
+        "from_ledger_state": { "state_version": 100 },
+        "at_ledger_state": { "state_version": 300 },
+        "limit_per_page": 1,
         "cursor": "eyJ2IjoyOTl9"
       }
       ```
 
       ### Ordering
 
-      By default ordering in that endpoint is **descending** (highest state version first), so when using cursor you'll fetch newest first and with each page you'll fetch older transactions.
+      By default, transactions are returned in **descending** order (highest state version / most recent first).
 
-      You can change default behaviour by seting `order` parameter to `Asc`
+      You can change this to **ascending** order by setting the `order` parameter to `Asc`
 
       ```
+      /stream/transactions
+
       { 
-        ...
+        // ...
         "order": "Asc" 
-        ...
+        // ...
       }
       ```
-      Keep in mind that if order is ascending you'll start fetching transactions from oldest first and with each page you'll fetch newer transactions.
 
-      ### Reading events to find out what happened in certain dApp.
+      Keep in mind that if order is ascending you'll start fetching transactions from the oldest first and with each page you'll fetch newer transactions.
+
+      ### Reading events to find out what happened in a given dApp
  
-      Currently gateway support filtering by `withdrawal` and `deposit` events only. So if you want to get all transactions and events that affected certain dApp you can use `affected_global_entities_filter`.
+      Currently the gateway supports filtering by `withdrawal` and `deposit` events only.
+      We wish to support other filters in future.
 
-      i.e 
+      For the time being, if your dApp component always updates state along with emitting events, you can use the `affected` filter to filter to all transactions which affected your component, and extract relevant events from those transactions.
+      
+      For example, to find all transactions which affected `component_rdx1cq4ugccz6pg89w83ujanqlycw566kd9c9vxxuc9r45p7vues2649t4`,
+      (and therefore all events which it emitted), you can use the following request:
       ```
       /stream/transactions
 
       {
         "kind_filter": "All",
         "affected_global_entities_filter": ["component_rdx1cq4ugccz6pg89w83ujanqlycw566kd9c9vxxuc9r45p7vues2649t4"],
-        "opt_ins":{ "receipt_events": true }
+        "opt_ins": { "receipt_events": true }
       }
       ```
 
-      Will return us first page of all transactions including receipt events (note enabled `receipt_events` optIn) that affected `component_rdx1cq4ugccz6pg89w83ujanqlycw566kd9c9vxxuc9r45p7vues2649t4` component.
+      This will return the first page of all transactions, including their emitted events (which was enabled by using the `receipt_events` opt-in).
+      These emitted events can be filtered by the client to just events which were emitted by the given component (`component_rdx1cq4ugccz6pg89w83ujanqlycw566kd9c9vxxuc9r45p7vues2649t4` in this case).
 
       ```
+      // Response
       {
         "transaction_status": "CommittedSuccess",
         "state_version": 14614370,
@@ -651,15 +668,21 @@ tags:
                 "type_name": "WithdrawEvent"
               }
             },
-            ...
+            // ...
+          ]
+        }
       },
-      ...
+      // ...
       ```
+
       ## How role assignment works
 
-      Global components define list of different roles which controlls access to their features. To get list of role assignment definition use `/state/entity/details` endpoint.
+      Blueprints define a list of different roles which control access to their features.
+      Global components of a given blueprint provide assignments of access rules to those roles.
+      
+      You can get the roles and role assignments for a blueprint from the `/state/entity/details` endpoint.
 
-      i.e let's take a look at XRD resource.
+      For example, let's take a look at the XRD resource:
       ```
       /state/entity/details
 
@@ -670,20 +693,31 @@ tags:
       }
       ```
 
-      Response will contain two main parts. Definition of owner role and list of all role assignments for that component:
+      The response will contain two main parts. The definition of the owner role, and a list of all role assignments for that component:
 
       ```
       "role_assignments": {
         "owner": {
-          ...
+          // ...
         },
         "entries": [
-          ...
+          // ...
         ]
       }
       ```
 
-      ### Owner
+      Each role assignment conceptually includes:
+
+      * An assigned `rule` which defines what are the requirements to access that role.
+      * Its `updater` which defines which role is allowed to update the assignment.
+
+      ### The Owner role
+
+      The owner role assignment includes the `rule` which specifies the requirements you have to meet to act
+      as the owner of the entity. In the below example you need to have access to a proof of a certain non-fungible id.
+
+      The `updater` of an owner role assingment is either `None` or specifies the owner can update itself.
+
 
       ```
         "owner": {
@@ -710,15 +744,16 @@ tags:
           "updater": "None"
         },
       ```
-      `rule` - defines what are the requirements to be treated as owner of given component. In below example you need to present certain non fungible id.
 
-      `updater` - defines updater role for certain role. In short words what role can update `Owner` role. In above example `None` which means it can't be changed.
+      ### Role assignment entries 
 
-      ### Entries 
+      Each role assignment contains three fields:
+      * `role_key` - a composite key consisting of the entity module which defines the role and the name of the role inside the module.
+      * `assignment` - the assigned rule. It could be either `Explicit` as in the below example and contain an inline rule, or `Owner` which means the owner role is used.
+      * `updater_roles` - a fixed list of `role_key`s which act as updaters for the role, defined on the blueprint. Access to any of these updater roles permits someone to update the assignment for this role. 
 
-      list of all role assignment keys. 
-
-      Let's take a look at one of the items:
+      An example assignment entry is the following. This response indicates that the given resource can be burned by an actor who
+      has access to a proof of a specific global caller badge:
       ```
       "role_key": {
         "module": "Main",
@@ -755,19 +790,14 @@ tags:
       ]
       ```
 
-      `role_key` - complex key consisting of module name and name of the role inside module.
+      ## How to query the content of a key-value store inside a component
 
-      `assignment` - role assignment definition. It could be either `Explicit` as in above example and contain rule or `Owner` which means it's same as Owner role.
+      ### An example component
 
-      `updater_roles` - similar as for owner role, it defines list of `role_key`'s which protect updating role. 
+      Imagine a component which can store resources into named vaults.
+      To support arbitrary names, it might store these vaults in a `KeyValueStore<String, Vault>` as follows.
+      We will use this blueprint for demonstrating some requests.
 
-
-      ## How to query content of KeyValueStore inside component
-
-      ### Creating component
-
-      Imagine a component with two XRD vaults - parse state and determine value of each vault
-      Let's say we created MultiVault which holds multiple vaults inside internal `KeyValueStore`. To make it clear, let's say we instantiated component that using below blueprint:
       ```
       use scrypto::prelude::*;
 
@@ -806,9 +836,9 @@ tags:
 
       ### Querying for `KeyValueStore` address
 
-      Let's say that after creating it we created 3 vaults "1", "2", "3" and transfered some amount of resource to them.
+      Let's say that after creating a component with the above blueprint, we created 3 vaults "1", "2", "3" and transfered some amount of resource to each of them.
 
-      If you'd like to get content of `KeyValueStore` you need to firstly get it's address. You can do that i.e by calling `/state/entity/details` with instantiated component:
+      If you'd like to look at the content of the `KeyValueStore`, you need to first get its address. You can do that by calling `/state/entity/details` with the instantiated component address:
 
       ```
       /state/entity/details
@@ -820,11 +850,12 @@ tags:
       }
       ```
 
-      In response you'll receive state of that component which will contain address of that `KeyValueStore`
+      In the response you'll receive the state of that component which will contain the address of that `KeyValueStore`:
 
       ```
+            // ...
             "details": {
-            ...
+              // ...
               "state": {
                 "kind": "Tuple",
                 "type_name": "MultiVault",
@@ -836,17 +867,19 @@ tags:
                     "value": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk"
                   }
                 ]
-              },
-            ...
+              }
+            }
       ```
 
-      ### Querying for each Key content
+      ### Querying for the content under specific keys
 
-      After that you can use `/state/key-value-store/data` endpoint to query each key content. To do that you can either use key in form of `json` or `hex`.
+      After that you can use `/state/key-value-store/data` endpoint to query the content for given keys. To do that you can either use key in form of `json` or `hex`.
 
-      Unfortunately currently gateway doesn't support iterating over all keys. So user need to keep track on their own of all created keys or use lower level API's to extract that data.
+      The gateway doesn't currently support iterating over keys, although we plan to add APIs which can support this in the near future. For now, a client would need to keep track on their own of all created keys or use lower level APIs to extract that data.
 
-      Assuming keys in our `KeyValueStore` are strings, each key is identified as simple JSON with two properties, `kind` and `value`:
+      The json keys are specified as programmatic SBOR JSON (which is a recursive data format, with each layer being a discriminated union with the `kind` discriminator). Search for [SBOR on our docs site](https://docs.radixdlt.com) for more information on SBOR and the programmatic SBOR JSON format.
+
+      In this case, our `KeyValueStore` keys are strings, so each key is identified as programmatic SBOR JSON with two properties:
 
       ```      
       "key_json": {
@@ -855,7 +888,7 @@ tags:
       }
       ```
 
-      And we can use that json in `/state/key-value-store/data` simply replacing {Id} with our vault id. i.e for "1":
+      And we can use that json in `/state/key-value-store/data` simply replacing {Id} with our vault name, for example, "1":
 
       ```
       /state/key-value-store/data 
@@ -873,11 +906,12 @@ tags:
       }
       ```
 
-      It'll respond with content which is held under given key:
+      The API will respond with content which is held under the given key:
 
       ```
+      // Response
       {
-        ...
+        // ...
         "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk",
         "entries": [
           {
@@ -896,11 +930,15 @@ tags:
                 "type_name": "Vault"
               }
             },
-          ...
+            // ...
           }
         ]
       }
       ```
+
+      In our case, we may want to look up information about the vault (for example, the vault's resource address and balance).
+      This can be done with the `/state/entity/details` endpoint.
+
   - name: Status
     x-displayName: Status Endpoints
     description: Query information about the Gateway API status.
