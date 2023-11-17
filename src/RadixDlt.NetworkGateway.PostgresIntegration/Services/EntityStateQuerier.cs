@@ -1490,7 +1490,6 @@ INNER JOIN LATERAL(
     FROM schema_history
     WHERE entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
-    LIMIT 1
 ) psh ON true")
                 .AnnotateMetricName()
                 .ToListAsync(token))
