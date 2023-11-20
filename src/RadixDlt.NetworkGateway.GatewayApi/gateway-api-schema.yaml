@@ -504,12 +504,14 @@ tags:
 
       * `affected_global_entities_filter` - allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as "affected" by a transaction if any of its state (or its descendents' state) was modified as a result of the transaction.
 
-      * `events_filter` - allows filtering the transaction stream to transactions which emitted at least one event matching each filter. Currently only vault deposit and withdrawal events are supported. 
+      * `events_filter` - allows filtering the transaction stream to transactions which, for each provided filter, the transaction emitted at least one event which matched that filter. Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event. 
 
       Each filter is a complex object where you can specify:
-      - `event` (required) - the type of event, e.g. `{"event": "withdrawal"}` 
-      - `emitter_address` (optional) - require that the given global or internal entity emitted the event, e.g. `{"emitter_address" : "consensusmanager_rdx1scxxxxxxxxxxcnsmgrxxxxxxxxx000999665565xxxxxxxxxcnsmgr" }` 
-      - `resource_address` (optional) - require that the event concerned the given resource, e.g. `{"resource_address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"}` 
+      - `event` (required) - the event tag. Currently only the following tags are supported:
+        * `{"event": "Withdrawal"}` - Filters to "Withdraw" events from fungible and non-fungible vaults
+        * `{"event": "Deposit"}` - Filters to "Deposit" events from fungible and non-fungible vaults
+      - `emitter_address` (optional) - The "global emitter". Adding a global address here filters to matching events which have an emitter entity which is a descendent of the given global address, e.g. using `{"emitter_address" : "account_rdx16y76fepuvxqpv6gp6qswqymwhj5ng6sduugj4z6yysccvdg95g0dtr" }` filters to events emitted by vaults inside that account.
+      - `resource_address` (optional) - Adding a resource address here filters to matching events which concern the given resource, e.g. `{"resource_address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"}` matches only events which involve XRD. 
       
       As an example, the following query selects all transactions where the first account withdrew XRD and the second account deposited XRD:
 
@@ -517,13 +519,13 @@ tags:
       {
         "events_filter": [
           {
-            "event": "Withdraw",
-            "emitter_address": "account_rdx1_TODO_account1",
+            "event": "Withdrawal",
+            "emitter_address": "account_rdx16y76fepuvxqpv6gp6qswqymwhj5ng6sduugj4z6yysccvdg95g0dtr",
             "resource_address": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
           },
           {
             "event": "Deposit",
-            "emitter_address": "account_rdx2_TODO_account2",
+            "emitter_address": "account_rdx12x5vk07qcez6xj0zt8ve0x2g20mrssk0vrest3vf0qljd76r6zfvsx",
             "resource_address": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
           }
         ]
