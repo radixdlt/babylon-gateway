@@ -16,7 +16,17 @@ RUN apt-get update -y \
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0-bookworm-slim AS build
 WORKDIR /src
-COPY . .
+COPY sdk /src/sdk
+COPY Directory.Build.props /src/Directory.Build.props
+COPY Directory.Packages.props /src/Directory.Packages.props
+COPY babylon-gateway.sln /src/
+COPY babylon-gateway.sln.DotSettings /src/
+COPY tests /src/tests
+COPY CHANGELOG.md /src/
+COPY .editorconfig /src/
+COPY stylecop.json /src/
+COPY src /src/src
+COPY apps /src/apps
 RUN dotnet restore "apps/DataAggregator/DataAggregator.csproj"
 RUN dotnet build "apps/DataAggregator/DataAggregator.csproj" -c Release -o /app/build
 
