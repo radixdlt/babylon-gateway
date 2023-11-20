@@ -96,7 +96,7 @@ jobs:
     name: AMD Migration
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@DO-2004
     with:
       runs_on: ubuntu-22.04
       image_registry: "docker.io"
@@ -112,6 +112,7 @@ jobs:
       provenance: "false"
       scan_image: true
       snyk_target_ref: ${{ github.ref_name }}
+      cache_tag_suffix: "AMD"
   
   docker-database-migrations-private-arm:
     name: ARM Migration
@@ -132,6 +133,7 @@ jobs:
       artifact_name: build_props
       provenance: "false"
       disable_qemu: true
+      cache_tag_suffix: "ARM"
 
   docker-data-aggregator-private:
     name: AMD Aggregator
@@ -153,6 +155,7 @@ jobs:
       provenance: "false"
       scan_image: true
       snyk_target_ref: ${{ github.ref_name }}
+      cache_tag_suffix: "AMD"
 
   docker-data-aggregator-private-arm:
     name: ARM Aggregator
@@ -173,6 +176,7 @@ jobs:
       artifact_name: build_props
       provenance: "false"
       disable_qemu: true
+      cache_tag_suffix: "ARM"
 
   docker-gateway-api-private:
     name: AMD Gateway
@@ -194,6 +198,7 @@ jobs:
       provenance: "false"
       scan_image: true
       snyk_target_ref: ${{ github.ref_name }}
+      cache_tag_suffix: "AMD"
       
   docker-gateway-api-private-arm:
     name: ARM Gateway
@@ -214,6 +219,7 @@ jobs:
       artifact_name: build_props
       provenance: "false"
       disable_qemu: true
+      cache_tag_suffix: "ARM"
 
   join-gateway-images:
     name: Gateway
