@@ -16,14 +16,12 @@ RUN apt-get update -y \
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0-bookworm-slim AS build
 WORKDIR /src
-COPY sdk /src/sdk
-COPY Directory.Packages.props /src/Directory.Packages.props
-COPY babylon-gateway.sln /src/
-COPY babylon-gateway.sln.DotSettings /src/
-COPY tests /src/tests
-COPY CHANGELOG.md /src/
-COPY .editorconfig /src/
-COPY stylecop.json /src/
+COPY babylon-gateway.sln \
+     babylon-gateway.sln.DotSettings \
+     CHANGELOG.md \
+     Directory.Packages.props \
+     .editorconfig \
+     stylecop.json /src/
 COPY src /src/src
 COPY apps /src/apps
 COPY Directory.Build.props /src/Directory.Build.props
