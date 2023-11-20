@@ -63,7 +63,9 @@
  */
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
 using System.Collections.Concurrent;
@@ -86,12 +88,18 @@ internal class TransactionBalanceChangesService : ITransactionBalanceChangesServ
 {
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly IEnumerable<ITransactionOutcomeServiceObserver> _observers;
+    private readonly IOptionsMonitor<CoreApiIntegrationOptions> _coreApiIntegrationOptionsMonitor;
     private readonly ILogger _logger;
 
-    public TransactionBalanceChangesService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionOutcomeServiceObserver> observers, ILogger<TransactionBalanceChangesService> logger)
+    public TransactionBalanceChangesService(
+        ICoreApiHandler coreApiHandler,
+        IEnumerable<ITransactionOutcomeServiceObserver> observers,
+        IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptionsMonitor,
+        ILogger<TransactionBalanceChangesService> logger)
     {
         _coreApiHandler = coreApiHandler;
         _observers = observers;
+        _coreApiIntegrationOptionsMonitor = coreApiIntegrationOptionsMonitor;
         _logger = logger;
     }
 
@@ -100,7 +108,7 @@ internal class TransactionBalanceChangesService : ITransactionBalanceChangesServ
         var result = new ConcurrentDictionary<long, CoreModel.LtsCommittedTransactionOutcome>();
         var options = new ParallelOptions
         {
-            MaxDegreeOfParallelism = 8,
+            MaxDegreeOfParallelism = _coreApiIntegrationOptionsMonitor.CurrentValue.TransactionBalanceChangesMaxDegreeOfParallelism,
             CancellationToken = token,
         };
 
