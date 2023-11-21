@@ -90,35 +90,64 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue
+    /// For the given transaction, contains individual entity resource balance changes. The balance changes accounts for the fee payments as well. For failed transactions, current implementation does not return any balance changes (not even the fee payments). This will also change in a future update. 
     /// </summary>
-    [DataContract(Name = "ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue")]
-    public partial class ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue : IEquatable<ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue>
+    [DataContract(Name = "CommittedTransactionBalanceChanges")]
+    public partial class CommittedTransactionBalanceChanges : IEquatable<CommittedTransactionBalanceChanges>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue" /> class.
+        /// Initializes a new instance of the <see cref="CommittedTransactionBalanceChanges" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue() { }
+        protected CommittedTransactionBalanceChanges() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue" /> class.
+        /// Initializes a new instance of the <see cref="CommittedTransactionBalanceChanges" /> class.
         /// </summary>
-        /// <param name="activeValidator">activeValidator (required).</param>
-        public ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue(ActiveValidator activeValidator = default(ActiveValidator))
+        /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated.  (required).</param>
+        /// <param name="nonFungibleEntityBalanceChanges">Non fungible changes per entity and resource  (required).</param>
+        /// <param name="resultantAccountFungibleBalances">A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity.  (required).</param>
+        public CommittedTransactionBalanceChanges(List<LtsEntityFungibleBalanceChanges> fungibleEntityBalanceChanges = default(List<LtsEntityFungibleBalanceChanges>), List<LtsEntityNonFungibleBalanceChanges> nonFungibleEntityBalanceChanges = default(List<LtsEntityNonFungibleBalanceChanges>), List<LtsResultantAccountFungibleBalances> resultantAccountFungibleBalances = default(List<LtsResultantAccountFungibleBalances>))
         {
-            // to ensure "activeValidator" is required (not null)
-            if (activeValidator == null)
+            // to ensure "fungibleEntityBalanceChanges" is required (not null)
+            if (fungibleEntityBalanceChanges == null)
             {
-                throw new ArgumentNullException("activeValidator is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue and cannot be null");
+                throw new ArgumentNullException("fungibleEntityBalanceChanges is a required property for CommittedTransactionBalanceChanges and cannot be null");
             }
-            this.ActiveValidator = activeValidator;
+            this.FungibleEntityBalanceChanges = fungibleEntityBalanceChanges;
+            // to ensure "nonFungibleEntityBalanceChanges" is required (not null)
+            if (nonFungibleEntityBalanceChanges == null)
+            {
+                throw new ArgumentNullException("nonFungibleEntityBalanceChanges is a required property for CommittedTransactionBalanceChanges and cannot be null");
+            }
+            this.NonFungibleEntityBalanceChanges = nonFungibleEntityBalanceChanges;
+            // to ensure "resultantAccountFungibleBalances" is required (not null)
+            if (resultantAccountFungibleBalances == null)
+            {
+                throw new ArgumentNullException("resultantAccountFungibleBalances is a required property for CommittedTransactionBalanceChanges and cannot be null");
+            }
+            this.ResultantAccountFungibleBalances = resultantAccountFungibleBalances;
         }
 
         /// <summary>
-        /// Gets or Sets ActiveValidator
+        /// A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. 
         /// </summary>
-        [DataMember(Name = "active_validator", IsRequired = true, EmitDefaultValue = true)]
-        public ActiveValidator ActiveValidator { get; set; }
+        /// <value>A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. </value>
+        [DataMember(Name = "fungible_entity_balance_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<LtsEntityFungibleBalanceChanges> FungibleEntityBalanceChanges { get; set; }
+
+        /// <summary>
+        /// Non fungible changes per entity and resource 
+        /// </summary>
+        /// <value>Non fungible changes per entity and resource </value>
+        [DataMember(Name = "non_fungible_entity_balance_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<LtsEntityNonFungibleBalanceChanges> NonFungibleEntityBalanceChanges { get; set; }
+
+        /// <summary>
+        /// A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity. 
+        /// </summary>
+        /// <value>A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity. </value>
+        [DataMember(Name = "resultant_account_fungible_balances", IsRequired = true, EmitDefaultValue = true)]
+        public List<LtsResultantAccountFungibleBalances> ResultantAccountFungibleBalances { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +156,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue {\n");
-            sb.Append("  ActiveValidator: ").Append(ActiveValidator).Append("\n");
+            sb.Append("class CommittedTransactionBalanceChanges {\n");
+            sb.Append("  FungibleEntityBalanceChanges: ").Append(FungibleEntityBalanceChanges).Append("\n");
+            sb.Append("  NonFungibleEntityBalanceChanges: ").Append(NonFungibleEntityBalanceChanges).Append("\n");
+            sb.Append("  ResultantAccountFungibleBalances: ").Append(ResultantAccountFungibleBalances).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue);
+            return this.Equals(input as CommittedTransactionBalanceChanges);
         }
 
         /// <summary>
-        /// Returns true if ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue instances are equal
+        /// Returns true if CommittedTransactionBalanceChanges instances are equal
         /// </summary>
-        /// <param name="input">Instance of ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue to be compared</param>
+        /// <param name="input">Instance of CommittedTransactionBalanceChanges to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue input)
+        public bool Equals(CommittedTransactionBalanceChanges input)
         {
             if (input == null)
             {
@@ -165,9 +196,22 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ActiveValidator == input.ActiveValidator ||
-                    (this.ActiveValidator != null &&
-                    this.ActiveValidator.Equals(input.ActiveValidator))
+                    this.FungibleEntityBalanceChanges == input.FungibleEntityBalanceChanges ||
+                    this.FungibleEntityBalanceChanges != null &&
+                    input.FungibleEntityBalanceChanges != null &&
+                    this.FungibleEntityBalanceChanges.SequenceEqual(input.FungibleEntityBalanceChanges)
+                ) && 
+                (
+                    this.NonFungibleEntityBalanceChanges == input.NonFungibleEntityBalanceChanges ||
+                    this.NonFungibleEntityBalanceChanges != null &&
+                    input.NonFungibleEntityBalanceChanges != null &&
+                    this.NonFungibleEntityBalanceChanges.SequenceEqual(input.NonFungibleEntityBalanceChanges)
+                ) && 
+                (
+                    this.ResultantAccountFungibleBalances == input.ResultantAccountFungibleBalances ||
+                    this.ResultantAccountFungibleBalances != null &&
+                    input.ResultantAccountFungibleBalances != null &&
+                    this.ResultantAccountFungibleBalances.SequenceEqual(input.ResultantAccountFungibleBalances)
                 );
         }
 
@@ -180,9 +224,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ActiveValidator != null)
+                if (this.FungibleEntityBalanceChanges != null)
                 {
-                    hashCode = (hashCode * 59) + this.ActiveValidator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FungibleEntityBalanceChanges.GetHashCode();
+                }
+                if (this.NonFungibleEntityBalanceChanges != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleEntityBalanceChanges.GetHashCode();
+                }
+                if (this.ResultantAccountFungibleBalances != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResultantAccountFungibleBalances.GetHashCode();
                 }
                 return hashCode;
             }
