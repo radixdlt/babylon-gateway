@@ -63,9 +63,12 @@
  */
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -78,52 +81,72 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ITransactionBalanceChangesService
 {
-    Task<CoreModel.LtsCommittedTransactionOutcome?> GetTransactionBalanceChanges(long stateVersion, CancellationToken token = default);
+    Task<Dictionary<long, CoreModel.LtsCommittedTransactionOutcome>> GetTransactionBalanceChanges(ICollection<long> stateVersions, CancellationToken token = default);
 }
 
 internal class TransactionBalanceChangesService : ITransactionBalanceChangesService
 {
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly IEnumerable<ITransactionOutcomeServiceObserver> _observers;
+    private readonly IOptionsMonitor<CoreApiIntegrationOptions> _coreApiIntegrationOptionsMonitor;
     private readonly ILogger _logger;
 
-    public TransactionBalanceChangesService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionOutcomeServiceObserver> observers, ILogger<TransactionBalanceChangesService> logger)
+    public TransactionBalanceChangesService(
+        ICoreApiHandler coreApiHandler,
+        IEnumerable<ITransactionOutcomeServiceObserver> observers,
+        IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptionsMonitor,
+        ILogger<TransactionBalanceChangesService> logger)
     {
         _coreApiHandler = coreApiHandler;
         _observers = observers;
+        _coreApiIntegrationOptionsMonitor = coreApiIntegrationOptionsMonitor;
         _logger = logger;
     }
 
-    public async Task<CoreModel.LtsCommittedTransactionOutcome?> GetTransactionBalanceChanges(long stateVersion, CancellationToken token = default)
+    public async Task<Dictionary<long, CoreModel.LtsCommittedTransactionOutcome>> GetTransactionBalanceChanges(ICollection<long> stateVersions, CancellationToken token = default)
     {
-        try
+        var result = new ConcurrentDictionary<long, CoreModel.LtsCommittedTransactionOutcome>();
+        var options = new ParallelOptions
         {
-            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-            await _observers.ForEachAsync(x => x.PreHandleOutcomeRequest(stateVersion, selectedNode.Name));
+            MaxDegreeOfParallelism = _coreApiIntegrationOptionsMonitor.CurrentValue.TransactionBalanceChangesMaxDegreeOfParallelism,
+            CancellationToken = token,
+        };
 
-            var coreRequest = new CoreModel.LtsStreamTransactionOutcomesRequest(
-                network: _coreApiHandler.GetNetworkName(),
-                fromStateVersion: stateVersion,
-                limit: 1);
-
-            var result = await _coreApiHandler.TransactionOutcome(coreRequest, token);
-
-            var response = result.Succeeded ?
-                result.SuccessResponse.CommittedTransactionOutcomes.Single()
-                : throw result.FailureResponse.OriginalApiException;
-
-            await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(stateVersion, selectedNode.Name));
-
-            return response;
-        }
-        catch (Exception ex)
+        await Parallel.ForEachAsync(stateVersions, options, async (stateVersion, cancellationToken) =>
         {
-            _logger.LogError(ex, "Failed to load transaction balance changes for {StateVersion}", stateVersion);
+            try
+            {
+                var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
+                await _observers.ForEachAsync(x => x.PreHandleOutcomeRequest(stateVersion, selectedNode.Name));
 
-            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-            await _observers.ForEachAsync(x => x.HandleOutcomeRequestFailed(stateVersion, selectedNode.Name, ex));
+                var coreRequest = new CoreModel.LtsStreamTransactionOutcomesRequest(
+                    network: _coreApiHandler.GetNetworkName(),
+                    fromStateVersion: stateVersion,
+                    limit: 1);
 
-            return null;
-        }
+                var balanceChangesResult = await _coreApiHandler.TransactionOutcome(coreRequest, cancellationToken);
+
+                if (!balanceChangesResult.Succeeded)
+                {
+                    throw balanceChangesResult.FailureResponse.OriginalApiException;
+                }
+
+                var balanceChanges = balanceChangesResult.SuccessResponse.CommittedTransactionOutcomes.Single();
+
+                await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(stateVersion, selectedNode.Name));
+
+                result.TryAdd(stateVersion, balanceChanges);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load transaction balance changes for {StateVersion}", stateVersion);
+
+                var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
+
+                await _observers.ForEachAsync(x => x.HandleOutcomeRequestFailed(stateVersion, selectedNode.Name, ex));
+            }
+        });
+
+        return result.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 }
