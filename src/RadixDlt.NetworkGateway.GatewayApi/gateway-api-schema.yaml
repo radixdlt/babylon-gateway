@@ -179,7 +179,7 @@ tags:
         ]
       }
       ```
-      
+
       Whereas the following request will return the state of XRD as it was at state version 1000, near the start of the Babylon ledger:
       ```
       /state/entity/details
@@ -197,7 +197,7 @@ tags:
       ## Using endpoints with opt-in features
 
       To reduce bandwith and wasted work, some properties in certain endpoints are optional.
-      
+
       Most opt-ins default to `false` if not provided, and you can ask for the supplementary data by explicitly setting the corresponding opt-in property to `true`.
 
       Some opt-ins for backwards-compatibility default to `true`. In these cases, explicitly providing a value of `false` will opt out of the data and save bandwidth.
@@ -432,7 +432,7 @@ tags:
       This is controlled by the `aggregation_level` request field.
 
       * `Global` - If the entity contains multiple vaults of the same resource, or nested components which contains vaults of the same resource, the total balance across all these vaults will be returned. This mode is useful for TVL style calculations.
-      
+
       * `Vault` - Each vault is returned separately. This mode is useful for non-fungibles, because you get the vault ids which you can use to paginated ids from a vault.
 
       ### Fungible resources opt-in
@@ -449,7 +449,7 @@ tags:
 
       If the `non_fungible_include_nfids` opt-in is set to true AND vault aggregation was requested, the response will also contain the first page of non-fungible ids in each returned vault. If the vault contains more than one page of ids, a `next_cursor` is returned, which can be used with the `/state/entity/page/non-fungible-vault/ids` endpoint to load further non-fungible ids in the vault.
 
-      ## Using the /transaction/stream endpoint
+      ## Using the /stream/transactions endpoint
 
       The transaction stream endpoint can be used to read a filtered stream of transaction results.
 
@@ -490,7 +490,7 @@ tags:
 
       ### Supported filters
 
-      The transaction stream endpoint allows additional filters. A transaction has to satisfy all filters in order to be returned. 
+      The transaction stream endpoint allows additional filters. A transaction has to satisfy all filters in order to be returned.
 
       The currently supported filters are:
 
@@ -498,21 +498,21 @@ tags:
 
       * `manifest_accounts_withdrawn_from_filter` - allows specifying an array of account addresses. If specified, the response will contain only transactions with a manifest containing withdrawals from the given accounts.
 
-      * `manifest_accounts_deposited_into_filter` - similar to withdrawn, but will return only transactions with a manifest containing deposits to the given accounts. 
+      * `manifest_accounts_deposited_into_filter` - similar to withdrawn, but will return only transactions with a manifest containing deposits to the given accounts.
 
       * `manifest_resources_filter` - allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
 
       * `affected_global_entities_filter` - allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as "affected" by a transaction if any of its state (or its descendents' state) was modified as a result of the transaction.
 
-      * `events_filter` - allows filtering the transaction stream to transactions which, for each provided filter, the transaction emitted at least one event which matched that filter. Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event. 
+      * `events_filter` - allows filtering the transaction stream to transactions which, for each provided filter, the transaction emitted at least one event which matched that filter. Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
 
       Each filter is a complex object where you can specify:
       - `event` (required) - the event tag. Currently only the following tags are supported:
         * `{"event": "Withdrawal"}` - Filters to "Withdraw" events from fungible and non-fungible vaults
         * `{"event": "Deposit"}` - Filters to "Deposit" events from fungible and non-fungible vaults
       - `emitter_address` (optional) - The "global emitter". Adding a global address here filters to matching events which have an emitter entity which is a descendent of the given global address, e.g. using `{"emitter_address" : "account_rdx16y76fepuvxqpv6gp6qswqymwhj5ng6sduugj4z6yysccvdg95g0dtr" }` filters to events emitted by vaults inside that account.
-      - `resource_address` (optional) - Adding a resource address here filters to matching events which concern the given resource, e.g. `{"resource_address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"}` matches only events which involve XRD. 
-      
+      - `resource_address` (optional) - Adding a resource address here filters to matching events which concern the given resource, e.g. `{"resource_address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"}` matches only events which involve XRD.
+
       As an example, the following query selects all transactions where the first account withdrew XRD and the second account deposited XRD:
 
       ```
@@ -578,9 +578,9 @@ tags:
       ```
       /stream/transactions
 
-      { 
+      {
         // ...
-        "order": "Asc" 
+        "order": "Asc"
         // ...
       }
       ```
@@ -588,12 +588,12 @@ tags:
       Keep in mind that if order is ascending you'll start fetching transactions from the oldest first and with each page you'll fetch newer transactions.
 
       ### Reading events to find out what happened in a given dApp
- 
+
       Currently the gateway supports filtering by `withdrawal` and `deposit` events only.
       We wish to support other filters in future.
 
       For the time being, if your dApp component always updates state along with emitting events, you can use the `affected` filter to filter to all transactions which affected your component, and extract relevant events from those transactions.
-      
+
       For example, to find all transactions which affected `component_rdx1cq4ugccz6pg89w83ujanqlycw566kd9c9vxxuc9r45p7vues2649t4`,
       (and therefore all events which it emitted), you can use the following request:
       ```
@@ -681,7 +681,7 @@ tags:
 
       Blueprints define a list of different roles which control access to their features.
       Global components of a given blueprint provide assignments of access rules to those roles.
-      
+
       You can get the roles and role assignments for a blueprint from the `/state/entity/details` endpoint.
 
       For example, let's take a look at the XRD resource:
@@ -747,12 +747,12 @@ tags:
         },
       ```
 
-      ### Role assignment entries 
+      ### Role assignment entries
 
       Each role assignment contains three fields:
       * `role_key` - a composite key consisting of the entity module which defines the role and the name of the role inside the module.
       * `assignment` - the assigned rule. It could be either `Explicit` as in the below example and contain an inline rule, or `Owner` which means the owner role is used.
-      * `updater_roles` - a fixed list of `role_key`s which act as updaters for the role, defined on the blueprint. Access to any of these updater roles permits someone to update the assignment for this role. 
+      * `updater_roles` - a fixed list of `role_key`s which act as updaters for the role, defined on the blueprint. Access to any of these updater roles permits someone to update the assignment for this role.
 
       An example assignment entry is the following. This response indicates that the given resource can be burned by an actor who
       has access to a proof of a specific global caller badge:
@@ -883,7 +883,7 @@ tags:
 
       In this case, our `KeyValueStore` keys are strings, so each key is identified as programmatic SBOR JSON with two properties:
 
-      ```      
+      ```
       "key_json": {
           "kind": "String",
           "value": "{Id}"
@@ -893,7 +893,7 @@ tags:
       And we can use that json in `/state/key-value-store/data` simply replacing {Id} with our vault name, for example, "1":
 
       ```
-      /state/key-value-store/data 
+      /state/key-value-store/data
 
       {
       "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk",
@@ -1106,7 +1106,7 @@ paths:
       summary: Get Transactions Stream
       description: |
         Returns transactions which have been committed to the ledger.
-        [Check detailed documentation for brief explanation](#section/Using-transactionstream-endpoint)
+        [Check detailed documentation for brief explanation](#section/Using-the-streamtransactions-endpoint)
       tags:
         - Stream
       requestBody:
@@ -1378,7 +1378,7 @@ paths:
       summary: Get KeyValueStore Data
       description: |
         Returns data (value) associated with a given key of a given key-value store.
-        [Check detailed documentation for explanation](#section/How-to-query-content-of-KeyValueStore-inside-component)
+        [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component)
       tags:
         - State
       requestBody:
@@ -2919,7 +2919,7 @@ components:
             - description
     StateEntityDetailsOptIns:
       type: object
-      description: Check detailed [OptIns](#section/Using-endpoints-with-OptIns-feature) documentation for more details
+      description: Check detailed [OptIns](#section/Using-endpoints-with-opt-in-features) documentation for more details
       properties:
         ancestor_identities:
           description: if set to `true`, ancestor addresses - `parent_address`, `owner_address` and `global_address` for entities are returned.
@@ -3228,7 +3228,7 @@ components:
         address: "<component-entity-address>"
     StateEntityFungiblesPageRequestOptIns:
       type: object
-      description: Check detailed [OptIns](#section/Using-endpoints-with-OptIns-feature) documentation for more details
+      description: Check detailed [OptIns](#section/Using-endpoints-with-opt-in-features) documentation for more details
       properties:
         explicit_metadata:
           description: allows specifying explicitly metadata properties which should be returned in response, limited to max 20 items.
@@ -3293,7 +3293,7 @@ components:
         address: "<component-entity-address>"
     StateEntityNonFungiblesPageRequestOptIns:
       type: object
-      description: Check detailed [OptIns](#section/Using-endpoints-with-OptIns-feature) documentation for more details
+      description: Check detailed [OptIns](#section/Using-endpoints-with-opt-in-features) documentation for more details
       properties:
         non_fungible_include_nfids:
           description: if set to `true`, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at `/state/entity/page/non-fungible-vault/ids` endpoint.
@@ -3335,7 +3335,7 @@ components:
         resource_address: "<resource_address>"
     StateEntityNonFungibleResourceVaultsPageOptIns:
       type: object
-      description: Check detailed [OptIns](#section/Using-endpoints-with-OptIns-feature) documentation for more details
+      description: Check detailed [OptIns](#section/Using-endpoints-with-opt-in-features) documentation for more details
       properties:
         non_fungible_include_nfids:
           description: if set to `true`, first page of non fungible ids are returned for each non fungible resource, with cursor which can be later used at `/state/entity/page/non-fungible-vault/ids` endpoint.
