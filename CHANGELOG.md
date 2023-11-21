@@ -1,5 +1,12 @@
-## 1.2.1 
+## 1.2.2
 Release Date: _unreleased_
+
+- Fixed invalid foreign key between `pending_transactions` and `pending_transaction_payloads` tables.
+- Fixed package detail lookups to return all the blueprints and schemas.
+- Optimized transaction balance changes fetch time (parallelized).
+
+## 1.2.1 
+Release Date: 06.11.2023
 
 - Fixed local development environment setup.
 - Fixed missing `state` property on non-global entity state details.

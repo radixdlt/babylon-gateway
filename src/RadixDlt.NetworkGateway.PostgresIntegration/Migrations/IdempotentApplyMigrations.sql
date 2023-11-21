@@ -981,3 +981,71 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    ALTER TABLE pending_transactions DROP CONSTRAINT "FK_pending_transactions_pending_transaction_payloads_payload_id";
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    DROP INDEX "IX_pending_transactions_payload_id";
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    ALTER TABLE pending_transactions ALTER COLUMN payload_id DROP NOT NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    ALTER TABLE pending_transaction_payloads ADD pending_transaction_id bigint NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    CREATE UNIQUE INDEX "IX_pending_transaction_payloads_pending_transaction_id" ON pending_transaction_payloads (pending_transaction_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    ALTER TABLE pending_transaction_payloads ADD CONSTRAINT "FK_pending_transaction_payloads_pending_transactions_pending_t~" FOREIGN KEY (pending_transaction_id) REFERENCES pending_transactions (id) ON DELETE CASCADE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    UPDATE pending_transaction_payloads ptp SET pending_transaction_id = pt.id FROM pending_transactions pt WHERE pt.payload_id = ptp.id;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+        DELETE FROM pending_transaction_payloads WHERE id IN (SELECT ptp.id FROM pending_transaction_payloads ptp LEFT JOIN pending_transactions pt ON ptp.id = pt.payload_id WHERE pt.id IS NULL);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20231101101154_InversePendingTransactionPayloadRelationship', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+

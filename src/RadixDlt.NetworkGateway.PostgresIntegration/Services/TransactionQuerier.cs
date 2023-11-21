@@ -76,6 +76,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
@@ -680,23 +681,22 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
 
         List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
         var networkId = _networkConfigurationProvider.GetNetworkId();
+        var orderedTransactions = transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)).ToList();
 
-        foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)))
+        Dictionary<long, CoreModel.LtsCommittedTransactionOutcome>? balanceChangesPerTransaction = null;
+
+        if (optIns.BalanceChanges)
+        {
+            balanceChangesPerTransaction = await _transactionBalanceChangesService.GetTransactionBalanceChanges(orderedTransactions.Select(x => x.StateVersion).ToList(), token);
+        }
+
+        foreach (var transaction in orderedTransactions)
         {
             GatewayModel.TransactionBalanceChanges? balanceChanges = null;
 
-            if (optIns.BalanceChanges)
+            if (balanceChangesPerTransaction?.TryGetValue(transaction.StateVersion, out var bc) == true)
             {
-                var coreBalanceChanges = await _transactionBalanceChangesService.GetTransactionBalanceChanges(transaction.StateVersion, token);
-
-                if (coreBalanceChanges == null)
-                {
-                    _logger.LogError("Failed to load transaction balance changes for {StateVersion}", transaction.StateVersion);
-                }
-                else
-                {
-                    balanceChanges = coreBalanceChanges.ToGatewayModel();
-                }
+                balanceChanges = bc.ToGatewayModel();
             }
 
             if (!optIns.ReceiptEvents || schemaLookups?.Any() == false)

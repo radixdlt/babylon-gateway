@@ -62,91 +62,95 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreClient = RadixDlt.CoreApiSdk.Client;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+#nullable disable
 
-public interface ITransactionBalanceChangesService
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    Task<Dictionary<long, CoreModel.LtsCommittedTransactionOutcome>> GetTransactionBalanceChanges(ICollection<long> stateVersions, CancellationToken token = default);
-}
-
-internal class TransactionBalanceChangesService : ITransactionBalanceChangesService
-{
-    private readonly ICoreApiHandler _coreApiHandler;
-    private readonly IEnumerable<ITransactionOutcomeServiceObserver> _observers;
-    private readonly IOptionsMonitor<CoreApiIntegrationOptions> _coreApiIntegrationOptionsMonitor;
-    private readonly ILogger _logger;
-
-    public TransactionBalanceChangesService(
-        ICoreApiHandler coreApiHandler,
-        IEnumerable<ITransactionOutcomeServiceObserver> observers,
-        IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptionsMonitor,
-        ILogger<TransactionBalanceChangesService> logger)
+    /// <inheritdoc />
+    public partial class InversePendingTransactionPayloadRelationship : Migration
     {
-        _coreApiHandler = coreApiHandler;
-        _observers = observers;
-        _coreApiIntegrationOptionsMonitor = coreApiIntegrationOptionsMonitor;
-        _logger = logger;
-    }
-
-    public async Task<Dictionary<long, CoreModel.LtsCommittedTransactionOutcome>> GetTransactionBalanceChanges(ICollection<long> stateVersions, CancellationToken token = default)
-    {
-        var result = new ConcurrentDictionary<long, CoreModel.LtsCommittedTransactionOutcome>();
-        var options = new ParallelOptions
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            MaxDegreeOfParallelism = _coreApiIntegrationOptionsMonitor.CurrentValue.TransactionBalanceChangesMaxDegreeOfParallelism,
-            CancellationToken = token,
-        };
+            migrationBuilder.DropForeignKey(
+                name: "FK_pending_transactions_pending_transaction_payloads_payload_id",
+                table: "pending_transactions");
 
-        await Parallel.ForEachAsync(stateVersions, options, async (stateVersion, cancellationToken) =>
+            migrationBuilder.DropIndex(
+                name: "IX_pending_transactions_payload_id",
+                table: "pending_transactions");
+
+            migrationBuilder.AlterColumn<long>(
+                name: "payload_id",
+                table: "pending_transactions",
+                type: "bigint",
+                nullable: true,
+                oldClrType: typeof(long),
+                oldType: "bigint");
+
+            migrationBuilder.AddColumn<long>(
+                name: "pending_transaction_id",
+                table: "pending_transaction_payloads",
+                type: "bigint",
+                nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_pending_transaction_payloads_pending_transaction_id",
+                table: "pending_transaction_payloads",
+                column: "pending_transaction_id",
+                unique: true);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_pending_transaction_payloads_pending_transactions_pending_t~",
+                table: "pending_transaction_payloads",
+                column: "pending_transaction_id",
+                principalTable: "pending_transactions",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.Sql("UPDATE pending_transaction_payloads ptp SET pending_transaction_id = pt.id FROM pending_transactions pt WHERE pt.payload_id = ptp.id;");
+            migrationBuilder.Sql("DELETE FROM pending_transaction_payloads WHERE id IN (SELECT ptp.id FROM pending_transaction_payloads ptp LEFT JOIN pending_transactions pt ON ptp.id = pt.payload_id WHERE pt.id IS NULL);");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
-            try
-            {
-                var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-                await _observers.ForEachAsync(x => x.PreHandleOutcomeRequest(stateVersion, selectedNode.Name));
+            migrationBuilder.DropForeignKey(
+                name: "FK_pending_transaction_payloads_pending_transactions_pending_t~",
+                table: "pending_transaction_payloads");
 
-                var coreRequest = new CoreModel.LtsStreamTransactionOutcomesRequest(
-                    network: _coreApiHandler.GetNetworkName(),
-                    fromStateVersion: stateVersion,
-                    limit: 1);
+            migrationBuilder.DropIndex(
+                name: "IX_pending_transaction_payloads_pending_transaction_id",
+                table: "pending_transaction_payloads");
 
-                var balanceChangesResult = await _coreApiHandler.TransactionOutcome(coreRequest, cancellationToken);
+            migrationBuilder.DropColumn(
+                name: "pending_transaction_id",
+                table: "pending_transaction_payloads");
 
-                if (!balanceChangesResult.Succeeded)
-                {
-                    throw balanceChangesResult.FailureResponse.OriginalApiException;
-                }
+            migrationBuilder.AlterColumn<long>(
+                name: "payload_id",
+                table: "pending_transactions",
+                type: "bigint",
+                nullable: false,
+                defaultValue: 0L,
+                oldClrType: typeof(long),
+                oldType: "bigint",
+                oldNullable: true);
 
-                var balanceChanges = balanceChangesResult.SuccessResponse.CommittedTransactionOutcomes.Single();
+            migrationBuilder.CreateIndex(
+                name: "IX_pending_transactions_payload_id",
+                table: "pending_transactions",
+                column: "payload_id");
 
-                await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(stateVersion, selectedNode.Name));
-
-                result.TryAdd(stateVersion, balanceChanges);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to load transaction balance changes for {StateVersion}", stateVersion);
-
-                var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-
-                await _observers.ForEachAsync(x => x.HandleOutcomeRequestFailed(stateVersion, selectedNode.Name, ex));
-            }
-        });
-
-        return result.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            migrationBuilder.AddForeignKey(
+                name: "FK_pending_transactions_pending_transaction_payloads_payload_id",
+                table: "pending_transactions",
+                column: "payload_id",
+                principalTable: "pending_transaction_payloads",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
+        }
     }
 }

@@ -1428,6 +1428,8 @@ INNER JOIN LATERAL (
             return new Dictionary<long, PackageBlueprintHistory[]>();
         }
 
+        // should return all the blueprint history entries (no LIMIT 1 in nested query) as blueprints cannot be deleted
+
         return (await _dbContext
                 .PackageBlueprintHistory
                 .FromSqlInterpolated($@"
@@ -1439,7 +1441,6 @@ INNER JOIN LATERAL(
     FROM package_blueprint_history
     WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
-    LIMIT 1
 ) pbh ON true")
                 .AnnotateMetricName()
                 .ToListAsync(token))
@@ -1489,7 +1490,6 @@ INNER JOIN LATERAL(
     FROM schema_history
     WHERE entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
-    LIMIT 1
 ) psh ON true")
                 .AnnotateMetricName()
                 .ToListAsync(token))
