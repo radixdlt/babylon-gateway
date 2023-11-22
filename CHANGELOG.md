@@ -1,5 +1,10 @@
-## 1.2.2
+## 1.2.3
 Release Date: _unreleased_
+
+TBD
+
+## 1.2.2
+Release Date: 22.11.2023
 
 - Fixed invalid foreign key between `pending_transactions` and `pending_transaction_payloads` tables.
 - Fixed package detail lookups to return all the blueprints and schemas.
