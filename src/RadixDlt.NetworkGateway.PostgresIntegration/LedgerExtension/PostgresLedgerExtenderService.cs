@@ -465,6 +465,14 @@ UPDATE pending_transactions
                         }
                     }
 
+                    if (committedTransaction.BalanceChanges != null)
+                    {
+                        foreach (var entityAddress in committedTransaction.BalanceChanges.GetEntityAddresses())
+                        {
+                            referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
+                        }
+                    }
+
                     /* NB:
                        The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
                        as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
@@ -529,6 +537,7 @@ UPDATE pending_transactions
                     ledgerTransaction.ReceiptNextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson();
                     ledgerTransaction.ReceiptCostingParameters = committedTransaction.Receipt.CostingParameters.ToJson();
                     ledgerTransaction.ReceiptFeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson();
+                    ledgerTransaction.BalanceChanges = committedTransaction.BalanceChanges?.ToJson();
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
 
                     if (committedTransaction.Receipt.NextEpoch != null)

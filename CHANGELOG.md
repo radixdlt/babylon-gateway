@@ -1,7 +1,7 @@
 ## 1.2.3
 Release Date: _unreleased_
 
-TBD
+- Optimized transaction balance changes; if available they're read from internal database, otherwise they use existing fallback mechanism
 
 ## 1.2.2
 Release Date: 22.11.2023

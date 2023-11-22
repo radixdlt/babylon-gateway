@@ -62,82 +62,31 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+#nullable disable
 
-public static class GatewayApiBuilderExtensions
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
+    /// <inheritdoc />
+    public partial class AddLedgerTransactionBalanceChanges : Migration
     {
-        return builder
-            .AddPostgresPersistenceCore()
-            .AddPostgresPersistenceInitializers()
-            .AddPostgresPersistenceHealthChecks();
-    }
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "balance_changes",
+                table: "ledger_transactions",
+                type: "jsonb",
+                nullable: true);
+        }
 
-    public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
-    {
-        builder
-            .Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
-            .AddScoped<IRoleAssignmentQuerier, RoleAssignmentQuerier>()
-            .AddScoped<IBlueprintProvider, BlueprintProvider>()
-            .AddScoped<IRoleAssignmentsKeyProvider, RoleAssignmentsKeyProvider>()
-            .AddScoped<IRoleAssignmentsMapper, RoleAssignmentsMapper>()
-            .AddScoped<IValidatorQuerier, ValidatorQuerier>()
-            .AddScoped<IVirtualEntityDataProvider, VirtualEntityDataProvider>()
-            .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>()
-            .AddScoped<IDapperWrapper, DapperWrapper>()
-            .AddScoped<ITransactionBalanceChangesService, TransactionBalanceChangesService>()
-            .AddSingleton<MetricsInterceptor>();
-
-        CustomTypes.EnsureConfigured();
-
-        builder
-            .Services
-            .AddNpgsqlDataSourceHolder<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadOnlyDbContext>>().NpgsqlDataSource);
-                options.AddInterceptors(serviceProvider.GetRequiredService<MetricsInterceptor>());
-                options.AddInterceptors(new ForceDistinctInterceptor());
-            })
-            .AddNpgsqlDataSourceHolder<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);
-                options.AddInterceptors(serviceProvider.GetRequiredService<MetricsInterceptor>());
-                options.AddInterceptors(new ForceDistinctInterceptor());
-            });
-
-        return builder;
-    }
-
-    public static GatewayApiBuilder AddPostgresPersistenceInitializers(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
-        return builder;
-    }
-
-    public static GatewayApiBuilder AddPostgresPersistenceHealthChecks(this GatewayApiBuilder builder)
-    {
-        builder
-            .Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("readonly_database_connection_check")
-            .AddDbContextCheck<ReadWriteDbContext>("readwrite_database_connection_check");
-
-        return builder;
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "balance_changes",
+                table: "ledger_transactions");
+        }
     }
 }

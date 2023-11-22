@@ -62,91 +62,43 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreClient = RadixDlt.CoreApiSdk.Client;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.CoreApiSdk.Model;
 
-public interface ITransactionBalanceChangesService
+public partial class CommittedTransactionBalanceChanges : IEntityAddressPointer
 {
-    Task<Dictionary<long, CoreModel.LtsCommittedTransactionOutcome>> GetTransactionBalanceChanges(ICollection<long> stateVersions, CancellationToken token = default);
-}
-
-internal class TransactionBalanceChangesService : ITransactionBalanceChangesService
-{
-    private readonly ICoreApiHandler _coreApiHandler;
-    private readonly IEnumerable<ITransactionOutcomeServiceObserver> _observers;
-    private readonly IOptionsMonitor<CoreApiIntegrationOptions> _coreApiIntegrationOptionsMonitor;
-    private readonly ILogger _logger;
-
-    public TransactionBalanceChangesService(
-        ICoreApiHandler coreApiHandler,
-        IEnumerable<ITransactionOutcomeServiceObserver> observers,
-        IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptionsMonitor,
-        ILogger<TransactionBalanceChangesService> logger)
+    public IEnumerable<string> GetEntityAddresses()
     {
-        _coreApiHandler = coreApiHandler;
-        _observers = observers;
-        _coreApiIntegrationOptionsMonitor = coreApiIntegrationOptionsMonitor;
-        _logger = logger;
-    }
-
-    public async Task<Dictionary<long, CoreModel.LtsCommittedTransactionOutcome>> GetTransactionBalanceChanges(ICollection<long> stateVersions, CancellationToken token = default)
-    {
-        var result = new ConcurrentDictionary<long, CoreModel.LtsCommittedTransactionOutcome>();
-        var options = new ParallelOptions
+        foreach (var fungibleBalanceChange in FungibleEntityBalanceChanges)
         {
-            MaxDegreeOfParallelism = _coreApiIntegrationOptionsMonitor.CurrentValue.TransactionBalanceChangesMaxDegreeOfParallelism,
-            CancellationToken = token,
-        };
+            yield return fungibleBalanceChange.EntityAddress;
 
-        await Parallel.ForEachAsync(stateVersions, options, async (stateVersion, cancellationToken) =>
+            foreach (var feeBalanceChange in fungibleBalanceChange.FeeBalanceChanges)
+            {
+                yield return feeBalanceChange.ResourceAddress;
+            }
+
+            foreach (var nonFeeBalanceChange in fungibleBalanceChange.NonFeeBalanceChanges)
+            {
+                yield return nonFeeBalanceChange.ResourceAddress;
+            }
+        }
+
+        foreach (var nonFungibleBalanceChange in NonFungibleEntityBalanceChanges)
         {
-            try
+            yield return nonFungibleBalanceChange.EntityAddress;
+            yield return nonFungibleBalanceChange.ResourceAddress;
+        }
+
+        foreach (var resultantAccountFungibleBalance in ResultantAccountFungibleBalances)
+        {
+            yield return resultantAccountFungibleBalance.AccountAddress;
+
+            foreach (var resultantBalance in resultantAccountFungibleBalance.ResultantBalances)
             {
-                var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-                await _observers.ForEachAsync(x => x.PreHandleOutcomeRequest(stateVersion, selectedNode.Name));
-
-                var coreRequest = new CoreModel.LtsStreamTransactionOutcomesRequest(
-                    network: _coreApiHandler.GetNetworkName(),
-                    fromStateVersion: stateVersion,
-                    limit: 1);
-
-                var balanceChangesResult = await _coreApiHandler.TransactionOutcome(coreRequest, cancellationToken);
-
-                if (!balanceChangesResult.Succeeded)
-                {
-                    throw balanceChangesResult.FailureResponse.OriginalApiException;
-                }
-
-                var balanceChanges = balanceChangesResult.SuccessResponse.CommittedTransactionOutcomes.Single();
-
-                await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(stateVersion, selectedNode.Name));
-
-                result.TryAdd(stateVersion, balanceChanges);
+                yield return resultantBalance.ResourceAddress;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to load transaction balance changes for {StateVersion}", stateVersion);
-
-                var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
-
-                await _observers.ForEachAsync(x => x.HandleOutcomeRequestFailed(stateVersion, selectedNode.Name, ex));
-            }
-        });
-
-        return result.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
     }
 }
