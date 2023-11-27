@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.NetworkGateway.Abstractions;
@@ -85,17 +86,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 internal class SubmissionTrackingService : ISubmissionTrackingService
 {
     private readonly ReadWriteDbContext _dbContext;
+    private readonly ILogger<SubmissionTrackingService> _logger;
     private readonly IReadOnlyCollection<ISubmissionTrackingServiceObserver> _observers;
     private readonly IClock _clock;
 
     public SubmissionTrackingService(
         ReadWriteDbContext dbContext,
         IEnumerable<ISubmissionTrackingServiceObserver> observers,
-        IClock clock)
+        IClock clock,
+        ILogger<SubmissionTrackingService> logger)
     {
         _dbContext = dbContext;
         _observers = observers.ToArray();
         _clock = clock;
+        _logger = logger;
     }
 
     public async Task<SubmissionResult> ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
@@ -214,20 +218,27 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         CancellationToken token
     )
     {
-        var nodeSubmissionResult = await TransactionSubmitter.Submit(
-            submitContext,
-            notarizedTransactionBytes,
-            _observers,
-            token
-        );
+        try
+        {
+            var nodeSubmissionResult = await TransactionSubmitter.Submit(
+                submitContext,
+                notarizedTransactionBytes,
+                _observers,
+                token
+            );
 
-        pendingTransaction.HandleNodeSubmissionResult(
-            handlingConfig,
-            nodeName,
-            nodeSubmissionResult,
-            _clock.UtcNow,
-            currentEpoch < 0 ? null : (ulong)currentEpoch);
+            pendingTransaction.HandleNodeSubmissionResult(
+                handlingConfig,
+                nodeName,
+                nodeSubmissionResult,
+                _clock.UtcNow,
+                currentEpoch < 0 ? null : (ulong)currentEpoch);
 
-        await _dbContext.SaveChangesAsync(token);
+            await _dbContext.SaveChangesAsync(token);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogInformation(ex, "Gateway failed to store submission result before it was handled by PendingTransactionResubmissionWorker");
+        }
     }
 }
