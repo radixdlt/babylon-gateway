@@ -76,6 +76,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -773,10 +774,10 @@ UPDATE pending_transactions
                         {
                             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
                             var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
-                            var amount = long.Parse(nonFungibleVaultFieldBalanceSubstate.Value.Amount);
+                            var amount = long.Parse(nonFungibleVaultFieldBalanceSubstate.Value.Amount, NumberFormatInfo.InvariantInfo);
 
                             var previousAmountRaw = (substate.PreviousValue?.SubstateData as CoreModel.NonFungibleVaultFieldBalanceSubstate)?.Value.Amount;
-                            var previousAmount = previousAmountRaw == null ? 0 : long.Parse(previousAmountRaw);
+                            var previousAmount = previousAmountRaw == null ? 0 : long.Parse(previousAmountRaw, NumberFormatInfo.InvariantInfo);
                             var delta = amount - previousAmount;
 
                             vaultChanges.Add(new EntityNonFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseGlobalAncestorId, resourceEntity.DatabaseId, delta, stateVersion));
