@@ -1,7 +1,7 @@
 ## 1.2.3
 Release Date: _unreleased_
 
-TBD
+- Fixed exception thrown on empty validator set in the `/state/validator/list` endpoint.
 
 ## 1.2.2
 Release Date: 22.11.2023
