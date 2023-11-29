@@ -64,6 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Npgsql;
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.NetworkGateway.Abstractions;
@@ -182,6 +183,8 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             return new TrackedSubmission(true, existingPendingTransaction);
         }
 
+        _logger.LogInformation("[Before] TrackSubmission: intentHash: {transactionHash}, payloadHash: {payloadHash}", notarizedTransaction.IntentHash().AsStr(), payloadHash);
+
         var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeToGateway(
             handlingConfig,
             payloadHash,
@@ -200,6 +203,11 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         try
         {
             await _dbContext.SaveChangesAsync(token);
+            _logger.LogInformation(
+                "[After] TrackSubmission: id: {transactionHash}, intentHash: {transactionHash}, payloadHash: {payloadHash}",
+                pendingTransaction.Id, notarizedTransaction.IntentHash().AsStr(), payloadHash
+            );
+
             return new TrackedSubmission(false, pendingTransaction);
         }
         catch (DbUpdateException ex) when ((ex.InnerException is PostgresException pg) && pg.SqlState.StartsWith("23"))
@@ -227,6 +235,9 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
                 token
             );
 
+            _logger.LogInformation("[before] HandleNodeSubmissionResult: id: {transactionId}, transaction: {transaction}", pendingTransaction.Id,
+                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
+
             pendingTransaction.HandleNodeSubmissionResult(
                 handlingConfig,
                 nodeName,
@@ -235,10 +246,15 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
                 currentEpoch < 0 ? null : (ulong)currentEpoch);
 
             await _dbContext.SaveChangesAsync(token);
+
+            _logger.LogInformation("[After] HandleNodeSubmissionResult: id: {transactionId}, transaction: {transaction}", pendingTransaction.Id,
+                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            _logger.LogInformation(ex, "Gateway failed to store submission result before it was handled by PendingTransactionResubmissionWorker");
+            var fromDb = await _dbContext.PendingTransactions.SingleOrDefaultAsync(x => x.Id == pendingTransaction.Id, cancellationToken: token);
+            _logger.LogCritical(ex, "Gateway failed to store submission result. PendingTx attempted to save: {toSave} PendingTx fetched from db: {fromDb}",
+                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }), JsonConvert.SerializeObject(fromDb, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
         }
     }
 }

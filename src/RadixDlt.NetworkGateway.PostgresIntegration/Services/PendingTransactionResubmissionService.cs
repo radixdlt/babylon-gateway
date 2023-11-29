@@ -66,6 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
@@ -212,7 +213,9 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
         foreach (var transaction in transactionsWantingResubmission)
         {
+            _logger.LogInformation("[Before] UpdateForPendingSubmissionOrRetirement: id: {transactionId}, transaction: {transaction}", transaction.Id, JsonConvert.SerializeObject(transaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
             var canResubmit = transaction.UpdateForPendingSubmissionOrRetirement(handlingConfig, currentTime, currentEpoch);
+            _logger.LogInformation("[After] UpdateForPendingSubmissionOrRetirement: id: {transactionId}, transaction: {transaction}", transaction.Id, JsonConvert.SerializeObject(transaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
 
             if (canResubmit)
             {
@@ -250,7 +253,9 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
         foreach (var (transaction, nodeName, result) in submissionResults)
         {
+            _logger.LogInformation("[Before] modifying Pending transaction id: {pendingTransactionId}, transaction: {transaction}", transaction.Id, JsonConvert.SerializeObject(transaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
             transaction.HandleNodeSubmissionResult(handlingConfig, nodeName, result, handledAt, currentEpoch);
+            _logger.LogInformation("[After] modifying Pending transaction id: {pendingTransactionId}, transaction: {transaction} with result: {result}", transaction.Id, JsonConvert.SerializeObject(transaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }), JsonConvert.SerializeObject(result, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
         }
     }
 
