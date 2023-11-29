@@ -252,6 +252,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
         catch (DbUpdateConcurrencyException ex)
         {
+            await _dbContext.Entry(pendingTransaction).ReloadAsync(token);
             var fromDb = await _dbContext.PendingTransactions.SingleOrDefaultAsync(x => x.Id == pendingTransaction.Id, cancellationToken: token);
             _logger.LogCritical(ex, "Gateway failed to store submission result. PendingTx attempted to save: {toSave} PendingTx fetched from db: {fromDb}",
                 JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }), JsonConvert.SerializeObject(fromDb, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
