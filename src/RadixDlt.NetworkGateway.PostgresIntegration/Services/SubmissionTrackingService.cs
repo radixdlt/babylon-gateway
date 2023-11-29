@@ -248,14 +248,27 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             await _dbContext.SaveChangesAsync(token);
 
             _logger.LogInformation("[After] HandleNodeSubmissionResult: id: {transactionId}, transaction: {transaction}", pendingTransaction.Id,
-                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
+                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            await _dbContext.Entry(pendingTransaction).ReloadAsync(token);
-            var fromDb = await _dbContext.PendingTransactions.SingleOrDefaultAsync(x => x.Id == pendingTransaction.Id, cancellationToken: token);
-            _logger.LogCritical(ex, "Gateway failed to store submission result. PendingTx attempted to save: {toSave} PendingTx fetched from db: {fromDb}",
-                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }), JsonConvert.SerializeObject(fromDb, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
+            foreach (var entry in ex.Entries)
+            {
+                if (entry.Entity is PendingTransaction)
+                {
+                    var proposedValues = entry.CurrentValues;
+                    var databaseValues = await entry.GetDatabaseValuesAsync(token);
+
+                    _logger.LogCritical(
+                        ex,
+                        "Gateway failed to store submission result. PendingTx attempted to save: {toSave} PendingTx fetched from db: {fromDb}, proposedValues: {proposedValues}, currentValues: {dbValues}",
+                        JsonConvert.SerializeObject(proposedValues.ToObject(), new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }),
+                        JsonConvert.SerializeObject(databaseValues!.ToObject(), new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }),
+                        JsonConvert.SerializeObject(proposedValues, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }),
+                        JsonConvert.SerializeObject(databaseValues, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore })
+                    );
+                }
+            }
         }
     }
 }
