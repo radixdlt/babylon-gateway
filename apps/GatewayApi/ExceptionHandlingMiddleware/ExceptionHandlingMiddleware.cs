@@ -142,7 +142,7 @@ internal sealed class ExceptionHandlingMiddleware
                 if (requestTimeoutFeature?.CancellationToken.IsCancellationRequested == true)
                 {
                     _logger.LogError(exception, "Request timed out after={Timeout} seconds, [RequestTrace={TraceId}]", requestTimeoutFeature.Timeout.TotalSeconds, traceId);
-                    return InternalServerException.OfRequestTimeoutException(exception, traceId);
+                    return new RequestTimeoutException(traceId, $"Request timed out after={requestTimeoutFeature.Timeout.TotalSeconds} seconds");
                 }
 
                 if (requestAbortedFeature?.CancellationToken.IsCancellationRequested == true)
