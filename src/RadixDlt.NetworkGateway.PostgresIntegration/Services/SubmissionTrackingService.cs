@@ -236,7 +236,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             );
 
             _logger.LogInformation("[before] HandleNodeSubmissionResult: id: {transactionId}, transaction: {transaction}", pendingTransaction.Id,
-                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }));
+                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
 
             pendingTransaction.HandleNodeSubmissionResult(
                 handlingConfig,
@@ -252,6 +252,13 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
         catch (DbUpdateConcurrencyException ex)
         {
+            _logger.LogCritical("DbUpdateConcurrencyException, full serialized exception {exception}", new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+
+            if (ex.Entries.Any() != true)
+            {
+                _logger.LogCritical("DbUpdateConcurrencyException with no entries");
+            }
+
             foreach (var entry in ex.Entries)
             {
                 if (entry.Entity is PendingTransaction)
@@ -267,6 +274,14 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
                         JsonConvert.SerializeObject(proposedValues, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }),
                         JsonConvert.SerializeObject(databaseValues, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore })
                     );
+                }
+                else
+                {
+                    _logger.LogCritical(
+                        "DbUpdateConcurrencyException has entries but of different type: {type}, {entity}",
+                        entry.Entity.GetType(),
+                        JsonConvert.SerializeObject(entry.Entity, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore })
+                        );
                 }
             }
         }

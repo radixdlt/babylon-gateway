@@ -165,6 +165,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             .Where(pt => pt.LedgerDetails.PayloadLedgerStatus == PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
             .Select(pt => new
             {
+                pt.Id,
+                pt.IntentHash,
                 pt.PayloadHash,
                 pt.LedgerDetails.PayloadLedgerStatus,
                 pt.GatewayHandling.FirstSubmittedToGatewayTimestamp,
@@ -176,6 +178,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         foreach (var details in pendingTransactions)
         {
+            _logger.LogInformation("Pending Transaction marked as committed in LedgerExtender, id: {id}, intenthash: {intent}, payloadHash: {payloadHash}", details.Id, details.IntentHash, details.PayloadHash);
             if (details.PayloadLedgerStatus == PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
             {
                 await _observers.ForEachAsync(x => x.TransactionMarkedCommittedWhichWasPermanentlyRejected());

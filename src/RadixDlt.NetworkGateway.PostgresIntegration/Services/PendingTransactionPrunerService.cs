@@ -65,6 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
@@ -130,6 +131,18 @@ DELETE FROM pending_transactions
     WHERE first_submitted_to_gateway_timestamp < {pruneIfLastGatewaySubmissionBefore}
 ",
                 token);
+
+        var transactionsToPrune = await dbContext
+            .PendingTransactions
+            .Where(canPruneExpression)
+            .ToListAsync(token);
+
+        foreach (var tx in transactionsToPrune)
+        {
+            _logger.LogInformation(
+                "Pruning transaction id {id}, intentHash: {intentHash}, transaction: {transaction}",
+                tx.Id, tx.IntentHash, JsonConvert.SerializeObject(tx, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+        }
 
         if (prunedTransactionCount > 0)
         {
