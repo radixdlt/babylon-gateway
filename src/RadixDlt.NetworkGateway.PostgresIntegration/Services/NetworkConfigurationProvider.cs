@@ -171,6 +171,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().GenesisRound;
     }
 
+    public string GetNetworkHrpSuffix()
+    {
+        return GetCapturedConfig().NetworkHrpSuffix;
+    }
+
     public HrpDefinition GetHrpDefinition()
     {
         return GetCapturedConfig().HrpDefinition;
@@ -195,6 +200,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         {
             NetworkId = (byte)networkConfiguration.NetworkId,
             NetworkName = networkConfiguration.Network,
+            NetworkHrpSuffix = networkConfiguration.NetworkHrpSuffix,
             HrpDefinition = new HrpDefinition(
                 GlobalPackage: GetHrpPrefix(at, AddressEntityType.GlobalPackage),
                 GlobalGenericComponent: GetHrpPrefix(at, AddressEntityType.GlobalGenericComponent),

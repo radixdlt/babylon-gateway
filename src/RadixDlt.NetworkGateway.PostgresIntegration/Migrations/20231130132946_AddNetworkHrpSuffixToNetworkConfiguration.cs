@@ -62,36 +62,40 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+#nullable disable
 
-internal class StateNonFungibleIdsRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleIdsRequest>
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    public StateNonFungibleIdsRequestValidator(
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
-        LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        RadixAddressValidator radixAddressValidator,
-        PaginableRequestValidator paginableRequestValidator)
+    /// <inheritdoc />
+    public partial class AddNetworkHrpSuffixToNetworkConfiguration : Migration
     {
-        RuleFor(x => x.ResourceAddress)
-            .NotEmpty()
-            .SetValidator(radixAddressValidator);
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "network_hrp_suffix",
+                table: "network_configuration",
+                type: "text",
+                nullable: true,
+                defaultValue: null);
 
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+            migrationBuilder.Sql("update network_configuration set network_hrp_suffix = (select substring((address_type_definitions[0]->>'HrpPrefix')::text,'_(.+)') from network_configuration)");
 
-        RuleFor(x => x.Cursor)
-            .Base64();
+            migrationBuilder.AlterColumn<string>(
+                name: "network_hrp_suffix",
+                table: "network_configuration",
+                type: "text",
+                nullable: false);
+        }
 
-        RuleFor(x => x)
-            .SetValidator(paginableRequestValidator);
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "network_hrp_suffix",
+                table: "network_configuration");
+        }
     }
 }

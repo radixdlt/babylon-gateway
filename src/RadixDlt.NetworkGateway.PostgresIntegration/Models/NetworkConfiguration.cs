@@ -88,6 +88,9 @@ internal class NetworkConfiguration
     [Column("network_name")]
     public string NetworkName { get; set; }
 
+    [Column("network_hrp_suffix")]
+    public string NetworkHrpSuffix { get; set; }
+
     [Column("hrp_definition", TypeName = "jsonb")]
     public HrpDefinition HrpDefinition { get; set; }
 

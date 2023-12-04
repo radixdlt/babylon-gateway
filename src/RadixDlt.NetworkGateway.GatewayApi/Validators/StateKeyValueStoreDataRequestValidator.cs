@@ -71,11 +71,14 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateKeyValueStoreDataRequestValidator : AbstractValidator<GatewayModel.StateKeyValueStoreDataRequest>
 {
-    public StateKeyValueStoreDataRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateKeyValueStoreDataRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator)
     {
         RuleFor(x => x.KeyValueStoreAddress)
             .NotEmpty()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.Keys)
             .NotEmpty()
