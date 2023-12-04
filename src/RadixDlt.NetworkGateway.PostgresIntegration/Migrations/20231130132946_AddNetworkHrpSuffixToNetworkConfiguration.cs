@@ -81,7 +81,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 nullable: true,
                 defaultValue: null);
 
-            migrationBuilder.Sql("update network_configuration set network_hrp_suffix = (select substring((address_type_definitions[0]->>'HrpPrefix')::text,'_(.+)') from network_configuration)");
+            migrationBuilder.Sql("update network_configuration set network_hrp_suffix = (select substring(recordset.\"HrpPrefix\"::text,'_(.+)') from network_configuration, jsonb_to_recordset(address_type_definitions) as recordset(\"HrpPrefix\" TEXT) WHERE recordset.\"HrpPrefix\" like '%account%' limit 1)");
 
             migrationBuilder.AlterColumn<string>(
                 name: "network_hrp_suffix",
