@@ -3,6 +3,7 @@ Release Date: _unreleased_
 
 - Fixed exception thrown on empty validator set in the `/state/validator/list` endpoint.
 - `524` status code returned instead of `500` if request takes longer than configured timeout.
+- Validate if addresses provided in requests to API belong to network it is running on. 
 
 
 ## 1.2.2
