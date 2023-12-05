@@ -91,6 +91,7 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
         return new CapturedConfig(
             networkConfiguration.NetworkId,
             networkConfiguration.NetworkName,
+            networkConfiguration.NetworkHrpSuffix,
             networkConfiguration.HrpDefinition,
             networkConfiguration.WellKnownAddresses,
             networkConfiguration.AddressTypeDefinitions,

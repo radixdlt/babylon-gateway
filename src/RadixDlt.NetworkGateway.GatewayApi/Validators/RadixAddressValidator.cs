@@ -63,59 +63,39 @@
  */
 
 using FluentValidation;
-using FluentValidation.Validators;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public sealed class RadixAddressValidator<T> : PropertyValidator<T, string?>
+public sealed class RadixAddressValidator : AbstractValidator<string>
 {
-    public override string Name => "RadixAddressValidator";
-
-    private readonly string? _expectedHrp;
-
-    public RadixAddressValidator(string? expectedHrp)
+    public RadixAddressValidator(INetworkAddressConfigProvider networkAddressConfigProvider)
     {
-        _expectedHrp = expectedHrp;
-    }
+        var networkHrpSuffix = networkAddressConfigProvider.GetNetworkHrpSuffix();
 
-    public override bool IsValid(ValidationContext<T> context, string? value)
-    {
-        if (value == null)
-        {
-            return true;
-        }
-
-        context.MessageFormatter.AppendPropertyName(context.PropertyName);
-
-        try
-        {
-            var decoded = RadixAddressCodec.Decode(value);
-
-            if (_expectedHrp != null)
+        RuleFor(x => x)
+            .Custom((address, context) =>
             {
-                context.MessageFormatter.AppendArgument("ExpectedHrp", _expectedHrp);
+                context.MessageFormatter.AppendArgument("PropertyName", context.PropertyPath);
 
-                if (!_expectedHrp.Equals(decoded.Hrp, StringComparison.OrdinalIgnoreCase))
+                try
                 {
-                    context.AddFailure("'{PropertyName}' must begin with '{ExpectedHrp}'.");
+                    var decodedAddress = RadixAddressCodec.Decode(address);
 
-                    return false;
+                    if (!decodedAddress.Hrp.EndsWith(networkHrpSuffix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        context.MessageFormatter.AppendArgument("networkHrpSuffix", networkHrpSuffix);
+                        context.AddFailure("'{PropertyName}' doesn't belong to this network. Expected network Hrp suffix: {networkHrpSuffix}");
+                        return;
+                    }
                 }
-            }
-        }
-        catch (AddressException)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected override string GetDefaultMessageTemplate(string errorCode)
-    {
-        return "'{PropertyName}' must be a valid Bech32M-encoded RadixAddress.";
+                catch (AddressException)
+                {
+                    context.AddFailure("'{PropertyName}' must be a valid Bech32M-encoded RadixAddress.");
+                }
+            });
     }
 }

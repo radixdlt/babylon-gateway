@@ -69,10 +69,10 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class TransactionStatusRequestValidator : AbstractValidator<GatewayModel.TransactionStatusRequest>
 {
-    public TransactionStatusRequestValidator()
+    public TransactionStatusRequestValidator(RadixAddressValidator radixAddressValidator)
     {
         RuleFor(x => x.IntentHash)
             .NotNull()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
     }
 }

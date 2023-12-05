@@ -68,6 +68,8 @@ namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
 public interface INetworkAddressConfigProvider
 {
+    string GetNetworkHrpSuffix();
+
     HrpDefinition GetHrpDefinition();
 
     WellKnownAddresses GetWellKnownAddresses();
