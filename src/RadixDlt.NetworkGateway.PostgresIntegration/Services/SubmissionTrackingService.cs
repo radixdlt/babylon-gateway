@@ -270,27 +270,15 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
             foreach (var entry in ex.Entries)
             {
-                if (entry.Entity is PendingTransaction)
-                {
-                    var proposedValues = entry.CurrentValues;
-                    var databaseValues = await entry.GetDatabaseValuesAsync(token);
+                var proposedValues = entry.CurrentValues;
+                var databaseValues = await entry.GetDatabaseValuesAsync(token);
 
-                    _logger.LogCritical(
-                        ex,
-                        "Gateway failed to store submission result. PendingTx attempted to save: {toSave} PendingTx fetched from db: {fromDb}, proposedValues: {proposedValues}, currentValues: {dbValues}",
-                        JsonConvert.SerializeObject(proposedValues.ToObject(), jsonSerializationSettings),
-                        JsonConvert.SerializeObject(databaseValues!.ToObject(), jsonSerializationSettings),
-                        JsonConvert.SerializeObject(proposedValues, jsonSerializationSettings),
-                        JsonConvert.SerializeObject(databaseValues, jsonSerializationSettings)
-                    );
-                }
-                else
-                {
-                    _logger.LogCritical(
-                        "DbUpdateConcurrencyException has entries but of different type: {type}, {entity}",
-                        entry.Entity.GetType(),
-                        JsonConvert.SerializeObject(entry.Entity, jsonSerializationSettings));
-                }
+                _logger.LogCritical(
+                    ex,
+                    "Gateway failed to store submission result. Entity attempted to save: {toSave} Entity fetched from db: {fromDb}",
+                    JsonConvert.SerializeObject(proposedValues.ToObject(), jsonSerializationSettings),
+                    JsonConvert.SerializeObject(databaseValues!.ToObject(), jsonSerializationSettings)
+                );
             }
         }
     }
