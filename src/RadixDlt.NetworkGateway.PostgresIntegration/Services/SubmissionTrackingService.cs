@@ -226,6 +226,12 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         CancellationToken token
     )
     {
+        var jsonSerializationSettings = new JsonSerializerSettings
+        {
+            Error = (sender, args) => { args.ErrorContext.Handled = true; },
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+        };
+
         try
         {
             var nodeSubmissionResult = await TransactionSubmitter.Submit(
@@ -236,7 +242,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             );
 
             _logger.LogInformation("[before] HandleNodeSubmissionResult: id: {transactionId}, transaction: {transaction}", pendingTransaction.Id,
-                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+                JsonConvert.SerializeObject(pendingTransaction, jsonSerializationSettings));
 
             pendingTransaction.HandleNodeSubmissionResult(
                 handlingConfig,
@@ -248,11 +254,14 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             await _dbContext.SaveChangesAsync(token);
 
             _logger.LogInformation("[After] HandleNodeSubmissionResult: id: {transactionId}, transaction: {transaction}", pendingTransaction.Id,
-                JsonConvert.SerializeObject(pendingTransaction, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+                JsonConvert.SerializeObject(pendingTransaction, jsonSerializationSettings));
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            _logger.LogCritical("DbUpdateConcurrencyException, full serialized exception {exception}", new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+            _logger.LogCritical(
+                "DbUpdateConcurrencyException, full serialized exception {exception}",
+                JsonConvert.SerializeObject(pendingTransaction, jsonSerializationSettings)
+                );
 
             if (ex.Entries.Any() != true)
             {
@@ -269,10 +278,10 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
                     _logger.LogCritical(
                         ex,
                         "Gateway failed to store submission result. PendingTx attempted to save: {toSave} PendingTx fetched from db: {fromDb}, proposedValues: {proposedValues}, currentValues: {dbValues}",
-                        JsonConvert.SerializeObject(proposedValues.ToObject(), new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }),
-                        JsonConvert.SerializeObject(databaseValues!.ToObject(), new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }),
-                        JsonConvert.SerializeObject(proposedValues, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }),
-                        JsonConvert.SerializeObject(databaseValues, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore })
+                        JsonConvert.SerializeObject(proposedValues.ToObject(), jsonSerializationSettings),
+                        JsonConvert.SerializeObject(databaseValues!.ToObject(), jsonSerializationSettings),
+                        JsonConvert.SerializeObject(proposedValues, jsonSerializationSettings),
+                        JsonConvert.SerializeObject(databaseValues, jsonSerializationSettings)
                     );
                 }
                 else
@@ -280,8 +289,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
                     _logger.LogCritical(
                         "DbUpdateConcurrencyException has entries but of different type: {type}, {entity}",
                         entry.Entity.GetType(),
-                        JsonConvert.SerializeObject(entry.Entity, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore })
-                        );
+                        JsonConvert.SerializeObject(entry.Entity, jsonSerializationSettings));
                 }
             }
         }
