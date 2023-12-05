@@ -85,7 +85,7 @@ public sealed class RadixAddressValidator : AbstractValidator<string>
                 {
                     var decodedAddress = RadixAddressCodec.Decode(address);
 
-                    if (!decodedAddress.Hrp.Contains(networkHrpSuffix, StringComparison.OrdinalIgnoreCase))
+                    if (!decodedAddress.Hrp.EndsWith(networkHrpSuffix, StringComparison.OrdinalIgnoreCase))
                     {
                         context.MessageFormatter.AppendArgument("networkHrpSuffix", networkHrpSuffix);
                         context.AddFailure("'{PropertyName}' doesn't belong to this network. Expected network Hrp suffix: {networkHrpSuffix}");
