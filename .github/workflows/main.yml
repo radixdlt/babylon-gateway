@@ -113,7 +113,7 @@ jobs:
       scan_image: true
       snyk_target_ref: ${{ github.ref_name }}
       cache_tag_suffix: "AMD"
-  
+
   docker-database-migrations-private-arm:
     name: ARM Migration
     needs:
@@ -199,7 +199,7 @@ jobs:
       scan_image: true
       snyk_target_ref: ${{ github.ref_name }}
       cache_tag_suffix: "AMD"
-      
+
   docker-gateway-api-private-arm:
     name: ARM Gateway
     needs:
@@ -228,7 +228,7 @@ jobs:
       - docker-gateway-api-private
       - docker-gateway-api-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: private-babylon-ng-gateway-api
       image_tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
       tag_suffix_1: amd64
@@ -244,7 +244,7 @@ jobs:
       - docker-data-aggregator-private
       - docker-data-aggregator-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: private-babylon-ng-data-aggregator
       image_tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
       tag_suffix_1: amd64
@@ -252,7 +252,7 @@ jobs:
       aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
-  
+
   join-migrations-images:
     name: Migration
     needs:
@@ -260,7 +260,7 @@ jobs:
       - docker-database-migrations-private
       - docker-database-migrations-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: private-babylon-ng-database-migrations
       image_tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
       tag_suffix_1: amd64
@@ -300,7 +300,7 @@ jobs:
           echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
       - name: Check if ci.env changed
         id: changed-files
-        uses: tj-actions/changed-files@db5dd7c176cf59a19ef6561bf1936f059dee4b74
+        uses: RDXWorks-actions/changed-files@main
         with:
           files: |
             deployment/ci.env
@@ -355,12 +355,12 @@ jobs:
           echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
       - name: Check if ci.env changed
         id: changed-files
-        uses: tj-actions/changed-files@db5dd7c176cf59a19ef6561bf1936f059dee4b74
+        uses: RDXWorks-actions/changed-files@main
         with:
           files: |
             deployment/ci.env
       - name: Deploy and run benchmark on an ephemeral network
-        uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
+        uses: RDXWorks-actions/jenkins-job-trigger-action@master
         with:
           jenkins_url: "${{ env.JENKINS_URL }}"
           jenkins_user: ${{ env.JENKINS_USER }}
@@ -454,7 +454,7 @@ jobs:
           echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
           echo "POSTGRES_VERSION=$POSTGRES_VERSION" >> $GITHUB_ENV
       - name: Deploy and test on an ephemeral network
-        uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
+        uses: RDXWorks-actions/jenkins-job-trigger-action@master
         with:
           jenkins_url: "${{ env.JENKINS_URL }}"
           jenkins_user: ${{ env.JENKINS_USER }}
@@ -488,7 +488,7 @@ jobs:
           secret_name: "github-actions/common/sonar-token"
           parse_json: true
       - name: SonarScanner for .NET
-        uses: highbyte/sonarscan-dotnet@8410b6452e036aff2fb830831e508e723b8af60d
+        uses: highbyte/sonarscan-dotnet@8410b6452e036aff2fb830831e508e723b8af60d # for .NET 8 use RDXWorks-actions/sonarscan-dotnet@master
         with:
           sonarProjectKey: radixdlt_babylon-gateway
           sonarProjectName: babylon-gateway
