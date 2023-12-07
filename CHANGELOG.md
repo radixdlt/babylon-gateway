@@ -1,6 +1,7 @@
 ## 1.2.4
 Release Date: _unreleased_
-- 
+- enable retries on transient database connectivity issues in gateway api.
+- enable retries on core api calls in gateway api.
 
 ## 1.2.3
 Release Date: 13.12.2023
