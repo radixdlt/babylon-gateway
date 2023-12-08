@@ -409,13 +409,12 @@ jobs:
           jenkins_url: "${{ env.JENKINS_URL }}"
           jenkins_user: ${{ env.JENKINS_USER }}
           jenkins_token: ${{ env.JENKINS_TOKEN }}
-          job_name: "ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
+          job_name: "babylon-testing/job/ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
           job_params: |
             {
-              "gatewayDockerTag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
-              "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
-              "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
-              "postgresVersion": "${{ env.POSTGRES_VERSION }}"
+              "RADIXDLT_GATEWAY_DOCKER_TAG": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
+              "RADIXDLT_NODE_DOCKER_TAG": "${{ env.FULLNODE_VERSION }}",
+              "RADIXDLT_POSTGRES_APP_VERSION": "${{ env.POSTGRES_VERSION }}"
             }
           job_timeout: "3600"
 
