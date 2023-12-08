@@ -325,56 +325,6 @@ jobs:
                 }
             }'
 
-  ephemeral-deploy-and-benchmark:
-    runs-on: ubuntu-22.04
-    needs:
-      - docker-gateway-api-private
-      - docker-data-aggregator-private
-      - docker-database-migrations-private
-      - join-gateway-images
-      - join-aggregator-images
-      - join-migrations-images
-      - setup-tags
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-      - uses: ./.github/actions/fetch-secrets
-        with:
-          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
-          app_name: "babylon-gateway"
-          step_name: "ephemeral-deploy-and-benchmark"
-          secret_prefix: "JENKINS"
-          secret_name: "github-actions/radixdlt/babylon-gateway/jenkins-api-token"
-          parse_json: true
-      - name: Process ci.env
-        run: |
-          export $(grep -v '^#' ./deployment/ci.env | xargs)
-          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
-      - name: Check if ci.env changed
-        id: changed-files
-        uses: RDXWorks-actions/changed-files@main
-        with:
-          files: |
-            deployment/ci.env
-      - name: Deploy and run benchmark on an ephemeral network
-        uses: RDXWorks-actions/jenkins-job-trigger-action@master
-        with:
-          jenkins_url: "${{ env.JENKINS_URL }}"
-          jenkins_user: ${{ env.JENKINS_USER }}
-          jenkins_token: ${{ env.JENKINS_TOKEN }}
-          job_name: "ephemeral-deployments/job/ephemeral-env-gateway-benchmark"
-          job_params: |
-            {
-              "gatewayDockerTag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
-              "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
-              "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
-              "postgresVersion": "${{ env.POSTGRES_VERSION }}"
-            }
-          job_timeout: "3600"
-
   deploy-pr:
     runs-on: ubuntu-22.04
     needs:
