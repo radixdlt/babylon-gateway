@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: cancel running workflows
-        uses: styfle/cancel-workflow-action@b173b6ec0100793626c2d9e6b90435061f4fc3e5
+        uses: RDXWorks-actions/cancel-workflow-action@main
         with:
           access_token: ${{github.token}}
   sync_collections:
@@ -41,7 +41,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "sync_collections"
@@ -54,7 +54,7 @@ jobs:
 
       # ========== Mapping the network name to postman-related variables ==========
       - name: Map network name to its variables
-        uses: kanga333/variable-mapper@3681b75f5c6c00162721168fb91ab74925eaebcb
+        uses: RDXWorks-actions/variable-mapper@master
         with:
           key: "${{ github.event.inputs.network_name || 'gilganet' }}"
           map: |
@@ -85,7 +85,7 @@ jobs:
 
       # ========== Credentials ==========
       - name: Setup Postman credentials
-        uses: DamianReeves/write-file-action@a432935930b2e351ec2d2792fc220717b656ec1c
+        uses: RDXWorks-actions/write-file-action@master
         with:
           path: .env
           contents: POSTMAN_API_KEY=${{env.POSTMAN_API_TOKEN}}

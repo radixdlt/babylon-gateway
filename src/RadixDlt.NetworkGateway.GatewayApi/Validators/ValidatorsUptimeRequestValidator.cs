@@ -71,7 +71,10 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class ValidatorsUptimeRequestValidator : AbstractValidator<ValidatorsUptimeRequest>
 {
-    public ValidatorsUptimeRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public ValidatorsUptimeRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator)
     {
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
@@ -89,7 +92,7 @@ internal class ValidatorsUptimeRequestValidator : AbstractValidator<ValidatorsUp
 
                 RuleForEach(x => x.ValidatorAddresses)
                     .NotNull()
-                    .RadixAddress();
+                    .SetValidator(radixAddressValidator);
             });
     }
 }

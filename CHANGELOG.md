@@ -1,5 +1,13 @@
-## 1.2.2
+## 1.2.3
 Release Date: _unreleased_
+
+- Fixed exception thrown on empty validator set in the `/state/validator/list` endpoint.
+- `524` status code returned instead of `500` if request takes longer than configured timeout.
+- Validate if addresses provided in requests to API belong to network it is running on. 
+- Fixed `500` status code returned from `/transaction/submit` when Transaction got committed before Gateway was able to store pending transaction node submission result. It'll return 200 status code from now on and log exception as information.
+
+## 1.2.2
+Release Date: 22.11.2023
 
 - Fixed invalid foreign key between `pending_transactions` and `pending_transaction_payloads` tables.
 - Fixed package detail lookups to return all the blueprints and schemas.
