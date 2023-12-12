@@ -1,5 +1,9 @@
-## 1.2.3
+## 1.2.4
 Release Date: _unreleased_
+- 
+
+## 1.2.3
+Release Date: 13.12.2023
 
 - Fixed exception thrown on empty validator set in the `/state/validator/list` endpoint.
 - `524` status code returned instead of `500` if request takes longer than configured timeout.
