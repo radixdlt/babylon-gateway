@@ -1656,6 +1656,18 @@ components:
     # Common Response Types
     #
 
+    TransactionType:
+      type: string
+      enum:
+        - General
+        - Transfer
+        - ValidatorStake
+        - ValidatorUnstake
+        - ValidatorClaim
+        - AccountDepositSettingsUpdate
+        - PoolContribution
+        - PoolRedemption
+
     ObjectModuleId:
       type: string
       enum:
@@ -2814,6 +2826,7 @@ components:
     # /stream/* Request & Response Types
     #
 
+    # TODO PP: update docs with examples.
     StreamTransactionsRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
@@ -2848,6 +2861,24 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/StreamTransactionsRequestEventFilterItem"
+            accounts_with_manifest_owner_method_calls:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            accounts_without_manifest_owner_method_calls:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            transaction_type_filter:
+              type: object
+              required:
+                - type
+              properties:
+                type:
+                  $ref: "#/components/schemas/TransactionType"
+                match_only_most_specific:
+                  type: boolean
+                  default: false
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string

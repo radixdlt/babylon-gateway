@@ -91,20 +91,17 @@ internal class TransactionQuerier : ITransactionQuerier
     private readonly ReadWriteDbContext _rwDbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ITransactionBalanceChangesService _transactionBalanceChangesService;
-    private readonly ILogger _logger;
 
     public TransactionQuerier(
         ReadOnlyDbContext dbContext,
         ReadWriteDbContext rwDbContext,
         INetworkConfigurationProvider networkConfigurationProvider,
-        ITransactionBalanceChangesService transactionBalanceChangesService,
-        ILogger<TransactionQuerier> logger)
+        ITransactionBalanceChangesService transactionBalanceChangesService)
     {
         _dbContext = dbContext;
         _rwDbContext = rwDbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
         _transactionBalanceChangesService = transactionBalanceChangesService;
-        _logger = logger;
     }
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
@@ -112,6 +109,8 @@ internal class TransactionQuerier : ITransactionQuerier
         var referencedAddresses = request
             .SearchCriteria
             .ManifestAccountsDepositedInto
+            .Concat(request.SearchCriteria.AccountsWithManifestOwnerMethodCalls)
+            .Concat(request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls)
             .Concat(request.SearchCriteria.ManifestAccountsWithdrawnFrom)
             .Concat(request.SearchCriteria.ManifestResources)
             .Concat(request.SearchCriteria.AffectedGlobalEntities)
@@ -271,6 +270,76 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
                     .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
                     .Select(eltm => eltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.TransactionTypeFilter != null)
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            var transactionType = request.SearchCriteria.TransactionTypeFilter.Type switch
+            {
+                TransactionType.General => LedgerTransactionMarkerManifestClassification.General,
+                TransactionType.Transfer => LedgerTransactionMarkerManifestClassification.Transfer,
+                TransactionType.ValidatorStake => LedgerTransactionMarkerManifestClassification.ValidatorStake,
+                TransactionType.ValidatorUnstake => LedgerTransactionMarkerManifestClassification.ValidatorUnstake,
+                TransactionType.ValidatorClaim => LedgerTransactionMarkerManifestClassification.ValidatorClaim,
+                TransactionType.AccountDepositSettingsUpdate => LedgerTransactionMarkerManifestClassification.AccountDepositSettingsUpdate,
+                TransactionType.PoolContribution => LedgerTransactionMarkerManifestClassification.PoolContribution,
+                TransactionType.PoolRedemption => LedgerTransactionMarkerManifestClassification.PoolRedemption,
+                _ => throw new UnreachableException($"Didn't expect {request.SearchCriteria.TransactionTypeFilter.Type} value"),
+            };
+
+            searchQuery = searchQuery
+                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                .OfType<TransactionTypeMarker>()
+                .Where(ttm => ttm.TransactionType == transactionType)
+                .Where(ttm => (request.SearchCriteria.TransactionTypeFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.TransactionTypeFilter.MatchOnlyMostSpecificType)
+                .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
+                .Select(eltm => eltm.StateVersion);
+        }
+
+        if (request.SearchCriteria.AccountsWithManifestOwnerMethodCalls.Any())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityAddress in request.SearchCriteria.AccountsWithManifestOwnerMethodCalls)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = searchQuery
+                    .Join(
+                        _dbContext.LedgerTransactionMarkers,
+                        stateVersion => stateVersion,
+                        ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
+                        (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
+                    .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls.Any())
+        {
+            foreach (var entityAddress in request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                var withManifestOwnerCall = _dbContext
+                    .LedgerTransactionMarkers
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
+                    .Select(y => y.StateVersion);
+
+                searchQuery = searchQuery.Where(x => withManifestOwnerCall.All(y => y != x));
             }
         }
 

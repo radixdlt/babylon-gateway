@@ -1036,7 +1036,7 @@ END $EF$;
 DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
-        DELETE FROM pending_transaction_payloads WHERE id IN (SELECT ptp.id FROM pending_transaction_payloads ptp LEFT JOIN pending_transactions pt ON ptp.id = pt.payload_id WHERE pt.id IS NULL);
+    DELETE FROM pending_transaction_payloads WHERE id IN (SELECT ptp.id FROM pending_transaction_payloads ptp LEFT JOIN pending_transactions pt ON ptp.id = pt.payload_id WHERE pt.id IS NULL);
     END IF;
 END $EF$;
 
@@ -1045,6 +1045,74 @@ BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
     VALUES ('20231101101154_InversePendingTransactionPayloadRelationship', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    ALTER TABLE network_configuration ADD network_hrp_suffix text NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    update network_configuration set network_hrp_suffix = (select substring(recordset."HrpPrefix"::text,'_(.+)') from network_configuration, jsonb_to_recordset(address_type_definitions) as recordset("HrpPrefix" TEXT) WHERE recordset."HrpPrefix" like '%account%' limit 1)
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20231130132946_AddNetworkHrpSuffixToNetworkConfiguration', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
+    CREATE TYPE ledger_transaction_marker_manifest_classification AS ENUM ('general', 'transfer', 'validator_stake', 'validator_unstake', 'validator_claim', 'account_deposit_settings_update', 'pool_contribution', 'pool_redemption');
+    ALTER TYPE ledger_transaction_marker_operation_type ADD VALUE 'account_owner_method_call';
+    ALTER TYPE ledger_transaction_marker_type ADD VALUE 'transaction_type';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
+    ALTER TABLE ledger_transaction_markers ADD is_most_specific boolean NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
+    ALTER TABLE ledger_transaction_markers ADD transaction_type ledger_transaction_marker_manifest_classification NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
+    CREATE INDEX "IX_ledger_transaction_markers_transaction_type_is_most_specifi~" ON ledger_transaction_markers (transaction_type, is_most_specific, state_version) WHERE discriminator = 'transaction_type';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20231218150147_NewTransactionTypeMarker', '7.0.11');
     END IF;
 END $EF$;
 COMMIT;
