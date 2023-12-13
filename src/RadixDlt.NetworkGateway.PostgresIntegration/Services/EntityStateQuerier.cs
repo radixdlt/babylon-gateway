@@ -760,7 +760,7 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
             .AnnotateMetricName("GetValidators")
             .ToListAsync(token);
 
-        var epoch = await _dbContext
+        var lastFinishedEpoch = await _dbContext
             .ValidatorActiveSetHistory
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .OrderByDescending(e => e.FromStateVersion)
@@ -768,7 +768,7 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
             .Select(e => e.Epoch)
             .FirstOrDefaultAsync(token);
 
-        if (epoch == 0)
+        if (lastFinishedEpoch == 0)
         {
             return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(0, null, new List<GatewayModel.ValidatorCollectionItem>()));
         }
@@ -776,7 +776,7 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
         var activeSetById = await _dbContext
             .ValidatorActiveSetHistory
             .Include(e => e.PublicKey)
-            .Where(e => e.Epoch == epoch)
+            .Where(e => e.Epoch == lastFinishedEpoch)
             .AnnotateMetricName("GetValidatorActiveSet")
             .ToDictionaryAsync(e => e.PublicKey.ValidatorEntityId, token);
 
@@ -889,6 +889,7 @@ INNER JOIN LATERAL (
                 }
 
                 var details = validatorsDetails.Single(x => x.ValidatorId == v.Id);
+                var effectiveFeeFactor = ValidatorEffectiveFeeFactorProvider.ExtractFeeFactorFromValidatorState(details.State, ledgerState.Epoch);
 
                 return new GatewayModel.ValidatorCollectionItem(
                     v.Address,
@@ -910,7 +911,9 @@ INNER JOIN LATERAL (
                         vaultAddresses[v.PendingXrdWithdrawVault]),
                     new JRaw(details.State),
                     activeInEpoch,
-                    metadataById[v.Id]);
+                    metadataById[v.Id],
+                    effectiveFeeFactor
+                    );
             })
             .ToList();
 

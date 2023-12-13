@@ -2253,6 +2253,8 @@ components:
         - pending_xrd_withdraw_vault
         - locked_owner_stake_unit_vault
         - pending_owner_stake_unit_unlock_vault
+        - state
+        - effective_fee_factor
       properties:
         address:
           $ref: "#/components/schemas/Address"
@@ -2274,6 +2276,32 @@ components:
           $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpoch"
         metadata:
           $ref: "#/components/schemas/EntityMetadataCollection"
+        effective_fee_factor:
+          type: object
+          required:
+            - current
+          properties:
+            current:
+              type: object
+              required:
+                - fee_factor
+              properties:
+                fee_factor:
+                  $ref: "#/components/schemas/BigDecimal"
+            pending:
+              type: object
+              nullable: true
+              required:
+                - fee_factor
+                - effective_at_epoch
+              properties:
+                fee_factor:
+                  $ref: "#/components/schemas/BigDecimal"
+                effective_at_epoch:
+                  type: integer
+                  format: int64
+                  minimum: 0
+                  maximum: 10000000000
     ValidatorCollectionItemActiveInEpoch:
       type: object
       required:
