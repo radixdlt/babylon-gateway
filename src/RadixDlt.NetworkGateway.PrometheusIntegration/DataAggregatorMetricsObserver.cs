@@ -118,7 +118,8 @@ internal class DataAggregatorMetricsObserver :
     private static readonly Gauge _extensionConsistentStatus = Metrics
         .CreateGauge(
             "ng_ledger_sync_quorum_extension_consistent_status",
-            "If a node quorum exists for a ledger extension, whether it agrees with the existing DB accumulator and is internally consistent. 1 = true, 0.5 = unknown, 0 = false. If 0, it's a critical alarm."
+            "If a node quorum exists for a ledger extension, whether it agrees with the existing DB accumulator and is internally consistent. 1 = true, 0 = false. If 0, it's a critical alarm.",
+            new GaugeConfiguration { SuppressInitialValue = true }
         );
 
     /* Global Metrics - Quorum/Sync related - ie ledger_commit prefix */
