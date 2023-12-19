@@ -83,17 +83,17 @@ public static class ValidatorEffectiveFeeFactorProvider
         if (parsedState.ValidatorFeeChangeRequest == null)
         {
             return new GatewayModel.ValidatorCollectionItemEffectiveFeeFactor(
-                new GatewayModel.ValidatorCollectionItemEffectiveFeeFactorCurrent(parsedState.ValidatorFeeFactor));
+                new GatewayModel.ValidatorCollectionItemEffectiveFeeFactorCurrent(feeFactor: parsedState.ValidatorFeeFactor));
         }
 
         if (currentEpoch >= parsedState.ValidatorFeeChangeRequest.EpochEffective)
         {
             return new GatewayModel.ValidatorCollectionItemEffectiveFeeFactor(
-                new GatewayModel.ValidatorCollectionItemEffectiveFeeFactorCurrent(parsedState.ValidatorFeeChangeRequest.NewFeeFactor));
+                new GatewayModel.ValidatorCollectionItemEffectiveFeeFactorCurrent(feeFactor: parsedState.ValidatorFeeChangeRequest.NewFeeFactor));
         }
 
         return new GatewayModel.ValidatorCollectionItemEffectiveFeeFactor(
-            new GatewayModel.ValidatorCollectionItemEffectiveFeeFactorCurrent(parsedState.ValidatorFeeFactor),
+            new GatewayModel.ValidatorCollectionItemEffectiveFeeFactorCurrent(feeFactor: parsedState.ValidatorFeeFactor),
             new GatewayModel.ValidatorCollectionItemEffectiveFeeFactorPending(
                 parsedState.ValidatorFeeChangeRequest.NewFeeFactor,
                 parsedState.ValidatorFeeChangeRequest.EpochEffective)

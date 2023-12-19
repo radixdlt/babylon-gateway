@@ -4,7 +4,7 @@ Release Date: _unreleased_
 - extended validator's data returned from `/state/validators/list`. Added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
 
 ## 1.2.3
-Release Date: _unreleased_
+Release Date: 19.12.2023
 
 - Fixed exception thrown on empty validator set in the `/state/validator/list` endpoint.
 - `524` status code returned instead of `500` if request takes longer than configured timeout.
