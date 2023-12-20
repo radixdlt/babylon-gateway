@@ -1036,7 +1036,7 @@ END $EF$;
 DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
-        DELETE FROM pending_transaction_payloads WHERE id IN (SELECT ptp.id FROM pending_transaction_payloads ptp LEFT JOIN pending_transactions pt ON ptp.id = pt.payload_id WHERE pt.id IS NULL);
+    DELETE FROM pending_transaction_payloads WHERE id IN (SELECT ptp.id FROM pending_transaction_payloads ptp LEFT JOIN pending_transactions pt ON ptp.id = pt.payload_id WHERE pt.id IS NULL);
     END IF;
 END $EF$;
 
@@ -1045,6 +1045,51 @@ BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
     VALUES ('20231101101154_InversePendingTransactionPayloadRelationship', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    ALTER TABLE network_configuration ADD network_hrp_suffix text NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    update network_configuration set network_hrp_suffix = (select substring(recordset."HrpPrefix"::text,'_(.+)') from network_configuration, jsonb_to_recordset(address_type_definitions) as recordset("HrpPrefix" TEXT) WHERE recordset."HrpPrefix" like '%account%' limit 1)
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20231130132946_AddNetworkHrpSuffixToNetworkConfiguration', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231220153048_TrackComponentAssignedModules') THEN
+    ALTER TABLE entities ADD assigned_module_ids module_id[] NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231220153048_TrackComponentAssignedModules') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20231220153048_TrackComponentAssignedModules', '7.0.11');
     END IF;
 END $EF$;
 COMMIT;

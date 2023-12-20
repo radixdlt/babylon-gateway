@@ -104,7 +104,7 @@ internal class WriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, blueprint_version, divisibility, non_fungible_id_type, vm_type, stake_vault_entity_id, pending_xrd_withdraw_vault_entity_id, locked_owner_stake_unit_vault_entity_id, pending_owner_stake_unit_unlock_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)",
+            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, vm_type, stake_vault_entity_id, pending_xrd_withdraw_vault_entity_id, locked_owner_stake_unit_vault_entity_id, pending_owner_stake_unit_unlock_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var e in entities)
@@ -128,9 +128,11 @@ internal class WriteHelper
                 await writer.WriteAsync(ce.PackageId, NpgsqlDbType.Bigint, token);
                 await writer.WriteAsync(ce.BlueprintName, NpgsqlDbType.Text, token);
                 await writer.WriteAsync(ce.BlueprintVersion, NpgsqlDbType.Text, token);
+                await writer.WriteAsync(ce.AssignedModuleIds, "module_id[]", token);
             }
             else
             {
+                await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);

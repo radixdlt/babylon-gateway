@@ -2,6 +2,7 @@
 Release Date: _unreleased_
 
 - extended validator's data returned from `/state/validators/list`. Added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
+- return components effective role assignments only for assigned modules.
 
 ## 1.2.3
 Release Date: 19.12.2023

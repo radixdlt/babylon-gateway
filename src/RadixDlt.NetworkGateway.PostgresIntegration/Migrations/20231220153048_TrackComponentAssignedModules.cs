@@ -63,70 +63,32 @@
  */
 
 using System.Collections.Generic;
-using System.Linq;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using GatewayModel = RadixDlt.NetworkGateway.Abstractions.Model;
+using Microsoft.EntityFrameworkCore.Migrations;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+#nullable disable
 
-internal record RoleAssignmentRuleKey(string Name, GatewayModel.ModuleId ModuleId);
-
-internal record RoleAssignmentEntry(RoleAssignmentRuleKey Key, RoleAssignmentRuleKey[] Updaters);
-
-internal record BlueprintDefinitionIdentifier(string Name, string Version, long PackageEntityId);
-
-internal interface IRoleAssignmentsKeyProvider
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    List<RoleAssignmentEntry> GetNativeModulesKeys();
-
-    List<RoleAssignmentEntry> ExtractKeysFromBlueprintAuthConfig(CoreModel.AuthConfig authConfig);
-}
-
-internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
-{
-    private static readonly string[] _metadataRuleKeys = { "metadata_locker", "metadata_setter", };
-
-    private static readonly string[] _royaltyRuleKeys = { "royalty_setter", "royalty_locker", "royalty_claimer", };
-
-    private readonly List<RoleAssignmentEntry> _nativeModulesKeys;
-
-    public RoleAssignmentsKeyProvider()
+    /// <inheritdoc />
+    public partial class TrackComponentAssignedModules : Migration
     {
-        var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, GatewayModel.ModuleId.Metadata);
-        var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, GatewayModel.ModuleId.Royalty);
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<List<ModuleId>>(
+                name: "assigned_module_ids",
+                table: "entities",
+                type: "module_id[]",
+                nullable: true);
+        }
 
-        _nativeModulesKeys = metadataWithUpdaterKeys
-            .Concat(royaltyWithUpdaterKeys)
-            .ToList();
-    }
-
-    public List<RoleAssignmentEntry> GetNativeModulesKeys() => _nativeModulesKeys;
-
-    public List<RoleAssignmentEntry> ExtractKeysFromBlueprintAuthConfig(CoreModel.AuthConfig authConfig)
-    {
-        return authConfig
-            .MethodRoles
-            ?.Roles
-            ?.Select(x =>
-                new RoleAssignmentEntry(
-                    new RoleAssignmentRuleKey(x.Key, GatewayModel.ModuleId.Main),
-                    x.Value.UpdaterRoles.Select(u => new RoleAssignmentRuleKey(u, GatewayModel.ModuleId.Main)).ToArray()
-                ))
-            .ToList() ?? new List<RoleAssignmentEntry>();
-    }
-
-    private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, GatewayModel.ModuleId moduleId)
-    {
-        const string UpdaterSuffix = "updater";
-
-        return
-            ruleKeys
-                .Select(key => new List<RoleAssignmentEntry>
-                {
-                    new(new RoleAssignmentRuleKey(key, moduleId), new[] { new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", moduleId) }),
-                    new(new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", moduleId), new[] { new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", moduleId) }),
-                })
-                .SelectMany(x => x)
-                .ToList();
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "assigned_module_ids",
+                table: "entities");
+        }
     }
 }
