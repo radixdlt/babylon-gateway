@@ -70,21 +70,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class ToolkitModelExtensions
 {
-    public static LedgerTransactionMarkerManifestClassification ToModel(this ToolkitModel.ManifestClass manifestClass)
+    public static LedgerTransactionMarkerManifestClass ToModel(this ToolkitModel.ManifestClass manifestClass)
     {
-        var transactionType = manifestClass switch
+        var transactionClass = manifestClass switch
         {
-            ToolkitModel.ManifestClass.General => LedgerTransactionMarkerManifestClassification.General,
-            ToolkitModel.ManifestClass.Transfer => LedgerTransactionMarkerManifestClassification.Transfer,
-            ToolkitModel.ManifestClass.PoolContribution => LedgerTransactionMarkerManifestClassification.PoolContribution,
-            ToolkitModel.ManifestClass.PoolRedemption => LedgerTransactionMarkerManifestClassification.PoolRedemption,
-            ToolkitModel.ManifestClass.ValidatorStake => LedgerTransactionMarkerManifestClassification.ValidatorStake,
-            ToolkitModel.ManifestClass.ValidatorUnstake => LedgerTransactionMarkerManifestClassification.ValidatorUnstake,
-            ToolkitModel.ManifestClass.ValidatorClaim => LedgerTransactionMarkerManifestClassification.ValidatorClaim,
-            ToolkitModel.ManifestClass.AccountDepositSettingsUpdate => LedgerTransactionMarkerManifestClassification.AccountDepositSettingsUpdate,
+            ToolkitModel.ManifestClass.General => LedgerTransactionMarkerManifestClass.General,
+            ToolkitModel.ManifestClass.Transfer => LedgerTransactionMarkerManifestClass.Transfer,
+            ToolkitModel.ManifestClass.PoolContribution => LedgerTransactionMarkerManifestClass.PoolContribution,
+            ToolkitModel.ManifestClass.PoolRedemption => LedgerTransactionMarkerManifestClass.PoolRedemption,
+            ToolkitModel.ManifestClass.ValidatorStake => LedgerTransactionMarkerManifestClass.ValidatorStake,
+            ToolkitModel.ManifestClass.ValidatorUnstake => LedgerTransactionMarkerManifestClass.ValidatorUnstake,
+            ToolkitModel.ManifestClass.ValidatorClaim => LedgerTransactionMarkerManifestClass.ValidatorClaim,
+            ToolkitModel.ManifestClass.AccountDepositSettingsUpdate => LedgerTransactionMarkerManifestClass.AccountDepositSettingsUpdate,
             _ => throw new UnreachableException($"Didn't expect {manifestClass} value"),
         };
 
-        return transactionType;
+        return transactionClass;
     }
 }

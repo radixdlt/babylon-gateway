@@ -81,8 +81,8 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20231218150147_NewTransactionTypeMarker")]
-    partial class NewTransactionTypeMarker
+    [Migration("20231220145152_AddManifestClassTransactionMarker")]
+    partial class AddManifestClassTransactionMarker
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,10 +96,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_resource_preference_rule", new[] { "allowed", "disallowed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity", "global_one_resource_pool", "global_two_resource_pool", "global_multi_resource_pool", "global_transaction_tracker" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_manifest_classification", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from", "account_owner_method_call" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_origin_type", new[] { "user", "epoch_change" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address", "affected_global_entity", "transaction_type" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address", "affected_global_entity", "manifest_class" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "round_update" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "module_id", new[] { "main", "metadata", "royalty", "role_assignment" });
@@ -2142,6 +2142,26 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.ManifestAddress);
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ManifestClassMarker", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionMarker");
+
+                    b.Property<bool>("IsMostSpecific")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_most_specific");
+
+                    b.Property<LedgerTransactionMarkerManifestClass>("ManifestClass")
+                        .HasColumnType("ledger_transaction_marker_manifest_class")
+                        .HasColumnName("manifest_class");
+
+                    b.HasIndex("ManifestClass", "IsMostSpecific", "StateVersion")
+                        .HasFilter("discriminator = 'manifest_class'");
+
+                    b.ToTable("ledger_transaction_markers");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.ManifestClass);
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.OriginLedgerTransactionMarker", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionMarker");
@@ -2156,26 +2176,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("ledger_transaction_markers");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.Origin);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TransactionTypeMarker", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionMarker");
-
-                    b.Property<bool>("IsMostSpecific")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_most_specific");
-
-                    b.Property<LedgerTransactionMarkerManifestClassification>("TransactionType")
-                        .HasColumnType("ledger_transaction_marker_manifest_classification")
-                        .HasColumnName("transaction_type");
-
-                    b.HasIndex("TransactionType", "IsMostSpecific", "StateVersion")
-                        .HasFilter("discriminator = 'transaction_type'");
-
-                    b.ToTable("ledger_transaction_markers");
-
-                    b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.TransactionType);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.JsonStateHistory", b =>

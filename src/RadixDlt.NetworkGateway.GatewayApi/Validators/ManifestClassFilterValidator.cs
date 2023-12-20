@@ -62,52 +62,16 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore.Migrations;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using FluentValidation;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-#nullable disable
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+internal class ManifestClassFilterValidator : AbstractValidator<StreamTransactionsRequestAllOfManifestClassFilter>
 {
-    /// <inheritdoc />
-    public partial class TransactionTypeFilterImplementation : Migration
+    public ManifestClassFilterValidator()
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<bool>(
-                name: "is_most_specific",
-                table: "ledger_transaction_markers",
-                type: "boolean",
-                nullable: true);
-
-            migrationBuilder.AddColumn<LedgerTransactionMarkerManifestClassification>(
-                name: "transaction_type",
-                table: "ledger_transaction_markers",
-                type: "ledger_transaction_marker_manifest_classification",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ledger_transaction_markers_transaction_type_is_most_specifi~",
-                table: "ledger_transaction_markers",
-                columns: new[] { "transaction_type", "is_most_specific", "state_version" },
-                filter: "discriminator = 'transaction_type'");
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropIndex(
-                name: "IX_ledger_transaction_markers_transaction_type_is_most_specifi~",
-                table: "ledger_transaction_markers");
-
-            migrationBuilder.DropColumn(
-                name: "is_most_specific",
-                table: "ledger_transaction_markers");
-
-            migrationBuilder.DropColumn(
-                name: "transaction_type",
-                table: "ledger_transaction_markers");
-        }
+        RuleFor(x => x.Class)
+            .IsInEnum();
     }
 }

@@ -90,58 +90,108 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines TransactionType
+    /// StreamTransactionsRequestAllOfManifestClassFilter
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum TransactionType
+    [DataContract(Name = "StreamTransactionsRequest_allOf_manifest_class_filter")]
+    public partial class StreamTransactionsRequestAllOfManifestClassFilter : IEquatable<StreamTransactionsRequestAllOfManifestClassFilter>
     {
-        /// <summary>
-        /// Enum General for value: General
-        /// </summary>
-        [EnumMember(Value = "General")]
-        General = 1,
 
         /// <summary>
-        /// Enum Transfer for value: Transfer
+        /// Gets or Sets Class
         /// </summary>
-        [EnumMember(Value = "Transfer")]
-        Transfer = 2,
+        [DataMember(Name = "class", IsRequired = true, EmitDefaultValue = true)]
+        public ManifestClass Class { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamTransactionsRequestAllOfManifestClassFilter" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected StreamTransactionsRequestAllOfManifestClassFilter() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamTransactionsRequestAllOfManifestClassFilter" /> class.
+        /// </summary>
+        /// <param name="_class">_class (required).</param>
+        /// <param name="matchOnlyMostSpecific">matchOnlyMostSpecific (default to false).</param>
+        public StreamTransactionsRequestAllOfManifestClassFilter(ManifestClass _class = default(ManifestClass), bool matchOnlyMostSpecific = false)
+        {
+            this.Class = _class;
+            this.MatchOnlyMostSpecific = matchOnlyMostSpecific;
+        }
 
         /// <summary>
-        /// Enum ValidatorStake for value: ValidatorStake
+        /// Gets or Sets MatchOnlyMostSpecific
         /// </summary>
-        [EnumMember(Value = "ValidatorStake")]
-        ValidatorStake = 3,
+        [DataMember(Name = "match_only_most_specific", EmitDefaultValue = true)]
+        public bool MatchOnlyMostSpecific { get; set; }
 
         /// <summary>
-        /// Enum ValidatorUnstake for value: ValidatorUnstake
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "ValidatorUnstake")]
-        ValidatorUnstake = 4,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class StreamTransactionsRequestAllOfManifestClassFilter {\n");
+            sb.Append("  Class: ").Append(Class).Append("\n");
+            sb.Append("  MatchOnlyMostSpecific: ").Append(MatchOnlyMostSpecific).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum ValidatorClaim for value: ValidatorClaim
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "ValidatorClaim")]
-        ValidatorClaim = 5,
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum AccountDepositSettingsUpdate for value: AccountDepositSettingsUpdate
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "AccountDepositSettingsUpdate")]
-        AccountDepositSettingsUpdate = 6,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as StreamTransactionsRequestAllOfManifestClassFilter);
+        }
 
         /// <summary>
-        /// Enum PoolContribution for value: PoolContribution
+        /// Returns true if StreamTransactionsRequestAllOfManifestClassFilter instances are equal
         /// </summary>
-        [EnumMember(Value = "PoolContribution")]
-        PoolContribution = 7,
+        /// <param name="input">Instance of StreamTransactionsRequestAllOfManifestClassFilter to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(StreamTransactionsRequestAllOfManifestClassFilter input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.Class == input.Class ||
+                    this.Class.Equals(input.Class)
+                ) && 
+                (
+                    this.MatchOnlyMostSpecific == input.MatchOnlyMostSpecific ||
+                    this.MatchOnlyMostSpecific.Equals(input.MatchOnlyMostSpecific)
+                );
+        }
 
         /// <summary>
-        /// Enum PoolRedemption for value: PoolRedemption
+        /// Gets the hash code
         /// </summary>
-        [EnumMember(Value = "PoolRedemption")]
-        PoolRedemption = 8
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Class.GetHashCode();
+                hashCode = (hashCode * 59) + this.MatchOnlyMostSpecific.GetHashCode();
+                return hashCode;
+            }
+        }
 
     }
 

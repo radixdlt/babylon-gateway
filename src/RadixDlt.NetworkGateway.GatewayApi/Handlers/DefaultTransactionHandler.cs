@@ -183,23 +183,23 @@ internal class DefaultTransactionHandler : ITransactionHandler
         request.AccountsWithManifestOwnerMethodCalls?.ForEach(a => searchCriteria.AccountsWithManifestOwnerMethodCalls.Add((EntityAddress)a));
         request.AccountsWithoutManifestOwnerMethodCalls?.ForEach(a => searchCriteria.AccountsWithoutManifestOwnerMethodCalls.Add((EntityAddress)a));
 
-        searchCriteria.TransactionTypeFilter = request.TransactionTypeFilter == null
+        searchCriteria.ManifestClassFilter = request.ManifestClassFilter == null
             ? null
-            : new TransactionTypeFilter
+            : new ManifestClassFilter
             {
-                Type = request.TransactionTypeFilter.Type switch
+                Class = request.ManifestClassFilter.Class switch
                 {
-                    GatewayModel.TransactionType.General => TransactionType.General,
-                    GatewayModel.TransactionType.Transfer => TransactionType.Transfer,
-                    GatewayModel.TransactionType.ValidatorStake => TransactionType.ValidatorStake,
-                    GatewayModel.TransactionType.ValidatorUnstake => TransactionType.ValidatorUnstake,
-                    GatewayModel.TransactionType.ValidatorClaim => TransactionType.ValidatorClaim,
-                    GatewayModel.TransactionType.AccountDepositSettingsUpdate => TransactionType.AccountDepositSettingsUpdate,
-                    GatewayModel.TransactionType.PoolContribution => TransactionType.PoolContribution,
-                    GatewayModel.TransactionType.PoolRedemption => TransactionType.PoolRedemption,
-                    _ => throw new UnreachableException($"Didn't expect {request.TransactionTypeFilter.Type} value"),
+                    GatewayModel.ManifestClass.General => ManifestClass.General,
+                    GatewayModel.ManifestClass.Transfer => ManifestClass.Transfer,
+                    GatewayModel.ManifestClass.ValidatorStake => ManifestClass.ValidatorStake,
+                    GatewayModel.ManifestClass.ValidatorUnstake => ManifestClass.ValidatorUnstake,
+                    GatewayModel.ManifestClass.ValidatorClaim => ManifestClass.ValidatorClaim,
+                    GatewayModel.ManifestClass.AccountDepositSettingsUpdate => ManifestClass.AccountDepositSettingsUpdate,
+                    GatewayModel.ManifestClass.PoolContribution => ManifestClass.PoolContribution,
+                    GatewayModel.ManifestClass.PoolRedemption => ManifestClass.PoolRedemption,
+                    _ => throw new UnreachableException($"Didn't expect {request.ManifestClassFilter.Class} value"),
                 },
-                MatchOnlyMostSpecificType = request.TransactionTypeFilter.MatchOnlyMostSpecific,
+                MatchOnlyMostSpecificType = request.ManifestClassFilter.MatchOnlyMostSpecific,
             };
 
         var transactionsPageRequest = new TransactionStreamPageRequest(

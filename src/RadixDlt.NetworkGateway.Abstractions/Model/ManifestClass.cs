@@ -64,9 +64,14 @@
 
 namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-public class TransactionTypeFilter
+public enum ManifestClass
 {
-    public TransactionType Type { get; set; }
-
-    public bool MatchOnlyMostSpecificType { get; set; }
+    General,
+    Transfer,
+    ValidatorStake,
+    ValidatorUnstake,
+    ValidatorClaim,
+    AccountDepositSettingsUpdate,
+    PoolContribution,
+    PoolRedemption,
 }

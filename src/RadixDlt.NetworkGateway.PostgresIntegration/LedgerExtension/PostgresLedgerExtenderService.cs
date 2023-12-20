@@ -300,13 +300,13 @@ UPDATE pending_transactions
 
                         for (var i = 0; i < manifestSummary.classification.Length; ++i)
                         {
-                            var transactionType = manifestSummary.classification[i].ToModel();
+                            var manifestClass = manifestSummary.classification[i].ToModel();
 
-                            ledgerTransactionMarkersToAdd.Add(new TransactionTypeMarker
+                            ledgerTransactionMarkersToAdd.Add(new ManifestClassMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
-                                TransactionType = transactionType,
+                                ManifestClass = manifestClass,
                                 IsMostSpecific = i == 0,
                             });
                         }

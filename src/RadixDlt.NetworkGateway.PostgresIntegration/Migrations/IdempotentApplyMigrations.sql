@@ -1080,39 +1080,39 @@ START TRANSACTION;
 
 DO $EF$
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
-    CREATE TYPE ledger_transaction_marker_manifest_classification AS ENUM ('general', 'transfer', 'validator_stake', 'validator_unstake', 'validator_claim', 'account_deposit_settings_update', 'pool_contribution', 'pool_redemption');
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231220145023_AddManifestClassMarkerType') THEN
+    CREATE TYPE ledger_transaction_marker_manifest_class AS ENUM ('general', 'transfer', 'validator_stake', 'validator_unstake', 'validator_claim', 'account_deposit_settings_update', 'pool_contribution', 'pool_redemption');
     ALTER TYPE ledger_transaction_marker_operation_type ADD VALUE 'account_owner_method_call';
-    ALTER TYPE ledger_transaction_marker_type ADD VALUE 'transaction_type';
+    ALTER TYPE ledger_transaction_marker_type ADD VALUE 'manifest_class';
     END IF;
 END $EF$;
 
 DO $EF$
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231220145023_AddManifestClassMarkerType') THEN
     ALTER TABLE ledger_transaction_markers ADD is_most_specific boolean NULL;
     END IF;
 END $EF$;
 
 DO $EF$
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
-    ALTER TABLE ledger_transaction_markers ADD transaction_type ledger_transaction_marker_manifest_classification NULL;
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231220145023_AddManifestClassMarkerType') THEN
+    ALTER TABLE ledger_transaction_markers ADD manifest_class ledger_transaction_marker_manifest_class NULL;
     END IF;
 END $EF$;
 
 DO $EF$
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
-    CREATE INDEX "IX_ledger_transaction_markers_transaction_type_is_most_specifi~" ON ledger_transaction_markers (transaction_type, is_most_specific, state_version) WHERE discriminator = 'transaction_type';
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231220145023_AddManifestClassMarkerType') THEN
+    CREATE INDEX "IX_ledger_transaction_markers_manifest_class_is_most_specific_~" ON ledger_transaction_markers (manifest_class, is_most_specific, state_version) WHERE discriminator = 'manifest_class';
     END IF;
 END $EF$;
 
 DO $EF$
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231218150147_NewTransactionTypeMarker') THEN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231220145023_AddManifestClassMarkerType') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-    VALUES ('20231218150147_NewTransactionTypeMarker', '7.0.11');
+    VALUES ('20231220145023_AddManifestClassMarkerType', '7.0.11');
     END IF;
 END $EF$;
 COMMIT;

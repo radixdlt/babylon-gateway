@@ -115,8 +115,8 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
             .NotNull()
             .SetValidator(radixAddressValidator);
 
-        RuleFor(x => x.TransactionTypeFilter)
-            .SetValidator(new TransactionTypeFilterValidator());
+        RuleFor(x => x.ManifestClassFilter)
+            .SetValidator(new ManifestClassFilterValidator());
 
         RuleForEach(x => x.EventsFilter)
             .NotNull()

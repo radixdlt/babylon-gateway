@@ -62,16 +62,52 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.EntityFrameworkCore.Migrations;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+#nullable disable
 
-internal class TransactionTypeFilterValidator : AbstractValidator<StreamTransactionsRequestAllOfTransactionTypeFilter>
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    public TransactionTypeFilterValidator()
+    /// <inheritdoc />
+    public partial class AddManifestClassTransactionMarker : Migration
     {
-        RuleFor(x => x.Type)
-            .IsInEnum();
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<bool>(
+                name: "is_most_specific",
+                table: "ledger_transaction_markers",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.AddColumn<LedgerTransactionMarkerManifestClass>(
+                name: "manifest_class",
+                table: "ledger_transaction_markers",
+                type: "ledger_transaction_marker_manifest_class",
+                nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_manifest_class_is_most_specific_~",
+                table: "ledger_transaction_markers",
+                columns: new[] { "manifest_class", "is_most_specific", "state_version" },
+                filter: "discriminator = 'manifest_class'");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_ledger_transaction_markers_manifest_class_is_most_specific_~",
+                table: "ledger_transaction_markers");
+
+            migrationBuilder.DropColumn(
+                name: "is_most_specific",
+                table: "ledger_transaction_markers");
+
+            migrationBuilder.DropColumn(
+                name: "manifest_class",
+                table: "ledger_transaction_markers");
+        }
     }
 }

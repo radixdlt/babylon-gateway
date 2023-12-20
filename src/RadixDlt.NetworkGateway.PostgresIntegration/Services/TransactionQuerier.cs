@@ -273,28 +273,28 @@ internal class TransactionQuerier : ITransactionQuerier
             }
         }
 
-        if (request.SearchCriteria.TransactionTypeFilter != null)
+        if (request.SearchCriteria.ManifestClassFilter != null)
         {
             userKindFilterImplicitlyApplied = true;
 
-            var transactionType = request.SearchCriteria.TransactionTypeFilter.Type switch
+            var manifestClass = request.SearchCriteria.ManifestClassFilter.Class switch
             {
-                TransactionType.General => LedgerTransactionMarkerManifestClassification.General,
-                TransactionType.Transfer => LedgerTransactionMarkerManifestClassification.Transfer,
-                TransactionType.ValidatorStake => LedgerTransactionMarkerManifestClassification.ValidatorStake,
-                TransactionType.ValidatorUnstake => LedgerTransactionMarkerManifestClassification.ValidatorUnstake,
-                TransactionType.ValidatorClaim => LedgerTransactionMarkerManifestClassification.ValidatorClaim,
-                TransactionType.AccountDepositSettingsUpdate => LedgerTransactionMarkerManifestClassification.AccountDepositSettingsUpdate,
-                TransactionType.PoolContribution => LedgerTransactionMarkerManifestClassification.PoolContribution,
-                TransactionType.PoolRedemption => LedgerTransactionMarkerManifestClassification.PoolRedemption,
-                _ => throw new UnreachableException($"Didn't expect {request.SearchCriteria.TransactionTypeFilter.Type} value"),
+                ManifestClass.General => LedgerTransactionMarkerManifestClass.General,
+                ManifestClass.Transfer => LedgerTransactionMarkerManifestClass.Transfer,
+                ManifestClass.ValidatorStake => LedgerTransactionMarkerManifestClass.ValidatorStake,
+                ManifestClass.ValidatorUnstake => LedgerTransactionMarkerManifestClass.ValidatorUnstake,
+                ManifestClass.ValidatorClaim => LedgerTransactionMarkerManifestClass.ValidatorClaim,
+                ManifestClass.AccountDepositSettingsUpdate => LedgerTransactionMarkerManifestClass.AccountDepositSettingsUpdate,
+                ManifestClass.PoolContribution => LedgerTransactionMarkerManifestClass.PoolContribution,
+                ManifestClass.PoolRedemption => LedgerTransactionMarkerManifestClass.PoolRedemption,
+                _ => throw new UnreachableException($"Didn't expect {request.SearchCriteria.ManifestClassFilter.Class} value"),
             };
 
             searchQuery = searchQuery
                 .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                .OfType<TransactionTypeMarker>()
-                .Where(ttm => ttm.TransactionType == transactionType)
-                .Where(ttm => (request.SearchCriteria.TransactionTypeFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.TransactionTypeFilter.MatchOnlyMostSpecificType)
+                .OfType<ManifestClassMarker>()
+                .Where(ttm => ttm.ManifestClass == manifestClass)
+                .Where(ttm => (request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType)
                 .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
                 .Select(eltm => eltm.StateVersion);
         }

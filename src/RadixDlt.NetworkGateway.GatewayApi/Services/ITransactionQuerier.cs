@@ -119,5 +119,5 @@ public class TransactionStreamPageRequestSearchCriteria
 
     public List<EntityAddress> AccountsWithManifestOwnerMethodCalls { get; set; } = new();
 
-    public TransactionTypeFilter? TransactionTypeFilter { get; set; }
+    public ManifestClassFilter? ManifestClassFilter { get; set; }
 }

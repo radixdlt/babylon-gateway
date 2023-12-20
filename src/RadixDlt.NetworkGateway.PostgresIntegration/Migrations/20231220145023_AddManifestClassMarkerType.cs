@@ -70,7 +70,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     /// <inheritdoc />
-    public partial class NewTransactionTypeMarker : Migration
+    public partial class AddManifestClassMarkerType : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -80,10 +80,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:account_resource_preference_rule", "allowed,disallowed")
                 .Annotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_manifest_classification", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,transaction_type")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,manifest_class")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
                 .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
@@ -141,10 +141,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .OldAnnotation("Npgsql:Enum:account_resource_preference_rule", "allowed,disallowed")
                 .OldAnnotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker")
                 .OldAnnotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
-                .OldAnnotation("Npgsql:Enum:ledger_transaction_marker_manifest_classification", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
+                .OldAnnotation("Npgsql:Enum:ledger_transaction_marker_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .OldAnnotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call")
                 .OldAnnotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change")
-                .OldAnnotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,transaction_type")
+                .OldAnnotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,manifest_class")
                 .OldAnnotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .OldAnnotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
                 .OldAnnotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")

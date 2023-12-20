@@ -169,7 +169,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerEventType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOperationType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerManifestClassification>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerManifestClass>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PackageVmType>();
         modelBuilder.HasPostgresEnum<PendingTransactionPayloadLedgerStatus>();
@@ -242,7 +242,7 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)
             .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
             .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress)
-            .HasValue<TransactionTypeMarker>(LedgerTransactionMarkerType.TransactionType)
+            .HasValue<ManifestClassMarker>(LedgerTransactionMarkerType.ManifestClass)
             .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity);
 
         modelBuilder
@@ -270,9 +270,9 @@ internal abstract class CommonDbContext : DbContext
             .HasFilter("discriminator = 'affected_global_entity'");
 
         modelBuilder
-            .Entity<TransactionTypeMarker>()
-            .HasIndex(e => new { TransactionType = e.TransactionType, e.IsMostSpecific, e.StateVersion })
-            .HasFilter("discriminator = 'transaction_type'");
+            .Entity<ManifestClassMarker>()
+            .HasIndex(e => new { TransactionType = e.ManifestClass, e.IsMostSpecific, e.StateVersion })
+            .HasFilter("discriminator = 'manifest_class'");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)

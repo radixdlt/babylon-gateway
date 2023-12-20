@@ -69,7 +69,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal enum LedgerTransactionMarkerManifestClassification
+internal enum LedgerTransactionMarkerManifestClass
 {
     General,
     Transfer,
@@ -133,10 +133,10 @@ internal class EventLedgerTransactionMarker : LedgerTransactionMarker
     public TokenAmount Quantity { get; set; }
 }
 
-internal class TransactionTypeMarker : LedgerTransactionMarker
+internal class ManifestClassMarker : LedgerTransactionMarker
 {
-    [Column("transaction_type")]
-    public LedgerTransactionMarkerManifestClassification TransactionType { get; set; }
+    [Column("manifest_class")]
+    public LedgerTransactionMarkerManifestClass ManifestClass { get; set; }
 
     [Column("is_most_specific")]
     public bool IsMostSpecific { get; set; }

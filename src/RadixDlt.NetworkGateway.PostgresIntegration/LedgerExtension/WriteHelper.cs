@@ -299,7 +299,7 @@ internal class WriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY ledger_transaction_markers (id, state_version, discriminator, event_type, entity_id, resource_entity_id, quantity, operation_type, origin_type, transaction_type, is_most_specific) FROM STDIN (FORMAT BINARY)",
+                "COPY ledger_transaction_markers (id, state_version, discriminator, event_type, entity_id, resource_entity_id, quantity, operation_type, origin_type, manifest_class, is_most_specific) FROM STDIN (FORMAT BINARY)",
                 token);
 
         foreach (var e in entities)
@@ -353,14 +353,14 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     break;
-                case TransactionTypeMarker ttm:
+                case ManifestClassMarker ttm:
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(ttm.TransactionType, "ledger_transaction_marker_manifest_classification", token);
+                    await writer.WriteAsync(ttm.ManifestClass, "ledger_transaction_marker_manifest_class", token);
                     await writer.WriteAsync(ttm.IsMostSpecific, NpgsqlDbType.Boolean, token);
                     break;
                 default:

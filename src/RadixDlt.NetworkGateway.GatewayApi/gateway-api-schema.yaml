@@ -1656,7 +1656,7 @@ components:
     # Common Response Types
     #
 
-    TransactionType:
+    ManifestClass:
       type: string
       enum:
         - General
@@ -2869,13 +2869,13 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/Address"
-            transaction_type_filter:
+            manifest_class_filter:
               type: object
               required:
-                - type
+                - class
               properties:
-                type:
-                  $ref: "#/components/schemas/TransactionType"
+                class:
+                  $ref: "#/components/schemas/ManifestClass"
                 match_only_most_specific:
                   type: boolean
                   default: false
