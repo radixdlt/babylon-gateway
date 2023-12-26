@@ -69,47 +69,16 @@ using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
-/// <summary>
-/// These should probably match MempoolOptions in the DataAggregator.
-/// </summary>
-public sealed class CoreApiIntegrationOptions
+public sealed class PostgresIntegrationOptions
 {
-    [ConfigurationKeyName("SubmitTransactionNodeRequestTimeoutMilliseconds")]
-    public long SubmitTransactionNodeRequestTimeoutMilliseconds { get; set; } = 4000;
-
-    public TimeSpan SubmitTransactionTimeout => TimeSpan.FromMilliseconds(SubmitTransactionNodeRequestTimeoutMilliseconds);
-
-    [ConfigurationKeyName("StopResubmittingAfterSeconds")]
-    public long StopResubmittingAfterSeconds { get; set; } = 5 * 60;
-
-    public TimeSpan StopResubmittingAfter => TimeSpan.FromSeconds(StopResubmittingAfterSeconds);
-
-    [ConfigurationKeyName("MaxSubmissionAttempts")]
-    public int MaxSubmissionAttempts { get; set; } = 5;
-
-    [ConfigurationKeyName("BaseDelayBetweenResubmissionsSeconds")]
-    public long BaseDelayBetweenResubmissionsSeconds { get; set; } = 10;
-
-    public TimeSpan BaseDelayBetweenResubmissions => TimeSpan.FromSeconds(BaseDelayBetweenResubmissionsSeconds);
-
-    [ConfigurationKeyName("ResubmissionDelayBackoffExponent")]
-    public double ResubmissionDelayBackoffExponent { get; set; } = 2;
-
-    [ConfigurationKeyName("TransactionBalanceChangesMaxDegreeOfParallelism")]
-    public int TransactionBalanceChangesMaxDegreeOfParallelism { get; set; } = 8;
-
     [ConfigurationKeyName("MaxTransientErrorRetryCount")]
     public int MaxTransientErrorRetryCount { get; set; } = 3;
 }
 
-internal class CoreApiIntegrationOptionsValidator : AbstractOptionsValidator<CoreApiIntegrationOptions>
+internal class PostgresIntegrationOptionsValidator : AbstractOptionsValidator<PostgresIntegrationOptions>
 {
-    public CoreApiIntegrationOptionsValidator()
+    public PostgresIntegrationOptionsValidator()
     {
-        RuleFor(x => x.SubmitTransactionTimeout).GreaterThan(TimeSpan.Zero);
-        RuleFor(x => x.StopResubmittingAfterSeconds).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.MaxSubmissionAttempts).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.TransactionBalanceChangesMaxDegreeOfParallelism).GreaterThan(0);
         RuleFor(x => x.MaxTransientErrorRetryCount).GreaterThanOrEqualTo(0);
     }
 }

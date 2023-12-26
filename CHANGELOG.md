@@ -1,7 +1,9 @@
 ## 1.2.4
 Release Date: _unreleased_
 
-- extended validator's data returned from `/state/validators/list`. Added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
+- Extended validator's data returned from `/state/validators/list`: added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
+- Enable retries on transient database connectivity issues in gateway api.
+- Enable retries on core api calls in gateway api.
 
 ## 1.2.3
 Release Date: 19.12.2023
