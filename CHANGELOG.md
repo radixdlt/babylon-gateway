@@ -1,10 +1,12 @@
 ## 1.2.4
 Release Date: _unreleased_
-- enable retries on transient database connectivity issues in gateway api.
-- enable retries on core api calls in gateway api.
+
+- Extended validator's data returned from `/state/validators/list`: added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
+- Enable retries on transient database connectivity issues in gateway api.
+- Enable retries on core api calls in gateway api.
 
 ## 1.2.3
-Release Date: 13.12.2023
+Release Date: 19.12.2023
 
 - Fixed exception thrown on empty validator set in the `/state/validator/list` endpoint.
 - `524` status code returned instead of `500` if request takes longer than configured timeout.
