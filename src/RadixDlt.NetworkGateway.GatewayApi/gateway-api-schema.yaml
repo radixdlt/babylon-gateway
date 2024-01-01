@@ -2929,6 +2929,7 @@ components:
               $ref: "#/components/schemas/StateEntityDetailsOptIns"
             addresses:
               type: array
+              description: limited to max 100 items.
               items:
                 $ref: "#/components/schemas/Address"
             aggregation_level:
@@ -3458,6 +3459,7 @@ components:
               $ref: "#/components/schemas/Address"
             non_fungible_ids:
               type: array
+              description: limited to max 100 items.
               items:
                 $ref: "#/components/schemas/NonFungibleId"
       example:
@@ -3506,6 +3508,7 @@ components:
               $ref: "#/components/schemas/Address"
             non_fungible_ids:
               type: array
+              description: limited to max 100 items.
               items:
                 $ref: "#/components/schemas/NonFungibleId"
       example:
@@ -3556,6 +3559,7 @@ components:
               $ref: "#/components/schemas/Address"
             keys:
               type: array
+              description: limited to max 100 items.
               items:
                 $ref: "#/components/schemas/StateKeyValueStoreDataRequestKeyItem"
       example:
