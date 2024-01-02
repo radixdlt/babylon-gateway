@@ -1,3 +1,8 @@
+## 2.0.0
+Release Date: _unreleased_
+
+TBA
+
 ## 1.2.4
 Release Date: _unreleased_
 
