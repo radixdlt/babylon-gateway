@@ -74,6 +74,7 @@ internal class StateEntityDetailsRequestValidator : AbstractValidator<GatewayMod
     public StateEntityDetailsRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator,
         StateEntityDetailsOptInsValidator optInsValidator)
     {
         RuleFor(x => x.AtLedgerState)
@@ -89,7 +90,7 @@ internal class StateEntityDetailsRequestValidator : AbstractValidator<GatewayMod
 
                 RuleForEach(x => x.Addresses)
                     .NotNull()
-                    .RadixAddress();
+                    .SetValidator(radixAddressValidator);
             });
 
         RuleFor(x => x.OptIns)

@@ -64,7 +64,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
@@ -107,14 +109,24 @@ public static class GatewayApiBuilderExtensions
             .AddNpgsqlDataSourceHolder<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)
             .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
             {
-                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadOnlyDbContext>>().NpgsqlDataSource);
+                var maxTransientErrorRetryCount = serviceProvider.GetRequiredService<IOptions<PostgresIntegrationOptions>>().Value.MaxTransientErrorRetryCount;
+
+                options.UseNpgsql(
+                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadOnlyDbContext>>().NpgsqlDataSource,
+                    npgsqlOptions => npgsqlOptions.EnableRetryOnFailure(maxRetryCount: maxTransientErrorRetryCount)
+                );
                 options.AddInterceptors(serviceProvider.GetRequiredService<MetricsInterceptor>());
                 options.AddInterceptors(new ForceDistinctInterceptor());
             })
             .AddNpgsqlDataSourceHolder<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
             .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
             {
-                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);
+                var maxTransientErrorRetryCount = serviceProvider.GetRequiredService<IOptions<PostgresIntegrationOptions>>().Value.MaxTransientErrorRetryCount;
+
+                options.UseNpgsql(
+                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource,
+                    npgsqlOptions => npgsqlOptions.EnableRetryOnFailure(maxRetryCount: maxTransientErrorRetryCount)
+                );
                 options.AddInterceptors(serviceProvider.GetRequiredService<MetricsInterceptor>());
                 options.AddInterceptors(new ForceDistinctInterceptor());
             });

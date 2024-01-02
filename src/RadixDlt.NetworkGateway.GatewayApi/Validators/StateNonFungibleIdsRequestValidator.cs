@@ -74,11 +74,12 @@ internal class StateNonFungibleIdsRequestValidator : AbstractValidator<GatewayMo
     public StateNonFungibleIdsRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator,
         PaginableRequestValidator paginableRequestValidator)
     {
         RuleFor(x => x.ResourceAddress)
             .NotEmpty()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);

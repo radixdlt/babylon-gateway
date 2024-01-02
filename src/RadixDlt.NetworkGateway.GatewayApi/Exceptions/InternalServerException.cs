@@ -84,17 +84,6 @@ public sealed class InternalServerException : KnownGatewayErrorException
         );
     }
 
-    public static InternalServerException OfRequestTimeoutException(Exception exception, string traceId)
-    {
-        var message = $"Request timed out. If reporting this issue, please include TraceId={traceId}";
-
-        return new InternalServerException(
-            new GatewayModel.InternalServerError(exception.GetType().Name, exception.Message),
-            message,
-            exception.Message
-        );
-    }
-
     public static InternalServerException OfHiddenException(Exception exception, string traceId)
     {
         var message = $"An unexpected error occurred handling the request. If reporting this issue, please include TraceId={traceId}";

@@ -8,9 +8,9 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+      - uses: RDXWorks-actions/checkout@main
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2
+        uses: RDXWorks-actions/setup-dotnet@main
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Build linux binaries
@@ -32,7 +32,7 @@ jobs:
           mv ./gateway-api.zip gateway-api-${{ github.event.release.tag_name }}-linux-x64.zip
           mv ./database-migrations.zip database-migrations-${{ github.event.release.tag_name }}-linux-x64.zip
       - name: Upload DataAggreagtor zip
-        uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+        uses: RDXWorks-actions/action-gh-release@master
         with:
           files: |
             data-aggregator-${{ github.event.release.tag_name }}-linux-x64.zip
@@ -44,10 +44,10 @@ jobs:
     outputs:
       version-suffix: ${{ steps.setup_tags.outputs.version-suffix }}
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - name: Get rele ase
         id: get_release
-        uses: bruceadams/get-release@f589ce0779c7bef1faf175f7488c972eb47dc046
+        uses: RDXWorks-actions/get-release@main
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Setup tags for docker image
@@ -57,7 +57,7 @@ jobs:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
       - name: Publish Gateway Settings
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        uses: RDXWorks-actions/upload-artifact@main
         with:
           path: Directory.Build.props
           name: build_props
@@ -214,7 +214,7 @@ jobs:
       - docker-gateway-api-dockerhub
       - docker-gateway-api-dockerhub-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: babylon-ng-gateway-api
       image_tag: ${{ needs.setup-tags.outputs.version-suffix }}
       tag_suffix_1: amd64
@@ -230,7 +230,7 @@ jobs:
       - docker-data-aggregator-dockerhub
       - docker-data-aggregator-dockerhub-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: babylon-ng-data-aggregator
       image_tag: ${{ needs.setup-tags.outputs.version-suffix }}
       tag_suffix_1: amd64
@@ -238,7 +238,7 @@ jobs:
       aws_dockerhub_secret: github-actions/rdxworks/dockerhub-images/release-credentials
     secrets:
       role-to-assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
-  
+
   join-migrations-images:
     name: Migration
     needs:
@@ -246,7 +246,7 @@ jobs:
       - docker-database-migrations-dockerhub
       - docker-database-migrations-dockerhub-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: babylon-ng-database-migrations
       image_tag: ${{ needs.setup-tags.outputs.version-suffix }}
       tag_suffix_1: amd64
@@ -254,7 +254,7 @@ jobs:
       aws_dockerhub_secret: github-actions/rdxworks/dockerhub-images/release-credentials
     secrets:
       role-to-assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
-      
+
   snyk-container-monitor:
     name: Snyk monitor container
     runs-on: ubuntu-latest
@@ -298,7 +298,7 @@ jobs:
       contents: read
       deployments: write
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
         with:
           role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
@@ -308,13 +308,13 @@ jobs:
           secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
           parse_json: true
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
+        uses: RDXWorks-actions/setup-dotnet@main
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Install dependencies
         run: dotnet restore
       - name: Enable Snyk online monitoring to check for vulnerabilities
-        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        uses: RDXWorks-actions/snyk-actions/dotnet@master
         with:
           args: --all-projects --org=${{ env.SNYK_NETWORK_ORG_ID }} --target-reference=${{ github.ref_name }}
           command: monitor
@@ -324,7 +324,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
         with:
           role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
@@ -334,17 +334,17 @@ jobs:
           secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
           parse_json: true
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
+        uses: RDXWorks-actions/setup-dotnet@main
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Install dependencies
         run: dotnet restore
       - name: Generate SBOM
-        uses: snyk/actions/node@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        uses: RDXWorks-actions/snyk-actions/node@master
         with:
           args: --all-projects --org=${{ env.SNYK_NETWORK_ORG_ID }} --format=cyclonedx1.4+json --json-file-output sbom.json
           command: sbom
       - name: Upload SBOM
-        uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+        uses: RDXWorks-actions/action-gh-release@master
         with:
           files: sbom.json

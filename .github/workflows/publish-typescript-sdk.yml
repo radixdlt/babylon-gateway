@@ -19,9 +19,9 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "publish-gateway-sdk-npmjs"
@@ -29,7 +29,7 @@ jobs:
           secret_name: "github-actions/radixdlt/babylon-gateway/npm-publishing-secret"
           parse_json: true
       - name: Use Node.js
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516
+        uses: RDXWorks-actions/setup-node@main
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
@@ -52,7 +52,7 @@ jobs:
           github_action_name: ${{ github.event.action}}
 
       - name: Update package.json version
-        uses: jossef/action-set-json-field@2a0f7d953b580b828717daf4de7fafc7e4135e97
+        uses: RDXWorks-actions/action-set-json-field@master
         with:
           file: ./sdk/typescript/package.json
           field: version

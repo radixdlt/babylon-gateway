@@ -77,9 +77,4 @@ internal static class Extensions
     {
         return ruleBuilder.SetValidator(new HexValidator<T>(expectedLength));
     }
-
-    public static IRuleBuilderOptions<T, string?> RadixAddress<T>(this IRuleBuilder<T, string?> ruleBuilder, string? expectedHrp = null)
-    {
-        return ruleBuilder.SetValidator(new RadixAddressValidator<T>(expectedHrp));
-    }
 }

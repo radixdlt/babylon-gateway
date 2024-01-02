@@ -79,6 +79,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -759,18 +760,23 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
             .AnnotateMetricName("GetValidators")
             .ToListAsync(token);
 
-        var findEpochSubquery = _dbContext
+        var lastFinishedEpoch = await _dbContext
             .ValidatorActiveSetHistory
-            .AsQueryable()
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .OrderByDescending(e => e.FromStateVersion)
             .Take(1)
-            .Select(e => e.Epoch);
+            .Select(e => e.Epoch)
+            .FirstOrDefaultAsync(token);
+
+        if (lastFinishedEpoch == 0)
+        {
+            return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(0, null, new List<GatewayModel.ValidatorCollectionItem>()));
+        }
 
         var activeSetById = await _dbContext
             .ValidatorActiveSetHistory
             .Include(e => e.PublicKey)
-            .Where(e => e.Epoch == findEpochSubquery.First())
+            .Where(e => e.Epoch == lastFinishedEpoch)
             .AnnotateMetricName("GetValidatorActiveSet")
             .ToDictionaryAsync(e => e.PublicKey.ValidatorEntityId, token);
 
@@ -873,13 +879,17 @@ INNER JOIN LATERAL (
 
                 if (activeSetById.TryGetValue(v.Id, out var validatorActiveSetHistory))
                 {
+                    var stake = validatorActiveSetHistory.Stake.ToString();
+                    var stakePercentage = (validatorActiveSetHistory.Stake * _tokenAmount100 / totalStake).ToString();
+
                     activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(
-                        validatorActiveSetHistory.Stake.ToString(),
-                        double.Parse((validatorActiveSetHistory.Stake * _tokenAmount100 / totalStake).ToString()),
+                        stake,
+                        double.Parse(stakePercentage, NumberFormatInfo.InvariantInfo),
                         validatorActiveSetHistory.PublicKey.ToGatewayPublicKey());
                 }
 
                 var details = validatorsDetails.Single(x => x.ValidatorId == v.Id);
+                var effectiveFeeFactor = ValidatorEffectiveFeeFactorProvider.ExtractFeeFactorFromValidatorState(details.State, ledgerState.Epoch);
 
                 return new GatewayModel.ValidatorCollectionItem(
                     v.Address,
@@ -901,7 +911,9 @@ INNER JOIN LATERAL (
                         vaultAddresses[v.PendingXrdWithdrawVault]),
                     new JRaw(details.State),
                     activeInEpoch,
-                    metadataById[v.Id]);
+                    metadataById[v.Id],
+                    effectiveFeeFactor
+                    );
             })
             .ToList();
 

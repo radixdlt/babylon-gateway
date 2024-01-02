@@ -924,6 +924,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("hrp_definition");
 
+                    b.Property<string>("NetworkHrpSuffix")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("network_hrp_suffix");
+
                     b.Property<byte>("NetworkId")
                         .HasColumnType("smallint")
                         .HasColumnName("network_id");

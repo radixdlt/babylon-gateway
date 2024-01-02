@@ -71,7 +71,10 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayModel.StreamTransactionsRequest>
 {
-    public StreamTransactionsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StreamTransactionsRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator)
     {
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
@@ -94,18 +97,18 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
 
         RuleForEach(x => x.ManifestAccountsWithdrawnFromFilter)
             .NotNull()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleForEach(x => x.ManifestAccountsDepositedIntoFilter)
             .NotNull()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleForEach(x => x.ManifestResourcesFilter)
             .NotNull()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleForEach(x => x.EventsFilter)
             .NotNull()
-            .SetValidator(new StreamTransactionsRequestEventItemValidator());
+            .SetValidator(new StreamTransactionsRequestEventItemValidator(radixAddressValidator));
     }
 }

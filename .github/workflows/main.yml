@@ -25,7 +25,7 @@ jobs:
       contents: read
       deployments: write
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
         with:
           role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
@@ -35,22 +35,22 @@ jobs:
           secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
           parse_json: true
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
+        uses: RDXWorks-actions/setup-dotnet@main
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Install dependencies
         run: dotnet restore
       - name: Run Snyk to check for deps vulnerabilities
-        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        uses: RDXWorks-actions/snyk-actions/dotnet@master
         with:
           args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=critical
       - name: Run Snyk to check for code vulnerabilities
-        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        uses: RDXWorks-actions/snyk-actions/dotnet@master
         with:
           args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=high
           command: code test
       - name: Generate SBOM # check SBOM can be generated but nothing is done with it
-        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        uses: RDXWorks-actions/snyk-actions/dotnet@master
         with:
           args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json --json-file-output sbom.json
           command: sbom
@@ -58,9 +58,9 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
+        uses: RDXWorks-actions/setup-dotnet@main
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Install dependencies
@@ -78,7 +78,7 @@ jobs:
       data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
       gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - name: Setup tags for docker image
         id: setup_tags
         uses: ./.github/actions/set-variables
@@ -86,7 +86,7 @@ jobs:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
       - name: Publish Gateway Settings
-        uses: actions/upload-artifact@v3
+        uses: RDXWorks-actions/upload-artifact@main
         with:
           path: Directory.Build.props
           name: build_props
@@ -113,7 +113,7 @@ jobs:
       scan_image: true
       snyk_target_ref: ${{ github.ref_name }}
       cache_tag_suffix: "AMD"
-  
+
   docker-database-migrations-private-arm:
     name: ARM Migration
     needs:
@@ -199,7 +199,7 @@ jobs:
       scan_image: true
       snyk_target_ref: ${{ github.ref_name }}
       cache_tag_suffix: "AMD"
-      
+
   docker-gateway-api-private-arm:
     name: ARM Gateway
     needs:
@@ -228,7 +228,7 @@ jobs:
       - docker-gateway-api-private
       - docker-gateway-api-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: private-babylon-ng-gateway-api
       image_tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
       tag_suffix_1: amd64
@@ -244,7 +244,7 @@ jobs:
       - docker-data-aggregator-private
       - docker-data-aggregator-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: private-babylon-ng-data-aggregator
       image_tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
       tag_suffix_1: amd64
@@ -252,7 +252,7 @@ jobs:
       aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
-  
+
   join-migrations-images:
     name: Migration
     needs:
@@ -260,7 +260,7 @@ jobs:
       - docker-database-migrations-private
       - docker-database-migrations-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
-    with: 
+    with:
       image_name: private-babylon-ng-database-migrations
       image_tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
       tag_suffix_1: amd64
@@ -285,7 +285,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
         with:
           role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
@@ -300,7 +300,7 @@ jobs:
           echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
       - name: Check if ci.env changed
         id: changed-files
-        uses: tj-actions/changed-files@db5dd7c176cf59a19ef6561bf1936f059dee4b74
+        uses: RDXWorks-actions/changed-files@main
         with:
           files: |
             deployment/ci.env
@@ -325,56 +325,6 @@ jobs:
                 }
             }'
 
-  ephemeral-deploy-and-benchmark:
-    runs-on: ubuntu-22.04
-    needs:
-      - docker-gateway-api-private
-      - docker-data-aggregator-private
-      - docker-database-migrations-private
-      - join-gateway-images
-      - join-aggregator-images
-      - join-migrations-images
-      - setup-tags
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-      - uses: ./.github/actions/fetch-secrets
-        with:
-          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
-          app_name: "babylon-gateway"
-          step_name: "ephemeral-deploy-and-benchmark"
-          secret_prefix: "JENKINS"
-          secret_name: "github-actions/radixdlt/babylon-gateway/jenkins-api-token"
-          parse_json: true
-      - name: Process ci.env
-        run: |
-          export $(grep -v '^#' ./deployment/ci.env | xargs)
-          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
-      - name: Check if ci.env changed
-        id: changed-files
-        uses: tj-actions/changed-files@db5dd7c176cf59a19ef6561bf1936f059dee4b74
-        with:
-          files: |
-            deployment/ci.env
-      - name: Deploy and run benchmark on an ephemeral network
-        uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
-        with:
-          jenkins_url: "${{ env.JENKINS_URL }}"
-          jenkins_user: ${{ env.JENKINS_USER }}
-          jenkins_token: ${{ env.JENKINS_TOKEN }}
-          job_name: "ephemeral-deployments/job/ephemeral-env-gateway-benchmark"
-          job_params: |
-            {
-              "gatewayDockerTag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
-              "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
-              "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
-              "postgresVersion": "${{ env.POSTGRES_VERSION }}"
-            }
-          job_timeout: "3600"
-
   deploy-pr:
     runs-on: ubuntu-22.04
     needs:
@@ -390,7 +340,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
         with:
           role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
@@ -436,7 +386,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
         with:
           role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
@@ -454,18 +404,17 @@ jobs:
           echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
           echo "POSTGRES_VERSION=$POSTGRES_VERSION" >> $GITHUB_ENV
       - name: Deploy and test on an ephemeral network
-        uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
+        uses: RDXWorks-actions/jenkins-job-trigger-action@master
         with:
           jenkins_url: "${{ env.JENKINS_URL }}"
           jenkins_user: ${{ env.JENKINS_USER }}
           jenkins_token: ${{ env.JENKINS_TOKEN }}
-          job_name: "ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
+          job_name: "babylon-testing/job/ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
           job_params: |
             {
-              "gatewayDockerTag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
-              "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
-              "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
-              "postgresVersion": "${{ env.POSTGRES_VERSION }}"
+              "RADIXDLT_GATEWAY_DOCKER_TAG": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
+              "RADIXDLT_NODE_DOCKER_TAG": "${{ env.FULLNODE_VERSION }}",
+              "RADIXDLT_POSTGRES_APP_VERSION": "${{ env.POSTGRES_VERSION }}"
             }
           job_timeout: "3600"
 
@@ -475,7 +424,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/actions/fetch-secrets
@@ -488,7 +437,7 @@ jobs:
           secret_name: "github-actions/common/sonar-token"
           parse_json: true
       - name: SonarScanner for .NET
-        uses: highbyte/sonarscan-dotnet@8410b6452e036aff2fb830831e508e723b8af60d
+        uses: RDXWorks-actions/sonarscan-dotnet@8410b6452e036aff2fb830831e508e723b8af60d
         with:
           sonarProjectKey: radixdlt_babylon-gateway
           sonarProjectName: babylon-gateway

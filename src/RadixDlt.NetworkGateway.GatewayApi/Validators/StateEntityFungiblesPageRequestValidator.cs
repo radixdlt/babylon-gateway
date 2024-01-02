@@ -75,11 +75,12 @@ internal class StateEntityFungiblesPageRequestValidator : AbstractValidator<Gate
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
         PaginableRequestValidator paginableRequestValidator,
+        RadixAddressValidator radixAddressValidator,
         StateEntityFungiblesPageRequestOptInsValidator entityFungiblesPageRequestOptInsValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.AggregationLevel)
             .IsInEnum();

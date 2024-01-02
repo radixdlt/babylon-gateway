@@ -69,16 +69,16 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StreamTransactionsRequestEventItemValidator : AbstractValidator<GatewayModel.StreamTransactionsRequestEventFilterItem>
 {
-    public StreamTransactionsRequestEventItemValidator()
+    public StreamTransactionsRequestEventItemValidator(RadixAddressValidator radixAddressValidator)
     {
         RuleFor(x => x.Event)
             .NotNull()
             .IsInEnum();
 
         RuleFor(x => x.EmitterAddress)
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.ResourceAddress)
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
     }
 }

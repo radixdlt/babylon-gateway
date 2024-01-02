@@ -72,6 +72,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -98,6 +99,8 @@ public static class OpenApiDocumentHandler
         var readResult = await new OpenApiStreamReader().ReadAsync(stream);
         var document = readResult.OpenApiDocument;
 
+        RemoveRedoclySpecificTags(document.Tags);
+
         document.Servers.Clear();
         document.Servers.Add(new OpenApiServer
         {
@@ -120,6 +123,25 @@ public static class OpenApiDocumentHandler
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
+    }
+
+    private static void RemoveRedoclySpecificTags(IList<OpenApiTag> tags)
+    {
+        var examplesTag = tags.Single(x => x.Name.Equals("Examples", StringComparison.InvariantCultureIgnoreCase));
+        var architectureTag = tags.Single(x => x.Name.Equals("Architecture", StringComparison.InvariantCultureIgnoreCase));
+        var conceptsTag = tags.Single(x => x.Name.Equals("Concepts", StringComparison.InvariantCultureIgnoreCase));
+
+        tags.Remove(examplesTag);
+        tags.Remove(architectureTag);
+        tags.Remove(conceptsTag);
+
+        var redoclyLinkTag = new OpenApiTag
+        {
+            Name = "Examples + More Docs",
+            Description = @"Please see the full API documentation in [ReDocly](https://radix-babylon-gateway-api.redoc.ly/) for details about the API abstractions and worked examples for many use cases.",
+        };
+
+        tags.Insert(1, redoclyLinkTag);
     }
 
     private static string OptionalReplace(string inputString, string pattern, string? replacement)

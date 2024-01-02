@@ -69,11 +69,14 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class TransactionCommittedDetailsRequestValidator : AbstractValidator<GatewayModel.TransactionCommittedDetailsRequest>
 {
-    public TransactionCommittedDetailsRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public TransactionCommittedDetailsRequestValidator(
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator
+        )
     {
         RuleFor(x => x.IntentHash)
             .NotNull()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
