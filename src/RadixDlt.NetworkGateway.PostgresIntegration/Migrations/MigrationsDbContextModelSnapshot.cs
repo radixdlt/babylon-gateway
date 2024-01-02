@@ -724,6 +724,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint[]")
                         .HasColumnName("affected_global_entities");
 
+                    b.Property<string>("BalanceChanges")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("balance_changes");
+
                     b.Property<DateTime>("CreatedTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_timestamp");

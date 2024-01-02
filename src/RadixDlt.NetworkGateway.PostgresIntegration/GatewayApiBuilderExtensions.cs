@@ -99,6 +99,7 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
             .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>()
             .AddScoped<IDapperWrapper, DapperWrapper>()
+            .AddScoped<ITransactionBalanceChangesService, TransactionBalanceChangesService>()
             .AddSingleton<MetricsInterceptor>();
 
         CustomTypes.EnsureConfigured();
