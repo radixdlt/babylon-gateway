@@ -15,7 +15,8 @@
 
 /**
  * A more specific intent status. See the description field for further information.
- * Note that `CommitPendingOutcomeUnknown` can either result in `CommittedSuccess` or `CommittedFailure`.
+Note that `CommitPendingOutcomeUnknown` can either result in `CommittedSuccess` or `CommittedFailure`.
+
  * @export
  */
 export const TransactionIntentStatus = {

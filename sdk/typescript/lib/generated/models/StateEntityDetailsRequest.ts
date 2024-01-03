@@ -51,7 +51,7 @@ export interface StateEntityDetailsRequest {
      */
     opt_ins?: StateEntityDetailsOptIns;
     /**
-     * 
+     * limited to max 100 items.
      * @type {Array<string>}
      * @memberof StateEntityDetailsRequest
      */

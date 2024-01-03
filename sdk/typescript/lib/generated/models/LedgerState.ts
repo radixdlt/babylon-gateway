@@ -15,7 +15,8 @@
 import { exists, mapValues } from '../runtime';
 /**
  * The ledger state against which the response was generated.
- * Can be used to detect if the Network Gateway is returning up-to-date information.
+Can be used to detect if the Network Gateway is returning up-to-date information.
+
  * @export
  * @interface LedgerState
  */
@@ -34,9 +35,10 @@ export interface LedgerState {
     state_version: number;
     /**
      * The proposer round timestamp of the consensus round when this transaction was committed to ledger.
-     * This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set.
-     * If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated
-     * information, or the network has stalled.
+This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set.
+If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated
+information, or the network has stalled.
+
      * @type {string}
      * @memberof LedgerState
      */

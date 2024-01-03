@@ -38,7 +38,7 @@ export interface StreamTransactionsOperationRequest {
 export class StreamApi extends runtime.BaseAPI {
 
     /**
-     * Returns transactions which have been committed to the ledger. 
+     * Returns transactions which have been committed to the ledger. [Check detailed documentation for brief explanation](#section/Using-the-streamtransactions-endpoint) 
      * Get Transactions Stream
      */
     async streamTransactionsRaw(requestParameters: StreamTransactionsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StreamTransactionsResponse>> {
@@ -64,7 +64,7 @@ export class StreamApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns transactions which have been committed to the ledger. 
+     * Returns transactions which have been committed to the ledger. [Check detailed documentation for brief explanation](#section/Using-the-streamtransactions-endpoint) 
      * Get Transactions Stream
      */
     async streamTransactions(requestParameters: StreamTransactionsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StreamTransactionsResponse> {

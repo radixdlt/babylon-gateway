@@ -39,7 +39,7 @@ export interface StateNonFungibleLocationRequest {
      */
     resource_address: string;
     /**
-     * 
+     * limited to max 100 items.
      * @type {Array<string>}
      * @memberof StateNonFungibleLocationRequest
      */

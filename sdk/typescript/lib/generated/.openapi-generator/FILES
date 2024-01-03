@@ -319,6 +319,9 @@ models/ValidatorCollection.ts
 models/ValidatorCollectionAllOf.ts
 models/ValidatorCollectionItem.ts
 models/ValidatorCollectionItemActiveInEpoch.ts
+models/ValidatorCollectionItemEffectiveFeeFactor.ts
+models/ValidatorCollectionItemEffectiveFeeFactorCurrent.ts
+models/ValidatorCollectionItemEffectiveFeeFactorPending.ts
 models/ValidatorUptimeCollection.ts
 models/ValidatorUptimeCollectionItem.ts
 models/ValidatorVaultItem.ts

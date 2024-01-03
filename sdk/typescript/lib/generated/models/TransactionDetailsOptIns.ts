@@ -75,8 +75,9 @@ export interface TransactionDetailsOptIns {
     affected_global_entities?: boolean;
     /**
      * if set to `true`, returns the fungible and non-fungible balance changes.
-     * 
-     * **Warning!** This opt-in might be missing for recently committed transactions, in that case a `null` value will be returned. Retry the request until non-null value is returned.
+
+**Warning!** This opt-in might be missing for recently committed transactions, in that case a `null` value will be returned. Retry the request until non-null value is returned.
+
      * @type {boolean}
      * @memberof TransactionDetailsOptIns
      */

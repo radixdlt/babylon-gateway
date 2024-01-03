@@ -118,7 +118,8 @@ export interface CommittedTransactionInfo {
     receipt?: TransactionReceipt;
     /**
      * The optional transaction message.
-     * This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
+This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
+
      * @type {object}
      * @memberof CommittedTransactionInfo
      */
