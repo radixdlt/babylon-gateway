@@ -1,7 +1,7 @@
 ## 2.0.0
 Release Date: _unreleased_
 
-TBA
+- Dropped `balance_changes` fallback mechanism.  
 
 ## 1.2.4
 Release Date: _unreleased_

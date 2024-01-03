@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -89,18 +90,15 @@ internal class TransactionQuerier : ITransactionQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ITransactionBalanceChangesService _transactionBalanceChangesService;
 
     public TransactionQuerier(
         ReadOnlyDbContext dbContext,
         ReadWriteDbContext rwDbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        ITransactionBalanceChangesService transactionBalanceChangesService)
+        INetworkConfigurationProvider networkConfigurationProvider)
     {
         _dbContext = dbContext;
         _rwDbContext = rwDbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _transactionBalanceChangesService = transactionBalanceChangesService;
     }
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
@@ -680,18 +678,21 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
         List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
         var networkId = _networkConfigurationProvider.GetNetworkId();
 
-        Dictionary<long, GatewayModel.TransactionBalanceChanges>? balanceChangesPerTransaction = null;
-
-        if (optIns.BalanceChanges)
-        {
-            balanceChangesPerTransaction = await _transactionBalanceChangesService.GetTransactionBalanceChanges(transactions, token);
-        }
-
         foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)).ToList())
         {
             GatewayModel.TransactionBalanceChanges? balanceChanges = null;
 
-            balanceChangesPerTransaction?.TryGetValue(transaction.StateVersion, out balanceChanges);
+            if (optIns.BalanceChanges && transaction.BalanceChanges != null)
+            {
+                var storedBalanceChanges = JsonConvert.DeserializeObject<CoreModel.CommittedTransactionBalanceChanges>(transaction.BalanceChanges);
+
+                if (storedBalanceChanges == null)
+                {
+                    throw new InvalidOperationException("Unable to deserialize stored balance changes into CoreModel.CommittedTransactionBalanceChanges");
+                }
+
+                balanceChanges = storedBalanceChanges.ToGatewayModel();
+            }
 
             if (!optIns.ReceiptEvents || schemaLookups?.Any() == false)
             {
