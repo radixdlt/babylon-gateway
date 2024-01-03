@@ -504,7 +504,7 @@ tags:
 
       * `affected_global_entities_filter` - allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as "affected" by a transaction if any of its state (or its descendents' state) was modified as a result of the transaction.
 
-      * `events_filter` - allows filtering the transaction stream to transactions which, for each provided filter, the transaction emitted at least one event which matched that filter. Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
+      * `events_filter` - filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
 
       Each filter is a complex object where you can specify:
       - `event` (required) - the event tag. Currently only the following tags are supported:
@@ -2253,6 +2253,8 @@ components:
         - pending_xrd_withdraw_vault
         - locked_owner_stake_unit_vault
         - pending_owner_stake_unit_unlock_vault
+        - state
+        - effective_fee_factor
       properties:
         address:
           $ref: "#/components/schemas/Address"
@@ -2274,6 +2276,32 @@ components:
           $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpoch"
         metadata:
           $ref: "#/components/schemas/EntityMetadataCollection"
+        effective_fee_factor:
+          type: object
+          required:
+            - current
+          properties:
+            current:
+              type: object
+              required:
+                - fee_factor
+              properties:
+                fee_factor:
+                  $ref: "#/components/schemas/BigDecimal"
+            pending:
+              type: object
+              nullable: true
+              required:
+                - fee_factor
+                - effective_at_epoch
+              properties:
+                fee_factor:
+                  $ref: "#/components/schemas/BigDecimal"
+                effective_at_epoch:
+                  type: integer
+                  format: int64
+                  minimum: 0
+                  maximum: 10000000000
     ValidatorCollectionItemActiveInEpoch:
       type: object
       required:
@@ -2901,6 +2929,7 @@ components:
               $ref: "#/components/schemas/StateEntityDetailsOptIns"
             addresses:
               type: array
+              description: limited to max 100 items.
               items:
                 $ref: "#/components/schemas/Address"
             aggregation_level:
@@ -3430,6 +3459,7 @@ components:
               $ref: "#/components/schemas/Address"
             non_fungible_ids:
               type: array
+              description: limited to max 100 items.
               items:
                 $ref: "#/components/schemas/NonFungibleId"
       example:
@@ -3478,6 +3508,7 @@ components:
               $ref: "#/components/schemas/Address"
             non_fungible_ids:
               type: array
+              description: limited to max 100 items.
               items:
                 $ref: "#/components/schemas/NonFungibleId"
       example:
@@ -3528,6 +3559,7 @@ components:
               $ref: "#/components/schemas/Address"
             keys:
               type: array
+              description: limited to max 100 items.
               items:
                 $ref: "#/components/schemas/StateKeyValueStoreDataRequestKeyItem"
       example:

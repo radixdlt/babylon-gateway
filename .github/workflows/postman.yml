@@ -37,7 +37,7 @@ jobs:
         id: date
         run: echo "date=$(date +'%b %d, %H:%M')" >> $GITHUB_OUTPUT
       - name: Checkout gateway repo
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+        uses: RDXWorks-actions/checkout@main
         with:
           fetch-depth: 0
       - uses: ./.github/actions/fetch-secrets
