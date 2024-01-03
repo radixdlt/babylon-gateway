@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -86,9 +86,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:account_resource_preference_rule", "allowed,disallowed")
                 .Annotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,manifest_class")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
                 .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
@@ -391,6 +392,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     quantity = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
                     operation_type = table.Column<LedgerTransactionMarkerOperationType>(type: "ledger_transaction_marker_operation_type", nullable: true),
+                    manifest_class = table.Column<LedgerTransactionMarkerManifestClass>(type: "ledger_transaction_marker_manifest_class", nullable: true),
+                    is_most_specific = table.Column<bool>(type: "boolean", nullable: true),
                     origin_type = table.Column<LedgerTransactionMarkerOriginType>(type: "ledger_transaction_marker_origin_type", nullable: true)
                 },
                 constraints: table =>
@@ -451,6 +454,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<int>(type: "integer", nullable: false),
                     network_id = table.Column<byte>(type: "smallint", nullable: false),
                     network_name = table.Column<string>(type: "text", nullable: false),
+                    network_hrp_suffix = table.Column<string>(type: "text", nullable: false),
                     hrp_definition = table.Column<HrpDefinition>(type: "jsonb", nullable: false),
                     well_known_addresses = table.Column<WellKnownAddresses>(type: "jsonb", nullable: false),
                     address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false),
@@ -581,16 +585,34 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "pending_transaction_payloads",
+                name: "pending_transactions",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    notarized_transaction_blob = table.Column<byte[]>(type: "bytea", nullable: false)
+                    payload_hash = table.Column<string>(type: "text", nullable: false),
+                    intent_hash = table.Column<string>(type: "text", nullable: false),
+                    end_epoch_exclusive = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    payload_id = table.Column<long>(type: "bigint", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    payload_status = table.Column<PendingTransactionPayloadLedgerStatus>(type: "pending_transaction_payload_ledger_status", nullable: false),
+                    intent_status = table.Column<PendingTransactionIntentLedgerStatus>(type: "pending_transaction_intent_ledger_status", nullable: false),
+                    initial_rejection_reason = table.Column<string>(type: "text", nullable: true),
+                    latest_rejection_reason = table.Column<string>(type: "text", nullable: true),
+                    latest_rejection_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    commit_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    resubmit_from_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    handling_status_reason = table.Column<string>(type: "text", nullable: true),
+                    first_submitted_to_gateway_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    node_submission_count = table.Column<int>(type: "integer", nullable: false),
+                    latest_node_submission_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    latest_submitted_to_node_name = table.Column<string>(type: "text", nullable: true),
+                    latest_node_submission_was_accepted = table.Column<bool>(type: "boolean", nullable: false),
+                    last_submit_error = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_pending_transaction_payloads", x => x.id);
+                    table.PrimaryKey("PK_pending_transactions", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -681,38 +703,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "pending_transactions",
+                name: "pending_transaction_payloads",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    payload_hash = table.Column<string>(type: "text", nullable: false),
-                    intent_hash = table.Column<string>(type: "text", nullable: false),
-                    end_epoch_exclusive = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    payload_id = table.Column<long>(type: "bigint", nullable: false),
-                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
-                    payload_status = table.Column<PendingTransactionPayloadLedgerStatus>(type: "pending_transaction_payload_ledger_status", nullable: false),
-                    intent_status = table.Column<PendingTransactionIntentLedgerStatus>(type: "pending_transaction_intent_ledger_status", nullable: false),
-                    initial_rejection_reason = table.Column<string>(type: "text", nullable: true),
-                    latest_rejection_reason = table.Column<string>(type: "text", nullable: true),
-                    latest_rejection_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    commit_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    resubmit_from_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    handling_status_reason = table.Column<string>(type: "text", nullable: true),
-                    first_submitted_to_gateway_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    node_submission_count = table.Column<int>(type: "integer", nullable: false),
-                    latest_node_submission_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    latest_submitted_to_node_name = table.Column<string>(type: "text", nullable: true),
-                    latest_node_submission_was_accepted = table.Column<bool>(type: "boolean", nullable: false),
-                    last_submit_error = table.Column<string>(type: "text", nullable: true)
+                    pending_transaction_id = table.Column<long>(type: "bigint", nullable: true),
+                    notarized_transaction_blob = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_pending_transactions", x => x.id);
+                    table.PrimaryKey("PK_pending_transaction_payloads", x => x.id);
                     table.ForeignKey(
-                        name: "FK_pending_transactions_pending_transaction_payloads_payload_id",
-                        column: x => x.payload_id,
-                        principalTable: "pending_transaction_payloads",
+                        name: "FK_pending_transaction_payloads_pending_transactions_pending_t~",
+                        column: x => x.pending_transaction_id,
+                        principalTable: "pending_transactions",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -867,6 +872,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'event'");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_manifest_class_is_most_specific_~",
+                table: "ledger_transaction_markers",
+                columns: new[] { "manifest_class", "is_most_specific", "state_version" },
+                filter: "discriminator = 'manifest_class'");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_markers_operation_type_entity_id_state_v~",
                 table: "ledger_transaction_markers",
                 columns: new[] { "operation_type", "entity_id", "state_version" },
@@ -949,6 +960,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "package_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_pending_transaction_payloads_pending_transaction_id",
+                table: "pending_transaction_payloads",
+                column: "pending_transaction_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_first_submitted_to_gateway_timestamp",
                 table: "pending_transactions",
                 column: "first_submitted_to_gateway_timestamp");
@@ -963,11 +980,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 table: "pending_transactions",
                 column: "payload_hash",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_pending_transactions_payload_id",
-                table: "pending_transactions",
-                column: "payload_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_resubmit_from_timestamp",
@@ -1104,7 +1116,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "package_code_history");
 
             migrationBuilder.DropTable(
-                name: "pending_transactions");
+                name: "pending_transaction_payloads");
 
             migrationBuilder.DropTable(
                 name: "resource_entity_supply_history");
@@ -1122,7 +1134,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "validator_emission_statistics");
 
             migrationBuilder.DropTable(
-                name: "pending_transaction_payloads");
+                name: "pending_transactions");
 
             migrationBuilder.DropTable(
                 name: "validator_public_key_history");
