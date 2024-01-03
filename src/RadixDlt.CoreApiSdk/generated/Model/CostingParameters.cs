@@ -109,9 +109,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="finalizationCostUnitPrice">The string-encoded decimal representing the XRD price of a single cost unit of transaction finalization. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         /// <param name="finalizationCostUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the maximum amount of cost units available for the transaction finalization. (required).</param>
         /// <param name="xrdUsdPrice">The string-encoded decimal representing the price of 1 USD, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
-        /// <param name="xrdStoragePrice">The string-encoded decimal representing the price of 1 byte of storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
+        /// <param name="xrdStoragePrice">The string-encoded decimal representing the price of 1 byte of state storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
+        /// <param name="xrdArchiveStoragePrice">The string-encoded decimal representing the price of 1 byte of archive storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
-        public CostingParameters(string executionCostUnitPrice = default(string), long executionCostUnitLimit = default(long), long executionCostUnitLoan = default(long), string finalizationCostUnitPrice = default(string), long finalizationCostUnitLimit = default(long), string xrdUsdPrice = default(string), string xrdStoragePrice = default(string), int tipPercentage = default(int))
+        public CostingParameters(string executionCostUnitPrice = default(string), long executionCostUnitLimit = default(long), long executionCostUnitLoan = default(long), string finalizationCostUnitPrice = default(string), long finalizationCostUnitLimit = default(long), string xrdUsdPrice = default(string), string xrdStoragePrice = default(string), string xrdArchiveStoragePrice = default(string), int tipPercentage = default(int))
         {
             // to ensure "executionCostUnitPrice" is required (not null)
             if (executionCostUnitPrice == null)
@@ -140,6 +141,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("xrdStoragePrice is a required property for CostingParameters and cannot be null");
             }
             this.XrdStoragePrice = xrdStoragePrice;
+            // to ensure "xrdArchiveStoragePrice" is required (not null)
+            if (xrdArchiveStoragePrice == null)
+            {
+                throw new ArgumentNullException("xrdArchiveStoragePrice is a required property for CostingParameters and cannot be null");
+            }
+            this.XrdArchiveStoragePrice = xrdArchiveStoragePrice;
             this.TipPercentage = tipPercentage;
         }
 
@@ -186,11 +193,18 @@ namespace RadixDlt.CoreApiSdk.Model
         public string XrdUsdPrice { get; set; }
 
         /// <summary>
-        /// The string-encoded decimal representing the price of 1 byte of storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
+        /// The string-encoded decimal representing the price of 1 byte of state storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
         /// </summary>
-        /// <value>The string-encoded decimal representing the price of 1 byte of storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
+        /// <value>The string-encoded decimal representing the price of 1 byte of state storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
         [DataMember(Name = "xrd_storage_price", IsRequired = true, EmitDefaultValue = true)]
         public string XrdStoragePrice { get; set; }
+
+        /// <summary>
+        /// The string-encoded decimal representing the price of 1 byte of archive storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
+        /// </summary>
+        /// <value>The string-encoded decimal representing the price of 1 byte of archive storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
+        [DataMember(Name = "xrd_archive_storage_price", IsRequired = true, EmitDefaultValue = true)]
+        public string XrdArchiveStoragePrice { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
@@ -214,6 +228,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  FinalizationCostUnitLimit: ").Append(FinalizationCostUnitLimit).Append("\n");
             sb.Append("  XrdUsdPrice: ").Append(XrdUsdPrice).Append("\n");
             sb.Append("  XrdStoragePrice: ").Append(XrdStoragePrice).Append("\n");
+            sb.Append("  XrdArchiveStoragePrice: ").Append(XrdArchiveStoragePrice).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -283,6 +298,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.XrdStoragePrice.Equals(input.XrdStoragePrice))
                 ) && 
                 (
+                    this.XrdArchiveStoragePrice == input.XrdArchiveStoragePrice ||
+                    (this.XrdArchiveStoragePrice != null &&
+                    this.XrdArchiveStoragePrice.Equals(input.XrdArchiveStoragePrice))
+                ) && 
+                (
                     this.TipPercentage == input.TipPercentage ||
                     this.TipPercentage.Equals(input.TipPercentage)
                 );
@@ -315,6 +335,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.XrdStoragePrice != null)
                 {
                     hashCode = (hashCode * 59) + this.XrdStoragePrice.GetHashCode();
+                }
+                if (this.XrdArchiveStoragePrice != null)
+                {
+                    hashCode = (hashCode * 59) + this.XrdArchiveStoragePrice.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
                 return hashCode;

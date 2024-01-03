@@ -1730,6 +1730,7 @@ components:
         - finalization_cost_unit_limit
         - xrd_usd_price
         - xrd_storage_price
+        - xrd_archive_storage_price
         - tip_percentage
       properties:
         execution_cost_unit_price:
@@ -1768,7 +1769,12 @@ components:
         xrd_storage_price:
           type: string
           description: |
-            The string-encoded decimal representing the price of 1 byte of storage, expressed in XRD.
+            The string-encoded decimal representing the price of 1 byte of state storage, expressed in XRD.
+            A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(192 - 1) <= m < 2^(192 - 1)`.
+        xrd_archive_storage_price:
+          type: string
+          description: |
+            The string-encoded decimal representing the price of 1 byte of archive storage, expressed in XRD.
             A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(192 - 1) <= m < 2^(192 - 1)`.
         tip_percentage:
           type: integer
@@ -5752,8 +5758,6 @@ components:
       description: |
         For the given transaction, contains the status, total fee summary and individual entity resource balance changes.
         The balance changes accounts for the fee payments as well.
-        For failed transactions, current implementation does not return any balance changes (not even the fee payments).
-        This will also change in a future update.
       type: object
       required:
         - state_version
@@ -7158,15 +7162,12 @@ components:
           description: An integer between `0` and `10^14`, marking the proposer timestamp in ms.
     CommittedTransactionBalanceChanges:
       description: |
-        For the given transaction, contains individual entity resource balance changes.
-        The balance changes accounts for the fee payments as well.
-        For failed transactions, current implementation does not return any balance changes (not even the fee payments).
-        This will also change in a future update.
+        The fee-related and non-fee-related balance changes of a transaction, aggregated by resource and global entity
+        within which the change occurred.
       type: object
       required:
         - fungible_entity_balance_changes
         - non_fungible_entity_balance_changes
-        - resultant_account_fungible_balances
       properties:
         fungible_entity_balance_changes:
           description: |
@@ -7181,13 +7182,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LtsEntityNonFungibleBalanceChanges"
-        resultant_account_fungible_balances:
-          description: |
-            A list of the resultant fungible account balances for any balances which changed in this transaction.
-            Only balances for accounts are returned, not any other kind of entity.
-          type: array
-          items:
-            $ref: "#/components/schemas/LtsResultantAccountFungibleBalances"
     LedgerProof:
       type: object
       required:
@@ -7275,6 +7269,7 @@ components:
         - Genesis
         - User
         - RoundUpdate
+        - Flash
     LedgerTransaction:
       type: object
       required:
@@ -7292,6 +7287,7 @@ components:
           Genesis: '#/components/schemas/GenesisLedgerTransaction'
           User: '#/components/schemas/UserLedgerTransaction'
           RoundUpdate: '#/components/schemas/RoundUpdateLedgerTransaction'
+          Flash: '#/components/schemas/FlashLedgerTransaction'
     GenesisLedgerTransaction:
       allOf:
         - $ref: "#/components/schemas/LedgerTransaction"
@@ -7324,6 +7320,15 @@ components:
           properties:
             round_update_transaction:
               $ref: "#/components/schemas/RoundUpdateTransaction"
+    FlashLedgerTransaction:
+      allOf:
+        - $ref: "#/components/schemas/LedgerTransaction"
+        - type: object
+          required:
+            - flash_transaction
+          properties:
+            flash_transaction:
+              $ref: "#/components/schemas/FlashTransaction"
     RoundUpdateTransaction:
       type: object
       required:
@@ -7351,6 +7356,35 @@ components:
         leader_proposal_history:
           $ref: '#/components/schemas/LeaderProposalHistory'
           description: A recent history (i.e. since the previous `RoundUpdateValidatorTransaction`) of consensus round leaders' reliability. Used for validator emissions calculation.
+    FlashTransaction:
+      type: object
+      required:
+        - flashed_substates
+      properties:
+        flashed_substates:
+          type: array
+          items:
+            $ref: "#/components/schemas/FlashedSubstate"
+    FlashedSubstate:
+      type: object
+      required:
+        - entity_address
+        - partition_number
+        - substate_key
+        - value
+      properties:
+        entity_address:
+          $ref: "#/components/schemas/EntityAddress"
+        partition_number:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 255
+        substate_key:
+          $ref: "#/components/schemas/SubstateKey"
+        value:
+          type: string
+          description: The hex-encoded, SBOR-encoded substate data bytes.
     LeaderProposalHistory:
       type: object
       required:
