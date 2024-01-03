@@ -81,8 +81,8 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20231122094710_AddLedgerTransactionBalanceChanges")]
-    partial class AddLedgerTransactionBalanceChanges
+    [Migration("20240103140521_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -926,6 +926,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("hrp_definition");
+
+                    b.Property<string>("NetworkHrpSuffix")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("network_hrp_suffix");
 
                     b.Property<byte>("NetworkId")
                         .HasColumnType("smallint")

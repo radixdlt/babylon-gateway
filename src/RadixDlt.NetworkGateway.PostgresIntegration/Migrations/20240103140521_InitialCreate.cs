@@ -429,6 +429,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     receipt_event_schema_hashes = table.Column<byte[][]>(type: "bytea[]", nullable: false),
                     receipt_event_type_indexes = table.Column<long[]>(type: "bigint[]", nullable: false),
                     receipt_event_sbor_type_kinds = table.Column<SborTypeKind[]>(type: "sbor_type_kind[]", nullable: false),
+                    balance_changes = table.Column<string>(type: "jsonb", nullable: true),
                     transaction_tree_hash = table.Column<string>(type: "text", nullable: false),
                     receipt_tree_hash = table.Column<string>(type: "text", nullable: false),
                     state_tree_hash = table.Column<string>(type: "text", nullable: false),
@@ -451,6 +452,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<int>(type: "integer", nullable: false),
                     network_id = table.Column<byte>(type: "smallint", nullable: false),
                     network_name = table.Column<string>(type: "text", nullable: false),
+                    network_hrp_suffix = table.Column<string>(type: "text", nullable: false),
                     hrp_definition = table.Column<HrpDefinition>(type: "jsonb", nullable: false),
                     well_known_addresses = table.Column<WellKnownAddresses>(type: "jsonb", nullable: false),
                     address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false),
@@ -581,16 +583,34 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "pending_transaction_payloads",
+                name: "pending_transactions",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    notarized_transaction_blob = table.Column<byte[]>(type: "bytea", nullable: false)
+                    payload_hash = table.Column<string>(type: "text", nullable: false),
+                    intent_hash = table.Column<string>(type: "text", nullable: false),
+                    end_epoch_exclusive = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    payload_id = table.Column<long>(type: "bigint", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    payload_status = table.Column<PendingTransactionPayloadLedgerStatus>(type: "pending_transaction_payload_ledger_status", nullable: false),
+                    intent_status = table.Column<PendingTransactionIntentLedgerStatus>(type: "pending_transaction_intent_ledger_status", nullable: false),
+                    initial_rejection_reason = table.Column<string>(type: "text", nullable: true),
+                    latest_rejection_reason = table.Column<string>(type: "text", nullable: true),
+                    latest_rejection_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    commit_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    resubmit_from_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    handling_status_reason = table.Column<string>(type: "text", nullable: true),
+                    first_submitted_to_gateway_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    node_submission_count = table.Column<int>(type: "integer", nullable: false),
+                    latest_node_submission_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    latest_submitted_to_node_name = table.Column<string>(type: "text", nullable: true),
+                    latest_node_submission_was_accepted = table.Column<bool>(type: "boolean", nullable: false),
+                    last_submit_error = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_pending_transaction_payloads", x => x.id);
+                    table.PrimaryKey("PK_pending_transactions", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -681,38 +701,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "pending_transactions",
+                name: "pending_transaction_payloads",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    payload_hash = table.Column<string>(type: "text", nullable: false),
-                    intent_hash = table.Column<string>(type: "text", nullable: false),
-                    end_epoch_exclusive = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    payload_id = table.Column<long>(type: "bigint", nullable: false),
-                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
-                    payload_status = table.Column<PendingTransactionPayloadLedgerStatus>(type: "pending_transaction_payload_ledger_status", nullable: false),
-                    intent_status = table.Column<PendingTransactionIntentLedgerStatus>(type: "pending_transaction_intent_ledger_status", nullable: false),
-                    initial_rejection_reason = table.Column<string>(type: "text", nullable: true),
-                    latest_rejection_reason = table.Column<string>(type: "text", nullable: true),
-                    latest_rejection_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    commit_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    resubmit_from_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    handling_status_reason = table.Column<string>(type: "text", nullable: true),
-                    first_submitted_to_gateway_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    node_submission_count = table.Column<int>(type: "integer", nullable: false),
-                    latest_node_submission_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    latest_submitted_to_node_name = table.Column<string>(type: "text", nullable: true),
-                    latest_node_submission_was_accepted = table.Column<bool>(type: "boolean", nullable: false),
-                    last_submit_error = table.Column<string>(type: "text", nullable: true)
+                    pending_transaction_id = table.Column<long>(type: "bigint", nullable: true),
+                    notarized_transaction_blob = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_pending_transactions", x => x.id);
+                    table.PrimaryKey("PK_pending_transaction_payloads", x => x.id);
                     table.ForeignKey(
-                        name: "FK_pending_transactions_pending_transaction_payloads_payload_id",
-                        column: x => x.payload_id,
-                        principalTable: "pending_transaction_payloads",
+                        name: "FK_pending_transaction_payloads_pending_transactions_pending_t~",
+                        column: x => x.pending_transaction_id,
+                        principalTable: "pending_transactions",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -949,6 +952,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "package_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_pending_transaction_payloads_pending_transaction_id",
+                table: "pending_transaction_payloads",
+                column: "pending_transaction_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_first_submitted_to_gateway_timestamp",
                 table: "pending_transactions",
                 column: "first_submitted_to_gateway_timestamp");
@@ -963,11 +972,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 table: "pending_transactions",
                 column: "payload_hash",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_pending_transactions_payload_id",
-                table: "pending_transactions",
-                column: "payload_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_resubmit_from_timestamp",
@@ -1104,7 +1108,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "package_code_history");
 
             migrationBuilder.DropTable(
-                name: "pending_transactions");
+                name: "pending_transaction_payloads");
 
             migrationBuilder.DropTable(
                 name: "resource_entity_supply_history");
@@ -1122,7 +1126,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "validator_emission_statistics");
 
             migrationBuilder.DropTable(
-                name: "pending_transaction_payloads");
+                name: "pending_transactions");
 
             migrationBuilder.DropTable(
                 name: "validator_public_key_history");
