@@ -358,7 +358,7 @@ export class StateApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns data (value) associated with a given key of a given key-value store. 
+     * Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
      * Get KeyValueStore Data
      */
     async keyValueStoreDataRaw(requestParameters: KeyValueStoreDataRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateKeyValueStoreDataResponse>> {
@@ -384,7 +384,7 @@ export class StateApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns data (value) associated with a given key of a given key-value store. 
+     * Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
      * Get KeyValueStore Data
      */
     async keyValueStoreData(requestParameters: KeyValueStoreDataRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateKeyValueStoreDataResponse> {

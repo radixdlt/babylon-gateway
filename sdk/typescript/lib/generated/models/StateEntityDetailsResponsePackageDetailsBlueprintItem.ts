@@ -33,6 +33,7 @@ export interface StateEntityDetailsResponsePackageDetailsBlueprintItem {
     version: string;
     /**
      * This type is defined in the Core API as `BlueprintDefinition`. See the Core API documentation for more details.
+
      * @type {object}
      * @memberof StateEntityDetailsResponsePackageDetailsBlueprintItem
      */
@@ -45,6 +46,7 @@ export interface StateEntityDetailsResponsePackageDetailsBlueprintItem {
     dependant_entities?: Array<string>;
     /**
      * This type is defined in the Core API as `AuthConfig`. See the Core API documentation for more details.
+
      * @type {object}
      * @memberof StateEntityDetailsResponsePackageDetailsBlueprintItem
      */
@@ -57,6 +59,7 @@ export interface StateEntityDetailsResponsePackageDetailsBlueprintItem {
     auth_template_is_locked?: boolean | null;
     /**
      * This type is defined in the Core API as `BlueprintRoyaltyConfig`. See the Core API documentation for more details.
+
      * @type {object}
      * @memberof StateEntityDetailsResponsePackageDetailsBlueprintItem
      */
