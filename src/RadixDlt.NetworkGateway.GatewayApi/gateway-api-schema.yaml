@@ -502,11 +502,11 @@ tags:
 
       * `manifest_resources_filter` - allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
 
-      * `accounts_with_manifest_owner_method_calls` - allows specifying array of account addresses. If specified, the response will contain only transactions that contain method calls on account which require owner role. Check [account docs](https://docs.radixdlt.com/docs/account) for more details.
+      * `accounts_with_manifest_owner_method_calls` - allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
 
-      * `accounts_without_manifest_owner_method_calls` - allows specifying array of account addresses. If specified, the response will contain only transactions that does NOT contain method calls on account which require owner role. Check [account docs](https://docs.radixdlt.com/docs/account) for more details.
+      * `accounts_without_manifest_owner_method_calls` - allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
 
-      * `manifest_class_filter` - allows filtering transaction by their manifest classification. If specified, the response will contain only transaction classes that matches the filter. If `match_only_most_specific` is set to true, only transactions where queried class is most specific will be returned.
+      * `manifest_class_filter` - allows filtering to transactions which match the given manifest classification. If specified, the response will contain only transactions which have a class that matches the filter. If `match_only_most_specific` set to true, only transactions where the queried class is most specific will be returned. See the [docs on manifest classification](https://docs.radixdlt.com/docs/conforming-transaction-manifest-types) for more information.
 
       * `affected_global_entities_filter` - allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as "affected" by a transaction if any of its state (or its descendents' state) was modified as a result of the transaction.
 
