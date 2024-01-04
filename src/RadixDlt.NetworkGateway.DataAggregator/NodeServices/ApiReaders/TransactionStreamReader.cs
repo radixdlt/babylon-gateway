@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -99,7 +99,7 @@ internal class TransactionStreamReader : ITransactionStreamReader
         {
             return await _streamApi.StreamTransactionsPostWithHttpInfoAsync(
                 new CoreModel.StreamTransactionsRequest(
-                    network: _networkConfigurationProvider.GetNetworkName(),
+                    network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
                     fromStateVersion: fromStateVersion,
                     limit: count,
                     transactionFormatOptions: new CoreModel.TransactionFormatOptions

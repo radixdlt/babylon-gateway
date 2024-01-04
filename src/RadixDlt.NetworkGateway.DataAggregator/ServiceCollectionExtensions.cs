@@ -67,7 +67,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
@@ -95,7 +94,8 @@ public static class ServiceCollectionExtensions
     public static DataAggregatorBuilder AddNetworkGatewayDataAggregatorCore(this IServiceCollection services)
     {
         services
-            .AddNetworkGatewayAbstractions();
+            .AddNetworkGatewayAbstractions()
+            .AddNetworkGatewayCoreServices();
 
         services
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("DataAggregator:Network")
@@ -112,7 +112,6 @@ public static class ServiceCollectionExtensions
         // Node-Scoped services
         AddNodeScopedServices(services);
         AddTransientApiReaders(services, out var coreApiHttpClientBuilder);
-        AddNodeInitializers(services);
         AddNodeWorkers(services);
 
         return new DataAggregatorBuilder(services, coreApiHttpClientBuilder);
@@ -123,7 +122,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
         services.TryAddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
         services.TryAddSingleton<ILedgerTransactionsProcessor, LedgerTransactionsProcessor>();
-        services.TryAddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.TryAddSingleton<ISystemStatusService, SystemStatusService>();
     }
 
@@ -148,12 +146,6 @@ public static class ServiceCollectionExtensions
 
         services.TryAddTransient<Func<ITransactionStreamReader>>(provider => provider.GetRequiredService<ITransactionStreamReader>);
         services.TryAddTransient<Func<INetworkStatusReader>>(provider => provider.GetRequiredService<INetworkStatusReader>);
-    }
-
-    private static void AddNodeInitializers(IServiceCollection services)
-    {
-        // Add node initializers - these will be instantiated by the NodeWorkersRunner.cs and run before the workers start
-        services.TryAddScoped<INodeInitializer, NodeNetworkConfigurationInitializer>();
     }
 
     private static void AddNodeWorkers(IServiceCollection services)

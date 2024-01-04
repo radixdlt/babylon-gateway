@@ -65,6 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -76,7 +77,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
@@ -748,7 +748,7 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
         }
 
         List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
-        var networkId = _networkConfigurationProvider.GetNetworkId();
+        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
 
         foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)).ToList())
         {

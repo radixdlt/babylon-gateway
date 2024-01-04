@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -71,7 +72,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
@@ -84,11 +84,13 @@ public interface ITransactionPreviewService
 
 internal class TransactionPreviewService : ITransactionPreviewService
 {
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly IEnumerable<ITransactionPreviewServiceObserver> _observers;
 
-    public TransactionPreviewService(ICoreApiHandler coreApiHandler, IEnumerable<ITransactionPreviewServiceObserver> observers)
+    public TransactionPreviewService(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiHandler coreApiHandler, IEnumerable<ITransactionPreviewServiceObserver> observers)
     {
+        _networkConfigurationProvider = networkConfigurationProvider;
         _coreApiHandler = coreApiHandler;
         _observers = observers;
     }
@@ -130,7 +132,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
             skipEpochCheck: request.Flags.SkipEpochCheck);
 
         var coreRequest = new CoreModel.TransactionPreviewRequest(
-            network: _coreApiHandler.GetNetworkName(),
+            network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
             manifest: request.Manifest,
             blobsHex: request.BlobsHex,
             startEpochInclusive: request.StartEpochInclusive,

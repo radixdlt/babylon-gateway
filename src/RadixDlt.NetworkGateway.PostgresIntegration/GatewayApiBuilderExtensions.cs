@@ -79,7 +79,6 @@ public static class GatewayApiBuilderExtensions
     {
         return builder
             .AddPostgresPersistenceCore()
-            .AddPostgresPersistenceInitializers()
             .AddPostgresPersistenceHealthChecks();
     }
 
@@ -97,7 +96,6 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<IValidatorQuerier, ValidatorQuerier>()
             .AddScoped<IVirtualEntityDataProvider, VirtualEntityDataProvider>()
             .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>()
             .AddScoped<IDapperWrapper, DapperWrapper>()
             .AddSingleton<MetricsInterceptor>();
 
@@ -129,14 +127,6 @@ public static class GatewayApiBuilderExtensions
                 options.AddInterceptors(serviceProvider.GetRequiredService<MetricsInterceptor>());
                 options.AddInterceptors(new ForceDistinctInterceptor());
             });
-
-        return builder;
-    }
-
-    public static GatewayApiBuilder AddPostgresPersistenceInitializers(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
 
         return builder;
     }

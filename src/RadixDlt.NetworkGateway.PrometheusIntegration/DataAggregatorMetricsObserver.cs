@@ -563,7 +563,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask GetNetworkConfigurationFailed(string nodeName, Exception exception)
+    ValueTask INetworkConfigurationReaderObserver.GetNetworkConfigurationFailed(string nodeName, Exception exception)
     {
         _failedNetworkConfigurationFetchCounterUnScoped.WithLabels(nodeName).Inc();
 

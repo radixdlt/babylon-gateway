@@ -67,7 +67,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -450,6 +449,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+<<<<<<<< HEAD:src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20240105125008_InitialCreate.cs
                 name: "network_configuration",
                 columns: table => new
                 {
@@ -469,6 +469,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+========
+>>>>>>>> 3fffa4cf (Reworked NetworkConfiguration):src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20240104131447_InitialCreate.cs
                 name: "non_fungible_id_data",
                 columns: table => new
                 {
@@ -1092,9 +1094,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "ledger_transactions");
-
-            migrationBuilder.DropTable(
-                name: "network_configuration");
 
             migrationBuilder.DropTable(
                 name: "non_fungible_id_data");

@@ -65,7 +65,6 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,15 +98,26 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
 
     public VirtualEntityDataProvider(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider, INetworkConfigurationProvider networkConfigurationProvider)
     {
-        _accountPackage = networkConfigurationProvider.GetWellKnownAddresses().AccountPackage;
-        _identityPackage = networkConfigurationProvider.GetWellKnownAddresses().IdentityPackage;
-        _networkId = networkConfigurationProvider.GetNetworkId();
-        _secp256k1VirtualAccountDiscriminator = (byte)networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
-        _ed25519VirtualAccountDiscriminator = (byte)networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
-        _secp256k1VirtualIdentityDiscriminator = (byte)networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Identity).AddressBytePrefix;
-        _ed25519VirtualIdentityDiscriminator = (byte)networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Identity).AddressBytePrefix;
-        _secp256k1SignatureVirtualBadge = networkConfigurationProvider.GetWellKnownAddresses().Secp256k1SignatureVirtualBadge;
-        _ed25519SignatureVirtualBadge = networkConfigurationProvider.GetWellKnownAddresses().Ed25519SignatureVirtualBadge;
+        _accountPackage = "a";
+        _identityPackage = "i";
+        _networkId = 1;
+        _secp256k1VirtualAccountDiscriminator = (byte)1;
+        _ed25519VirtualAccountDiscriminator = (byte)2;
+        _secp256k1VirtualIdentityDiscriminator = (byte)3;
+        _ed25519VirtualIdentityDiscriminator = (byte)4;
+        _secp256k1SignatureVirtualBadge = "networkConfigurationProvider.GetWellKnownAddresses().Secp256k1SignatureVirtualBadge";
+        _ed25519SignatureVirtualBadge = "networkConfigurationProvider.GetWellKnownAddresses().Ed25519SignatureVirtualBadge";
+
+        // TODO restore
+        // _accountPackage = networkConfigurationProvider.GetWellKnownAddresses().AccountPackage;
+        // _identityPackage = networkConfigurationProvider.GetWellKnownAddresses().IdentityPackage;
+        // _networkId = networkConfigurationProvider.GetNetworkId();
+        // _secp256k1VirtualAccountDiscriminator = (byte)networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
+        // _ed25519VirtualAccountDiscriminator = (byte)networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
+        // _secp256k1VirtualIdentityDiscriminator = (byte)networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Identity).AddressBytePrefix;
+        // _ed25519VirtualIdentityDiscriminator = (byte)networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Identity).AddressBytePrefix;
+        // _secp256k1SignatureVirtualBadge = networkConfigurationProvider.GetWellKnownAddresses().Secp256k1SignatureVirtualBadge;
+        // _ed25519SignatureVirtualBadge = networkConfigurationProvider.GetWellKnownAddresses().Ed25519SignatureVirtualBadge;
         _virtualEntityRoleAssignmentEntries = GenerateVirtualEntityRoleAssignmentEntries(roleAssignmentsKeyProvider);
     }
 

@@ -64,7 +64,17 @@
 
 namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 
+public sealed record NetworkConfiguration(
+    byte Id,
+    string Name,
+    long GenesisEpoch,
+    long GenesisRound,
+    WellKnownAddresses WellKnownAddresses,
+    HrpDefinition Hrp
+);
+
 public sealed record HrpDefinition(
+    string Suffix,
     string GlobalPackage,
     string GlobalGenericComponent,
     string InternalGenericComponent,
@@ -104,7 +114,7 @@ public sealed record WellKnownAddresses(
     string TransactionProcessorPackage,
     string MetadataModulePackage,
     string RoyaltyModulePackage,
-    string AccessRulesPackage,
+    string RoleAssignmentModulePackage,
     string GenesisHelperPackage,
     string FaucetPackage,
     string ConsensusManager,

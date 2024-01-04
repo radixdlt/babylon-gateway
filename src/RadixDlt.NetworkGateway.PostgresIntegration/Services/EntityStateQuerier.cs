@@ -65,9 +65,9 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
@@ -84,7 +84,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -659,7 +658,7 @@ ORDER BY nfid.from_state_version DESC
         {
             var programmaticJson = !vm.IsDeleted
                 ? ScryptoSborUtils.DataToProgrammaticJson(vm.Data, nonFungibleDataSchema.Schema,
-                    nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, _networkConfigurationProvider.GetNetworkId())
+                    nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id)
                 : null;
 
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
@@ -992,11 +991,11 @@ INNER JOIN LATERAL (
                 continue;
             }
 
+            var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
             var keyProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.KeySchema, keyValueStoreSchema.KeySborTypeKind,
-                keyValueStoreSchema.KeyTypeIndex, _networkConfigurationProvider.GetNetworkId());
-
+                keyValueStoreSchema.KeyTypeIndex, networkId);
             var valueProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(e.Value, keyValueStoreSchema.ValueSchema, keyValueStoreSchema.ValueSborTypeKind,
-                keyValueStoreSchema.ValueTypeIndex, _networkConfigurationProvider.GetNetworkId());
+                keyValueStoreSchema.ValueTypeIndex, networkId);
 
             items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(
                 key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), keyProgrammaticJson),
@@ -1084,8 +1083,9 @@ ORDER BY metadata_join.ordinality ASC;",
                 result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, GenerateOffsetCursor(offset, limit, vm.TotalCount), new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
-            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(vm.Value, _networkConfigurationProvider.GetNetworkId());
+            var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, networkId);
+            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(vm.Value, networkId);
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), programmaticJson, value);
 
             result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
@@ -1155,8 +1155,9 @@ INNER JOIN LATERAL (
                 result[mh.EntityId] = new GatewayModel.EntityMetadataCollection(items: new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId());
-            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(mh.Value, _networkConfigurationProvider.GetNetworkId());
+            var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, networkId);
+            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(mh.Value, networkId);
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), programmaticJson, value);
 
             result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, entityMetadataItemValue, mh.IsLocked, mh.FromStateVersion));
@@ -1422,7 +1423,7 @@ INNER JOIN LATERAL (
                         schemaBytes!,
                         sborStateHistory.SborTypeKind,
                         sborStateHistory.TypeIndex,
-                        _networkConfigurationProvider.GetNetworkId());
+                        (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id);
 
                     result.Add(state.EntityId, jsonState);
                     break;

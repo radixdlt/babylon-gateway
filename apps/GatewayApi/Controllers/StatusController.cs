@@ -63,8 +63,8 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -91,13 +91,14 @@ public sealed class StatusController : ControllerBase
     }
 
     [HttpPost("network-configuration")]
-    public GatewayModel.NetworkConfigurationResponse NetworkConfiguration()
+    public async Task<GatewayModel.NetworkConfigurationResponse> NetworkConfiguration(CancellationToken token)
     {
-        var wellKnownAddresses = _networkConfigurationProvider.GetWellKnownAddresses();
+        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
+        var wellKnownAddresses = networkConfiguration.WellKnownAddresses;
 
         return new GatewayModel.NetworkConfigurationResponse(
-            _networkConfigurationProvider.GetNetworkId(),
-            _networkConfigurationProvider.GetNetworkName(),
+            networkConfiguration.Id,
+            networkConfiguration.Name,
             new GatewayModel.NetworkConfigurationResponseWellKnownAddresses(
                 xrd: wellKnownAddresses.Xrd,
                 secp256k1SignatureVirtualBadge: wellKnownAddresses.Secp256k1SignatureVirtualBadge,
@@ -118,7 +119,7 @@ public sealed class StatusController : ControllerBase
                 transactionProcessorPackage: wellKnownAddresses.TransactionProcessorPackage,
                 metadataModulePackage: wellKnownAddresses.MetadataModulePackage,
                 royaltyModulePackage: wellKnownAddresses.RoyaltyModulePackage,
-                accessRulesPackage: wellKnownAddresses.AccessRulesPackage,
+                accessRulesPackage: wellKnownAddresses.RoleAssignmentModulePackage,
                 genesisHelperPackage: wellKnownAddresses.GenesisHelperPackage,
                 faucetPackage: wellKnownAddresses.FaucetPackage,
                 consensusManager: wellKnownAddresses.ConsensusManager,

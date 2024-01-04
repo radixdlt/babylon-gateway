@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.CoreApiSdk.Api;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -76,10 +77,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 
 public interface ICoreApiHandler
 {
-    string GetNetworkName();
-
-    byte GetNetworkId();
-
     CoreApiNode GetCoreNodeConnectedTo();
 
     TransactionApi GetTransactionApi();
@@ -105,16 +102,6 @@ internal class CoreApiHandler : ICoreApiHandler
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _coreApiProvider = new Lazy<ICoreApiProvider>(() => ChooseCoreApiProvider(coreNodesSelectorService, httpClient));
-    }
-
-    public byte GetNetworkId()
-    {
-        return _networkConfigurationProvider.GetNetworkId();
-    }
-
-    public string GetNetworkName()
-    {
-        return _networkConfigurationProvider.GetNetworkName();
     }
 
     public CoreApiNode GetCoreNodeConnectedTo()

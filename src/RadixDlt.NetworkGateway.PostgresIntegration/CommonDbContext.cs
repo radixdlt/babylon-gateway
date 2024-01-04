@@ -80,8 +80,6 @@ internal abstract class CommonDbContext : DbContext
 {
     private const string DiscriminatorColumnName = "discriminator";
 
-    public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
-
     /// <summary>
     /// Gets LedgerTransactions.
     /// </summary>

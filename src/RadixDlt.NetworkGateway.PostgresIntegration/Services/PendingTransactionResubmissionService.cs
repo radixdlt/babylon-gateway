@@ -67,6 +67,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -82,7 +83,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -287,7 +287,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
             new SubmitContext(
                 TransactionApi: coreApiProvider.TransactionsApi,
                 TargetNode: chosenNode.Name,
-                NetworkName: _networkConfigurationProvider.GetNetworkName(),
+                NetworkName: (await _networkConfigurationProvider.GetNetworkConfiguration(cancellationToken)).Name,
                 SubmissionTimeout: _mempoolOptionsMonitor.CurrentValue.ResubmissionNodeRequestTimeout,
                 IsResubmission: true,
                 ForceNodeToRecalculateResult: false),
