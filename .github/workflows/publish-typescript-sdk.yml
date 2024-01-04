@@ -6,8 +6,6 @@ on:
       package_version_number:
         description: "Package version number"
         required: true
-  release:
-    types: [published]
 
 jobs:
   publish-gateway-sdk-npmjs:
