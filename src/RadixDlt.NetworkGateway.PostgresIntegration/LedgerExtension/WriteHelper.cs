@@ -301,7 +301,7 @@ internal class WriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY ledger_transaction_markers (id, state_version, discriminator, event_type, entity_id, resource_entity_id, quantity, operation_type, origin_type) FROM STDIN (FORMAT BINARY)",
+                "COPY ledger_transaction_markers (id, state_version, discriminator, event_type, entity_id, resource_entity_id, quantity, operation_type, origin_type, manifest_class, is_most_specific) FROM STDIN (FORMAT BINARY)",
                 token);
 
         foreach (var e in entities)
@@ -322,6 +322,8 @@ internal class WriteHelper
                     await writer.WriteAsync(eltm.Quantity.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
                     break;
                 case ManifestAddressLedgerTransactionMarker maltm:
                     await writer.WriteNullAsync(token);
@@ -329,6 +331,8 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(maltm.OperationType, "ledger_transaction_marker_operation_type", token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     break;
                 case OriginLedgerTransactionMarker oltm:
@@ -338,6 +342,8 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(oltm.OriginType, "ledger_transaction_marker_origin_type", token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
                     break;
                 case AffectedGlobalEntityTransactionMarker oltm:
                     await writer.WriteNullAsync(token);
@@ -346,6 +352,18 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case ManifestClassMarker ttm:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(ttm.ManifestClass, "ledger_transaction_marker_manifest_class", token);
+                    await writer.WriteAsync(ttm.IsMostSpecific, NpgsqlDbType.Boolean, token);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(e), e, null);

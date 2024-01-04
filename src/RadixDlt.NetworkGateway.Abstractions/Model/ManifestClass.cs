@@ -62,95 +62,16 @@
  * permissions under this License.
  */
 
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-#nullable disable
-
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+public enum ManifestClass
 {
-    /// <inheritdoc />
-    public partial class InversePendingTransactionPayloadRelationship : Migration
-    {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_pending_transactions_pending_transaction_payloads_payload_id",
-                table: "pending_transactions");
-
-            migrationBuilder.DropIndex(
-                name: "IX_pending_transactions_payload_id",
-                table: "pending_transactions");
-
-            migrationBuilder.AlterColumn<long>(
-                name: "payload_id",
-                table: "pending_transactions",
-                type: "bigint",
-                nullable: true,
-                oldClrType: typeof(long),
-                oldType: "bigint");
-
-            migrationBuilder.AddColumn<long>(
-                name: "pending_transaction_id",
-                table: "pending_transaction_payloads",
-                type: "bigint",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_pending_transaction_payloads_pending_transaction_id",
-                table: "pending_transaction_payloads",
-                column: "pending_transaction_id",
-                unique: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_pending_transaction_payloads_pending_transactions_pending_t~",
-                table: "pending_transaction_payloads",
-                column: "pending_transaction_id",
-                principalTable: "pending_transactions",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.Sql("UPDATE pending_transaction_payloads ptp SET pending_transaction_id = pt.id FROM pending_transactions pt WHERE pt.payload_id = ptp.id;");
-            migrationBuilder.Sql("DELETE FROM pending_transaction_payloads WHERE id IN (SELECT ptp.id FROM pending_transaction_payloads ptp LEFT JOIN pending_transactions pt ON ptp.id = pt.payload_id WHERE pt.id IS NULL);");
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_pending_transaction_payloads_pending_transactions_pending_t~",
-                table: "pending_transaction_payloads");
-
-            migrationBuilder.DropIndex(
-                name: "IX_pending_transaction_payloads_pending_transaction_id",
-                table: "pending_transaction_payloads");
-
-            migrationBuilder.DropColumn(
-                name: "pending_transaction_id",
-                table: "pending_transaction_payloads");
-
-            migrationBuilder.AlterColumn<long>(
-                name: "payload_id",
-                table: "pending_transactions",
-                type: "bigint",
-                nullable: false,
-                defaultValue: 0L,
-                oldClrType: typeof(long),
-                oldType: "bigint",
-                oldNullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_pending_transactions_payload_id",
-                table: "pending_transactions",
-                column: "payload_id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_pending_transactions_pending_transaction_payloads_payload_id",
-                table: "pending_transactions",
-                column: "payload_id",
-                principalTable: "pending_transaction_payloads",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
-        }
-    }
+    General,
+    Transfer,
+    ValidatorStake,
+    ValidatorUnstake,
+    ValidatorClaim,
+    AccountDepositSettingsUpdate,
+    PoolContribution,
+    PoolRedemption,
 }

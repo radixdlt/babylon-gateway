@@ -62,31 +62,11 @@
  * permissions under this License.
  */
 
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-#nullable disable
-
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+public class ManifestClassFilter
 {
-    /// <inheritdoc />
-    public partial class AddLedgerTransactionBalanceChanges : Migration
-    {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<string>(
-                name: "balance_changes",
-                table: "ledger_transactions",
-                type: "jsonb",
-                nullable: true);
-        }
+    public ManifestClass Class { get; set; }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "balance_changes",
-                table: "ledger_transactions");
-        }
-    }
+    public bool MatchOnlyMostSpecificType { get; set; }
 }

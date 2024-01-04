@@ -62,40 +62,16 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore.Migrations;
+using FluentValidation;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-#nullable disable
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+internal class ManifestClassFilterValidator : AbstractValidator<StreamTransactionsRequestAllOfManifestClassFilter>
 {
-    /// <inheritdoc />
-    public partial class AddNetworkHrpSuffixToNetworkConfiguration : Migration
+    public ManifestClassFilterValidator()
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<string>(
-                name: "network_hrp_suffix",
-                table: "network_configuration",
-                type: "text",
-                nullable: true,
-                defaultValue: null);
-
-            migrationBuilder.Sql("update network_configuration set network_hrp_suffix = (select substring(recordset.\"HrpPrefix\"::text,'_(.+)') from network_configuration, jsonb_to_recordset(address_type_definitions) as recordset(\"HrpPrefix\" TEXT) WHERE recordset.\"HrpPrefix\" like '%account%' limit 1)");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "network_hrp_suffix",
-                table: "network_configuration",
-                type: "text",
-                nullable: false);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "network_hrp_suffix",
-                table: "network_configuration");
-        }
+        RuleFor(x => x.Class)
+            .IsInEnum();
     }
 }
