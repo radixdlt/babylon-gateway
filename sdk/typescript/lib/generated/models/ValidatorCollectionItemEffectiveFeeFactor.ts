@@ -13,60 +13,65 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { StateKeyValueStoreDataRequestKeyItem } from './StateKeyValueStoreDataRequestKeyItem';
+import type { ValidatorCollectionItemEffectiveFeeFactorCurrent } from './ValidatorCollectionItemEffectiveFeeFactorCurrent';
 import {
-    StateKeyValueStoreDataRequestKeyItemFromJSON,
-    StateKeyValueStoreDataRequestKeyItemFromJSONTyped,
-    StateKeyValueStoreDataRequestKeyItemToJSON,
-} from './StateKeyValueStoreDataRequestKeyItem';
+    ValidatorCollectionItemEffectiveFeeFactorCurrentFromJSON,
+    ValidatorCollectionItemEffectiveFeeFactorCurrentFromJSONTyped,
+    ValidatorCollectionItemEffectiveFeeFactorCurrentToJSON,
+} from './ValidatorCollectionItemEffectiveFeeFactorCurrent';
+import type { ValidatorCollectionItemEffectiveFeeFactorPending } from './ValidatorCollectionItemEffectiveFeeFactorPending';
+import {
+    ValidatorCollectionItemEffectiveFeeFactorPendingFromJSON,
+    ValidatorCollectionItemEffectiveFeeFactorPendingFromJSONTyped,
+    ValidatorCollectionItemEffectiveFeeFactorPendingToJSON,
+} from './ValidatorCollectionItemEffectiveFeeFactorPending';
 
 /**
  * 
  * @export
- * @interface StateKeyValueStoreDataRequestAllOf
+ * @interface ValidatorCollectionItemEffectiveFeeFactor
  */
-export interface StateKeyValueStoreDataRequestAllOf {
+export interface ValidatorCollectionItemEffectiveFeeFactor {
     /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof StateKeyValueStoreDataRequestAllOf
+     * 
+     * @type {ValidatorCollectionItemEffectiveFeeFactorCurrent}
+     * @memberof ValidatorCollectionItemEffectiveFeeFactor
      */
-    key_value_store_address: string;
+    current: ValidatorCollectionItemEffectiveFeeFactorCurrent;
     /**
-     * limited to max 100 items.
-     * @type {Array<StateKeyValueStoreDataRequestKeyItem>}
-     * @memberof StateKeyValueStoreDataRequestAllOf
+     * 
+     * @type {ValidatorCollectionItemEffectiveFeeFactorPending}
+     * @memberof ValidatorCollectionItemEffectiveFeeFactor
      */
-    keys: Array<StateKeyValueStoreDataRequestKeyItem>;
+    pending?: ValidatorCollectionItemEffectiveFeeFactorPending | null;
 }
 
 /**
- * Check if a given object implements the StateKeyValueStoreDataRequestAllOf interface.
+ * Check if a given object implements the ValidatorCollectionItemEffectiveFeeFactor interface.
  */
-export function instanceOfStateKeyValueStoreDataRequestAllOf(value: object): boolean {
+export function instanceOfValidatorCollectionItemEffectiveFeeFactor(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "key_value_store_address" in value;
-    isInstance = isInstance && "keys" in value;
+    isInstance = isInstance && "current" in value;
 
     return isInstance;
 }
 
-export function StateKeyValueStoreDataRequestAllOfFromJSON(json: any): StateKeyValueStoreDataRequestAllOf {
-    return StateKeyValueStoreDataRequestAllOfFromJSONTyped(json, false);
+export function ValidatorCollectionItemEffectiveFeeFactorFromJSON(json: any): ValidatorCollectionItemEffectiveFeeFactor {
+    return ValidatorCollectionItemEffectiveFeeFactorFromJSONTyped(json, false);
 }
 
-export function StateKeyValueStoreDataRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateKeyValueStoreDataRequestAllOf {
+export function ValidatorCollectionItemEffectiveFeeFactorFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorCollectionItemEffectiveFeeFactor {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'key_value_store_address': json['key_value_store_address'],
-        'keys': ((json['keys'] as Array<any>).map(StateKeyValueStoreDataRequestKeyItemFromJSON)),
+        'current': ValidatorCollectionItemEffectiveFeeFactorCurrentFromJSON(json['current']),
+        'pending': !exists(json, 'pending') ? undefined : ValidatorCollectionItemEffectiveFeeFactorPendingFromJSON(json['pending']),
     };
 }
 
-export function StateKeyValueStoreDataRequestAllOfToJSON(value?: StateKeyValueStoreDataRequestAllOf | null): any {
+export function ValidatorCollectionItemEffectiveFeeFactorToJSON(value?: ValidatorCollectionItemEffectiveFeeFactor | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -75,8 +80,8 @@ export function StateKeyValueStoreDataRequestAllOfToJSON(value?: StateKeyValueSt
     }
     return {
         
-        'key_value_store_address': value.key_value_store_address,
-        'keys': ((value.keys as Array<any>).map(StateKeyValueStoreDataRequestKeyItemToJSON)),
+        'current': ValidatorCollectionItemEffectiveFeeFactorCurrentToJSON(value.current),
+        'pending': ValidatorCollectionItemEffectiveFeeFactorPendingToJSON(value.pending),
     };
 }
 

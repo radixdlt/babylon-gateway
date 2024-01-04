@@ -45,7 +45,7 @@ export interface StateKeyValueStoreDataRequest {
      */
     key_value_store_address: string;
     /**
-     * 
+     * limited to max 100 items.
      * @type {Array<StateKeyValueStoreDataRequestKeyItem>}
      * @memberof StateKeyValueStoreDataRequest
      */

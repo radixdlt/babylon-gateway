@@ -13,60 +13,53 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { StateKeyValueStoreDataRequestKeyItem } from './StateKeyValueStoreDataRequestKeyItem';
-import {
-    StateKeyValueStoreDataRequestKeyItemFromJSON,
-    StateKeyValueStoreDataRequestKeyItemFromJSONTyped,
-    StateKeyValueStoreDataRequestKeyItemToJSON,
-} from './StateKeyValueStoreDataRequestKeyItem';
-
 /**
  * 
  * @export
- * @interface StateKeyValueStoreDataRequestAllOf
+ * @interface ValidatorCollectionItemEffectiveFeeFactorPending
  */
-export interface StateKeyValueStoreDataRequestAllOf {
+export interface ValidatorCollectionItemEffectiveFeeFactorPending {
     /**
-     * Bech32m-encoded human readable version of the address.
+     * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
-     * @memberof StateKeyValueStoreDataRequestAllOf
+     * @memberof ValidatorCollectionItemEffectiveFeeFactorPending
      */
-    key_value_store_address: string;
+    fee_factor: string;
     /**
-     * limited to max 100 items.
-     * @type {Array<StateKeyValueStoreDataRequestKeyItem>}
-     * @memberof StateKeyValueStoreDataRequestAllOf
+     * 
+     * @type {number}
+     * @memberof ValidatorCollectionItemEffectiveFeeFactorPending
      */
-    keys: Array<StateKeyValueStoreDataRequestKeyItem>;
+    effective_at_epoch: number;
 }
 
 /**
- * Check if a given object implements the StateKeyValueStoreDataRequestAllOf interface.
+ * Check if a given object implements the ValidatorCollectionItemEffectiveFeeFactorPending interface.
  */
-export function instanceOfStateKeyValueStoreDataRequestAllOf(value: object): boolean {
+export function instanceOfValidatorCollectionItemEffectiveFeeFactorPending(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "key_value_store_address" in value;
-    isInstance = isInstance && "keys" in value;
+    isInstance = isInstance && "fee_factor" in value;
+    isInstance = isInstance && "effective_at_epoch" in value;
 
     return isInstance;
 }
 
-export function StateKeyValueStoreDataRequestAllOfFromJSON(json: any): StateKeyValueStoreDataRequestAllOf {
-    return StateKeyValueStoreDataRequestAllOfFromJSONTyped(json, false);
+export function ValidatorCollectionItemEffectiveFeeFactorPendingFromJSON(json: any): ValidatorCollectionItemEffectiveFeeFactorPending {
+    return ValidatorCollectionItemEffectiveFeeFactorPendingFromJSONTyped(json, false);
 }
 
-export function StateKeyValueStoreDataRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateKeyValueStoreDataRequestAllOf {
+export function ValidatorCollectionItemEffectiveFeeFactorPendingFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorCollectionItemEffectiveFeeFactorPending {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'key_value_store_address': json['key_value_store_address'],
-        'keys': ((json['keys'] as Array<any>).map(StateKeyValueStoreDataRequestKeyItemFromJSON)),
+        'fee_factor': json['fee_factor'],
+        'effective_at_epoch': json['effective_at_epoch'],
     };
 }
 
-export function StateKeyValueStoreDataRequestAllOfToJSON(value?: StateKeyValueStoreDataRequestAllOf | null): any {
+export function ValidatorCollectionItemEffectiveFeeFactorPendingToJSON(value?: ValidatorCollectionItemEffectiveFeeFactorPending | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -75,8 +68,8 @@ export function StateKeyValueStoreDataRequestAllOfToJSON(value?: StateKeyValueSt
     }
     return {
         
-        'key_value_store_address': value.key_value_store_address,
-        'keys': ((value.keys as Array<any>).map(StateKeyValueStoreDataRequestKeyItemToJSON)),
+        'fee_factor': value.fee_factor,
+        'effective_at_epoch': value.effective_at_epoch,
     };
 }
 
