@@ -62,27 +62,91 @@
  * permissions under this License.
  */
 
-using System;
+namespace RadixDlt.NetworkGateway.Abstractions.Network;
 
-namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
+public sealed record NetworkConfiguration(
+    byte Id,
+    string Name,
+    long GenesisEpoch,
+    long GenesisRound,
+    WellKnownAddresses WellKnownAddresses,
+    HrpDefinition Hrp
+);
 
-/// <summary>
-/// An Exception thrown when parsing addresses.
-/// </summary>
-[Serializable]
-public sealed class AddressException : Exception
+public sealed record HrpDefinition(
+    string Suffix,
+    string GlobalPackage,
+    string GlobalGenericComponent,
+    string InternalGenericComponent,
+    string GlobalAccount,
+    string GlobalVirtualEd25519Account,
+    string GlobalVirtualSecp256k1Account,
+    string GlobalValidator,
+    string GlobalIdentity,
+    string GlobalVirtualSecp256k1Identity,
+    string GlobalVirtualEd25519Identity,
+    string GlobalConsensusManager,
+    string GlobalFungibleResource,
+    string GlobalNonFungibleResource,
+    string InternalFungibleVault,
+    string InternalNonFungibleVault,
+    string InternalKeyValueStore,
+    string GlobalAccessController
+);
+
+public sealed record WellKnownAddresses(
+    string Xrd,
+    string Secp256k1SignatureVirtualBadge,
+    string Ed25519SignatureVirtualBadge,
+    string PackageOfDirectCallerVirtualBadge,
+    string GlobalCallerVirtualBadge,
+    string SystemTransactionBadge,
+    string PackageOwnerBadge,
+    string ValidatorOwnerBadge,
+    string AccountOwnerBadge,
+    string IdentityOwnerBadge,
+    string PackagePackage,
+    string ResourcePackage,
+    string AccountPackage,
+    string IdentityPackage,
+    string ConsensusManagerPackage,
+    string AccessControllerPackage,
+    string TransactionProcessorPackage,
+    string MetadataModulePackage,
+    string RoyaltyModulePackage,
+    string RoleAssignmentModulePackage,
+    string GenesisHelperPackage,
+    string FaucetPackage,
+    string ConsensusManager,
+    string GenesisHelper,
+    string Faucet,
+    string PoolPackage
+);
+
+public enum AddressEntityType
 {
-    public AddressException()
-    {
-    }
-
-    public AddressException(string message)
-        : base(message)
-    {
-    }
-
-    public AddressException(string message, Exception inner)
-        : base(message, inner)
-    {
-    }
+    GlobalPackage,
+    GlobalConsensusManager,
+    GlobalValidator,
+    GlobalGenericComponent,
+    InternalGenericComponent,
+    GlobalAccount,
+    GlobalVirtualSecp256k1Account,
+    GlobalVirtualEd25519Account,
+    GlobalIdentity,
+    GlobalVirtualEd25519Identity,
+    GlobalVirtualSecp256k1Identity,
+    GlobalAccessController,
+    GlobalFungibleResource,
+    InternalFungibleVault,
+    GlobalNonFungibleResource,
+    InternalNonFungibleVault,
+    InternalKeyValueStore,
 }
+
+public sealed record AddressTypeDefinition(
+    AddressEntityType EntityType,
+    string HrpPrefix,
+    int AddressBytePrefix,
+    int AddressByteLength
+);

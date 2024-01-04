@@ -63,8 +63,8 @@
  */
 
 using FluentValidation;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using System;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 

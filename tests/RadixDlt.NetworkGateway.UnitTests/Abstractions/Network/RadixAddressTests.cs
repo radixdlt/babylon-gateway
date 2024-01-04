@@ -63,12 +63,12 @@
  */
 
 using FluentAssertions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using System.Collections.Generic;
 using Xunit;
 
-namespace RadixDlt.NetworkGateway.UnitTests.Abstractions.Addressing;
+namespace RadixDlt.NetworkGateway.UnitTests.Abstractions.Network;
 
 public class RadixAddressTests
 {

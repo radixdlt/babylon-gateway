@@ -62,17 +62,15 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreApi = RadixDlt.CoreApiSdk.Api;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
+namespace RadixDlt.NetworkGateway.Abstractions.Network;
 
 public interface INetworkConfigurationProvider
 {
