@@ -166,9 +166,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="manifestResourcesFilter">manifestResourcesFilter.</param>
         /// <param name="affectedGlobalEntitiesFilter">affectedGlobalEntitiesFilter.</param>
         /// <param name="eventsFilter">eventsFilter.</param>
+        /// <param name="accountsWithManifestOwnerMethodCalls">accountsWithManifestOwnerMethodCalls.</param>
+        /// <param name="accountsWithoutManifestOwnerMethodCalls">accountsWithoutManifestOwnerMethodCalls.</param>
+        /// <param name="manifestClassFilter">manifestClassFilter.</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
         /// <param name="optIns">optIns.</param>
-        public StreamTransactionsRequestAllOf(KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
+        public StreamTransactionsRequestAllOf(KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), List<string> accountsWithManifestOwnerMethodCalls = default(List<string>), List<string> accountsWithoutManifestOwnerMethodCalls = default(List<string>), StreamTransactionsRequestAllOfManifestClassFilter manifestClassFilter = default(StreamTransactionsRequestAllOfManifestClassFilter), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
         {
             this.KindFilter = kindFilter;
             this.ManifestAccountsWithdrawnFromFilter = manifestAccountsWithdrawnFromFilter;
@@ -176,6 +179,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.ManifestResourcesFilter = manifestResourcesFilter;
             this.AffectedGlobalEntitiesFilter = affectedGlobalEntitiesFilter;
             this.EventsFilter = eventsFilter;
+            this.AccountsWithManifestOwnerMethodCalls = accountsWithManifestOwnerMethodCalls;
+            this.AccountsWithoutManifestOwnerMethodCalls = accountsWithoutManifestOwnerMethodCalls;
+            this.ManifestClassFilter = manifestClassFilter;
             this.Order = order;
             this.OptIns = optIns;
         }
@@ -211,6 +217,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<StreamTransactionsRequestEventFilterItem> EventsFilter { get; set; }
 
         /// <summary>
+        /// Gets or Sets AccountsWithManifestOwnerMethodCalls
+        /// </summary>
+        [DataMember(Name = "accounts_with_manifest_owner_method_calls", EmitDefaultValue = true)]
+        public List<string> AccountsWithManifestOwnerMethodCalls { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccountsWithoutManifestOwnerMethodCalls
+        /// </summary>
+        [DataMember(Name = "accounts_without_manifest_owner_method_calls", EmitDefaultValue = true)]
+        public List<string> AccountsWithoutManifestOwnerMethodCalls { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ManifestClassFilter
+        /// </summary>
+        [DataMember(Name = "manifest_class_filter", EmitDefaultValue = true)]
+        public StreamTransactionsRequestAllOfManifestClassFilter ManifestClassFilter { get; set; }
+
+        /// <summary>
         /// Gets or Sets OptIns
         /// </summary>
         [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
@@ -230,6 +254,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ManifestResourcesFilter: ").Append(ManifestResourcesFilter).Append("\n");
             sb.Append("  AffectedGlobalEntitiesFilter: ").Append(AffectedGlobalEntitiesFilter).Append("\n");
             sb.Append("  EventsFilter: ").Append(EventsFilter).Append("\n");
+            sb.Append("  AccountsWithManifestOwnerMethodCalls: ").Append(AccountsWithManifestOwnerMethodCalls).Append("\n");
+            sb.Append("  AccountsWithoutManifestOwnerMethodCalls: ").Append(AccountsWithoutManifestOwnerMethodCalls).Append("\n");
+            sb.Append("  ManifestClassFilter: ").Append(ManifestClassFilter).Append("\n");
             sb.Append("  Order: ").Append(Order).Append("\n");
             sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("}\n");
@@ -302,6 +329,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.EventsFilter.SequenceEqual(input.EventsFilter)
                 ) && 
                 (
+                    this.AccountsWithManifestOwnerMethodCalls == input.AccountsWithManifestOwnerMethodCalls ||
+                    this.AccountsWithManifestOwnerMethodCalls != null &&
+                    input.AccountsWithManifestOwnerMethodCalls != null &&
+                    this.AccountsWithManifestOwnerMethodCalls.SequenceEqual(input.AccountsWithManifestOwnerMethodCalls)
+                ) && 
+                (
+                    this.AccountsWithoutManifestOwnerMethodCalls == input.AccountsWithoutManifestOwnerMethodCalls ||
+                    this.AccountsWithoutManifestOwnerMethodCalls != null &&
+                    input.AccountsWithoutManifestOwnerMethodCalls != null &&
+                    this.AccountsWithoutManifestOwnerMethodCalls.SequenceEqual(input.AccountsWithoutManifestOwnerMethodCalls)
+                ) && 
+                (
+                    this.ManifestClassFilter == input.ManifestClassFilter ||
+                    (this.ManifestClassFilter != null &&
+                    this.ManifestClassFilter.Equals(input.ManifestClassFilter))
+                ) && 
+                (
                     this.Order == input.Order ||
                     this.Order.Equals(input.Order)
                 ) && 
@@ -341,6 +385,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.EventsFilter != null)
                 {
                     hashCode = (hashCode * 59) + this.EventsFilter.GetHashCode();
+                }
+                if (this.AccountsWithManifestOwnerMethodCalls != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccountsWithManifestOwnerMethodCalls.GetHashCode();
+                }
+                if (this.AccountsWithoutManifestOwnerMethodCalls != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccountsWithoutManifestOwnerMethodCalls.GetHashCode();
+                }
+                if (this.ManifestClassFilter != null)
+                {
+                    hashCode = (hashCode * 59) + this.ManifestClassFilter.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Order.GetHashCode();
                 if (this.OptIns != null)

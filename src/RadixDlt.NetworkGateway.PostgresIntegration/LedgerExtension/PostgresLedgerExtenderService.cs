@@ -286,7 +286,8 @@ UPDATE pending_transactions
                         var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
                         using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, _networkConfigurationProvider.GetNetworkId());
                         using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
-                        var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest);
+
+                        var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, _networkConfigurationProvider.GetNetworkId());
 
                         foreach (var address in extractedAddresses.All())
                         {
@@ -294,6 +295,21 @@ UPDATE pending_transactions
                         }
 
                         manifestExtractedAddresses[stateVersion] = extractedAddresses;
+
+                        var manifestSummary = toolkitManifest.Summary(_networkConfigurationProvider.GetNetworkId());
+
+                        for (var i = 0; i < manifestSummary.classification.Length; ++i)
+                        {
+                            var manifestClass = manifestSummary.classification[i].ToModel();
+
+                            ledgerTransactionMarkersToAdd.Add(new ManifestClassMarker
+                            {
+                                Id = sequences.LedgerTransactionMarkerSequence++,
+                                StateVersion = stateVersion,
+                                ManifestClass = manifestClass,
+                                IsMostSpecific = i == 0,
+                            });
+                        }
                     }
 
                     if (committedTransaction.LedgerTransaction is CoreModel.RoundUpdateLedgerTransaction rult)
@@ -481,6 +497,14 @@ UPDATE pending_transactions
                         }
                     }
 
+                    if (committedTransaction.BalanceChanges != null)
+                    {
+                        foreach (var entityAddress in committedTransaction.BalanceChanges.GetEntityAddresses())
+                        {
+                            referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
+                        }
+                    }
+
                     /* NB:
                        The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
                        as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
@@ -545,6 +569,7 @@ UPDATE pending_transactions
                     ledgerTransaction.ReceiptNextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson();
                     ledgerTransaction.ReceiptCostingParameters = committedTransaction.Receipt.CostingParameters.ToJson();
                     ledgerTransaction.ReceiptFeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson();
+                    ledgerTransaction.BalanceChanges = committedTransaction.BalanceChanges?.ToJson();
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
 
                     if (committedTransaction.Receipt.NextEpoch != null)
@@ -989,15 +1014,16 @@ UPDATE pending_transactions
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
 
                             packageBlueprintHistoryToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                                {
-                                    Id = sequences.PackageBlueprintHistorySequence++,
-                                    FromStateVersion = stateVersion,
-                                    PackageEntityId = referencedEntity.DatabaseId,
-                                    Name = lookup.Name,
-                                    Version = lookup.BlueprintVersion,
-                                })
-                                .DependantEntityIds = packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                                    .GetOrAdd(lookup, _ => new PackageBlueprintHistory
+                                    {
+                                        Id = sequences.PackageBlueprintHistorySequence++,
+                                        FromStateVersion = stateVersion,
+                                        PackageEntityId = referencedEntity.DatabaseId,
+                                        Name = lookup.Name,
+                                        Version = lookup.BlueprintVersion,
+                                    })
+                                    .DependantEntityIds =
+                                packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
                         }
 
                         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
@@ -1303,6 +1329,20 @@ UPDATE pending_transactions
                                     Id = sequences.LedgerTransactionMarkerSequence++,
                                     StateVersion = stateVersion,
                                     OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
+
+                        foreach (var address in extractedAddresses.AccountsRequiringAuth)
+                        {
+                            if (referencedEntities.TryGet(address, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.AccountOwnerMethodCall,
                                     EntityId = re.DatabaseId,
                                 });
                             }
