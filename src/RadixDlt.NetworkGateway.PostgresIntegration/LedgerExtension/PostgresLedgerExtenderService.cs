@@ -406,10 +406,6 @@ UPDATE pending_transactions
                                 case CoreModel.ObjectTypeInfoDetails objectDetails:
                                     referencedEntity.PostResolveConfigure((ComponentEntity e) =>
                                     {
-                                        // TODO PP:
-                                        // What about non global components?
-                                        // we don't return role assignments for them
-                                        // but we also dont have specific db type/entity for only global components
                                         e.AssignedModuleIds = objectDetails
                                             .ModuleVersions
                                             .Select(x =>
