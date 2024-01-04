@@ -422,6 +422,21 @@ UPDATE pending_transactions
                                 case CoreModel.ObjectTypeInfoDetails objectDetails:
                                     referencedEntity.PostResolveConfigure((ComponentEntity e) =>
                                     {
+                                        e.AssignedModuleIds = objectDetails
+                                            .ModuleVersions
+                                            .Select(x =>
+                                            {
+                                                return x.Module switch
+                                                {
+                                                    CoreModel.AttachedModuleId.Metadata => ModuleId.Metadata,
+                                                    CoreModel.AttachedModuleId.Royalty => ModuleId.Royalty,
+                                                    CoreModel.AttachedModuleId.RoleAssignment => ModuleId.RoleAssignment,
+                                                    _ => throw new ArgumentOutOfRangeException(nameof(x.Module), x.Module, "Unexpected value of AssignedModule"),
+                                                };
+                                            })
+                                            .OrderBy(x => x)
+                                            .ToList();
+
                                         e.PackageId = referencedEntities.Get((EntityAddress)objectDetails.BlueprintInfo.PackageAddress).DatabaseId;
                                         e.BlueprintName = objectDetails.BlueprintInfo.BlueprintName;
                                         e.BlueprintVersion = objectDetails.BlueprintInfo.BlueprintVersion;

@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
 using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -110,8 +109,8 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
             ?.Roles
             ?.Select(x =>
                 new RoleAssignmentEntry(
-                    new RoleAssignmentRuleKey(x.Key, ModuleId.Main),
-                    x.Value.UpdaterRoles.Select(u => new RoleAssignmentRuleKey(u, ModuleId.Main)).ToArray()
+                    new RoleAssignmentRuleKey(x.Key, GatewayModel.ModuleId.Main),
+                    x.Value.UpdaterRoles.Select(u => new RoleAssignmentRuleKey(u, GatewayModel.ModuleId.Main)).ToArray()
                 ))
             .ToList() ?? new List<RoleAssignmentEntry>();
     }
