@@ -25,7 +25,7 @@ jobs:
       contents: read
       deployments: write
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
         with:
           role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
@@ -35,22 +35,22 @@ jobs:
           secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
           parse_json: true
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
+        uses: RDXWorks-actions/setup-dotnet@main
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Install dependencies
         run: dotnet restore
       - name: Run Snyk to check for deps vulnerabilities
-        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        uses: RDXWorks-actions/snyk-actions/dotnet@master
         with:
           args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=critical
       - name: Run Snyk to check for code vulnerabilities
-        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        uses: RDXWorks-actions/snyk-actions/dotnet@master
         with:
           args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=high
           command: code test
       - name: Generate SBOM # check SBOM can be generated but nothing is done with it
-        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        uses: RDXWorks-actions/snyk-actions/dotnet@master
         with:
           args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json --json-file-output sbom.json
           command: sbom
@@ -58,9 +58,9 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
+        uses: RDXWorks-actions/setup-dotnet@main
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Install dependencies
@@ -78,7 +78,7 @@ jobs:
       data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
       gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - name: Setup tags for docker image
         id: setup_tags
         uses: ./.github/actions/set-variables
@@ -86,7 +86,7 @@ jobs:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
       - name: Publish Gateway Settings
-        uses: actions/upload-artifact@v3
+        uses: RDXWorks-actions/upload-artifact@main
         with:
           path: Directory.Build.props
           name: build_props
@@ -285,7 +285,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
         with:
           role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
@@ -340,7 +340,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
         with:
           role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
@@ -386,7 +386,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
         with:
           role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
@@ -424,7 +424,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/actions/fetch-secrets

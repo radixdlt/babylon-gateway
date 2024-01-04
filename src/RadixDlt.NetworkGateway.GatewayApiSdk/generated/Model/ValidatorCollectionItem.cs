@@ -108,10 +108,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="pendingXrdWithdrawVault">pendingXrdWithdrawVault (required).</param>
         /// <param name="lockedOwnerStakeUnitVault">lockedOwnerStakeUnitVault (required).</param>
         /// <param name="pendingOwnerStakeUnitUnlockVault">pendingOwnerStakeUnitUnlockVault (required).</param>
-        /// <param name="state">Validator inner state representation. This type is defined in the Core API as &#x60;ValidatorFieldStateValue&#x60;. See the Core API documentation for more details. .</param>
+        /// <param name="state">Validator inner state representation. This type is defined in the Core API as &#x60;ValidatorFieldStateValue&#x60;. See the Core API documentation for more details.  (required).</param>
         /// <param name="activeInEpoch">activeInEpoch.</param>
         /// <param name="metadata">metadata (required).</param>
-        public ValidatorCollectionItem(string address = default(string), ValidatorVaultItem stakeVault = default(ValidatorVaultItem), ValidatorVaultItem pendingXrdWithdrawVault = default(ValidatorVaultItem), ValidatorVaultItem lockedOwnerStakeUnitVault = default(ValidatorVaultItem), ValidatorVaultItem pendingOwnerStakeUnitUnlockVault = default(ValidatorVaultItem), Object state = default(Object), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection))
+        /// <param name="effectiveFeeFactor">effectiveFeeFactor (required).</param>
+        public ValidatorCollectionItem(string address = default(string), ValidatorVaultItem stakeVault = default(ValidatorVaultItem), ValidatorVaultItem pendingXrdWithdrawVault = default(ValidatorVaultItem), ValidatorVaultItem lockedOwnerStakeUnitVault = default(ValidatorVaultItem), ValidatorVaultItem pendingOwnerStakeUnitUnlockVault = default(ValidatorVaultItem), Object state = default(Object), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection), ValidatorCollectionItemEffectiveFeeFactor effectiveFeeFactor = default(ValidatorCollectionItemEffectiveFeeFactor))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -143,13 +144,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("pendingOwnerStakeUnitUnlockVault is a required property for ValidatorCollectionItem and cannot be null");
             }
             this.PendingOwnerStakeUnitUnlockVault = pendingOwnerStakeUnitUnlockVault;
+            // to ensure "state" is required (not null)
+            if (state == null)
+            {
+                throw new ArgumentNullException("state is a required property for ValidatorCollectionItem and cannot be null");
+            }
+            this.State = state;
             // to ensure "metadata" is required (not null)
             if (metadata == null)
             {
                 throw new ArgumentNullException("metadata is a required property for ValidatorCollectionItem and cannot be null");
             }
             this.Metadata = metadata;
-            this.State = state;
+            // to ensure "effectiveFeeFactor" is required (not null)
+            if (effectiveFeeFactor == null)
+            {
+                throw new ArgumentNullException("effectiveFeeFactor is a required property for ValidatorCollectionItem and cannot be null");
+            }
+            this.EffectiveFeeFactor = effectiveFeeFactor;
             this.ActiveInEpoch = activeInEpoch;
         }
 
@@ -188,7 +200,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Validator inner state representation. This type is defined in the Core API as &#x60;ValidatorFieldStateValue&#x60;. See the Core API documentation for more details. 
         /// </summary>
         /// <value>Validator inner state representation. This type is defined in the Core API as &#x60;ValidatorFieldStateValue&#x60;. See the Core API documentation for more details. </value>
-        [DataMember(Name = "state", EmitDefaultValue = true)]
+        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
         public Object State { get; set; }
 
         /// <summary>
@@ -202,6 +214,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
         public EntityMetadataCollection Metadata { get; set; }
+
+        /// <summary>
+        /// Gets or Sets EffectiveFeeFactor
+        /// </summary>
+        [DataMember(Name = "effective_fee_factor", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorCollectionItemEffectiveFeeFactor EffectiveFeeFactor { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -219,6 +237,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  ActiveInEpoch: ").Append(ActiveInEpoch).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  EffectiveFeeFactor: ").Append(EffectiveFeeFactor).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -293,6 +312,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Metadata == input.Metadata ||
                     (this.Metadata != null &&
                     this.Metadata.Equals(input.Metadata))
+                ) && 
+                (
+                    this.EffectiveFeeFactor == input.EffectiveFeeFactor ||
+                    (this.EffectiveFeeFactor != null &&
+                    this.EffectiveFeeFactor.Equals(input.EffectiveFeeFactor))
                 );
         }
 
@@ -336,6 +360,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Metadata != null)
                 {
                     hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                }
+                if (this.EffectiveFeeFactor != null)
+                {
+                    hashCode = (hashCode * 59) + this.EffectiveFeeFactor.GetHashCode();
                 }
                 return hashCode;
             }

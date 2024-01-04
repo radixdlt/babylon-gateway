@@ -63,7 +63,6 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -695,7 +694,8 @@ WITH configuration AS (
         true AS with_receipt_next_epoch,
         {optIns.ReceiptOutput} AS with_receipt_output,
         {optIns.ReceiptStateChanges} AS with_receipt_state_updates,
-        {optIns.ReceiptEvents} AS with_receipt_events
+        {optIns.ReceiptEvents} AS with_receipt_events,
+        {optIns.BalanceChanges} AS with_balance_changes
 )
 SELECT
     state_version, epoch, round_in_epoch, index_in_epoch,
@@ -716,7 +716,8 @@ SELECT
     CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_entity_ids ELSE '{{}}'::bigint[] END AS receipt_event_schema_entity_ids,
     CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_hashes ELSE '{{}}'::bytea[] END AS receipt_event_schema_hashes,
     CASE WHEN configuration.with_receipt_events THEN receipt_event_type_indexes ELSE '{{}}'::bigint[] END AS receipt_event_type_indexes,
-    CASE WHEN configuration.with_receipt_events THEN receipt_event_sbor_type_kinds ELSE '{{}}'::sbor_type_kind[] END AS receipt_event_sbor_type_kinds
+    CASE WHEN configuration.with_receipt_events THEN receipt_event_sbor_type_kinds ELSE '{{}}'::sbor_type_kind[] END AS receipt_event_sbor_type_kinds,
+    CASE WHEN configuration.with_balance_changes THEN balance_changes ELSE '{{}}'::jsonb END AS balance_changes
 FROM ledger_transactions, configuration
 WHERE state_version = ANY({transactionStateVersions})")
             .AnnotateMetricName("GetTransactions")
@@ -750,23 +751,19 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
 
         List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
         var networkId = _networkConfigurationProvider.GetNetworkId();
-        var orderedTransactions = transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)).ToList();
 
-        Dictionary<long, CoreModel.LtsCommittedTransactionOutcome>? balanceChangesPerTransaction = null;
+        Dictionary<long, GatewayModel.TransactionBalanceChanges>? balanceChangesPerTransaction = null;
 
         if (optIns.BalanceChanges)
         {
-            balanceChangesPerTransaction = await _transactionBalanceChangesService.GetTransactionBalanceChanges(orderedTransactions.Select(x => x.StateVersion).ToList(), token);
+            balanceChangesPerTransaction = await _transactionBalanceChangesService.GetTransactionBalanceChanges(transactions, token);
         }
 
-        foreach (var transaction in orderedTransactions)
+        foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)).ToList())
         {
             GatewayModel.TransactionBalanceChanges? balanceChanges = null;
 
-            if (balanceChangesPerTransaction?.TryGetValue(transaction.StateVersion, out var bc) == true)
-            {
-                balanceChanges = bc.ToGatewayModel();
-            }
+            balanceChangesPerTransaction?.TryGetValue(transaction.StateVersion, out balanceChanges);
 
             if (!optIns.ReceiptEvents || schemaLookups?.Any() == false)
             {

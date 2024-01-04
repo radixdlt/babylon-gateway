@@ -432,6 +432,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     receipt_event_schema_hashes = table.Column<byte[][]>(type: "bytea[]", nullable: false),
                     receipt_event_type_indexes = table.Column<long[]>(type: "bigint[]", nullable: false),
                     receipt_event_sbor_type_kinds = table.Column<SborTypeKind[]>(type: "sbor_type_kind[]", nullable: false),
+                    balance_changes = table.Column<string>(type: "jsonb", nullable: true),
                     transaction_tree_hash = table.Column<string>(type: "text", nullable: false),
                     receipt_tree_hash = table.Column<string>(type: "text", nullable: false),
                     state_tree_hash = table.Column<string>(type: "text", nullable: false),

@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240103151915_InitialCreate")]
+    [Migration("20240104104456_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -727,6 +727,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("bigint[]")
                         .HasColumnName("affected_global_entities");
+
+                    b.Property<string>("BalanceChanges")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("balance_changes");
 
                     b.Property<DateTime>("CreatedTimestamp")
                         .HasColumnType("timestamp with time zone")

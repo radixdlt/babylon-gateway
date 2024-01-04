@@ -233,6 +233,27 @@ internal static class GatewayModelExtensions
         return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
     }
 
+    public static GatewayModel.TransactionBalanceChanges ToGatewayModel(this CoreModel.CommittedTransactionBalanceChanges input)
+    {
+        var fungibleFeeBalanceChanges = new List<GatewayModel.TransactionFungibleFeeBalanceChanges>();
+        var fungibleBalanceChanges = new List<GatewayModel.TransactionFungibleBalanceChanges>();
+
+        foreach (var f in input.FungibleEntityBalanceChanges)
+        {
+            fungibleFeeBalanceChanges.AddRange(f.FeeBalanceChanges
+                .Select(x => new GatewayModel.TransactionFungibleFeeBalanceChanges(x.Type.ToGatewayModel(), f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
+            fungibleBalanceChanges.AddRange(f.NonFeeBalanceChanges
+                .Select(x => new GatewayModel.TransactionFungibleBalanceChanges(f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
+        }
+
+        var nonFungibleBalanceChanges = input
+            .NonFungibleEntityBalanceChanges
+            .Select(x => new GatewayModel.TransactionNonFungibleBalanceChanges(x.EntityAddress, x.ResourceAddress, x.Added, x.Removed))
+            .ToList();
+
+        return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
+    }
+
     private static GatewayModel.TransactionFungibleFeeBalanceChangeType ToGatewayModel(this CoreModel.LtsFeeFungibleResourceBalanceChangeType input)
     {
         return input switch

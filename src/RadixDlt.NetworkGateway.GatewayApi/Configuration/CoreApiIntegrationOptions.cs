@@ -97,6 +97,9 @@ public sealed class CoreApiIntegrationOptions
 
     [ConfigurationKeyName("TransactionBalanceChangesMaxDegreeOfParallelism")]
     public int TransactionBalanceChangesMaxDegreeOfParallelism { get; set; } = 8;
+
+    [ConfigurationKeyName("MaxTransientErrorRetryCount")]
+    public int MaxTransientErrorRetryCount { get; set; } = 3;
 }
 
 internal class CoreApiIntegrationOptionsValidator : AbstractOptionsValidator<CoreApiIntegrationOptions>
@@ -107,5 +110,6 @@ internal class CoreApiIntegrationOptionsValidator : AbstractOptionsValidator<Cor
         RuleFor(x => x.StopResubmittingAfterSeconds).GreaterThanOrEqualTo(0);
         RuleFor(x => x.MaxSubmissionAttempts).GreaterThanOrEqualTo(0);
         RuleFor(x => x.TransactionBalanceChangesMaxDegreeOfParallelism).GreaterThan(0);
+        RuleFor(x => x.MaxTransientErrorRetryCount).GreaterThanOrEqualTo(0);
     }
 }

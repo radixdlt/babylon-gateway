@@ -1,5 +1,18 @@
-## 1.2.3
+## 2.0.0
 Release Date: _unreleased_
+
+TBA
+
+## 1.2.4
+Release Date: _unreleased_
+
+- Extended validator's data returned from `/state/validators/list`: added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
+- Enable retries on transient database connectivity issues in gateway api.
+- Enable retries on core api calls in gateway api.
+- Optimized transaction balance changes; if available they're read from internal database, otherwise they use existing fallback mechanism
+
+## 1.2.3
+Release Date: 19.12.2023
 
 - Fixed exception thrown on empty validator set in the `/state/validator/list` endpoint.
 - `524` status code returned instead of `500` if request takes longer than configured timeout.

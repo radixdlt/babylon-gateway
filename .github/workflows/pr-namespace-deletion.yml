@@ -10,9 +10,9 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "dispatch-pr-hns-deletion-events"

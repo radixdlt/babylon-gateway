@@ -67,6 +67,8 @@ using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Polly;
+using Polly.Extensions.Http;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
@@ -99,6 +101,7 @@ public static class ServiceCollectionExtensions
 
         services
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
+            .AddValidatableOptionsAtSection<PostgresIntegrationOptions, PostgresIntegrationOptionsValidator>("GatewayApi:PostgresIntegration")
             .AddValidatableOptionsAtSection<SlowQueryLoggingOptions, SlowQueryLoggingOptionsValidator>("GatewayApi:SlowQueryLogging")
             .AddValidatableOptionsAtSection<CoreApiIntegrationOptions, CoreApiIntegrationOptionsValidator>("GatewayApi:CoreApiIntegration")
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("GatewayApi:Network")
@@ -146,7 +149,6 @@ public static class ServiceCollectionExtensions
         services.TryAddScoped<INonFungibleHandler, DefaultNonFungibleHandler>();
         services.TryAddScoped<IKeyValueStoreHandler, DefaultKeyValueStoreHandler>();
         services.TryAddScoped<ITransactionPreviewService, TransactionPreviewService>();
-        services.TryAddScoped<ITransactionBalanceChangesService, TransactionBalanceChangesService>();
         services.TryAddScoped<ISubmissionService, SubmissionService>();
     }
 
@@ -156,6 +158,14 @@ public static class ServiceCollectionExtensions
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         coreApiHttpClientBuilder = services
             .AddHttpClient<ICoreApiHandler, CoreApiHandler>()
+            .AddPolicyHandler((serviceProvider, _) =>
+            {
+                var retryCount = serviceProvider.GetRequiredService<IOptions<CoreApiIntegrationOptions>>().Value.MaxTransientErrorRetryCount;
+
+                return HttpPolicyExtensions
+                    .HandleTransientHttpError()
+                    .RetryAsync(retryCount);
+            })
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
 
         coreNodeHealthCheckerClientBuilder = services
