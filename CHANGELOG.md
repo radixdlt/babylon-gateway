@@ -1,10 +1,11 @@
 ## 2.0.0
 Release Date: _unreleased_
-
-- Dropped `balance_changes` fallback mechanism.  
+  
+- Return components effective role assignments only for assigned modules.
+- Dropped `balance_changes` fallback mechanism.
 
 ## 1.2.4
-Release Date: _unreleased_
+Release Date: 4.01.2024
 
 - Extended validator's data returned from `/state/validators/list`: added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
 - Enable retries on transient database connectivity issues in gateway api.

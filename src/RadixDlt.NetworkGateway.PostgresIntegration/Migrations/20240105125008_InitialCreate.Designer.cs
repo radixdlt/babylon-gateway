@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240103140521_InitialCreate")]
+    [Migration("20240105125008_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -96,9 +96,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_resource_preference_rule", new[] { "allowed", "disallowed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity", "global_one_resource_pool", "global_two_resource_pool", "global_multi_resource_pool", "global_transaction_tracker" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from", "account_owner_method_call" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_origin_type", new[] { "user", "epoch_change" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address", "affected_global_entity" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address", "affected_global_entity", "manifest_class" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "round_update" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "module_id", new[] { "main", "metadata", "royalty", "role_assignment" });
@@ -1499,6 +1500,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
                     b.Property<string>("BlueprintName")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -1524,6 +1531,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalAccountEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
 
                     b.Property<string>("BlueprintName")
                         .IsRequired()
@@ -1551,6 +1564,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
                     b.Property<string>("BlueprintName")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -1576,6 +1595,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalFungibleResourceEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
 
                     b.Property<string>("BlueprintName")
                         .IsRequired()
@@ -1607,6 +1632,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
                     b.Property<string>("BlueprintName")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -1632,6 +1663,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalIdentityEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
 
                     b.Property<string>("BlueprintName")
                         .IsRequired()
@@ -1659,6 +1696,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
                     b.Property<string>("BlueprintName")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -1684,6 +1727,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalNonFungibleResourceEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
 
                     b.Property<string>("BlueprintName")
                         .IsRequired()
@@ -1715,6 +1764,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
                     b.Property<string>("BlueprintName")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -1740,6 +1795,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalPackageEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
 
                     b.Property<string>("BlueprintName")
                         .IsRequired()
@@ -1771,6 +1832,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
                     b.Property<string>("BlueprintName")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -1797,6 +1864,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
                     b.Property<string>("BlueprintName")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -1822,6 +1895,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalValidatorEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
 
                     b.Property<string>("BlueprintName")
                         .IsRequired()
@@ -1865,6 +1944,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
                     b.Property<string>("BlueprintName")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -1900,6 +1985,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
                     b.Property<string>("BlueprintName")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -1934,6 +2025,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.InternalNonFungibleVaultEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
 
                     b.Property<string>("BlueprintName")
                         .IsRequired()
@@ -2143,6 +2240,26 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("ledger_transaction_markers");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.ManifestAddress);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ManifestClassMarker", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionMarker");
+
+                    b.Property<bool>("IsMostSpecific")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_most_specific");
+
+                    b.Property<LedgerTransactionMarkerManifestClass>("ManifestClass")
+                        .HasColumnType("ledger_transaction_marker_manifest_class")
+                        .HasColumnName("manifest_class");
+
+                    b.HasIndex("ManifestClass", "IsMostSpecific", "StateVersion")
+                        .HasFilter("discriminator = 'manifest_class'");
+
+                    b.ToTable("ledger_transaction_markers");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.ManifestClass);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.OriginLedgerTransactionMarker", b =>

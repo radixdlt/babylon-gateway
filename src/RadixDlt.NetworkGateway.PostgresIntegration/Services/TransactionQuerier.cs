@@ -106,6 +106,8 @@ internal class TransactionQuerier : ITransactionQuerier
         var referencedAddresses = request
             .SearchCriteria
             .ManifestAccountsDepositedInto
+            .Concat(request.SearchCriteria.AccountsWithManifestOwnerMethodCalls)
+            .Concat(request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls)
             .Concat(request.SearchCriteria.ManifestAccountsWithdrawnFrom)
             .Concat(request.SearchCriteria.ManifestResources)
             .Concat(request.SearchCriteria.AffectedGlobalEntities)
@@ -265,6 +267,76 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
                     .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
                     .Select(eltm => eltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.ManifestClassFilter != null)
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            var manifestClass = request.SearchCriteria.ManifestClassFilter.Class switch
+            {
+                ManifestClass.General => LedgerTransactionMarkerManifestClass.General,
+                ManifestClass.Transfer => LedgerTransactionMarkerManifestClass.Transfer,
+                ManifestClass.ValidatorStake => LedgerTransactionMarkerManifestClass.ValidatorStake,
+                ManifestClass.ValidatorUnstake => LedgerTransactionMarkerManifestClass.ValidatorUnstake,
+                ManifestClass.ValidatorClaim => LedgerTransactionMarkerManifestClass.ValidatorClaim,
+                ManifestClass.AccountDepositSettingsUpdate => LedgerTransactionMarkerManifestClass.AccountDepositSettingsUpdate,
+                ManifestClass.PoolContribution => LedgerTransactionMarkerManifestClass.PoolContribution,
+                ManifestClass.PoolRedemption => LedgerTransactionMarkerManifestClass.PoolRedemption,
+                _ => throw new UnreachableException($"Didn't expect {request.SearchCriteria.ManifestClassFilter.Class} value"),
+            };
+
+            searchQuery = searchQuery
+                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                .OfType<ManifestClassMarker>()
+                .Where(ttm => ttm.ManifestClass == manifestClass)
+                .Where(ttm => (request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType)
+                .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
+                .Select(eltm => eltm.StateVersion);
+        }
+
+        if (request.SearchCriteria.AccountsWithManifestOwnerMethodCalls.Any())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityAddress in request.SearchCriteria.AccountsWithManifestOwnerMethodCalls)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = searchQuery
+                    .Join(
+                        _dbContext.LedgerTransactionMarkers,
+                        stateVersion => stateVersion,
+                        ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
+                        (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
+                    .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls.Any())
+        {
+            foreach (var entityAddress in request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                var withManifestOwnerCall = _dbContext
+                    .LedgerTransactionMarkers
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
+                    .Select(y => y.StateVersion);
+
+                searchQuery = searchQuery.Where(x => withManifestOwnerCall.All(y => y != x));
             }
         }
 

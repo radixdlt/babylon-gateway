@@ -180,6 +180,27 @@ internal class DefaultTransactionHandler : ITransactionHandler
                 ResourceAddress = ef.ResourceAddress != null ? (EntityAddress)ef.ResourceAddress : null,
             });
         });
+        request.AccountsWithManifestOwnerMethodCalls?.ForEach(a => searchCriteria.AccountsWithManifestOwnerMethodCalls.Add((EntityAddress)a));
+        request.AccountsWithoutManifestOwnerMethodCalls?.ForEach(a => searchCriteria.AccountsWithoutManifestOwnerMethodCalls.Add((EntityAddress)a));
+
+        searchCriteria.ManifestClassFilter = request.ManifestClassFilter == null
+            ? null
+            : new ManifestClassFilter
+            {
+                Class = request.ManifestClassFilter.Class switch
+                {
+                    GatewayModel.ManifestClass.General => ManifestClass.General,
+                    GatewayModel.ManifestClass.Transfer => ManifestClass.Transfer,
+                    GatewayModel.ManifestClass.ValidatorStake => ManifestClass.ValidatorStake,
+                    GatewayModel.ManifestClass.ValidatorUnstake => ManifestClass.ValidatorUnstake,
+                    GatewayModel.ManifestClass.ValidatorClaim => ManifestClass.ValidatorClaim,
+                    GatewayModel.ManifestClass.AccountDepositSettingsUpdate => ManifestClass.AccountDepositSettingsUpdate,
+                    GatewayModel.ManifestClass.PoolContribution => ManifestClass.PoolContribution,
+                    GatewayModel.ManifestClass.PoolRedemption => ManifestClass.PoolRedemption,
+                    _ => throw new UnreachableException($"Didn't expect {request.ManifestClassFilter.Class} value"),
+                },
+                MatchOnlyMostSpecificType = request.ManifestClassFilter.MatchOnlyMostSpecific,
+            };
 
         var transactionsPageRequest = new TransactionStreamPageRequest(
             FromStateVersion: fromLedgerState?.StateVersion,
