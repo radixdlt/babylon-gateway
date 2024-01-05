@@ -1,7 +1,8 @@
 ## 2.0.0
 Release Date: _unreleased_
-
-- return components effective role assignments only for assigned modules.
+  
+- Return components effective role assignments only for assigned modules.
+- Dropped `balance_changes` fallback mechanism.
 
 ## 1.2.4
 Release Date: 4.01.2024
