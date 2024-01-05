@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;

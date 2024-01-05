@@ -64,8 +64,8 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
 using System.Collections.Generic;
@@ -82,7 +82,7 @@ public interface ICoreNodeHealthChecker
     Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken);
 }
 
-public sealed record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>> CoreApiNodesByStatus);
+public sealed record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<CoreApiNode>> CoreApiNodesByStatus);
 
 // Using explicit integers for enum values
 // because they're used for ordering the nodes (from best to worst).
@@ -130,7 +130,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
         if (!enabledCoreNodes.Any())
         {
             _logger.LogError("No Core API Nodes have been defined as enabled");
-            return new CoreNodeHealthResult(new Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>>());
+            return new CoreNodeHealthResult(new Dictionary<CoreNodeStatus, List<CoreApiNode>>());
         }
 
         var enabledCoreNodeStateVersionLookupTasks = coreNodes
@@ -171,7 +171,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
         return new CoreNodeHealthResult(coreNodesByStatus);
     }
 
-    private CoreNodeStatus DetermineNodeStatus((Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, System.Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
+    private CoreNodeStatus DetermineNodeStatus((CoreApiNode CoreApiNode, long? NodeStateVersion, System.Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
     {
         if (healthCheckData.NodeStateVersion == null)
         {

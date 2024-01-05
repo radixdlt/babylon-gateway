@@ -64,10 +64,9 @@
 
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
+namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
 public sealed class NetworkOptions
 {
@@ -93,7 +92,7 @@ public sealed class NetworkOptions
 public sealed record CoreApiNode
 {
     /// <summary>
-    /// Whether the node's core API should be used to read from (defaults to true).
+    /// If false, the node should not be used.
     /// </summary>
     [ConfigurationKeyName("Enabled")]
     public bool Enabled { get; set; } = true;
@@ -102,28 +101,34 @@ public sealed record CoreApiNode
     /// A unique name identifying this node - used as the node's id.
     /// </summary>
     [ConfigurationKeyName("Name")]
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = null!;
 
     /// <summary>
     /// Address of the node's Core API.
     /// </summary>
     [ConfigurationKeyName("CoreApiAddress")]
-    public string CoreApiAddress { get; set; } = string.Empty;
+    public string CoreApiAddress { get; set; } = null!;
 
     /// <summary>
     /// AuthorizationHeader - if set, can allow for basic auth.
     /// </summary>
     [ConfigurationKeyName("CoreApiAuthorizationHeader")]
-    public string? CoreApiAuthorizationHeader { get; set; } = null;
+    public string? CoreApiAuthorizationHeader { get; set; }
 
     /// <summary>
     /// Relative weighting of the node.
     /// </summary>
     [ConfigurationKeyName("RequestWeighting")]
     public decimal RequestWeighting { get; set; } = 1;
+
+    [ConfigurationKeyName("DisabledForTransactionIndexing")]
+    public bool DisabledForTransactionIndexing { get; set; }
+
+    [ConfigurationKeyName("DisabledForConstruction")]
+    public bool DisabledForConstruction { get; set; }
 }
 
-internal class NetworkOptionsValidator : AbstractOptionsValidator<NetworkOptions>
+public sealed class NetworkOptionsValidator : AbstractOptionsValidator<NetworkOptions>
 {
     public NetworkOptionsValidator()
     {
@@ -134,7 +139,7 @@ internal class NetworkOptionsValidator : AbstractOptionsValidator<NetworkOptions
     }
 }
 
-internal class CoreApiNodeOptionsValidator : AbstractOptionsValidator<CoreApiNode>
+public sealed class CoreApiNodeOptionsValidator : AbstractOptionsValidator<CoreApiNode>
 {
     public CoreApiNodeOptionsValidator()
     {

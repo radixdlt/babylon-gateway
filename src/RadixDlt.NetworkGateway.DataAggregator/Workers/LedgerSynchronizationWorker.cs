@@ -64,6 +64,8 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using System;
 using System.Linq;

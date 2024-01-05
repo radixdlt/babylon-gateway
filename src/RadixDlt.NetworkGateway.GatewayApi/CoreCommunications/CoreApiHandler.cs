@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.CoreApiSdk.Api;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
