@@ -212,6 +212,7 @@ UPDATE pending_transactions
 
     private async Task<ExtendLedgerReport> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
+        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration();
         var rowsInserted = 0;
         var rowsUpdated = 0;
         var dbReadDuration = TimeSpan.Zero;
@@ -283,7 +284,7 @@ UPDATE pending_transactions
                         using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, (await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
                         using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
 
-                        var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, _networkConfigurationProvider.GetNetworkId());
+                        var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, networkConfiguration.Id);
 
                         foreach (var address in extractedAddresses.All())
                         {
@@ -292,7 +293,7 @@ UPDATE pending_transactions
 
                         manifestExtractedAddresses[stateVersion] = extractedAddresses;
 
-                        var manifestSummary = toolkitManifest.Summary(_networkConfigurationProvider.GetNetworkId());
+                        var manifestSummary = toolkitManifest.Summary(networkConfiguration.Id);
 
                         for (var i = 0; i < manifestSummary.classification.Length; ++i)
                         {
