@@ -252,7 +252,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
                 case VirtualIdentityEntity:
                 case VirtualAccountComponentEntity:
-                    var virtualEntityData = _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
+                    var virtualEntityData = await _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
 
                     details = virtualEntityData.Details;
                     metadata[entity.Id] = virtualEntityData.Metadata;
@@ -502,7 +502,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
         if (entity is VirtualIdentityEntity or VirtualAccountComponentEntity)
         {
-            var (_, virtualEntityMetadata) = _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
+            var (_, virtualEntityMetadata) = await _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
             metadata = virtualEntityMetadata;
         }
         else
@@ -1277,9 +1277,11 @@ INNER JOIN LATERAL(
 
         if (entity == null)
         {
-            // TODO this method should return null/throw on missing, virtual component handling should be done upstream to avoid entity.Id = 0 uses, see https://github.com/radixdlt/babylon-gateway/pull/171#discussion_r1111957627
-            if (!TryGetVirtualEntity(address, out entity))
+            entity = await TryResolveAsVirtualEntity(address);
+
+            if (entity == null)
             {
+                // TODO this method should return null/throw on missing, virtual component handling should be done upstream to avoid entity.Id = 0 uses, see https://github.com/radixdlt/babylon-gateway/pull/171#discussion_r1111957627
                 throw new EntityNotFoundException(address.ToString());
             }
         }
@@ -1292,25 +1294,19 @@ INNER JOIN LATERAL(
         return typedEntity;
     }
 
-    private bool TryGetVirtualEntity(EntityAddress address, [NotNullWhen(true)] out Entity? entity)
+    private async Task<Entity?> TryResolveAsVirtualEntity(EntityAddress address)
     {
-        if (_virtualEntityDataProvider.IsVirtualAccountAddress(address))
+        if (await _virtualEntityDataProvider.IsVirtualAccountAddress(address))
         {
-            entity = new VirtualAccountComponentEntity(address);
-
-            return true;
+            return new VirtualAccountComponentEntity(address);
         }
 
-        if (_virtualEntityDataProvider.IsVirtualIdentityAddress(address))
+        if (await _virtualEntityDataProvider.IsVirtualIdentityAddress(address))
         {
-            entity = new VirtualIdentityEntity(address);
-
-            return true;
+            return new VirtualIdentityEntity(address);
         }
 
-        entity = default;
-
-        return false;
+        return null;
     }
 
     private async Task<ICollection<Entity>> GetEntities(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
@@ -1319,17 +1315,19 @@ INNER JOIN LATERAL(
             .Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
             .AnnotateMetricName()
-            .ToListAsync(token);
+            .ToDictionaryAsync(e => e.Address, token);
 
-        foreach (var address in addresses)
+        foreach (var address in addresses.Except(entities.Keys))
         {
-            if (entities.All(e => e.Address != address) && TryGetVirtualEntity(address, out var virtualEntity))
+            var virtualEntity = await TryResolveAsVirtualEntity(address);
+
+            if (virtualEntity != null)
             {
-                entities.Add(virtualEntity);
+                entities.Add(virtualEntity.Address, virtualEntity);
             }
         }
 
-        return entities;
+        return entities.Values;
     }
 
     private async Task<Dictionary<long, string>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)

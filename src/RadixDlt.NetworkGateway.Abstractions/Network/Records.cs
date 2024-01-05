@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using System.Collections.Generic;
+
 namespace RadixDlt.NetworkGateway.Abstractions.Network;
 
 public sealed record NetworkConfiguration(
@@ -70,11 +72,11 @@ public sealed record NetworkConfiguration(
     long GenesisEpoch,
     long GenesisRound,
     WellKnownAddresses WellKnownAddresses,
-    HrpDefinition Hrp
-);
+    HrpDefinition Hrp,
+    string HrpSuffix,
+    ICollection<AddressTypeDefinition> AddressTypeDefinitions);
 
 public sealed record HrpDefinition(
-    string Suffix,
     string GlobalPackage,
     string GlobalGenericComponent,
     string InternalGenericComponent,
@@ -147,6 +149,6 @@ public enum AddressEntityType
 public sealed record AddressTypeDefinition(
     AddressEntityType EntityType,
     string HrpPrefix,
-    int AddressBytePrefix,
+    byte AddressBytePrefix,
     int AddressByteLength
 );

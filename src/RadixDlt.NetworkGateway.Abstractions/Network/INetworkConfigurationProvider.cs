@@ -80,12 +80,12 @@ public interface INetworkConfigurationProvider
 public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
     private readonly CoreApi.StatusApi _statusApi;
-    // private readonly IEnumerable<INetworkConfigurationReaderObserver>? _oservers;
+    // private readonly IEnumerable<INetworkConfigurationReaderObserver>? _oservers; // TODO restore
     private readonly AsyncLazy<NetworkConfiguration> _factory;
 
     public NetworkConfigurationProvider()
     {
-        _statusApi = new CoreApi.StatusApi(); // TODO use DI
+        _statusApi = new CoreApi.StatusApi(); // TODO resolve from DI container, this is not going to work outside of localnet
         _factory = new AsyncLazy<NetworkConfiguration>(ReadNetworkConfiguration, AsyncLazyFlags.RetryOnFailure);
     }
 
@@ -96,16 +96,13 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     private async Task<NetworkConfiguration> ReadNetworkConfiguration()
     {
-        // TODO check if network matches our configuration (or just read network name from our config)
-
         try
         {
             var configuration = await _statusApi.StatusNetworkConfigurationPostAsync();
-            var status = await _statusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(configuration.Network));
+            var status = await _statusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(configuration.Network)); // TODO read network name the static configuration! (separate PR)
 
-            var wellKnownAddresses = configuration.WellKnownAddresses;
             var addressTypeDefinitions = configuration.AddressTypes
-                .Select(at => new AddressTypeDefinition(Enum.Parse<AddressEntityType>(at.EntityType.ToString(), true), at.HrpPrefix, at.AddressBytePrefix, at.AddressByteLength))
+                .Select(at => new AddressTypeDefinition(Enum.Parse<AddressEntityType>(at.EntityType.ToString(), true), at.HrpPrefix, (byte)at.AddressBytePrefix, at.AddressByteLength))
                 .ToArray();
 
             string GetHrpPrefix(AddressEntityType entityType)
@@ -113,8 +110,7 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
                 return addressTypeDefinitions.First(at => at.EntityType == entityType).HrpPrefix;
             }
 
-            var hrp = new HrpDefinition(
-                Suffix: configuration.NetworkHrpSuffix,
+            var hrpDefinition = new HrpDefinition(
                 GlobalPackage: GetHrpPrefix(AddressEntityType.GlobalPackage),
                 GlobalGenericComponent: GetHrpPrefix(AddressEntityType.GlobalGenericComponent),
                 InternalGenericComponent: GetHrpPrefix(AddressEntityType.InternalGenericComponent),
@@ -134,36 +130,45 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
                 GlobalAccessController: GetHrpPrefix(AddressEntityType.GlobalAccessController)
             );
 
-            var wa = new WellKnownAddresses(
-                Xrd: wellKnownAddresses.Xrd,
-                Secp256k1SignatureVirtualBadge: wellKnownAddresses.Secp256k1SignatureVirtualBadge,
-                Ed25519SignatureVirtualBadge: wellKnownAddresses.Ed25519SignatureVirtualBadge,
-                PackageOfDirectCallerVirtualBadge: wellKnownAddresses.PackageOfDirectCallerVirtualBadge,
-                GlobalCallerVirtualBadge: wellKnownAddresses.GlobalCallerVirtualBadge,
-                SystemTransactionBadge: wellKnownAddresses.SystemTransactionBadge,
-                PackageOwnerBadge: wellKnownAddresses.PackageOwnerBadge,
-                ValidatorOwnerBadge: wellKnownAddresses.ValidatorOwnerBadge,
-                AccountOwnerBadge: wellKnownAddresses.AccountOwnerBadge,
-                IdentityOwnerBadge: wellKnownAddresses.IdentityOwnerBadge,
-                PackagePackage: wellKnownAddresses.PackagePackage,
-                ResourcePackage: wellKnownAddresses.ResourcePackage,
-                AccountPackage: wellKnownAddresses.AccountPackage,
-                IdentityPackage: wellKnownAddresses.IdentityPackage,
-                ConsensusManagerPackage: wellKnownAddresses.ConsensusManagerPackage,
-                AccessControllerPackage: wellKnownAddresses.AccessControllerPackage,
-                TransactionProcessorPackage: wellKnownAddresses.TransactionProcessorPackage,
-                MetadataModulePackage: wellKnownAddresses.MetadataModulePackage,
-                RoyaltyModulePackage: wellKnownAddresses.RoyaltyModulePackage,
-                RoleAssignmentModulePackage: wellKnownAddresses.RoleAssignmentModulePackage,
-                GenesisHelperPackage: wellKnownAddresses.GenesisHelperPackage,
-                FaucetPackage: wellKnownAddresses.FaucetPackage,
-                ConsensusManager: wellKnownAddresses.ConsensusManager,
-                GenesisHelper: wellKnownAddresses.GenesisHelper,
-                Faucet: wellKnownAddresses.Faucet,
-                PoolPackage: wellKnownAddresses.PoolPackage
+            var wa = configuration.WellKnownAddresses;
+            var wellKnownAddresses = new WellKnownAddresses(
+                Xrd: wa.Xrd,
+                Secp256k1SignatureVirtualBadge: wa.Secp256k1SignatureVirtualBadge,
+                Ed25519SignatureVirtualBadge: wa.Ed25519SignatureVirtualBadge,
+                PackageOfDirectCallerVirtualBadge: wa.PackageOfDirectCallerVirtualBadge,
+                GlobalCallerVirtualBadge: wa.GlobalCallerVirtualBadge,
+                SystemTransactionBadge: wa.SystemTransactionBadge,
+                PackageOwnerBadge: wa.PackageOwnerBadge,
+                ValidatorOwnerBadge: wa.ValidatorOwnerBadge,
+                AccountOwnerBadge: wa.AccountOwnerBadge,
+                IdentityOwnerBadge: wa.IdentityOwnerBadge,
+                PackagePackage: wa.PackagePackage,
+                ResourcePackage: wa.ResourcePackage,
+                AccountPackage: wa.AccountPackage,
+                IdentityPackage: wa.IdentityPackage,
+                ConsensusManagerPackage: wa.ConsensusManagerPackage,
+                AccessControllerPackage: wa.AccessControllerPackage,
+                TransactionProcessorPackage: wa.TransactionProcessorPackage,
+                MetadataModulePackage: wa.MetadataModulePackage,
+                RoyaltyModulePackage: wa.RoyaltyModulePackage,
+                RoleAssignmentModulePackage: wa.RoleAssignmentModulePackage,
+                GenesisHelperPackage: wa.GenesisHelperPackage,
+                FaucetPackage: wa.FaucetPackage,
+                ConsensusManager: wa.ConsensusManager,
+                GenesisHelper: wa.GenesisHelper,
+                Faucet: wa.Faucet,
+                PoolPackage: wa.PoolPackage
             );
 
-            return new NetworkConfiguration((byte)configuration.NetworkId, configuration.Network, status.GenesisEpochRound.Epoch, status.GenesisEpochRound.Round, wa, hrp);
+            return new NetworkConfiguration(
+                (byte)configuration.NetworkId,
+                configuration.Network,
+                status.GenesisEpochRound.Epoch,
+                status.GenesisEpochRound.Round,
+                wellKnownAddresses,
+                hrpDefinition,
+                configuration.NetworkHrpSuffix,
+                addressTypeDefinitions);
         }
         catch (Exception ex)
         {

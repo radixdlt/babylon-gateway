@@ -81,7 +81,7 @@ public sealed class RadixAddressValidator : AbstractValidator<string>
 
                 try
                 {
-                    var networkHrpSuffix = (await networkConfigurationProvider.GetNetworkConfiguration(token)).Hrp.Suffix;
+                    var networkHrpSuffix = (await networkConfigurationProvider.GetNetworkConfiguration(token)).HrpSuffix;
                     var decodedAddress = RadixAddressCodec.Decode(address);
 
                     if (!decodedAddress.Hrp.EndsWith(networkHrpSuffix, StringComparison.OrdinalIgnoreCase))
