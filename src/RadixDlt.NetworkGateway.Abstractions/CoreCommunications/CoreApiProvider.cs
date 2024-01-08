@@ -62,53 +62,44 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
+namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
-/// <summary>
-/// A marker interface for NodeInitializers - Dependency Injection will pick each of them up to start them in the NodeWorkersRunner.
-/// </summary>
-public interface INodeInitializer
+public interface ICoreApiProvider
 {
-    public Task Run(CancellationToken cancellationToken);
+    public CoreApiNode CoreApiNode { get; }
+
+    public CoreApi.StatusApi StatusApi { get; }
+
+    public CoreApi.StreamApi StreamApi { get; }
+
+    public CoreApi.TransactionApi TransactionApi { get; }
 }
 
-/// <summary>
-/// A base class for NodeInitializers, which handles errors etc.
-/// </summary>
-public abstract class NodeInitializer : INodeInitializer
+public sealed class CoreApiProvider : ICoreApiProvider
 {
-    private readonly string _nodeName;
-    private readonly IEnumerable<INodeInitializerObserver> _observers;
+    public CoreApiNode CoreApiNode { get; }
 
-    protected NodeInitializer(string nodeName, IEnumerable<INodeInitializerObserver> observers)
-    {
-        _nodeName = nodeName;
-        _observers = observers;
-    }
+    public CoreApi.StatusApi StatusApi { get; }
 
-    public async Task Run(CancellationToken cancellationToken)
+    public CoreApi.StreamApi StreamApi { get; }
+
+    public CoreApi.TransactionApi TransactionApi { get; }
+
+    public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
     {
-        try
+        if (!string.IsNullOrWhiteSpace(coreApiNode.CoreApiAuthorizationHeader))
         {
-            await Initialize(cancellationToken);
+            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(coreApiNode.CoreApiAuthorizationHeader);
         }
-        catch (Exception ex)
-        {
-            TrackInitializerFaultedException(cancellationToken.IsCancellationRequested, ex);
-            throw;
-        }
-    }
 
-    protected abstract Task Initialize(CancellationToken cancellationToken);
-
-    protected void TrackInitializerFaultedException(bool isStopRequested, Exception ex)
-    {
-        _observers.ForEach(x => x.TrackInitializerFaultedException(GetType(), _nodeName, isStopRequested, ex));
+        CoreApiNode = coreApiNode;
+        StatusApi = new CoreApi.StatusApi(httpClient, coreApiNode.CoreApiAddress);
+        StreamApi = new CoreApi.StreamApi(httpClient, coreApiNode.CoreApiAddress);
+        TransactionApi = new CoreApi.TransactionApi(httpClient, coreApiNode.CoreApiAddress);
     }
 }

@@ -71,22 +71,6 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
-public interface ICoreApiProvider
-{
-    CoreApi.TransactionApi TransactionsApi { get; }
-
-    CoreApi.StreamApi StreamApi { get; }
-
-    CoreApi.StatusApi StatusApi { get; }
-
-    CoreApi.MempoolApi MempoolApi { get; }
-}
-
-public interface INetworkConfigurationReader
-{
-    Task<(CoreModel.NetworkConfigurationResponse Configuration, CoreModel.NetworkStatusResponse Status)> GetNetworkConfiguration(CancellationToken token);
-}
-
 public interface INetworkStatusReader
 {
     Task<CoreModel.NetworkStatusResponse> GetNetworkStatus(CancellationToken token);

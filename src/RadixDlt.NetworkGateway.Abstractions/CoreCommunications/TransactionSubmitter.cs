@@ -73,7 +73,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
-public class TransactionSubmitter
+public sealed class TransactionSubmitter
 {
     public static async Task<NodeSubmissionResult> Submit(
         SubmitContext submitContext,

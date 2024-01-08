@@ -74,7 +74,6 @@ using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -285,7 +284,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
         var result = await TransactionSubmitter.Submit(
             new SubmitContext(
-                TransactionApi: coreApiProvider.TransactionsApi,
+                TransactionApi: coreApiProvider.TransactionApi,
                 TargetNode: chosenNode.Name,
                 NetworkName: (await _networkConfigurationProvider.GetNetworkConfiguration(cancellationToken)).Name,
                 SubmissionTimeout: _mempoolOptionsMonitor.CurrentValue.ResubmissionNodeRequestTimeout,
