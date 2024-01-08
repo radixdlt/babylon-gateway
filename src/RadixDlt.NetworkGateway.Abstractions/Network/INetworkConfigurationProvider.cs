@@ -62,12 +62,16 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreApi = RadixDlt.CoreApiSdk.Api;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Network;
@@ -79,13 +83,19 @@ public interface INetworkConfigurationProvider
 
 public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
-    private readonly CoreApi.StatusApi _statusApi;
-    // private readonly IEnumerable<INetworkConfigurationReaderObserver>? _oservers; // TODO restore
+    private readonly NetworkOptions _networkOptions;
+    private readonly ICoreApiProvider _coreApiProvider;
+    private readonly IEnumerable<INetworkConfigurationReaderObserver> _observers;
     private readonly AsyncLazy<NetworkConfiguration> _factory;
 
-    public NetworkConfigurationProvider()
+    public NetworkConfigurationProvider(
+        IOptions<NetworkOptions> networkOptions,
+        ICoreApiProvider coreApiProvider,
+        IEnumerable<INetworkConfigurationReaderObserver> observers)
     {
-        _statusApi = new CoreApi.StatusApi(); // TODO resolve from DI container, this is not going to work outside of localnet
+        _networkOptions = networkOptions.Value;
+        _coreApiProvider = coreApiProvider;
+        _observers = observers;
         _factory = new AsyncLazy<NetworkConfiguration>(ReadNetworkConfiguration, AsyncLazyFlags.RetryOnFailure);
     }
 
@@ -98,8 +108,8 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
     {
         try
         {
-            var configuration = await _statusApi.StatusNetworkConfigurationPostAsync();
-            var status = await _statusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(configuration.Network)); // TODO read network name the static configuration! (separate PR)
+            var configuration = await _coreApiProvider.StatusApi.StatusNetworkConfigurationPostAsync();
+            var status = await _coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(_networkOptions.NetworkName));
 
             var addressTypeDefinitions = configuration.AddressTypes
                 .Select(at => new AddressTypeDefinition(Enum.Parse<AddressEntityType>(at.EntityType.ToString(), true), at.HrpPrefix, (byte)at.AddressBytePrefix, at.AddressByteLength))
@@ -172,9 +182,7 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
         }
         catch (Exception ex)
         {
-            // TODO restore
-            Console.Write(ex);
-            // await _observers.ForEachAsync(x => x.GetNetworkConfigurationFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
+            await _observers.ForEachAsync(x => x.GetNetworkConfigurationFailed(_coreApiProvider.CoreApiNode.Name, ex));
 
             throw;
         }

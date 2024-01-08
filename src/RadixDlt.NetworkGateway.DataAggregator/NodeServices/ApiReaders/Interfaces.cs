@@ -81,11 +81,6 @@ public interface ITransactionStreamReader
     Task<CoreClient.ApiResponse<CoreModel.StreamTransactionsResponse>> GetTransactionStream(long fromStateVersion, int count, CancellationToken token);
 }
 
-public interface INetworkConfigurationReaderObserver
-{
-    ValueTask GetNetworkConfigurationFailed(string nodeName, Exception exception);
-}
-
 public interface INetworkStatusReaderObserver
 {
     ValueTask GetNetworkStatusFailed(string nodeName, Exception exception);
