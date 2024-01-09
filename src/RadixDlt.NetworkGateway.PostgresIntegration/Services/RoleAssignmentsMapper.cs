@@ -96,7 +96,7 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
         ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
         ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
     {
-        var nativeModulesKeys = _roleAssignmentsKeyProvider.GetNativeModulesKeys();
+        var nativeModulesKeys = _roleAssignmentsKeyProvider.AllNativeModulesKeys;
 
         return componentEntities.ToDictionary(entity => entity.Id, entity =>
         {
