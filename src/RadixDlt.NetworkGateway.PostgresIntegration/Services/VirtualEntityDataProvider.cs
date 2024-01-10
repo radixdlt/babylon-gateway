@@ -92,7 +92,8 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
     private readonly AsyncLazy<byte> _ed25519VirtualAccountDiscriminator;
     private readonly AsyncLazy<byte> _secp256k1VirtualIdentityDiscriminator;
     private readonly AsyncLazy<byte> _ed25519VirtualIdentityDiscriminator;
-    private readonly List<GatewayModel.ComponentEntityRoleAssignmentEntry> _virtualEntityRoleAssignmentEntries;
+    private readonly List<GatewayModel.ComponentEntityRoleAssignmentEntry> _virtualAccountRoleAssignmentEntries;
+    private readonly List<GatewayModel.ComponentEntityRoleAssignmentEntry> _virtualIdentityRoleAssignmentEntries;
 
     public VirtualEntityDataProvider(INetworkConfigurationProvider networkConfigurationProvider, IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
@@ -113,7 +114,8 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
         _ed25519VirtualAccountDiscriminator = CreateAsyncLazy(AddressEntityType.GlobalVirtualEd25519Account);
         _secp256k1VirtualIdentityDiscriminator = CreateAsyncLazy(AddressEntityType.GlobalVirtualSecp256k1Identity);
         _ed25519VirtualIdentityDiscriminator = CreateAsyncLazy(AddressEntityType.GlobalVirtualEd25519Identity);
-        _virtualEntityRoleAssignmentEntries = GenerateVirtualEntityRoleAssignmentEntries(roleAssignmentsKeyProvider);
+        _virtualAccountRoleAssignmentEntries = GenerateVirtualAccountRoleAssignmentEntries(roleAssignmentsKeyProvider);
+        _virtualIdentityRoleAssignmentEntries = GenerateVirtualIdentityRoleAssignmentEntries(roleAssignmentsKeyProvider);
     }
 
     public Task<bool> IsVirtualAccountAddress(EntityAddress address)
@@ -174,22 +176,20 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
                 new List<GatewayModel.RoleKey> { new("_self_", GatewayModel.ObjectModuleId.Main) }),
         };
 
-        var effectiveRoleAssignmentEntries = securifyRule.Concat(_virtualEntityRoleAssignmentEntries).ToList();
-
         var details = await IsAccount(decoded)
             ? new GatewayModel.StateEntityDetailsResponseComponentDetails(
                 packageAddress: networkConfiguration.WellKnownAddresses.AccountPackage,
                 blueprintName: "Account",
                 blueprintVersion: "1.0.0",
                 state: new CoreModel.AccountFieldStateValue(CoreModel.DefaultDepositRule.Accept),
-                roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, effectiveRoleAssignmentEntries),
+                roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, securifyRule.Concat(_virtualAccountRoleAssignmentEntries).ToList()),
                 royaltyVaultBalance: null)
             : new GatewayModel.StateEntityDetailsResponseComponentDetails(
                 packageAddress: networkConfiguration.WellKnownAddresses.IdentityPackage,
                 blueprintName: "Identity",
                 blueprintVersion: "1.0.0",
                 state: null,
-                roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, effectiveRoleAssignmentEntries),
+                roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, securifyRule.Concat(_virtualIdentityRoleAssignmentEntries).ToList()),
                 royaltyVaultBalance: null);
 
         var ownerKeys = new GatewayModel.EntityMetadataItemValue(ownerKeysRawHex, ownerKeysProgrammaticJson, ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem));
@@ -242,10 +242,22 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
         return decoded.DiscriminatorByte == await _ed25519VirtualAccountDiscriminator.Task || decoded.DiscriminatorByte == await _ed25519VirtualIdentityDiscriminator.Task;
     }
 
-    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GenerateVirtualEntityRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
+    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GenerateVirtualAccountRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
         return roleAssignmentsKeyProvider
-            .GetNativeModulesKeys()
+            .MetadataModulesKeys
+            .Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
+                new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ModuleId.ToGatewayModel()),
+                new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
+                entry.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ModuleId.ToGatewayModel())).ToList()
+            ))
+            .ToList();
+    }
+
+    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GenerateVirtualIdentityRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
+    {
+        return roleAssignmentsKeyProvider
+            .AllNativeModulesKeys
             .Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
                 new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ModuleId.ToGatewayModel()),
                 new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
