@@ -62,53 +62,93 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
+namespace RadixDlt.NetworkGateway.Abstractions.Network;
 
-/// <summary>
-/// A marker interface for NodeInitializers - Dependency Injection will pick each of them up to start them in the NodeWorkersRunner.
-/// </summary>
-public interface INodeInitializer
+public sealed record NetworkConfiguration(
+    byte Id,
+    string Name,
+    long GenesisEpoch,
+    long GenesisRound,
+    WellKnownAddresses WellKnownAddresses,
+    HrpDefinition Hrp,
+    string HrpSuffix,
+    ICollection<AddressTypeDefinition> AddressTypeDefinitions);
+
+public sealed record HrpDefinition(
+    string GlobalPackage,
+    string GlobalGenericComponent,
+    string InternalGenericComponent,
+    string GlobalAccount,
+    string GlobalVirtualEd25519Account,
+    string GlobalVirtualSecp256k1Account,
+    string GlobalValidator,
+    string GlobalIdentity,
+    string GlobalVirtualSecp256k1Identity,
+    string GlobalVirtualEd25519Identity,
+    string GlobalConsensusManager,
+    string GlobalFungibleResource,
+    string GlobalNonFungibleResource,
+    string InternalFungibleVault,
+    string InternalNonFungibleVault,
+    string InternalKeyValueStore,
+    string GlobalAccessController
+);
+
+public sealed record WellKnownAddresses(
+    string Xrd,
+    string Secp256k1SignatureVirtualBadge,
+    string Ed25519SignatureVirtualBadge,
+    string PackageOfDirectCallerVirtualBadge,
+    string GlobalCallerVirtualBadge,
+    string SystemTransactionBadge,
+    string PackageOwnerBadge,
+    string ValidatorOwnerBadge,
+    string AccountOwnerBadge,
+    string IdentityOwnerBadge,
+    string PackagePackage,
+    string ResourcePackage,
+    string AccountPackage,
+    string IdentityPackage,
+    string ConsensusManagerPackage,
+    string AccessControllerPackage,
+    string TransactionProcessorPackage,
+    string MetadataModulePackage,
+    string RoyaltyModulePackage,
+    string RoleAssignmentModulePackage,
+    string GenesisHelperPackage,
+    string FaucetPackage,
+    string ConsensusManager,
+    string GenesisHelper,
+    string Faucet,
+    string PoolPackage
+);
+
+public enum AddressEntityType
 {
-    public Task Run(CancellationToken cancellationToken);
+    GlobalPackage,
+    GlobalConsensusManager,
+    GlobalValidator,
+    GlobalGenericComponent,
+    InternalGenericComponent,
+    GlobalAccount,
+    GlobalVirtualSecp256k1Account,
+    GlobalVirtualEd25519Account,
+    GlobalIdentity,
+    GlobalVirtualEd25519Identity,
+    GlobalVirtualSecp256k1Identity,
+    GlobalAccessController,
+    GlobalFungibleResource,
+    InternalFungibleVault,
+    GlobalNonFungibleResource,
+    InternalNonFungibleVault,
+    InternalKeyValueStore,
 }
 
-/// <summary>
-/// A base class for NodeInitializers, which handles errors etc.
-/// </summary>
-public abstract class NodeInitializer : INodeInitializer
-{
-    private readonly string _nodeName;
-    private readonly IEnumerable<INodeInitializerObserver> _observers;
-
-    protected NodeInitializer(string nodeName, IEnumerable<INodeInitializerObserver> observers)
-    {
-        _nodeName = nodeName;
-        _observers = observers;
-    }
-
-    public async Task Run(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await Initialize(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            TrackInitializerFaultedException(cancellationToken.IsCancellationRequested, ex);
-            throw;
-        }
-    }
-
-    protected abstract Task Initialize(CancellationToken cancellationToken);
-
-    protected void TrackInitializerFaultedException(bool isStopRequested, Exception ex)
-    {
-        _observers.ForEach(x => x.TrackInitializerFaultedException(GetType(), _nodeName, isStopRequested, ex));
-    }
-}
+public sealed record AddressTypeDefinition(
+    AddressEntityType EntityType,
+    string HrpPrefix,
+    byte AddressBytePrefix,
+    int AddressByteLength
+);

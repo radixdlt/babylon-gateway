@@ -67,7 +67,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -447,25 +446,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "network_configuration",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false),
-                    network_id = table.Column<byte>(type: "smallint", nullable: false),
-                    network_name = table.Column<string>(type: "text", nullable: false),
-                    network_hrp_suffix = table.Column<string>(type: "text", nullable: false),
-                    hrp_definition = table.Column<HrpDefinition>(type: "jsonb", nullable: false),
-                    well_known_addresses = table.Column<WellKnownAddresses>(type: "jsonb", nullable: false),
-                    address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false),
-                    genesis_epoch = table.Column<long>(type: "bigint", nullable: false),
-                    genesis_round = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_network_configuration", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1092,9 +1072,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "ledger_transactions");
-
-            migrationBuilder.DropTable(
-                name: "network_configuration");
 
             migrationBuilder.DropTable(
                 name: "non_fungible_id_data");

@@ -67,6 +67,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -127,7 +128,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
         return new GatewayModel.GatewayStatusResponse(
             new GatewayModel.LedgerState(
-                _networkConfigurationProvider.GetNetworkName(),
+                (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
                 topLedgerTransaction.StateVersion,
                 topLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 topLedgerTransaction.Epoch,
@@ -398,7 +399,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
             ? null
             : new LedgerStateReport(
                 new GatewayModel.LedgerState(
-                    _networkConfigurationProvider.GetNetworkName(),
+                    (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
                     lt.StateVersion,
                     lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                     lt.Epoch,

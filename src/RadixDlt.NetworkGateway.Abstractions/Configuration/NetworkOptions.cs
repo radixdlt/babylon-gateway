@@ -62,58 +62,91 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
-[Table("network_configuration")]
-internal class NetworkConfiguration
+public sealed class NetworkOptions
 {
-    [Key]
-    [Column(name: "id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public int Id
+    [ConfigurationKeyName("NetworkName")]
+    public string NetworkName { get; set; } = null!;
+
+    [ConfigurationKeyName("CoreApiNodes")]
+    public ICollection<CoreApiNode> CoreApiNodes { get; set; } = new List<CoreApiNode>();
+
+    [ConfigurationKeyName("DisableCoreApiHttpsCertificateChecks")]
+    public bool DisableCoreApiHttpsCertificateChecks { get; set; }
+
+    [ConfigurationKeyName("CoreApiHttpProxyAddress")]
+    public string? CoreApiHttpProxyAddress { get; set; }
+
+    [ConfigurationKeyName("MaxAllowedStateVersionLagToBeConsideredSynced")]
+    public long MaxAllowedStateVersionLagToBeConsideredSynced { get; set; } = 100;
+
+    [ConfigurationKeyName("IgnoreNonSyncedNodes")]
+    public bool IgnoreNonSyncedNodes { get; set; } = true;
+}
+
+public sealed record CoreApiNode
+{
+    /// <summary>
+    /// If false, the node should not be used.
+    /// </summary>
+    [ConfigurationKeyName("Enabled")]
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// A unique name identifying this node - used as the node's id.
+    /// </summary>
+    [ConfigurationKeyName("Name")]
+    public string Name { get; set; } = null!;
+
+    /// <summary>
+    /// Address of the node's Core API.
+    /// </summary>
+    [ConfigurationKeyName("CoreApiAddress")]
+    public string CoreApiAddress { get; set; } = null!;
+
+    /// <summary>
+    /// AuthorizationHeader - if set, can allow for basic auth.
+    /// </summary>
+    [ConfigurationKeyName("CoreApiAuthorizationHeader")]
+    public string? CoreApiAuthorizationHeader { get; set; }
+
+    /// <summary>
+    /// Relative weighting of the node.
+    /// </summary>
+    [ConfigurationKeyName("RequestWeighting")]
+    public decimal RequestWeighting { get; set; } = 1;
+
+    [ConfigurationKeyName("DisabledForTransactionIndexing")]
+    public bool DisabledForTransactionIndexing { get; set; }
+
+    [ConfigurationKeyName("DisabledForConstruction")]
+    public bool DisabledForConstruction { get; set; }
+}
+
+public sealed class NetworkOptionsValidator : AbstractOptionsValidator<NetworkOptions>
+{
+    public NetworkOptionsValidator()
     {
-        get { return 1; }
-        // ReSharper disable once ValueParameterNotUsed
-        set { }
+        RuleFor(x => x.NetworkName).NotNull();
+        RuleFor(x => x.CoreApiNodes).NotNull();
+        RuleForEach(x => x.CoreApiNodes).SetValidator(new CoreApiNodeOptionsValidator());
+        RuleFor(x => x.MaxAllowedStateVersionLagToBeConsideredSynced).GreaterThan(0);
     }
+}
 
-    [Column("network_id")]
-    public byte NetworkId { get; set; }
-
-    [Column("network_name")]
-    public string NetworkName { get; set; }
-
-    [Column("network_hrp_suffix")]
-    public string NetworkHrpSuffix { get; set; }
-
-    [Column("hrp_definition", TypeName = "jsonb")]
-    public HrpDefinition HrpDefinition { get; set; }
-
-    [Column("well_known_addresses", TypeName = "jsonb")]
-    public WellKnownAddresses WellKnownAddresses { get; set; }
-
-    [Column("address_type_definitions", TypeName = "jsonb")]
-    public AddressTypeDefinition[] AddressTypeDefinitions { get; set; }
-
-    [Column("genesis_epoch")]
-    public long GenesisEpoch { get; set; }
-
-    [Column("genesis_round")]
-    public long GenesisRound { get; set; }
-
-    public bool HasEqualConfiguration(NetworkConfiguration other)
+public sealed class CoreApiNodeOptionsValidator : AbstractOptionsValidator<CoreApiNode>
+{
+    public CoreApiNodeOptionsValidator()
     {
-        return NetworkId == other.NetworkId
-               && NetworkName == other.NetworkName
-               && HrpDefinition == other.HrpDefinition
-               && WellKnownAddresses == other.WellKnownAddresses
-               && AddressTypeDefinitions.SequenceEqual(other.AddressTypeDefinitions)
-               && GenesisEpoch == other.GenesisEpoch
-               && GenesisRound == other.GenesisRound;
+        When(x => x.Enabled, () =>
+        {
+            RuleFor(x => x.Name).NotNull();
+            RuleFor(x => x.CoreApiAddress).NotNull();
+        });
     }
 }

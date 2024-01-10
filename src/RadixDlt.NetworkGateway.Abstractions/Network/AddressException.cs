@@ -62,81 +62,27 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
+using System;
 
-public sealed record HrpDefinition(
-    string GlobalPackage,
-    string GlobalGenericComponent,
-    string InternalGenericComponent,
-    string GlobalAccount,
-    string GlobalVirtualEd25519Account,
-    string GlobalVirtualSecp256k1Account,
-    string GlobalValidator,
-    string GlobalIdentity,
-    string GlobalVirtualSecp256k1Identity,
-    string GlobalVirtualEd25519Identity,
-    string GlobalConsensusManager,
-    string GlobalFungibleResource,
-    string GlobalNonFungibleResource,
-    string InternalFungibleVault,
-    string InternalNonFungibleVault,
-    string InternalKeyValueStore,
-    string GlobalAccessController
-);
+namespace RadixDlt.NetworkGateway.Abstractions.Network;
 
-public sealed record WellKnownAddresses(
-    string Xrd,
-    string Secp256k1SignatureVirtualBadge,
-    string Ed25519SignatureVirtualBadge,
-    string PackageOfDirectCallerVirtualBadge,
-    string GlobalCallerVirtualBadge,
-    string SystemTransactionBadge,
-    string PackageOwnerBadge,
-    string ValidatorOwnerBadge,
-    string AccountOwnerBadge,
-    string IdentityOwnerBadge,
-    string PackagePackage,
-    string ResourcePackage,
-    string AccountPackage,
-    string IdentityPackage,
-    string ConsensusManagerPackage,
-    string AccessControllerPackage,
-    string TransactionProcessorPackage,
-    string MetadataModulePackage,
-    string RoyaltyModulePackage,
-    string AccessRulesPackage,
-    string GenesisHelperPackage,
-    string FaucetPackage,
-    string ConsensusManager,
-    string GenesisHelper,
-    string Faucet,
-    string PoolPackage
-);
-
-public enum AddressEntityType
+/// <summary>
+/// An Exception thrown when parsing addresses.
+/// </summary>
+[Serializable]
+public sealed class AddressException : Exception
 {
-    GlobalPackage,
-    GlobalConsensusManager,
-    GlobalValidator,
-    GlobalGenericComponent,
-    InternalGenericComponent,
-    GlobalAccount,
-    GlobalVirtualSecp256k1Account,
-    GlobalVirtualEd25519Account,
-    GlobalIdentity,
-    GlobalVirtualEd25519Identity,
-    GlobalVirtualSecp256k1Identity,
-    GlobalAccessController,
-    GlobalFungibleResource,
-    InternalFungibleVault,
-    GlobalNonFungibleResource,
-    InternalNonFungibleVault,
-    InternalKeyValueStore,
-}
+    public AddressException()
+    {
+    }
 
-public sealed record AddressTypeDefinition(
-    AddressEntityType EntityType,
-    string HrpPrefix,
-    int AddressBytePrefix,
-    int AddressByteLength
-);
+    public AddressException(string message)
+        : base(message)
+    {
+    }
+
+    public AddressException(string message, Exception inner)
+        : base(message, inner)
+    {
+    }
+}

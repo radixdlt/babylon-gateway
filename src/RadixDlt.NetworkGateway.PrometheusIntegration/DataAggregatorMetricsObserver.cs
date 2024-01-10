@@ -65,6 +65,7 @@
 using Prometheus;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
@@ -87,7 +88,6 @@ internal class DataAggregatorMetricsObserver :
     IPendingTransactionResubmissionServiceObserver,
     IAggregatorHealthCheckObserver,
     ISystemStatusServiceObserver,
-    INodeInitializerObserver,
     INodeTransactionLogWorkerObserver,
     INodeMempoolTransactionHashesReaderWorkerObserver,
     ILedgerExtenderServiceObserver,
@@ -495,12 +495,6 @@ internal class DataAggregatorMetricsObserver :
         _isPrimaryStatus.SetStatus(isPrimary);
     }
 
-    void INodeInitializerObserver.TrackInitializerFaultedException(Type worker, string nodeName, bool isStopRequested, Exception exception)
-    {
-        var errorType = isStopRequested && exception is OperationCanceledException ? "stopped" : "faulting";
-        _nodeInitializersErrorsCount.WithLabels(GetType().Name, nodeName, exception.GetNameForMetricsOrLogging(), errorType).Inc();
-    }
-
     ValueTask INodeTransactionLogWorkerObserver.DoWorkFailed(string nodeName, Exception exception)
     {
         _failedFetchLoopsUnlabeled.WithLabels(nodeName).Inc();
@@ -563,7 +557,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask GetNetworkConfigurationFailed(string nodeName, Exception exception)
+    ValueTask INetworkConfigurationReaderObserver.GetNetworkConfigurationFailed(string nodeName, Exception exception)
     {
         _failedNetworkConfigurationFetchCounterUnScoped.WithLabels(nodeName).Inc();
 

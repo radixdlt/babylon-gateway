@@ -63,8 +63,8 @@
  */
 
 using FluentValidation;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using System;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
@@ -72,17 +72,16 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 public sealed class RadixAddressValidator : AbstractValidator<string>
 {
-    public RadixAddressValidator(INetworkAddressConfigProvider networkAddressConfigProvider)
+    public RadixAddressValidator(INetworkConfigurationProvider networkConfigurationProvider)
     {
-        var networkHrpSuffix = networkAddressConfigProvider.GetNetworkHrpSuffix();
-
         RuleFor(x => x)
-            .Custom((address, context) =>
+            .CustomAsync(async (address, context, token) =>
             {
                 context.MessageFormatter.AppendArgument("PropertyName", context.PropertyPath);
 
                 try
                 {
+                    var networkHrpSuffix = (await networkConfigurationProvider.GetNetworkConfiguration(token)).HrpSuffix;
                     var decodedAddress = RadixAddressCodec.Decode(address);
 
                     if (!decodedAddress.Hrp.EndsWith(networkHrpSuffix, StringComparison.OrdinalIgnoreCase))

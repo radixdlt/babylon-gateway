@@ -65,11 +65,11 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -84,7 +84,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -253,7 +252,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
                 case VirtualIdentityEntity:
                 case VirtualAccountComponentEntity:
-                    var virtualEntityData = _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
+                    var virtualEntityData = await _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
 
                     details = virtualEntityData.Details;
                     metadata[entity.Id] = virtualEntityData.Metadata;
@@ -503,7 +502,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
         if (entity is VirtualIdentityEntity or VirtualAccountComponentEntity)
         {
-            var (_, virtualEntityMetadata) = _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
+            var (_, virtualEntityMetadata) = await _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
             metadata = virtualEntityMetadata;
         }
         else
@@ -659,7 +658,7 @@ ORDER BY nfid.from_state_version DESC
         {
             var programmaticJson = !vm.IsDeleted
                 ? ScryptoSborUtils.DataToProgrammaticJson(vm.Data, nonFungibleDataSchema.Schema,
-                    nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, _networkConfigurationProvider.GetNetworkId())
+                    nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id)
                 : null;
 
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
@@ -992,11 +991,11 @@ INNER JOIN LATERAL (
                 continue;
             }
 
+            var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
             var keyProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.KeySchema, keyValueStoreSchema.KeySborTypeKind,
-                keyValueStoreSchema.KeyTypeIndex, _networkConfigurationProvider.GetNetworkId());
-
+                keyValueStoreSchema.KeyTypeIndex, networkId);
             var valueProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(e.Value, keyValueStoreSchema.ValueSchema, keyValueStoreSchema.ValueSborTypeKind,
-                keyValueStoreSchema.ValueTypeIndex, _networkConfigurationProvider.GetNetworkId());
+                keyValueStoreSchema.ValueTypeIndex, networkId);
 
             items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(
                 key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), keyProgrammaticJson),
@@ -1084,8 +1083,9 @@ ORDER BY metadata_join.ordinality ASC;",
                 result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, GenerateOffsetCursor(offset, limit, vm.TotalCount), new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
-            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(vm.Value, _networkConfigurationProvider.GetNetworkId());
+            var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, networkId);
+            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(vm.Value, networkId);
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), programmaticJson, value);
 
             result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
@@ -1155,8 +1155,9 @@ INNER JOIN LATERAL (
                 result[mh.EntityId] = new GatewayModel.EntityMetadataCollection(items: new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId());
-            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(mh.Value, _networkConfigurationProvider.GetNetworkId());
+            var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, networkId);
+            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(mh.Value, networkId);
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), programmaticJson, value);
 
             result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, entityMetadataItemValue, mh.IsLocked, mh.FromStateVersion));
@@ -1276,9 +1277,11 @@ INNER JOIN LATERAL(
 
         if (entity == null)
         {
-            // TODO this method should return null/throw on missing, virtual component handling should be done upstream to avoid entity.Id = 0 uses, see https://github.com/radixdlt/babylon-gateway/pull/171#discussion_r1111957627
-            if (!TryGetVirtualEntity(address, out entity))
+            entity = await TryResolveAsVirtualEntity(address);
+
+            if (entity == null)
             {
+                // TODO this method should return null/throw on missing, virtual component handling should be done upstream to avoid entity.Id = 0 uses, see https://github.com/radixdlt/babylon-gateway/pull/171#discussion_r1111957627
                 throw new EntityNotFoundException(address.ToString());
             }
         }
@@ -1291,25 +1294,19 @@ INNER JOIN LATERAL(
         return typedEntity;
     }
 
-    private bool TryGetVirtualEntity(EntityAddress address, [NotNullWhen(true)] out Entity? entity)
+    private async Task<Entity?> TryResolveAsVirtualEntity(EntityAddress address)
     {
-        if (_virtualEntityDataProvider.IsVirtualAccountAddress(address))
+        if (await _virtualEntityDataProvider.IsVirtualAccountAddress(address))
         {
-            entity = new VirtualAccountComponentEntity(address);
-
-            return true;
+            return new VirtualAccountComponentEntity(address);
         }
 
-        if (_virtualEntityDataProvider.IsVirtualIdentityAddress(address))
+        if (await _virtualEntityDataProvider.IsVirtualIdentityAddress(address))
         {
-            entity = new VirtualIdentityEntity(address);
-
-            return true;
+            return new VirtualIdentityEntity(address);
         }
 
-        entity = default;
-
-        return false;
+        return null;
     }
 
     private async Task<ICollection<Entity>> GetEntities(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
@@ -1318,17 +1315,19 @@ INNER JOIN LATERAL(
             .Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
             .AnnotateMetricName()
-            .ToListAsync(token);
+            .ToDictionaryAsync(e => e.Address, token);
 
-        foreach (var address in addresses)
+        foreach (var address in addresses.Except(entities.Keys))
         {
-            if (entities.All(e => e.Address != address) && TryGetVirtualEntity(address, out var virtualEntity))
+            var virtualEntity = await TryResolveAsVirtualEntity(address);
+
+            if (virtualEntity != null)
             {
-                entities.Add(virtualEntity);
+                entities.Add(virtualEntity.Address, virtualEntity);
             }
         }
 
-        return entities;
+        return entities.Values;
     }
 
     private async Task<Dictionary<long, string>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -1422,7 +1421,7 @@ INNER JOIN LATERAL (
                         schemaBytes!,
                         sborStateHistory.SborTypeKind,
                         sborStateHistory.TypeIndex,
-                        _networkConfigurationProvider.GetNetworkId());
+                        (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id);
 
                     result.Add(state.EntityId, jsonState);
                     break;

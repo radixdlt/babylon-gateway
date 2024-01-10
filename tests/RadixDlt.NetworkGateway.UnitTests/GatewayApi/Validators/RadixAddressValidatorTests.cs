@@ -64,8 +64,10 @@
 
 using FluentAssertions;
 using Moq;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Validators;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators;
@@ -126,15 +128,17 @@ public class RadixAddressValidatorTests
     [InlineData("internal_keyvaluestore_tdx_24_1kpkxjgh28rp2e2fudwfx3ck9sau86xzt3ckc7gnl25rd6dltc023jk", "tdx_24_")]
     [InlineData("internal_vault_tdx_24_1nqhwlrwsq3g99n5kxnly9j58ase6ncwe0ce80dyq92f233jcemy2t8", "tdx_24_")]
     [InlineData("accesscontroller_tdx_24_1cd9e0x20w8e6fh5zcyv0rzzpz94n275ldxs26w868x5davl7s2w47v", "tdx_24_")]
-    public void WhenGiven_ValidValue_Succeeds(string address, string expectedNetworkHrpSuffix)
+    public async Task WhenGiven_ValidValue_Succeeds(string address, string expectedNetworkHrpSuffix)
     {
         // Prepare.
-        var mockNetworkConfigurationProvider = new Mock<INetworkConfigurationProvider>();
-        mockNetworkConfigurationProvider.Setup(x => x.GetNetworkHrpSuffix()).Returns(expectedNetworkHrpSuffix);
-        var validator = new RadixAddressValidator(mockNetworkConfigurationProvider.Object);
+        var networkConfigurationProviderMock = new Mock<INetworkConfigurationProvider>();
+        networkConfigurationProviderMock
+            .Setup(x => x.GetNetworkConfiguration(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new NetworkConfiguration(0, null!, 0, 0, null!, null!, expectedNetworkHrpSuffix, null!));
+        var validator = new RadixAddressValidator(networkConfigurationProviderMock.Object);
 
         // Act.
-        var result = validator.Validate(address);
+        var result = await validator.ValidateAsync(address);
 
         // Assert.
         result.IsValid.Should().BeTrue();
@@ -147,15 +151,17 @@ public class RadixAddressValidatorTests
     [InlineData("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd", "tdx_2_")]
     [InlineData("resource_tdx_24_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxd3jrej", "rdx")]
     [InlineData("consensusmanager_tdx_2_1scxxxxxxxxxxcnsmgrxxxxxxxxx000999665565xxxxxxxxxv6cg29", "tdx_24_")]
-    public void WhenGiven_InvalidValue_Fails(string address, string expectedNetworkHrpSuffix)
+    public async Task WhenGiven_InvalidValue_Fails(string address, string expectedNetworkHrpSuffix)
     {
         // Prepare.
-        var mockNetworkConfigurationProvider = new Mock<INetworkConfigurationProvider>();
-        mockNetworkConfigurationProvider.Setup(x => x.GetNetworkHrpSuffix()).Returns(expectedNetworkHrpSuffix);
-        var validator = new RadixAddressValidator(mockNetworkConfigurationProvider.Object);
+        var networkConfigurationProviderMock = new Mock<INetworkConfigurationProvider>();
+        networkConfigurationProviderMock
+            .Setup(x => x.GetNetworkConfiguration(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new NetworkConfiguration(0, null!, 0, 0, null!, null!, expectedNetworkHrpSuffix, null!));
+        var validator = new RadixAddressValidator(networkConfigurationProviderMock.Object);
 
         // Act.
-        var result = validator.Validate(address);
+        var result = await validator.ValidateAsync(address);
 
         // Assert.
         result.IsValid.Should().BeFalse();

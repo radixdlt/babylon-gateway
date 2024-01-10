@@ -62,8 +62,9 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -98,7 +99,7 @@ internal class NetworkStatusReader : INetworkStatusReader
         {
             return await _statusApi.StatusNetworkStatusPostAsync(
                 new CoreModel.NetworkStatusRequest(
-                    network: _networkConfigurationProvider.GetNetworkName()
+                    network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name
                 ),
                 token
             );

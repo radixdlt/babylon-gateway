@@ -62,93 +62,44 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
-public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
+public interface ICoreApiProvider
 {
-    Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
+    public CoreApiNode CoreApiNode { get; }
 
-    byte GetNetworkId();
+    public CoreApi.StatusApi StatusApi { get; }
 
-    string GetNetworkName();
+    public CoreApi.StreamApi StreamApi { get; }
+
+    public CoreApi.TransactionApi TransactionApi { get; }
 }
 
-public sealed record CapturedConfig(
-    byte NetworkId,
-    string NetworkName,
-    string NetworkHrpSuffix,
-    HrpDefinition HrpDefinition,
-    WellKnownAddresses WellKnownAddresses,
-    AddressTypeDefinition[] AddressTypeDefinitions,
-    long GenesisEpoch,
-    long GenesisRound);
-
-public interface ICapturedConfigProvider
+public sealed class CoreApiProvider : ICoreApiProvider
 {
-    Task<CapturedConfig> CaptureConfiguration();
-}
+    public CoreApiNode CoreApiNode { get; }
 
-internal class NetworkConfigurationProvider : INetworkConfigurationProvider
-{
-    private readonly object _writeLock = new();
-    private CapturedConfig? _capturedConfig;
+    public CoreApi.StatusApi StatusApi { get; }
 
-    public async Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token)
+    public CoreApi.StreamApi StreamApi { get; }
+
+    public CoreApi.TransactionApi TransactionApi { get; }
+
+    public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
     {
-        var capturedConfig = await capturedConfigProvider.CaptureConfiguration();
-
-        lock (_writeLock)
+        if (!string.IsNullOrWhiteSpace(coreApiNode.CoreApiAuthorizationHeader))
         {
-            if (_capturedConfig != null)
-            {
-                return;
-            }
-
-            _capturedConfig = capturedConfig;
+            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(coreApiNode.CoreApiAuthorizationHeader);
         }
-    }
 
-    public byte GetNetworkId()
-    {
-        return GetCapturedConfig().NetworkId;
-    }
-
-    public string GetNetworkName()
-    {
-        return GetCapturedConfig().NetworkName;
-    }
-
-    public string GetNetworkHrpSuffix()
-    {
-        return GetCapturedConfig().NetworkHrpSuffix;
-    }
-
-    public HrpDefinition GetHrpDefinition()
-    {
-        return GetCapturedConfig().HrpDefinition;
-    }
-
-    public WellKnownAddresses GetWellKnownAddresses()
-    {
-        return GetCapturedConfig().WellKnownAddresses;
-    }
-
-    public AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType)
-    {
-        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
-    }
-
-    private CapturedConfig GetCapturedConfig()
-    {
-        return _capturedConfig ?? throw new ConfigurationException("Config hasn't been captured from a Node or from the Database yet.");
+        CoreApiNode = coreApiNode;
+        StatusApi = new CoreApi.StatusApi(httpClient, coreApiNode.CoreApiAddress);
+        StreamApi = new CoreApi.StreamApi(httpClient, coreApiNode.CoreApiAddress);
+        TransactionApi = new CoreApi.TransactionApi(httpClient, coreApiNode.CoreApiAddress);
     }
 }

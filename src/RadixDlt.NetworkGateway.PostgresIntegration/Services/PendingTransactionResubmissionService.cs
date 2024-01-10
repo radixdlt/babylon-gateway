@@ -70,10 +70,10 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -82,7 +82,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -285,9 +284,9 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
         var result = await TransactionSubmitter.Submit(
             new SubmitContext(
-                TransactionApi: coreApiProvider.TransactionsApi,
+                TransactionApi: coreApiProvider.TransactionApi,
                 TargetNode: chosenNode.Name,
-                NetworkName: _networkConfigurationProvider.GetNetworkName(),
+                NetworkName: (await _networkConfigurationProvider.GetNetworkConfiguration(cancellationToken)).Name,
                 SubmissionTimeout: _mempoolOptionsMonitor.CurrentValue.ResubmissionNodeRequestTimeout,
                 IsResubmission: true,
                 ForceNodeToRecalculateResult: false),

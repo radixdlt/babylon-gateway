@@ -71,7 +71,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -81,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240105125008_InitialCreate")]
+    [Migration("20240105132051_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -902,54 +901,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator<LedgerTransactionMarkerType>("discriminator");
 
                     b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<AddressTypeDefinition[]>("AddressTypeDefinitions")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("address_type_definitions");
-
-                    b.Property<long>("GenesisEpoch")
-                        .HasColumnType("bigint")
-                        .HasColumnName("genesis_epoch");
-
-                    b.Property<long>("GenesisRound")
-                        .HasColumnType("bigint")
-                        .HasColumnName("genesis_round");
-
-                    b.Property<HrpDefinition>("HrpDefinition")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("hrp_definition");
-
-                    b.Property<string>("NetworkHrpSuffix")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("network_hrp_suffix");
-
-                    b.Property<byte>("NetworkId")
-                        .HasColumnType("smallint")
-                        .HasColumnName("network_id");
-
-                    b.Property<string>("NetworkName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("network_name");
-
-                    b.Property<WellKnownAddresses>("WellKnownAddresses")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("well_known_addresses");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("network_configuration");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdData", b =>

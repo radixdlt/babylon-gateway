@@ -72,7 +72,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
+namespace RadixDlt.NetworkGateway.Abstractions.Network;
 
 /// <summary>
 /// <para>A class for encoding and decoding Bech32 (and Bech32M) strings.</para>

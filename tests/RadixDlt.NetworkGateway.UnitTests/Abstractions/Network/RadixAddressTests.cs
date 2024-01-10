@@ -62,17 +62,61 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
+using System.Collections.Generic;
+using Xunit;
 
-namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+namespace RadixDlt.NetworkGateway.UnitTests.Abstractions.Network;
 
-public interface INetworkAddressConfigProvider
+public class RadixAddressTests
 {
-    string GetNetworkHrpSuffix();
+    [Theory]
+    [InlineData("account_loc1qdj0c2rrk5v9yv87gr9zz9mdcrjpxq60fyw0n6j57q3szeyglx")]
+    [InlineData("resource_loc1qrky4vgxu4pqpk07k6hem2kx23wshq4renre04smrlwsvvyu3v")]
+    public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeAndReencodeIsIdentity(string encodedString)
+    {
+        var decodedData = RadixAddressCodec.Decode(encodedString);
+        var reEncodedString = RadixAddressCodec.Encode(decodedData.Hrp, decodedData.Data);
 
-    HrpDefinition GetHrpDefinition();
+        decodedData.Variant.Should().Be(Bech32Codec.Variant.Bech32M);
+        reEncodedString.Should().Be(encodedString.ToLowerInvariant());
+    }
 
-    WellKnownAddresses GetWellKnownAddresses();
+    [Theory]
+    [InlineData("account_loc1qdj0c2rrk5v9yv87gr9zz9mdcrjpxq60fyw0n6j57q3szeyglx", "0364fc2863b5185230fe40ca21176dc0e413034f491cf9ea54f023")]
+    [InlineData("resource_loc1qrky4vgxu4pqpk07k6hem2kx23wshq4renre04smrlwsvvyu3v", "00ec4ab106e54200d9feb6af9daac6545d0b82a3ccc797d61b1fdd")]
+    public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeGivesAddress(string encodedString, string expectedAddress)
+    {
+        var decodedData = RadixAddressCodec.Decode(encodedString);
+        var decodedHex = decodedData.Data.ToHex();
 
-    AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType);
+        decodedHex.Should().Be(expectedAddress);
+    }
+
+    public static IEnumerable<object[]> Invalid_Bech32Strings => new List<object[]>
+    {
+        new object[] { (char)0x20 + "1nwldj5" }, // HRP character out of range
+        new object[] { (char)0x7F + "1axkwrx" }, // HRP character out of range
+        new object[] { (char)0x80 + "1eym55h" }, // HRP character out of range
+        new object[] { "de1lg7wt" + (char)0xFF }, // Invalid character in checksum
+        new object[] { "an84characterslonghumanreadablepartthatcontainsthenumber1andtheexcludedcharactersbio1569pvx" }, // HRP character out of range
+        new object[] { "pzry9x0s0muk" }, // No separator character
+        new object[] { "1pzry9x0s0muk" }, // Empty HRP
+        new object[] { "x1b4n0q5v" }, // Invalid data character
+        new object[] { "li1dgmt3" }, // Too short checksum
+        new object[] { "A1G7SGD8" }, // checksum calculated with uppercase form of HRP
+        new object[] { "10a06t8" }, // empty HRP
+        new object[] { "vb1qvx0emaq0tua6md7wu9c047mm5krrwnlfl8c7ws3jm2s9uf4vxcyvrwrazz" }, // Bad checksum
+    };
+
+    [Theory]
+    [MemberData(nameof(Invalid_Bech32Strings))]
+    public void WhenGiven_InvalidEncodedString_DecodeThrows(string encodedString)
+    {
+        var act = () => RadixAddressCodec.Decode(encodedString);
+
+        act.Should().Throw<AddressException>();
+    }
 }

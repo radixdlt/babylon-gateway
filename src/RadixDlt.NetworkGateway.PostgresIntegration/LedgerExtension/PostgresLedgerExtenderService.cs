@@ -68,6 +68,7 @@ using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -124,11 +125,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var topOfLedgerSummary = await _topOfLedgerProvider.GetTopOfLedger(token);
 
             TransactionConsistencyValidator.AssertLatestTransactionConsistent(ledgerExtension.LatestTransactionSummary.StateVersion, topOfLedgerSummary.StateVersion);
-
-            if (topOfLedgerSummary.StateVersion == 0)
-            {
-                await EnsureDbLedgerIsInitialized(token);
-            }
 
             var extendLedgerReport = await ProcessTransactions(dbContext, ledgerExtension, token);
 
@@ -216,6 +212,7 @@ UPDATE pending_transactions
 
     private async Task<ExtendLedgerReport> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
+        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration();
         var rowsInserted = 0;
         var rowsUpdated = 0;
         var dbReadDuration = TimeSpan.Zero;
@@ -284,10 +281,10 @@ UPDATE pending_transactions
 
                         var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
                         var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
-                        using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, _networkConfigurationProvider.GetNetworkId());
+                        using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, (await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
                         using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
 
-                        var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, _networkConfigurationProvider.GetNetworkId());
+                        var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, networkConfiguration.Id);
 
                         foreach (var address in extractedAddresses.All())
                         {
@@ -296,7 +293,7 @@ UPDATE pending_transactions
 
                         manifestExtractedAddresses[stateVersion] = extractedAddresses;
 
-                        var manifestSummary = toolkitManifest.Summary(_networkConfigurationProvider.GetNetworkId());
+                        var manifestSummary = toolkitManifest.Summary(networkConfiguration.Id);
 
                         for (var i = 0; i < manifestSummary.classification.Length; ++i)
                         {
@@ -1234,7 +1231,7 @@ UPDATE pending_transactions
 
                         var eventEmitterEntity = referencedEntities.Get((EntityAddress)methodEventEmitter.Entity.EntityAddress);
 
-                        using var decodedEvent = EventDecoder.DecodeEvent(@event, _networkConfigurationProvider.GetNetworkId());
+                        using var decodedEvent = EventDecoder.DecodeEvent(@event, (await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
 
                         if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
                         {
@@ -1935,18 +1932,5 @@ UPDATE pending_transactions
         var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
 
         return new ExtendLedgerReport(lastTransactionSummary, rowsInserted + rowsUpdated, dbReadDuration, dbWriteDuration, contentHandlingDuration);
-    }
-
-    private async Task EnsureDbLedgerIsInitialized(CancellationToken token)
-    {
-        var created = await _networkConfigurationProvider.SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(token);
-
-        if (created)
-        {
-            _logger.LogInformation(
-                "Ledger initialized with network: {NetworkName}",
-                _networkConfigurationProvider.GetNetworkName()
-            );
-        }
     }
 }

@@ -66,6 +66,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -74,7 +75,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using ToolkitModel = RadixEngineToolkit;
 
@@ -87,6 +87,7 @@ public interface ISubmissionService
 
 internal class SubmissionService : ISubmissionService
 {
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly ISubmissionTrackingService _submissionTrackingService;
     private readonly IReadOnlyCollection<ISubmissionServiceObserver> _observers;
@@ -94,12 +95,14 @@ internal class SubmissionService : ISubmissionService
     private readonly ILogger<SubmissionService> _logger;
 
     public SubmissionService(
+        INetworkConfigurationProvider networkConfigurationProvider,
         ICoreApiHandler coreApiHandler,
         ISubmissionTrackingService submissionTrackingService,
         IEnumerable<ISubmissionServiceObserver> observers,
         IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptions,
         ILogger<SubmissionService> logger)
     {
+        _networkConfigurationProvider = networkConfigurationProvider;
         _coreApiHandler = coreApiHandler;
         _submissionTrackingService = submissionTrackingService;
         _observers = observers.ToArray();
@@ -118,7 +121,7 @@ internal class SubmissionService : ISubmissionService
         var options = _coreApiIntegrationOptions.CurrentValue;
         var submissionResult = await _submissionTrackingService.ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
             _coreApiHandler.GetTransactionApi(),
-            _coreApiHandler.GetNetworkName(),
+            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
             targetNode.Name,
             new PendingTransactionHandlingConfig(
                 options.MaxSubmissionAttempts,
@@ -172,7 +175,7 @@ internal class SubmissionService : ISubmissionService
         try
         {
             var notarizedTransaction = ToolkitModel.NotarizedTransaction.Decompile(notarizedTransactionBytes);
-            notarizedTransaction.StaticallyValidate(ToolkitModel.ValidationConfig.Default(_coreApiHandler.GetNetworkId()));
+            notarizedTransaction.StaticallyValidate(ToolkitModel.ValidationConfig.Default((await _networkConfigurationProvider.GetNetworkConfiguration()).Id));
             return notarizedTransaction;
         }
         catch (ToolkitModel.RadixEngineToolkitException.TransactionValidationFailed ex)

@@ -62,41 +62,67 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+// ReSharper disable CommentTypo
+// ReSharper disable StringLiteralTypo
+// ReSharper disable IdentifierTypo
+/* The above is a fix for ReShaper not liking the work "Bech" */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using System;
 
-internal class CapturedConfigProvider : ICapturedConfigProvider
+namespace RadixDlt.NetworkGateway.Abstractions.Network;
+
+public sealed record DecodedRadixAddress(string Hrp, byte[] Data, Bech32Codec.Variant Variant)
 {
-    private readonly ReadOnlyDbContext _dbContext;
+    public byte DiscriminatorByte => Data[0];
 
-    public CapturedConfigProvider(ReadOnlyDbContext dbContext)
+    public byte[] AddressBytes => Data[1..];
+
+    public override string ToString()
     {
-        _dbContext = dbContext;
+        return RadixAddressCodec.Encode(Hrp, Data);
+    }
+}
+
+public static class RadixAddressCodec
+{
+    public static string Encode(string hrp, ReadOnlySpan<byte> addressData)
+    {
+        return Bech32Codec.Encode(hrp, EncodeAddressDataInBase32(addressData), Bech32Codec.Variant.Bech32M);
     }
 
-    public async Task<CapturedConfig> CaptureConfiguration()
+    public static DecodedRadixAddress Decode(string encoded)
     {
-        var networkConfiguration = await _dbContext.NetworkConfiguration.AsNoTracking().AnnotateMetricName().SingleOrDefaultAsync();
+        var (hrp, rawBase32Data, variant) = Bech32Codec.Decode(encoded);
+        var addressData = DecodeBase32IntoAddressData(rawBase32Data);
 
-        if (networkConfiguration == null)
+        if (addressData.Length == 0)
         {
-            throw new ConfigurationException("Can't set current configuration from database as it's not there");
+            throw new AddressException("The Bech32 address has no data");
         }
 
-        return new CapturedConfig(
-            networkConfiguration.NetworkId,
-            networkConfiguration.NetworkName,
-            networkConfiguration.NetworkHrpSuffix,
-            networkConfiguration.HrpDefinition,
-            networkConfiguration.WellKnownAddresses,
-            networkConfiguration.AddressTypeDefinitions,
-            networkConfiguration.GenesisEpoch,
-            networkConfiguration.GenesisRound
-        );
+        if (variant != Bech32Codec.Variant.Bech32M)
+        {
+            throw new AddressException("Only Bech32M addresses are supported");
+        }
+
+        return new DecodedRadixAddress(hrp, addressData, variant);
+    }
+
+    /// <summary>
+    /// Defines how the 5-bit per byte (base32 per byte) data should be decoded.
+    /// This will likely making use of ConvertBits to unpack to 8 bits per byte.
+    /// </summary>
+    private static byte[] DecodeBase32IntoAddressData(ReadOnlySpan<byte> base32EncodedData)
+    {
+        return Bech32Codec.ConvertBits(base32EncodedData, 5, 8, false);
+    }
+
+    /// <summary>
+    /// Defines how the data should be encoded as 5-bits per byte (base32 per byte) for the Bech32 data part.
+    /// This will likely making use of ConvertBits to convert from 8 bits per byte to 5 bits per byte.
+    /// </summary>
+    private static ReadOnlySpan<byte> EncodeAddressDataInBase32(ReadOnlySpan<byte> dataToEncode)
+    {
+        return Bech32Codec.ConvertBits(dataToEncode, 8, 5, true);
     }
 }

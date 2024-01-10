@@ -64,13 +64,23 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 
 namespace RadixDlt.NetworkGateway.Abstractions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddNetworkGatewayAbstractions(this IServiceCollection services)
+    public static IServiceCollection AddNetworkGatewayAbstractions(this IServiceCollection services)
     {
         services.TryAddSingleton<IClock, SystemClock>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddNetworkGatewayCoreServices(this IServiceCollection services)
+    {
+        services.TryAddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
+
+        return services;
     }
 }

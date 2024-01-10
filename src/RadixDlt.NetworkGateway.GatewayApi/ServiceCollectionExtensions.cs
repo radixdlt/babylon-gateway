@@ -97,7 +97,8 @@ public static class ServiceCollectionExtensions
     public static GatewayApiBuilder AddNetworkGatewayApiCore(this IServiceCollection services)
     {
         services
-            .AddNetworkGatewayAbstractions();
+            .AddNetworkGatewayAbstractions()
+            .AddNetworkGatewayCoreServices();
 
         services
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
@@ -130,10 +131,6 @@ public static class ServiceCollectionExtensions
 
     private static void AddSingletonServices(IServiceCollection services)
     {
-        // Should only contain services without any DBContext or HttpClient - as these both need to be recycled
-        // semi-regularly
-        services.TryAddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
-        services.TryAddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.TryAddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.TryAddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
         services.TryAddSingleton<RequestTimeoutMiddleware>();

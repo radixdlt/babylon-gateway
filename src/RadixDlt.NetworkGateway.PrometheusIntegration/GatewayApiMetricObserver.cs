@@ -67,7 +67,6 @@ using Microsoft.AspNetCore.Routing;
 using Prometheus;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
@@ -233,17 +232,17 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    void ICoreNodeHealthCheckerObserver.NodeUnhealthy((CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
+    void ICoreNodeHealthCheckerObserver.NodeUnhealthy((Abstractions.Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
     {
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0);
     }
 
-    void ICoreNodeHealthCheckerObserver.NodeHealthyButLagging((CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
+    void ICoreNodeHealthCheckerObserver.NodeHealthyButLagging((Abstractions.Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
     {
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0.5);
     }
 
-    void ICoreNodeHealthCheckerObserver.NodeHealthyAndSynced((CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
+    void ICoreNodeHealthCheckerObserver.NodeHealthyAndSynced((Abstractions.Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
     {
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(1);
     }

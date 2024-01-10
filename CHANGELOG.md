@@ -1,8 +1,9 @@
 ## 2.0.0
 Release Date: _unreleased_
-  
+
 - Return components effective role assignments only for assigned modules.
 - Dropped `balance_changes` fallback mechanism.
+- Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
 
 ## 1.2.4
 Release Date: 4.01.2024

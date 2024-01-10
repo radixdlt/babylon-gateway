@@ -26,4 +26,16 @@
     <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration\RadixDlt.NetworkGateway.PostgresIntegration.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Abstractions\Network\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Abstractions\Network\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Abstractions\Network\**" />
+  </ItemGroup>
+
 </Project>
