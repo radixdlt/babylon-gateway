@@ -112,7 +112,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum RoundUpdate for value: RoundUpdate
         /// </summary>
         [EnumMember(Value = "RoundUpdate")]
-        RoundUpdate = 3
+        RoundUpdate = 3,
+
+        /// <summary>
+        /// Enum Flash for value: Flash
+        /// </summary>
+        [EnumMember(Value = "Flash")]
+        Flash = 4
 
     }
 

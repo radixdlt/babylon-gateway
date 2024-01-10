@@ -62,12 +62,29 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-public enum LedgerTransactionType
+#nullable disable
+
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    Genesis,
-    User,
-    RoundUpdate,
-    Flash,
+    /// <inheritdoc />
+    public partial class AddFlashTransactionType : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash")
+                .OldAnnotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
+                .OldAnnotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash");
+        }
+    }
 }

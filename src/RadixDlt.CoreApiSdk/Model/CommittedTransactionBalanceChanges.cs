@@ -90,15 +90,5 @@ public partial class CommittedTransactionBalanceChanges : IEntityAddressPointer
             yield return nonFungibleBalanceChange.EntityAddress;
             yield return nonFungibleBalanceChange.ResourceAddress;
         }
-
-        foreach (var resultantAccountFungibleBalance in ResultantAccountFungibleBalances)
-        {
-            yield return resultantAccountFungibleBalance.AccountAddress;
-
-            foreach (var resultantBalance in resultantAccountFungibleBalance.ResultantBalances)
-            {
-                yield return resultantBalance.ResourceAddress;
-            }
-        }
     }
 }

@@ -84,49 +84,77 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// UserLedgerTransaction
+    /// FlashedSubstate
     /// </summary>
-    [DataContract(Name = "UserLedgerTransaction")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(FlashLedgerTransaction), "Flash")]
-    [JsonSubtypes.KnownSubType(typeof(GenesisLedgerTransaction), "Genesis")]
-    [JsonSubtypes.KnownSubType(typeof(RoundUpdateLedgerTransaction), "RoundUpdate")]
-    [JsonSubtypes.KnownSubType(typeof(UserLedgerTransaction), "User")]
-    public partial class UserLedgerTransaction : LedgerTransaction, IEquatable<UserLedgerTransaction>
+    [DataContract(Name = "FlashedSubstate")]
+    public partial class FlashedSubstate : IEquatable<FlashedSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserLedgerTransaction" /> class.
+        /// Initializes a new instance of the <see cref="FlashedSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected UserLedgerTransaction() { }
+        protected FlashedSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserLedgerTransaction" /> class.
+        /// Initializes a new instance of the <see cref="FlashedSubstate" /> class.
         /// </summary>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="type">type (required) (default to LedgerTransactionType.User).</param>
-        /// <param name="payloadHex">The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request..</param>
-        public UserLedgerTransaction(NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), LedgerTransactionType type = LedgerTransactionType.User, string payloadHex = default(string)) : base(type, payloadHex)
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id) (required).</param>
+        /// <param name="partitionNumber">partitionNumber (required).</param>
+        /// <param name="substateKey">substateKey (required).</param>
+        /// <param name="value">The hex-encoded, SBOR-encoded substate data bytes. (required).</param>
+        public FlashedSubstate(string entityAddress = default(string), int partitionNumber = default(int), SubstateKey substateKey = default(SubstateKey), string value = default(string))
         {
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for UserLedgerTransaction and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for FlashedSubstate and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.EntityAddress = entityAddress;
+            this.PartitionNumber = partitionNumber;
+            // to ensure "substateKey" is required (not null)
+            if (substateKey == null)
+            {
+                throw new ArgumentNullException("substateKey is a required property for FlashedSubstate and cannot be null");
+            }
+            this.SubstateKey = substateKey;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for FlashedSubstate and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PartitionNumber
+        /// </summary>
+        [DataMember(Name = "partition_number", IsRequired = true, EmitDefaultValue = true)]
+        public int PartitionNumber { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateKey
+        /// </summary>
+        [DataMember(Name = "substate_key", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateKey SubstateKey { get; set; }
+
+        /// <summary>
+        /// The hex-encoded, SBOR-encoded substate data bytes.
+        /// </summary>
+        /// <value>The hex-encoded, SBOR-encoded substate data bytes.</value>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public string Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +163,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class UserLedgerTransaction {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("class FlashedSubstate {\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  PartitionNumber: ").Append(PartitionNumber).Append("\n");
+            sb.Append("  SubstateKey: ").Append(SubstateKey).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -146,7 +176,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -158,25 +188,39 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as UserLedgerTransaction);
+            return this.Equals(input as FlashedSubstate);
         }
 
         /// <summary>
-        /// Returns true if UserLedgerTransaction instances are equal
+        /// Returns true if FlashedSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of UserLedgerTransaction to be compared</param>
+        /// <param name="input">Instance of FlashedSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(UserLedgerTransaction input)
+        public bool Equals(FlashedSubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
+                ) && 
+                (
+                    this.PartitionNumber == input.PartitionNumber ||
+                    this.PartitionNumber.Equals(input.PartitionNumber)
+                ) && 
+                (
+                    this.SubstateKey == input.SubstateKey ||
+                    (this.SubstateKey != null &&
+                    this.SubstateKey.Equals(input.SubstateKey))
+                ) && 
+                (
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -188,10 +232,19 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                int hashCode = 41;
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.PartitionNumber.GetHashCode();
+                if (this.SubstateKey != null)
+                {
+                    hashCode = (hashCode * 59) + this.SubstateKey.GetHashCode();
+                }
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

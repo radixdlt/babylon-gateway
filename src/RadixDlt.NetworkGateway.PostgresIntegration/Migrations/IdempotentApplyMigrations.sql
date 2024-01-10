@@ -1068,3 +1068,48 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    ALTER TABLE network_configuration ADD network_hrp_suffix text NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    update network_configuration set network_hrp_suffix = (select substring(recordset."HrpPrefix"::text,'_(.+)') from network_configuration, jsonb_to_recordset(address_type_definitions) as recordset("HrpPrefix" TEXT) WHERE recordset."HrpPrefix" like '%account%' limit 1)
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20231130132946_AddNetworkHrpSuffixToNetworkConfiguration', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240110094622_AddFlashTransactionType') THEN
+    ALTER TYPE ledger_transaction_type ADD VALUE 'flash';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240110094622_AddFlashTransactionType') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20240110094622_AddFlashTransactionType', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+

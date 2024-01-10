@@ -95,6 +95,8 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "LedgerTransaction")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(FlashLedgerTransaction), "Flash")]
+    [JsonSubtypes.KnownSubType(typeof(FlashLedgerTransaction), "FlashLedgerTransaction")]
     [JsonSubtypes.KnownSubType(typeof(GenesisLedgerTransaction), "Genesis")]
     [JsonSubtypes.KnownSubType(typeof(GenesisLedgerTransaction), "GenesisLedgerTransaction")]
     [JsonSubtypes.KnownSubType(typeof(RoundUpdateLedgerTransaction), "RoundUpdate")]

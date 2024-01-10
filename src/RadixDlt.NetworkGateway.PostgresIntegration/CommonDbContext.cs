@@ -210,7 +210,8 @@ internal abstract class CommonDbContext : DbContext
             .HasDiscriminator<LedgerTransactionType>(DiscriminatorColumnName)
             .HasValue<UserLedgerTransaction>(LedgerTransactionType.User)
             .HasValue<RoundUpdateLedgerTransaction>(LedgerTransactionType.RoundUpdate)
-            .HasValue<GenesisLedgerTransaction>(LedgerTransactionType.Genesis);
+            .HasValue<GenesisLedgerTransaction>(LedgerTransactionType.Genesis)
+            .HasValue<FlashLedgerTransaction>(LedgerTransactionType.Flash);
 
         modelBuilder
             .Entity<UserLedgerTransaction>()

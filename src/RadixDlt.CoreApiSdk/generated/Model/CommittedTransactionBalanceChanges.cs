@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// For the given transaction, contains individual entity resource balance changes. The balance changes accounts for the fee payments as well. For failed transactions, current implementation does not return any balance changes (not even the fee payments). This will also change in a future update. 
+    /// CommittedTransactionBalanceChanges
     /// </summary>
     [DataContract(Name = "CommittedTransactionBalanceChanges")]
     public partial class CommittedTransactionBalanceChanges : IEquatable<CommittedTransactionBalanceChanges>
@@ -105,8 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated.  (required).</param>
         /// <param name="nonFungibleEntityBalanceChanges">Non fungible changes per entity and resource  (required).</param>
-        /// <param name="resultantAccountFungibleBalances">A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity.  (required).</param>
-        public CommittedTransactionBalanceChanges(List<LtsEntityFungibleBalanceChanges> fungibleEntityBalanceChanges = default(List<LtsEntityFungibleBalanceChanges>), List<LtsEntityNonFungibleBalanceChanges> nonFungibleEntityBalanceChanges = default(List<LtsEntityNonFungibleBalanceChanges>), List<LtsResultantAccountFungibleBalances> resultantAccountFungibleBalances = default(List<LtsResultantAccountFungibleBalances>))
+        public CommittedTransactionBalanceChanges(List<LtsEntityFungibleBalanceChanges> fungibleEntityBalanceChanges = default(List<LtsEntityFungibleBalanceChanges>), List<LtsEntityNonFungibleBalanceChanges> nonFungibleEntityBalanceChanges = default(List<LtsEntityNonFungibleBalanceChanges>))
         {
             // to ensure "fungibleEntityBalanceChanges" is required (not null)
             if (fungibleEntityBalanceChanges == null)
@@ -120,12 +119,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("nonFungibleEntityBalanceChanges is a required property for CommittedTransactionBalanceChanges and cannot be null");
             }
             this.NonFungibleEntityBalanceChanges = nonFungibleEntityBalanceChanges;
-            // to ensure "resultantAccountFungibleBalances" is required (not null)
-            if (resultantAccountFungibleBalances == null)
-            {
-                throw new ArgumentNullException("resultantAccountFungibleBalances is a required property for CommittedTransactionBalanceChanges and cannot be null");
-            }
-            this.ResultantAccountFungibleBalances = resultantAccountFungibleBalances;
         }
 
         /// <summary>
@@ -143,13 +136,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<LtsEntityNonFungibleBalanceChanges> NonFungibleEntityBalanceChanges { get; set; }
 
         /// <summary>
-        /// A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity. 
-        /// </summary>
-        /// <value>A list of the resultant fungible account balances for any balances which changed in this transaction. Only balances for accounts are returned, not any other kind of entity. </value>
-        [DataMember(Name = "resultant_account_fungible_balances", IsRequired = true, EmitDefaultValue = true)]
-        public List<LtsResultantAccountFungibleBalances> ResultantAccountFungibleBalances { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -159,7 +145,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class CommittedTransactionBalanceChanges {\n");
             sb.Append("  FungibleEntityBalanceChanges: ").Append(FungibleEntityBalanceChanges).Append("\n");
             sb.Append("  NonFungibleEntityBalanceChanges: ").Append(NonFungibleEntityBalanceChanges).Append("\n");
-            sb.Append("  ResultantAccountFungibleBalances: ").Append(ResultantAccountFungibleBalances).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -206,12 +191,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.NonFungibleEntityBalanceChanges != null &&
                     input.NonFungibleEntityBalanceChanges != null &&
                     this.NonFungibleEntityBalanceChanges.SequenceEqual(input.NonFungibleEntityBalanceChanges)
-                ) && 
-                (
-                    this.ResultantAccountFungibleBalances == input.ResultantAccountFungibleBalances ||
-                    this.ResultantAccountFungibleBalances != null &&
-                    input.ResultantAccountFungibleBalances != null &&
-                    this.ResultantAccountFungibleBalances.SequenceEqual(input.ResultantAccountFungibleBalances)
                 );
         }
 
@@ -231,10 +210,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.NonFungibleEntityBalanceChanges != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleEntityBalanceChanges.GetHashCode();
-                }
-                if (this.ResultantAccountFungibleBalances != null)
-                {
-                    hashCode = (hashCode * 59) + this.ResultantAccountFungibleBalances.GetHashCode();
                 }
                 return hashCode;
             }
