@@ -62,86 +62,44 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
+namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
-public sealed class NetworkOptions
+public interface ICoreApiProvider
 {
-    [ConfigurationKeyName("NetworkName")]
-    public string NetworkName { get; set; } = null!;
+    public CoreApiNode CoreApiNode { get; }
 
-    [ConfigurationKeyName("CoreApiNodes")]
-    public ICollection<CoreApiNode> CoreApiNodes { get; set; } = new List<CoreApiNode>();
+    public CoreApi.StatusApi StatusApi { get; }
 
-    [ConfigurationKeyName("DisableCoreApiHttpsCertificateChecks")]
-    public bool DisableCoreApiHttpsCertificateChecks { get; set; }
+    public CoreApi.StreamApi StreamApi { get; }
 
-    [ConfigurationKeyName("CoreApiHttpProxyAddress")]
-    public string? CoreApiHttpProxyAddress { get; set; }
-
-    [ConfigurationKeyName("MaxAllowedStateVersionLagToBeConsideredSynced")]
-    public long MaxAllowedStateVersionLagToBeConsideredSynced { get; set; } = 100;
-
-    [ConfigurationKeyName("IgnoreNonSyncedNodes")]
-    public bool IgnoreNonSyncedNodes { get; set; } = true;
+    public CoreApi.TransactionApi TransactionApi { get; }
 }
 
-public sealed record CoreApiNode
+public sealed class CoreApiProvider : ICoreApiProvider
 {
-    /// <summary>
-    /// Whether the node's core API should be used to read from (defaults to true).
-    /// </summary>
-    [ConfigurationKeyName("Enabled")]
-    public bool Enabled { get; set; } = true;
+    public CoreApiNode CoreApiNode { get; }
 
-    /// <summary>
-    /// A unique name identifying this node - used as the node's id.
-    /// </summary>
-    [ConfigurationKeyName("Name")]
-    public string Name { get; set; } = string.Empty;
+    public CoreApi.StatusApi StatusApi { get; }
 
-    /// <summary>
-    /// Address of the node's Core API.
-    /// </summary>
-    [ConfigurationKeyName("CoreApiAddress")]
-    public string CoreApiAddress { get; set; } = string.Empty;
+    public CoreApi.StreamApi StreamApi { get; }
 
-    /// <summary>
-    /// AuthorizationHeader - if set, can allow for basic auth.
-    /// </summary>
-    [ConfigurationKeyName("CoreApiAuthorizationHeader")]
-    public string? CoreApiAuthorizationHeader { get; set; } = null;
+    public CoreApi.TransactionApi TransactionApi { get; }
 
-    /// <summary>
-    /// Relative weighting of the node.
-    /// </summary>
-    [ConfigurationKeyName("RequestWeighting")]
-    public decimal RequestWeighting { get; set; } = 1;
-}
-
-internal class NetworkOptionsValidator : AbstractOptionsValidator<NetworkOptions>
-{
-    public NetworkOptionsValidator()
+    public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
     {
-        RuleFor(x => x.NetworkName).NotNull();
-        RuleFor(x => x.CoreApiNodes).NotNull();
-        RuleForEach(x => x.CoreApiNodes).SetValidator(new CoreApiNodeOptionsValidator());
-        RuleFor(x => x.MaxAllowedStateVersionLagToBeConsideredSynced).GreaterThan(0);
-    }
-}
-
-internal class CoreApiNodeOptionsValidator : AbstractOptionsValidator<CoreApiNode>
-{
-    public CoreApiNodeOptionsValidator()
-    {
-        When(x => x.Enabled, () =>
+        if (!string.IsNullOrWhiteSpace(coreApiNode.CoreApiAuthorizationHeader))
         {
-            RuleFor(x => x.Name).NotNull();
-            RuleFor(x => x.CoreApiAddress).NotNull();
-        });
+            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(coreApiNode.CoreApiAuthorizationHeader);
+        }
+
+        CoreApiNode = coreApiNode;
+        StatusApi = new CoreApi.StatusApi(httpClient, coreApiNode.CoreApiAddress);
+        StreamApi = new CoreApi.StreamApi(httpClient, coreApiNode.CoreApiAddress);
+        TransactionApi = new CoreApi.TransactionApi(httpClient, coreApiNode.CoreApiAddress);
     }
 }

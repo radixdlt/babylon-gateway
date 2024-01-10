@@ -67,6 +67,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
@@ -141,7 +142,6 @@ public static class ServiceCollectionExtensions
         // We can mock these out in tests
         // These should be transient so that they don't capture a transient HttpClient
         services.TryAddTransient<ITransactionStreamReader, TransactionStreamReader>();
-        services.TryAddTransient<INetworkConfigurationReader, NetworkConfigurationReader>();
         services.TryAddTransient<INetworkStatusReader, NetworkStatusReader>();
 
         services.TryAddTransient<Func<ITransactionStreamReader>>(provider => provider.GetRequiredService<ITransactionStreamReader>);

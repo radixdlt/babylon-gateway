@@ -62,15 +62,14 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Api;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
@@ -79,7 +78,7 @@ public interface ICoreApiHandler
 {
     CoreApiNode GetCoreNodeConnectedTo();
 
-    TransactionApi GetTransactionApi();
+    CoreApi.TransactionApi GetTransactionApi();
 
     Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> TransactionPreview(
         CoreModel.TransactionPreviewRequest request,
@@ -92,15 +91,10 @@ public interface ICoreApiHandler
 /// </summary>
 internal class CoreApiHandler : ICoreApiHandler
 {
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly Lazy<ICoreApiProvider> _coreApiProvider;
 
-    public CoreApiHandler(
-        INetworkConfigurationProvider networkConfigurationProvider,
-        ICoreNodesSelectorService coreNodesSelectorService,
-        HttpClient httpClient)
+    public CoreApiHandler(ICoreNodesSelectorService coreNodesSelectorService, HttpClient httpClient)
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
         _coreApiProvider = new Lazy<ICoreApiProvider>(() => ChooseCoreApiProvider(coreNodesSelectorService, httpClient));
     }
 
@@ -109,7 +103,7 @@ internal class CoreApiHandler : ICoreApiHandler
         return _coreApiProvider.Value.CoreApiNode;
     }
 
-    public TransactionApi GetTransactionApi()
+    public CoreApi.TransactionApi GetTransactionApi()
     {
         return _coreApiProvider.Value.TransactionApi;
     }

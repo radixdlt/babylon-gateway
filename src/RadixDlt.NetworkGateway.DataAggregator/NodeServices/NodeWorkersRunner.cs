@@ -104,7 +104,6 @@ public sealed class NodeWorkersRunner : IDisposable
         }
     }
 
-    private readonly List<INodeInitializer> _initializers;
     private readonly List<INodeWorker> _workers;
     private readonly object _statusLock = new();
     private readonly ILogger<NodeWorkersRunner> _logger;
@@ -130,7 +129,6 @@ public sealed class NodeWorkersRunner : IDisposable
         _clock = clock;
         _nodeWorkersOptions = nodeWorkersOptions;
         _cancellationTokenSource = new CancellationTokenSource();
-        _initializers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeInitializer>().ToList();
         _workers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeWorker>().ToList();
         Status = NodeWorkersRunnerStatus.Uninitialized;
     }
@@ -185,6 +183,8 @@ public sealed class NodeWorkersRunner : IDisposable
     /// </summary>
     public async Task Initialize(CancellationToken cancellationToken)
     {
+        await Task.Yield();
+
         lock (_statusLock)
         {
             switch (Status)
@@ -206,18 +206,6 @@ public sealed class NodeWorkersRunner : IDisposable
         }
 
         _combinedInitializeCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var combinedCancellationToken = _combinedInitializeCancellationTokenSource.Token;
-
-        try
-        {
-            await Task.WhenAll(_initializers.Select(i => i.Run(combinedCancellationToken)));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogInformation(ex, "At least one initializer errored - all workers for the node will now be stopped");
-            await StopAllSafe(CancellationToken.None);
-            throw;
-        }
 
         lock (_statusLock)
         {
@@ -366,7 +354,6 @@ public sealed class NodeWorkersRunner : IDisposable
         _runningWorkersCancellationTokenRegistration = null;
         _logScope?.Dispose();
         _logScope = null;
-        GC.SuppressFinalize(this);
     }
 
     private void SafelyCancelInitializationOrStartup()

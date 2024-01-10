@@ -62,53 +62,91 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using System;
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
+namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
-/// <summary>
-/// A marker interface for NodeInitializers - Dependency Injection will pick each of them up to start them in the NodeWorkersRunner.
-/// </summary>
-public interface INodeInitializer
+public sealed class NetworkOptions
 {
-    public Task Run(CancellationToken cancellationToken);
+    [ConfigurationKeyName("NetworkName")]
+    public string NetworkName { get; set; } = null!;
+
+    [ConfigurationKeyName("CoreApiNodes")]
+    public ICollection<CoreApiNode> CoreApiNodes { get; set; } = new List<CoreApiNode>();
+
+    [ConfigurationKeyName("DisableCoreApiHttpsCertificateChecks")]
+    public bool DisableCoreApiHttpsCertificateChecks { get; set; }
+
+    [ConfigurationKeyName("CoreApiHttpProxyAddress")]
+    public string? CoreApiHttpProxyAddress { get; set; }
+
+    [ConfigurationKeyName("MaxAllowedStateVersionLagToBeConsideredSynced")]
+    public long MaxAllowedStateVersionLagToBeConsideredSynced { get; set; } = 100;
+
+    [ConfigurationKeyName("IgnoreNonSyncedNodes")]
+    public bool IgnoreNonSyncedNodes { get; set; } = true;
 }
 
-/// <summary>
-/// A base class for NodeInitializers, which handles errors etc.
-/// </summary>
-public abstract class NodeInitializer : INodeInitializer
+public sealed record CoreApiNode
 {
-    private readonly string _nodeName;
-    private readonly IEnumerable<INodeInitializerObserver> _observers;
+    /// <summary>
+    /// If false, the node should not be used.
+    /// </summary>
+    [ConfigurationKeyName("Enabled")]
+    public bool Enabled { get; set; } = true;
 
-    protected NodeInitializer(string nodeName, IEnumerable<INodeInitializerObserver> observers)
+    /// <summary>
+    /// A unique name identifying this node - used as the node's id.
+    /// </summary>
+    [ConfigurationKeyName("Name")]
+    public string Name { get; set; } = null!;
+
+    /// <summary>
+    /// Address of the node's Core API.
+    /// </summary>
+    [ConfigurationKeyName("CoreApiAddress")]
+    public string CoreApiAddress { get; set; } = null!;
+
+    /// <summary>
+    /// AuthorizationHeader - if set, can allow for basic auth.
+    /// </summary>
+    [ConfigurationKeyName("CoreApiAuthorizationHeader")]
+    public string? CoreApiAuthorizationHeader { get; set; }
+
+    /// <summary>
+    /// Relative weighting of the node.
+    /// </summary>
+    [ConfigurationKeyName("RequestWeighting")]
+    public decimal RequestWeighting { get; set; } = 1;
+
+    [ConfigurationKeyName("DisabledForTransactionIndexing")]
+    public bool DisabledForTransactionIndexing { get; set; }
+
+    [ConfigurationKeyName("DisabledForConstruction")]
+    public bool DisabledForConstruction { get; set; }
+}
+
+public sealed class NetworkOptionsValidator : AbstractOptionsValidator<NetworkOptions>
+{
+    public NetworkOptionsValidator()
     {
-        _nodeName = nodeName;
-        _observers = observers;
+        RuleFor(x => x.NetworkName).NotNull();
+        RuleFor(x => x.CoreApiNodes).NotNull();
+        RuleForEach(x => x.CoreApiNodes).SetValidator(new CoreApiNodeOptionsValidator());
+        RuleFor(x => x.MaxAllowedStateVersionLagToBeConsideredSynced).GreaterThan(0);
     }
+}
 
-    public async Task Run(CancellationToken cancellationToken)
+public sealed class CoreApiNodeOptionsValidator : AbstractOptionsValidator<CoreApiNode>
+{
+    public CoreApiNodeOptionsValidator()
     {
-        try
+        When(x => x.Enabled, () =>
         {
-            await Initialize(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            TrackInitializerFaultedException(cancellationToken.IsCancellationRequested, ex);
-            throw;
-        }
-    }
-
-    protected abstract Task Initialize(CancellationToken cancellationToken);
-
-    protected void TrackInitializerFaultedException(bool isStopRequested, Exception ex)
-    {
-        _observers.ForEach(x => x.TrackInitializerFaultedException(GetType(), _nodeName, isStopRequested, ex));
+            RuleFor(x => x.Name).NotNull();
+            RuleFor(x => x.CoreApiAddress).NotNull();
+        });
     }
 }
