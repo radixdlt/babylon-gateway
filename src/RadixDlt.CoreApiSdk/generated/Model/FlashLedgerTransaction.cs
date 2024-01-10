@@ -91,42 +91,42 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// UserLedgerTransaction
+    /// FlashLedgerTransaction
     /// </summary>
-    [DataContract(Name = "UserLedgerTransaction")]
+    [DataContract(Name = "FlashLedgerTransaction")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(FlashLedgerTransaction), "Flash")]
     [JsonSubtypes.KnownSubType(typeof(GenesisLedgerTransaction), "Genesis")]
     [JsonSubtypes.KnownSubType(typeof(RoundUpdateLedgerTransaction), "RoundUpdate")]
     [JsonSubtypes.KnownSubType(typeof(UserLedgerTransaction), "User")]
-    public partial class UserLedgerTransaction : LedgerTransaction, IEquatable<UserLedgerTransaction>
+    public partial class FlashLedgerTransaction : LedgerTransaction, IEquatable<FlashLedgerTransaction>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserLedgerTransaction" /> class.
+        /// Initializes a new instance of the <see cref="FlashLedgerTransaction" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected UserLedgerTransaction() { }
+        protected FlashLedgerTransaction() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserLedgerTransaction" /> class.
+        /// Initializes a new instance of the <see cref="FlashLedgerTransaction" /> class.
         /// </summary>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="type">type (required) (default to LedgerTransactionType.User).</param>
+        /// <param name="flashTransaction">flashTransaction (required).</param>
+        /// <param name="type">type (required) (default to LedgerTransactionType.Flash).</param>
         /// <param name="payloadHex">The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request..</param>
-        public UserLedgerTransaction(NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), LedgerTransactionType type = LedgerTransactionType.User, string payloadHex = default(string)) : base(type, payloadHex)
+        public FlashLedgerTransaction(FlashTransaction flashTransaction = default(FlashTransaction), LedgerTransactionType type = LedgerTransactionType.Flash, string payloadHex = default(string)) : base(type, payloadHex)
         {
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "flashTransaction" is required (not null)
+            if (flashTransaction == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for UserLedgerTransaction and cannot be null");
+                throw new ArgumentNullException("flashTransaction is a required property for FlashLedgerTransaction and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.FlashTransaction = flashTransaction;
         }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// Gets or Sets FlashTransaction
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
+        [DataMember(Name = "flash_transaction", IsRequired = true, EmitDefaultValue = true)]
+        public FlashTransaction FlashTransaction { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +135,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class UserLedgerTransaction {\n");
+            sb.Append("class FlashLedgerTransaction {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("  FlashTransaction: ").Append(FlashTransaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -158,15 +158,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as UserLedgerTransaction);
+            return this.Equals(input as FlashLedgerTransaction);
         }
 
         /// <summary>
-        /// Returns true if UserLedgerTransaction instances are equal
+        /// Returns true if FlashLedgerTransaction instances are equal
         /// </summary>
-        /// <param name="input">Instance of UserLedgerTransaction to be compared</param>
+        /// <param name="input">Instance of FlashLedgerTransaction to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(UserLedgerTransaction input)
+        public bool Equals(FlashLedgerTransaction input)
         {
             if (input == null)
             {
@@ -174,9 +174,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.FlashTransaction == input.FlashTransaction ||
+                    (this.FlashTransaction != null &&
+                    this.FlashTransaction.Equals(input.FlashTransaction))
                 );
         }
 
@@ -189,9 +189,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                if (this.FlashTransaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FlashTransaction.GetHashCode();
                 }
                 return hashCode;
             }
