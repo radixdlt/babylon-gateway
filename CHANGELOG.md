@@ -1,10 +1,10 @@
 ## 1.2.5
 Release Date: _unreleased_
 
-- 
+- add support for new transaction types (flash transactions) that are gonna occur on protocol update.
 
 ## 1.2.4
-Release Date: _unreleased_
+Release Date: 4.01.2024
 
 - Extended validator's data returned from `/state/validators/list`: added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
 - Enable retries on transient database connectivity issues in gateway api.
