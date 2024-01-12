@@ -17,6 +17,7 @@ import {
   StateEntityDetailsResponseItem,
   StateEntityFungiblesPageResponse,
   StateEntityMetadataPageResponse,
+  StateEntityNonFungiblesPageResponse,
   StateNonFungibleDetailsResponseItem,
   StateNonFungibleIdsResponse,
   StateNonFungibleLocationResponseItem,
@@ -62,14 +63,14 @@ export class State {
   constructor(
     public innerClient: StateApi,
     public configuration: RuntimeConfiguration
-  ) {}
+  ) { }
 
   /**
    * Get detailed information about entities together with vault aggregated fungible and non-fungible resources.
    * Returns an array or single item depending on input value. If array is passed, it will be split into chunks of 20 addresses
    * which will be requested separately and returned only if all requests are successful.
    *
-   * Calling this function will exhaust list of all fungible resources for each entity.
+   * Calling this function will exhaust list of all resources for each entity.
    * If any of the requests fail, the whole operation will fail.
    *
    * When requesting details for `internal_vault` entity, `non_fungible_resources` and `fungible_resources` will be defaulted to objects with empty arrays
@@ -135,21 +136,20 @@ export class State {
 
     return isArray
       ? Promise.all(
-          (items as StateEntityDetailsVaultResponseItem[]).map((item) =>
-            this.queryAllFungibles(
-              item,
-              ledgerState || {
-                state_version: ledger_state.state_version,
-              }
-            )
+        (items as StateEntityDetailsVaultResponseItem[]).map((item) =>
+          this.queryAllResources(
+            item,
+            ledgerState || {
+              state_version: ledger_state.state_version,
+            }
           )
-        )
-      : this.queryAllFungibles(
-          items[0] as StateEntityDetailsVaultResponseItem,
-          ledgerState || {
-            state_version: ledger_state.state_version,
-          }
-        )
+        ))
+      : this.queryAllResources(
+        items[0] as StateEntityDetailsVaultResponseItem,
+        ledgerState || {
+          state_version: ledger_state.state_version,
+        }
+      )
   }
 
   /**
@@ -383,6 +383,57 @@ export class State {
     >
   }
 
+  private async getEntityNonFungiblesPageVaultAggregated(
+    entity: string,
+    nextCursor?: string | undefined,
+    ledgerState?: LedgerStateSelector
+  ): Promise<
+    ReplaceProperty<
+      StateEntityNonFungiblesPageResponse,
+      'items',
+      NonFungibleResourcesCollectionItemVaultAggregated[]
+    >
+  > {
+    return this.innerClient.entityNonFungiblesPage({
+      stateEntityNonFungiblesPageRequest: {
+        address: entity,
+        cursor: nextCursor,
+        aggregation_level: 'Vault',
+        at_ledger_state: ledgerState,
+      },
+    }) as Promise<
+      ReplaceProperty<
+        StateEntityNonFungiblesPageResponse,
+        'items',
+        NonFungibleResourcesCollectionItemVaultAggregated[]
+      >
+    >
+  }
+
+  private ensureResourcesProperties(
+    response: StateEntityDetailsResponse
+  ): ReplaceProperty<
+    StateEntityDetailsResponse,
+    'items',
+    StateEntityDetailsVaultResponseItem[]
+  > {
+    return {
+      ...response,
+      items: response.items.map((item) => ({
+        ...item,
+        fungible_resources: item.fungible_resources || {
+          total_count: 0,
+          items: [],
+        },
+        non_fungible_resources: item.non_fungible_resources || {
+          total_count: 0,
+          items: [],
+        },
+      })) as StateEntityDetailsVaultResponseItem[],
+    }
+  }
+
+
   private async queryAllFungibles(
     stateEntityDetails: StateEntityDetailsVaultResponseItem,
     ledgerState?: LedgerStateSelector
@@ -412,26 +463,61 @@ export class State {
     })
   }
 
-  private ensureResourcesProperties(
-    response: StateEntityDetailsResponse
-  ): ReplaceProperty<
-    StateEntityDetailsResponse,
-    'items',
-    StateEntityDetailsVaultResponseItem[]
-  > {
-    return {
-      ...response,
-      items: response.items.map((item) => ({
-        ...item,
-        fungible_resources: item.fungible_resources || {
-          total_count: 0,
-          items: [],
+
+  private async queryAllNonFungibles(
+    stateEntityDetails: StateEntityDetailsVaultResponseItem,
+    ledgerState?: LedgerStateSelector
+  ): Promise<StateEntityDetailsVaultResponseItem> {
+    const nextCursor = stateEntityDetails.non_fungible_resources.next_cursor
+
+    if (!nextCursor) return Promise.resolve(stateEntityDetails)
+
+    const allNonFungibles = await exhaustPaginationWithLedgerState(
+      (cursor) =>
+        this.getEntityNonFungiblesPageVaultAggregated(
+          stateEntityDetails.address,
+          cursor,
+          ledgerState
+        ),
+      nextCursor
+    )
+
+    return Promise.resolve({
+      ...stateEntityDetails,
+      non_fungible_resources: {
+        items: [
+          ...stateEntityDetails.non_fungible_resources.items,
+          ...allNonFungibles.aggregatedEntities,
+        ],
+      },
+    })
+  }
+
+  private async queryAllResources(
+    stateEntityDetails: StateEntityDetailsVaultResponseItem,
+    ledgerState?: LedgerStateSelector
+  ): Promise<StateEntityDetailsVaultResponseItem> {
+    const itemsWithAllFungibles = this.queryAllFungibles(stateEntityDetails, ledgerState)
+    const itemsWithAllNonFungibles = this.queryAllNonFungibles(stateEntityDetails, ledgerState)
+
+    return Promise.all([itemsWithAllFungibles, itemsWithAllNonFungibles]).then((results) => {
+      return {
+        ...stateEntityDetails,
+        fungible_resources: {
+          ...stateEntityDetails.fungible_resources,
+          items: [
+            ...stateEntityDetails.fungible_resources.items,
+            ...results[0].fungible_resources.items,
+          ],
         },
-        non_fungible_resources: item.non_fungible_resources || {
-          total_count: 0,
-          items: [],
+        non_fungible_resources: {
+          ...stateEntityDetails.non_fungible_resources,
+          items: [
+            ...stateEntityDetails.non_fungible_resources.items,
+            ...results[1].non_fungible_resources.items,
+          ],
         },
-      })) as StateEntityDetailsVaultResponseItem[],
-    }
+      }
+    })
   }
 }
