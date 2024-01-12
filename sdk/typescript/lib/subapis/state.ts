@@ -506,14 +506,12 @@ export class State {
         fungible_resources: {
           ...stateEntityDetails.fungible_resources,
           items: [
-            ...stateEntityDetails.fungible_resources.items,
             ...results[0].fungible_resources.items,
           ],
         },
         non_fungible_resources: {
           ...stateEntityDetails.non_fungible_resources,
           items: [
-            ...stateEntityDetails.non_fungible_resources.items,
             ...results[1].non_fungible_resources.items,
           ],
         },
