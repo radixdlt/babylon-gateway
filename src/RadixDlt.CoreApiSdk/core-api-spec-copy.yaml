@@ -7153,6 +7153,9 @@ components:
         receipt:
           $ref: "#/components/schemas/TransactionReceipt"
         balance_changes:
+          description: |
+            All balance changes of a transaction (including those fee-related), aggregated by resource and global entity
+            within which the change occurred. Only returned if available and enabled in `TransactionFormatOptions` on your request.
           $ref: "#/components/schemas/CommittedTransactionBalanceChanges"
         proposer_timestamp_ms:
           type: integer

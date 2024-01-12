@@ -25,6 +25,12 @@ import {
     ValidatorCollectionItemActiveInEpochFromJSONTyped,
     ValidatorCollectionItemActiveInEpochToJSON,
 } from './ValidatorCollectionItemActiveInEpoch';
+import type { ValidatorCollectionItemEffectiveFeeFactor } from './ValidatorCollectionItemEffectiveFeeFactor';
+import {
+    ValidatorCollectionItemEffectiveFeeFactorFromJSON,
+    ValidatorCollectionItemEffectiveFeeFactorFromJSONTyped,
+    ValidatorCollectionItemEffectiveFeeFactorToJSON,
+} from './ValidatorCollectionItemEffectiveFeeFactor';
 import type { ValidatorVaultItem } from './ValidatorVaultItem';
 import {
     ValidatorVaultItemFromJSON,
@@ -70,11 +76,12 @@ export interface ValidatorCollectionItem {
     pending_owner_stake_unit_unlock_vault: ValidatorVaultItem;
     /**
      * Validator inner state representation.
-     * This type is defined in the Core API as `ValidatorFieldStateValue`. See the Core API documentation for more details.
+This type is defined in the Core API as `ValidatorFieldStateValue`. See the Core API documentation for more details.
+
      * @type {object}
      * @memberof ValidatorCollectionItem
      */
-    state?: object | null;
+    state: object | null;
     /**
      * 
      * @type {ValidatorCollectionItemActiveInEpoch}
@@ -87,6 +94,12 @@ export interface ValidatorCollectionItem {
      * @memberof ValidatorCollectionItem
      */
     metadata: EntityMetadataCollection;
+    /**
+     * 
+     * @type {ValidatorCollectionItemEffectiveFeeFactor}
+     * @memberof ValidatorCollectionItem
+     */
+    effective_fee_factor: ValidatorCollectionItemEffectiveFeeFactor;
 }
 
 /**
@@ -99,7 +112,9 @@ export function instanceOfValidatorCollectionItem(value: object): boolean {
     isInstance = isInstance && "pending_xrd_withdraw_vault" in value;
     isInstance = isInstance && "locked_owner_stake_unit_vault" in value;
     isInstance = isInstance && "pending_owner_stake_unit_unlock_vault" in value;
+    isInstance = isInstance && "state" in value;
     isInstance = isInstance && "metadata" in value;
+    isInstance = isInstance && "effective_fee_factor" in value;
 
     return isInstance;
 }
@@ -119,9 +134,10 @@ export function ValidatorCollectionItemFromJSONTyped(json: any, ignoreDiscrimina
         'pending_xrd_withdraw_vault': ValidatorVaultItemFromJSON(json['pending_xrd_withdraw_vault']),
         'locked_owner_stake_unit_vault': ValidatorVaultItemFromJSON(json['locked_owner_stake_unit_vault']),
         'pending_owner_stake_unit_unlock_vault': ValidatorVaultItemFromJSON(json['pending_owner_stake_unit_unlock_vault']),
-        'state': !exists(json, 'state') ? undefined : json['state'],
+        'state': json['state'],
         'active_in_epoch': !exists(json, 'active_in_epoch') ? undefined : ValidatorCollectionItemActiveInEpochFromJSON(json['active_in_epoch']),
         'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
+        'effective_fee_factor': ValidatorCollectionItemEffectiveFeeFactorFromJSON(json['effective_fee_factor']),
     };
 }
 
@@ -142,6 +158,7 @@ export function ValidatorCollectionItemToJSON(value?: ValidatorCollectionItem | 
         'state': value.state,
         'active_in_epoch': ValidatorCollectionItemActiveInEpochToJSON(value.active_in_epoch),
         'metadata': EntityMetadataCollectionToJSON(value.metadata),
+        'effective_fee_factor': ValidatorCollectionItemEffectiveFeeFactorToJSON(value.effective_fee_factor),
     };
 }
 

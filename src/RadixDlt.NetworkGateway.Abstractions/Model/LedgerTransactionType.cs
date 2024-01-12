@@ -69,4 +69,5 @@ public enum LedgerTransactionType
     Genesis,
     User,
     RoundUpdate,
+    Flash,
 }

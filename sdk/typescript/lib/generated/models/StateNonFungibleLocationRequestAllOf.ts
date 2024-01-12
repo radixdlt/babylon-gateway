@@ -26,7 +26,7 @@ export interface StateNonFungibleLocationRequestAllOf {
      */
     resource_address: string;
     /**
-     * 
+     * limited to max 100 items.
      * @type {Array<string>}
      * @memberof StateNonFungibleLocationRequestAllOf
      */

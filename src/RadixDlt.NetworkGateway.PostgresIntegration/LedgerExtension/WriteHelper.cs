@@ -259,6 +259,8 @@ internal class WriteHelper
             switch (lt)
             {
                 case GenesisLedgerTransaction:
+                case RoundUpdateLedgerTransaction:
+                case FlashLedgerTransaction:
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
@@ -271,13 +273,6 @@ internal class WriteHelper
                     await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(ult.Message, NpgsqlDbType.Jsonb, token);
                     await writer.WriteAsync(ult.RawPayload, NpgsqlDbType.Bytea, token);
-                    break;
-                case RoundUpdateLedgerTransaction:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lt), lt, null);

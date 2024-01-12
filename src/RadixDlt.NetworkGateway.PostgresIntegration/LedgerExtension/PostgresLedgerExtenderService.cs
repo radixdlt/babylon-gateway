@@ -541,7 +541,8 @@ UPDATE pending_transactions
                             RawPayload = ult.NotarizedTransaction.GetPayloadBytes(),
                         },
                         CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
-                        _ => throw new UnreachableException(),
+                        CoreModel.FlashLedgerTransaction => new FlashLedgerTransaction(),
+                        _ => throw new UnreachableException($"Unsupported transaction type: {committedTransaction.LedgerTransaction.GetType()}"),
                     };
 
                     ledgerTransaction.StateVersion = stateVersion;

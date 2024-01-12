@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -90,7 +90,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,manifest_class")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
-                .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
+                .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash")
                 .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,ruid")
                 .Annotation("Npgsql:Enum:package_vm_type", "native,scrypto_v1")

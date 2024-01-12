@@ -14,7 +14,7 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * 
+ * Check detailed [OptIns](#section/Using-endpoints-with-opt-in-features) documentation for more details
  * @export
  * @interface StateEntityNonFungiblesPageRequestOptIns
  */
