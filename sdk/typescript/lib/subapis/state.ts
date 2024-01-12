@@ -1,6 +1,5 @@
 import { chunk } from '../helpers/chunk'
 import {
-  exhaustPagination,
   exhaustPaginationWithLedgerState,
 } from '../helpers/exhaust-pagination'
 import {
@@ -208,10 +207,10 @@ export class State {
     address: string,
     startCursor?: string
   ): Promise<EntityMetadataItem[]> {
-    return exhaustPagination(
+    return exhaustPaginationWithLedgerState(
       this.getEntityMetadata.bind(this, address),
       startCursor
-    )
+    ).then((res) => res.aggregatedEntities)
   }
 
   /**
@@ -232,11 +231,20 @@ export class State {
    * Get list of all validators. This will iterate over returned cursors and aggregate all responses.
    */
   async getAllValidators(start?: string): Promise<ValidatorCollectionItem[]> {
-    return exhaustPagination(this.getValidators.bind(this), start)
+    return exhaustPaginationWithLedgerState((cursor?: string) => {
+      const v = this.getValidatorsWithLedgerState(cursor)
+      return v.then((res) => ({
+        items: res.validators.items,
+        ledger_state: res.ledger_state,
+        next_cursor: res.validators.next_cursor
+      }))
+    }, start).then(
+      (res) => res.aggregatedEntities
+    )
   }
 
   /**
-   * Get paged list of validators
+   * Get paged list of validators with ledger state
    * @param cursor
    */
   async getValidatorsWithLedgerState(cursor?: string) {
@@ -256,6 +264,7 @@ export class State {
         this.getValidatorsWithLedgerState(cursor).then((res) => ({
           items: res.validators.items,
           ledger_state: res.ledger_state,
+          next_cursor: res.validators.next_cursor
         })),
       start
     )
