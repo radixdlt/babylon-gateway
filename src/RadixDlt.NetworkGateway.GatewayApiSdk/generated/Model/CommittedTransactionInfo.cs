@@ -122,9 +122,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="errorMessage">errorMessage.</param>
         /// <param name="rawHex">Hex-encoded binary blob..</param>
         /// <param name="receipt">receipt.</param>
+        /// <param name="manifestInstructions">manifestInstructions.</param>
         /// <param name="message">The optional transaction message. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="balanceChanges">balanceChanges.</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHash = default(string), string intentHash = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), Object message = default(Object), TransactionBalanceChanges balanceChanges = default(TransactionBalanceChanges))
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHash = default(string), string intentHash = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), string manifestInstructions = default(string), Object message = default(Object), TransactionBalanceChanges balanceChanges = default(TransactionBalanceChanges))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
@@ -144,6 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.ErrorMessage = errorMessage;
             this.RawHex = rawHex;
             this.Receipt = receipt;
+            this.ManifestInstructions = manifestInstructions;
             this.Message = message;
             this.BalanceChanges = balanceChanges;
         }
@@ -225,6 +227,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TransactionReceipt Receipt { get; set; }
 
         /// <summary>
+        /// Gets or Sets ManifestInstructions
+        /// </summary>
+        [DataMember(Name = "manifest_instructions", EmitDefaultValue = true)]
+        public string ManifestInstructions { get; set; }
+
+        /// <summary>
         /// The optional transaction message. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. 
         /// </summary>
         /// <value>The optional transaction message. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. </value>
@@ -258,6 +266,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("  ManifestInstructions: ").Append(ManifestInstructions).Append("\n");
             sb.Append("  Message: ").Append(Message).Append("\n");
             sb.Append("  BalanceChanges: ").Append(BalanceChanges).Append("\n");
             sb.Append("}\n");
@@ -358,6 +367,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Receipt.Equals(input.Receipt))
                 ) && 
                 (
+                    this.ManifestInstructions == input.ManifestInstructions ||
+                    (this.ManifestInstructions != null &&
+                    this.ManifestInstructions.Equals(input.ManifestInstructions))
+                ) && 
+                (
                     this.Message == input.Message ||
                     (this.Message != null &&
                     this.Message.Equals(input.Message))
@@ -417,6 +431,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Receipt != null)
                 {
                     hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                }
+                if (this.ManifestInstructions != null)
+                {
+                    hashCode = (hashCode * 59) + this.ManifestInstructions.GetHashCode();
                 }
                 if (this.Message != null)
                 {

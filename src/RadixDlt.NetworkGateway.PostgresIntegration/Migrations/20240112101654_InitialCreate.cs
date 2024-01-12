@@ -441,7 +441,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     intent_hash = table.Column<string>(type: "text", nullable: true),
                     signed_intent_hash = table.Column<string>(type: "text", nullable: true),
                     message = table.Column<string>(type: "jsonb", nullable: true),
-                    raw_payload = table.Column<byte[]>(type: "bytea", nullable: true)
+                    raw_payload = table.Column<byte[]>(type: "bytea", nullable: true),
+                    manifest_instructions = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

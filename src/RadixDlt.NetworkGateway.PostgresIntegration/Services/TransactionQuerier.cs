@@ -694,7 +694,8 @@ WITH configuration AS (
         {optIns.ReceiptOutput} AS with_receipt_output,
         {optIns.ReceiptStateChanges} AS with_receipt_state_updates,
         {optIns.ReceiptEvents} AS with_receipt_events,
-        {optIns.BalanceChanges} AS with_balance_changes
+        {optIns.BalanceChanges} AS with_balance_changes,
+        {optIns.ManifestInstructions} AS with_manifest_instructions
 )
 SELECT
     state_version, epoch, round_in_epoch, index_in_epoch,
@@ -716,7 +717,8 @@ SELECT
     CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_hashes ELSE '{{}}'::bytea[] END AS receipt_event_schema_hashes,
     CASE WHEN configuration.with_receipt_events THEN receipt_event_type_indexes ELSE '{{}}'::bigint[] END AS receipt_event_type_indexes,
     CASE WHEN configuration.with_receipt_events THEN receipt_event_sbor_type_kinds ELSE '{{}}'::sbor_type_kind[] END AS receipt_event_sbor_type_kinds,
-    CASE WHEN configuration.with_balance_changes THEN balance_changes ELSE '{{}}'::jsonb END AS balance_changes
+    CASE WHEN configuration.with_balance_changes THEN balance_changes ELSE '{{}}'::jsonb END AS balance_changes,
+    CASE WHEN configuration.with_manifest_instructions THEN manifest_instructions ELSE ''::text END AS manifest_instructions
 FROM ledger_transactions, configuration
 WHERE state_version = ANY({transactionStateVersions})")
             .AnnotateMetricName("GetTransactions")

@@ -104,7 +104,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateNonFungibleLocationRequestAllOf" /> class.
         /// </summary>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
+        /// <param name="nonFungibleIds">limited to max 100 items. (required).</param>
         public StateNonFungibleLocationRequestAllOf(string resourceAddress = default(string), List<string> nonFungibleIds = default(List<string>))
         {
             // to ensure "resourceAddress" is required (not null)
@@ -129,8 +129,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIds
+        /// limited to max 100 items.
         /// </summary>
+        /// <value>limited to max 100 items.</value>
         [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
         public List<string> NonFungibleIds { get; set; }
 

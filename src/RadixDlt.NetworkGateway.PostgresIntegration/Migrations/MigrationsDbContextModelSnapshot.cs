@@ -2102,6 +2102,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("intent_hash");
 
+                    b.Property<string>("ManifestInstructions")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("manifest_instructions");
+
                     b.Property<string>("Message")
                         .HasColumnType("jsonb")
                         .HasColumnName("message");

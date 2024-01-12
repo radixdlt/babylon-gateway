@@ -232,6 +232,9 @@ internal class UserLedgerTransaction : LedgerTransaction
     /// </summary>
     [Column("raw_payload")]
     public byte[] RawPayload { get; set; }
+
+    [Column("manifest_instructions")]
+    public string ManifestInstructions { get; set; }
 }
 
 internal class RoundUpdateLedgerTransaction : LedgerTransaction

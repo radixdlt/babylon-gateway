@@ -539,6 +539,7 @@ UPDATE pending_transactions
                             SignedIntentHash = ult.NotarizedTransaction.SignedIntent.HashBech32m,
                             Message = ult.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
                             RawPayload = ult.NotarizedTransaction.GetPayloadBytes(),
+                            ManifestInstructions = ult.NotarizedTransaction.SignedIntent.Intent.Instructions,
                         },
                         CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
                         CoreModel.FlashLedgerTransaction => new FlashLedgerTransaction(),
