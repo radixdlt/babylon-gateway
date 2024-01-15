@@ -74,6 +74,8 @@ public sealed class RadixAddressValidator : AbstractValidator<string>
 {
     public RadixAddressValidator(INetworkConfigurationProvider networkConfigurationProvider)
     {
+        // TODO:
+        //Has to be sync.
         RuleFor(x => x)
             .CustomAsync(async (address, context, token) =>
             {
