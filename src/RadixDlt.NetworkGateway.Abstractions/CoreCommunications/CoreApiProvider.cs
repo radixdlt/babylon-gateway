@@ -69,10 +69,8 @@ using CoreApi = RadixDlt.CoreApiSdk.Api;
 
 namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
-public interface ICoreApiProvider
+public interface ICoreApiProvider : ICoreApiNodeProvider
 {
-    public CoreApiNode CoreApiNode { get; }
-
     public CoreApi.StatusApi StatusApi { get; }
 
     public CoreApi.StreamApi StreamApi { get; }
@@ -90,8 +88,10 @@ public sealed class CoreApiProvider : ICoreApiProvider
 
     public CoreApi.TransactionApi TransactionApi { get; }
 
-    public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
+    public CoreApiProvider(ICoreApiNodeProvider coreApiNodeProvider, HttpClient httpClient)
     {
+        var coreApiNode = coreApiNodeProvider.CoreApiNode;
+
         if (!string.IsNullOrWhiteSpace(coreApiNode.CoreApiAuthorizationHeader))
         {
             httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(coreApiNode.CoreApiAuthorizationHeader);

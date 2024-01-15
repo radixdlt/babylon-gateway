@@ -69,7 +69,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreApi = RadixDlt.CoreApiSdk.Api;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
@@ -77,27 +76,24 @@ namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 internal class NetworkStatusReader : INetworkStatusReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly CoreApi.StatusApi _statusApi;
-    private readonly INodeConfigProvider _nodeConfigProvider;
+    private readonly ICoreApiProvider _coreApiProvider;
     private readonly IEnumerable<INetworkStatusReaderObserver> _observers;
 
     public NetworkStatusReader(
         INetworkConfigurationProvider networkConfigurationProvider,
         ICoreApiProvider coreApiProvider,
-        INodeConfigProvider nodeConfigProvider,
         IEnumerable<INetworkStatusReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _nodeConfigProvider = nodeConfigProvider;
+        _coreApiProvider = coreApiProvider;
         _observers = observers;
-        _statusApi = coreApiProvider.StatusApi;
     }
 
     public async Task<CoreModel.NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
     {
         try
         {
-            return await _statusApi.StatusNetworkStatusPostAsync(
+            return await _coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(
                 new CoreModel.NetworkStatusRequest(
                     network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name
                 ),
@@ -106,7 +102,7 @@ internal class NetworkStatusReader : INetworkStatusReader
         }
         catch (Exception ex)
         {
-            await _observers.ForEachAsync(x => x.GetNetworkStatusFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
+            await _observers.ForEachAsync(x => x.GetNetworkStatusFailed(_coreApiProvider.CoreApiNode.Name, ex));
 
             throw;
         }

@@ -118,6 +118,11 @@ internal class CoreApiHandler : ICoreApiHandler
 
     private static ICoreApiProvider ChooseCoreApiProvider(ICoreNodesSelectorService coreNodesSelectorService, HttpClient httpClient)
     {
-        return new CoreApiProvider(coreNodesSelectorService.GetRandomTopTierCoreNode(), httpClient);
+        var nodeProvider = new CoreApiNodeProvider
+        {
+            CoreApiNode = coreNodesSelectorService.GetRandomTopTierCoreNode(),
+        };
+
+        return new CoreApiProvider(nodeProvider, httpClient);
     }
 }

@@ -98,7 +98,7 @@ internal class NodeWorkersRunnerFactory : INodeWorkersRunnerFactory
     public NodeWorkersRunner CreateWorkersForNode(CoreApiNode initialCoreApiNode)
     {
         var nodeScope = _services.CreateScope();
-        nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = initialCoreApiNode;
+        nodeScope.ServiceProvider.GetRequiredService<ICoreApiNodeConfigurator>().CoreApiNode = initialCoreApiNode;
         var logScope = _logger.BeginScope($"[NODE: {initialCoreApiNode.Name}]");
         return new NodeWorkersRunner(_logger, nodeScope, logScope!, nodeScope.ServiceProvider.GetRequiredService<IClock>(),
             nodeScope.ServiceProvider.GetRequiredService<IOptionsMonitor<NodeWorkersOptions>>());
