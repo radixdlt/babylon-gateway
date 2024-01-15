@@ -152,6 +152,253 @@ describe('State Subapi', () => {
         },
       ])
     })
+
+    it('should propagate explicit_metadata to fungbile paging requests', async () => {
+      // Arrange
+      const spy = jest.fn().mockImplementation((a) => {
+        if (a.includes('/state/entity/details')) {
+          return fetchResponseFactory({
+            items: [
+              {
+                address: 'address',
+                fungible_resources: {
+                  items: [{ aggregation_level: 'Vault' }],
+                  next_cursor: 'eyJvIjoxMDB9',
+                  total_count: 2,
+                },
+                non_fungible_resources: {
+                  items: [{ aggregation_level: 'Vault' }],
+                  total_count: 1,
+                },
+              },
+            ],
+            ledger_state: {
+              state_version: 1,
+            },
+          })()
+        } else {
+          return fetchResponseFactory({
+            items: [],
+            ledger_state: {
+              state_version: 1,
+            },
+          })()
+        }
+      })
+      const gatewayApi = GatewayApiClient.initialize({
+        fetchApi: spy,
+        basePath: 'https://just-for-test.com',
+        maxAddressesCount: 1,
+      })
+
+      // Act
+      const response = await gatewayApi.state.getEntityDetailsVaultAggregated(
+        ['address'],
+        {
+          explicitMetadata: ['name'],
+        }
+      )
+
+      // Assert
+      expect(spy).toHaveBeenCalledTimes(2)
+      expect(spy.mock.calls).toEqual([
+        [
+          'https://just-for-test.com/state/entity/details',
+          {
+            body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":true,"explicit_metadata":["name"]},"addresses":["address"],"aggregation_level":"Vault"}',
+            credentials: undefined,
+            headers: {
+              'Content-Type': 'application/json',
+              'RDX-App-Dapp-Definition': 'Unknown',
+              'RDX-App-Name': 'Unknown',
+              'RDX-App-Version': 'Unknown',
+              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
+              'RDX-Client-Version': '0.0.0',
+            },
+            method: 'POST',
+          },
+        ],
+        [
+          'https://just-for-test.com/state/entity/page/fungibles/',
+          {
+            body: '{"at_ledger_state":{"state_version":1},"cursor":"eyJvIjoxMDB9","address":"address","aggregation_level":"Vault","opt_ins":{"explicit_metadata":["name"]}}',
+            credentials: undefined,
+            headers: {
+              'Content-Type': 'application/json',
+              'RDX-App-Dapp-Definition': 'Unknown',
+              'RDX-App-Name': 'Unknown',
+              'RDX-App-Version': 'Unknown',
+              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
+              'RDX-Client-Version': '0.0.0',
+            },
+            method: 'POST',
+          },
+        ],
+      ])
+    })
+
+    it('should propagate explicit_metadata & nonFungibleIncludeNfids to non-fungbile paging requests', async () => {
+      // Arrange
+      const spy = jest.fn().mockImplementation((a) => {
+        if (a.includes('/state/entity/details')) {
+          return fetchResponseFactory({
+            items: [
+              {
+                address: 'address',
+                fungible_resources: {
+                  items: [{ aggregation_level: 'Vault' }],
+                  total_count: 2,
+                },
+                non_fungible_resources: {
+                  items: [{ aggregation_level: 'Vault' }],
+                  next_cursor: 'eyJvIjoxMDB9',
+                  total_count: 2,
+                },
+              },
+            ],
+            ledger_state: {
+              state_version: 1,
+            },
+          })()
+        } else {
+          return fetchResponseFactory({
+            items: [],
+            ledger_state: {
+              state_version: 1,
+            },
+          })()
+        }
+      })
+      const gatewayApi = GatewayApiClient.initialize({
+        fetchApi: spy,
+        basePath: 'https://just-for-test.com',
+        maxAddressesCount: 1,
+      })
+
+      // Act
+      await gatewayApi.state.getEntityDetailsVaultAggregated(['address'], {
+        explicitMetadata: ['name'],
+      })
+
+      // Assert
+      expect(spy).toHaveBeenCalledTimes(2)
+      expect(spy.mock.calls).toEqual([
+        [
+          'https://just-for-test.com/state/entity/details',
+          {
+            body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":true,"explicit_metadata":["name"]},"addresses":["address"],"aggregation_level":"Vault"}',
+            credentials: undefined,
+            headers: {
+              'Content-Type': 'application/json',
+              'RDX-App-Dapp-Definition': 'Unknown',
+              'RDX-App-Name': 'Unknown',
+              'RDX-App-Version': 'Unknown',
+              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
+              'RDX-Client-Version': '0.0.0',
+            },
+            method: 'POST',
+          },
+        ],
+        [
+          'https://just-for-test.com/state/entity/page/non-fungibles/',
+          {
+            body: '{"at_ledger_state":{"state_version":1},"cursor":"eyJvIjoxMDB9","address":"address","aggregation_level":"Vault","opt_ins":{"non_fungible_include_nfids":true,"explicit_metadata":["name"]}}',
+            credentials: undefined,
+            headers: {
+              'Content-Type': 'application/json',
+              'RDX-App-Dapp-Definition': 'Unknown',
+              'RDX-App-Name': 'Unknown',
+              'RDX-App-Version': 'Unknown',
+              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
+              'RDX-Client-Version': '0.0.0',
+            },
+            method: 'POST',
+          },
+        ],
+      ])
+    })
+
+    it('should false nonFungibleIncludeNfids to non-fungbile paging requests', async () => {
+      // Arrange
+      const spy = jest.fn().mockImplementation((a) => {
+        if (a.includes('/state/entity/details')) {
+          return fetchResponseFactory({
+            items: [
+              {
+                address: 'address',
+                fungible_resources: {
+                  items: [{ aggregation_level: 'Vault' }],
+                  total_count: 2,
+                },
+                non_fungible_resources: {
+                  items: [{ aggregation_level: 'Vault' }],
+                  next_cursor: 'eyJvIjoxMDB9',
+                  total_count: 2,
+                },
+              },
+            ],
+            ledger_state: {
+              state_version: 1,
+            },
+          })()
+        } else {
+          return fetchResponseFactory({
+            items: [],
+            ledger_state: {
+              state_version: 1,
+            },
+          })()
+        }
+      })
+      const gatewayApi = GatewayApiClient.initialize({
+        fetchApi: spy,
+        basePath: 'https://just-for-test.com',
+        maxAddressesCount: 1,
+      })
+
+      // Act
+      await gatewayApi.state.getEntityDetailsVaultAggregated(['address'], {
+        explicitMetadata: ['name'],
+        nonFungibleIncludeNfids: false,
+      })
+
+      // Assert
+      expect(spy).toHaveBeenCalledTimes(2)
+      expect(spy.mock.calls).toEqual([
+        [
+          'https://just-for-test.com/state/entity/details',
+          {
+            body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":false,"explicit_metadata":["name"]},"addresses":["address"],"aggregation_level":"Vault"}',
+            credentials: undefined,
+            headers: {
+              'Content-Type': 'application/json',
+              'RDX-App-Dapp-Definition': 'Unknown',
+              'RDX-App-Name': 'Unknown',
+              'RDX-App-Version': 'Unknown',
+              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
+              'RDX-Client-Version': '0.0.0',
+            },
+            method: 'POST',
+          },
+        ],
+        [
+          'https://just-for-test.com/state/entity/page/non-fungibles/',
+          {
+            body: '{"at_ledger_state":{"state_version":1},"cursor":"eyJvIjoxMDB9","address":"address","aggregation_level":"Vault","opt_ins":{"non_fungible_include_nfids":false,"explicit_metadata":["name"]}}',
+            credentials: undefined,
+            headers: {
+              'Content-Type': 'application/json',
+              'RDX-App-Dapp-Definition': 'Unknown',
+              'RDX-App-Name': 'Unknown',
+              'RDX-App-Version': 'Unknown',
+              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
+              'RDX-Client-Version': '0.0.0',
+            },
+            method: 'POST',
+          },
+        ],
+      ])
+    })
   })
 
   describe('getNonFungibleData', () => {
