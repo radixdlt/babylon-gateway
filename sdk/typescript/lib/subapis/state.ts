@@ -1,7 +1,5 @@
 import { chunk } from '../helpers/chunk'
-import {
-  exhaustPaginationWithLedgerState,
-} from '../helpers/exhaust-pagination'
+import { exhaustPaginationWithLedgerState } from '../helpers/exhaust-pagination'
 import {
   EntityMetadataItem,
   FungibleResourcesCollection,
@@ -62,7 +60,7 @@ export class State {
   constructor(
     public innerClient: StateApi,
     public configuration: RuntimeConfiguration
-  ) { }
+  ) {}
 
   /**
    * Get detailed information about entities together with vault aggregated fungible and non-fungible resources.
@@ -135,20 +133,30 @@ export class State {
 
     return isArray
       ? Promise.all(
-        (items as StateEntityDetailsVaultResponseItem[]).map((item) =>
-          this.queryAllResources(
-            item,
-            ledgerState || {
-              state_version: ledger_state.state_version,
-            }
+          (items as StateEntityDetailsVaultResponseItem[]).map((item) =>
+            this.queryAllResources(
+              item,
+              {
+                explicitMetadata: options?.explicitMetadata ?? [],
+                nonFungibleIncludeNfids:
+                  options?.nonFungibleIncludeNfids ?? true,
+              },
+              ledgerState || {
+                state_version: ledger_state.state_version,
+              }
+            )
           )
-        ))
+        )
       : this.queryAllResources(
-        items[0] as StateEntityDetailsVaultResponseItem,
-        ledgerState || {
-          state_version: ledger_state.state_version,
-        }
-      )
+          items[0] as StateEntityDetailsVaultResponseItem,
+          {
+            explicitMetadata: options?.explicitMetadata ?? [],
+            nonFungibleIncludeNfids: options?.nonFungibleIncludeNfids ?? true,
+          },
+          ledgerState || {
+            state_version: ledger_state.state_version,
+          }
+        )
   }
 
   /**
@@ -236,11 +244,9 @@ export class State {
       return v.then((res) => ({
         items: res.validators.items,
         ledger_state: res.ledger_state,
-        next_cursor: res.validators.next_cursor
+        next_cursor: res.validators.next_cursor,
       }))
-    }, start).then(
-      (res) => res.aggregatedEntities
-    )
+    }, start).then((res) => res.aggregatedEntities)
   }
 
   /**
@@ -264,7 +270,7 @@ export class State {
         this.getValidatorsWithLedgerState(cursor).then((res) => ({
           items: res.validators.items,
           ledger_state: res.ledger_state,
-          next_cursor: res.validators.next_cursor
+          next_cursor: res.validators.next_cursor,
         })),
       start
     )
@@ -367,8 +373,11 @@ export class State {
 
   private async getEntityFungiblesPageVaultAggregated(
     entity: string,
-    nextCursor?: string | undefined,
-    ledgerState?: LedgerStateSelector
+    options?: {
+      nextCursor?: string | undefined
+      ledgerState?: LedgerStateSelector
+      explicitMetadata?: string[]
+    }
   ): Promise<
     ReplaceProperty<
       StateEntityFungiblesPageResponse,
@@ -379,9 +388,12 @@ export class State {
     return this.innerClient.entityFungiblesPage({
       stateEntityFungiblesPageRequest: {
         address: entity,
-        cursor: nextCursor,
+        cursor: options?.nextCursor,
         aggregation_level: 'Vault',
-        at_ledger_state: ledgerState,
+        at_ledger_state: options?.ledgerState,
+        opt_ins: {
+          explicit_metadata: options?.explicitMetadata,
+        },
       },
     }) as Promise<
       ReplaceProperty<
@@ -394,8 +406,12 @@ export class State {
 
   private async getEntityNonFungiblesPageVaultAggregated(
     entity: string,
-    nextCursor?: string | undefined,
-    ledgerState?: LedgerStateSelector
+    options?: {
+      cursor: string | undefined
+      ledgerState?: LedgerStateSelector
+      explicitMetadata?: string[]
+      nonFungibleIncludeNfids?: boolean
+    }
   ): Promise<
     ReplaceProperty<
       StateEntityNonFungiblesPageResponse,
@@ -406,9 +422,13 @@ export class State {
     return this.innerClient.entityNonFungiblesPage({
       stateEntityNonFungiblesPageRequest: {
         address: entity,
-        cursor: nextCursor,
+        cursor: options?.cursor,
         aggregation_level: 'Vault',
-        at_ledger_state: ledgerState,
+        at_ledger_state: options?.ledgerState,
+        opt_ins: {
+          explicit_metadata: options?.explicitMetadata,
+          non_fungible_include_nfids: options?.nonFungibleIncludeNfids,
+        },
       },
     }) as Promise<
       ReplaceProperty<
@@ -442,9 +462,11 @@ export class State {
     }
   }
 
-
   private async queryAllFungibles(
     stateEntityDetails: StateEntityDetailsVaultResponseItem,
+    options?: {
+      explicitMetadata?: string[]
+    },
     ledgerState?: LedgerStateSelector
   ): Promise<StateEntityDetailsVaultResponseItem> {
     const nextCursor = stateEntityDetails?.fungible_resources?.next_cursor
@@ -453,11 +475,11 @@ export class State {
 
     const allFungibles = await exhaustPaginationWithLedgerState(
       (cursor) =>
-        this.getEntityFungiblesPageVaultAggregated(
-          stateEntityDetails.address,
-          cursor,
-          ledgerState
-        ),
+        this.getEntityFungiblesPageVaultAggregated(stateEntityDetails.address, {
+          nextCursor: cursor,
+          ledgerState,
+          explicitMetadata: options?.explicitMetadata,
+        }),
       nextCursor
     )
 
@@ -472,9 +494,12 @@ export class State {
     })
   }
 
-
   private async queryAllNonFungibles(
     stateEntityDetails: StateEntityDetailsVaultResponseItem,
+    options?: {
+      explicitMetadata?: string[]
+      nonFungibleIncludeNfids?: boolean
+    },
     ledgerState?: LedgerStateSelector
   ): Promise<StateEntityDetailsVaultResponseItem> {
     const nextCursor = stateEntityDetails.non_fungible_resources.next_cursor
@@ -485,8 +510,12 @@ export class State {
       (cursor) =>
         this.getEntityNonFungiblesPageVaultAggregated(
           stateEntityDetails.address,
-          cursor,
-          ledgerState
+          {
+            cursor,
+            ledgerState,
+            explicitMetadata: options?.explicitMetadata,
+            nonFungibleIncludeNfids: options?.nonFungibleIncludeNfids,
+          }
         ),
       nextCursor
     )
@@ -504,27 +533,35 @@ export class State {
 
   private async queryAllResources(
     stateEntityDetails: StateEntityDetailsVaultResponseItem,
+    options?: {
+      explicitMetadata?: string[]
+      nonFungibleIncludeNfids?: boolean
+    },
     ledgerState?: LedgerStateSelector
   ): Promise<StateEntityDetailsVaultResponseItem> {
-    const itemsWithAllFungibles = this.queryAllFungibles(stateEntityDetails, ledgerState)
-    const itemsWithAllNonFungibles = this.queryAllNonFungibles(stateEntityDetails, ledgerState)
+    const itemsWithAllFungibles = this.queryAllFungibles(
+      stateEntityDetails,
+      options,
+      ledgerState
+    )
+    const itemsWithAllNonFungibles = this.queryAllNonFungibles(
+      stateEntityDetails,
+      options,
+      ledgerState
+    )
 
-    return Promise.all([itemsWithAllFungibles, itemsWithAllNonFungibles]).then((results) => {
-      return {
+    return Promise.all([itemsWithAllFungibles, itemsWithAllNonFungibles]).then(
+      (results) => ({
         ...stateEntityDetails,
         fungible_resources: {
           ...stateEntityDetails.fungible_resources,
-          items: [
-            ...results[0].fungible_resources.items,
-          ],
+          items: [...results[0].fungible_resources.items],
         },
         non_fungible_resources: {
           ...stateEntityDetails.non_fungible_resources,
-          items: [
-            ...results[1].non_fungible_resources.items,
-          ],
+          items: [...results[1].non_fungible_resources.items],
         },
-      }
-    })
+      })
+    )
   }
 }
