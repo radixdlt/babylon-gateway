@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
@@ -84,17 +85,17 @@ public interface INetworkConfigurationProvider
 public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
     private readonly NetworkOptions _networkOptions;
-    private readonly ICoreApiProvider _coreApiProvider;
+    private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<INetworkConfigurationReaderObserver> _observers;
     private readonly AsyncLazy<NetworkConfiguration> _factory;
 
     public NetworkConfigurationProvider(
         IOptions<NetworkOptions> networkOptions,
-        ICoreApiProvider coreApiProvider,
+        IServiceProvider serviceProvider,
         IEnumerable<INetworkConfigurationReaderObserver> observers)
     {
         _networkOptions = networkOptions.Value;
-        _coreApiProvider = coreApiProvider;
+        _serviceProvider = serviceProvider;
         _observers = observers;
         _factory = new AsyncLazy<NetworkConfiguration>(ReadNetworkConfiguration, AsyncLazyFlags.RetryOnFailure);
     }
@@ -106,10 +107,15 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     private async Task<NetworkConfiguration> ReadNetworkConfiguration()
     {
+        using var scope = _serviceProvider.CreateScope();
+        var coreApiNode = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<NetworkOptions>>().CurrentValue.CoreApiNodes.Where(n => n.Enabled).GetRandomBy(x => (double)x.RequestWeighting);
+        scope.ServiceProvider.GetRequiredService<ICoreApiNodeConfigurator>().CoreApiNode = coreApiNode;
+        var coreApiProvider = scope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
+
         try
         {
-            var configuration = await _coreApiProvider.StatusApi.StatusNetworkConfigurationPostAsync();
-            var status = await _coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(_networkOptions.NetworkName));
+            var configuration = await coreApiProvider.StatusApi.StatusNetworkConfigurationPostAsync();
+            var status = await coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(_networkOptions.NetworkName));
 
             var addressTypeDefinitions = configuration.AddressTypes
                 .Select(at => new AddressTypeDefinition(Enum.Parse<AddressEntityType>(at.EntityType.ToString(), true), at.HrpPrefix, (byte)at.AddressBytePrefix, at.AddressByteLength))
@@ -182,7 +188,7 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
         }
         catch (Exception ex)
         {
-            await _observers.ForEachAsync(x => x.GetNetworkConfigurationFailed(_coreApiProvider.CoreApiNode.Name, ex));
+            await _observers.ForEachAsync(x => x.GetNetworkConfigurationFailed(coreApiProvider.CoreApiNode.Name, ex));
 
             throw;
         }

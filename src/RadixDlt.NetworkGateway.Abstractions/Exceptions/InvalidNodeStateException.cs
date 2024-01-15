@@ -64,7 +64,7 @@
 
 using System;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
+namespace RadixDlt.NetworkGateway.Abstractions.Exceptions;
 
 [Serializable]
 public sealed class InvalidNodeStateException : Exception

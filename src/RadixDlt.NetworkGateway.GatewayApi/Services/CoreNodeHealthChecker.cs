@@ -225,7 +225,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
         string networkName,
         CancellationToken cancellationToken)
     {
-        var coreApiProvider = new CoreApiProvider(coreApiNode, _httpClient);
+        var coreApiProvider = new CoreApiProvider(new CoreApiNodeProvider { CoreApiNode = coreApiNode, }, _httpClient);
         var timeoutSeconds = 5;
         try
         {

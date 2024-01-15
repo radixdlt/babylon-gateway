@@ -128,7 +128,9 @@ public static class ServiceCollectionExtensions
 
     private static void AddNodeScopedServices(IServiceCollection services)
     {
-        services.TryAddScoped<INodeConfigProvider, NodeConfigProvider>();
+        services.TryAddScoped<CoreApiNodeProvider>();
+        services.TryAddScoped<ICoreApiNodeProvider>(sp => sp.GetRequiredService<CoreApiNodeProvider>());
+        services.TryAddScoped<ICoreApiNodeConfigurator>(sp => sp.GetRequiredService<CoreApiNodeProvider>());
     }
 
     private static void AddTransientApiReaders(IServiceCollection services, out IHttpClientBuilder coreApiHttpClientBuilder)

@@ -279,7 +279,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         }
 
         using var nodeScope = _services.CreateScope();
-        nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = chosenNode;
+        nodeScope.ServiceProvider.GetRequiredService<ICoreApiNodeConfigurator>().CoreApiNode = chosenNode;
         var coreApiProvider = nodeScope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
 
         var result = await TransactionSubmitter.Submit(

@@ -98,7 +98,7 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
     /* Dependencies */
     private readonly ILogger<NodeTransactionFetchWorker> _logger;
     private readonly IFetchedTransactionStore _fetchedTransactionStore;
-    private readonly INodeConfigProvider _nodeConfigProvider;
+    private readonly ICoreApiNodeProvider _coreApiNodeProvider;
     private readonly INodeStatusProvider _nodeStatusProvider;
     private readonly IEnumerable<INodeTransactionLogWorkerObserver> _observers;
     private readonly IOptionsMonitor<LedgerConfirmationOptions> _ledgerConfirmationOptionsMonitor;
@@ -108,12 +108,12 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
     private readonly ITopOfLedgerProvider _topOfLedgerProvider;
 
     /* Properties */
-    private string NodeName => _nodeConfigProvider.CoreApiNode.Name;
+    private string NodeName => _coreApiNodeProvider.CoreApiNode.Name;
 
     public NodeTransactionFetchWorker(
         ILogger<NodeTransactionFetchWorker> logger,
         IFetchedTransactionStore fetchedTransactionStore,
-        INodeConfigProvider nodeConfigProvider,
+        ICoreApiNodeProvider coreApiNodeProvider,
         IEnumerable<INodeTransactionLogWorkerObserver> observers,
         IEnumerable<INodeWorkerObserver> nodeWorkerObservers,
         GatewayModel.IClock clock,
@@ -123,11 +123,11 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
         Func<ITransactionStreamReader> transactionStreamReaderFactory,
         Func<INetworkStatusReader> networkStatusReaderFactory,
         ITopOfLedgerProvider topOfLedgerProvider)
-        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers, clock)
+        : base(logger, coreApiNodeProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers, clock)
     {
         _logger = logger;
         _fetchedTransactionStore = fetchedTransactionStore;
-        _nodeConfigProvider = nodeConfigProvider;
+        _coreApiNodeProvider = coreApiNodeProvider;
         _observers = observers;
         _ledgerConfirmationOptionsMonitor = ledgerConfirmationOptionsMonitor;
         _nodeStatusProvider = nodeStatusProvider;
@@ -139,7 +139,7 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
 
     public override bool IsEnabledByNodeConfiguration()
     {
-        return _nodeConfigProvider.CoreApiNode is { Enabled: true, DisabledForTransactionIndexing: false };
+        return _coreApiNodeProvider.CoreApiNode is { Enabled: true, DisabledForTransactionIndexing: false };
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
