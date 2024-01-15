@@ -74,23 +74,20 @@ public sealed class RadixAddressValidator : AbstractValidator<string>
 {
     public RadixAddressValidator(INetworkConfigurationProvider networkConfigurationProvider)
     {
-        // TODO:
-        //Has to be sync.
         RuleFor(x => x)
-            .CustomAsync(async (address, context, token) =>
+            .Custom((address, context) =>
             {
                 context.MessageFormatter.AppendArgument("PropertyName", context.PropertyPath);
 
                 try
                 {
-                    var networkHrpSuffix = (await networkConfigurationProvider.GetNetworkConfiguration(token)).HrpSuffix;
+                    var networkHrpSuffix = networkConfigurationProvider.GetNetworkConfiguration().GetAwaiter().GetResult().HrpSuffix;
                     var decodedAddress = RadixAddressCodec.Decode(address);
 
                     if (!decodedAddress.Hrp.EndsWith(networkHrpSuffix, StringComparison.OrdinalIgnoreCase))
                     {
                         context.MessageFormatter.AppendArgument("networkHrpSuffix", networkHrpSuffix);
                         context.AddFailure("'{PropertyName}' doesn't belong to this network. Expected network Hrp suffix: {networkHrpSuffix}");
-                        return;
                     }
                 }
                 catch (AddressException)
