@@ -2090,6 +2090,9 @@ components:
           $ref: "#/components/schemas/HexString"
         receipt:
           $ref: "#/components/schemas/TransactionReceipt"
+        manifest_instructions:
+          type: string
+          nullable: true
         message:
           type: object
           description: |
@@ -2743,6 +2746,10 @@ components:
           description: if set to `true`, all affected global entities by given transaction are returned.
           type: boolean
           default: false
+        manifest_instructions:
+          description: if set to `true`, manifest instructions for user transactions are returned.
+          type: boolean
+          default: false
         balance_changes:
           description: |
             if set to `true`, returns the fungible and non-fungible balance changes.
@@ -2860,7 +2867,6 @@ components:
     # /stream/* Request & Response Types
     #
 
-    # TODO PP: update docs with examples.
     StreamTransactionsRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"

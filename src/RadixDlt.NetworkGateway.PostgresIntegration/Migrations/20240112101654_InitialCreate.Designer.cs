@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240112100632_InitialCreate")]
+    [Migration("20240112101654_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -2104,6 +2104,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("intent_hash");
+
+                    b.Property<string>("ManifestInstructions")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("manifest_instructions");
 
                     b.Property<string>("Message")
                         .HasColumnType("jsonb")
