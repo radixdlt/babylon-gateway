@@ -123,6 +123,9 @@ public static class ServiceCollectionExtensions
         // Request-scoped services
         AddRequestServices(services);
 
+        // Node-Scoped services
+        AddNodeScopedServices(services);
+
         // Transient (pooled) services
         AddCoreApiHttpClient(services, out var coreApiHttpClientBuilder, out var coreNodeHealthCheckerClientBuilder);
 
@@ -134,6 +137,13 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.TryAddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
         services.TryAddSingleton<RequestTimeoutMiddleware>();
+    }
+
+    private static void AddNodeScopedServices(IServiceCollection services)
+    {
+        services.TryAddScoped<CoreApiNodeProvider>();
+        services.TryAddScoped<ICoreApiNodeProvider>(sp => sp.GetRequiredService<CoreApiNodeProvider>());
+        services.TryAddScoped<ICoreApiNodeConfigurator>(sp => sp.GetRequiredService<CoreApiNodeProvider>());
     }
 
     private static void AddRequestServices(IServiceCollection services)
@@ -151,10 +161,8 @@ public static class ServiceCollectionExtensions
 
     private static void AddCoreApiHttpClient(IServiceCollection services, out IHttpClientBuilder coreApiHttpClientBuilder, out IHttpClientBuilder coreNodeHealthCheckerClientBuilder)
     {
-        // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
-        // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         coreApiHttpClientBuilder = services
-            .AddHttpClient<ICoreApiHandler, CoreApiHandler>()
+            .AddHttpClient<ICoreApiProvider, CoreApiProvider>()
             .AddPolicyHandler((serviceProvider, _) =>
             {
                 var retryCount = serviceProvider.GetRequiredService<IOptions<CoreApiIntegrationOptions>>().Value.MaxTransientErrorRetryCount;
@@ -164,6 +172,9 @@ public static class ServiceCollectionExtensions
                     .RetryAsync(retryCount);
             })
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
+
+        services
+            .AddTransient<ICoreApiHandler, CoreApiHandler>();
 
         coreNodeHealthCheckerClientBuilder = services
             .AddHttpClient<ICoreNodeHealthChecker, CoreNodeHealthChecker>()
