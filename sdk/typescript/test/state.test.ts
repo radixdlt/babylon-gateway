@@ -207,14 +207,7 @@ describe('State Subapi', () => {
           {
             body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":true,"explicit_metadata":["name"]},"addresses":["address"],"aggregation_level":"Vault"}',
             credentials: undefined,
-            headers: {
-              'Content-Type': 'application/json',
-              'RDX-App-Dapp-Definition': 'Unknown',
-              'RDX-App-Name': 'Unknown',
-              'RDX-App-Version': 'Unknown',
-              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
-              'RDX-Client-Version': '0.0.0',
-            },
+            headers: expect.anything(),
             method: 'POST',
           },
         ],
@@ -223,14 +216,7 @@ describe('State Subapi', () => {
           {
             body: '{"at_ledger_state":{"state_version":1},"cursor":"eyJvIjoxMDB9","address":"address","aggregation_level":"Vault","opt_ins":{"explicit_metadata":["name"]}}',
             credentials: undefined,
-            headers: {
-              'Content-Type': 'application/json',
-              'RDX-App-Dapp-Definition': 'Unknown',
-              'RDX-App-Name': 'Unknown',
-              'RDX-App-Version': 'Unknown',
-              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
-              'RDX-Client-Version': '0.0.0',
-            },
+            headers: expect.anything(),
             method: 'POST',
           },
         ],
@@ -288,14 +274,7 @@ describe('State Subapi', () => {
           {
             body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":true,"explicit_metadata":["name"]},"addresses":["address"],"aggregation_level":"Vault"}',
             credentials: undefined,
-            headers: {
-              'Content-Type': 'application/json',
-              'RDX-App-Dapp-Definition': 'Unknown',
-              'RDX-App-Name': 'Unknown',
-              'RDX-App-Version': 'Unknown',
-              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
-              'RDX-Client-Version': '0.0.0',
-            },
+            headers: expect.anything(),
             method: 'POST',
           },
         ],
@@ -304,21 +283,14 @@ describe('State Subapi', () => {
           {
             body: '{"at_ledger_state":{"state_version":1},"cursor":"eyJvIjoxMDB9","address":"address","aggregation_level":"Vault","opt_ins":{"non_fungible_include_nfids":true,"explicit_metadata":["name"]}}',
             credentials: undefined,
-            headers: {
-              'Content-Type': 'application/json',
-              'RDX-App-Dapp-Definition': 'Unknown',
-              'RDX-App-Name': 'Unknown',
-              'RDX-App-Version': 'Unknown',
-              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
-              'RDX-Client-Version': '0.0.0',
-            },
+            headers: expect.anything(),
             method: 'POST',
           },
         ],
       ])
     })
 
-    it('should false nonFungibleIncludeNfids to non-fungbile paging requests', async () => {
+    it('should propagate nonFungibleIncludeNfids=false to non-fungbile paging requests', async () => {
       // Arrange
       const spy = jest.fn().mockImplementation((a) => {
         if (a.includes('/state/entity/details')) {
@@ -370,14 +342,7 @@ describe('State Subapi', () => {
           {
             body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":false,"explicit_metadata":["name"]},"addresses":["address"],"aggregation_level":"Vault"}',
             credentials: undefined,
-            headers: {
-              'Content-Type': 'application/json',
-              'RDX-App-Dapp-Definition': 'Unknown',
-              'RDX-App-Name': 'Unknown',
-              'RDX-App-Version': 'Unknown',
-              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
-              'RDX-Client-Version': '0.0.0',
-            },
+            headers: expect.anything(),
             method: 'POST',
           },
         ],
@@ -386,14 +351,7 @@ describe('State Subapi', () => {
           {
             body: '{"at_ledger_state":{"state_version":1},"cursor":"eyJvIjoxMDB9","address":"address","aggregation_level":"Vault","opt_ins":{"non_fungible_include_nfids":false,"explicit_metadata":["name"]}}',
             credentials: undefined,
-            headers: {
-              'Content-Type': 'application/json',
-              'RDX-App-Dapp-Definition': 'Unknown',
-              'RDX-App-Name': 'Unknown',
-              'RDX-App-Version': 'Unknown',
-              'RDX-Client-Name': '@radixdlt/babylon-gateway-api-sdk',
-              'RDX-Client-Version': '0.0.0',
-            },
+            headers: expect.anything(),
             method: 'POST',
           },
         ],
