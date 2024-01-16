@@ -437,14 +437,6 @@ UPDATE pending_transactions
                                 e.PendingOwnerStakeUnitUnlockVault = referencedEntities.Get((EntityAddress)validator.Value.PendingOwnerStakeUnitUnlockVault.EntityAddress).DatabaseId;
                             });
                         }
-
-                        if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
-                        {
-                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
-                            {
-                                e.VmType = packageCodeVmType.Value.VmType.ToModel();
-                            });
-                        }
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -715,7 +707,7 @@ UPDATE pending_transactions
         var keyValueStoreEntryHistoryToAdd = new List<KeyValueStoreEntryHistory>();
         var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
         var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
-        var packageCodeHistoryToAdd = new List<PackageCodeHistory>();
+        var packageCodeHistoryToAdd = new Dictionary<PackageCodeLookup, PackageCodeHistory>();
         var schemaHistoryToAdd = new List<SchemaHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
@@ -1029,14 +1021,32 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
                         {
-                            packageCodeHistoryToAdd.Add(new PackageCodeHistory
+                            var lookup = new PackageCodeLookup(packageCodeOriginalCode.Key.CodeHash);
+
+                            var codeHistory = packageCodeHistoryToAdd.GetOrAdd(lookup, _ => new PackageCodeHistory
                             {
                                 Id = sequences.PackageCodeHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 PackageEntityId = referencedEntity.DatabaseId,
                                 CodeHash = packageCodeOriginalCode.Key.CodeHash.ConvertFromHex(),
-                                Code = packageCodeOriginalCode.Value.CodeHex.ConvertFromHex(),
                             });
+
+                            codeHistory.Code = packageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
+                        }
+
+                        if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
+                        {
+                            var lookup = new PackageCodeLookup(packageCodeVmType.Key.CodeHash);
+
+                            var codeHistory = packageCodeHistoryToAdd.GetOrAdd(lookup, _ => new PackageCodeHistory
+                            {
+                                Id = sequences.PackageCodeHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                PackageEntityId = referencedEntity.DatabaseId,
+                                CodeHash = packageCodeVmType.Key.CodeHash.ConvertFromHex(),
+                            });
+
+                            codeHistory.VmType = packageCodeVmType.Value.VmType.ToModel();
                         }
 
                         if (substateData is CoreModel.SchemaEntrySubstate schema)
@@ -1872,7 +1882,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
-            rowsInserted += await writeHelper.CopyPackageCodeHistory(packageCodeHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyPackageCodeHistory(packageCodeHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopySchemaHistory(schemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreEntryHistory(keyValueStoreEntryHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);

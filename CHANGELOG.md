@@ -1,7 +1,8 @@
-## 1.2.5
+## 1.3.0
 Release Date: _unreleased_
 
 - add support for new transaction types (flash transactions) that are gonna occur on protocol update.
+- move vm_type to `package_code_history` table from package in `entity` table.
 
 ## 1.2.4
 Release Date: 4.01.2024

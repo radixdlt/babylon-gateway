@@ -243,7 +243,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
-                        vmType: pe.VmType.ToGatewayModel(),
+                        vmType: codeHistory.VmType.ToGatewayModel(),
                         codeHashHex: codeHistory.CodeHash.ToHex(),
                         codeHex: codeHistory.Code.ToHex(),
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null,
