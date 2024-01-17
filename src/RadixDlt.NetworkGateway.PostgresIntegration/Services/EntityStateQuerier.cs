@@ -84,7 +84,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -1440,20 +1439,29 @@ INNER JOIN LATERAL (
             return new Dictionary<long, PackageBlueprintHistory[]>();
         }
 
-        // should return all the blueprint history entries (no LIMIT 1 in nested query) as blueprints cannot be deleted
-
         return (await _dbContext
                 .PackageBlueprintHistory
                 .FromSqlInterpolated($@"
-WITH variables (entity_id) AS (SELECT UNNEST({packageEntityIds}))
+WITH variables (package_entity_id) AS (SELECT UNNEST({packageEntityIds})),
+most_recent_package_blueprints AS
+(
+    SELECT
+        package_blueprint_ids
+    FROM variables var
+    INNER JOIN LATERAL (
+        SELECT *
+        FROM package_blueprint_aggregate_history
+        WHERE from_state_version <= {ledgerState.StateVersion} AND package_entity_id = var.package_entity_id
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) pbah ON TRUE
+)
 SELECT pbh.*
-FROM variables
-INNER JOIN LATERAL(
-    SELECT *
-    FROM package_blueprint_history
-    WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-) pbh ON true")
+FROM most_recent_package_blueprints mrpb
+INNER JOIN package_blueprint_history pbh
+ON pbh.id = ANY(mrpb.package_blueprint_ids)
+ORDER BY array_position(mrpb.package_blueprint_ids, pbh.id)
+")
                 .AnnotateMetricName()
                 .ToListAsync(token))
             .GroupBy(b => b.PackageEntityId)

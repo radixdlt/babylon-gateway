@@ -101,6 +101,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityMetadataAggregateHistory> EntityMetadataAggregateHistory => Set<EntityMetadataAggregateHistory>();
 
+    public DbSet<PackageBlueprintAggregateHistory> PackageBlueprintAggregateHistory => Set<PackageBlueprintAggregateHistory>();
+
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
     public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
@@ -359,6 +361,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<EntityMetadataAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<PackageBlueprintAggregateHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<EntityResourceAggregateHistory>()

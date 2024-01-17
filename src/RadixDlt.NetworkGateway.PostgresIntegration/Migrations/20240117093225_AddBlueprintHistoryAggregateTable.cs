@@ -62,74 +62,52 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+#nullable disable
 
-internal interface IVaultSnapshot
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    public ReferencedEntity ReferencedVault { get; }
+    /// <inheritdoc />
+    public partial class AddBlueprintHistoryAggregateTable : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "package_blueprint_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    package_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    package_blueprint_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_package_blueprint_aggregate_history", x => x.id);
+                });
 
-    public ReferencedEntity ReferencedResource { get; }
+            migrationBuilder.CreateIndex(
+                name: "IX_package_blueprint_aggregate_history_package_entity_id_from_~",
+                table: "package_blueprint_aggregate_history",
+                columns: new[] { "package_entity_id", "from_state_version" });
 
-    public long StateVersion { get; }
-}
+            migrationBuilder.Sql(@"
+INSERT INTO package_blueprint_aggregate_history (from_state_version, package_entity_id, package_blueprint_ids)
+SELECT MIN(from_state_version) from_state_version, package_entity_id, array_agg(id order by id asc) package_blueprint_ids
+FROM package_blueprint_history
+GROUP BY package_entity_id");
+        }
 
-internal interface IVaultChange
-{
-    public long EntityId { get; }
-
-    public long ResourceEntityId { get; }
-
-    public long StateVersion { get; }
-}
-
-internal record FungibleVaultSnapshot(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion) : IVaultSnapshot;
-
-internal record NonFungibleVaultSnapshot(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion) : IVaultSnapshot;
-
-internal record EntityFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, TokenAmount Delta, long StateVersion) : IVaultChange;
-
-internal record EntityNonFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, long Delta, long StateVersion) : IVaultChange;
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
-
-internal record NonFungibleIdDeletion(ReferencedEntity ReferencedResource, string NonFungibleId, long StateVersion);
-
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
-
-internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? Minted = null, TokenAmount? Burned = null);
-
-internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record struct MetadataLookup(long EntityId, string Key);
-
-internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string Version);
-
-internal record struct PackageCodeLookup(string CodeHex);
-
-internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
-
-internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
-
-internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
-
-internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
-
-internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
-
-internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
-
-internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ModuleId KeyModule);
-
-internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
-{
-    public CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
-
-    public IList<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.RoleAssignmentModuleRuleEntrySubstate>();
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "package_blueprint_aggregate_history");
+        }
+    }
 }

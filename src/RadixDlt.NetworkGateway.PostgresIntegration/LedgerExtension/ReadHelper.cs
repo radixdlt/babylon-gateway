@@ -93,6 +93,56 @@ internal class ReadHelper
         _observers = observers;
     }
 
+    public async Task<Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>> MostRecentPackageBlueprintHistoryFor(List<PackageBlueprintChange> packageBlueprintChanges, CancellationToken token)
+    {
+        if (!packageBlueprintChanges.Any())
+        {
+            return new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+
+        var entityIds = new List<long>();
+        var names = new List<string>();
+        var versions = new List<string>();
+        var lookupSet = new HashSet<PackageBlueprintLookup>();
+
+        foreach (var change in packageBlueprintChanges)
+        {
+            lookupSet.Add(new PackageBlueprintLookup(change.PackageEntityId, change.Name, change.Version));
+        }
+
+        foreach (var lookup in lookupSet)
+        {
+            entityIds.Add(lookup.PackageEntityId);
+            names.Add(lookup.Name);
+            versions.Add(lookup.Version);
+        }
+
+        var result = await _dbContext
+            .PackageBlueprintHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id, name, version) AS (
+    SELECT UNNEST({entityIds}), UNNEST({names}), UNNEST({versions})
+)
+SELECT pbh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM package_blueprint_history
+    WHERE package_entity_id = variables.entity_id AND name = variables.name AND version = variables.version
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) pbh ON true;")
+            .AsNoTracking()
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => new PackageBlueprintLookup(e.PackageEntityId, e.Name, e.Version), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageBlueprintHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
+    }
+
     public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
     {
         if (!metadataChanges.Any())
@@ -136,6 +186,40 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => new MetadataLookup(e.EntityId, e.Key), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
+    }
+
+    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(List<PackageBlueprintChange> packageBlueprintChanges, CancellationToken token)
+    {
+        if (!packageBlueprintChanges.Any())
+        {
+            return new Dictionary<long, PackageBlueprintAggregateHistory>();
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+        var packageEntityIds = packageBlueprintChanges.Select(x => x.PackageEntityId).Distinct().ToList();
+
+        var result = await _dbContext
+            .PackageBlueprintAggregateHistory
+            .FromSqlInterpolated(@$"
+WITH variables (package_entity_id) AS (
+    SELECT UNNEST({packageEntityIds})
+)
+SELECT pbah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM package_blueprint_aggregate_history
+    WHERE package_entity_id = variables.package_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) pbah ON true;")
+            .AsNoTracking()
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => e.PackageEntityId, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageBlueprintAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }
@@ -662,7 +746,8 @@ SELECT
     nextval('key_value_store_entry_history_id_seq') AS KeyValueStoreEntryHistorySequence,
     nextval('validator_emission_statistics_id_seq') AS ValidatorEmissionStatisticsSequence,
     nextval('non_fungible_schema_history_id_seq') AS NonFungibleSchemaHistorySequence,
-    nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence",
+    nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence,
+    nextval('package_blueprint_aggregate_history_id_seq') AS PackageBlueprintAggregateHistorySequence",
             cancellationToken: token);
 
         var result = await _connection.QueryFirstAsync<SequencesHolder>(cd);

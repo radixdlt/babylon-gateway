@@ -702,11 +702,11 @@ UPDATE pending_transactions
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
+        var packageBlueprintChanges = new List<PackageBlueprintChange>();
         var stateToAdd = new List<StateHistory>();
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
         var keyValueStoreEntryHistoryToAdd = new List<KeyValueStoreEntryHistory>();
         var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
-        var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
         var packageCodeHistoryToAdd = new Dictionary<PackageCodeLookup, PackageCodeHistory>();
         var schemaHistoryToAdd = new List<SchemaHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
@@ -957,66 +957,52 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
                         {
-                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion);
-
-                            packageBlueprintHistoryToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                                {
-                                    Id = sequences.PackageBlueprintHistorySequence++,
-                                    FromStateVersion = stateVersion,
-                                    PackageEntityId = referencedEntity.DatabaseId,
-                                    Name = lookup.Name,
-                                    Version = lookup.BlueprintVersion,
-                                })
-                                .Definition = packageBlueprintDefinition.Value.Definition.ToJson();
+                            packageBlueprintChanges.Add(
+                                new PackageBlueprintDefinitionChange(
+                                    stateVersion,
+                                    referencedEntity.DatabaseId,
+                                    packageBlueprintDefinition.Key.BlueprintName,
+                                    packageBlueprintDefinition.Key.BlueprintVersion,
+                                    packageBlueprintDefinition.Value.Definition.ToJson()
+                                ));
                         }
 
                         if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate packageBlueprintDependencies)
                         {
-                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
-
-                            packageBlueprintHistoryToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                                {
-                                    Id = sequences.PackageBlueprintHistorySequence++,
-                                    FromStateVersion = stateVersion,
-                                    PackageEntityId = referencedEntity.DatabaseId,
-                                    Name = lookup.Name,
-                                    Version = lookup.BlueprintVersion,
-                                })
-                                .DependantEntityIds = packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                            packageBlueprintChanges.Add(
+                                new PackageBlueprintDependantEntityIdsChange(
+                                    stateVersion,
+                                    referencedEntity.DatabaseId,
+                                    packageBlueprintDependencies.Key.BlueprintName,
+                                    packageBlueprintDependencies.Key.BlueprintVersion,
+                                    packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList()
+                                ));
                         }
 
                         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
                         {
-                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion);
-                            var pb = packageBlueprintHistoryToAdd.GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                            {
-                                Id = sequences.PackageBlueprintHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                PackageEntityId = referencedEntity.DatabaseId,
-                                Name = lookup.Name,
-                                Version = lookup.BlueprintVersion,
-                            });
-
-                            pb.RoyaltyConfig = packageBlueprintRoyalty.Value.RoyaltyConfig.ToJson();
-                            pb.RoyaltyConfigIsLocked = packageBlueprintRoyalty.IsLocked;
+                            packageBlueprintChanges.Add(
+                                new PackageBlueprintRoyaltyConfigChange(
+                                    stateVersion,
+                                    referencedEntity.DatabaseId,
+                                    packageBlueprintRoyalty.Key.BlueprintName,
+                                    packageBlueprintRoyalty.Key.BlueprintVersion,
+                                    packageBlueprintRoyalty.Value.RoyaltyConfig.ToJson(),
+                                    packageBlueprintRoyalty.IsLocked
+                                ));
                         }
 
                         if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate packageBlueprintAuthTemplate)
                         {
-                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion);
-                            var pb = packageBlueprintHistoryToAdd.GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                            {
-                                Id = sequences.PackageBlueprintHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                PackageEntityId = referencedEntity.DatabaseId,
-                                Name = lookup.Name,
-                                Version = lookup.BlueprintVersion,
-                            });
-
-                            pb.AuthTemplate = packageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
-                            pb.AuthTemplateIsLocked = packageBlueprintAuthTemplate.IsLocked;
+                            packageBlueprintChanges.Add(
+                                new PackageBlueprintAuthTemplateChange(
+                                    stateVersion,
+                                    referencedEntity.DatabaseId,
+                                    packageBlueprintAuthTemplate.Key.BlueprintName,
+                                    packageBlueprintAuthTemplate.Key.BlueprintVersion,
+                                    packageBlueprintAuthTemplate.Value.AuthConfig.ToJson(),
+                                    packageBlueprintAuthTemplate.IsLocked
+                                ));
                         }
 
                         if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
@@ -1356,6 +1342,7 @@ UPDATE pending_transactions
         {
             var sw = Stopwatch.StartNew();
 
+            var mostRecentPackageBlueprintHistory = await readHelper.MostRecentPackageBlueprintHistoryFor(packageBlueprintChanges, token);
             var mostRecentMetadataHistory = await readHelper.MostRecentEntityMetadataHistoryFor(metadataChanges, token);
             var mostRecentAggregatedMetadataHistory = await readHelper.MostRecentEntityAggregateMetadataHistoryFor(metadataChanges, token);
             var mostRecentAccessRulesEntryHistory = await readHelper.MostRecentEntityRoleAssignmentsEntryHistoryFor(roleAssignmentsChangePointers.Values, token);
@@ -1368,6 +1355,7 @@ UPDATE pending_transactions
             var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
+            var mostRecentPackageBlueprintAggregateHistory = await readHelper.MostRecentPackageBlueprintAggregateHistoryFor(packageBlueprintChanges, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -1383,6 +1371,9 @@ UPDATE pending_transactions
             var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
             var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
+
+            var (packageBlueprintHistoryToAdd, packageBlueprintAggregateHistoryToAdd) =
+                PackageBlueprintAggregator.AggregatePackageBlueprint(packageBlueprintChanges, mostRecentPackageBlueprintHistory, mostRecentPackageBlueprintAggregateHistory, sequences);
 
             foreach (var metadataChange in metadataChanges)
             {
@@ -1881,7 +1872,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyPackageCodeHistory(packageCodeHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopySchemaHistory(schemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreEntryHistory(keyValueStoreEntryHistoryToAdd, token);
@@ -1890,6 +1881,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyPackageBlueprintAggregateHistory(packageBlueprintAggregateHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;
