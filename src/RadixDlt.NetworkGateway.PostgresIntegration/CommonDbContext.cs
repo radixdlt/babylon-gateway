@@ -103,6 +103,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<PackageBlueprintAggregateHistory> PackageBlueprintAggregateHistory => Set<PackageBlueprintAggregateHistory>();
 
+    public DbSet<PackageCodeAggregateHistory> PackageCodeAggregateHistory => Set<PackageCodeAggregateHistory>();
+
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
     public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
@@ -364,6 +366,10 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<PackageBlueprintAggregateHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<PackageCodeAggregateHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder

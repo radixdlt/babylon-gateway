@@ -90,58 +90,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateKeyValueStoreDataRequest
+    /// PackageCodeCollectionItem
     /// </summary>
-    [DataContract(Name = "StateKeyValueStoreDataRequest")]
-    public partial class StateKeyValueStoreDataRequest : IEquatable<StateKeyValueStoreDataRequest>
+    [DataContract(Name = "PackageCodeCollectionItem")]
+    public partial class PackageCodeCollectionItem : IEquatable<PackageCodeCollectionItem>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequest" /> class.
+        /// Gets or Sets VmType
         /// </summary>
-        [JsonConstructorAttribute]
-        protected StateKeyValueStoreDataRequest() { }
+        [DataMember(Name = "vm_type", EmitDefaultValue = true)]
+        public PackageVmType? VmType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequest" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeCollectionItem" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="keyValueStoreAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="keys">limited to max 100 items. (required).</param>
-        public StateKeyValueStoreDataRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string keyValueStoreAddress = default(string), List<StateKeyValueStoreDataRequestKeyItem> keys = default(List<StateKeyValueStoreDataRequestKeyItem>))
+        /// <param name="vmType">vmType.</param>
+        /// <param name="codeHashHex">Hex-encoded binary blob..</param>
+        /// <param name="codeHex">Hex-encoded binary blob..</param>
+        public PackageCodeCollectionItem(PackageVmType? vmType = default(PackageVmType?), string codeHashHex = default(string), string codeHex = default(string))
         {
-            // to ensure "keyValueStoreAddress" is required (not null)
-            if (keyValueStoreAddress == null)
-            {
-                throw new ArgumentNullException("keyValueStoreAddress is a required property for StateKeyValueStoreDataRequest and cannot be null");
-            }
-            this.KeyValueStoreAddress = keyValueStoreAddress;
-            // to ensure "keys" is required (not null)
-            if (keys == null)
-            {
-                throw new ArgumentNullException("keys is a required property for StateKeyValueStoreDataRequest and cannot be null");
-            }
-            this.Keys = keys;
-            this.AtLedgerState = atLedgerState;
+            this.VmType = vmType;
+            this.CodeHashHex = codeHashHex;
+            this.CodeHex = codeHex;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// Hex-encoded binary blob.
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "code_hash_hex", EmitDefaultValue = true)]
+        public string CodeHashHex { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Hex-encoded binary blob.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "key_value_store_address", IsRequired = true, EmitDefaultValue = true)]
-        public string KeyValueStoreAddress { get; set; }
-
-        /// <summary>
-        /// limited to max 100 items.
-        /// </summary>
-        /// <value>limited to max 100 items.</value>
-        [DataMember(Name = "keys", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateKeyValueStoreDataRequestKeyItem> Keys { get; set; }
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "code_hex", EmitDefaultValue = true)]
+        public string CodeHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +135,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateKeyValueStoreDataRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  KeyValueStoreAddress: ").Append(KeyValueStoreAddress).Append("\n");
-            sb.Append("  Keys: ").Append(Keys).Append("\n");
+            sb.Append("class PackageCodeCollectionItem {\n");
+            sb.Append("  VmType: ").Append(VmType).Append("\n");
+            sb.Append("  CodeHashHex: ").Append(CodeHashHex).Append("\n");
+            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateKeyValueStoreDataRequest);
+            return this.Equals(input as PackageCodeCollectionItem);
         }
 
         /// <summary>
-        /// Returns true if StateKeyValueStoreDataRequest instances are equal
+        /// Returns true if PackageCodeCollectionItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateKeyValueStoreDataRequest to be compared</param>
+        /// <param name="input">Instance of PackageCodeCollectionItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateKeyValueStoreDataRequest input)
+        public bool Equals(PackageCodeCollectionItem input)
         {
             if (input == null)
             {
@@ -190,20 +175,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
+                    this.VmType == input.VmType ||
+                    this.VmType.Equals(input.VmType)
                 ) && 
                 (
-                    this.KeyValueStoreAddress == input.KeyValueStoreAddress ||
-                    (this.KeyValueStoreAddress != null &&
-                    this.KeyValueStoreAddress.Equals(input.KeyValueStoreAddress))
+                    this.CodeHashHex == input.CodeHashHex ||
+                    (this.CodeHashHex != null &&
+                    this.CodeHashHex.Equals(input.CodeHashHex))
                 ) && 
                 (
-                    this.Keys == input.Keys ||
-                    this.Keys != null &&
-                    input.Keys != null &&
-                    this.Keys.SequenceEqual(input.Keys)
+                    this.CodeHex == input.CodeHex ||
+                    (this.CodeHex != null &&
+                    this.CodeHex.Equals(input.CodeHex))
                 );
         }
 
@@ -216,17 +199,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
+                hashCode = (hashCode * 59) + this.VmType.GetHashCode();
+                if (this.CodeHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeHashHex.GetHashCode();
                 }
-                if (this.KeyValueStoreAddress != null)
+                if (this.CodeHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyValueStoreAddress.GetHashCode();
-                }
-                if (this.Keys != null)
-                {
-                    hashCode = (hashCode * 59) + this.Keys.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
                 }
                 return hashCode;
             }

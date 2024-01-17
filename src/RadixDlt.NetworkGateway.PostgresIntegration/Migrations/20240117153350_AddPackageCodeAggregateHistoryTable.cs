@@ -62,69 +62,52 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-internal class SequencesHolder
+#nullable disable
+
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    /// <inheritdoc />
+    public partial class AddPackageCodeAggregateHistoryTable : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "package_code_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    package_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    package_code_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_package_code_aggregate_history", x => x.id);
+                });
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+            migrationBuilder.CreateIndex(
+                name: "IX_package_code_aggregate_history_package_entity_id_from_state~",
+                table: "package_code_aggregate_history",
+                columns: new[] { "package_entity_id", "from_state_version" });
 
-    public long StateHistorySequence { get; set; }
+            migrationBuilder.Sql(@"
+INSERT INTO package_code_aggregate_history (from_state_version, package_entity_id, package_code_ids)
+SELECT MIN(from_state_version) from_state_version, package_entity_id, array_agg(id order by id asc) package_code_ids
+FROM package_code_history
+GROUP BY package_entity_id");
+        }
 
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long NonFungibleIdLocationHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long SchemaHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorEmissionStatisticsSequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
-
-    public long PackageBlueprintAggregateHistorySequence { get; set; }
-
-    public long PackageCodeAggregateHistorySequence { get; set; }
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "package_code_aggregate_history");
+        }
+    }
 }

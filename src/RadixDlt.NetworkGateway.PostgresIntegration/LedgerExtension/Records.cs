@@ -111,7 +111,7 @@ internal record struct MetadataLookup(long EntityId, string Key);
 
 internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string Version);
 
-internal record struct PackageCodeLookup(string CodeHex);
+internal record struct PackageCodeLookup(long PackageEntityId, ValueBytes CodeHex);
 
 internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
 

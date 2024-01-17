@@ -3104,15 +3104,20 @@ components:
               $ref: "#/components/schemas/Address"
             balance:
               $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
+
     StateEntityDetailsResponsePackageDetails:
+      description: "vm_type, code_hash_hex and code_hex are always going to be empty, use `codes` property which will return code collection"
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
+            - code_items
             - vm_type
             - code_hash_hex
             - code_hex
           properties:
+            codes:
+              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsCodeCollection"
             vm_type:
               $ref: "#/components/schemas/PackageVmType"
             code_hash_hex:
@@ -3125,6 +3130,26 @@ components:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
             schemas:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaCollection"
+    StateEntityDetailsResponsePackageDetailsCodeCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/PackageCodeCollectionItem"
+    PackageCodeCollectionItem:
+      type: object
+      properties:
+        vm_type:
+          $ref: "#/components/schemas/PackageVmType"
+        code_hash_hex:
+          $ref: "#/components/schemas/HexString"
+        code_hex:
+          $ref: "#/components/schemas/HexString"
     StateEntityDetailsResponsePackageDetailsBlueprintCollection:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"

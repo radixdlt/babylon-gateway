@@ -91,7 +91,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetails
+    /// vm_type, code_hash_hex and code_hex are always going to be empty, use &#x60;codes&#x60; property which will return code collection
     /// </summary>
     [DataContract(Name = "StateEntityDetailsResponsePackageDetails")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
@@ -117,6 +117,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetails" /> class.
         /// </summary>
+        /// <param name="codes">codes.</param>
         /// <param name="vmType">vmType (required).</param>
         /// <param name="codeHashHex">Hex-encoded binary blob. (required).</param>
         /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
@@ -124,7 +125,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="blueprints">blueprints.</param>
         /// <param name="schemas">schemas.</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Package).</param>
-        public StateEntityDetailsResponsePackageDetails(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
+        public StateEntityDetailsResponsePackageDetails(StateEntityDetailsResponsePackageDetailsCodeCollection codes = default(StateEntityDetailsResponsePackageDetailsCodeCollection), PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
         {
             this.VmType = vmType;
             // to ensure "codeHashHex" is required (not null)
@@ -139,10 +140,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("codeHex is a required property for StateEntityDetailsResponsePackageDetails and cannot be null");
             }
             this.CodeHex = codeHex;
+            this.Codes = codes;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
             this.Blueprints = blueprints;
             this.Schemas = schemas;
         }
+
+        /// <summary>
+        /// Gets or Sets Codes
+        /// </summary>
+        [DataMember(Name = "codes", EmitDefaultValue = true)]
+        public StateEntityDetailsResponsePackageDetailsCodeCollection Codes { get; set; }
 
         /// <summary>
         /// Hex-encoded binary blob.
@@ -186,6 +194,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponsePackageDetails {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Codes: ").Append(Codes).Append("\n");
             sb.Append("  VmType: ").Append(VmType).Append("\n");
             sb.Append("  CodeHashHex: ").Append(CodeHashHex).Append("\n");
             sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
@@ -228,6 +237,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
+                    this.Codes == input.Codes ||
+                    (this.Codes != null &&
+                    this.Codes.Equals(input.Codes))
+                ) && base.Equals(input) && 
+                (
                     this.VmType == input.VmType ||
                     this.VmType.Equals(input.VmType)
                 ) && base.Equals(input) && 
@@ -267,6 +281,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                if (this.Codes != null)
+                {
+                    hashCode = (hashCode * 59) + this.Codes.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.VmType.GetHashCode();
                 if (this.CodeHashHex != null)
                 {

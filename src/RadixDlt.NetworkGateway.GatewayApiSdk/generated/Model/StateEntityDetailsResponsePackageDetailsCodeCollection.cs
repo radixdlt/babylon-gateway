@@ -90,58 +90,53 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateKeyValueStoreDataRequest
+    /// StateEntityDetailsResponsePackageDetailsCodeCollection
     /// </summary>
-    [DataContract(Name = "StateKeyValueStoreDataRequest")]
-    public partial class StateKeyValueStoreDataRequest : IEquatable<StateKeyValueStoreDataRequest>
+    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsCodeCollection")]
+    public partial class StateEntityDetailsResponsePackageDetailsCodeCollection : IEquatable<StateEntityDetailsResponsePackageDetailsCodeCollection>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsCodeCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateKeyValueStoreDataRequest() { }
+        protected StateEntityDetailsResponsePackageDetailsCodeCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsCodeCollection" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="keyValueStoreAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="keys">limited to max 100 items. (required).</param>
-        public StateKeyValueStoreDataRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string keyValueStoreAddress = default(string), List<StateKeyValueStoreDataRequestKeyItem> keys = default(List<StateKeyValueStoreDataRequestKeyItem>))
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
+        /// <param name="items">items (required).</param>
+        public StateEntityDetailsResponsePackageDetailsCodeCollection(long? totalCount = default(long?), string nextCursor = default(string), List<PackageCodeCollectionItem> items = default(List<PackageCodeCollectionItem>))
         {
-            // to ensure "keyValueStoreAddress" is required (not null)
-            if (keyValueStoreAddress == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("keyValueStoreAddress is a required property for StateKeyValueStoreDataRequest and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsCodeCollection and cannot be null");
             }
-            this.KeyValueStoreAddress = keyValueStoreAddress;
-            // to ensure "keys" is required (not null)
-            if (keys == null)
-            {
-                throw new ArgumentNullException("keys is a required property for StateKeyValueStoreDataRequest and cannot be null");
-            }
-            this.Keys = keys;
-            this.AtLedgerState = atLedgerState;
+            this.Items = items;
+            this.TotalCount = totalCount;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "key_value_store_address", IsRequired = true, EmitDefaultValue = true)]
-        public string KeyValueStoreAddress { get; set; }
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
 
         /// <summary>
-        /// limited to max 100 items.
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>limited to max 100 items.</value>
-        [DataMember(Name = "keys", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateKeyValueStoreDataRequestKeyItem> Keys { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<PackageCodeCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +145,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateKeyValueStoreDataRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  KeyValueStoreAddress: ").Append(KeyValueStoreAddress).Append("\n");
-            sb.Append("  Keys: ").Append(Keys).Append("\n");
+            sb.Append("class StateEntityDetailsResponsePackageDetailsCodeCollection {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +169,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateKeyValueStoreDataRequest);
+            return this.Equals(input as StateEntityDetailsResponsePackageDetailsCodeCollection);
         }
 
         /// <summary>
-        /// Returns true if StateKeyValueStoreDataRequest instances are equal
+        /// Returns true if StateEntityDetailsResponsePackageDetailsCodeCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateKeyValueStoreDataRequest to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsCodeCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateKeyValueStoreDataRequest input)
+        public bool Equals(StateEntityDetailsResponsePackageDetailsCodeCollection input)
         {
             if (input == null)
             {
@@ -190,20 +185,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
-                    this.KeyValueStoreAddress == input.KeyValueStoreAddress ||
-                    (this.KeyValueStoreAddress != null &&
-                    this.KeyValueStoreAddress.Equals(input.KeyValueStoreAddress))
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
-                    this.Keys == input.Keys ||
-                    this.Keys != null &&
-                    input.Keys != null &&
-                    this.Keys.SequenceEqual(input.Keys)
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -216,17 +211,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
+                if (this.TotalCount != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 }
-                if (this.KeyValueStoreAddress != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyValueStoreAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
-                if (this.Keys != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Keys.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }
