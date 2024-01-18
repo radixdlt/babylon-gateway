@@ -93,9 +93,9 @@ internal class ReadHelper
         _observers = observers;
     }
 
-    public async Task<Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>> MostRecentPackageBlueprintHistoryFor(List<PackageBlueprintChange> packageBlueprintChanges, CancellationToken token)
+    public async Task<Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>> MostRecentPackageBlueprintHistoryFor(ICollection<PackageBlueprintLookup> packageBlueprintLookups, CancellationToken token)
     {
-        if (!packageBlueprintChanges.Any())
+        if (!packageBlueprintLookups.Any())
         {
             return new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
         }
@@ -107,9 +107,9 @@ internal class ReadHelper
         var versions = new List<string>();
         var lookupSet = new HashSet<PackageBlueprintLookup>();
 
-        foreach (var change in packageBlueprintChanges)
+        foreach (var lookup in packageBlueprintLookups)
         {
-            lookupSet.Add(change.Lookup);
+            lookupSet.Add(lookup);
         }
 
         foreach (var lookup in lookupSet)
@@ -143,7 +143,7 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    public async Task<Dictionary<PackageCodeLookup, PackageCodeHistory>> MostRecentPackageCodeHistoryFor(List<PackageCodeChange> packageCodeChanges, CancellationToken token)
+    public async Task<Dictionary<PackageCodeLookup, PackageCodeHistory>> MostRecentPackageCodeHistoryFor(ICollection<PackageCodeLookup> packageCodeChanges, CancellationToken token)
     {
         if (!packageCodeChanges.Any())
         {
@@ -156,9 +156,9 @@ INNER JOIN LATERAL (
         var codeHashes = new List<byte[]>();
         var lookupSet = new HashSet<PackageCodeLookup>();
 
-        foreach (var change in packageCodeChanges)
+        foreach (var lookup in packageCodeChanges)
         {
-            lookupSet.Add(change.Lookup);
+            lookupSet.Add(lookup);
         }
 
         foreach (var lookup in lookupSet)
@@ -238,7 +238,7 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    public async Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(List<PackageCodeChange> packageCodeChanges, CancellationToken token)
+    public async Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(ICollection<PackageCodeLookup> packageCodeChanges, CancellationToken token)
     {
         if (!packageCodeChanges.Any())
         {
@@ -246,7 +246,7 @@ INNER JOIN LATERAL (
         }
 
         var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageCodeChanges.Select(x => x.Lookup.PackageEntityId).Distinct().ToList();
+        var packageEntityIds = packageCodeChanges.Select(x => x.PackageEntityId).Distinct().ToList();
 
         var result = await _dbContext
             .PackageCodeAggregateHistory
@@ -272,7 +272,7 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(List<PackageBlueprintChange> packageBlueprintChanges, CancellationToken token)
+    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(ICollection<PackageBlueprintLookup> packageBlueprintChanges, CancellationToken token)
     {
         if (!packageBlueprintChanges.Any())
         {
@@ -280,7 +280,7 @@ INNER JOIN LATERAL (
         }
 
         var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageBlueprintChanges.Select(x => x.Lookup.PackageEntityId).Distinct().ToList();
+        var packageEntityIds = packageBlueprintChanges.Select(x => x.PackageEntityId).Distinct().ToList();
 
         var result = await _dbContext
             .PackageBlueprintAggregateHistory

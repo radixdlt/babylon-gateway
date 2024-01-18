@@ -63,26 +63,26 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal record struct PackageCodeLookup(long PackageEntityId, ValueBytes CodeHash);
 
-internal abstract record PackageCodeChange(long StateVersion, PackageCodeLookup Lookup);
+internal record PackageCodeChange(long StateVersion)
+{
+    public CoreModel.PackageCodeOriginalCodeEntrySubstate? PackageCodeOriginalCode { get; set; }
 
-internal record PackageCodeByteChange(long StateVersion,  PackageCodeLookup Lookup, byte[] Code) : PackageCodeChange(StateVersion, Lookup);
-
-internal record PackageCodeVmChange(long StateVersion,  PackageCodeLookup Lookup, PackageVmType VmType) : PackageCodeChange(StateVersion, Lookup);
+    public CoreModel.PackageCodeVmTypeEntrySubstate? PackageCodeVmType { get; set; }
+}
 
 internal static class PackageCodeAggregator
 {
     public static (List<PackageCodeHistory> PackageCodeHistoryToAdd, List<PackageCodeAggregateHistory> PackageCodeAggregateHistoryToAdd) AggregatePackageCode(
-        List<PackageCodeChange> packageCodeChanges,
+        Dictionary<PackageCodeLookup, PackageCodeChange> packageCodeChanges,
         Dictionary<PackageCodeLookup, PackageCodeHistory> mostRecentPackageCodeHistory,
         Dictionary<long, PackageCodeAggregateHistory> mostRecentPackageCodeAggregateHistory,
         SequencesHolder sequences)
@@ -90,96 +90,74 @@ internal static class PackageCodeAggregator
         var packageCodeHistoryToAdd = new List<PackageCodeHistory>();
         var packageCodeAggregateHistoryToAdd = new List<PackageCodeAggregateHistory>();
 
-        var packageGroups = packageCodeChanges.GroupBy(x => new { x.Lookup.PackageEntityId, x.StateVersion });
-
-        foreach (var packageGroup in packageGroups)
+        foreach (var change in packageCodeChanges)
         {
-            var packageEntityId = packageGroup.Key.PackageEntityId;
-            var stateVersion = packageGroup.Key.StateVersion;
+            var packageEntityId = change.Key.PackageEntityId;
+            var stateVersion = change.Value.StateVersion;
 
             mostRecentPackageCodeAggregateHistory.TryGetValue(packageEntityId, out var existingPackageCodeAggregate);
 
             PackageCodeAggregateHistory packageCodeAggregate;
 
-            if (existingPackageCodeAggregate == null)
+            if (existingPackageCodeAggregate == null || existingPackageCodeAggregate.FromStateVersion != change.Value.StateVersion)
             {
                 packageCodeAggregate = new PackageCodeAggregateHistory
                 {
                     Id = sequences.PackageCodeAggregateHistorySequence++,
                     FromStateVersion = stateVersion,
                     PackageEntityId = packageEntityId,
-                    PackageCodeIds = new List<long>(),
+                    PackageCodeIds = existingPackageCodeAggregate?.PackageCodeIds ?? new List<long>(),
                 };
 
                 mostRecentPackageCodeAggregateHistory[packageEntityId] = packageCodeAggregate;
+                packageCodeAggregateHistoryToAdd.Add(packageCodeAggregate);
             }
             else
             {
                 packageCodeAggregate = existingPackageCodeAggregate;
-                packageCodeAggregate.Id = sequences.PackageCodeAggregateHistorySequence++;
-                packageCodeAggregate.FromStateVersion = stateVersion;
             }
 
-            var packageCodeGroups = packageGroup
-                .GroupBy(x => new { x.Lookup.PackageEntityId, x.Lookup.CodeHash, x.StateVersion });
+            mostRecentPackageCodeHistory.TryGetValue(change.Key, out var existingPackageCode);
 
-            foreach (var packageCodeGroup in packageCodeGroups)
+            PackageCodeHistory packageCodeHistory;
+
+            if (existingPackageCode != null)
             {
-                var lookup = new PackageCodeLookup(packageEntityId, packageCodeGroup.Key.CodeHash);
-                mostRecentPackageCodeHistory.TryGetValue(lookup, out var existingPackageCode);
+                var previousPackageCodeId = existingPackageCode.Id;
 
-                PackageCodeHistory packageCodeHistory;
+                packageCodeHistory = existingPackageCode;
+                packageCodeHistory.Id = sequences.PackageCodeHistorySequence++;
+                packageCodeHistory.FromStateVersion = change.Value.StateVersion;
 
-                if (existingPackageCode != null)
+                packageCodeAggregate.PackageCodeIds.Remove(previousPackageCodeId);
+                packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
+            }
+            else
+            {
+                packageCodeHistory = new PackageCodeHistory
                 {
-                    var previousPackageCodeId = existingPackageCode.Id;
+                    Id = sequences.PackageCodeHistorySequence++,
+                    PackageEntityId = packageEntityId,
+                    FromStateVersion = stateVersion,
+                    CodeHash = change.Key.CodeHash,
+                };
 
-                    packageCodeHistory = existingPackageCode;
-                    packageCodeHistory.Id = sequences.PackageCodeHistorySequence++;
-                    packageCodeHistory.FromStateVersion = packageCodeGroup.Key.StateVersion;
+                mostRecentPackageCodeHistory[change.Key] = packageCodeHistory;
 
-                    packageCodeAggregate.PackageCodeIds.Remove(previousPackageCodeId);
-                    packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
-                }
-                else
-                {
-                    packageCodeHistory = new PackageCodeHistory
-                    {
-                        Id = sequences.PackageCodeHistorySequence++,
-                        PackageEntityId = packageEntityId,
-                        FromStateVersion = stateVersion,
-                        CodeHash = lookup.CodeHash,
-                    };
-
-                    mostRecentPackageCodeHistory[lookup] = packageCodeHistory;
-
-                    packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
-                }
-
-                foreach (var change in packageCodeGroup)
-                {
-                    switch (change)
-                    {
-                        case PackageCodeByteChange codeByteChange:
-                        {
-                            packageCodeHistory.Code = codeByteChange.Code;
-                            break;
-                        }
-
-                        case PackageCodeVmChange vmChange:
-                        {
-                            packageCodeHistory.VmType = vmChange.VmType;
-                            break;
-                        }
-
-                        default: throw new UnreachableException($"Unexpected type of package code change: {change.GetType()}");
-                    }
-                }
-
-                packageCodeHistoryToAdd.Add(packageCodeHistory);
+                packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
             }
 
-            packageCodeAggregateHistoryToAdd.Add(packageCodeAggregate);
+            if (change.Value.PackageCodeVmType != null)
+            {
+                packageCodeHistory.VmType = change.Value.PackageCodeVmType.Value.VmType.ToModel();
+            }
+
+            if (change.Value.PackageCodeOriginalCode != null)
+            {
+                packageCodeHistory.Code = change.Value.PackageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
+            }
+
+            packageCodeHistoryToAdd.Add(packageCodeHistory);
         }
 
         return (packageCodeHistoryToAdd, packageCodeAggregateHistoryToAdd);

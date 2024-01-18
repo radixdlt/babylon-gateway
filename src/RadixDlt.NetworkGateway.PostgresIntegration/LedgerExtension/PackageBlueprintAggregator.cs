@@ -62,143 +62,119 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string Version);
 
-internal abstract record PackageBlueprintChange(long StateVersion, PackageBlueprintLookup Lookup);
+internal record PackageBlueprintChange(long StateVersion)
+{
+    public CoreModel.PackageBlueprintDefinitionEntrySubstate? PackageBlueprintDefinition { get; set; }
 
-internal record PackageBlueprintDefinitionChange(long StateVersion, PackageBlueprintLookup Lookup, string Definition)
-    : PackageBlueprintChange(StateVersion, Lookup);
+    public CoreModel.PackageBlueprintDependenciesEntrySubstate? PackageBlueprintDependencies { get; set; }
 
-internal record PackageBlueprintDependantEntityIdsChange(long StateVersion, PackageBlueprintLookup Lookup, List<long>? DependantEntityIds = null)
-    : PackageBlueprintChange(StateVersion, Lookup);
+    public CoreModel.PackageBlueprintRoyaltyEntrySubstate? PackageBlueprintRoyalty { get; set; }
 
-internal record PackageBlueprintAuthTemplateChange(long StateVersion, PackageBlueprintLookup Lookup, string? AuthTemplate = null, bool? AuthTemplateIsLocked = null)
-    : PackageBlueprintChange(StateVersion, Lookup);
-
-internal record PackageBlueprintRoyaltyConfigChange(long StateVersion, PackageBlueprintLookup Lookup, string? RoyaltyConfig = null, bool? RoyaltyConfigIsLocked = null)
-    : PackageBlueprintChange(StateVersion, Lookup);
+    public CoreModel.PackageBlueprintAuthTemplateEntrySubstate? PackageBlueprintAuthTemplate { get; set; }
+}
 
 internal static class PackageBlueprintAggregator
 {
     public static (List<PackageBlueprintHistory> PackageBlueprintHistoryToAdd, List<PackageBlueprintAggregateHistory> PackageBlueprintAggregateHistoryToAdd) AggregatePackageBlueprint(
-        List<PackageBlueprintChange> packageBlueprintChanges,
+        Dictionary<PackageBlueprintLookup, PackageBlueprintChange> packageBlueprintChanges,
         Dictionary<PackageBlueprintLookup, PackageBlueprintHistory> mostRecentPackageBlueprintHistory,
         Dictionary<long, PackageBlueprintAggregateHistory> mostRecentPackageBlueprintAggregateHistory,
+        ReferencedEntityDictionary referencedEntities,
         SequencesHolder sequences)
     {
         var packageBlueprintHistoryToAdd = new List<PackageBlueprintHistory>();
         var packageBlueprintAggregateHistoryToAdd = new List<PackageBlueprintAggregateHistory>();
 
-        var packageGroups = packageBlueprintChanges.GroupBy(x => new { x.Lookup.PackageEntityId, x.StateVersion });
-
-        foreach (var packageGroup in packageGroups)
+        foreach (var change in packageBlueprintChanges)
         {
-            var packageEntityId = packageGroup.Key.PackageEntityId;
-            var stateVersion = packageGroup.Key.StateVersion;
+            var packageEntityId = change.Key.PackageEntityId;
+            var stateVersion = change.Value.StateVersion;
             mostRecentPackageBlueprintAggregateHistory.TryGetValue(packageEntityId, out var existingPackageBlueprintAggregate);
 
             PackageBlueprintAggregateHistory packageBlueprintAggregate;
 
-            if (existingPackageBlueprintAggregate == null)
+            if (existingPackageBlueprintAggregate == null || existingPackageBlueprintAggregate.FromStateVersion != change.Value.StateVersion)
             {
                 packageBlueprintAggregate = new PackageBlueprintAggregateHistory
                 {
                     Id = sequences.PackageBlueprintAggregateHistorySequence++,
                     FromStateVersion = stateVersion,
                     PackageEntityId = packageEntityId,
-                    PackageBlueprintIds = new List<long>(),
+                    PackageBlueprintIds = existingPackageBlueprintAggregate?.PackageBlueprintIds ?? new List<long>(),
                 };
 
                 mostRecentPackageBlueprintAggregateHistory[packageEntityId] = packageBlueprintAggregate;
+                packageBlueprintAggregateHistoryToAdd.Add(packageBlueprintAggregate);
             }
             else
             {
                 packageBlueprintAggregate = existingPackageBlueprintAggregate;
-                packageBlueprintAggregate.Id = sequences.PackageBlueprintAggregateHistorySequence++;
-                packageBlueprintAggregate.FromStateVersion = stateVersion;
             }
 
-            var packageBlueprintGroups = packageGroup
-                .GroupBy(x => new { x.Lookup.PackageEntityId, x.Lookup.Name, x.Lookup.Version, x.StateVersion });
+            mostRecentPackageBlueprintHistory.TryGetValue(change.Key, out var existingPackageBlueprint);
 
-            foreach (var packageBlueprintGroup in packageBlueprintGroups)
+            PackageBlueprintHistory packageBlueprintHistory;
+
+            if (existingPackageBlueprint != null)
             {
-                var lookup = new PackageBlueprintLookup(packageEntityId, packageBlueprintGroup.Key.Name, packageBlueprintGroup.Key.Version);
-                mostRecentPackageBlueprintHistory.TryGetValue(lookup, out var existingPackageBlueprint);
+                var previousPackageBlueprintHistoryId = existingPackageBlueprint.Id;
 
-                PackageBlueprintHistory packageBlueprintHistory;
+                packageBlueprintHistory = existingPackageBlueprint;
+                packageBlueprintHistory.Id = sequences.PackageBlueprintHistorySequence++;
+                packageBlueprintHistory.FromStateVersion = change.Value.StateVersion;
 
-                if (existingPackageBlueprint != null)
+                packageBlueprintAggregate.PackageBlueprintIds.Remove(previousPackageBlueprintHistoryId);
+                packageBlueprintAggregate.PackageBlueprintIds.Add(packageBlueprintHistory.Id);
+            }
+            else
+            {
+                packageBlueprintHistory = new PackageBlueprintHistory
                 {
-                    var previousPackageBlueprintHistoryId = existingPackageBlueprint.Id;
+                    Id = sequences.PackageBlueprintHistorySequence++,
+                    PackageEntityId = packageEntityId,
+                    FromStateVersion = stateVersion,
+                    Name = change.Key.Name,
+                    Version = change.Key.Version,
+                };
+                mostRecentPackageBlueprintHistory[change.Key] = packageBlueprintHistory;
 
-                    packageBlueprintHistory = existingPackageBlueprint;
-                    packageBlueprintHistory.Id = sequences.PackageBlueprintHistorySequence++;
-                    packageBlueprintHistory.FromStateVersion = packageBlueprintGroup.Key.StateVersion;
-
-                    packageBlueprintAggregate.PackageBlueprintIds.Remove(previousPackageBlueprintHistoryId);
-                    packageBlueprintAggregate.PackageBlueprintIds.Add(packageBlueprintHistory.Id);
-                }
-                else
-                {
-                    packageBlueprintHistory = new PackageBlueprintHistory
-                    {
-                        Id = sequences.PackageBlueprintHistorySequence++,
-                        PackageEntityId = packageEntityId,
-                        FromStateVersion = stateVersion,
-                        Name = lookup.Name,
-                        Version = lookup.Version,
-                    };
-                    mostRecentPackageBlueprintHistory[lookup] = packageBlueprintHistory;
-
-                    packageBlueprintAggregate.PackageBlueprintIds.Add(packageBlueprintHistory.Id);
-                }
-
-                foreach (var change in packageBlueprintGroup)
-                {
-                    switch (change)
-                    {
-                        case PackageBlueprintDefinitionChange definitionChange:
-                        {
-                            packageBlueprintHistory.Definition = definitionChange.Definition;
-                            break;
-                        }
-
-                        case PackageBlueprintAuthTemplateChange authTemplateChange:
-                        {
-                            packageBlueprintHistory.AuthTemplate = authTemplateChange.AuthTemplate;
-                            packageBlueprintHistory.AuthTemplateIsLocked = authTemplateChange.AuthTemplateIsLocked;
-                            break;
-                        }
-
-                        case PackageBlueprintRoyaltyConfigChange royaltyConfigChange:
-                        {
-                            packageBlueprintHistory.RoyaltyConfig = royaltyConfigChange.RoyaltyConfig;
-                            packageBlueprintHistory.RoyaltyConfigIsLocked = royaltyConfigChange.RoyaltyConfigIsLocked;
-                            break;
-                        }
-
-                        case PackageBlueprintDependantEntityIdsChange dependantEntityIdsChange:
-                        {
-                            packageBlueprintHistory.DependantEntityIds = dependantEntityIdsChange.DependantEntityIds;
-                            break;
-                        }
-
-                        default: throw new UnreachableException($"Unexpected type of package blueprint change: {change.GetType()}");
-                    }
-                }
-
-                packageBlueprintHistoryToAdd.Add(packageBlueprintHistory);
+                packageBlueprintAggregate.PackageBlueprintIds.Add(packageBlueprintHistory.Id);
             }
 
-            packageBlueprintAggregateHistoryToAdd.Add(packageBlueprintAggregate);
+            if (change.Value.PackageBlueprintDefinition != null)
+            {
+                packageBlueprintHistory.Definition = change.Value.PackageBlueprintDefinition.Value.Definition.ToJson();
+            }
+
+            if (change.Value.PackageBlueprintDependencies != null)
+            {
+                packageBlueprintHistory.DependantEntityIds =
+                    change.Value.PackageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+            }
+
+            if (change.Value.PackageBlueprintRoyalty != null)
+            {
+                packageBlueprintHistory.RoyaltyConfig = change.Value.PackageBlueprintRoyalty.Value.RoyaltyConfig.ToJson();
+                packageBlueprintHistory.RoyaltyConfigIsLocked = change.Value.PackageBlueprintRoyalty.IsLocked;
+            }
+
+            if (change.Value.PackageBlueprintAuthTemplate != null)
+            {
+                packageBlueprintHistory.AuthTemplate = change.Value.PackageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
+                packageBlueprintHistory.AuthTemplateIsLocked = change.Value.PackageBlueprintAuthTemplate.IsLocked;
+            }
+
+            packageBlueprintHistoryToAdd.Add(packageBlueprintHistory);
         }
 
         return (packageBlueprintHistoryToAdd, packageBlueprintAggregateHistoryToAdd);
