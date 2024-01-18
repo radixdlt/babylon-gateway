@@ -3119,10 +3119,13 @@ components:
             codes:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsCodeCollection"
             vm_type:
+              description: "Obsolete! Use codes collection"
               $ref: "#/components/schemas/PackageVmType"
             code_hash_hex:
+              description: "Obsolete! Use codes collection"
               $ref: "#/components/schemas/HexString"
             code_hex:
+              description: "Obsolete! Use codes collection"
               $ref: "#/components/schemas/HexString"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
@@ -3143,6 +3146,10 @@ components:
                 $ref: "#/components/schemas/PackageCodeCollectionItem"
     PackageCodeCollectionItem:
       type: object
+      required:
+        - vm_type
+        - code_hash_hex
+        - code_hex
       properties:
         vm_type:
           $ref: "#/components/schemas/PackageVmType"

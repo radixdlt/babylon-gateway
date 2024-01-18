@@ -105,12 +105,7 @@ internal class ReadHelper
         var entityIds = new List<long>();
         var names = new List<string>();
         var versions = new List<string>();
-        var lookupSet = new HashSet<PackageBlueprintLookup>();
-
-        foreach (var lookup in packageBlueprintLookups)
-        {
-            lookupSet.Add(lookup);
-        }
+        var lookupSet = packageBlueprintLookups.ToHashSet();
 
         foreach (var lookup in lookupSet)
         {
@@ -154,12 +149,7 @@ INNER JOIN LATERAL (
 
         var entityIds = new List<long>();
         var codeHashes = new List<byte[]>();
-        var lookupSet = new HashSet<PackageCodeLookup>();
-
-        foreach (var lookup in packageCodeChanges)
-        {
-            lookupSet.Add(lookup);
-        }
+        var lookupSet = packageCodeChanges.ToHashSet();
 
         foreach (var lookup in lookupSet)
         {
@@ -267,7 +257,7 @@ INNER JOIN LATERAL (
             .AnnotateMetricName()
             .ToDictionaryAsync(e => e.PackageEntityId, token);
 
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageBlueprintAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageCodeAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }

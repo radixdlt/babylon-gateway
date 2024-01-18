@@ -99,18 +99,33 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets VmType
         /// </summary>
-        [DataMember(Name = "vm_type", EmitDefaultValue = true)]
-        public PackageVmType? VmType { get; set; }
+        [DataMember(Name = "vm_type", IsRequired = true, EmitDefaultValue = true)]
+        public PackageVmType VmType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageCodeCollectionItem" /> class.
         /// </summary>
-        /// <param name="vmType">vmType.</param>
-        /// <param name="codeHashHex">Hex-encoded binary blob..</param>
-        /// <param name="codeHex">Hex-encoded binary blob..</param>
-        public PackageCodeCollectionItem(PackageVmType? vmType = default(PackageVmType?), string codeHashHex = default(string), string codeHex = default(string))
+        [JsonConstructorAttribute]
+        protected PackageCodeCollectionItem() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PackageCodeCollectionItem" /> class.
+        /// </summary>
+        /// <param name="vmType">vmType (required).</param>
+        /// <param name="codeHashHex">Hex-encoded binary blob. (required).</param>
+        /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
+        public PackageCodeCollectionItem(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string))
         {
             this.VmType = vmType;
+            // to ensure "codeHashHex" is required (not null)
+            if (codeHashHex == null)
+            {
+                throw new ArgumentNullException("codeHashHex is a required property for PackageCodeCollectionItem and cannot be null");
+            }
             this.CodeHashHex = codeHashHex;
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
+            {
+                throw new ArgumentNullException("codeHex is a required property for PackageCodeCollectionItem and cannot be null");
+            }
             this.CodeHex = codeHex;
         }
 
@@ -118,14 +133,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hash_hex", EmitDefaultValue = true)]
+        [DataMember(Name = "code_hash_hex", IsRequired = true, EmitDefaultValue = true)]
         public string CodeHashHex { get; set; }
 
         /// <summary>
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hex", EmitDefaultValue = true)]
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
         public string CodeHex { get; set; }
 
         /// <summary>

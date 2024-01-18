@@ -252,9 +252,9 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
-                        vmType: default,
-                        codeHashHex: string.Empty,
-                        codeHex: string.Empty,
+                        vmType: codeItems[0].VmType,
+                        codeHashHex: codeItems[0].CodeHashHex,
+                        codeHex: codeItems[0].CodeHex,
                         codes: new GatewayModel.StateEntityDetailsResponsePackageDetailsCodeCollection(totalCount: codeItems.Count, items: codeItems),
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null,
                         blueprints: new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintCollection(totalCount: blueprints.Count, items: blueprints),

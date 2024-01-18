@@ -92,6 +92,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.Sql("update package_code_history pch set vm_type = (select vm_type from entities e where e.id = pch.package_entity_id)");
 
+            migrationBuilder.AlterColumn<PackageVmType>(
+                name: "vm_type",
+                table: "package_code_history",
+                oldDefaultValue: PackageVmType.Native,
+                defaultValue: null);
+
             migrationBuilder.DropColumn(
                 name: "vm_type",
                 table: "entities");
