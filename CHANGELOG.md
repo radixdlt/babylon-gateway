@@ -3,7 +3,7 @@ Release Date: _unreleased_
 
 - add support for new transaction types (flash transactions) that are gonna occur on protocol update.
 - move vm_type to `package_code_history` table from package in `entity` table.
-- fix and return `vm_type`, `code_hash_hex` and `code_hex` as collection (it's allowed to have multiple codes per package). previous properties will return empty strings to keep contract compatibility.
+- fix and return `vm_type`, `code_hash_hex` and `code_hex` as collection (it's allowed after protocol update to have multiple codes per package). previous properties will return empty strings to keep contract compatibility.
 - create new `package_blueprint_aggregate_history` table which will hold pointers to all current package blueprints.
 - create new `package_code_aggregate_history` table which will hold pointers to all current package codes.
 

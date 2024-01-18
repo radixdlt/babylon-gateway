@@ -91,7 +91,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// vm_type, code_hash_hex and code_hex are always going to be empty, use &#x60;codes&#x60; property which will return code collection
+    /// vm_type, code_hash_hex and code_hex are always going to be empty, use &#x60;codes&#x60; property which will return collection (it&#39;s possible after protocol update that package might have multiple codes)
     /// </summary>
     [DataContract(Name = "StateEntityDetailsResponsePackageDetails")]
     [JsonConverter(typeof(JsonSubtypes), "type")]

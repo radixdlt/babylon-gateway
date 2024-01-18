@@ -3106,7 +3106,7 @@ components:
               $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
 
     StateEntityDetailsResponsePackageDetails:
-      description: "vm_type, code_hash_hex and code_hex are always going to be empty, use `codes` property which will return code collection"
+      description: "vm_type, code_hash_hex and code_hex are always going to be empty, use `codes` property which will return collection (it's possible after protocol update that package might have multiple codes)"
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
