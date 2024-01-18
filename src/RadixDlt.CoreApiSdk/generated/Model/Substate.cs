@@ -105,6 +105,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(AccountResourcePreferenceEntrySubstate), "AccountResourcePreferenceEntrySubstate")]
     [JsonSubtypes.KnownSubType(typeof(AccountVaultEntrySubstate), "AccountVaultEntry")]
     [JsonSubtypes.KnownSubType(typeof(AccountVaultEntrySubstate), "AccountVaultEntrySubstate")]
+    [JsonSubtypes.KnownSubType(typeof(BootLoaderModuleFieldVmBootSubstate), "BootLoaderModuleFieldVmBoot")]
+    [JsonSubtypes.KnownSubType(typeof(BootLoaderModuleFieldVmBootSubstate), "BootLoaderModuleFieldVmBootSubstate")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfigSubstate")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]

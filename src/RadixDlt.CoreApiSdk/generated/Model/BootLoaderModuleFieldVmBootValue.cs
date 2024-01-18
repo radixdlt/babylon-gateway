@@ -90,53 +90,30 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NextEpoch
+    /// BootLoaderModuleFieldVmBootValue
     /// </summary>
-    [DataContract(Name = "NextEpoch")]
-    public partial class NextEpoch : IEquatable<NextEpoch>
+    [DataContract(Name = "BootLoaderModuleFieldVmBootValue")]
+    public partial class BootLoaderModuleFieldVmBootValue : IEquatable<BootLoaderModuleFieldVmBootValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NextEpoch" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldVmBootValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NextEpoch() { }
+        protected BootLoaderModuleFieldVmBootValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NextEpoch" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldVmBootValue" /> class.
         /// </summary>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch (required).</param>
-        /// <param name="validators">Active validator set for the new epoch, ordered by stake descending. (required).</param>
-        /// <param name="significantProtocolUpdateReadiness">significantProtocolUpdateReadiness.</param>
-        public NextEpoch(long epoch = default(long), List<ActiveValidator> validators = default(List<ActiveValidator>), List<SignificantProtocolUpdateReadinessEntry> significantProtocolUpdateReadiness = default(List<SignificantProtocolUpdateReadinessEntry>))
+        /// <param name="scryptoV1MinorVersion">scryptoV1MinorVersion (required).</param>
+        public BootLoaderModuleFieldVmBootValue(long scryptoV1MinorVersion = default(long))
         {
-            this.Epoch = epoch;
-            // to ensure "validators" is required (not null)
-            if (validators == null)
-            {
-                throw new ArgumentNullException("validators is a required property for NextEpoch and cannot be null");
-            }
-            this.Validators = validators;
-            this.SignificantProtocolUpdateReadiness = significantProtocolUpdateReadiness;
+            this.ScryptoV1MinorVersion = scryptoV1MinorVersion;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch
+        /// Gets or Sets ScryptoV1MinorVersion
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
-
-        /// <summary>
-        /// Active validator set for the new epoch, ordered by stake descending.
-        /// </summary>
-        /// <value>Active validator set for the new epoch, ordered by stake descending.</value>
-        [DataMember(Name = "validators", IsRequired = true, EmitDefaultValue = true)]
-        public List<ActiveValidator> Validators { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SignificantProtocolUpdateReadiness
-        /// </summary>
-        [DataMember(Name = "significant_protocol_update_readiness", EmitDefaultValue = true)]
-        public List<SignificantProtocolUpdateReadinessEntry> SignificantProtocolUpdateReadiness { get; set; }
+        [DataMember(Name = "scrypto_v1_minor_version", IsRequired = true, EmitDefaultValue = true)]
+        public long ScryptoV1MinorVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +122,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NextEpoch {\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
-            sb.Append("  Validators: ").Append(Validators).Append("\n");
-            sb.Append("  SignificantProtocolUpdateReadiness: ").Append(SignificantProtocolUpdateReadiness).Append("\n");
+            sb.Append("class BootLoaderModuleFieldVmBootValue {\n");
+            sb.Append("  ScryptoV1MinorVersion: ").Append(ScryptoV1MinorVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +144,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NextEpoch);
+            return this.Equals(input as BootLoaderModuleFieldVmBootValue);
         }
 
         /// <summary>
-        /// Returns true if NextEpoch instances are equal
+        /// Returns true if BootLoaderModuleFieldVmBootValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of NextEpoch to be compared</param>
+        /// <param name="input">Instance of BootLoaderModuleFieldVmBootValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NextEpoch input)
+        public bool Equals(BootLoaderModuleFieldVmBootValue input)
         {
             if (input == null)
             {
@@ -185,20 +160,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
-                ) && 
-                (
-                    this.Validators == input.Validators ||
-                    this.Validators != null &&
-                    input.Validators != null &&
-                    this.Validators.SequenceEqual(input.Validators)
-                ) && 
-                (
-                    this.SignificantProtocolUpdateReadiness == input.SignificantProtocolUpdateReadiness ||
-                    this.SignificantProtocolUpdateReadiness != null &&
-                    input.SignificantProtocolUpdateReadiness != null &&
-                    this.SignificantProtocolUpdateReadiness.SequenceEqual(input.SignificantProtocolUpdateReadiness)
+                    this.ScryptoV1MinorVersion == input.ScryptoV1MinorVersion ||
+                    this.ScryptoV1MinorVersion.Equals(input.ScryptoV1MinorVersion)
                 );
         }
 
@@ -211,15 +174,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
-                if (this.Validators != null)
-                {
-                    hashCode = (hashCode * 59) + this.Validators.GetHashCode();
-                }
-                if (this.SignificantProtocolUpdateReadiness != null)
-                {
-                    hashCode = (hashCode * 59) + this.SignificantProtocolUpdateReadiness.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.ScryptoV1MinorVersion.GetHashCode();
                 return hashCode;
             }
         }

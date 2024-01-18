@@ -90,53 +90,49 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NextEpoch
+    /// ConsensusLedgerProofOriginAllOf
     /// </summary>
-    [DataContract(Name = "NextEpoch")]
-    public partial class NextEpoch : IEquatable<NextEpoch>
+    [DataContract(Name = "ConsensusLedgerProofOrigin_allOf")]
+    public partial class ConsensusLedgerProofOriginAllOf : IEquatable<ConsensusLedgerProofOriginAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NextEpoch" /> class.
+        /// Initializes a new instance of the <see cref="ConsensusLedgerProofOriginAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NextEpoch() { }
+        protected ConsensusLedgerProofOriginAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NextEpoch" /> class.
+        /// Initializes a new instance of the <see cref="ConsensusLedgerProofOriginAllOf" /> class.
         /// </summary>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch (required).</param>
-        /// <param name="validators">Active validator set for the new epoch, ordered by stake descending. (required).</param>
-        /// <param name="significantProtocolUpdateReadiness">significantProtocolUpdateReadiness.</param>
-        public NextEpoch(long epoch = default(long), List<ActiveValidator> validators = default(List<ActiveValidator>), List<SignificantProtocolUpdateReadinessEntry> significantProtocolUpdateReadiness = default(List<SignificantProtocolUpdateReadinessEntry>))
+        /// <param name="opaqueHash">A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger. (required).</param>
+        /// <param name="timestampedSignatures">timestampedSignatures (required).</param>
+        public ConsensusLedgerProofOriginAllOf(string opaqueHash = default(string), List<TimestampedValidatorSignature> timestampedSignatures = default(List<TimestampedValidatorSignature>))
         {
-            this.Epoch = epoch;
-            // to ensure "validators" is required (not null)
-            if (validators == null)
+            // to ensure "opaqueHash" is required (not null)
+            if (opaqueHash == null)
             {
-                throw new ArgumentNullException("validators is a required property for NextEpoch and cannot be null");
+                throw new ArgumentNullException("opaqueHash is a required property for ConsensusLedgerProofOriginAllOf and cannot be null");
             }
-            this.Validators = validators;
-            this.SignificantProtocolUpdateReadiness = significantProtocolUpdateReadiness;
+            this.OpaqueHash = opaqueHash;
+            // to ensure "timestampedSignatures" is required (not null)
+            if (timestampedSignatures == null)
+            {
+                throw new ArgumentNullException("timestampedSignatures is a required property for ConsensusLedgerProofOriginAllOf and cannot be null");
+            }
+            this.TimestampedSignatures = timestampedSignatures;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch
+        /// A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger.
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
+        /// <value>A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger.</value>
+        [DataMember(Name = "opaque_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string OpaqueHash { get; set; }
 
         /// <summary>
-        /// Active validator set for the new epoch, ordered by stake descending.
+        /// Gets or Sets TimestampedSignatures
         /// </summary>
-        /// <value>Active validator set for the new epoch, ordered by stake descending.</value>
-        [DataMember(Name = "validators", IsRequired = true, EmitDefaultValue = true)]
-        public List<ActiveValidator> Validators { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SignificantProtocolUpdateReadiness
-        /// </summary>
-        [DataMember(Name = "significant_protocol_update_readiness", EmitDefaultValue = true)]
-        public List<SignificantProtocolUpdateReadinessEntry> SignificantProtocolUpdateReadiness { get; set; }
+        [DataMember(Name = "timestamped_signatures", IsRequired = true, EmitDefaultValue = true)]
+        public List<TimestampedValidatorSignature> TimestampedSignatures { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NextEpoch {\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
-            sb.Append("  Validators: ").Append(Validators).Append("\n");
-            sb.Append("  SignificantProtocolUpdateReadiness: ").Append(SignificantProtocolUpdateReadiness).Append("\n");
+            sb.Append("class ConsensusLedgerProofOriginAllOf {\n");
+            sb.Append("  OpaqueHash: ").Append(OpaqueHash).Append("\n");
+            sb.Append("  TimestampedSignatures: ").Append(TimestampedSignatures).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NextEpoch);
+            return this.Equals(input as ConsensusLedgerProofOriginAllOf);
         }
 
         /// <summary>
-        /// Returns true if NextEpoch instances are equal
+        /// Returns true if ConsensusLedgerProofOriginAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NextEpoch to be compared</param>
+        /// <param name="input">Instance of ConsensusLedgerProofOriginAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NextEpoch input)
+        public bool Equals(ConsensusLedgerProofOriginAllOf input)
         {
             if (input == null)
             {
@@ -185,20 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
+                    this.OpaqueHash == input.OpaqueHash ||
+                    (this.OpaqueHash != null &&
+                    this.OpaqueHash.Equals(input.OpaqueHash))
                 ) && 
                 (
-                    this.Validators == input.Validators ||
-                    this.Validators != null &&
-                    input.Validators != null &&
-                    this.Validators.SequenceEqual(input.Validators)
-                ) && 
-                (
-                    this.SignificantProtocolUpdateReadiness == input.SignificantProtocolUpdateReadiness ||
-                    this.SignificantProtocolUpdateReadiness != null &&
-                    input.SignificantProtocolUpdateReadiness != null &&
-                    this.SignificantProtocolUpdateReadiness.SequenceEqual(input.SignificantProtocolUpdateReadiness)
+                    this.TimestampedSignatures == input.TimestampedSignatures ||
+                    this.TimestampedSignatures != null &&
+                    input.TimestampedSignatures != null &&
+                    this.TimestampedSignatures.SequenceEqual(input.TimestampedSignatures)
                 );
         }
 
@@ -211,14 +201,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
-                if (this.Validators != null)
+                if (this.OpaqueHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.Validators.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OpaqueHash.GetHashCode();
                 }
-                if (this.SignificantProtocolUpdateReadiness != null)
+                if (this.TimestampedSignatures != null)
                 {
-                    hashCode = (hashCode * 59) + this.SignificantProtocolUpdateReadiness.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TimestampedSignatures.GetHashCode();
                 }
                 return hashCode;
             }

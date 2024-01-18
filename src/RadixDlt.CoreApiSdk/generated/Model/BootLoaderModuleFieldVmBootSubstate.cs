@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ValidatorFieldProtocolUpdateReadinessSignalSubstate
+    /// BootLoaderModuleFieldVmBootSubstate
     /// </summary>
-    [DataContract(Name = "ValidatorFieldProtocolUpdateReadinessSignalSubstate")]
+    [DataContract(Name = "BootLoaderModuleFieldVmBootSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorEntrySubstate), "AccountAuthorizedDepositorEntry")]
@@ -144,25 +144,25 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldProtocolUpdateReadinessSignalSubstate), "ValidatorFieldProtocolUpdateReadinessSignal")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
-    public partial class ValidatorFieldProtocolUpdateReadinessSignalSubstate : Substate, IEquatable<ValidatorFieldProtocolUpdateReadinessSignalSubstate>
+    public partial class BootLoaderModuleFieldVmBootSubstate : Substate, IEquatable<BootLoaderModuleFieldVmBootSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorFieldProtocolUpdateReadinessSignalSubstate" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldVmBootSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ValidatorFieldProtocolUpdateReadinessSignalSubstate() { }
+        protected BootLoaderModuleFieldVmBootSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorFieldProtocolUpdateReadinessSignalSubstate" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldVmBootSubstate" /> class.
         /// </summary>
         /// <param name="value">value (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ValidatorFieldProtocolUpdateReadinessSignal).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.BootLoaderModuleFieldVmBoot).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public ValidatorFieldProtocolUpdateReadinessSignalSubstate(ValidatorFieldProtocolUpdateReadinessSignalValue value = default(ValidatorFieldProtocolUpdateReadinessSignalValue), SubstateType substateType = SubstateType.ValidatorFieldProtocolUpdateReadinessSignal, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public BootLoaderModuleFieldVmBootSubstate(BootLoaderModuleFieldVmBootValue value = default(BootLoaderModuleFieldVmBootValue), SubstateType substateType = SubstateType.BootLoaderModuleFieldVmBoot, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "value" is required (not null)
             if (value == null)
             {
-                throw new ArgumentNullException("value is a required property for ValidatorFieldProtocolUpdateReadinessSignalSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for BootLoaderModuleFieldVmBootSubstate and cannot be null");
             }
             this.Value = value;
         }
@@ -171,7 +171,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Value
         /// </summary>
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public ValidatorFieldProtocolUpdateReadinessSignalValue Value { get; set; }
+        public BootLoaderModuleFieldVmBootValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ValidatorFieldProtocolUpdateReadinessSignalSubstate {\n");
+            sb.Append("class BootLoaderModuleFieldVmBootSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
@@ -203,15 +203,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ValidatorFieldProtocolUpdateReadinessSignalSubstate);
+            return this.Equals(input as BootLoaderModuleFieldVmBootSubstate);
         }
 
         /// <summary>
-        /// Returns true if ValidatorFieldProtocolUpdateReadinessSignalSubstate instances are equal
+        /// Returns true if BootLoaderModuleFieldVmBootSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of ValidatorFieldProtocolUpdateReadinessSignalSubstate to be compared</param>
+        /// <param name="input">Instance of BootLoaderModuleFieldVmBootSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ValidatorFieldProtocolUpdateReadinessSignalSubstate input)
+        public bool Equals(BootLoaderModuleFieldVmBootSubstate input)
         {
             if (input == null)
             {

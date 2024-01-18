@@ -91,87 +91,48 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ValidatorFieldProtocolUpdateReadinessSignalSubstate
+    /// ProtocolUpdateLedgerProofOrigin
     /// </summary>
-    [DataContract(Name = "ValidatorFieldProtocolUpdateReadinessSignalSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorEntrySubstate), "AccountAuthorizedDepositorEntry")]
-    [JsonSubtypes.KnownSubType(typeof(AccountFieldStateSubstate), "AccountFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccountResourcePreferenceEntrySubstate), "AccountResourcePreferenceEntry")]
-    [JsonSubtypes.KnownSubType(typeof(AccountVaultEntrySubstate), "AccountVaultEntry")]
-    [JsonSubtypes.KnownSubType(typeof(BootLoaderModuleFieldVmBootSubstate), "BootLoaderModuleFieldVmBoot")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldValidatorRewardsSubstate), "ConsensusManagerFieldValidatorRewards")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldDivisibilitySubstate), "FungibleResourceManagerFieldDivisibility")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldTotalSupplySubstate), "FungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldBalanceSubstate), "FungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldFrozenStatusSubstate), "FungibleVaultFieldFrozenStatus")]
-    [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolFieldStateSubstate), "MultiResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldFrozenStatusSubstate), "NonFungibleVaultFieldFrozenStatus")]
-    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolFieldStateSubstate), "OneResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintAuthTemplateEntrySubstate), "PackageBlueprintAuthTemplateEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(RoleAssignmentModuleFieldOwnerRoleSubstate), "RoleAssignmentModuleFieldOwnerRole")]
-    [JsonSubtypes.KnownSubType(typeof(RoleAssignmentModuleRuleEntrySubstate), "RoleAssignmentModuleRuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(SchemaEntrySubstate), "SchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldProtocolUpdateReadinessSignalSubstate), "ValidatorFieldProtocolUpdateReadinessSignal")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
-    public partial class ValidatorFieldProtocolUpdateReadinessSignalSubstate : Substate, IEquatable<ValidatorFieldProtocolUpdateReadinessSignalSubstate>
+    [DataContract(Name = "ProtocolUpdateLedgerProofOrigin")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusLedgerProofOrigin), "Consensus")]
+    [JsonSubtypes.KnownSubType(typeof(GenesisLedgerProofOrigin), "Genesis")]
+    [JsonSubtypes.KnownSubType(typeof(ProtocolUpdateLedgerProofOrigin), "ProtocolUpdate")]
+    public partial class ProtocolUpdateLedgerProofOrigin : LedgerProofOrigin, IEquatable<ProtocolUpdateLedgerProofOrigin>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorFieldProtocolUpdateReadinessSignalSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ProtocolUpdateLedgerProofOrigin" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ValidatorFieldProtocolUpdateReadinessSignalSubstate() { }
+        protected ProtocolUpdateLedgerProofOrigin() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorFieldProtocolUpdateReadinessSignalSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ProtocolUpdateLedgerProofOrigin" /> class.
         /// </summary>
-        /// <param name="value">value (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ValidatorFieldProtocolUpdateReadinessSignal).</param>
-        /// <param name="isLocked">isLocked (required).</param>
-        public ValidatorFieldProtocolUpdateReadinessSignalSubstate(ValidatorFieldProtocolUpdateReadinessSignalValue value = default(ValidatorFieldProtocolUpdateReadinessSignalValue), SubstateType substateType = SubstateType.ValidatorFieldProtocolUpdateReadinessSignal, bool isLocked = default(bool)) : base(substateType, isLocked)
+        /// <param name="protocolVersionName">protocolVersionName (required).</param>
+        /// <param name="batchIdx">batchIdx (required).</param>
+        /// <param name="type">type (required) (default to LedgerProofOriginType.ProtocolUpdate).</param>
+        public ProtocolUpdateLedgerProofOrigin(string protocolVersionName = default(string), long batchIdx = default(long), LedgerProofOriginType type = LedgerProofOriginType.ProtocolUpdate) : base(type)
         {
-            // to ensure "value" is required (not null)
-            if (value == null)
+            // to ensure "protocolVersionName" is required (not null)
+            if (protocolVersionName == null)
             {
-                throw new ArgumentNullException("value is a required property for ValidatorFieldProtocolUpdateReadinessSignalSubstate and cannot be null");
+                throw new ArgumentNullException("protocolVersionName is a required property for ProtocolUpdateLedgerProofOrigin and cannot be null");
             }
-            this.Value = value;
+            this.ProtocolVersionName = protocolVersionName;
+            this.BatchIdx = batchIdx;
         }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// Gets or Sets ProtocolVersionName
         /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public ValidatorFieldProtocolUpdateReadinessSignalValue Value { get; set; }
+        [DataMember(Name = "protocol_version_name", IsRequired = true, EmitDefaultValue = true)]
+        public string ProtocolVersionName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BatchIdx
+        /// </summary>
+        [DataMember(Name = "batch_idx", IsRequired = true, EmitDefaultValue = true)]
+        public long BatchIdx { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,9 +141,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ValidatorFieldProtocolUpdateReadinessSignalSubstate {\n");
+            sb.Append("class ProtocolUpdateLedgerProofOrigin {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("  ProtocolVersionName: ").Append(ProtocolVersionName).Append("\n");
+            sb.Append("  BatchIdx: ").Append(BatchIdx).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -203,15 +165,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ValidatorFieldProtocolUpdateReadinessSignalSubstate);
+            return this.Equals(input as ProtocolUpdateLedgerProofOrigin);
         }
 
         /// <summary>
-        /// Returns true if ValidatorFieldProtocolUpdateReadinessSignalSubstate instances are equal
+        /// Returns true if ProtocolUpdateLedgerProofOrigin instances are equal
         /// </summary>
-        /// <param name="input">Instance of ValidatorFieldProtocolUpdateReadinessSignalSubstate to be compared</param>
+        /// <param name="input">Instance of ProtocolUpdateLedgerProofOrigin to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ValidatorFieldProtocolUpdateReadinessSignalSubstate input)
+        public bool Equals(ProtocolUpdateLedgerProofOrigin input)
         {
             if (input == null)
             {
@@ -219,9 +181,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.ProtocolVersionName == input.ProtocolVersionName ||
+                    (this.ProtocolVersionName != null &&
+                    this.ProtocolVersionName.Equals(input.ProtocolVersionName))
+                ) && base.Equals(input) && 
+                (
+                    this.BatchIdx == input.BatchIdx ||
+                    this.BatchIdx.Equals(input.BatchIdx)
                 );
         }
 
@@ -234,10 +200,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Value != null)
+                if (this.ProtocolVersionName != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ProtocolVersionName.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.BatchIdx.GetHashCode();
                 return hashCode;
             }
         }

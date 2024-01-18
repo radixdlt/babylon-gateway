@@ -91,87 +91,54 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ValidatorFieldProtocolUpdateReadinessSignalSubstate
+    /// ConsensusLedgerProofOrigin
     /// </summary>
-    [DataContract(Name = "ValidatorFieldProtocolUpdateReadinessSignalSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorEntrySubstate), "AccountAuthorizedDepositorEntry")]
-    [JsonSubtypes.KnownSubType(typeof(AccountFieldStateSubstate), "AccountFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccountResourcePreferenceEntrySubstate), "AccountResourcePreferenceEntry")]
-    [JsonSubtypes.KnownSubType(typeof(AccountVaultEntrySubstate), "AccountVaultEntry")]
-    [JsonSubtypes.KnownSubType(typeof(BootLoaderModuleFieldVmBootSubstate), "BootLoaderModuleFieldVmBoot")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldValidatorRewardsSubstate), "ConsensusManagerFieldValidatorRewards")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldDivisibilitySubstate), "FungibleResourceManagerFieldDivisibility")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldTotalSupplySubstate), "FungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldBalanceSubstate), "FungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldFrozenStatusSubstate), "FungibleVaultFieldFrozenStatus")]
-    [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolFieldStateSubstate), "MultiResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldFrozenStatusSubstate), "NonFungibleVaultFieldFrozenStatus")]
-    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolFieldStateSubstate), "OneResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintAuthTemplateEntrySubstate), "PackageBlueprintAuthTemplateEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(RoleAssignmentModuleFieldOwnerRoleSubstate), "RoleAssignmentModuleFieldOwnerRole")]
-    [JsonSubtypes.KnownSubType(typeof(RoleAssignmentModuleRuleEntrySubstate), "RoleAssignmentModuleRuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(SchemaEntrySubstate), "SchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldProtocolUpdateReadinessSignalSubstate), "ValidatorFieldProtocolUpdateReadinessSignal")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
-    public partial class ValidatorFieldProtocolUpdateReadinessSignalSubstate : Substate, IEquatable<ValidatorFieldProtocolUpdateReadinessSignalSubstate>
+    [DataContract(Name = "ConsensusLedgerProofOrigin")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusLedgerProofOrigin), "Consensus")]
+    [JsonSubtypes.KnownSubType(typeof(GenesisLedgerProofOrigin), "Genesis")]
+    [JsonSubtypes.KnownSubType(typeof(ProtocolUpdateLedgerProofOrigin), "ProtocolUpdate")]
+    public partial class ConsensusLedgerProofOrigin : LedgerProofOrigin, IEquatable<ConsensusLedgerProofOrigin>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorFieldProtocolUpdateReadinessSignalSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ConsensusLedgerProofOrigin" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ValidatorFieldProtocolUpdateReadinessSignalSubstate() { }
+        protected ConsensusLedgerProofOrigin() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorFieldProtocolUpdateReadinessSignalSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ConsensusLedgerProofOrigin" /> class.
         /// </summary>
-        /// <param name="value">value (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ValidatorFieldProtocolUpdateReadinessSignal).</param>
-        /// <param name="isLocked">isLocked (required).</param>
-        public ValidatorFieldProtocolUpdateReadinessSignalSubstate(ValidatorFieldProtocolUpdateReadinessSignalValue value = default(ValidatorFieldProtocolUpdateReadinessSignalValue), SubstateType substateType = SubstateType.ValidatorFieldProtocolUpdateReadinessSignal, bool isLocked = default(bool)) : base(substateType, isLocked)
+        /// <param name="opaqueHash">A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger. (required).</param>
+        /// <param name="timestampedSignatures">timestampedSignatures (required).</param>
+        /// <param name="type">type (required) (default to LedgerProofOriginType.Consensus).</param>
+        public ConsensusLedgerProofOrigin(string opaqueHash = default(string), List<TimestampedValidatorSignature> timestampedSignatures = default(List<TimestampedValidatorSignature>), LedgerProofOriginType type = LedgerProofOriginType.Consensus) : base(type)
         {
-            // to ensure "value" is required (not null)
-            if (value == null)
+            // to ensure "opaqueHash" is required (not null)
+            if (opaqueHash == null)
             {
-                throw new ArgumentNullException("value is a required property for ValidatorFieldProtocolUpdateReadinessSignalSubstate and cannot be null");
+                throw new ArgumentNullException("opaqueHash is a required property for ConsensusLedgerProofOrigin and cannot be null");
             }
-            this.Value = value;
+            this.OpaqueHash = opaqueHash;
+            // to ensure "timestampedSignatures" is required (not null)
+            if (timestampedSignatures == null)
+            {
+                throw new ArgumentNullException("timestampedSignatures is a required property for ConsensusLedgerProofOrigin and cannot be null");
+            }
+            this.TimestampedSignatures = timestampedSignatures;
         }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger.
         /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public ValidatorFieldProtocolUpdateReadinessSignalValue Value { get; set; }
+        /// <value>A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger.</value>
+        [DataMember(Name = "opaque_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string OpaqueHash { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TimestampedSignatures
+        /// </summary>
+        [DataMember(Name = "timestamped_signatures", IsRequired = true, EmitDefaultValue = true)]
+        public List<TimestampedValidatorSignature> TimestampedSignatures { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,9 +147,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ValidatorFieldProtocolUpdateReadinessSignalSubstate {\n");
+            sb.Append("class ConsensusLedgerProofOrigin {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("  OpaqueHash: ").Append(OpaqueHash).Append("\n");
+            sb.Append("  TimestampedSignatures: ").Append(TimestampedSignatures).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -203,15 +171,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ValidatorFieldProtocolUpdateReadinessSignalSubstate);
+            return this.Equals(input as ConsensusLedgerProofOrigin);
         }
 
         /// <summary>
-        /// Returns true if ValidatorFieldProtocolUpdateReadinessSignalSubstate instances are equal
+        /// Returns true if ConsensusLedgerProofOrigin instances are equal
         /// </summary>
-        /// <param name="input">Instance of ValidatorFieldProtocolUpdateReadinessSignalSubstate to be compared</param>
+        /// <param name="input">Instance of ConsensusLedgerProofOrigin to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ValidatorFieldProtocolUpdateReadinessSignalSubstate input)
+        public bool Equals(ConsensusLedgerProofOrigin input)
         {
             if (input == null)
             {
@@ -219,9 +187,15 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.OpaqueHash == input.OpaqueHash ||
+                    (this.OpaqueHash != null &&
+                    this.OpaqueHash.Equals(input.OpaqueHash))
+                ) && base.Equals(input) && 
+                (
+                    this.TimestampedSignatures == input.TimestampedSignatures ||
+                    this.TimestampedSignatures != null &&
+                    input.TimestampedSignatures != null &&
+                    this.TimestampedSignatures.SequenceEqual(input.TimestampedSignatures)
                 );
         }
 
@@ -234,9 +208,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Value != null)
+                if (this.OpaqueHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OpaqueHash.GetHashCode();
+                }
+                if (this.TimestampedSignatures != null)
+                {
+                    hashCode = (hashCode * 59) + this.TimestampedSignatures.GetHashCode();
                 }
                 return hashCode;
             }

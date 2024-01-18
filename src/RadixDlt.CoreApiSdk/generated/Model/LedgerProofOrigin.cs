@@ -84,59 +84,44 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NextEpoch
+    /// LedgerProofOrigin
     /// </summary>
-    [DataContract(Name = "NextEpoch")]
-    public partial class NextEpoch : IEquatable<NextEpoch>
+    [DataContract(Name = "LedgerProofOrigin")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusLedgerProofOrigin), "Consensus")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusLedgerProofOrigin), "ConsensusLedgerProofOrigin")]
+    [JsonSubtypes.KnownSubType(typeof(GenesisLedgerProofOrigin), "Genesis")]
+    [JsonSubtypes.KnownSubType(typeof(GenesisLedgerProofOrigin), "GenesisLedgerProofOrigin")]
+    [JsonSubtypes.KnownSubType(typeof(ProtocolUpdateLedgerProofOrigin), "ProtocolUpdate")]
+    [JsonSubtypes.KnownSubType(typeof(ProtocolUpdateLedgerProofOrigin), "ProtocolUpdateLedgerProofOrigin")]
+    public partial class LedgerProofOrigin : IEquatable<LedgerProofOrigin>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="NextEpoch" /> class.
+        /// Gets or Sets Type
+        /// </summary>
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerProofOriginType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LedgerProofOrigin" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NextEpoch() { }
+        protected LedgerProofOrigin() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NextEpoch" /> class.
+        /// Initializes a new instance of the <see cref="LedgerProofOrigin" /> class.
         /// </summary>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch (required).</param>
-        /// <param name="validators">Active validator set for the new epoch, ordered by stake descending. (required).</param>
-        /// <param name="significantProtocolUpdateReadiness">significantProtocolUpdateReadiness.</param>
-        public NextEpoch(long epoch = default(long), List<ActiveValidator> validators = default(List<ActiveValidator>), List<SignificantProtocolUpdateReadinessEntry> significantProtocolUpdateReadiness = default(List<SignificantProtocolUpdateReadinessEntry>))
+        /// <param name="type">type (required).</param>
+        public LedgerProofOrigin(LedgerProofOriginType type = default(LedgerProofOriginType))
         {
-            this.Epoch = epoch;
-            // to ensure "validators" is required (not null)
-            if (validators == null)
-            {
-                throw new ArgumentNullException("validators is a required property for NextEpoch and cannot be null");
-            }
-            this.Validators = validators;
-            this.SignificantProtocolUpdateReadiness = significantProtocolUpdateReadiness;
+            this.Type = type;
         }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
-
-        /// <summary>
-        /// Active validator set for the new epoch, ordered by stake descending.
-        /// </summary>
-        /// <value>Active validator set for the new epoch, ordered by stake descending.</value>
-        [DataMember(Name = "validators", IsRequired = true, EmitDefaultValue = true)]
-        public List<ActiveValidator> Validators { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SignificantProtocolUpdateReadiness
-        /// </summary>
-        [DataMember(Name = "significant_protocol_update_readiness", EmitDefaultValue = true)]
-        public List<SignificantProtocolUpdateReadinessEntry> SignificantProtocolUpdateReadiness { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +130,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NextEpoch {\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
-            sb.Append("  Validators: ").Append(Validators).Append("\n");
-            sb.Append("  SignificantProtocolUpdateReadiness: ").Append(SignificantProtocolUpdateReadiness).Append("\n");
+            sb.Append("class LedgerProofOrigin {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +152,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NextEpoch);
+            return this.Equals(input as LedgerProofOrigin);
         }
 
         /// <summary>
-        /// Returns true if NextEpoch instances are equal
+        /// Returns true if LedgerProofOrigin instances are equal
         /// </summary>
-        /// <param name="input">Instance of NextEpoch to be compared</param>
+        /// <param name="input">Instance of LedgerProofOrigin to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NextEpoch input)
+        public bool Equals(LedgerProofOrigin input)
         {
             if (input == null)
             {
@@ -185,20 +168,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
-                ) && 
-                (
-                    this.Validators == input.Validators ||
-                    this.Validators != null &&
-                    input.Validators != null &&
-                    this.Validators.SequenceEqual(input.Validators)
-                ) && 
-                (
-                    this.SignificantProtocolUpdateReadiness == input.SignificantProtocolUpdateReadiness ||
-                    this.SignificantProtocolUpdateReadiness != null &&
-                    input.SignificantProtocolUpdateReadiness != null &&
-                    this.SignificantProtocolUpdateReadiness.SequenceEqual(input.SignificantProtocolUpdateReadiness)
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 );
         }
 
@@ -211,15 +182,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
-                if (this.Validators != null)
-                {
-                    hashCode = (hashCode * 59) + this.Validators.GetHashCode();
-                }
-                if (this.SignificantProtocolUpdateReadiness != null)
-                {
-                    hashCode = (hashCode * 59) + this.SignificantProtocolUpdateReadiness.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }
