@@ -129,7 +129,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum Schema for value: Schema
         /// </summary>
         [EnumMember(Value = "Schema")]
-        Schema = 6
+        Schema = 6,
+
+        /// <summary>
+        /// Enum BootLoader for value: BootLoader
+        /// </summary>
+        [EnumMember(Value = "BootLoader")]
+        BootLoader = 7
 
     }
 

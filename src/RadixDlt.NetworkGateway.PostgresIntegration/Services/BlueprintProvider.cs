@@ -102,11 +102,34 @@ internal class BlueprintProvider : IBlueprintProvider
         var result = await _dbContext
             .PackageBlueprintHistory
             .FromSqlInterpolated($@"
-WITH variables (blueprint_name, blueprint_version, package_entity_id) AS (SELECT UNNEST({blueprintNames}), UNNEST({blueprintVersions}), UNNEST({packageEntityIds}))
+WITH variables (blueprint_name, blueprint_version, package_entity_id) AS
+(
+    SELECT
+        UNNEST({blueprintNames}),
+        UNNEST({blueprintVersions}),
+        UNNEST({packageEntityIds})
+),
+most_recent_package_blueprint_aggregates AS
+(
+     SELECT
+         package_blueprint_ids,
+         var.blueprint_name,
+         var.blueprint_version
+     FROM variables var
+     INNER JOIN LATERAL (
+         SELECT *
+         FROM package_blueprint_aggregate_history
+         WHERE from_state_version <= {ledgerState.StateVersion} AND package_entity_id = var.package_entity_id
+         ORDER BY from_state_version DESC
+         LIMIT 1
+      ) pbah ON TRUE
+)
 SELECT pbh.*
-FROM variables v
-INNER JOIN package_blueprint_history pbh
-ON pbh.name = v.blueprint_name AND pbh.version = v.blueprint_version and pbh.package_entity_id = v.package_entity_id
+FROM most_recent_package_blueprint_aggregates mrpb
+         INNER JOIN package_blueprint_history pbh
+         ON pbh.id = ANY (mrpb.package_blueprint_ids)
+            AND pbh.name = mrpb.blueprint_name
+            AND pbh.version = mrpb.blueprint_version
 WHERE from_state_version <= {ledgerState.StateVersion}
 ")
             .AnnotateMetricName()

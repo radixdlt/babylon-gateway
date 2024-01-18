@@ -62,26 +62,120 @@
  * permissions under this License.
  */
 
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 
 #nullable disable
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFlashTransactionType : Migration
+    public partial class SupportProtocolUpdate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Support flash transaction type.
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash")
                 .OldAnnotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update");
+
+            // Store package vm type on package_code_history
+            migrationBuilder.AddColumn<PackageVmType>(
+                name: "vm_type",
+                table: "package_code_history",
+                type: "package_vm_type",
+                nullable: false,
+                defaultValue: PackageVmType.Native);
+
+            migrationBuilder.Sql("update package_code_history pch set vm_type = (select vm_type from entities e where e.id = pch.package_entity_id)");
+
+            migrationBuilder.AlterColumn<PackageVmType>(
+                name: "vm_type",
+                table: "package_code_history",
+                oldDefaultValue: PackageVmType.Native,
+                defaultValue: null);
+
+            migrationBuilder.DropColumn(
+                name: "vm_type",
+                table: "entities");
+
+            // Create aggregate for package blueprint.
+            migrationBuilder.CreateTable(
+                name: "package_blueprint_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    package_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    package_blueprint_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_package_blueprint_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_package_blueprint_aggregate_history_package_entity_id_from_~",
+                table: "package_blueprint_aggregate_history",
+                columns: new[] { "package_entity_id", "from_state_version" });
+
+            migrationBuilder.Sql(@"
+     INSERT INTO package_blueprint_aggregate_history (from_state_version, package_entity_id, package_blueprint_ids)
+     SELECT MIN(from_state_version) from_state_version, package_entity_id, array_agg(id order by id asc) package_blueprint_ids
+     FROM package_blueprint_history
+     GROUP BY package_entity_id");
+
+            // Create aggregate for package code.
+            migrationBuilder.CreateTable(
+                name: "package_code_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    package_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    package_code_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_package_code_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_package_code_aggregate_history_package_entity_id_from_state~",
+                table: "package_code_aggregate_history",
+                columns: new[] { "package_entity_id", "from_state_version" });
+
+            migrationBuilder.Sql(@"
+INSERT INTO package_code_aggregate_history (from_state_version, package_entity_id, package_code_ids)
+SELECT MIN(from_state_version) from_state_version, package_entity_id, array_agg(id order by id asc) package_code_ids
+FROM package_code_history
+GROUP BY package_entity_id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "package_blueprint_aggregate_history");
+
+            migrationBuilder.DropTable(
+                name: "package_code_aggregate_history");
+
+            migrationBuilder.DropColumn(
+                name: "vm_type",
+                table: "package_code_history");
+
+            migrationBuilder.AddColumn<PackageVmType>(
+                name: "vm_type",
+                table: "entities",
+                type: "package_vm_type",
+                nullable: true);
+
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
                 .OldAnnotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash");

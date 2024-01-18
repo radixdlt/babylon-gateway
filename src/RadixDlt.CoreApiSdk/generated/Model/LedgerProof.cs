@@ -103,37 +103,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="LedgerProof" /> class.
         /// </summary>
-        /// <param name="opaqueHash">A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger. (required).</param>
         /// <param name="ledgerHeader">ledgerHeader (required).</param>
-        /// <param name="timestampedSignatures">timestampedSignatures (required).</param>
-        public LedgerProof(string opaqueHash = default(string), LedgerHeader ledgerHeader = default(LedgerHeader), List<TimestampedValidatorSignature> timestampedSignatures = default(List<TimestampedValidatorSignature>))
+        /// <param name="origin">origin (required).</param>
+        public LedgerProof(LedgerHeader ledgerHeader = default(LedgerHeader), LedgerProofOrigin origin = default(LedgerProofOrigin))
         {
-            // to ensure "opaqueHash" is required (not null)
-            if (opaqueHash == null)
-            {
-                throw new ArgumentNullException("opaqueHash is a required property for LedgerProof and cannot be null");
-            }
-            this.OpaqueHash = opaqueHash;
             // to ensure "ledgerHeader" is required (not null)
             if (ledgerHeader == null)
             {
                 throw new ArgumentNullException("ledgerHeader is a required property for LedgerProof and cannot be null");
             }
             this.LedgerHeader = ledgerHeader;
-            // to ensure "timestampedSignatures" is required (not null)
-            if (timestampedSignatures == null)
+            // to ensure "origin" is required (not null)
+            if (origin == null)
             {
-                throw new ArgumentNullException("timestampedSignatures is a required property for LedgerProof and cannot be null");
+                throw new ArgumentNullException("origin is a required property for LedgerProof and cannot be null");
             }
-            this.TimestampedSignatures = timestampedSignatures;
+            this.Origin = origin;
         }
-
-        /// <summary>
-        /// A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger.
-        /// </summary>
-        /// <value>A hex-encoded 32-byte vertex VoteData hash on the consensus side, opaque to ledger.</value>
-        [DataMember(Name = "opaque_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string OpaqueHash { get; set; }
 
         /// <summary>
         /// Gets or Sets LedgerHeader
@@ -142,10 +128,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public LedgerHeader LedgerHeader { get; set; }
 
         /// <summary>
-        /// Gets or Sets TimestampedSignatures
+        /// Gets or Sets Origin
         /// </summary>
-        [DataMember(Name = "timestamped_signatures", IsRequired = true, EmitDefaultValue = true)]
-        public List<TimestampedValidatorSignature> TimestampedSignatures { get; set; }
+        [DataMember(Name = "origin", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerProofOrigin Origin { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,9 +141,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class LedgerProof {\n");
-            sb.Append("  OpaqueHash: ").Append(OpaqueHash).Append("\n");
             sb.Append("  LedgerHeader: ").Append(LedgerHeader).Append("\n");
-            sb.Append("  TimestampedSignatures: ").Append(TimestampedSignatures).Append("\n");
+            sb.Append("  Origin: ").Append(Origin).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -194,20 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.OpaqueHash == input.OpaqueHash ||
-                    (this.OpaqueHash != null &&
-                    this.OpaqueHash.Equals(input.OpaqueHash))
-                ) && 
-                (
                     this.LedgerHeader == input.LedgerHeader ||
                     (this.LedgerHeader != null &&
                     this.LedgerHeader.Equals(input.LedgerHeader))
                 ) && 
                 (
-                    this.TimestampedSignatures == input.TimestampedSignatures ||
-                    this.TimestampedSignatures != null &&
-                    input.TimestampedSignatures != null &&
-                    this.TimestampedSignatures.SequenceEqual(input.TimestampedSignatures)
+                    this.Origin == input.Origin ||
+                    (this.Origin != null &&
+                    this.Origin.Equals(input.Origin))
                 );
         }
 
@@ -220,17 +199,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.OpaqueHash != null)
-                {
-                    hashCode = (hashCode * 59) + this.OpaqueHash.GetHashCode();
-                }
                 if (this.LedgerHeader != null)
                 {
                     hashCode = (hashCode * 59) + this.LedgerHeader.GetHashCode();
                 }
-                if (this.TimestampedSignatures != null)
+                if (this.Origin != null)
                 {
-                    hashCode = (hashCode * 59) + this.TimestampedSignatures.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Origin.GetHashCode();
                 }
                 return hashCode;
             }

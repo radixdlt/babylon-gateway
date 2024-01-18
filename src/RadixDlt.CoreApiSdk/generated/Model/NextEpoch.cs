@@ -105,7 +105,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch (required).</param>
         /// <param name="validators">Active validator set for the new epoch, ordered by stake descending. (required).</param>
-        public NextEpoch(long epoch = default(long), List<ActiveValidator> validators = default(List<ActiveValidator>))
+        /// <param name="significantProtocolUpdateReadiness">significantProtocolUpdateReadiness.</param>
+        public NextEpoch(long epoch = default(long), List<ActiveValidator> validators = default(List<ActiveValidator>), List<SignificantProtocolUpdateReadinessEntry> significantProtocolUpdateReadiness = default(List<SignificantProtocolUpdateReadinessEntry>))
         {
             this.Epoch = epoch;
             // to ensure "validators" is required (not null)
@@ -114,6 +115,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("validators is a required property for NextEpoch and cannot be null");
             }
             this.Validators = validators;
+            this.SignificantProtocolUpdateReadiness = significantProtocolUpdateReadiness;
         }
 
         /// <summary>
@@ -131,6 +133,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<ActiveValidator> Validators { get; set; }
 
         /// <summary>
+        /// Gets or Sets SignificantProtocolUpdateReadiness
+        /// </summary>
+        [DataMember(Name = "significant_protocol_update_readiness", EmitDefaultValue = true)]
+        public List<SignificantProtocolUpdateReadinessEntry> SignificantProtocolUpdateReadiness { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -140,6 +148,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class NextEpoch {\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("  Validators: ").Append(Validators).Append("\n");
+            sb.Append("  SignificantProtocolUpdateReadiness: ").Append(SignificantProtocolUpdateReadiness).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,6 +193,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Validators != null &&
                     input.Validators != null &&
                     this.Validators.SequenceEqual(input.Validators)
+                ) && 
+                (
+                    this.SignificantProtocolUpdateReadiness == input.SignificantProtocolUpdateReadiness ||
+                    this.SignificantProtocolUpdateReadiness != null &&
+                    input.SignificantProtocolUpdateReadiness != null &&
+                    this.SignificantProtocolUpdateReadiness.SequenceEqual(input.SignificantProtocolUpdateReadiness)
                 );
         }
 
@@ -200,6 +215,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Validators != null)
                 {
                     hashCode = (hashCode * 59) + this.Validators.GetHashCode();
+                }
+                if (this.SignificantProtocolUpdateReadiness != null)
+                {
+                    hashCode = (hashCode * 59) + this.SignificantProtocolUpdateReadiness.GetHashCode();
                 }
                 return hashCode;
             }

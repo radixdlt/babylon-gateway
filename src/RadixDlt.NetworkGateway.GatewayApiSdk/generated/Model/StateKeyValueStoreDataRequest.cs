@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="keyValueStoreAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="keys">keys (required).</param>
+        /// <param name="keys">limited to max 100 items. (required).</param>
         public StateKeyValueStoreDataRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string keyValueStoreAddress = default(string), List<StateKeyValueStoreDataRequestKeyItem> keys = default(List<StateKeyValueStoreDataRequestKeyItem>))
         {
             // to ensure "keyValueStoreAddress" is required (not null)
@@ -137,8 +137,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string KeyValueStoreAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets Keys
+        /// limited to max 100 items.
         /// </summary>
+        /// <value>limited to max 100 items.</value>
         [DataMember(Name = "keys", IsRequired = true, EmitDefaultValue = true)]
         public List<StateKeyValueStoreDataRequestKeyItem> Keys { get; set; }
 

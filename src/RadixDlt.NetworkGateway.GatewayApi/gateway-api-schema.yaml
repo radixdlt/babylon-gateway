@@ -3104,20 +3104,31 @@ components:
               $ref: "#/components/schemas/Address"
             balance:
               $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
+
     StateEntityDetailsResponsePackageDetails:
+      description: "vm_type, code_hash_hex and code_hex are always going to be empty, use `codes` property which will return collection (it's possible after protocol update that package might have multiple codes)"
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
+            - codes
             - vm_type
             - code_hash_hex
             - code_hex
           properties:
+            codes:
+              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsCodeCollection"
             vm_type:
+              description: "Obsolete! Use codes collection"
+              deprecated: true
               $ref: "#/components/schemas/PackageVmType"
             code_hash_hex:
+              description: "Obsolete! Use codes collection"
+              deprecated: true
               $ref: "#/components/schemas/HexString"
             code_hex:
+              description: "Obsolete! Use codes collection"
+              deprecated: true
               $ref: "#/components/schemas/HexString"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
@@ -3125,6 +3136,30 @@ components:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
             schemas:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaCollection"
+    StateEntityDetailsResponsePackageDetailsCodeCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/PackageCodeCollectionItem"
+    PackageCodeCollectionItem:
+      type: object
+      required:
+        - vm_type
+        - code_hash_hex
+        - code_hex
+      properties:
+        vm_type:
+          $ref: "#/components/schemas/PackageVmType"
+        code_hash_hex:
+          $ref: "#/components/schemas/HexString"
+        code_hex:
+          $ref: "#/components/schemas/HexString"
     StateEntityDetailsResponsePackageDetailsBlueprintCollection:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"

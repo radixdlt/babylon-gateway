@@ -109,8 +109,6 @@ internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, T
 
 internal record struct MetadataLookup(long EntityId, string Key);
 
-internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string BlueprintVersion);
-
 internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
 
 internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
