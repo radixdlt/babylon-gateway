@@ -3120,12 +3120,15 @@ components:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsCodeCollection"
             vm_type:
               description: "Obsolete! Use codes collection"
+              deprecated: true
               $ref: "#/components/schemas/PackageVmType"
             code_hash_hex:
               description: "Obsolete! Use codes collection"
+              deprecated: true
               $ref: "#/components/schemas/HexString"
             code_hex:
               description: "Obsolete! Use codes collection"
+              deprecated: true
               $ref: "#/components/schemas/HexString"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
