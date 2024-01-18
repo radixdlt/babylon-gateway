@@ -109,7 +109,7 @@ internal class ReadHelper
 
         foreach (var change in packageBlueprintChanges)
         {
-            lookupSet.Add(new PackageBlueprintLookup(change.PackageEntityId, change.Name, change.Version));
+            lookupSet.Add(change.Lookup);
         }
 
         foreach (var lookup in lookupSet)
@@ -158,13 +158,13 @@ INNER JOIN LATERAL (
 
         foreach (var change in packageCodeChanges)
         {
-            lookupSet.Add(new PackageCodeLookup(change.PackageEntityId, change.CodeHash));
+            lookupSet.Add(change.Lookup);
         }
 
         foreach (var lookup in lookupSet)
         {
             entityIds.Add(lookup.PackageEntityId);
-            codeHashes.Add(lookup.CodeHex);
+            codeHashes.Add(lookup.CodeHash);
         }
 
         var result = await _dbContext
@@ -246,7 +246,7 @@ INNER JOIN LATERAL (
         }
 
         var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageCodeChanges.Select(x => x.PackageEntityId).Distinct().ToList();
+        var packageEntityIds = packageCodeChanges.Select(x => x.Lookup.PackageEntityId).Distinct().ToList();
 
         var result = await _dbContext
             .PackageCodeAggregateHistory
@@ -280,7 +280,7 @@ INNER JOIN LATERAL (
         }
 
         var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageBlueprintChanges.Select(x => x.PackageEntityId).Distinct().ToList();
+        var packageEntityIds = packageBlueprintChanges.Select(x => x.Lookup.PackageEntityId).Distinct().ToList();
 
         var result = await _dbContext
             .PackageBlueprintAggregateHistory

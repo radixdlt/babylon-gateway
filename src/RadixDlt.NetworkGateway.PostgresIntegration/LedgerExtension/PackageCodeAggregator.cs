@@ -71,11 +71,13 @@ using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal abstract record PackageCodeChange(long StateVersion, long PackageEntityId, byte[] CodeHash);
+internal record struct PackageCodeLookup(long PackageEntityId, ValueBytes CodeHash);
 
-internal record PackageCodeByteChange(long StateVersion, long PackageEntityId, byte[] CodeHash, byte[] Code) : PackageCodeChange(StateVersion, PackageEntityId, CodeHash);
+internal abstract record PackageCodeChange(long StateVersion, PackageCodeLookup Lookup);
 
-internal record PackageCodeVmChange(long StateVersion, long PackageEntityId, byte[] CodeHash, PackageVmType VmType) : PackageCodeChange(StateVersion, PackageEntityId, CodeHash);
+internal record PackageCodeByteChange(long StateVersion,  PackageCodeLookup Lookup, byte[] Code) : PackageCodeChange(StateVersion, Lookup);
+
+internal record PackageCodeVmChange(long StateVersion,  PackageCodeLookup Lookup, PackageVmType VmType) : PackageCodeChange(StateVersion, Lookup);
 
 internal static class PackageCodeAggregator
 {
@@ -88,7 +90,7 @@ internal static class PackageCodeAggregator
         var packageCodeHistoryToAdd = new List<PackageCodeHistory>();
         var packageCodeAggregateHistoryToAdd = new List<PackageCodeAggregateHistory>();
 
-        var packageGroups = packageCodeChanges.GroupBy(x => new { x.PackageEntityId, x.StateVersion });
+        var packageGroups = packageCodeChanges.GroupBy(x => new { x.Lookup.PackageEntityId, x.StateVersion });
 
         foreach (var packageGroup in packageGroups)
         {
@@ -119,7 +121,7 @@ internal static class PackageCodeAggregator
             }
 
             var packageCodeGroups = packageGroup
-                .GroupBy(x => new { x.PackageEntityId, CodeHash = (ValueBytes)x.CodeHash, x.StateVersion });
+                .GroupBy(x => new { x.Lookup.PackageEntityId, x.Lookup.CodeHash, x.StateVersion });
 
             foreach (var packageCodeGroup in packageCodeGroups)
             {
@@ -130,13 +132,13 @@ internal static class PackageCodeAggregator
 
                 if (existingPackageCode != null)
                 {
-                    var previousPackageBlueprintHistoryId = existingPackageCode.Id;
+                    var previousPackageCodeId = existingPackageCode.Id;
 
                     packageCodeHistory = existingPackageCode;
                     packageCodeHistory.Id = sequences.PackageCodeHistorySequence++;
                     packageCodeHistory.FromStateVersion = packageCodeGroup.Key.StateVersion;
 
-                    packageCodeAggregate.PackageCodeIds.Remove(previousPackageBlueprintHistoryId);
+                    packageCodeAggregate.PackageCodeIds.Remove(previousPackageCodeId);
                     packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
                 }
                 else
@@ -146,7 +148,7 @@ internal static class PackageCodeAggregator
                         Id = sequences.PackageCodeHistorySequence++,
                         PackageEntityId = packageEntityId,
                         FromStateVersion = stateVersion,
-                        CodeHash = lookup.CodeHex,
+                        CodeHash = lookup.CodeHash,
                     };
 
                     mostRecentPackageCodeHistory[lookup] = packageCodeHistory;

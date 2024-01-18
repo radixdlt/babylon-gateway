@@ -69,19 +69,21 @@ using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal abstract record PackageBlueprintChange(long StateVersion, long PackageEntityId, string Name, string Version);
+internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string Version);
 
-internal record PackageBlueprintDefinitionChange(long StateVersion, long PackageEntityId, string Name, string Version, string Definition)
-    : PackageBlueprintChange(StateVersion, PackageEntityId, Name, Version);
+internal abstract record PackageBlueprintChange(long StateVersion, PackageBlueprintLookup Lookup);
 
-internal record PackageBlueprintDependantEntityIdsChange(long StateVersion, long PackageEntityId, string Name, string Version, List<long>? DependantEntityIds = null)
-    : PackageBlueprintChange(StateVersion, PackageEntityId, Name, Version);
+internal record PackageBlueprintDefinitionChange(long StateVersion, PackageBlueprintLookup Lookup, string Definition)
+    : PackageBlueprintChange(StateVersion, Lookup);
 
-internal record PackageBlueprintAuthTemplateChange(long StateVersion, long PackageEntityId, string Name, string Version, string? AuthTemplate = null, bool? AuthTemplateIsLocked = null)
-    : PackageBlueprintChange(StateVersion, PackageEntityId, Name, Version);
+internal record PackageBlueprintDependantEntityIdsChange(long StateVersion, PackageBlueprintLookup Lookup, List<long>? DependantEntityIds = null)
+    : PackageBlueprintChange(StateVersion, Lookup);
 
-internal record PackageBlueprintRoyaltyConfigChange(long StateVersion, long PackageEntityId, string Name, string Version, string? RoyaltyConfig = null, bool? RoyaltyConfigIsLocked = null)
-    : PackageBlueprintChange(StateVersion, PackageEntityId, Name, Version);
+internal record PackageBlueprintAuthTemplateChange(long StateVersion, PackageBlueprintLookup Lookup, string? AuthTemplate = null, bool? AuthTemplateIsLocked = null)
+    : PackageBlueprintChange(StateVersion, Lookup);
+
+internal record PackageBlueprintRoyaltyConfigChange(long StateVersion, PackageBlueprintLookup Lookup, string? RoyaltyConfig = null, bool? RoyaltyConfigIsLocked = null)
+    : PackageBlueprintChange(StateVersion, Lookup);
 
 internal static class PackageBlueprintAggregator
 {
@@ -94,7 +96,7 @@ internal static class PackageBlueprintAggregator
         var packageBlueprintHistoryToAdd = new List<PackageBlueprintHistory>();
         var packageBlueprintAggregateHistoryToAdd = new List<PackageBlueprintAggregateHistory>();
 
-        var packageGroups = packageBlueprintChanges.GroupBy(x => new { x.PackageEntityId, x.StateVersion });
+        var packageGroups = packageBlueprintChanges.GroupBy(x => new { x.Lookup.PackageEntityId, x.StateVersion });
 
         foreach (var packageGroup in packageGroups)
         {
@@ -124,7 +126,7 @@ internal static class PackageBlueprintAggregator
             }
 
             var packageBlueprintGroups = packageGroup
-                .GroupBy(x => new { x.PackageEntityId, x.Name, x.Version, x.StateVersion });
+                .GroupBy(x => new { x.Lookup.PackageEntityId, x.Lookup.Name, x.Lookup.Version, x.StateVersion });
 
             foreach (var packageBlueprintGroup in packageBlueprintGroups)
             {

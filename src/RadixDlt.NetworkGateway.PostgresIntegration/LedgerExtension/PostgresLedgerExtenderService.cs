@@ -957,36 +957,35 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
                         {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion);
+
                             packageBlueprintChanges.Add(
                                 new PackageBlueprintDefinitionChange(
                                     stateVersion,
-                                    referencedEntity.DatabaseId,
-                                    packageBlueprintDefinition.Key.BlueprintName,
-                                    packageBlueprintDefinition.Key.BlueprintVersion,
+                                    lookup,
                                     packageBlueprintDefinition.Value.Definition.ToJson()
                                 ));
                         }
 
                         if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate packageBlueprintDependencies)
                         {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
                             packageBlueprintChanges.Add(
                                 new PackageBlueprintDependantEntityIdsChange(
                                     stateVersion,
-                                    referencedEntity.DatabaseId,
-                                    packageBlueprintDependencies.Key.BlueprintName,
-                                    packageBlueprintDependencies.Key.BlueprintVersion,
+                                    lookup,
                                     packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList()
                                 ));
                         }
 
                         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
                         {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion);
+
                             packageBlueprintChanges.Add(
                                 new PackageBlueprintRoyaltyConfigChange(
                                     stateVersion,
-                                    referencedEntity.DatabaseId,
-                                    packageBlueprintRoyalty.Key.BlueprintName,
-                                    packageBlueprintRoyalty.Key.BlueprintVersion,
+                                    lookup,
                                     packageBlueprintRoyalty.Value.RoyaltyConfig.ToJson(),
                                     packageBlueprintRoyalty.IsLocked
                                 ));
@@ -994,12 +993,12 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate packageBlueprintAuthTemplate)
                         {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion);
+
                             packageBlueprintChanges.Add(
                                 new PackageBlueprintAuthTemplateChange(
                                     stateVersion,
-                                    referencedEntity.DatabaseId,
-                                    packageBlueprintAuthTemplate.Key.BlueprintName,
-                                    packageBlueprintAuthTemplate.Key.BlueprintVersion,
+                                    lookup,
                                     packageBlueprintAuthTemplate.Value.AuthConfig.ToJson(),
                                     packageBlueprintAuthTemplate.IsLocked
                                 ));
@@ -1007,20 +1006,22 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
                         {
+                            var lookup = new PackageCodeLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeOriginalCode.Key.CodeHash.ConvertFromHex());
+
                             packageCodeChanges.Add(new PackageCodeByteChange(
                                 stateVersion,
-                                referencedEntity.DatabaseId,
-                                packageCodeOriginalCode.Key.CodeHash.ConvertFromHex(),
+                                lookup,
                                 packageCodeOriginalCode.Value.CodeHex.ConvertFromHex()
                             ));
                         }
 
                         if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
                         {
+                            var lookup = new PackageCodeLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeVmType.Key.CodeHash.ConvertFromHex());
+
                             packageCodeChanges.Add(new PackageCodeVmChange(
                                 stateVersion,
-                                referencedEntity.DatabaseId,
-                                packageCodeVmType.Key.CodeHash.ConvertFromHex(),
+                                lookup,
                                 packageCodeVmType.Value.VmType.ToModel()
                             ));
                         }

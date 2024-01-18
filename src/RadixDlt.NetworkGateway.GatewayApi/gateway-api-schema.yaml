@@ -3111,7 +3111,7 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - code_items
+            - codes
             - vm_type
             - code_hash_hex
             - code_hex

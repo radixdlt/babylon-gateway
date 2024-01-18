@@ -117,7 +117,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetails" /> class.
         /// </summary>
-        /// <param name="codes">codes.</param>
+        /// <param name="codes">codes (required).</param>
         /// <param name="vmType">vmType (required).</param>
         /// <param name="codeHashHex">Hex-encoded binary blob. (required).</param>
         /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
@@ -127,6 +127,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Package).</param>
         public StateEntityDetailsResponsePackageDetails(StateEntityDetailsResponsePackageDetailsCodeCollection codes = default(StateEntityDetailsResponsePackageDetailsCodeCollection), PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
         {
+            // to ensure "codes" is required (not null)
+            if (codes == null)
+            {
+                throw new ArgumentNullException("codes is a required property for StateEntityDetailsResponsePackageDetails and cannot be null");
+            }
+            this.Codes = codes;
             this.VmType = vmType;
             // to ensure "codeHashHex" is required (not null)
             if (codeHashHex == null)
@@ -140,7 +146,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("codeHex is a required property for StateEntityDetailsResponsePackageDetails and cannot be null");
             }
             this.CodeHex = codeHex;
-            this.Codes = codes;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
             this.Blueprints = blueprints;
             this.Schemas = schemas;
@@ -149,7 +154,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets Codes
         /// </summary>
-        [DataMember(Name = "codes", EmitDefaultValue = true)]
+        [DataMember(Name = "codes", IsRequired = true, EmitDefaultValue = true)]
         public StateEntityDetailsResponsePackageDetailsCodeCollection Codes { get; set; }
 
         /// <summary>
