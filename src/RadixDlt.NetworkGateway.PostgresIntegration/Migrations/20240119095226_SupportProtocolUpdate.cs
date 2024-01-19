@@ -90,12 +90,25 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 nullable: false,
                 defaultValue: PackageVmType.Native);
 
+            migrationBuilder.AddColumn<bool>(
+                name: "is_deleted",
+                table: "package_code_history",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.Sql("update package_code_history pch set vm_type = (select vm_type from entities e where e.id = pch.package_entity_id)");
 
             migrationBuilder.AlterColumn<PackageVmType>(
                 name: "vm_type",
                 table: "package_code_history",
                 oldDefaultValue: PackageVmType.Native,
+                defaultValue: null);
+
+            migrationBuilder.AlterColumn<bool>(
+                name: "is_deleted",
+                table: "package_code_history",
+                oldDefaultValue: false,
                 defaultValue: null);
 
             migrationBuilder.DropColumn(
@@ -167,18 +180,22 @@ GROUP BY package_entity_id");
                 name: "package_code_aggregate_history");
 
             migrationBuilder.DropColumn(
+                name: "is_deleted",
+                table: "package_code_history");
+
+            migrationBuilder.DropColumn(
                 name: "vm_type",
                 table: "package_code_history");
+
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
+                .OldAnnotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash");
 
             migrationBuilder.AddColumn<PackageVmType>(
                 name: "vm_type",
                 table: "entities",
                 type: "package_vm_type",
                 nullable: true);
-
-            migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
-                .OldAnnotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash");
         }
     }
 }

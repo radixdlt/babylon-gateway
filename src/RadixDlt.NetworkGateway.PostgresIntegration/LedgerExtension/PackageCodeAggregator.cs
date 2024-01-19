@@ -66,6 +66,7 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
+using System.Diagnostics;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
@@ -77,6 +78,10 @@ internal record PackageCodeChange(long StateVersion)
     public CoreModel.PackageCodeOriginalCodeEntrySubstate? PackageCodeOriginalCode { get; set; }
 
     public CoreModel.PackageCodeVmTypeEntrySubstate? PackageCodeVmType { get; set; }
+
+    public bool CodeVmTypeIsDeleted { get; set; }
+
+    public bool PackageCodeIsDeleted { get; set; }
 }
 
 internal static class PackageCodeAggregator
@@ -144,17 +149,30 @@ internal static class PackageCodeAggregator
 
                 mostRecentPackageCodeHistory[change.Key] = packageCodeHistory;
 
-                packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
-            }
+                var isDeleted = change.Value.PackageCodeIsDeleted && change.Value.CodeVmTypeIsDeleted;
+                if (isDeleted)
+                {
+                    packageCodeHistory.IsDeleted = true;
+                }
+                else if (change.Value.PackageCodeIsDeleted != change.Value.CodeVmTypeIsDeleted)
+                {
+                    throw new UnreachableException(
+                        $"Unexpected situation where PackageCode was deleted but VmType wasn't. PackageId: {change.Key.PackageEntityId}, CodeHashHex: {change.Key.CodeHash.ToHex()}, StateVersion: {change.Value.StateVersion}");
+                }
+                else
+                {
+                    packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
 
-            if (change.Value.PackageCodeVmType != null)
-            {
-                packageCodeHistory.VmType = change.Value.PackageCodeVmType.Value.VmType.ToModel();
-            }
+                    if (change.Value.PackageCodeVmType != null)
+                    {
+                        packageCodeHistory.VmType = change.Value.PackageCodeVmType.Value.VmType.ToModel();
+                    }
 
-            if (change.Value.PackageCodeOriginalCode != null)
-            {
-                packageCodeHistory.Code = change.Value.PackageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
+                    if (change.Value.PackageCodeOriginalCode != null)
+                    {
+                        packageCodeHistory.Code = change.Value.PackageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
+                    }
+                }
             }
 
             packageCodeHistoryToAdd.Add(packageCodeHistory);

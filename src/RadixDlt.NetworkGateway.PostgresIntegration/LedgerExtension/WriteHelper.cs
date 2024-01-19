@@ -1123,7 +1123,7 @@ internal class WriteHelper
 
         var sw = Stopwatch.GetTimestamp();
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_code_history (id, from_state_version, package_entity_id, code_hash, code, vm_type) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_code_history (id, from_state_version, package_entity_id, code_hash, code, vm_type, is_deleted) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -1134,6 +1134,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.CodeHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.Code, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.VmType, "package_vm_type", token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
         }
 
         await writer.CompleteAsync(token);

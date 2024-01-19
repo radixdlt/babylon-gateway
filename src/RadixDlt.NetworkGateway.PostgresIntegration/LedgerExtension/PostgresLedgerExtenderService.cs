@@ -805,7 +805,7 @@ UPDATE pending_transactions
                             var resourceManagerEntityId = substateId.EntityAddress;
                             var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
 
-                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
+                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex);
 
                             nonFungibleIdChanges.Add(new NonFungibleIdChange(
                                 resourceManagerEntity,
@@ -1144,9 +1144,35 @@ UPDATE pending_transactions
                         if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
                             var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
-                            var simpleRep = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
+                            var simpleRep = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex);
 
                             vaultSnapshots.Add(new NonFungibleVaultSnapshot(referencedEntity, resourceEntity, simpleRep, true, stateVersion));
+                        }
+
+                        if (substateId.SubstateType == CoreModel.SubstateType.PackageCodeVmTypeEntry)
+                        {
+                            var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
+                            var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkConfigurationProvider.GetNetworkId());
+
+                            packageCodeChanges
+                                .GetOrAdd(
+                                    new PackageCodeLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()),
+                                    _ => new PackageCodeChange(stateVersion)
+                                )
+                                .CodeVmTypeIsDeleted = true;
+                        }
+
+                        if (substateId.SubstateType == CoreModel.SubstateType.PackageCodeOriginalCodeEntry)
+                        {
+                            var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
+                            var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkConfigurationProvider.GetNetworkId());
+
+                            packageCodeChanges
+                                .GetOrAdd(
+                                    new PackageCodeLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()),
+                                    _ => new PackageCodeChange(stateVersion)
+                                )
+                                .PackageCodeIsDeleted = true;
                         }
                     }
 
