@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240118114735_SupportProtocolUpdate")]
+    [Migration("20240119095226_SupportProtocolUpdate")]
     partial class SupportProtocolUpdate
     {
         /// <inheritdoc />
@@ -1258,6 +1258,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("FromStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<long>("PackageEntityId")
                         .HasColumnType("bigint")

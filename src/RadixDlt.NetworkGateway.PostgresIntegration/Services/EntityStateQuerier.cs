@@ -238,10 +238,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     if (packageCodeHistory.TryGetValue(pe.Id, out var packageCodes))
                     {
                         codeItems.AddRange(packageCodes.Select(pb => new GatewayModel.PackageCodeCollectionItem(
-                            vmType: pb.VmType.ToGatewayModel(),
-                            codeHashHex: pb.CodeHash.ToHex(),
-                            codeHex: pb.Code.ToHex()
-                        )));
+                                vmType: pb.VmType.ToGatewayModel(),
+                                codeHashHex: pb.CodeHash.ToHex(),
+                                codeHex: pb.Code.ToHex()
+                            )));
                     }
 
                     if (packageSchemaHistory.TryGetValue(pe.Id, out var packageSchemas))

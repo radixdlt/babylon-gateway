@@ -1256,6 +1256,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
                     b.Property<long>("PackageEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("package_entity_id");

@@ -109,24 +109,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FlashLedgerTransaction" /> class.
         /// </summary>
-        /// <param name="flashTransaction">flashTransaction (required).</param>
+        /// <param name="flashedStateUpdates">flashedStateUpdates (required).</param>
         /// <param name="type">type (required) (default to LedgerTransactionType.Flash).</param>
         /// <param name="payloadHex">The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request..</param>
-        public FlashLedgerTransaction(FlashTransaction flashTransaction = default(FlashTransaction), LedgerTransactionType type = LedgerTransactionType.Flash, string payloadHex = default(string)) : base(type, payloadHex)
+        public FlashLedgerTransaction(FlashedStateUpdates flashedStateUpdates = default(FlashedStateUpdates), LedgerTransactionType type = LedgerTransactionType.Flash, string payloadHex = default(string)) : base(type, payloadHex)
         {
-            // to ensure "flashTransaction" is required (not null)
-            if (flashTransaction == null)
+            // to ensure "flashedStateUpdates" is required (not null)
+            if (flashedStateUpdates == null)
             {
-                throw new ArgumentNullException("flashTransaction is a required property for FlashLedgerTransaction and cannot be null");
+                throw new ArgumentNullException("flashedStateUpdates is a required property for FlashLedgerTransaction and cannot be null");
             }
-            this.FlashTransaction = flashTransaction;
+            this.FlashedStateUpdates = flashedStateUpdates;
         }
 
         /// <summary>
-        /// Gets or Sets FlashTransaction
+        /// Gets or Sets FlashedStateUpdates
         /// </summary>
-        [DataMember(Name = "flash_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public FlashTransaction FlashTransaction { get; set; }
+        [DataMember(Name = "flashed_state_updates", IsRequired = true, EmitDefaultValue = true)]
+        public FlashedStateUpdates FlashedStateUpdates { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class FlashLedgerTransaction {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  FlashTransaction: ").Append(FlashTransaction).Append("\n");
+            sb.Append("  FlashedStateUpdates: ").Append(FlashedStateUpdates).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,9 +174,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.FlashTransaction == input.FlashTransaction ||
-                    (this.FlashTransaction != null &&
-                    this.FlashTransaction.Equals(input.FlashTransaction))
+                    this.FlashedStateUpdates == input.FlashedStateUpdates ||
+                    (this.FlashedStateUpdates != null &&
+                    this.FlashedStateUpdates.Equals(input.FlashedStateUpdates))
                 );
         }
 
@@ -189,9 +189,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.FlashTransaction != null)
+                if (this.FlashedStateUpdates != null)
                 {
-                    hashCode = (hashCode * 59) + this.FlashTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FlashedStateUpdates.GetHashCode();
                 }
                 return hashCode;
             }

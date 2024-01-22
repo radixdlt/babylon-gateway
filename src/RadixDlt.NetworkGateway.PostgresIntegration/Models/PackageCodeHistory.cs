@@ -89,4 +89,7 @@ internal class PackageCodeHistory
 
     [Column("vm_type")]
     public PackageVmType VmType { get; set; }
+
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
 }

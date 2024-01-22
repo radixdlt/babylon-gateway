@@ -90,71 +90,61 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// FlashedSubstate
+    /// Direct state updates performed by a Flash Transaction.
     /// </summary>
-    [DataContract(Name = "FlashedSubstate")]
-    public partial class FlashedSubstate : IEquatable<FlashedSubstate>
+    [DataContract(Name = "FlashedStateUpdates")]
+    public partial class FlashedStateUpdates : IEquatable<FlashedStateUpdates>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FlashedSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FlashedStateUpdates" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FlashedSubstate() { }
+        protected FlashedStateUpdates() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FlashedSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FlashedStateUpdates" /> class.
         /// </summary>
-        /// <param name="entityAddress">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id) (required).</param>
-        /// <param name="partitionNumber">partitionNumber (required).</param>
-        /// <param name="substateKey">substateKey (required).</param>
-        /// <param name="value">The hex-encoded, SBOR-encoded substate data bytes. (required).</param>
-        public FlashedSubstate(string entityAddress = default(string), int partitionNumber = default(int), SubstateKey substateKey = default(SubstateKey), string value = default(string))
+        /// <param name="deletedPartitions">deletedPartitions (required).</param>
+        /// <param name="setSubstates">setSubstates (required).</param>
+        /// <param name="deletedSubstates">deletedSubstates (required).</param>
+        public FlashedStateUpdates(List<PartitionId> deletedPartitions = default(List<PartitionId>), List<FlashSetSubstate> setSubstates = default(List<FlashSetSubstate>), List<SubstateId> deletedSubstates = default(List<SubstateId>))
         {
-            // to ensure "entityAddress" is required (not null)
-            if (entityAddress == null)
+            // to ensure "deletedPartitions" is required (not null)
+            if (deletedPartitions == null)
             {
-                throw new ArgumentNullException("entityAddress is a required property for FlashedSubstate and cannot be null");
+                throw new ArgumentNullException("deletedPartitions is a required property for FlashedStateUpdates and cannot be null");
             }
-            this.EntityAddress = entityAddress;
-            this.PartitionNumber = partitionNumber;
-            // to ensure "substateKey" is required (not null)
-            if (substateKey == null)
+            this.DeletedPartitions = deletedPartitions;
+            // to ensure "setSubstates" is required (not null)
+            if (setSubstates == null)
             {
-                throw new ArgumentNullException("substateKey is a required property for FlashedSubstate and cannot be null");
+                throw new ArgumentNullException("setSubstates is a required property for FlashedStateUpdates and cannot be null");
             }
-            this.SubstateKey = substateKey;
-            // to ensure "value" is required (not null)
-            if (value == null)
+            this.SetSubstates = setSubstates;
+            // to ensure "deletedSubstates" is required (not null)
+            if (deletedSubstates == null)
             {
-                throw new ArgumentNullException("value is a required property for FlashedSubstate and cannot be null");
+                throw new ArgumentNullException("deletedSubstates is a required property for FlashedStateUpdates and cannot be null");
             }
-            this.Value = value;
+            this.DeletedSubstates = deletedSubstates;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
+        /// Gets or Sets DeletedPartitions
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
-        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityAddress { get; set; }
+        [DataMember(Name = "deleted_partitions", IsRequired = true, EmitDefaultValue = true)]
+        public List<PartitionId> DeletedPartitions { get; set; }
 
         /// <summary>
-        /// Gets or Sets PartitionNumber
+        /// Gets or Sets SetSubstates
         /// </summary>
-        [DataMember(Name = "partition_number", IsRequired = true, EmitDefaultValue = true)]
-        public int PartitionNumber { get; set; }
+        [DataMember(Name = "set_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<FlashSetSubstate> SetSubstates { get; set; }
 
         /// <summary>
-        /// Gets or Sets SubstateKey
+        /// Gets or Sets DeletedSubstates
         /// </summary>
-        [DataMember(Name = "substate_key", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateKey SubstateKey { get; set; }
-
-        /// <summary>
-        /// The hex-encoded, SBOR-encoded substate data bytes.
-        /// </summary>
-        /// <value>The hex-encoded, SBOR-encoded substate data bytes.</value>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public string Value { get; set; }
+        [DataMember(Name = "deleted_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<SubstateId> DeletedSubstates { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -163,11 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FlashedSubstate {\n");
-            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
-            sb.Append("  PartitionNumber: ").Append(PartitionNumber).Append("\n");
-            sb.Append("  SubstateKey: ").Append(SubstateKey).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("class FlashedStateUpdates {\n");
+            sb.Append("  DeletedPartitions: ").Append(DeletedPartitions).Append("\n");
+            sb.Append("  SetSubstates: ").Append(SetSubstates).Append("\n");
+            sb.Append("  DeletedSubstates: ").Append(DeletedSubstates).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,15 +177,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FlashedSubstate);
+            return this.Equals(input as FlashedStateUpdates);
         }
 
         /// <summary>
-        /// Returns true if FlashedSubstate instances are equal
+        /// Returns true if FlashedStateUpdates instances are equal
         /// </summary>
-        /// <param name="input">Instance of FlashedSubstate to be compared</param>
+        /// <param name="input">Instance of FlashedStateUpdates to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FlashedSubstate input)
+        public bool Equals(FlashedStateUpdates input)
         {
             if (input == null)
             {
@@ -204,23 +193,22 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityAddress == input.EntityAddress ||
-                    (this.EntityAddress != null &&
-                    this.EntityAddress.Equals(input.EntityAddress))
+                    this.DeletedPartitions == input.DeletedPartitions ||
+                    this.DeletedPartitions != null &&
+                    input.DeletedPartitions != null &&
+                    this.DeletedPartitions.SequenceEqual(input.DeletedPartitions)
                 ) && 
                 (
-                    this.PartitionNumber == input.PartitionNumber ||
-                    this.PartitionNumber.Equals(input.PartitionNumber)
+                    this.SetSubstates == input.SetSubstates ||
+                    this.SetSubstates != null &&
+                    input.SetSubstates != null &&
+                    this.SetSubstates.SequenceEqual(input.SetSubstates)
                 ) && 
                 (
-                    this.SubstateKey == input.SubstateKey ||
-                    (this.SubstateKey != null &&
-                    this.SubstateKey.Equals(input.SubstateKey))
-                ) && 
-                (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.DeletedSubstates == input.DeletedSubstates ||
+                    this.DeletedSubstates != null &&
+                    input.DeletedSubstates != null &&
+                    this.DeletedSubstates.SequenceEqual(input.DeletedSubstates)
                 );
         }
 
@@ -233,18 +221,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.EntityAddress != null)
+                if (this.DeletedPartitions != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DeletedPartitions.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.PartitionNumber.GetHashCode();
-                if (this.SubstateKey != null)
+                if (this.SetSubstates != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateKey.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SetSubstates.GetHashCode();
                 }
-                if (this.Value != null)
+                if (this.DeletedSubstates != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DeletedSubstates.GetHashCode();
                 }
                 return hashCode;
             }
