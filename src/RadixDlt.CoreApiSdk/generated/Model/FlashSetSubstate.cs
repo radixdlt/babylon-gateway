@@ -90,35 +90,48 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// FlashTransaction
+    /// FlashSetSubstate
     /// </summary>
-    [DataContract(Name = "FlashTransaction")]
-    public partial class FlashTransaction : IEquatable<FlashTransaction>
+    [DataContract(Name = "FlashSetSubstate")]
+    public partial class FlashSetSubstate : IEquatable<FlashSetSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FlashTransaction" /> class.
+        /// Initializes a new instance of the <see cref="FlashSetSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FlashTransaction() { }
+        protected FlashSetSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FlashTransaction" /> class.
+        /// Initializes a new instance of the <see cref="FlashSetSubstate" /> class.
         /// </summary>
-        /// <param name="flashedSubstates">flashedSubstates (required).</param>
-        public FlashTransaction(List<FlashedSubstate> flashedSubstates = default(List<FlashedSubstate>))
+        /// <param name="substateId">substateId (required).</param>
+        /// <param name="value">value (required).</param>
+        public FlashSetSubstate(SubstateId substateId = default(SubstateId), SubstateValue value = default(SubstateValue))
         {
-            // to ensure "flashedSubstates" is required (not null)
-            if (flashedSubstates == null)
+            // to ensure "substateId" is required (not null)
+            if (substateId == null)
             {
-                throw new ArgumentNullException("flashedSubstates is a required property for FlashTransaction and cannot be null");
+                throw new ArgumentNullException("substateId is a required property for FlashSetSubstate and cannot be null");
             }
-            this.FlashedSubstates = flashedSubstates;
+            this.SubstateId = substateId;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for FlashSetSubstate and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets FlashedSubstates
+        /// Gets or Sets SubstateId
         /// </summary>
-        [DataMember(Name = "flashed_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<FlashedSubstate> FlashedSubstates { get; set; }
+        [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateId SubstateId { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +140,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FlashTransaction {\n");
-            sb.Append("  FlashedSubstates: ").Append(FlashedSubstates).Append("\n");
+            sb.Append("class FlashSetSubstate {\n");
+            sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +163,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FlashTransaction);
+            return this.Equals(input as FlashSetSubstate);
         }
 
         /// <summary>
-        /// Returns true if FlashTransaction instances are equal
+        /// Returns true if FlashSetSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of FlashTransaction to be compared</param>
+        /// <param name="input">Instance of FlashSetSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FlashTransaction input)
+        public bool Equals(FlashSetSubstate input)
         {
             if (input == null)
             {
@@ -165,10 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.FlashedSubstates == input.FlashedSubstates ||
-                    this.FlashedSubstates != null &&
-                    input.FlashedSubstates != null &&
-                    this.FlashedSubstates.SequenceEqual(input.FlashedSubstates)
+                    this.SubstateId == input.SubstateId ||
+                    (this.SubstateId != null &&
+                    this.SubstateId.Equals(input.SubstateId))
+                ) && 
+                (
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -181,9 +199,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.FlashedSubstates != null)
+                if (this.SubstateId != null)
                 {
-                    hashCode = (hashCode * 59) + this.FlashedSubstates.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
+                }
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

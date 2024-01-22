@@ -135,7 +135,6 @@ internal static class PackageCodeAggregator
                 packageCodeHistory.FromStateVersion = change.Value.StateVersion;
 
                 packageCodeAggregate.PackageCodeIds.Remove(previousPackageCodeId);
-                packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
             }
             else
             {
@@ -148,30 +147,30 @@ internal static class PackageCodeAggregator
                 };
 
                 mostRecentPackageCodeHistory[change.Key] = packageCodeHistory;
+            }
 
-                var isDeleted = change.Value.PackageCodeIsDeleted && change.Value.CodeVmTypeIsDeleted;
-                if (isDeleted)
+            var isDeleted = change.Value.PackageCodeIsDeleted && change.Value.CodeVmTypeIsDeleted;
+            if (isDeleted)
+            {
+                packageCodeHistory.IsDeleted = true;
+            }
+            else if (change.Value.PackageCodeIsDeleted != change.Value.CodeVmTypeIsDeleted)
+            {
+                throw new UnreachableException(
+                    $"Unexpected situation where PackageCode was deleted but VmType wasn't. PackageId: {change.Key.PackageEntityId}, CodeHashHex: {change.Key.CodeHash.ToHex()}, StateVersion: {change.Value.StateVersion}");
+            }
+            else
+            {
+                packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
+
+                if (change.Value.PackageCodeVmType != null)
                 {
-                    packageCodeHistory.IsDeleted = true;
+                    packageCodeHistory.VmType = change.Value.PackageCodeVmType.Value.VmType.ToModel();
                 }
-                else if (change.Value.PackageCodeIsDeleted != change.Value.CodeVmTypeIsDeleted)
-                {
-                    throw new UnreachableException(
-                        $"Unexpected situation where PackageCode was deleted but VmType wasn't. PackageId: {change.Key.PackageEntityId}, CodeHashHex: {change.Key.CodeHash.ToHex()}, StateVersion: {change.Value.StateVersion}");
-                }
-                else
-                {
-                    packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
 
-                    if (change.Value.PackageCodeVmType != null)
-                    {
-                        packageCodeHistory.VmType = change.Value.PackageCodeVmType.Value.VmType.ToModel();
-                    }
-
-                    if (change.Value.PackageCodeOriginalCode != null)
-                    {
-                        packageCodeHistory.Code = change.Value.PackageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
-                    }
+                if (change.Value.PackageCodeOriginalCode != null)
+                {
+                    packageCodeHistory.Code = change.Value.PackageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
                 }
             }
 
