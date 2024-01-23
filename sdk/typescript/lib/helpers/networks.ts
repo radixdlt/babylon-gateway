@@ -50,6 +50,12 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
     gatewayUrl: 'https://rcnet.radixdlt.com',
     dashboardUrl: 'https://rcnet-dashboard.radixdlt.com',
   },
+  Mardunet: {
+    networkName: 'Mardunet',
+    networkId: RadixNetwork.Mardunet,
+    gatewayUrl: 'https://mardunet-gateway.radixdlt.com',
+    dashboardUrl: 'https://mardunet-dashboard.rdx-works-main.extratools.works',
+  },
   Zabanet: {
     networkName: 'Zabanet',
     networkId: RadixNetwork.Zabanet,
@@ -66,7 +72,7 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
     networkName: 'Gilganet',
     networkId: RadixNetwork.Gilganet,
     gatewayUrl: 'https://gilganet-gateway.radixdlt.com',
-    dashboardUrl: '',
+    dashboardUrl: 'https://gilganet-dashboard.rdx-works-main.extratools.works',
   },
   Enkinet: {
     networkName: 'Enkinet',
