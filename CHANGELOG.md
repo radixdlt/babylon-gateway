@@ -5,6 +5,10 @@ Release Date: _unreleased_
 - Dropped `balance_changes` fallback mechanism.
 - Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
 
+### Breaking Changes
+
+- Renamed well-known network configuration address property `access_rules_package` to `role_assignment_module_package`.
+
 ## 1.3.0
 Release Date: _unreleased_
 

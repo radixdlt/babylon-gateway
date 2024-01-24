@@ -2374,7 +2374,7 @@ components:
             - transaction_processor_package
             - metadata_module_package
             - royalty_module_package
-            - access_rules_package
+            - role_assignment_module_package
             - genesis_helper_package
             - faucet_package
             - consensus_manager
@@ -2420,7 +2420,7 @@ components:
               $ref: "#/components/schemas/Address"
             royalty_module_package:
               $ref: "#/components/schemas/Address"
-            access_rules_package:
+            role_assignment_module_package:
               $ref: "#/components/schemas/Address"
             genesis_helper_package:
               $ref: "#/components/schemas/Address"
