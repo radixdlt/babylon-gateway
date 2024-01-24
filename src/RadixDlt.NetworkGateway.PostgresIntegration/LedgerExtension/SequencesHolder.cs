@@ -123,4 +123,8 @@ internal class SequencesHolder
     public long NonFungibleSchemaHistorySequence { get; set; }
 
     public long KeyValueSchemaHistorySequence { get; set; }
+
+    public long PackageBlueprintAggregateHistorySequence { get; set; }
+
+    public long PackageCodeAggregateHistorySequence { get; set; }
 }

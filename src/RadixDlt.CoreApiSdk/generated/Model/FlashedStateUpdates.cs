@@ -90,35 +90,61 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// FlashTransaction
+    /// Direct state updates performed by a Flash Transaction.
     /// </summary>
-    [DataContract(Name = "FlashTransaction")]
-    public partial class FlashTransaction : IEquatable<FlashTransaction>
+    [DataContract(Name = "FlashedStateUpdates")]
+    public partial class FlashedStateUpdates : IEquatable<FlashedStateUpdates>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FlashTransaction" /> class.
+        /// Initializes a new instance of the <see cref="FlashedStateUpdates" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FlashTransaction() { }
+        protected FlashedStateUpdates() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FlashTransaction" /> class.
+        /// Initializes a new instance of the <see cref="FlashedStateUpdates" /> class.
         /// </summary>
-        /// <param name="flashedSubstates">flashedSubstates (required).</param>
-        public FlashTransaction(List<FlashedSubstate> flashedSubstates = default(List<FlashedSubstate>))
+        /// <param name="deletedPartitions">deletedPartitions (required).</param>
+        /// <param name="setSubstates">setSubstates (required).</param>
+        /// <param name="deletedSubstates">deletedSubstates (required).</param>
+        public FlashedStateUpdates(List<PartitionId> deletedPartitions = default(List<PartitionId>), List<FlashSetSubstate> setSubstates = default(List<FlashSetSubstate>), List<SubstateId> deletedSubstates = default(List<SubstateId>))
         {
-            // to ensure "flashedSubstates" is required (not null)
-            if (flashedSubstates == null)
+            // to ensure "deletedPartitions" is required (not null)
+            if (deletedPartitions == null)
             {
-                throw new ArgumentNullException("flashedSubstates is a required property for FlashTransaction and cannot be null");
+                throw new ArgumentNullException("deletedPartitions is a required property for FlashedStateUpdates and cannot be null");
             }
-            this.FlashedSubstates = flashedSubstates;
+            this.DeletedPartitions = deletedPartitions;
+            // to ensure "setSubstates" is required (not null)
+            if (setSubstates == null)
+            {
+                throw new ArgumentNullException("setSubstates is a required property for FlashedStateUpdates and cannot be null");
+            }
+            this.SetSubstates = setSubstates;
+            // to ensure "deletedSubstates" is required (not null)
+            if (deletedSubstates == null)
+            {
+                throw new ArgumentNullException("deletedSubstates is a required property for FlashedStateUpdates and cannot be null");
+            }
+            this.DeletedSubstates = deletedSubstates;
         }
 
         /// <summary>
-        /// Gets or Sets FlashedSubstates
+        /// Gets or Sets DeletedPartitions
         /// </summary>
-        [DataMember(Name = "flashed_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<FlashedSubstate> FlashedSubstates { get; set; }
+        [DataMember(Name = "deleted_partitions", IsRequired = true, EmitDefaultValue = true)]
+        public List<PartitionId> DeletedPartitions { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SetSubstates
+        /// </summary>
+        [DataMember(Name = "set_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<FlashSetSubstate> SetSubstates { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DeletedSubstates
+        /// </summary>
+        [DataMember(Name = "deleted_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<SubstateId> DeletedSubstates { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FlashTransaction {\n");
-            sb.Append("  FlashedSubstates: ").Append(FlashedSubstates).Append("\n");
+            sb.Append("class FlashedStateUpdates {\n");
+            sb.Append("  DeletedPartitions: ").Append(DeletedPartitions).Append("\n");
+            sb.Append("  SetSubstates: ").Append(SetSubstates).Append("\n");
+            sb.Append("  DeletedSubstates: ").Append(DeletedSubstates).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +177,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FlashTransaction);
+            return this.Equals(input as FlashedStateUpdates);
         }
 
         /// <summary>
-        /// Returns true if FlashTransaction instances are equal
+        /// Returns true if FlashedStateUpdates instances are equal
         /// </summary>
-        /// <param name="input">Instance of FlashTransaction to be compared</param>
+        /// <param name="input">Instance of FlashedStateUpdates to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FlashTransaction input)
+        public bool Equals(FlashedStateUpdates input)
         {
             if (input == null)
             {
@@ -165,10 +193,22 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.FlashedSubstates == input.FlashedSubstates ||
-                    this.FlashedSubstates != null &&
-                    input.FlashedSubstates != null &&
-                    this.FlashedSubstates.SequenceEqual(input.FlashedSubstates)
+                    this.DeletedPartitions == input.DeletedPartitions ||
+                    this.DeletedPartitions != null &&
+                    input.DeletedPartitions != null &&
+                    this.DeletedPartitions.SequenceEqual(input.DeletedPartitions)
+                ) && 
+                (
+                    this.SetSubstates == input.SetSubstates ||
+                    this.SetSubstates != null &&
+                    input.SetSubstates != null &&
+                    this.SetSubstates.SequenceEqual(input.SetSubstates)
+                ) && 
+                (
+                    this.DeletedSubstates == input.DeletedSubstates ||
+                    this.DeletedSubstates != null &&
+                    input.DeletedSubstates != null &&
+                    this.DeletedSubstates.SequenceEqual(input.DeletedSubstates)
                 );
         }
 
@@ -181,9 +221,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.FlashedSubstates != null)
+                if (this.DeletedPartitions != null)
                 {
-                    hashCode = (hashCode * 59) + this.FlashedSubstates.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DeletedPartitions.GetHashCode();
+                }
+                if (this.SetSubstates != null)
+                {
+                    hashCode = (hashCode * 59) + this.SetSubstates.GetHashCode();
+                }
+                if (this.DeletedSubstates != null)
+                {
+                    hashCode = (hashCode * 59) + this.DeletedSubstates.GetHashCode();
                 }
                 return hashCode;
             }

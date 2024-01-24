@@ -5,13 +5,18 @@ Release Date: _unreleased_
 - Dropped `balance_changes` fallback mechanism.
 - Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
 
-## 1.2.5
+## 1.3.0
 Release Date: _unreleased_
 
-- add support for new transaction types (flash transactions) that are gonna occur on protocol update.
+- Added support for new transaction types (flash transactions) that are gonna occur on protocol updates.
+- Moved vm_type to `package_code_history` table from package in `entity` table.
+- `vm_type`, `code_hash_hex` and `code_hex` are returned as collection (it's allowed after protocol update to have multiple codes per package). Previous properties will return empty strings to keep contract compatibility.
+- Created new `package_blueprint_aggregate_history` table which will hold pointers to all package blueprints.
+- Created new `package_code_aggregate_history` table which will hold pointers to all package codes. 
 
 ## 1.2.4
 Release Date: 4.01.2024
+
 - Extended validator's data returned from `/state/validators/list`: added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
 - Enable retries on transient database connectivity issues in gateway api.
 - Enable retries on core api calls in gateway api.

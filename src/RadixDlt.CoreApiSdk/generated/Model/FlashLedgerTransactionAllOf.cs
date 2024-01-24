@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FlashLedgerTransactionAllOf" /> class.
         /// </summary>
-        /// <param name="flashTransaction">flashTransaction (required).</param>
-        public FlashLedgerTransactionAllOf(FlashTransaction flashTransaction = default(FlashTransaction))
+        /// <param name="flashedStateUpdates">flashedStateUpdates (required).</param>
+        public FlashLedgerTransactionAllOf(FlashedStateUpdates flashedStateUpdates = default(FlashedStateUpdates))
         {
-            // to ensure "flashTransaction" is required (not null)
-            if (flashTransaction == null)
+            // to ensure "flashedStateUpdates" is required (not null)
+            if (flashedStateUpdates == null)
             {
-                throw new ArgumentNullException("flashTransaction is a required property for FlashLedgerTransactionAllOf and cannot be null");
+                throw new ArgumentNullException("flashedStateUpdates is a required property for FlashLedgerTransactionAllOf and cannot be null");
             }
-            this.FlashTransaction = flashTransaction;
+            this.FlashedStateUpdates = flashedStateUpdates;
         }
 
         /// <summary>
-        /// Gets or Sets FlashTransaction
+        /// Gets or Sets FlashedStateUpdates
         /// </summary>
-        [DataMember(Name = "flash_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public FlashTransaction FlashTransaction { get; set; }
+        [DataMember(Name = "flashed_state_updates", IsRequired = true, EmitDefaultValue = true)]
+        public FlashedStateUpdates FlashedStateUpdates { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class FlashLedgerTransactionAllOf {\n");
-            sb.Append("  FlashTransaction: ").Append(FlashTransaction).Append("\n");
+            sb.Append("  FlashedStateUpdates: ").Append(FlashedStateUpdates).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.FlashTransaction == input.FlashTransaction ||
-                    (this.FlashTransaction != null &&
-                    this.FlashTransaction.Equals(input.FlashTransaction))
+                    this.FlashedStateUpdates == input.FlashedStateUpdates ||
+                    (this.FlashedStateUpdates != null &&
+                    this.FlashedStateUpdates.Equals(input.FlashedStateUpdates))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.FlashTransaction != null)
+                if (this.FlashedStateUpdates != null)
                 {
-                    hashCode = (hashCode * 59) + this.FlashTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FlashedStateUpdates.GetHashCode();
                 }
                 return hashCode;
             }

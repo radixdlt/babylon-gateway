@@ -109,6 +109,13 @@ internal static class ScryptoSborUtils
         return JsonConvert.DeserializeObject<GatewayModel.ProgrammaticScryptoSborValue>(json) ?? throw new ArgumentException("Invalid input Scrypto SBOR");
     }
 
+    public static GatewayModel.ProgrammaticScryptoSborValueBytes DataToProgrammaticScryptoSborValueBytes(byte[] rawScryptoSbor, byte networkId)
+    {
+        var json = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(rawScryptoSbor, ToolkitModel.SerializationMode.Programmatic, networkId, null);
+
+        return JsonConvert.DeserializeObject<GatewayModel.ProgrammaticScryptoSborValueBytes>(json) ?? throw new ArgumentException("Invalid input Scrypto SBOR");
+    }
+
     public static GatewayModel.MetadataTypedValue DecodeToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)
     {
         using var metadataValue = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborDecode(rawScryptoSbor, networkId);

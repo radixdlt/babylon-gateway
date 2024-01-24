@@ -217,9 +217,9 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
                 case GlobalPackageEntity pe:
                     var packageRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == pe.Id)?.Balance;
-                    var codeHistory = packageCodeHistory[pe.Id];
                     var blueprints = new List<GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem>();
                     var schemas = new List<GatewayModel.StateEntityDetailsResponsePackageDetailsSchemaItem>();
+                    var codeItems = new List<GatewayModel.PackageCodeCollectionItem>();
 
                     if (packageBlueprintHistory.TryGetValue(pe.Id, out var packageBlueprints))
                     {
@@ -231,7 +231,17 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                             authTemplate: pb.AuthTemplate != null ? new JRaw(pb.AuthTemplate) : null,
                             authTemplateIsLocked: pb.AuthTemplateIsLocked,
                             royaltyConfig: pb.RoyaltyConfig != null ? new JRaw(pb.RoyaltyConfig) : null,
-                            royaltyConfigIsLocked: pb.RoyaltyConfigIsLocked)));
+                            royaltyConfigIsLocked: pb.RoyaltyConfigIsLocked
+                        )));
+                    }
+
+                    if (packageCodeHistory.TryGetValue(pe.Id, out var packageCodes))
+                    {
+                        codeItems.AddRange(packageCodes.Select(pb => new GatewayModel.PackageCodeCollectionItem(
+                                vmType: pb.VmType.ToGatewayModel(),
+                                codeHashHex: pb.CodeHash.ToHex(),
+                                codeHex: pb.Code.ToHex()
+                            )));
                     }
 
                     if (packageSchemaHistory.TryGetValue(pe.Id, out var packageSchemas))
@@ -242,9 +252,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
-                        vmType: pe.VmType.ToGatewayModel(),
-                        codeHashHex: codeHistory.CodeHash.ToHex(),
-                        codeHex: codeHistory.Code.ToHex(),
+                        vmType: codeItems[0].VmType,
+                        codeHashHex: codeItems[0].CodeHashHex,
+                        codeHex: codeItems[0].CodeHex,
+                        codes: new GatewayModel.StateEntityDetailsResponsePackageDetailsCodeCollection(totalCount: codeItems.Count, items: codeItems),
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null,
                         blueprints: new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintCollection(totalCount: blueprints.Count, items: blueprints),
                         schemas: new GatewayModel.StateEntityDetailsResponsePackageDetailsSchemaCollection(totalCount: schemas.Count, items: schemas));
@@ -912,7 +923,7 @@ INNER JOIN LATERAL (
                     activeInEpoch,
                     metadataById[v.Id],
                     effectiveFeeFactor
-                    );
+                );
             })
             .ToList();
 
@@ -1439,48 +1450,68 @@ INNER JOIN LATERAL (
             return new Dictionary<long, PackageBlueprintHistory[]>();
         }
 
-        // should return all the blueprint history entries (no LIMIT 1 in nested query) as blueprints cannot be deleted
-
         return (await _dbContext
                 .PackageBlueprintHistory
                 .FromSqlInterpolated($@"
-WITH variables (entity_id) AS (SELECT UNNEST({packageEntityIds}))
+WITH variables (package_entity_id) AS (SELECT UNNEST({packageEntityIds})),
+most_recent_package_blueprints AS
+(
+    SELECT
+        package_blueprint_ids
+    FROM variables var
+    INNER JOIN LATERAL (
+        SELECT *
+        FROM package_blueprint_aggregate_history
+        WHERE from_state_version <= {ledgerState.StateVersion} AND package_entity_id = var.package_entity_id
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) pbah ON TRUE
+)
 SELECT pbh.*
-FROM variables
-INNER JOIN LATERAL(
-    SELECT *
-    FROM package_blueprint_history
-    WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-) pbh ON true")
+FROM most_recent_package_blueprints mrpb
+INNER JOIN package_blueprint_history pbh
+ON pbh.id = ANY(mrpb.package_blueprint_ids)
+ORDER BY array_position(mrpb.package_blueprint_ids, pbh.id)
+")
                 .AnnotateMetricName()
                 .ToListAsync(token))
             .GroupBy(b => b.PackageEntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
     }
 
-    private async Task<Dictionary<long, PackageCodeHistory>> GetPackageCodeHistory(long[] packageEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<Dictionary<long, PackageCodeHistory[]>> GetPackageCodeHistory(long[] packageEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         if (!packageEntityIds.Any())
         {
-            return new Dictionary<long, PackageCodeHistory>();
+            return new Dictionary<long, PackageCodeHistory[]>();
         }
 
-        return await _dbContext
-            .PackageCodeHistory
-            .FromSqlInterpolated($@"
-WITH variables (entity_id) AS (SELECT UNNEST({packageEntityIds}))
+        return (await _dbContext
+                .PackageCodeHistory
+                .FromSqlInterpolated($@"
+WITH variables (package_entity_id) AS (SELECT UNNEST({packageEntityIds})),
+most_recent_package_codes AS
+(
+    SELECT
+        package_code_ids
+    FROM variables var
+    INNER JOIN LATERAL (
+        SELECT *
+        FROM package_code_aggregate_history
+        WHERE from_state_version <= {ledgerState.StateVersion} AND package_entity_id = var.package_entity_id
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) pcah ON TRUE
+)
 SELECT pch.*
-FROM variables
-INNER JOIN LATERAL(
-    SELECT *
-    FROM package_code_history
-    WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) pch ON true")
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.PackageEntityId, token);
+FROM most_recent_package_codes mrpc
+INNER JOIN package_code_history pch
+ON pch.id = ANY(mrpc.package_code_ids)
+ORDER BY array_position(mrpc.package_code_ids, pch.id)")
+                .AnnotateMetricName()
+                .ToListAsync(token))
+            .GroupBy(b => b.PackageEntityId)
+            .ToDictionary(g => g.Key, g => g.ToArray());
     }
 
     private async Task<Dictionary<long, SchemaHistory[]>> GetPackageSchemaHistory(long[] packageEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)

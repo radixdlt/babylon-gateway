@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -85,4 +86,10 @@ internal class PackageCodeHistory
 
     [Column("code")]
     public byte[] Code { get; set; }
+
+    [Column("vm_type")]
+    public PackageVmType VmType { get; set; }
+
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
 }

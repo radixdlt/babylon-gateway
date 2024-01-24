@@ -90,71 +90,48 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// FlashedSubstate
+    /// SignificantProtocolUpdateReadinessEntry
     /// </summary>
-    [DataContract(Name = "FlashedSubstate")]
-    public partial class FlashedSubstate : IEquatable<FlashedSubstate>
+    [DataContract(Name = "SignificantProtocolUpdateReadinessEntry")]
+    public partial class SignificantProtocolUpdateReadinessEntry : IEquatable<SignificantProtocolUpdateReadinessEntry>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FlashedSubstate" /> class.
+        /// Initializes a new instance of the <see cref="SignificantProtocolUpdateReadinessEntry" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FlashedSubstate() { }
+        protected SignificantProtocolUpdateReadinessEntry() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FlashedSubstate" /> class.
+        /// Initializes a new instance of the <see cref="SignificantProtocolUpdateReadinessEntry" /> class.
         /// </summary>
-        /// <param name="entityAddress">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id) (required).</param>
-        /// <param name="partitionNumber">partitionNumber (required).</param>
-        /// <param name="substateKey">substateKey (required).</param>
-        /// <param name="value">The hex-encoded, SBOR-encoded substate data bytes. (required).</param>
-        public FlashedSubstate(string entityAddress = default(string), int partitionNumber = default(int), SubstateKey substateKey = default(SubstateKey), string value = default(string))
+        /// <param name="readinessSignalName">readinessSignalName (required).</param>
+        /// <param name="signalledStake">signalledStake (required).</param>
+        public SignificantProtocolUpdateReadinessEntry(string readinessSignalName = default(string), string signalledStake = default(string))
         {
-            // to ensure "entityAddress" is required (not null)
-            if (entityAddress == null)
+            // to ensure "readinessSignalName" is required (not null)
+            if (readinessSignalName == null)
             {
-                throw new ArgumentNullException("entityAddress is a required property for FlashedSubstate and cannot be null");
+                throw new ArgumentNullException("readinessSignalName is a required property for SignificantProtocolUpdateReadinessEntry and cannot be null");
             }
-            this.EntityAddress = entityAddress;
-            this.PartitionNumber = partitionNumber;
-            // to ensure "substateKey" is required (not null)
-            if (substateKey == null)
+            this.ReadinessSignalName = readinessSignalName;
+            // to ensure "signalledStake" is required (not null)
+            if (signalledStake == null)
             {
-                throw new ArgumentNullException("substateKey is a required property for FlashedSubstate and cannot be null");
+                throw new ArgumentNullException("signalledStake is a required property for SignificantProtocolUpdateReadinessEntry and cannot be null");
             }
-            this.SubstateKey = substateKey;
-            // to ensure "value" is required (not null)
-            if (value == null)
-            {
-                throw new ArgumentNullException("value is a required property for FlashedSubstate and cannot be null");
-            }
-            this.Value = value;
+            this.SignalledStake = signalledStake;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
+        /// Gets or Sets ReadinessSignalName
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
-        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityAddress { get; set; }
+        [DataMember(Name = "readiness_signal_name", IsRequired = true, EmitDefaultValue = true)]
+        public string ReadinessSignalName { get; set; }
 
         /// <summary>
-        /// Gets or Sets PartitionNumber
+        /// Gets or Sets SignalledStake
         /// </summary>
-        [DataMember(Name = "partition_number", IsRequired = true, EmitDefaultValue = true)]
-        public int PartitionNumber { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SubstateKey
-        /// </summary>
-        [DataMember(Name = "substate_key", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateKey SubstateKey { get; set; }
-
-        /// <summary>
-        /// The hex-encoded, SBOR-encoded substate data bytes.
-        /// </summary>
-        /// <value>The hex-encoded, SBOR-encoded substate data bytes.</value>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public string Value { get; set; }
+        [DataMember(Name = "signalled_stake", IsRequired = true, EmitDefaultValue = true)]
+        public string SignalledStake { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -163,11 +140,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FlashedSubstate {\n");
-            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
-            sb.Append("  PartitionNumber: ").Append(PartitionNumber).Append("\n");
-            sb.Append("  SubstateKey: ").Append(SubstateKey).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("class SignificantProtocolUpdateReadinessEntry {\n");
+            sb.Append("  ReadinessSignalName: ").Append(ReadinessSignalName).Append("\n");
+            sb.Append("  SignalledStake: ").Append(SignalledStake).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,15 +163,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FlashedSubstate);
+            return this.Equals(input as SignificantProtocolUpdateReadinessEntry);
         }
 
         /// <summary>
-        /// Returns true if FlashedSubstate instances are equal
+        /// Returns true if SignificantProtocolUpdateReadinessEntry instances are equal
         /// </summary>
-        /// <param name="input">Instance of FlashedSubstate to be compared</param>
+        /// <param name="input">Instance of SignificantProtocolUpdateReadinessEntry to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FlashedSubstate input)
+        public bool Equals(SignificantProtocolUpdateReadinessEntry input)
         {
             if (input == null)
             {
@@ -204,23 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityAddress == input.EntityAddress ||
-                    (this.EntityAddress != null &&
-                    this.EntityAddress.Equals(input.EntityAddress))
+                    this.ReadinessSignalName == input.ReadinessSignalName ||
+                    (this.ReadinessSignalName != null &&
+                    this.ReadinessSignalName.Equals(input.ReadinessSignalName))
                 ) && 
                 (
-                    this.PartitionNumber == input.PartitionNumber ||
-                    this.PartitionNumber.Equals(input.PartitionNumber)
-                ) && 
-                (
-                    this.SubstateKey == input.SubstateKey ||
-                    (this.SubstateKey != null &&
-                    this.SubstateKey.Equals(input.SubstateKey))
-                ) && 
-                (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.SignalledStake == input.SignalledStake ||
+                    (this.SignalledStake != null &&
+                    this.SignalledStake.Equals(input.SignalledStake))
                 );
         }
 
@@ -233,18 +199,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.EntityAddress != null)
+                if (this.ReadinessSignalName != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ReadinessSignalName.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.PartitionNumber.GetHashCode();
-                if (this.SubstateKey != null)
+                if (this.SignalledStake != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateKey.GetHashCode();
-                }
-                if (this.Value != null)
-                {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SignalledStake.GetHashCode();
                 }
                 return hashCode;
             }
