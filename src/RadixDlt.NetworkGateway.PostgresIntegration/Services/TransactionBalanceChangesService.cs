@@ -147,7 +147,12 @@ internal class TransactionBalanceChangesService : ITransactionBalanceChangesServ
                     throw balanceChangesResult.FailureResponse.OriginalApiException;
                 }
 
-                var balanceChanges = balanceChangesResult.SuccessResponse.CommittedTransactionOutcomes.Single();
+                var balanceChanges = balanceChangesResult.SuccessResponse.CommittedTransactionOutcomes.FirstOrDefault();
+
+                if (balanceChanges == null)
+                {
+                    return;
+                }
 
                 await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(transaction.StateVersion, selectedNode.Name));
 
