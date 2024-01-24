@@ -1183,7 +1183,7 @@ paths:
   /state/entity/page/fungibles/:
     post:
       operationId: EntityFungiblesPage
-      summary: Get Entity Fungible Resource Totals Page aggregated globally
+      summary: Get page of Global Entity Fungible Resource Balances
       description: |
         Returns the total amount of each fungible resource owned by a given global entity.
         Result can be aggregated globally or per vault.
@@ -1209,7 +1209,7 @@ paths:
   /state/entity/page/fungible-vaults/:
     post:
       operationId: EntityFungibleResourceVaultPage
-      summary: Get vault page of Entity Fungible resource aggregated per vault
+      summary: Get page of Global Entity Fungible Resource Vaults
       description: |
         Returns vaults for fungible resource owned by a given global entity.
         The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
@@ -1234,7 +1234,7 @@ paths:
   /state/entity/page/non-fungibles/:
     post:
       operationId: EntityNonFungiblesPage
-      summary: Get Entity Non-Fungible Resource Totals Page aggregated globally
+      summary: Get page of Global Entity Non-Fungible Resource Balances
       description: |
         Returns the total amount of each non-fungible resource owned by a given global entity.
         Result can be aggregated globally or per vault.
@@ -1260,7 +1260,7 @@ paths:
   /state/entity/page/non-fungible-vaults/:
     post:
       operationId: EntityNonFungibleResourceVaultPage
-      summary: Get vault page of Entity Non Fungible aggregated per vault
+      summary: Get page of Global Entity Non-Fungible Resource Vaults
       description: |
         Returns vaults for non fungible resource owned by a given global entity.
         The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
@@ -1285,7 +1285,7 @@ paths:
   /state/entity/page/non-fungible-vault/ids:
     post:
       operationId: EntityNonFungibleIdsPage
-      summary: Get Entity Non-Fungible IDs
+      summary: Get page of Non-Fungibles in Vault
       description: |
         Returns all non-fungible IDs of a given non-fungible resource owned by a given entity.
         The returned response is in a paginated format, ordered by the resource's first appearence on the ledger.
@@ -1310,7 +1310,7 @@ paths:
   /state/non-fungible/ids:
     post:
       operationId: NonFungibleIds
-      summary: Get Non-Fungible Collection
+      summary: Get page of Non-Fungible Ids in Resource Collection
       description: |
         Returns the non-fungible IDs of a given non-fungible resource.
         Returned response is in a paginated format, ordered by their first appearance on the ledger.
