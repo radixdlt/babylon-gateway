@@ -119,7 +119,7 @@ public sealed class StatusController : ControllerBase
                 transactionProcessorPackage: wellKnownAddresses.TransactionProcessorPackage,
                 metadataModulePackage: wellKnownAddresses.MetadataModulePackage,
                 royaltyModulePackage: wellKnownAddresses.RoyaltyModulePackage,
-                accessRulesPackage: wellKnownAddresses.RoleAssignmentModulePackage,
+                roleAssignmentModulePackage: wellKnownAddresses.RoleAssignmentModulePackage,
                 genesisHelperPackage: wellKnownAddresses.GenesisHelperPackage,
                 faucetPackage: wellKnownAddresses.FaucetPackage,
                 consensusManager: wellKnownAddresses.ConsensusManager,
