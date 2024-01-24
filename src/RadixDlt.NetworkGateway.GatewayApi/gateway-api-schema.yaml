@@ -2374,6 +2374,7 @@ components:
             - transaction_processor_package
             - metadata_module_package
             - royalty_module_package
+            - access_rules_package
             - role_assignment_module_package
             - genesis_helper_package
             - faucet_package
@@ -2419,6 +2420,10 @@ components:
             metadata_module_package:
               $ref: "#/components/schemas/Address"
             royalty_module_package:
+              $ref: "#/components/schemas/Address"
+            access_rules_package:
+              description: "Obsolete! Use `role_assignment_module_package` instead."
+              deprecated: true
               $ref: "#/components/schemas/Address"
             role_assignment_module_package:
               $ref: "#/components/schemas/Address"
@@ -3162,15 +3167,15 @@ components:
             codes:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsCodeCollection"
             vm_type:
-              description: "Obsolete! Use codes collection"
+              description: "Obsolete! Use `codes` collection instead."
               deprecated: true
               $ref: "#/components/schemas/PackageVmType"
             code_hash_hex:
-              description: "Obsolete! Use codes collection"
+              description: "Obsolete! Use `codes` collection instead."
               deprecated: true
               $ref: "#/components/schemas/HexString"
             code_hex:
-              description: "Obsolete! Use codes collection"
+              description: "Obsolete! Use `codes` collection instead."
               deprecated: true
               $ref: "#/components/schemas/HexString"
             royalty_vault_balance:

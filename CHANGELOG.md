@@ -2,21 +2,26 @@
 Release Date: _unreleased_
 
 - Return components effective role assignments only for assigned modules.
-- Dropped `balance_changes` fallback mechanism.
+- Dropped internal `balance_changes` fallback mechanism. As of right now this information is ingested as part of regular transaction ingestion process.
 - Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
 
-### Breaking Changes
+### What’s new?
+- Added new filters for the `/stream/transactions` endpoint: `accounts_with_manifest_owner_method_calls`, `accounts_without_manifest_owner_method_calls` and `manifest_class_filter`.
+- Added new `manifest_instructions` opt-in for `/transaction/committed-details` and `/stream/transactions` endpoints returning original manifest of user transactions. 
 
-- Renamed well-known network configuration address property `access_rules_package` to `role_assignment_module_package`.
+### Deprecations
+- Obsoleted incorrectly named `access_rules_package` in favor of `role_assignment_module_package` on `NetworkConfigurationResponse.well_known_addresses`. Obsoleted property will contain effective copy of the new one for backwards compability.
 
 ## 1.3.0
 Release Date: _unreleased_
 
 - Added support for new transaction types (flash transactions) that are gonna occur on protocol updates.
 - Moved vm_type to `package_code_history` table from package in `entity` table.
-- `vm_type`, `code_hash_hex` and `code_hex` are returned as collection (it's allowed after protocol update to have multiple codes per package). Previous properties will return empty strings to keep contract compatibility.
 - Created new `package_blueprint_aggregate_history` table which will hold pointers to all package blueprints.
 - Created new `package_code_aggregate_history` table which will hold pointers to all package codes. 
+
+### Deprecations
+- Obsoleted `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of `codes` collection. With upcoming protocol upgrade it's going to be allowed to have multiple codes per package. Obsoleted properties will contain effective copy of the first element of the new collection for backwards compability.
 
 ## 1.2.4
 Release Date: 4.01.2024
