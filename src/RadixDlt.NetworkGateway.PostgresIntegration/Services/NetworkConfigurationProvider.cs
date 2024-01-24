@@ -246,7 +246,8 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 ConsensusManager: wka.ConsensusManager,
                 GenesisHelper: wka.GenesisHelper,
                 Faucet: wka.Faucet,
-                PoolPackage: wka.PoolPackage
+                PoolPackage: wka.PoolPackage,
+                TransactionTracker: wka.TransactionTracker
             ),
             AddressTypeDefinitions = at,
             GenesisEpoch = networkStatus.GenesisEpochRound.Epoch,

@@ -6,6 +6,7 @@ Release Date: _unreleased_
 - `vm_type`, `code_hash_hex` and `code_hex` are returned as collection (it's allowed after protocol update to have multiple codes per package). Previous properties will return empty strings to keep contract compatibility.
 - Created new `package_blueprint_aggregate_history` table which will hold pointers to all package blueprints.
 - Created new `package_code_aggregate_history` table which will hold pointers to all package codes. 
+- Extended well known addresses returned from `/status/network-configuration` with transaction tracker address.
 
 ## 1.2.4
 Release Date: 4.01.2024
