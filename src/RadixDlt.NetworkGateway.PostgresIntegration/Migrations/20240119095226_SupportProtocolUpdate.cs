@@ -77,6 +77,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Add transaction_trakcer to well known addresses.
+            migrationBuilder.Sql(@"UPDATE network_configuration SET well_known_addresses = well_known_addresses || '{""TransactionTracker"": ""transactiontracker_tdx_2_1stxxxxxxxxxxtxtrakxxxxxxxxx006844685494xxxxxxxxxxzw7jp""}'::jsonb  WHERE network_name = 'stokenet'");
+            migrationBuilder.Sql(@"UPDATE network_configuration SET well_known_addresses = well_known_addresses || '{""TransactionTracker"": ""transactiontracker_rdx1stxxxxxxxxxxtxtrakxxxxxxxxx006844685494xxxxxxxxxtxtrak""}'::jsonb WHERE network_name = 'mainnet'");
+
             // Support flash transaction type.
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash")
