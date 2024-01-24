@@ -122,6 +122,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="transactionProcessorPackage">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="metadataModulePackage">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="royaltyModulePackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="accessRulesPackage">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="roleAssignmentModulePackage">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="genesisHelperPackage">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="faucetPackage">Bech32m-encoded human readable version of the address. (required).</param>
@@ -129,7 +130,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="genesisHelper">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="faucet">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="poolPackage">Bech32m-encoded human readable version of the address. (required).</param>
-        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string roleAssignmentModulePackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string), string poolPackage = default(string))
+        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string accessRulesPackage = default(string), string roleAssignmentModulePackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string), string poolPackage = default(string))
         {
             // to ensure "xrd" is required (not null)
             if (xrd == null)
@@ -245,6 +246,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("royaltyModulePackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.RoyaltyModulePackage = royaltyModulePackage;
+            // to ensure "accessRulesPackage" is required (not null)
+            if (accessRulesPackage == null)
+            {
+                throw new ArgumentNullException("accessRulesPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.AccessRulesPackage = accessRulesPackage;
             // to ensure "roleAssignmentModulePackage" is required (not null)
             if (roleAssignmentModulePackage == null)
             {
@@ -426,6 +433,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Bech32m-encoded human readable version of the address.
         /// </summary>
         /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "access_rules_package", IsRequired = true, EmitDefaultValue = true)]
+        public string AccessRulesPackage { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "role_assignment_module_package", IsRequired = true, EmitDefaultValue = true)]
         public string RoleAssignmentModulePackage { get; set; }
 
@@ -498,6 +512,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  TransactionProcessorPackage: ").Append(TransactionProcessorPackage).Append("\n");
             sb.Append("  MetadataModulePackage: ").Append(MetadataModulePackage).Append("\n");
             sb.Append("  RoyaltyModulePackage: ").Append(RoyaltyModulePackage).Append("\n");
+            sb.Append("  AccessRulesPackage: ").Append(AccessRulesPackage).Append("\n");
             sb.Append("  RoleAssignmentModulePackage: ").Append(RoleAssignmentModulePackage).Append("\n");
             sb.Append("  GenesisHelperPackage: ").Append(GenesisHelperPackage).Append("\n");
             sb.Append("  FaucetPackage: ").Append(FaucetPackage).Append("\n");
@@ -636,6 +651,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.RoyaltyModulePackage.Equals(input.RoyaltyModulePackage))
                 ) && 
                 (
+                    this.AccessRulesPackage == input.AccessRulesPackage ||
+                    (this.AccessRulesPackage != null &&
+                    this.AccessRulesPackage.Equals(input.AccessRulesPackage))
+                ) && 
+                (
                     this.RoleAssignmentModulePackage == input.RoleAssignmentModulePackage ||
                     (this.RoleAssignmentModulePackage != null &&
                     this.RoleAssignmentModulePackage.Equals(input.RoleAssignmentModulePackage))
@@ -756,6 +776,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.RoyaltyModulePackage != null)
                 {
                     hashCode = (hashCode * 59) + this.RoyaltyModulePackage.GetHashCode();
+                }
+                if (this.AccessRulesPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRulesPackage.GetHashCode();
                 }
                 if (this.RoleAssignmentModulePackage != null)
                 {
