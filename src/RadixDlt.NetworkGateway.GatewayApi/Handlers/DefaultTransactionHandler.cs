@@ -187,18 +187,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
             ? null
             : new ManifestClassFilter
             {
-                Class = request.ManifestClassFilter.Class switch
-                {
-                    GatewayModel.ManifestClass.General => ManifestClass.General,
-                    GatewayModel.ManifestClass.Transfer => ManifestClass.Transfer,
-                    GatewayModel.ManifestClass.ValidatorStake => ManifestClass.ValidatorStake,
-                    GatewayModel.ManifestClass.ValidatorUnstake => ManifestClass.ValidatorUnstake,
-                    GatewayModel.ManifestClass.ValidatorClaim => ManifestClass.ValidatorClaim,
-                    GatewayModel.ManifestClass.AccountDepositSettingsUpdate => ManifestClass.AccountDepositSettingsUpdate,
-                    GatewayModel.ManifestClass.PoolContribution => ManifestClass.PoolContribution,
-                    GatewayModel.ManifestClass.PoolRedemption => ManifestClass.PoolRedemption,
-                    _ => throw new UnreachableException($"Didn't expect {request.ManifestClassFilter.Class} value"),
-                },
+                Class = request.ManifestClassFilter.Class.ToModel(),
                 MatchOnlyMostSpecificType = request.ManifestClassFilter.MatchOnlyMostSpecific,
             };
 

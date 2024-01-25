@@ -277,21 +277,21 @@ internal class TransactionQuerier : ITransactionQuerier
 
             var manifestClass = request.SearchCriteria.ManifestClassFilter.Class switch
             {
-                ManifestClass.General => LedgerTransactionMarkerManifestClass.General,
-                ManifestClass.Transfer => LedgerTransactionMarkerManifestClass.Transfer,
-                ManifestClass.ValidatorStake => LedgerTransactionMarkerManifestClass.ValidatorStake,
-                ManifestClass.ValidatorUnstake => LedgerTransactionMarkerManifestClass.ValidatorUnstake,
-                ManifestClass.ValidatorClaim => LedgerTransactionMarkerManifestClass.ValidatorClaim,
-                ManifestClass.AccountDepositSettingsUpdate => LedgerTransactionMarkerManifestClass.AccountDepositSettingsUpdate,
-                ManifestClass.PoolContribution => LedgerTransactionMarkerManifestClass.PoolContribution,
-                ManifestClass.PoolRedemption => LedgerTransactionMarkerManifestClass.PoolRedemption,
+                LedgerTransactionManifestClass.General => LedgerTransactionManifestClass.General,
+                LedgerTransactionManifestClass.Transfer => LedgerTransactionManifestClass.Transfer,
+                LedgerTransactionManifestClass.ValidatorStake => LedgerTransactionManifestClass.ValidatorStake,
+                LedgerTransactionManifestClass.ValidatorUnstake => LedgerTransactionManifestClass.ValidatorUnstake,
+                LedgerTransactionManifestClass.ValidatorClaim => LedgerTransactionManifestClass.ValidatorClaim,
+                LedgerTransactionManifestClass.AccountDepositSettingsUpdate => LedgerTransactionManifestClass.AccountDepositSettingsUpdate,
+                LedgerTransactionManifestClass.PoolContribution => LedgerTransactionManifestClass.PoolContribution,
+                LedgerTransactionManifestClass.PoolRedemption => LedgerTransactionManifestClass.PoolRedemption,
                 _ => throw new UnreachableException($"Didn't expect {request.SearchCriteria.ManifestClassFilter.Class} value"),
             };
 
             searchQuery = searchQuery
                 .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                 .OfType<ManifestClassMarker>()
-                .Where(ttm => ttm.ManifestClass == manifestClass)
+                .Where(ttm => ttm.LedgerTransactionManifestClass == manifestClass)
                 .Where(ttm => (request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType)
                 .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
                 .Select(eltm => eltm.StateVersion);
@@ -703,7 +703,7 @@ SELECT
     round_timestamp, created_timestamp, normalized_round_timestamp,
     receipt_status, receipt_fee_source, receipt_fee_destination, receipt_error_message,
     transaction_tree_hash, receipt_tree_hash, state_tree_hash,
-    discriminator, payload_hash, intent_hash, signed_intent_hash, message,
+    discriminator, payload_hash, intent_hash, signed_intent_hash, message, manifest_classes,
     CASE WHEN configuration.with_raw_payload THEN raw_payload ELSE ''::bytea END AS raw_payload,
     CASE WHEN configuration.with_receipt_costing_parameters THEN receipt_costing_parameters ELSE '{{}}'::jsonb END AS receipt_costing_parameters,
     CASE WHEN configuration.with_receipt_fee_summary THEN receipt_fee_summary ELSE '{{}}'::jsonb END AS receipt_fee_summary,

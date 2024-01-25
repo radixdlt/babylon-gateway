@@ -69,18 +69,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal enum LedgerTransactionMarkerManifestClass
-{
-    General,
-    Transfer,
-    ValidatorStake,
-    ValidatorUnstake,
-    ValidatorClaim,
-    AccountDepositSettingsUpdate,
-    PoolContribution,
-    PoolRedemption,
-}
-
 internal enum LedgerTransactionMarkerOriginType
 {
     User,
@@ -136,7 +124,7 @@ internal class EventLedgerTransactionMarker : LedgerTransactionMarker
 internal class ManifestClassMarker : LedgerTransactionMarker
 {
     [Column("manifest_class")]
-    public LedgerTransactionMarkerManifestClass ManifestClass { get; set; }
+    public LedgerTransactionManifestClass LedgerTransactionManifestClass { get; set; }
 
     [Column("is_most_specific")]
     public bool IsMostSpecific { get; set; }

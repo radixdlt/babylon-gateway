@@ -221,6 +221,7 @@ UPDATE pending_transactions
         var referencedEntities = new ReferencedEntityDictionary();
         var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
         var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
+        var manifestClasses = new Dictionary<long, List<LedgerTransactionManifestClass>>();
 
         var readHelper = new ReadHelper(dbContext, _observers);
         var writeHelper = new WriteHelper(dbContext, _observers);
@@ -281,7 +282,7 @@ UPDATE pending_transactions
 
                         var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
                         var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
-                        using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, (await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
+                        using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, networkConfiguration.Id);
                         using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
 
                         var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, networkConfiguration.Id);
@@ -299,11 +300,15 @@ UPDATE pending_transactions
                         {
                             var manifestClass = manifestSummary.classification[i].ToModel();
 
+                            manifestClasses
+                                .GetOrAdd(stateVersion, _ => new List<LedgerTransactionManifestClass>())
+                                .Add(manifestClass);
+
                             ledgerTransactionMarkersToAdd.Add(new ManifestClassMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
-                                ManifestClass = manifestClass,
+                                LedgerTransactionManifestClass = manifestClass,
                                 IsMostSpecific = i == 0,
                             });
                         }
@@ -532,6 +537,7 @@ UPDATE pending_transactions
                             Message = ult.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
                             RawPayload = ult.NotarizedTransaction.GetPayloadBytes(),
                             ManifestInstructions = ult.NotarizedTransaction.SignedIntent.Intent.Instructions,
+                            ManifestClasses = manifestClasses.TryGetValue(stateVersion, out var mc) ? mc.ToArray() : Array.Empty<LedgerTransactionManifestClass>(),
                         },
                         CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
                         CoreModel.FlashLedgerTransaction => new FlashLedgerTransaction(),
@@ -1236,7 +1242,7 @@ UPDATE pending_transactions
 
                         var eventEmitterEntity = referencedEntities.Get((EntityAddress)methodEventEmitter.Entity.EntityAddress);
 
-                        using var decodedEvent = EventDecoder.DecodeEvent(@event, (await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
+                        using var decodedEvent = EventDecoder.DecodeEvent(@event, networkConfiguration.Id);
 
                         if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
                         {

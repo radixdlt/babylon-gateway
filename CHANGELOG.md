@@ -6,6 +6,7 @@ Release Date: _unreleased_
 - Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
 
 ### What’s new?
+- Added `manifest_classes` collection to `CommittedTransactionInfo`: a collection of zero or more manifest classes ordered from the most specific class to the least specific one.
 - Added new filters for the `/stream/transactions` endpoint: `accounts_with_manifest_owner_method_calls`, `accounts_without_manifest_owner_method_calls` and `manifest_class_filter`.
 - Added new `manifest_instructions` opt-in for `/transaction/committed-details` and `/stream/transactions` endpoints returning original manifest of user transactions. 
 

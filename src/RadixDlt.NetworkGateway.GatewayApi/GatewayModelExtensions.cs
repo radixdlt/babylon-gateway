@@ -62,16 +62,27 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using System;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public enum ManifestClass
+namespace RadixDlt.NetworkGateway.GatewayApi;
+
+internal static class GatewayModelExtensions
 {
-    General,
-    Transfer,
-    ValidatorStake,
-    ValidatorUnstake,
-    ValidatorClaim,
-    AccountDepositSettingsUpdate,
-    PoolContribution,
-    PoolRedemption,
+    public static LedgerTransactionManifestClass ToModel(this GatewayModel.ManifestClass input)
+    {
+        return input switch
+        {
+            GatewayModel.ManifestClass.General => LedgerTransactionManifestClass.General,
+            GatewayModel.ManifestClass.Transfer => LedgerTransactionManifestClass.Transfer,
+            GatewayModel.ManifestClass.ValidatorStake => LedgerTransactionManifestClass.ValidatorStake,
+            GatewayModel.ManifestClass.ValidatorUnstake => LedgerTransactionManifestClass.ValidatorUnstake,
+            GatewayModel.ManifestClass.ValidatorClaim => LedgerTransactionManifestClass.ValidatorClaim,
+            GatewayModel.ManifestClass.AccountDepositSettingsUpdate => LedgerTransactionManifestClass.AccountDepositSettingsUpdate,
+            GatewayModel.ManifestClass.PoolContribution => LedgerTransactionManifestClass.PoolContribution,
+            GatewayModel.ManifestClass.PoolRedemption => LedgerTransactionManifestClass.PoolRedemption,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
+    }
 }

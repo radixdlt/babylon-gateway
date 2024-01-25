@@ -97,6 +97,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionManifestClass>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerEventType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOperationType>();
@@ -110,7 +111,6 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ModuleId>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<SborTypeKind>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerManifestClass>();
 #pragma warning restore CS0618
 
         _configured = true;

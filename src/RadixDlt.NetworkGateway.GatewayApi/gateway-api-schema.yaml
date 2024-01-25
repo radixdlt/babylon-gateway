@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.2.2
+  version: v1.2.3
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
@@ -1663,16 +1663,26 @@ components:
     #
 
     ManifestClass:
+      description: |
+        High-level manifest class type:
+          * `General`: A general manifest that involves any amount of arbitrary components and packages where nothing more concrete can be said about the manifest and its nature.
+          * `Transfer`: A manifest of a 1-to-1 transfer to a one-to-many transfer of resources.
+          * `PoolContribution`: A manifest that contributed some amount of resources to a liquidity pool that can be a one-resource pool, two-resource pool, or a multi-resource pool.
+          * `PoolRedemption`: A manifest that redeemed resources from a liquidity pool. Similar to contributions, this can be any of the three pool blueprints available in the pool package.
+          * `ValidatorStake`: A manifest where XRD is staked to one or more validators.
+          * `ValidatorUnstake`: A manifest where XRD is unstaked from one or more validators.
+          * `ValidatorClaim`: A manifest where XRD is claimed from one or more validators.
+          * `AccountDepositSettingsUpdate`: A manifest that updated the deposit settings of the account.
       type: string
       enum:
         - General
         - Transfer
+        - PoolContribution
+        - PoolRedemption
         - ValidatorStake
         - ValidatorUnstake
         - ValidatorClaim
         - AccountDepositSettingsUpdate
-        - PoolContribution
-        - PoolRedemption
 
     ObjectModuleId:
       type: string
@@ -2091,8 +2101,19 @@ components:
         receipt:
           $ref: "#/components/schemas/TransactionReceipt"
         manifest_instructions:
+          description: |
+            A text-representation of a transaction manifest.
+            This field will be present only for user transactions and when explicitly opted-in using `manifest_instructions` flag.
           type: string
           nullable: true
+        manifest_classes:
+          description: |
+            A collection of zero or more manifest classes ordered from the most specific class to the least specific one.
+            This field will be present only for user transactions.
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/ManifestClass"
         message:
           type: object
           description: |

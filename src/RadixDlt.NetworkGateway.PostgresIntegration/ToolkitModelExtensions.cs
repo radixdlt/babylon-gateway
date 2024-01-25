@@ -62,29 +62,27 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Diagnostics;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using System;
 using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class ToolkitModelExtensions
 {
-    public static LedgerTransactionMarkerManifestClass ToModel(this ToolkitModel.ManifestClass manifestClass)
+    public static LedgerTransactionManifestClass ToModel(this ToolkitModel.ManifestClass input)
     {
-        var transactionClass = manifestClass switch
+        return input switch
         {
-            ToolkitModel.ManifestClass.General => LedgerTransactionMarkerManifestClass.General,
-            ToolkitModel.ManifestClass.Transfer => LedgerTransactionMarkerManifestClass.Transfer,
-            ToolkitModel.ManifestClass.PoolContribution => LedgerTransactionMarkerManifestClass.PoolContribution,
-            ToolkitModel.ManifestClass.PoolRedemption => LedgerTransactionMarkerManifestClass.PoolRedemption,
-            ToolkitModel.ManifestClass.ValidatorStake => LedgerTransactionMarkerManifestClass.ValidatorStake,
-            ToolkitModel.ManifestClass.ValidatorUnstake => LedgerTransactionMarkerManifestClass.ValidatorUnstake,
-            ToolkitModel.ManifestClass.ValidatorClaim => LedgerTransactionMarkerManifestClass.ValidatorClaim,
-            ToolkitModel.ManifestClass.AccountDepositSettingsUpdate => LedgerTransactionMarkerManifestClass.AccountDepositSettingsUpdate,
-            _ => throw new UnreachableException($"Didn't expect {manifestClass} value"),
+            ToolkitModel.ManifestClass.General => LedgerTransactionManifestClass.General,
+            ToolkitModel.ManifestClass.Transfer => LedgerTransactionManifestClass.Transfer,
+            ToolkitModel.ManifestClass.PoolContribution => LedgerTransactionManifestClass.PoolContribution,
+            ToolkitModel.ManifestClass.PoolRedemption => LedgerTransactionManifestClass.PoolRedemption,
+            ToolkitModel.ManifestClass.ValidatorStake => LedgerTransactionManifestClass.ValidatorStake,
+            ToolkitModel.ManifestClass.ValidatorUnstake => LedgerTransactionManifestClass.ValidatorUnstake,
+            ToolkitModel.ManifestClass.ValidatorClaim => LedgerTransactionManifestClass.ValidatorClaim,
+            ToolkitModel.ManifestClass.AccountDepositSettingsUpdate => LedgerTransactionManifestClass.AccountDepositSettingsUpdate,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
         };
-
-        return transactionClass;
     }
 }

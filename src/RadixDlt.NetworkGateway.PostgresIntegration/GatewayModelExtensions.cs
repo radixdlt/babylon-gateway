@@ -83,6 +83,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
+    public static GatewayModel.ManifestClass ToGatewayModel(this LedgerTransactionManifestClass input)
+    {
+        return input switch
+        {
+            LedgerTransactionManifestClass.General => GatewayModel.ManifestClass.General,
+            LedgerTransactionManifestClass.Transfer => GatewayModel.ManifestClass.Transfer,
+            LedgerTransactionManifestClass.ValidatorStake => GatewayModel.ManifestClass.ValidatorStake,
+            LedgerTransactionManifestClass.ValidatorUnstake => GatewayModel.ManifestClass.ValidatorUnstake,
+            LedgerTransactionManifestClass.ValidatorClaim => GatewayModel.ManifestClass.ValidatorClaim,
+            LedgerTransactionManifestClass.AccountDepositSettingsUpdate => GatewayModel.ManifestClass.AccountDepositSettingsUpdate,
+            LedgerTransactionManifestClass.PoolContribution => GatewayModel.ManifestClass.PoolContribution,
+            LedgerTransactionManifestClass.PoolRedemption => GatewayModel.ManifestClass.PoolRedemption,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
+    }
+
     public static GatewayModel.NonFungibleIdType ToGatewayModel(this NonFungibleIdType nonFungibleIdType)
     {
         return nonFungibleIdType switch
@@ -119,6 +135,7 @@ internal static class GatewayModelExtensions
         string? rawHex = null;
         JRaw? message = null;
         string? manifestInstructions = null;
+        List<GatewayModel.ManifestClass>? manifestClasses = null;
 
         if (lt is UserLedgerTransaction ult)
         {
@@ -127,6 +144,7 @@ internal static class GatewayModelExtensions
             rawHex = optIns.RawHex ? ult.RawPayload.ToHex() : null;
             message = ult.Message != null ? new JRaw(ult.Message) : null;
             manifestInstructions = optIns.ManifestInstructions ? ult.ManifestInstructions : null;
+            manifestClasses = ult.ManifestClasses.Select(mc => mc.ToGatewayModel()).ToList();
         }
 
         var receipt = new GatewayModel.TransactionReceipt
@@ -159,7 +177,8 @@ internal static class GatewayModelExtensions
             receipt: receipt,
             message: message,
             balanceChanges: optIns.BalanceChanges ? transactionBalanceChanges : null,
-            manifestInstructions: manifestInstructions
+            manifestInstructions: manifestInstructions,
+            manifestClasses: manifestClasses
         );
     }
 
