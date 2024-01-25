@@ -437,7 +437,7 @@ jobs:
           secret_name: "github-actions/common/sonar-token"
           parse_json: true
       - name: SonarScanner for .NET
-        uses: RDXWorks-actions/sonarscan-dotnet@8410b6452e036aff2fb830831e508e723b8af60d
+        uses: RDXWorks-actions/sonarscan-dotnet@v2.2.6
         with:
           sonarProjectKey: radixdlt_babylon-gateway
           sonarProjectName: babylon-gateway
