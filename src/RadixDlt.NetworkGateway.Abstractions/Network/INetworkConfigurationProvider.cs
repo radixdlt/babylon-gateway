@@ -173,7 +173,8 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
                 ConsensusManager: wa.ConsensusManager,
                 GenesisHelper: wa.GenesisHelper,
                 Faucet: wa.Faucet,
-                PoolPackage: wa.PoolPackage
+                PoolPackage: wa.PoolPackage,
+                TransactionTracker: wa.TransactionTracker
             );
 
             return new NetworkConfiguration(

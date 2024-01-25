@@ -21,6 +21,10 @@ Release Date: _unreleased_
 - Moved vm_type to `package_code_history` table from package in `entity` table.
 - Created new `package_blueprint_aggregate_history` table which will hold pointers to all package blueprints.
 - Created new `package_code_aggregate_history` table which will hold pointers to all package codes. 
+- Extended well known addresses returned from `/status/network-configuration` with transaction tracker address.
+
+### Deprecations
+- Obsoleted `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of `codes` collection. With upcoming protocol upgrade it's going to be allowed to have multiple codes per package. Obsoleted properties will contain effective copy of the first element of the new collection for backwards compability.
 
 ### Deprecations
 - Obsoleted `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of `codes` collection. With upcoming protocol upgrade it's going to be allowed to have multiple codes per package. Obsoleted properties will contain effective copy of the first element of the new collection for backwards compability.

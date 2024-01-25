@@ -129,7 +129,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="consensusManager">consensusManager (required).</param>
         /// <param name="genesisHelper">genesisHelper (required).</param>
         /// <param name="faucet">faucet (required).</param>
-        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string roleAssignmentModulePackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string poolPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string))
+        /// <param name="transactionTracker">transactionTracker (required).</param>
+        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string roleAssignmentModulePackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string poolPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string), string transactionTracker = default(string))
         {
             // to ensure "xrd" is required (not null)
             if (xrd == null)
@@ -287,6 +288,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("faucet is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.Faucet = faucet;
+            // to ensure "transactionTracker" is required (not null)
+            if (transactionTracker == null)
+            {
+                throw new ArgumentNullException("transactionTracker is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.TransactionTracker = transactionTracker;
         }
 
         /// <summary>
@@ -446,6 +453,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Faucet { get; set; }
 
         /// <summary>
+        /// Gets or Sets TransactionTracker
+        /// </summary>
+        [DataMember(Name = "transaction_tracker", IsRequired = true, EmitDefaultValue = true)]
+        public string TransactionTracker { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -479,6 +492,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ConsensusManager: ").Append(ConsensusManager).Append("\n");
             sb.Append("  GenesisHelper: ").Append(GenesisHelper).Append("\n");
             sb.Append("  Faucet: ").Append(Faucet).Append("\n");
+            sb.Append("  TransactionTracker: ").Append(TransactionTracker).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -643,6 +657,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Faucet == input.Faucet ||
                     (this.Faucet != null &&
                     this.Faucet.Equals(input.Faucet))
+                ) && 
+                (
+                    this.TransactionTracker == input.TransactionTracker ||
+                    (this.TransactionTracker != null &&
+                    this.TransactionTracker.Equals(input.TransactionTracker))
                 );
         }
 
@@ -758,6 +777,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Faucet != null)
                 {
                     hashCode = (hashCode * 59) + this.Faucet.GetHashCode();
+                }
+                if (this.TransactionTracker != null)
+                {
+                    hashCode = (hashCode * 59) + this.TransactionTracker.GetHashCode();
                 }
                 return hashCode;
             }

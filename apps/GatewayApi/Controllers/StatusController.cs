@@ -126,7 +126,8 @@ public sealed class StatusController : ControllerBase
                 consensusManager: wellKnownAddresses.ConsensusManager,
                 genesisHelper: wellKnownAddresses.GenesisHelper,
                 faucet: wellKnownAddresses.Faucet,
-                poolPackage: wellKnownAddresses.PoolPackage
+                poolPackage: wellKnownAddresses.PoolPackage,
+                transactionTracker: wellKnownAddresses.TransactionTracker
             )
         );
     }

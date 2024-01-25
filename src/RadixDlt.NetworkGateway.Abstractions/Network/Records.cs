@@ -122,7 +122,8 @@ public sealed record WellKnownAddresses(
     string ConsensusManager,
     string GenesisHelper,
     string Faucet,
-    string PoolPackage
+    string PoolPackage,
+    string TransactionTracker
 );
 
 public enum AddressEntityType

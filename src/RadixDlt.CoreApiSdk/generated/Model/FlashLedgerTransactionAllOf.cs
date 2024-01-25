@@ -103,9 +103,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FlashLedgerTransactionAllOf" /> class.
         /// </summary>
+        /// <param name="name">Human-readable identifier of the flash transaction. (required).</param>
         /// <param name="flashedStateUpdates">flashedStateUpdates (required).</param>
-        public FlashLedgerTransactionAllOf(FlashedStateUpdates flashedStateUpdates = default(FlashedStateUpdates))
+        public FlashLedgerTransactionAllOf(string name = default(string), FlashedStateUpdates flashedStateUpdates = default(FlashedStateUpdates))
         {
+            // to ensure "name" is required (not null)
+            if (name == null)
+            {
+                throw new ArgumentNullException("name is a required property for FlashLedgerTransactionAllOf and cannot be null");
+            }
+            this.Name = name;
             // to ensure "flashedStateUpdates" is required (not null)
             if (flashedStateUpdates == null)
             {
@@ -113,6 +120,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.FlashedStateUpdates = flashedStateUpdates;
         }
+
+        /// <summary>
+        /// Human-readable identifier of the flash transaction.
+        /// </summary>
+        /// <value>Human-readable identifier of the flash transaction.</value>
+        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets or Sets FlashedStateUpdates
@@ -128,6 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class FlashLedgerTransactionAllOf {\n");
+            sb.Append("  Name: ").Append(Name).Append("\n");
             sb.Append("  FlashedStateUpdates: ").Append(FlashedStateUpdates).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -165,6 +180,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.Name == input.Name ||
+                    (this.Name != null &&
+                    this.Name.Equals(input.Name))
+                ) && 
+                (
                     this.FlashedStateUpdates == input.FlashedStateUpdates ||
                     (this.FlashedStateUpdates != null &&
                     this.FlashedStateUpdates.Equals(input.FlashedStateUpdates))
@@ -180,6 +200,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.Name != null)
+                {
+                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
+                }
                 if (this.FlashedStateUpdates != null)
                 {
                     hashCode = (hashCode * 59) + this.FlashedStateUpdates.GetHashCode();
