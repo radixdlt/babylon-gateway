@@ -3,10 +3,12 @@ Release Date: _unreleased_
 
 - Added support for new transaction types (flash transactions) that are gonna occur on protocol updates.
 - Moved vm_type to `package_code_history` table from package in `entity` table.
-- `vm_type`, `code_hash_hex` and `code_hex` are returned as collection (it's allowed after protocol update to have multiple codes per package). Previous properties will return empty strings to keep contract compatibility.
 - Created new `package_blueprint_aggregate_history` table which will hold pointers to all package blueprints.
 - Created new `package_code_aggregate_history` table which will hold pointers to all package codes. 
 - Extended well known addresses returned from `/status/network-configuration` with transaction tracker address.
+
+### Deprecations
+- Obsoleted `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of `codes` collection. With upcoming protocol upgrade it's going to be allowed to have multiple codes per package. Obsoleted properties will contain effective copy of the first element of the new collection for backwards compability.
 
 ## 1.2.4
 Release Date: 4.01.2024
