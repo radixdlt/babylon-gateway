@@ -167,11 +167,11 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<EntityType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionManifestClass>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerEventType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOperationType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerManifestClass>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PackageVmType>();
         modelBuilder.HasPostgresEnum<PendingTransactionPayloadLedgerStatus>();
@@ -274,7 +274,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<ManifestClassMarker>()
-            .HasIndex(e => new { TransactionType = e.ManifestClass, e.IsMostSpecific, e.StateVersion })
+            .HasIndex(e => new { TransactionType = e.LedgerTransactionManifestClass, e.IsMostSpecific, e.StateVersion })
             .HasFilter("discriminator = 'manifest_class'");
     }
 

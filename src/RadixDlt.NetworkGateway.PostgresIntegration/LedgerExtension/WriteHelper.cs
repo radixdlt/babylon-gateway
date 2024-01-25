@@ -205,7 +205,7 @@ internal class WriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY ledger_transactions (state_version, transaction_tree_hash, receipt_tree_hash, state_tree_hash, epoch, round_in_epoch, index_in_epoch, index_in_round, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, balance_changes, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_fee_source, receipt_fee_destination, receipt_costing_parameters, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_emitters, receipt_event_names, receipt_event_sbors, receipt_event_schema_entity_ids, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash, message, raw_payload, manifest_instructions) FROM STDIN (FORMAT BINARY)",
+            "COPY ledger_transactions (state_version, transaction_tree_hash, receipt_tree_hash, state_tree_hash, epoch, round_in_epoch, index_in_epoch, index_in_round, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, balance_changes, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_fee_source, receipt_fee_destination, receipt_costing_parameters, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_emitters, receipt_event_names, receipt_event_sbors, receipt_event_schema_entity_ids, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash, message, raw_payload, manifest_instructions, manifest_classes) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var lt in entities)
@@ -258,6 +258,7 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
                     break;
                 case UserLedgerTransaction ult:
                     await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Text, token);
@@ -266,6 +267,7 @@ internal class WriteHelper
                     await writer.WriteAsync(ult.Message, NpgsqlDbType.Jsonb, token);
                     await writer.WriteAsync(ult.RawPayload, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(ult.ManifestInstructions, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(ult.ManifestClasses, "ledger_transaction_manifest_class[]", token);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lt), lt, null);
@@ -351,7 +353,7 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(ttm.ManifestClass, "ledger_transaction_marker_manifest_class", token);
+                    await writer.WriteAsync(ttm.LedgerTransactionManifestClass, "ledger_transaction_manifest_class", token);
                     await writer.WriteAsync(ttm.IsMostSpecific, NpgsqlDbType.Boolean, token);
                     break;
                 default:

@@ -66,7 +66,7 @@ namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
 public class ManifestClassFilter
 {
-    public ManifestClass Class { get; set; }
+    public LedgerTransactionManifestClass Class { get; set; }
 
     public bool MatchOnlyMostSpecificType { get; set; }
 }

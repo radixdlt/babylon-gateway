@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240124105229_InitialCreate")]
+    [Migration("20240125111233_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -94,8 +94,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_default_deposit_rule", new[] { "accept", "reject", "allow_existing" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_resource_preference_rule", new[] { "allowed", "disallowed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity", "global_one_resource_pool", "global_two_resource_pool", "global_multi_resource_pool", "global_transaction_tracker" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from", "account_owner_method_call" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_origin_type", new[] { "user", "epoch_change" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address", "affected_global_entity", "manifest_class" });
@@ -2167,6 +2167,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("intent_hash");
 
+                    b.Property<LedgerTransactionManifestClass[]>("ManifestClasses")
+                        .IsRequired()
+                        .HasColumnType("ledger_transaction_manifest_class[]")
+                        .HasColumnName("manifest_classes");
+
                     b.Property<string>("ManifestInstructions")
                         .IsRequired()
                         .HasColumnType("text")
@@ -2277,11 +2282,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_most_specific");
 
-                    b.Property<LedgerTransactionMarkerManifestClass>("ManifestClass")
-                        .HasColumnType("ledger_transaction_marker_manifest_class")
+                    b.Property<LedgerTransactionManifestClass>("LedgerTransactionManifestClass")
+                        .HasColumnType("ledger_transaction_manifest_class")
                         .HasColumnName("manifest_class");
 
-                    b.HasIndex("ManifestClass", "IsMostSpecific", "StateVersion")
+                    b.HasIndex("LedgerTransactionManifestClass", "IsMostSpecific", "StateVersion")
                         .HasFilter("discriminator = 'manifest_class'");
 
                     b.ToTable("ledger_transaction_markers");

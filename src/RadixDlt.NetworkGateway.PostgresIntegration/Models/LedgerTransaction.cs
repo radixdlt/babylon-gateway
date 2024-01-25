@@ -235,6 +235,9 @@ internal class UserLedgerTransaction : LedgerTransaction
 
     [Column("manifest_instructions")]
     public string ManifestInstructions { get; set; }
+
+    [Column("manifest_classes")]
+    public LedgerTransactionManifestClass[] ManifestClasses { get; set; }
 }
 
 internal class RoundUpdateLedgerTransaction : LedgerTransaction
