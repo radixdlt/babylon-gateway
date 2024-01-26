@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   fullnode:
-    image: "radixdlt/babylon-node:v1.0.4"
+    image: "radixdlt/babylon-node:v1.1.0-rc.1"
     profiles: ["fullnode"]
     init: true
     ports:
