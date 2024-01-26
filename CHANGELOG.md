@@ -8,8 +8,8 @@ Release Date: _unreleased_
 ### What’s new?
 - Added new filters for the `/stream/transactions` endpoint: `accounts_with_manifest_owner_method_calls`, `accounts_without_manifest_owner_method_calls` and `manifest_class_filter`.
 - Extended response models returned by `/transaction/committed-details` and `/stream/transactions` endpoints:
-  - added `manifest_instructions` optional property and a corresponding opt-in for returning original manifest of user transactions,
-  - added optional `manifest_classes` property: a collection of zero or more manifest classes ordered from the most specific class to the least specific one.
+- added `manifest_instructions` optional property and a corresponding opt-in for returning original manifest of user transactions,
+- added optional `manifest_classes` property: a collection of zero or more manifest classes ordered from the most specific class to the least specific one.
 
 ### Deprecations
 - Obsoleted incorrectly named `access_rules_package` in favor of `role_assignment_module_package` on `NetworkConfigurationResponse.well_known_addresses`. Obsoleted property will contain effective copy of the new one for backwards compability.
@@ -26,8 +26,11 @@ Release Date: _unreleased_
 ### Deprecations
 - Obsoleted `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of `codes` collection. With upcoming protocol upgrade it's going to be allowed to have multiple codes per package. Obsoleted properties will contain effective copy of the first element of the new collection for backwards compability.
 
-### Deprecations
-- Obsoleted `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of `codes` collection. With upcoming protocol upgrade it's going to be allowed to have multiple codes per package. Obsoleted properties will contain effective copy of the first element of the new collection for backwards compability.
+
+## 1.2.5
+Release Date: 26.01.2024
+
+- Fixed broken (incompatible) Core API SDK
 
 ## 1.2.4
 Release Date: 4.01.2024
