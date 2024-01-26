@@ -1,3 +1,4 @@
+
 ## 1.3.0
 Release Date: _unreleased_
 
@@ -9,6 +10,12 @@ Release Date: _unreleased_
 
 ### Deprecations
 - Obsoleted `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of `codes` collection. With upcoming protocol upgrade it's going to be allowed to have multiple codes per package. Obsoleted properties will contain effective copy of the first element of the new collection for backwards compability.
+
+
+## 1.2.5
+Release Date: 26.01.2024
+
+- Fixed broken (incompatible) Core API SDK
 
 ## 1.2.4
 Release Date: 4.01.2024

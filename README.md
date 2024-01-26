@@ -6,6 +6,10 @@ This system is designed to be the Radix-run publicly exposed gateway into the Ba
 
 For documentation on the Gateway API, see the [Gateway API docs](https://docs-babylon.radixdlt.com/main/apis/api-specification.html).
 
+## Community Involvement
+
+If you have questions, suggestions or bug reports, please come to the [Network Gateway channel](https://discord.com/channels/417762285172555786/1149370695206318151) on the [Radix DLT Discord server](http://discord.gg/radixdlt).
+
 ## Structure
 
 The system is in three main parts:
