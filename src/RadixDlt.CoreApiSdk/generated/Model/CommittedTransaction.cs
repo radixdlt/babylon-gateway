@@ -106,9 +106,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="resultantStateIdentifiers">resultantStateIdentifiers (required).</param>
         /// <param name="ledgerTransaction">ledgerTransaction (required).</param>
         /// <param name="receipt">receipt (required).</param>
-        /// <param name="balanceChanges">balanceChanges.</param>
         /// <param name="proposerTimestampMs">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms. (required).</param>
-        public CommittedTransaction(CommittedStateIdentifier resultantStateIdentifiers = default(CommittedStateIdentifier), LedgerTransaction ledgerTransaction = default(LedgerTransaction), TransactionReceipt receipt = default(TransactionReceipt), CommittedTransactionBalanceChanges balanceChanges = default(CommittedTransactionBalanceChanges), long proposerTimestampMs = default(long))
+        public CommittedTransaction(CommittedStateIdentifier resultantStateIdentifiers = default(CommittedStateIdentifier), LedgerTransaction ledgerTransaction = default(LedgerTransaction), TransactionReceipt receipt = default(TransactionReceipt), long proposerTimestampMs = default(long))
         {
             // to ensure "resultantStateIdentifiers" is required (not null)
             if (resultantStateIdentifiers == null)
@@ -129,7 +128,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.Receipt = receipt;
             this.ProposerTimestampMs = proposerTimestampMs;
-            this.BalanceChanges = balanceChanges;
         }
 
         /// <summary>
@@ -151,12 +149,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public TransactionReceipt Receipt { get; set; }
 
         /// <summary>
-        /// Gets or Sets BalanceChanges
-        /// </summary>
-        [DataMember(Name = "balance_changes", EmitDefaultValue = true)]
-        public CommittedTransactionBalanceChanges BalanceChanges { get; set; }
-
-        /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms.
         /// </summary>
         /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the proposer timestamp in ms.</value>
@@ -174,7 +166,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ResultantStateIdentifiers: ").Append(ResultantStateIdentifiers).Append("\n");
             sb.Append("  LedgerTransaction: ").Append(LedgerTransaction).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
-            sb.Append("  BalanceChanges: ").Append(BalanceChanges).Append("\n");
             sb.Append("  ProposerTimestampMs: ").Append(ProposerTimestampMs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -227,11 +218,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Receipt.Equals(input.Receipt))
                 ) && 
                 (
-                    this.BalanceChanges == input.BalanceChanges ||
-                    (this.BalanceChanges != null &&
-                    this.BalanceChanges.Equals(input.BalanceChanges))
-                ) && 
-                (
                     this.ProposerTimestampMs == input.ProposerTimestampMs ||
                     this.ProposerTimestampMs.Equals(input.ProposerTimestampMs)
                 );
@@ -257,10 +243,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Receipt != null)
                 {
                     hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
-                }
-                if (this.BalanceChanges != null)
-                {
-                    hashCode = (hashCode * 59) + this.BalanceChanges.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.ProposerTimestampMs.GetHashCode();
                 return hashCode;

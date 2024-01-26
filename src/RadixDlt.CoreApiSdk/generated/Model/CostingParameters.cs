@@ -110,7 +110,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="finalizationCostUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the maximum amount of cost units available for the transaction finalization. (required).</param>
         /// <param name="xrdUsdPrice">The string-encoded decimal representing the price of 1 USD, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         /// <param name="xrdStoragePrice">The string-encoded decimal representing the price of 1 byte of storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
-        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
+        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
         public CostingParameters(string executionCostUnitPrice = default(string), long executionCostUnitLimit = default(long), long executionCostUnitLoan = default(long), string finalizationCostUnitPrice = default(string), long finalizationCostUnitLimit = default(long), string xrdUsdPrice = default(string), string xrdStoragePrice = default(string), int tipPercentage = default(int))
         {
             // to ensure "executionCostUnitPrice" is required (not null)
@@ -193,9 +193,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public string XrdStoragePrice { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
+        /// An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
         public int TipPercentage { get; set; }
 
