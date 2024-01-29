@@ -177,6 +177,19 @@ GROUP BY package_entity_id");
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<PackageVmType>(
+                name: "vm_type",
+                table: "entities",
+                type: "package_vm_type",
+                nullable: true);
+
+            migrationBuilder.Sql("update entities e set vm_type = (select vm_type from package_code_history pch where pch.package_entity_id = e.id)");
+
+            migrationBuilder.AlterColumn<PackageVmType>(
+                name: "vm_type",
+                table: "entities",
+                nullable: false);
+
             migrationBuilder.DropTable(
                 name: "package_blueprint_aggregate_history");
 
@@ -194,12 +207,6 @@ GROUP BY package_entity_id");
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
                 .OldAnnotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash");
-
-            migrationBuilder.AddColumn<PackageVmType>(
-                name: "vm_type",
-                table: "entities",
-                type: "package_vm_type",
-                nullable: true);
         }
     }
 }
