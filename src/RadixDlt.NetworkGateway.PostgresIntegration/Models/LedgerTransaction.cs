@@ -238,6 +238,10 @@ internal class RoundUpdateLedgerTransaction : LedgerTransaction
 {
 }
 
+internal class FlashLedgerTransaction : LedgerTransaction
+{
+}
+
 internal class TransactionReceipt
 {
     private readonly LedgerTransaction _ledgerTransaction;

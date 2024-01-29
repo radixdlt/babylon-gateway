@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
-  version: v1.2.2
+  version: v1.3.0
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
     url: https://www.radixfoundation.org/licenses/license-v1
   x-logo:
-    url: https://docs-babylon.radixdlt.com/main/_images/radix-logo-banner.png
+    url: https://cdn.document360.io/50e78792-5410-4ac9-aa43-4612b4d33953/Images/Documentation/radix-logo-banner.png
     href: https://docs.radixdlt.com
   description: |
     This API is exposed by the Babylon Radix Gateway to enable clients to efficiently query current and historic
@@ -1177,7 +1177,7 @@ paths:
   /state/entity/page/fungibles/:
     post:
       operationId: EntityFungiblesPage
-      summary: Get Entity Fungible Resource Totals Page aggregated globally
+      summary: Get page of Global Entity Fungible Resource Balances
       description: |
         Returns the total amount of each fungible resource owned by a given global entity.
         Result can be aggregated globally or per vault.
@@ -1203,7 +1203,7 @@ paths:
   /state/entity/page/fungible-vaults/:
     post:
       operationId: EntityFungibleResourceVaultPage
-      summary: Get vault page of Entity Fungible resource aggregated per vault
+      summary: Get page of Global Entity Fungible Resource Vaults
       description: |
         Returns vaults for fungible resource owned by a given global entity.
         The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
@@ -1228,7 +1228,7 @@ paths:
   /state/entity/page/non-fungibles/:
     post:
       operationId: EntityNonFungiblesPage
-      summary: Get Entity Non-Fungible Resource Totals Page aggregated globally
+      summary: Get page of Global Entity Non-Fungible Resource Balances
       description: |
         Returns the total amount of each non-fungible resource owned by a given global entity.
         Result can be aggregated globally or per vault.
@@ -1254,7 +1254,7 @@ paths:
   /state/entity/page/non-fungible-vaults/:
     post:
       operationId: EntityNonFungibleResourceVaultPage
-      summary: Get vault page of Entity Non Fungible aggregated per vault
+      summary: Get page of Global Entity Non-Fungible Resource Vaults
       description: |
         Returns vaults for non fungible resource owned by a given global entity.
         The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
@@ -1279,7 +1279,7 @@ paths:
   /state/entity/page/non-fungible-vault/ids:
     post:
       operationId: EntityNonFungibleIdsPage
-      summary: Get Entity Non-Fungible IDs
+      summary: Get page of Non-Fungibles in Vault
       description: |
         Returns all non-fungible IDs of a given non-fungible resource owned by a given entity.
         The returned response is in a paginated format, ordered by the resource's first appearence on the ledger.
@@ -1304,7 +1304,7 @@ paths:
   /state/non-fungible/ids:
     post:
       operationId: NonFungibleIds
-      summary: Get Non-Fungible Collection
+      summary: Get page of Non-Fungible Ids in Resource Collection
       description: |
         Returns the non-fungible IDs of a given non-fungible resource.
         Returned response is in a paginated format, ordered by their first appearance on the ledger.
@@ -2360,6 +2360,7 @@ components:
             - genesis_helper
             - faucet
             - pool_package
+            - transaction_tracker
           properties:
             xrd:
               $ref: "#/components/schemas/Address"
@@ -2412,6 +2413,8 @@ components:
             faucet:
               $ref: "#/components/schemas/Address"
             pool_package:
+              $ref: "#/components/schemas/Address"
+            transaction_tracker:
               $ref: "#/components/schemas/Address"
 
     GatewayStatusResponse:
@@ -3104,20 +3107,31 @@ components:
               $ref: "#/components/schemas/Address"
             balance:
               $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
+
     StateEntityDetailsResponsePackageDetails:
+      description: "vm_type, code_hash_hex and code_hex are always going to be empty, use `codes` property which will return collection (it's possible after protocol update that package might have multiple codes)"
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
+            - codes
             - vm_type
             - code_hash_hex
             - code_hex
           properties:
+            codes:
+              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsCodeCollection"
             vm_type:
+              description: "Obsolete! Use codes collection"
+              deprecated: true
               $ref: "#/components/schemas/PackageVmType"
             code_hash_hex:
+              description: "Obsolete! Use codes collection"
+              deprecated: true
               $ref: "#/components/schemas/HexString"
             code_hex:
+              description: "Obsolete! Use codes collection"
+              deprecated: true
               $ref: "#/components/schemas/HexString"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
@@ -3125,6 +3139,30 @@ components:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
             schemas:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaCollection"
+    StateEntityDetailsResponsePackageDetailsCodeCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/PackageCodeCollectionItem"
+    PackageCodeCollectionItem:
+      type: object
+      required:
+        - vm_type
+        - code_hash_hex
+        - code_hex
+      properties:
+        vm_type:
+          $ref: "#/components/schemas/PackageVmType"
+        code_hash_hex:
+          $ref: "#/components/schemas/HexString"
+        code_hex:
+          $ref: "#/components/schemas/HexString"
     StateEntityDetailsResponsePackageDetailsBlueprintCollection:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"

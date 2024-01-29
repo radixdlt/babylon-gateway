@@ -250,8 +250,6 @@ internal class GlobalIdentityEntity : ComponentEntity
 
 internal class GlobalPackageEntity : ComponentEntity
 {
-    [Column("vm_type")]
-    public PackageVmType VmType { get; set; }
 }
 
 // This is transient model, not stored in database

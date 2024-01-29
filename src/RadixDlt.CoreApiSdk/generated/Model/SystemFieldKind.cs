@@ -96,10 +96,16 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum SystemFieldKind
     {
         /// <summary>
+        /// Enum BootLoader for value: BootLoader
+        /// </summary>
+        [EnumMember(Value = "BootLoader")]
+        BootLoader = 1,
+
+        /// <summary>
         /// Enum TypeInfo for value: TypeInfo
         /// </summary>
         [EnumMember(Value = "TypeInfo")]
-        TypeInfo = 1
+        TypeInfo = 2
 
     }
 

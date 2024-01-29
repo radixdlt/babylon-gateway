@@ -1,10 +1,28 @@
+
+## 1.3.0
+Release Date: 29.01.2024
+
+Adds support for protocol updates (in general) and the anemone update in particular.
+
+### API Changes
+
+- Adds support for a new transaction type (flash transactions) that occur during protocol updates.
+- Extends well known addresses returned from `/status/network-configuration` to include the transaction tracker address.
+- **DEPRECATION** - Obsoletes the `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of the `codes` collection. With the upcoming protocol upgrade it will be possible to have multiple codes per package. The obsoleted properties will contain an effective copy of the first element of the new collection for backwards compability.
+
+### Database changes
+
+- Moves `vm_type` to `package_code_history` table from package in `entity` table.
+- Creates new `package_blueprint_aggregate_history` table which will hold pointers to all package blueprints.
+- Creates new `package_code_aggregate_history` table which will hold pointers to all package codes.
+
 ## 1.2.5
 Release Date: 26.01.2024
 
 - Fixed broken (incompatible) Core API SDK
 
 ## 1.2.4
-Release Date: 04.01.2024
+Release Date: 4.01.2024
 
 - Extended validator's data returned from `/state/validators/list`: added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
 - Enable retries on transient database connectivity issues in gateway api.

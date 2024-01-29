@@ -64,6 +64,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
@@ -117,6 +118,20 @@ internal class TransactionBalanceChangesService : ITransactionBalanceChangesServ
         {
             try
             {
+                if (transaction.BalanceChanges != null)
+                {
+                    var storedBalanceChanges = JsonConvert.DeserializeObject<CoreModel.CommittedTransactionBalanceChanges>(transaction.BalanceChanges);
+
+                    if (storedBalanceChanges == null)
+                    {
+                        throw new InvalidOperationException("Unable to deserialize stored balance changes into CoreModel.CommittedTransactionBalanceChanges");
+                    }
+
+                    result.TryAdd(transaction.StateVersion, storedBalanceChanges.ToGatewayModel());
+
+                    return;
+                }
+
                 var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
                 await _observers.ForEachAsync(x => x.PreHandleOutcomeRequest(transaction.StateVersion, selectedNode.Name));
 
@@ -132,7 +147,12 @@ internal class TransactionBalanceChangesService : ITransactionBalanceChangesServ
                     throw balanceChangesResult.FailureResponse.OriginalApiException;
                 }
 
-                var balanceChanges = balanceChangesResult.SuccessResponse.CommittedTransactionOutcomes.Single();
+                var balanceChanges = balanceChangesResult.SuccessResponse.CommittedTransactionOutcomes.FirstOrDefault();
+
+                if (balanceChanges == null)
+                {
+                    return;
+                }
 
                 await _observers.ForEachAsync(x => x.PostHandleOutcomeRequest(transaction.StateVersion, selectedNode.Name));
 

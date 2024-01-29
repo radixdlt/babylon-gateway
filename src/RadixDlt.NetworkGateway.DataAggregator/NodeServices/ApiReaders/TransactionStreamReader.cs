@@ -107,6 +107,7 @@ internal class TransactionStreamReader : ITransactionStreamReader
                         Blobs = true,
                         Manifest = true,
                         Message = true,
+                        BalanceChanges = true,
                         RawLedgerTransaction = false,
                         RawNotarizedTransaction = true,
                         RawSystemTransaction = false,

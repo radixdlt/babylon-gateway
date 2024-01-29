@@ -101,14 +101,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="manifest">Whether to return the raw manifest (default true).</param>
         /// <param name="blobs">Whether to return the hex-encoded blobs (default false).</param>
         /// <param name="message">Whether to return the transaction message (default true).</param>
+        /// <param name="balanceChanges">Whether to return the transaction balance changes (default false).</param>
         /// <param name="rawSystemTransaction">Whether to return the raw hex-encoded system transaction bytes (default false).</param>
         /// <param name="rawNotarizedTransaction">Whether to return the raw hex-encoded notarized transaction bytes (default true).</param>
         /// <param name="rawLedgerTransaction">Whether to return the raw hex-encoded ledger transaction bytes (default false).</param>
-        public TransactionFormatOptions(bool manifest = default(bool), bool blobs = default(bool), bool message = default(bool), bool rawSystemTransaction = default(bool), bool rawNotarizedTransaction = default(bool), bool rawLedgerTransaction = default(bool))
+        public TransactionFormatOptions(bool manifest = default(bool), bool blobs = default(bool), bool message = default(bool), bool balanceChanges = default(bool), bool rawSystemTransaction = default(bool), bool rawNotarizedTransaction = default(bool), bool rawLedgerTransaction = default(bool))
         {
             this.Manifest = manifest;
             this.Blobs = blobs;
             this.Message = message;
+            this.BalanceChanges = balanceChanges;
             this.RawSystemTransaction = rawSystemTransaction;
             this.RawNotarizedTransaction = rawNotarizedTransaction;
             this.RawLedgerTransaction = rawLedgerTransaction;
@@ -134,6 +136,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>Whether to return the transaction message (default true)</value>
         [DataMember(Name = "message", EmitDefaultValue = true)]
         public bool Message { get; set; }
+
+        /// <summary>
+        /// Whether to return the transaction balance changes (default false)
+        /// </summary>
+        /// <value>Whether to return the transaction balance changes (default false)</value>
+        [DataMember(Name = "balance_changes", EmitDefaultValue = true)]
+        public bool BalanceChanges { get; set; }
 
         /// <summary>
         /// Whether to return the raw hex-encoded system transaction bytes (default false)
@@ -167,6 +176,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
             sb.Append("  Blobs: ").Append(Blobs).Append("\n");
             sb.Append("  Message: ").Append(Message).Append("\n");
+            sb.Append("  BalanceChanges: ").Append(BalanceChanges).Append("\n");
             sb.Append("  RawSystemTransaction: ").Append(RawSystemTransaction).Append("\n");
             sb.Append("  RawNotarizedTransaction: ").Append(RawNotarizedTransaction).Append("\n");
             sb.Append("  RawLedgerTransaction: ").Append(RawLedgerTransaction).Append("\n");
@@ -218,6 +228,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Message.Equals(input.Message)
                 ) && 
                 (
+                    this.BalanceChanges == input.BalanceChanges ||
+                    this.BalanceChanges.Equals(input.BalanceChanges)
+                ) && 
+                (
                     this.RawSystemTransaction == input.RawSystemTransaction ||
                     this.RawSystemTransaction.Equals(input.RawSystemTransaction)
                 ) && 
@@ -243,6 +257,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 hashCode = (hashCode * 59) + this.Manifest.GetHashCode();
                 hashCode = (hashCode * 59) + this.Blobs.GetHashCode();
                 hashCode = (hashCode * 59) + this.Message.GetHashCode();
+                hashCode = (hashCode * 59) + this.BalanceChanges.GetHashCode();
                 hashCode = (hashCode * 59) + this.RawSystemTransaction.GetHashCode();
                 hashCode = (hashCode * 59) + this.RawNotarizedTransaction.GetHashCode();
                 hashCode = (hashCode * 59) + this.RawLedgerTransaction.GetHashCode();
