@@ -64,16 +64,26 @@
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace DataAggregator;
 
 public static class Program
 {
+    public record DevOpsLogs;
+
     public static async Task Main(string[] args)
     {
         using var host = CreateHostBuilder(args).Build();
+
+        var logger = host.Services.GetRequiredService<ILogger<DevOpsLogs>>();
+        var al = host.Services.GetRequiredService<IHostApplicationLifetime>();
+        al.ApplicationStarted.Register(() => logger.LogError("DEVOPS_TRACKER: DA STARTED"));
+        al.ApplicationStopping.Register(() => logger.LogError("DEVOPS_TRACKER: DA STOPPING"));
+        al.ApplicationStopped.Register(() => logger.LogError("DEVOPS_TRACKER: DA STOPPED"));
 
         await host.RunAsync();
     }

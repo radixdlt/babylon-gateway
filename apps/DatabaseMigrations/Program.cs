@@ -65,16 +65,26 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.PostgresIntegration;
+using System;
 using System.Threading.Tasks;
 
 namespace DatabaseMigrations;
 
 public static class Program
 {
+    public record DevOpsLogs;
+
     public static async Task Main(string[] args)
     {
         using var host = CreateHostBuilder(args).Build();
+
+        var logger = host.Services.GetRequiredService<ILogger<DevOpsLogs>>();
+        var al = host.Services.GetRequiredService<IHostApplicationLifetime>();
+        al.ApplicationStarted.Register(() => logger.LogError("DEVOPS_TRACKER: DB MIGRATIONS STARTED"));
+        al.ApplicationStopping.Register(() => logger.LogError("DEVOPS_TRACKER: DB MIGRATIONS STOPPING"));
+        al.ApplicationStopped.Register(() => logger.LogError("DEVOPS_TRACKER: DB MIGRATIONS STOPPED"));
 
         await host.StartAsync();
 
@@ -82,6 +92,10 @@ public static class Program
         {
             // backwards compability with Olympia
             var wipeDatabase = host.Services.GetRequiredService<IConfiguration>().GetValue<bool>("WIPE_DATABASE");
+
+            logger.LogError("DEVOPS_TRACKER: DB MIGRATIONS WAITING FOR 2 MINUTES TO SIMULATE LONG-RUNNING MIGRATION");
+            await Task.Delay(TimeSpan.FromMinutes(2));
+            logger.LogError("DEVOPS_TRACKER: DB MIGRATIONS WAITED FOR 2 MINUTES TO SIMULATE LONG-RUNNING MIGRATION");
 
             await host.ExecutePostgresMigrations(wipeDatabase);
         }
