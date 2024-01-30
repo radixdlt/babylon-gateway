@@ -65,15 +65,13 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -89,47 +87,47 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
 {
     private readonly ILogger<LedgerTransactionsProcessor> _logger;
     private readonly IOptionsMonitor<LedgerConfirmationOptions> _ledgerConfirmationOptionsMonitor;
-    private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILedgerExtenderService _ledgerExtenderService;
     private readonly IEnumerable<ILedgerConfirmationServiceObserver> _observers;
     private readonly ITopOfLedgerProvider _topOfLedgerProvider;
-    private readonly IClock _clock;
     private readonly IFetchedTransactionStore _fetchedTransactionStore;
-
-    private IList<CoreApiNode> TransactionNodes { get; set; } = new List<CoreApiNode>();
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IClock _clock;
 
     private LedgerConfirmationOptions Config { get; set; }
 
     public LedgerTransactionsProcessor(
         ILogger<LedgerTransactionsProcessor> logger,
         IOptionsMonitor<LedgerConfirmationOptions> ledgerConfirmationOptionsMonitor,
-        IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
         ISystemStatusService systemStatusService,
         ILedgerExtenderService ledgerExtenderService,
         IEnumerable<ILedgerConfirmationServiceObserver> observers,
         IFetchedTransactionStore fetchedTransactionStore,
-        IClock clock,
-        ITopOfLedgerProvider topOfLedgerProvider)
+        ITopOfLedgerProvider topOfLedgerProvider,
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IClock clock)
     {
         _logger = logger;
         _ledgerConfirmationOptionsMonitor = ledgerConfirmationOptionsMonitor;
-        _networkOptionsMonitor = networkOptionsMonitor;
         _systemStatusService = systemStatusService;
         _ledgerExtenderService = ledgerExtenderService;
         _observers = observers;
-        _clock = clock;
-        _topOfLedgerProvider = topOfLedgerProvider;
         _fetchedTransactionStore = fetchedTransactionStore;
+        _topOfLedgerProvider = topOfLedgerProvider;
+        _clock = clock;
+        _networkConfigurationProvider = networkConfigurationProvider;
         Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
 
     public async Task ProcessTransactions(CancellationToken token)
     {
+        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
         var lastCommittedTransactionSummary = await _topOfLedgerProvider.GetTopOfLedger(token);
         await _observers.ForEachAsync(x => x.PreHandleLedgerExtension(_clock.UtcNow));
 
-        PrepareForLedgerExtensionCheck();
+        Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
+
         var transactions = ConstructLedgerExtension(lastCommittedTransactionSummary);
 
         if (transactions.Count == 0)
@@ -146,17 +144,6 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         HandleLedgerExtensionSuccess(consistentLedgerExtension, totalCommitMs, commitReport);
 
         await DelayBetweenIngestionBatchesIfRequested(commitReport);
-    }
-
-    private void PrepareForLedgerExtensionCheck()
-    {
-        TransactionNodes = _networkOptionsMonitor
-            .CurrentValue
-            .CoreApiNodes
-            .Where(n => n.Enabled && !n.DisabledForTransactionIndexing)
-            .ToList();
-
-        Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
 
     private List<CoreModel.CommittedTransaction> ConstructLedgerExtension(TransactionSummary topOfLedger)

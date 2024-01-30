@@ -108,7 +108,7 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
     private async Task<NetworkConfiguration> ReadNetworkConfiguration()
     {
         using var scope = _serviceProvider.CreateScope();
-        var coreApiNode = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<NetworkOptions>>().CurrentValue.CoreApiNodes.Where(n => n.Enabled).GetRandomBy(x => (double)x.RequestWeighting);
+        var coreApiNode = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<NetworkOptions>>().CurrentValue.CoreApiNodes.GetRandomEnabledNode();
         scope.ServiceProvider.GetRequiredService<ICoreApiNodeConfigurator>().CoreApiNode = coreApiNode;
         var coreApiProvider = scope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
 

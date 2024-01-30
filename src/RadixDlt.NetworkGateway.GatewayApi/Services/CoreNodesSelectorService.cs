@@ -105,8 +105,7 @@ internal class CoreNodesSelectorService : ICoreNodesSelectorService
 
         _allEnabledCoreNodes = networkOptions
             .CoreApiNodes
-            .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
-            .ToList();
+            .GetEnabledNodes();
 
         _nodesInTheTopTierStatus = new List<CoreApiNode>(_allEnabledCoreNodes);
     }

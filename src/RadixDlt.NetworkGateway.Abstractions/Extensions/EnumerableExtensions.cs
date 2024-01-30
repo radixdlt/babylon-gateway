@@ -86,20 +86,6 @@ public static class EnumerableExtensions
         }
     }
 
-    public static IEnumerable<TSource> ExceptInSet<TSource>(
-        this IEnumerable<TSource> source,
-        IReadOnlySet<TSource> set
-    )
-    {
-        foreach (var item in source)
-        {
-            if (!set.Contains(item))
-            {
-                yield return item;
-            }
-        }
-    }
-
     public static TItem GetRandomBy<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
     {
         var allItems = items.ToList();
@@ -122,17 +108,6 @@ public static class EnumerableExtensions
 
         // Shouldn't happen - but let's do something sensible anyway
         return allItems[0];
-    }
-
-    private record ItemWithResult<TItem>(TItem Item, double Result);
-
-    public static List<TItem> GetWeightedRandomOrdering<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
-    {
-        return items
-            .Select(item => new ItemWithResult<TItem>(item, Random.Shared.NextDouble() * weightingSelector(item)))
-            .OrderByDescending(x => x.Result)
-            .Select(x => x.Item)
-            .ToList();
     }
 
     public static void ForEach<T>(this IEnumerable<T> source, Action<T> callback)

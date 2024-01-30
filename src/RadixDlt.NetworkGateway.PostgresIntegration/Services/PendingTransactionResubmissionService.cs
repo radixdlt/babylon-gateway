@@ -73,7 +73,6 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -216,7 +215,10 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
             if (canResubmit)
             {
                 _observers.ForEach(x => x.TransactionMarkedAsSubmissionPending());
-                transactionsToResubmitWithNodes.Add(new PendingTransactionWithChosenNode(transaction, GetRandomCoreApi()));
+
+                var coreApiNode = _networkOptionsMonitor.CurrentValue.CoreApiNodes.GetRandomEnabledNodeForConstruction();
+
+                transactionsToResubmitWithNodes.Add(new PendingTransactionWithChosenNode(transaction, coreApiNode));
             }
             else
             {
@@ -296,15 +298,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         );
 
         return new ContextualSubmissionResult(transaction, chosenNode.Name, result);
-    }
-
-    private CoreApiNode GetRandomCoreApi()
-    {
-        return _networkOptionsMonitor
-            .CurrentValue
-            .CoreApiNodes
-            .Where(n => n.Enabled && !n.DisabledForConstruction)
-            .GetRandomBy(n => (double)n.RequestWeighting);
     }
 
     private async Task<ulong> GetCurrentEpoch(CancellationToken cancellationToken)
