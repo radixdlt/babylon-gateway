@@ -120,7 +120,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="intentStatusDescription">An additional description to clarify the intent status.  (required).</param>
         /// <param name="knownPayloads">knownPayloads (required).</param>
         /// <param name="committedStateVersion">If the intent was committed, this gives the state version when this intent was committed. .</param>
-        /// <param name="permanentlyRejectsAtEpoch">epoch in which transaction will be considered permanently rejected..</param>
+        /// <param name="permanentlyRejectsAtEpoch">The epoch number at which the transaction is guaranteed to get permanently rejected by the Network due to exceeded epoch range defined when submitting transaction..</param>
         /// <param name="errorMessage">The most relevant error message received, due to a rejection or commit as failure. Please note that presence of an error message doesn&#39;t imply that the intent will definitely reject or fail. This could represent a temporary error (such as out of fees), or an error with a payload which doesn&#39;t end up being committed. .</param>
         public TransactionStatusResponseAllOf(TransactionStatus status = default(TransactionStatus), TransactionIntentStatus intentStatus = default(TransactionIntentStatus), string intentStatusDescription = default(string), List<TransactionStatusResponseKnownPayloadItem> knownPayloads = default(List<TransactionStatusResponseKnownPayloadItem>), long? committedStateVersion = default(long?), string permanentlyRejectsAtEpoch = default(string), string errorMessage = default(string))
         {
@@ -164,9 +164,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public long? CommittedStateVersion { get; set; }
 
         /// <summary>
-        /// epoch in which transaction will be considered permanently rejected.
+        /// The epoch number at which the transaction is guaranteed to get permanently rejected by the Network due to exceeded epoch range defined when submitting transaction.
         /// </summary>
-        /// <value>epoch in which transaction will be considered permanently rejected.</value>
+        /// <value>The epoch number at which the transaction is guaranteed to get permanently rejected by the Network due to exceeded epoch range defined when submitting transaction.</value>
         [DataMember(Name = "permanently_rejects_at_epoch", EmitDefaultValue = true)]
         public string PermanentlyRejectsAtEpoch { get; set; }
 

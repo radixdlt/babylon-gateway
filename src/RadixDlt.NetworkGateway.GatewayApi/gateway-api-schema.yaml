@@ -2663,7 +2663,7 @@ components:
               format: int64
               nullable: true
             permanently_rejects_at_epoch:
-              description: epoch in which transaction will be considered permanently rejected.
+              description: The epoch number at which the transaction is guaranteed to get permanently rejected by the Network due to exceeded epoch range defined when submitting transaction.
               type: string
             error_message:
               description: |
