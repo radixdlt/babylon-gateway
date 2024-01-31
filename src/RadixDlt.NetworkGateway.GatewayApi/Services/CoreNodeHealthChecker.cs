@@ -122,10 +122,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
 
     public async Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken)
     {
-        var coreNodes = _networkOptionsMonitor.CurrentValue.CoreApiNodes;
-        var enabledCoreNodes = coreNodes
-            .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
-            .ToList();
+        var enabledCoreNodes = _networkOptionsMonitor.CurrentValue.CoreApiNodes.GetEnabledNodes();
 
         if (!enabledCoreNodes.Any())
         {
@@ -133,7 +130,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
             return new CoreNodeHealthResult(new Dictionary<CoreNodeStatus, List<CoreApiNode>>());
         }
 
-        var enabledCoreNodeStateVersionLookupTasks = coreNodes
+        var enabledCoreNodeStateVersionLookupTasks = enabledCoreNodes
             .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .Select(n => GetCoreNodeStateVersion(n, _networkOptionsMonitor.CurrentValue.NetworkName, cancellationToken));
 

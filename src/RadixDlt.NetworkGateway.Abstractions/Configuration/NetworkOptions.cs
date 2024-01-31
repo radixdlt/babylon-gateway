@@ -65,6 +65,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
@@ -132,10 +133,18 @@ public sealed class NetworkOptionsValidator : AbstractOptionsValidator<NetworkOp
 {
     public NetworkOptionsValidator()
     {
-        RuleFor(x => x.NetworkName).NotNull();
-        RuleFor(x => x.CoreApiNodes).NotNull();
-        RuleForEach(x => x.CoreApiNodes).SetValidator(new CoreApiNodeOptionsValidator());
-        RuleFor(x => x.MaxAllowedStateVersionLagToBeConsideredSynced).GreaterThan(0);
+        RuleFor(x => x.NetworkName)
+            .NotEmpty();
+
+        RuleFor(x => x.CoreApiNodes)
+            .NotEmpty()
+            .Must(x => x.Any(n => n.Enabled)).WithMessage("At least one Core API Node must be enabled");
+
+        RuleForEach(x => x.CoreApiNodes)
+            .SetValidator(new CoreApiNodeOptionsValidator());
+
+        RuleFor(x => x.MaxAllowedStateVersionLagToBeConsideredSynced)
+            .GreaterThan(0);
     }
 }
 
@@ -145,8 +154,11 @@ public sealed class CoreApiNodeOptionsValidator : AbstractOptionsValidator<CoreA
     {
         When(x => x.Enabled, () =>
         {
-            RuleFor(x => x.Name).NotNull();
-            RuleFor(x => x.CoreApiAddress).NotNull();
+            RuleFor(x => x.Name)
+                .NotEmpty();
+
+            RuleFor(x => x.CoreApiAddress)
+                .NotEmpty();
         });
     }
 }

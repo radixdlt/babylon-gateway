@@ -125,11 +125,7 @@ public sealed class NodeConfigurationMonitorWorker : BaseGlobalWorker
 
     private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
     {
-        var nodeConfiguration = _networkOptions.CurrentValue.CoreApiNodes;
-
-        var enabledNodes = nodeConfiguration
-            .Where(n => n.Enabled)
-            .ToList();
+        var enabledNodes = _networkOptions.CurrentValue.CoreApiNodes.GetEnabledNodes();
 
         await _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, stoppingToken);
     }
