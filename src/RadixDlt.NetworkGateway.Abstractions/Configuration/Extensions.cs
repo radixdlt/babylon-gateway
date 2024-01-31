@@ -66,7 +66,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -76,28 +75,28 @@ public static class Extensions
 {
     public static List<CoreApiNode> GetEnabledNodes(this ICollection<CoreApiNode> nodes)
     {
-        return nodes.Where(n => n.Enabled).ToList();
-    }
-
-    public static CoreApiNode GetRandomEnabledNode(this ICollection<CoreApiNode> nodes)
-    {
-        var availableNodes = nodes.Where(n => n.Enabled).ToArray();
+        var availableNodes = nodes.Where(n => n.Enabled).ToList();
 
         if (!availableNodes.Any())
         {
             throw new InvalidConfigurationException("No Core API Nodes have been defined as enabled.");
         }
 
-        return availableNodes.GetRandomBy(x => (double)x.RequestWeighting);
+        return availableNodes;
+    }
+
+    public static CoreApiNode GetRandomEnabledNode(this ICollection<CoreApiNode> nodes)
+    {
+        return GetEnabledNodes(nodes).GetRandomBy(x => (double)x.RequestWeighting);
     }
 
     public static CoreApiNode GetRandomEnabledNodeForConstruction(this ICollection<CoreApiNode> nodes)
     {
-        var availableNodes = nodes.Where(n => n.Enabled && !n.DisabledForConstruction).ToArray();
+        var availableNodes = GetEnabledNodes(nodes).Where(n => !n.DisabledForConstruction).ToArray();
 
         if (!availableNodes.Any())
         {
-            throw new InvalidConfigurationException("No Core API Nodes have been defined as enabled for construction.");
+            throw new InvalidConfigurationException("No Core API Nodes have been enabled for construction.");
         }
 
         return availableNodes.GetRandomBy(x => (double)x.RequestWeighting);
