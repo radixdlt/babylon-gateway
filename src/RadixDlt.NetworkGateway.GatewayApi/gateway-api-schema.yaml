@@ -2662,6 +2662,9 @@ components:
               type: integer
               format: int64
               nullable: true
+            permanently_rejects_at_epoch:
+              description: epoch in which transaction will be considered permanently rejected.
+              type: string
             error_message:
               description: |
                 The most relevant error message received, due to a rejection or commit as failure.
