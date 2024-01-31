@@ -66,6 +66,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -82,17 +83,17 @@ internal record PendingTransactionSummary(
 
 internal class PendingTransactionResponseAggregator
 {
-    private readonly GatewayApiSdk.Model.LedgerState _ledgerState;
+    private readonly GatewayModel.LedgerState _ledgerState;
     private readonly string? _committedPayloadHash;
     private readonly long? _committedStateVersion;
-    private readonly List<GatewayApiSdk.Model.TransactionStatusResponseKnownPayloadItem> _knownPayloads = new();
-    private readonly GatewayApiSdk.Model.TransactionIntentStatus? _committedIntentStatus;
+    private readonly List<GatewayModel.TransactionStatusResponseKnownPayloadItem> _knownPayloads = new();
+    private readonly GatewayModel.TransactionIntentStatus? _committedIntentStatus;
     private readonly string? _committedErrorMessage;
     private PendingTransactionIntentLedgerStatus _mostAccuratePendingTransactionIntentLedgerStatus = PendingTransactionIntentLedgerStatus.Unknown;
     private string? _rejectionReasonForMostAccurateIntentLedgerStatus;
     private ulong? _rejectionEpoch;
 
-    internal PendingTransactionResponseAggregator(GatewayApiSdk.Model.LedgerState ledgerState, TransactionQuerier.CommittedTransactionSummary? committedTransactionSummary)
+    internal PendingTransactionResponseAggregator(GatewayModel.LedgerState ledgerState, TransactionQuerier.CommittedTransactionSummary? committedTransactionSummary)
     {
         _ledgerState = ledgerState;
 
@@ -106,22 +107,22 @@ internal class PendingTransactionResponseAggregator
 
         var (legacyStatus, payloadStatus, intentStatus) = committedTransactionSummary.Status switch
         {
-            LedgerTransactionStatus.Succeeded => (GatewayApiSdk.Model.TransactionStatus.CommittedSuccess, GatewayApiSdk.Model.TransactionPayloadStatus.CommittedSuccess,
-                GatewayApiSdk.Model.TransactionIntentStatus.CommittedSuccess),
-            LedgerTransactionStatus.Failed => (GatewayApiSdk.Model.TransactionStatus.CommittedFailure, GatewayApiSdk.Model.TransactionPayloadStatus.CommittedFailure,
-                GatewayApiSdk.Model.TransactionIntentStatus.CommittedFailure),
+            LedgerTransactionStatus.Succeeded => (GatewayModel.TransactionStatus.CommittedSuccess, GatewayModel.TransactionPayloadStatus.CommittedSuccess,
+                GatewayModel.TransactionIntentStatus.CommittedSuccess),
+            LedgerTransactionStatus.Failed => (GatewayModel.TransactionStatus.CommittedFailure, GatewayModel.TransactionPayloadStatus.CommittedFailure,
+                GatewayModel.TransactionIntentStatus.CommittedFailure),
         };
 
         _committedIntentStatus = intentStatus;
         _committedErrorMessage = committedTransactionSummary.ErrorMessage;
 
-        _knownPayloads.Add(new GatewayApiSdk.Model.TransactionStatusResponseKnownPayloadItem(
+        _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
             payloadHash: committedTransactionSummary.PayloadHash,
             status: legacyStatus,
             payloadStatus: payloadStatus,
             payloadStatusDescription: GetPayloadStatusDescription(payloadStatus),
             errorMessage: committedTransactionSummary.ErrorMessage,
-            handlingStatus: GatewayApiSdk.Model.TransactionPayloadGatewayHandlingStatus.Concluded,
+            handlingStatus: GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
             handlingStatusReason: "The transaction is committed",
             submissionError: null
         ));
@@ -136,21 +137,21 @@ internal class PendingTransactionResponseAggregator
 
         var (legacyStatus, payloadStatus) = pendingTransactionSummary.PayloadStatus switch
         {
-            PendingTransactionPayloadLedgerStatus.Unknown => (GatewayApiSdk.Model.TransactionStatus.Unknown, GatewayApiSdk.Model.TransactionPayloadStatus.Unknown),
-            PendingTransactionPayloadLedgerStatus.Committed => (GatewayApiSdk.Model.TransactionStatus.Pending, GatewayApiSdk.Model.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
-            PendingTransactionPayloadLedgerStatus.CommitPending => (GatewayApiSdk.Model.TransactionStatus.Pending, GatewayApiSdk.Model.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
-            PendingTransactionPayloadLedgerStatus.ClashingCommit => (GatewayApiSdk.Model.TransactionStatus.Rejected, GatewayApiSdk.Model.TransactionPayloadStatus.PermanentlyRejected),
-            PendingTransactionPayloadLedgerStatus.PermanentlyRejected => (GatewayApiSdk.Model.TransactionStatus.Rejected, GatewayApiSdk.Model.TransactionPayloadStatus.PermanentlyRejected),
-            PendingTransactionPayloadLedgerStatus.TransientlyAccepted => (GatewayApiSdk.Model.TransactionStatus.Pending, GatewayApiSdk.Model.TransactionPayloadStatus.Pending),
-            PendingTransactionPayloadLedgerStatus.TransientlyRejected => (GatewayApiSdk.Model.TransactionStatus.Pending, GatewayApiSdk.Model.TransactionPayloadStatus.TemporarilyRejected),
+            PendingTransactionPayloadLedgerStatus.Unknown => (GatewayModel.TransactionStatus.Unknown, GatewayModel.TransactionPayloadStatus.Unknown),
+            PendingTransactionPayloadLedgerStatus.Committed => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
+            PendingTransactionPayloadLedgerStatus.CommitPending => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
+            PendingTransactionPayloadLedgerStatus.ClashingCommit => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionPayloadStatus.PermanentlyRejected),
+            PendingTransactionPayloadLedgerStatus.PermanentlyRejected => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionPayloadStatus.PermanentlyRejected),
+            PendingTransactionPayloadLedgerStatus.TransientlyAccepted => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.Pending),
+            PendingTransactionPayloadLedgerStatus.TransientlyRejected => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.TemporarilyRejected),
         };
 
         _rejectionEpoch = pendingTransactionSummary.EndEpochExclusive;
 
         var handlingStatus = pendingTransactionSummary.ResubmitFromTimestamp switch
         {
-            not null => GatewayApiSdk.Model.TransactionPayloadGatewayHandlingStatus.HandlingSubmission,
-            null => GatewayApiSdk.Model.TransactionPayloadGatewayHandlingStatus.Concluded,
+            not null => GatewayModel.TransactionPayloadGatewayHandlingStatus.HandlingSubmission,
+            null => GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
         };
 
         if (pendingTransactionSummary.IntentStatus.AggregationPriorityAcrossKnownPayloads() >= _mostAccuratePendingTransactionIntentLedgerStatus.AggregationPriorityAcrossKnownPayloads())
@@ -179,14 +180,14 @@ internal class PendingTransactionResponseAggregator
             // (Even though this shouldn't be possible because of the early return if pendingTransactionSummary.PayloadHash == _committedPayloadHash)
             if (PendingTransactionPayloadLedgerStatus.PermanentlyRejected.ReplacementPriority() >= pendingTransactionSummary.PayloadStatus.ReplacementPriority())
             {
-                payloadStatus = GatewayApiSdk.Model.TransactionPayloadStatus.PermanentlyRejected;
-                legacyStatus = GatewayApiSdk.Model.TransactionStatus.Rejected;
+                payloadStatus = GatewayModel.TransactionPayloadStatus.PermanentlyRejected;
+                legacyStatus = GatewayModel.TransactionStatus.Rejected;
                 latestRejectionReason = $"Transaction has expired, as its expiry epoch of {pendingTransactionSummary.EndEpochExclusive} has been reached.";
                 initialRejectionReason ??= latestRejectionReason;
             }
         }
 
-        _knownPayloads.Add(new GatewayApiSdk.Model.TransactionStatusResponseKnownPayloadItem(
+        _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
             payloadHash: pendingTransactionSummary.PayloadHash,
             status: legacyStatus,
             payloadStatus: payloadStatus,
@@ -199,44 +200,44 @@ internal class PendingTransactionResponseAggregator
         ));
     }
 
-    internal GatewayApiSdk.Model.TransactionStatusResponse IntoResponse()
+    internal GatewayModel.TransactionStatusResponse IntoResponse()
     {
         var (intentStatus, errorMessage) = _committedIntentStatus != null
             ? (_committedIntentStatus.Value, _committedErrorMessage)
             : (
                 _mostAccuratePendingTransactionIntentLedgerStatus switch
                 {
-                    PendingTransactionIntentLedgerStatus.Unknown => GatewayApiSdk.Model.TransactionIntentStatus.Unknown,
-                    PendingTransactionIntentLedgerStatus.Committed => GatewayApiSdk.Model.TransactionIntentStatus.CommitPendingOutcomeUnknown,
-                    PendingTransactionIntentLedgerStatus.CommitPending => GatewayApiSdk.Model.TransactionIntentStatus.CommitPendingOutcomeUnknown,
-                    PendingTransactionIntentLedgerStatus.PermanentRejection => GatewayApiSdk.Model.TransactionIntentStatus.PermanentlyRejected,
-                    PendingTransactionIntentLedgerStatus.PossibleToCommit => GatewayApiSdk.Model.TransactionIntentStatus.Pending,
-                    PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => GatewayApiSdk.Model.TransactionIntentStatus.LikelyButNotCertainRejection,
+                    PendingTransactionIntentLedgerStatus.Unknown => GatewayModel.TransactionIntentStatus.Unknown,
+                    PendingTransactionIntentLedgerStatus.Committed => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
+                    PendingTransactionIntentLedgerStatus.CommitPending => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
+                    PendingTransactionIntentLedgerStatus.PermanentRejection => GatewayModel.TransactionIntentStatus.PermanentlyRejected,
+                    PendingTransactionIntentLedgerStatus.PossibleToCommit => GatewayModel.TransactionIntentStatus.Pending,
+                    PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection,
                 },
                 _rejectionReasonForMostAccurateIntentLedgerStatus
             );
 
         var legacyIntentStatus = intentStatus switch
         {
-            GatewayApiSdk.Model.TransactionIntentStatus.Unknown => GatewayApiSdk.Model.TransactionStatus.Unknown,
-            GatewayApiSdk.Model.TransactionIntentStatus.CommittedSuccess => GatewayApiSdk.Model.TransactionStatus.CommittedSuccess,
-            GatewayApiSdk.Model.TransactionIntentStatus.CommittedFailure => GatewayApiSdk.Model.TransactionStatus.CommittedFailure,
-            GatewayApiSdk.Model.TransactionIntentStatus.CommitPendingOutcomeUnknown => GatewayApiSdk.Model.TransactionStatus.Pending,
-            GatewayApiSdk.Model.TransactionIntentStatus.PermanentlyRejected => GatewayApiSdk.Model.TransactionStatus.Rejected,
-            GatewayApiSdk.Model.TransactionIntentStatus.LikelyButNotCertainRejection => GatewayApiSdk.Model.TransactionStatus.Pending,
-            GatewayApiSdk.Model.TransactionIntentStatus.Pending => GatewayApiSdk.Model.TransactionStatus.Pending,
+            GatewayModel.TransactionIntentStatus.Unknown => GatewayModel.TransactionStatus.Unknown,
+            GatewayModel.TransactionIntentStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
+            GatewayModel.TransactionIntentStatus.CommittedFailure => GatewayModel.TransactionStatus.CommittedFailure,
+            GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown => GatewayModel.TransactionStatus.Pending,
+            GatewayModel.TransactionIntentStatus.PermanentlyRejected => GatewayModel.TransactionStatus.Rejected,
+            GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection => GatewayModel.TransactionStatus.Pending,
+            GatewayModel.TransactionIntentStatus.Pending => GatewayModel.TransactionStatus.Pending,
         };
 
         var statusesToReturnPermanentlyRejectsAtEpoch = new[]
         {
-            GatewayApiSdk.Model.TransactionIntentStatus.Unknown,
-            GatewayApiSdk.Model.TransactionIntentStatus.LikelyButNotCertainRejection,
-            GatewayApiSdk.Model.TransactionIntentStatus.Pending,
+            GatewayModel.TransactionIntentStatus.Unknown,
+            GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection,
+            GatewayModel.TransactionIntentStatus.Pending,
         };
 
         var permanentlyRejectsAtEpoch = statusesToReturnPermanentlyRejectsAtEpoch.Contains(intentStatus) ? _rejectionEpoch : null;
 
-        return new GatewayApiSdk.Model.TransactionStatusResponse(
+        return new GatewayModel.TransactionStatusResponse(
             ledgerState: _ledgerState,
             status: legacyIntentStatus,
             intentStatus,
@@ -248,44 +249,44 @@ internal class PendingTransactionResponseAggregator
         );
     }
 
-    private string GetPayloadStatusDescription(GatewayApiSdk.Model.TransactionPayloadStatus payloadStatus)
+    private string GetPayloadStatusDescription(GatewayModel.TransactionPayloadStatus payloadStatus)
     {
         return payloadStatus switch
         {
-            GatewayApiSdk.Model.TransactionPayloadStatus.Unknown =>
+            GatewayModel.TransactionPayloadStatus.Unknown =>
                 "No information is known about the possible outcome of this transaction payload.",
-            GatewayApiSdk.Model.TransactionPayloadStatus.CommittedSuccess =>
+            GatewayModel.TransactionPayloadStatus.CommittedSuccess =>
                 "This particular payload for this transaction has been committed to the ledger as a success. For more information, use the /transaction/committed-details endpoint.",
-            GatewayApiSdk.Model.TransactionPayloadStatus.CommittedFailure =>
+            GatewayModel.TransactionPayloadStatus.CommittedFailure =>
                 "This particular payload for this transaction has been committed to the ledger as a failure. For more information, use the /transaction/committed-details endpoint.",
-            GatewayApiSdk.Model.TransactionPayloadStatus.CommitPendingOutcomeUnknown =>
+            GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown =>
                 "This particular payload for this transaction has been committed to the ledger, but the Gateway is still waiting for further details about its result.",
-            GatewayApiSdk.Model.TransactionPayloadStatus.PermanentlyRejected =>
+            GatewayModel.TransactionPayloadStatus.PermanentlyRejected =>
                 "This particular payload for this transaction has been permanently rejected. It is not possible for this particular transaction payload to be committed to this network.",
-            GatewayApiSdk.Model.TransactionPayloadStatus.TemporarilyRejected =>
+            GatewayModel.TransactionPayloadStatus.TemporarilyRejected =>
                 "This particular payload for this transaction was rejected at its last execution. It may still be possible for this transaction payload to be committed to this network.",
-            GatewayApiSdk.Model.TransactionPayloadStatus.Pending =>
+            GatewayModel.TransactionPayloadStatus.Pending =>
                 "This particular payload for this transaction has been accepted into a node's mempool on the network. It's possible but not certain that it will be committed to this network.",
         };
     }
 
-    private string GetIntentStatusDescription(GatewayApiSdk.Model.TransactionIntentStatus intentStatus)
+    private string GetIntentStatusDescription(GatewayModel.TransactionIntentStatus intentStatus)
     {
         return intentStatus switch
         {
-            GatewayApiSdk.Model.TransactionIntentStatus.Unknown =>
+            GatewayModel.TransactionIntentStatus.Unknown =>
                 "No information is known about the possible outcome of this transaction.",
-            GatewayApiSdk.Model.TransactionIntentStatus.CommittedSuccess =>
+            GatewayModel.TransactionIntentStatus.CommittedSuccess =>
                 "This transaction has been committed to the ledger as a success. For more information, use the /transaction/committed-details endpoint.",
-            GatewayApiSdk.Model.TransactionIntentStatus.CommittedFailure =>
+            GatewayModel.TransactionIntentStatus.CommittedFailure =>
                 "This transaction has been committed to the ledger as a failure. For more information, use the /transaction/committed-details endpoint.",
-            GatewayApiSdk.Model.TransactionIntentStatus.CommitPendingOutcomeUnknown =>
+            GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown =>
                 "This transaction has been committed to the ledger, but the Gateway is still waiting for further details about its result.",
-            GatewayApiSdk.Model.TransactionIntentStatus.PermanentlyRejected =>
+            GatewayModel.TransactionIntentStatus.PermanentlyRejected =>
                 "This transaction is permanently rejected, so can never be committed to this network.",
-            GatewayApiSdk.Model.TransactionIntentStatus.Pending =>
+            GatewayModel.TransactionIntentStatus.Pending =>
                 "A payload for this transaction has been accepted into a node's mempool on the network. It's possible but not certain that it will be committed to this network.",
-            GatewayApiSdk.Model.TransactionIntentStatus.LikelyButNotCertainRejection =>
+            GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection =>
                 "All known payload/s for this transaction have been temporarily rejected at their last execution. It may still be possible for this transaction to be committed to this network.",
         };
     }
