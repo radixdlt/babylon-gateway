@@ -15,17 +15,21 @@ Release Date: _unreleased_
 - Obsoleted incorrectly named `access_rules_package` in favor of `role_assignment_module_package` on `NetworkConfigurationResponse.well_known_addresses`. Obsoleted property will contain effective copy of the new one for backwards compability.
 
 ## 1.3.0
-Release Date: _unreleased_
+Release Date: 29.01.2024
 
-- Added support for new transaction types (flash transactions) that are gonna occur on protocol updates.
-- Moved vm_type to `package_code_history` table from package in `entity` table.
-- Created new `package_blueprint_aggregate_history` table which will hold pointers to all package blueprints.
-- Created new `package_code_aggregate_history` table which will hold pointers to all package codes. 
-- Extended well known addresses returned from `/status/network-configuration` with transaction tracker address.
+Adds support for protocol updates (in general) and the anemone update in particular.
 
-### Deprecations
-- Obsoleted `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of `codes` collection. With upcoming protocol upgrade it's going to be allowed to have multiple codes per package. Obsoleted properties will contain effective copy of the first element of the new collection for backwards compability.
+### API Changes
 
+- Adds support for a new transaction type (flash transactions) that occur during protocol updates.
+- Extends well known addresses returned from `/status/network-configuration` to include the transaction tracker address.
+- **DEPRECATION** - Obsoletes the `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of the `codes` collection. With the upcoming protocol upgrade it will be possible to have multiple codes per package. The obsoleted properties will contain an effective copy of the first element of the new collection for backwards compability.
+
+### Database changes
+
+- Moves `vm_type` to `package_code_history` table from package in `entity` table.
+- Creates new `package_blueprint_aggregate_history` table which will hold pointers to all package blueprints.
+- Creates new `package_code_aggregate_history` table which will hold pointers to all package codes.
 
 ## 1.2.5
 Release Date: 26.01.2024
