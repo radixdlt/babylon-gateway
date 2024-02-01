@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -85,21 +85,22 @@ public interface ITransactionPreviewService
 internal class TransactionPreviewService : ITransactionPreviewService
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ICoreApiHandler _coreApiHandler;
+    private readonly ICoreApiProvider _coreApiProvider;
     private readonly IEnumerable<ITransactionPreviewServiceObserver> _observers;
 
-    public TransactionPreviewService(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiHandler coreApiHandler, IEnumerable<ITransactionPreviewServiceObserver> observers)
+    public TransactionPreviewService(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, IEnumerable<ITransactionPreviewServiceObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _coreApiHandler = coreApiHandler;
+        _coreApiProvider = coreApiProvider;
         _observers = observers;
     }
 
     public async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
     {
+        var selectedNode = _coreApiProvider.CoreApiNode;
+
         try
         {
-            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
             await _observers.ForEachAsync(x => x.PreHandlePreviewRequest(request, selectedNode.Name));
 
             var response = await HandlePreviewAndCreateResponse(request, token);
@@ -110,7 +111,6 @@ internal class TransactionPreviewService : ITransactionPreviewService
         }
         catch (Exception ex)
         {
-            var selectedNode = _coreApiHandler.GetCoreNodeConnectedTo();
             await _observers.ForEachAsync(x => x.HandlePreviewRequestFailed(request, selectedNode.Name, ex));
 
             throw;
@@ -144,7 +144,8 @@ internal class TransactionPreviewService : ITransactionPreviewService
             signerPublicKeys: request.SignerPublicKeys.Select(ToCoreModel).ToList(),
             flags: coreRequestFlags);
 
-        var result = await _coreApiHandler.TransactionPreview(coreRequest, token);
+        var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() =>
+            _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(coreRequest, token));
 
         if (result.Succeeded)
         {
