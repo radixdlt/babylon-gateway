@@ -12,6 +12,13 @@ on:
       - develop
       - release\/*
 
+permissions:
+      id-token: write
+      pull-requests: write
+      contents: read
+      deployments: write
+      packages: write
+
 env:
   DOTNET_VERSION: "7.0.x"
 
@@ -19,11 +26,7 @@ jobs:
   snyk-scan:
     name: snyk scan
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      pull-requests: read
-      contents: read
-      deployments: write
+
     steps:
       - uses: RDXWorks-actions/checkout@main
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
