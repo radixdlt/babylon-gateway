@@ -14,9 +14,11 @@ on:
 
 permissions:
       id-token: write
-      pull-requests: read
+      pull-requests: write
       contents: read
       deployments: write
+      packages: write
+
 env:
   DOTNET_VERSION: "7.0.x"
 
