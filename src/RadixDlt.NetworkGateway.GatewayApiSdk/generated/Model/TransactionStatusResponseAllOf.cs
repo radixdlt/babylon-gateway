@@ -120,8 +120,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="intentStatusDescription">An additional description to clarify the intent status.  (required).</param>
         /// <param name="knownPayloads">knownPayloads (required).</param>
         /// <param name="committedStateVersion">If the intent was committed, this gives the state version when this intent was committed. .</param>
+        /// <param name="permanentlyRejectsAtEpoch">The epoch number at which the transaction is guaranteed to get permanently rejected by the Network due to exceeded epoch range defined when submitting transaction..</param>
         /// <param name="errorMessage">The most relevant error message received, due to a rejection or commit as failure. Please note that presence of an error message doesn&#39;t imply that the intent will definitely reject or fail. This could represent a temporary error (such as out of fees), or an error with a payload which doesn&#39;t end up being committed. .</param>
-        public TransactionStatusResponseAllOf(TransactionStatus status = default(TransactionStatus), TransactionIntentStatus intentStatus = default(TransactionIntentStatus), string intentStatusDescription = default(string), List<TransactionStatusResponseKnownPayloadItem> knownPayloads = default(List<TransactionStatusResponseKnownPayloadItem>), long? committedStateVersion = default(long?), string errorMessage = default(string))
+        public TransactionStatusResponseAllOf(TransactionStatus status = default(TransactionStatus), TransactionIntentStatus intentStatus = default(TransactionIntentStatus), string intentStatusDescription = default(string), List<TransactionStatusResponseKnownPayloadItem> knownPayloads = default(List<TransactionStatusResponseKnownPayloadItem>), long? committedStateVersion = default(long?), long? permanentlyRejectsAtEpoch = default(long?), string errorMessage = default(string))
         {
             this.Status = status;
             this.IntentStatus = intentStatus;
@@ -138,6 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.KnownPayloads = knownPayloads;
             this.CommittedStateVersion = committedStateVersion;
+            this.PermanentlyRejectsAtEpoch = permanentlyRejectsAtEpoch;
             this.ErrorMessage = errorMessage;
         }
 
@@ -162,6 +164,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public long? CommittedStateVersion { get; set; }
 
         /// <summary>
+        /// The epoch number at which the transaction is guaranteed to get permanently rejected by the Network due to exceeded epoch range defined when submitting transaction.
+        /// </summary>
+        /// <value>The epoch number at which the transaction is guaranteed to get permanently rejected by the Network due to exceeded epoch range defined when submitting transaction.</value>
+        [DataMember(Name = "permanently_rejects_at_epoch", EmitDefaultValue = true)]
+        public long? PermanentlyRejectsAtEpoch { get; set; }
+
+        /// <summary>
         /// The most relevant error message received, due to a rejection or commit as failure. Please note that presence of an error message doesn&#39;t imply that the intent will definitely reject or fail. This could represent a temporary error (such as out of fees), or an error with a payload which doesn&#39;t end up being committed. 
         /// </summary>
         /// <value>The most relevant error message received, due to a rejection or commit as failure. Please note that presence of an error message doesn&#39;t imply that the intent will definitely reject or fail. This could represent a temporary error (such as out of fees), or an error with a payload which doesn&#39;t end up being committed. </value>
@@ -181,6 +190,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  IntentStatusDescription: ").Append(IntentStatusDescription).Append("\n");
             sb.Append("  KnownPayloads: ").Append(KnownPayloads).Append("\n");
             sb.Append("  CommittedStateVersion: ").Append(CommittedStateVersion).Append("\n");
+            sb.Append("  PermanentlyRejectsAtEpoch: ").Append(PermanentlyRejectsAtEpoch).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -242,6 +252,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.CommittedStateVersion.Equals(input.CommittedStateVersion))
                 ) && 
                 (
+                    this.PermanentlyRejectsAtEpoch == input.PermanentlyRejectsAtEpoch ||
+                    (this.PermanentlyRejectsAtEpoch != null &&
+                    this.PermanentlyRejectsAtEpoch.Equals(input.PermanentlyRejectsAtEpoch))
+                ) && 
+                (
                     this.ErrorMessage == input.ErrorMessage ||
                     (this.ErrorMessage != null &&
                     this.ErrorMessage.Equals(input.ErrorMessage))
@@ -270,6 +285,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.CommittedStateVersion != null)
                 {
                     hashCode = (hashCode * 59) + this.CommittedStateVersion.GetHashCode();
+                }
+                if (this.PermanentlyRejectsAtEpoch != null)
+                {
+                    hashCode = (hashCode * 59) + this.PermanentlyRejectsAtEpoch.GetHashCode();
                 }
                 if (this.ErrorMessage != null)
                 {

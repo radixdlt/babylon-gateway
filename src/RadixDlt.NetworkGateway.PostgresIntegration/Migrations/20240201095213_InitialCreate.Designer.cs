@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240125135339_InitialCreate")]
+    [Migration("20240201095213_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1239,8 +1239,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("EndEpochExclusive")
-                        .HasColumnType("numeric(20,0)")
+                    b.Property<long>("EndEpochExclusive")
+                        .HasColumnType("bigint")
                         .HasColumnName("end_epoch_exclusive");
 
                     b.Property<string>("IntentHash")

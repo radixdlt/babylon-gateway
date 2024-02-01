@@ -2662,6 +2662,13 @@ components:
               type: integer
               format: int64
               nullable: true
+            permanently_rejects_at_epoch:
+              description: The epoch number at which the transaction is guaranteed to get permanently rejected by the Network due to exceeded epoch range defined when submitting transaction.
+              nullable: true
+              type: integer
+              format: int64
+              minimum: 0
+              maximum: 10000000000
             error_message:
               description: |
                 The most relevant error message received, due to a rejection or commit as failure.
