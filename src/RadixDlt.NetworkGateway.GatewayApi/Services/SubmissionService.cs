@@ -65,10 +65,10 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -88,7 +88,7 @@ public interface ISubmissionService
 internal class SubmissionService : ISubmissionService
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ICoreApiHandler _coreApiHandler;
+    private readonly ICoreApiProvider _coreApiProvider;
     private readonly ISubmissionTrackingService _submissionTrackingService;
     private readonly IReadOnlyCollection<ISubmissionServiceObserver> _observers;
     private readonly IOptionsMonitor<CoreApiIntegrationOptions> _coreApiIntegrationOptions;
@@ -96,14 +96,14 @@ internal class SubmissionService : ISubmissionService
 
     public SubmissionService(
         INetworkConfigurationProvider networkConfigurationProvider,
-        ICoreApiHandler coreApiHandler,
+        ICoreApiProvider coreApiProvider,
         ISubmissionTrackingService submissionTrackingService,
         IEnumerable<ISubmissionServiceObserver> observers,
         IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptions,
         ILogger<SubmissionService> logger)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _coreApiHandler = coreApiHandler;
+        _coreApiProvider = coreApiProvider;
         _submissionTrackingService = submissionTrackingService;
         _observers = observers.ToArray();
         _coreApiIntegrationOptions = coreApiIntegrationOptions;
@@ -117,10 +117,10 @@ internal class SubmissionService : ISubmissionService
         using var parsedTransaction = await HandlePreSubmissionParseTransaction(transactionBytes);
         await CheckPendingTransactionEpochValidity(ledgerState, parsedTransaction);
 
-        var targetNode = _coreApiHandler.GetCoreNodeConnectedTo();
+        var targetNode = _coreApiProvider.CoreApiNode;
         var options = _coreApiIntegrationOptions.CurrentValue;
         var submissionResult = await _submissionTrackingService.ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
-            _coreApiHandler.GetTransactionApi(),
+            _coreApiProvider.TransactionApi,
             (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
             targetNode.Name,
             new PendingTransactionHandlingConfig(

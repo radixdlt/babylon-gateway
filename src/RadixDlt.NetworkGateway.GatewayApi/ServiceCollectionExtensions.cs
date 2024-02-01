@@ -74,7 +74,6 @@ using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Net;
@@ -162,7 +161,15 @@ public static class ServiceCollectionExtensions
     private static void AddCoreApiHttpClient(IServiceCollection services, out IHttpClientBuilder coreApiHttpClientBuilder, out IHttpClientBuilder coreNodeHealthCheckerClientBuilder)
     {
         coreApiHttpClientBuilder = services
-            .AddHttpClient<ICoreApiProvider, CoreApiProvider>()
+            .AddHttpClient<ICoreApiProvider, CoreApiProvider>((httpClient, serviceProvider) =>
+            {
+                var nodeProvider = new CoreApiNodeProvider
+                {
+                    CoreApiNode = serviceProvider.GetRequiredService<ICoreNodesSelectorService>().GetRandomTopTierCoreNode(),
+                };
+
+                return new CoreApiProvider(nodeProvider, httpClient);
+            })
             .AddPolicyHandler((serviceProvider, _) =>
             {
                 var retryCount = serviceProvider.GetRequiredService<IOptions<CoreApiIntegrationOptions>>().Value.MaxTransientErrorRetryCount;
@@ -172,9 +179,6 @@ public static class ServiceCollectionExtensions
                     .RetryAsync(retryCount);
             })
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
-
-        services
-            .AddTransient<ICoreApiHandler, CoreApiHandler>();
 
         coreNodeHealthCheckerClientBuilder = services
             .AddHttpClient<ICoreNodeHealthChecker, CoreNodeHealthChecker>()
