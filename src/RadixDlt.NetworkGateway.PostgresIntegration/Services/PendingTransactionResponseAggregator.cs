@@ -83,6 +83,12 @@ internal record PendingTransactionSummary(
 
 internal class PendingTransactionResponseAggregator
 {
+    private static readonly GatewayModel.TransactionIntentStatus[] _statusesToReturnPermanentlyRejectsAtEpoch = {
+        GatewayModel.TransactionIntentStatus.Unknown,
+        GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection,
+        GatewayModel.TransactionIntentStatus.Pending,
+    };
+
     private readonly GatewayModel.LedgerState _ledgerState;
     private readonly string? _committedPayloadHash;
     private readonly long? _committedStateVersion;
@@ -92,6 +98,7 @@ internal class PendingTransactionResponseAggregator
     private PendingTransactionIntentLedgerStatus _mostAccuratePendingTransactionIntentLedgerStatus = PendingTransactionIntentLedgerStatus.Unknown;
     private string? _rejectionReasonForMostAccurateIntentLedgerStatus;
     private ulong? _rejectionEpoch;
+
 
     internal PendingTransactionResponseAggregator(GatewayModel.LedgerState ledgerState, TransactionQuerier.CommittedTransactionSummary? committedTransactionSummary)
     {
@@ -228,14 +235,7 @@ internal class PendingTransactionResponseAggregator
             GatewayModel.TransactionIntentStatus.Pending => GatewayModel.TransactionStatus.Pending,
         };
 
-        var statusesToReturnPermanentlyRejectsAtEpoch = new[]
-        {
-            GatewayModel.TransactionIntentStatus.Unknown,
-            GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection,
-            GatewayModel.TransactionIntentStatus.Pending,
-        };
-
-        var permanentlyRejectsAtEpoch = statusesToReturnPermanentlyRejectsAtEpoch.Contains(intentStatus) ? _rejectionEpoch : null;
+        var permanentlyRejectsAtEpoch = _statusesToReturnPermanentlyRejectsAtEpoch.Contains(intentStatus) ? _rejectionEpoch : null;
 
         return new GatewayModel.TransactionStatusResponse(
             ledgerState: _ledgerState,
