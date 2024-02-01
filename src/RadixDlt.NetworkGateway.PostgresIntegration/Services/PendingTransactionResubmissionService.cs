@@ -202,7 +202,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private List<PendingTransactionWithChosenNode> UpdateTransactionsForPotentialSubmissionOrRetirement(
         PendingTransactionHandlingConfig handlingConfig,
         List<PendingTransaction> transactionsWantingResubmission,
-        ulong currentEpoch,
+        long currentEpoch,
         DateTime currentTime
     )
     {
@@ -242,7 +242,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private async Task ResubmitAllAndUpdateTransactionStatusesOnFailure(
         List<PendingTransactionWithChosenNode> transactionsToResubmitWithNodes,
         PendingTransactionHandlingConfig handlingConfig,
-        ulong currentEpoch,
+        long currentEpoch,
         CancellationToken token
     )
     {
@@ -300,10 +300,10 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         return new ContextualSubmissionResult(transaction, chosenNode.Name, result);
     }
 
-    private async Task<ulong> GetCurrentEpoch(CancellationToken cancellationToken)
+    private async Task<long> GetCurrentEpoch(CancellationToken cancellationToken)
     {
         var topOfLedger = await _topOfLedgerProvider.GetTopOfLedger(cancellationToken);
         var signedEpoch = topOfLedger.Epoch;
-        return (signedEpoch >= 0) ? (ulong)signedEpoch : throw new InvalidStateException($"Epoch was negative: {signedEpoch}");
+        return (signedEpoch >= 0) ? signedEpoch : throw new InvalidStateException($"Epoch was negative: {signedEpoch}");
     }
 }

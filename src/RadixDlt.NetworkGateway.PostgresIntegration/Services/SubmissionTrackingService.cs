@@ -185,7 +185,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             handlingConfig,
             payloadHash,
             notarizedTransaction.IntentHash().AsStr(),
-            notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive,
+            (long)notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive,
             notarizedTransactionBytes,
             submittedTimestamp
         );
@@ -231,7 +231,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
                 nodeName,
                 nodeSubmissionResult,
                 _clock.UtcNow,
-                currentEpoch < 0 ? null : (ulong)currentEpoch);
+                currentEpoch < 0 ? null : currentEpoch);
 
             await _dbContext.SaveChangesAsync(token);
         }

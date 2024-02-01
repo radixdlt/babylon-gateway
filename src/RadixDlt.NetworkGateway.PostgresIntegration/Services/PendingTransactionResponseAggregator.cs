@@ -72,7 +72,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal record PendingTransactionSummary(
     string PayloadHash,
-    ulong EndEpochExclusive,
+    long EndEpochExclusive,
     DateTime? ResubmitFromTimestamp,
     string? HandlingStatusReason,
     PendingTransactionPayloadLedgerStatus PayloadStatus,
@@ -83,7 +83,8 @@ internal record PendingTransactionSummary(
 
 internal class PendingTransactionResponseAggregator
 {
-    private static readonly GatewayModel.TransactionIntentStatus[] _statusesToReturnPermanentlyRejectsAtEpoch = {
+    private static readonly GatewayModel.TransactionIntentStatus[] _statusesToReturnPermanentlyRejectsAtEpoch =
+    {
         GatewayModel.TransactionIntentStatus.Unknown,
         GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection,
         GatewayModel.TransactionIntentStatus.Pending,
@@ -97,8 +98,7 @@ internal class PendingTransactionResponseAggregator
     private readonly string? _committedErrorMessage;
     private PendingTransactionIntentLedgerStatus _mostAccuratePendingTransactionIntentLedgerStatus = PendingTransactionIntentLedgerStatus.Unknown;
     private string? _rejectionReasonForMostAccurateIntentLedgerStatus;
-    private ulong? _rejectionEpoch;
-
+    private long? _rejectionEpoch;
 
     internal PendingTransactionResponseAggregator(GatewayModel.LedgerState ledgerState, TransactionQuerier.CommittedTransactionSummary? committedTransactionSummary)
     {
@@ -171,7 +171,7 @@ internal class PendingTransactionResponseAggregator
         var latestRejectionReason = pendingTransactionSummary.LatestRejectionReason;
 
         // If the intent's EndEpochExclusive has been reached, then the payload and intent must be permanently rejected (assuming they're not already committed).
-        if ((ulong)_ledgerState.Epoch >= pendingTransactionSummary.EndEpochExclusive)
+        if (_ledgerState.Epoch >= pendingTransactionSummary.EndEpochExclusive)
         {
             // The if statement is defence-in-depth to avoid replacing a Committed status with PermanentlyRejected.
             // This shouldn't matter, because we'd see a committed transaction in this case, which would trump the _mostAccuratePendingTransactionIntentLedgerStatus when we
@@ -244,7 +244,7 @@ internal class PendingTransactionResponseAggregator
             intentStatusDescription: GetIntentStatusDescription(intentStatus),
             knownPayloads: _knownPayloads,
             committedStateVersion: _committedStateVersion,
-            permanentlyRejectsAtEpoch: permanentlyRejectsAtEpoch?.ToString(),
+            permanentlyRejectsAtEpoch: (long?)permanentlyRejectsAtEpoch,
             errorMessage
         );
     }

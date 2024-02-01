@@ -607,7 +607,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     payload_hash = table.Column<string>(type: "text", nullable: false),
                     intent_hash = table.Column<string>(type: "text", nullable: false),
-                    end_epoch_exclusive = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    end_epoch_exclusive = table.Column<long>(type: "bigint", nullable: false),
                     payload_id = table.Column<long>(type: "bigint", nullable: true),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
                     payload_status = table.Column<PendingTransactionPayloadLedgerStatus>(type: "pending_transaction_payload_ledger_status", nullable: false),

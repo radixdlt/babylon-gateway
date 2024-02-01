@@ -1236,8 +1236,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("EndEpochExclusive")
-                        .HasColumnType("numeric(20,0)")
+                    b.Property<long>("EndEpochExclusive")
+                        .HasColumnType("bigint")
                         .HasColumnName("end_epoch_exclusive");
 
                     b.Property<string>("IntentHash")
