@@ -8,8 +8,8 @@ Release Date: _unreleased_
 ### What’s new?
 - Added new filters for the `/stream/transactions` endpoint: `accounts_with_manifest_owner_method_calls`, `accounts_without_manifest_owner_method_calls` and `manifest_class_filter`.
 - Extended response models returned by `/transaction/committed-details` and `/stream/transactions` endpoints:
-- added `manifest_instructions` optional property and a corresponding opt-in for returning original manifest of user transactions,
-- added optional `manifest_classes` property: a collection of zero or more manifest classes ordered from the most specific class to the least specific one.
+  - added `manifest_instructions` optional property and a corresponding opt-in for returning original manifest of user transactions,
+  - added optional `manifest_classes` property: a collection of zero or more manifest classes ordered from the most specific class to the least specific one.
 - added `permanently_rejects_at_epoch` to `/transaction/status` response for pending transactions. 
 
 ### Deprecations
