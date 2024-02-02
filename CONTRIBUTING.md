@@ -1,54 +1,79 @@
-# Babylon Network Gateway
+# Contributing Guidelines
 
-This system is designed to be the Radix-run publicly exposed gateway into the Babylon Radix network. It is the successor to the [Olympia Gateway](https://github.com/radixdlt/radixdlt-network-gateway).
+Thank you for your interest in contributing to Babylon Network Gateway! 
 
-## Using the Gateway API
+## Clarification on GitHub Issue Usage and Feature Requests
 
-For documentation on the Gateway API, see the [Gateway API docs](https://docs-babylon.radixdlt.com/main/apis/api-specification.html).
+We want to clarify that Github Issues are primarily meant for the purpose of reporting problems or concerns, rather than functioning as an open bug tracker. This means that reported issues on Github may be closed and reported in our internal tracking system or added to our roadmap. 
 
-## Community Involvement
-Please see  [CONTRIBUTING.md](./CONTRIBUTING.md)
+If you are thinking of requesting a feature, make sure it’s not already part of our upcoming features outlined in the [Roadmap](https://docs.radixdlt.com/docs/roadmap). If you have a feature suggestion, we kindly ask that you share it through [Discord](http://discord.gg/radixdlt) or [Telegram](https://t.me/RadixDevelopers).
 
-## Structure
+Our primary focus is on the priorities outlined in our Roadmap. We appreciate your understanding that addressing reported issues may not always align with our immediate roadmap goals.
 
-The system is in three main parts:
-* **Database Migrations** - This project has ownership of the PostgreSQL database schema migrations.
-* **Data Aggregator** - Reads from the Core API of one or more full nodes, ingesting from their Transaction Stream API and Mempool Contents API, and committing transactions to a PostgreSQL database. It also handles the pruning (and resubmission where relevant) of submitted transactions.
-* **Gateway API** - Provides the public API for Wallets and Explorers, and maps construction and submission requests to the Core API of one or more full nodes.
 
-## Technical Docs
+# Table of Contents
+1. [Code of Conduct](#code-of-conduct)
+2. [Reporting Issues](#reporting-issues)
+3. [Contributing Code](#contributing-code)
+   - [Setting Up Your Development Environment](#setting-up-your-development-environment)
+   - [Making Changes](#making-changes)
+   - [Testing](#testing)
+   - [Submitting a Pull Request](#submitting-a-pull-request)
+5. [Review Process](#review-process)
+6. [Code Style](#code-style)
+7. [License](#license)
 
-For docs giving an overview of the Network Gateway and its place in the Radix Ecosystem - including information on the Radix-run Network Gateway, and how to run one of your own - check out [the Radix Babylon docs site](https://docs-babylon.radixdlt.com/).
+# Code of Conduct
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.md).
+By participating, you are expected to uphold this code.
+Please report unacceptable behavior to [hello@radixdlt.com](mailto:hello@radixdlt.com).
 
-For docs related to development on the Network Gateway, see the [docs folder](./docs).
+# Reporting Issues
+Ensure the bug was not already reported by searching on GitHub under [Issues](https://github.com/radixdlt/babylon-gateway/issues).
 
-For docs related to running a Network Gateway locally, see the instructions about running a local toy deployment in the [deployment folder](./deployment).
+If you encounter a bug or have a problem with the project, please open an issue on our [issue tracker](https://github.com/radixdlt/babylon-gateway/issues). Make sure to provide as much detail as possible, including:
 
-## Database Migrations & Application Deployment
+- A clear and descriptive title.
+- Steps to reproduce the issue.
+- Expected behavior and actual behavior.
+- Your operating system, browser, or other relevant information.
+- If possible, include screenshots or code snippets that illustrate the issue.
 
-While all three main system parts are technically independent of each other it is assumed that during overall stack deployment the following order is preserved:
 
-1. Deploy Database Migrations. This is a short-lived container that executes new database migrations, if any, and exists successfully with `0` exit code. Should this container fail to apply database migrations (non-successful exit code) deployment procedure must be aborted. 
-2. Deploy Data Aggregator. Wait until application healthcheck endpoints report `Healthy` status. 
-3. Deploy Gateway API. 
+# Contributing Code
 
-**Hint:** For Kubernetes cluster deployments it is recommended to set up Database Migrations as init container of Data Aggregator.
+Prior to commencing any work on a PR, we strongly advise initiating a discussion with the team via Discord, Telegram, or Github Issues (for bugs).
 
-**Note:** Babylon Network Gateway is **NOT** compatible with previous Olympia version. Brand-new, clean database must be used. 
-If you're upgrading from Olympia and deploying for the very first time you may want to run Database Migrations application with `WIPE_DATABASE=true` configuration parameter to drop existing database and recreate it. This is irreversible operation. **Proceed with caution!**  
+Submitting a Pull Request does not guarantee the acceptance of your proposed changes.
 
-## Dependencies
+## Setting Up Your Development Environment
 
-Mandatory dependencies:
+Please check [documentation](https://github.com/radixdlt/babylon-gateway/blob/main/docs/development.md) on how to setup local environment.
 
-* Connection to at least one RadixDLT Node - source of network transactions,
-* PostgreSQL version 15.2 or newer - primary storage.
+## Making Changes
 
-Optional dependencies:
+1. Write clear, concise, and well-documented code.
+2. Commit your changes with a descriptive commit message. Please follow the PROJECT’s commit message format.
 
-* Prometheus - for metrics collection.
+## Testing
 
-## License
+1. Ensure that your changes do not break existing tests (`/tests` directory)
+2. Write new tests for your code if applicable.
+3. Run the test suite to make sure everything is passing (you can do that by using `dotnet test` command or any IDE of your choice)
+
+## Submitting a Pull Request
+
+1. Push your changes to your forked repository:
+2. Open a pull request against the `develop` branch of the original repository.
+3. Provide a clear and informative title and description for your pull request.
+4. Be prepared to address any feedback or questions during the review process.
+
+# Review Process
+Pull requests will be reviewed by project maintainers. Reviewers may provide feedback, request changes, or approve the pull request. We appreciate your patience during this process, and we aim to be responsive and constructive in our feedback.
+
+
+# License
+By contributing to Babylon Network Gateway, you agree that your contributions will be licensed under the Babylon Network Gateway license.
 
 The executable components of the Babylon Gateway Code are licensed under the [Radix Software EULA](http://www.radixdlt.com/terms/genericEULA).
 
@@ -126,3 +151,4 @@ for any commercial or non-commercial purpose and for any reproduction or
 redistribution by You of the Work. You assume all risks associated with Your use
 of the Work and the exercise of permissions under this Licence.
 ```
+
