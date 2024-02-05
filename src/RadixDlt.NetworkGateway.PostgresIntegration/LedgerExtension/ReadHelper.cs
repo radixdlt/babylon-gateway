@@ -93,11 +93,11 @@ internal class ReadHelper
         _observers = observers;
     }
 
-    public async Task<Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>> MostRecentPackageBlueprintHistoryFor(ICollection<PackageBlueprintLookup> packageBlueprintLookups, CancellationToken token)
+    public async Task<Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>> MostRecentPackageBlueprintHistoryFor(ICollection<PackageBlueprintDbLookup> packageBlueprintLookups, CancellationToken token)
     {
         if (!packageBlueprintLookups.Any())
         {
-            return new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
+            return new Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>();
         }
 
         var sw = Stopwatch.GetTimestamp();
@@ -131,18 +131,18 @@ INNER JOIN LATERAL (
 ) pbh ON true;")
             .AsNoTracking()
             .AnnotateMetricName()
-            .ToDictionaryAsync(e => new PackageBlueprintLookup(e.PackageEntityId, e.Name, e.Version), token);
+            .ToDictionaryAsync(e => new PackageBlueprintDbLookup(e.PackageEntityId, e.Name, e.Version), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageBlueprintHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }
 
-    public async Task<Dictionary<PackageCodeLookup, PackageCodeHistory>> MostRecentPackageCodeHistoryFor(ICollection<PackageCodeLookup> packageCodeChanges, CancellationToken token)
+    public async Task<Dictionary<PackageCodeDbLookup, PackageCodeHistory>> MostRecentPackageCodeHistoryFor(ICollection<PackageCodeDbLookup> packageCodeChanges, CancellationToken token)
     {
         if (!packageCodeChanges.Any())
         {
-            return new Dictionary<PackageCodeLookup, PackageCodeHistory>();
+            return new Dictionary<PackageCodeDbLookup, PackageCodeHistory>();
         }
 
         var sw = Stopwatch.GetTimestamp();
@@ -174,7 +174,7 @@ INNER JOIN LATERAL (
 ) pbh ON true;")
             .AsNoTracking()
             .AnnotateMetricName()
-            .ToDictionaryAsync(e => new PackageCodeLookup(e.PackageEntityId, e.CodeHash), token);
+            .ToDictionaryAsync(e => new PackageCodeDbLookup(e.PackageEntityId, e.CodeHash), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageCodeHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
@@ -228,7 +228,7 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    public async Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(ICollection<PackageCodeLookup> packageCodeChanges, CancellationToken token)
+    public async Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(ICollection<PackageCodeDbLookup> packageCodeChanges, CancellationToken token)
     {
         if (!packageCodeChanges.Any())
         {
@@ -262,7 +262,7 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(ICollection<PackageBlueprintLookup> packageBlueprintChanges, CancellationToken token)
+    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(ICollection<PackageBlueprintDbLookup> packageBlueprintChanges, CancellationToken token)
     {
         if (!packageBlueprintChanges.Any())
         {
