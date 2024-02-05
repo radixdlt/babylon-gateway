@@ -738,7 +738,6 @@ UPDATE pending_transactions
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
-        var stateToAdd = new List<StateHistory>();
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
         var keyValueStoreEntryHistoryToAdd = new List<KeyValueStoreEntryHistory>();
         var schemaHistoryToAdd = new List<SchemaHistory>();
@@ -750,6 +749,7 @@ UPDATE pending_transactions
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
         var d_ctx = new Dumpyard_Context(sequences, readHelper, writeHelper, token);
+        var d_s = new Dumpyard_EntityState(d_ctx, referencedEntities);
         var d_cmr = new Dumpyard_ComponentMethodRoyalty(d_ctx);
         var d_era = new Dumpyard_EntityRoleAssignment(d_ctx);
         var d_pc = new Dumpyard_PackageCode(d_ctx, networkConfiguration.Id);
@@ -852,28 +852,6 @@ UPDATE pending_transactions
                                 stateVersion));
                         }
 
-                        if (substateData is CoreModel.GenericScryptoComponentFieldStateSubstate componentState)
-                        {
-                            if (substate.SystemStructure is not CoreModel.ObjectFieldStructure objectFieldStructure)
-                            {
-                                throw new UnreachableException($"Generic Scrypto components are expected to have ObjectFieldStructure. Got: {substate.SystemStructure.GetType()}");
-                            }
-
-                            var schemaDetails = objectFieldStructure.ValueSchema.GetSchemaDetails();
-
-                            stateToAdd.Add(new SborStateHistory
-                            {
-                                Id = sequences.StateHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                SborState = componentState.Value.DataStruct.StructData.GetDataBytes(),
-                                SchemaHash = schemaDetails.SchemaHash.ConvertFromHex(),
-                                SborTypeKind = schemaDetails.SborTypeKind.ToModel(),
-                                TypeIndex = schemaDetails.TypeIndex,
-                                SchemaDefiningEntityId = referencedEntities.Get((EntityAddress)schemaDetails.SchemaDefiningEntityAddress).DatabaseId,
-                            });
-                        }
-
                         if (substateData is CoreModel.GenericKeyValueStoreEntrySubstate genericKeyValueStoreEntry)
                         {
                             keyValueStoreEntryHistoryToAdd.Add(new KeyValueStoreEntryHistory
@@ -901,14 +879,6 @@ UPDATE pending_transactions
                                 KeyType = lookup.PublicKeyType,
                                 Key = lookup.PublicKey,
                             };
-
-                            stateToAdd.Add(new JsonStateHistory
-                            {
-                                Id = sequences.StateHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                JsonState = validator.Value.ToJson(),
-                            });
                         }
 
                         if (substateData is CoreModel.ConsensusManagerFieldStateSubstate consensusManagerFieldStateSubstate)
@@ -943,14 +913,6 @@ UPDATE pending_transactions
                                 FromStateVersion = stateVersion,
                                 AccountEntityId = referencedEntity.DatabaseId,
                                 DefaultDepositRule = accountFieldState.Value.DefaultDepositRule.ToModel(),
-                            });
-
-                            stateToAdd.Add(new JsonStateHistory
-                            {
-                                Id = sequences.StateHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                JsonState = accountFieldState.Value.ToJson(),
                             });
                         }
 
@@ -1028,50 +990,7 @@ UPDATE pending_transactions
                             }
                         }
 
-                        if (substateData is CoreModel.AccessControllerFieldStateSubstate accessControllerFieldState)
-                        {
-                            stateToAdd.Add(new JsonStateHistory
-                            {
-                                Id = sequences.StateHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                JsonState = accessControllerFieldState.Value.ToJson(),
-                            });
-                        }
-
-                        if (substateData is CoreModel.OneResourcePoolFieldStateSubstate oneResourcePoolFieldStateSubstate)
-                        {
-                            stateToAdd.Add(new JsonStateHistory
-                            {
-                                Id = sequences.StateHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                JsonState = oneResourcePoolFieldStateSubstate.Value.ToJson(),
-                            });
-                        }
-
-                        if (substateData is CoreModel.TwoResourcePoolFieldStateSubstate twoResourcePoolFieldStateSubstate)
-                        {
-                            stateToAdd.Add(new JsonStateHistory
-                            {
-                                Id = sequences.StateHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                JsonState = twoResourcePoolFieldStateSubstate.Value.ToJson(),
-                            });
-                        }
-
-                        if (substateData is CoreModel.MultiResourcePoolFieldStateSubstate multiResourcePoolFieldStateSubstate)
-                        {
-                            stateToAdd.Add(new JsonStateHistory
-                            {
-                                Id = sequences.StateHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                JsonState = multiResourcePoolFieldStateSubstate.Value.ToJson(),
-                            });
-                        }
-
+                        d_s.VisitUpsert(substate, stateVersion);
                         d_cmr.VisitUpsert(substateData, referencedEntity, stateVersion);
                         d_era.VisitUpsert(substateData, referencedEntity, stateVersion);
                         d_pc.VisitUpsert(substateData, referencedEntity, stateVersion);
@@ -1713,7 +1632,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
-            rowsInserted += await writeHelper.CopyStateHistory(stateToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(entityMetadataAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(entityResourceAggregatedVaultsHistoryToAdd, token);
@@ -1735,6 +1653,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
 
+            rowsInserted += await d_s.SaveEntities();
             rowsInserted += await d_cmr.SaveEntities();
             rowsInserted += await d_era.SaveEntities();
             rowsInserted += await d_pc.SaveEntities();
