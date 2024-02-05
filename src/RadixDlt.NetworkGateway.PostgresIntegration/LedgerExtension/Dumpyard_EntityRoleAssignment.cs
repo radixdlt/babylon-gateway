@@ -2,45 +2,51 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
-
 internal record struct RoleAssignmentEntryDbLookup(long EntityId, string KeyRole, ModuleId KeyModule);
 
-internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
+internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
+
+internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity)
 {
     public CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
 
-    public IList<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.RoleAssignmentModuleRuleEntrySubstate>();
+    public List<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new();
 }
 
 internal class Dumpyard_EntityRoleAssignment
 {
+    private readonly Dumpyard_Context _context;
+
     private Dictionary<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer> _changePointers = new();
-    private List<RoleAssignmentsChangePointerLookup> _changes = new();
+    private List<RoleAssignmentsChangePointerLookup> _changeOrder = new();
 
-    private Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory> _mostRecentEntries = new();
     private Dictionary<long, EntityRoleAssignmentsAggregateHistory> _mostRecentAggregates = new();
+    private Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory> _mostRecentEntries = new();
 
-    private List<EntityRoleAssignmentsOwnerRoleHistory> _ownersToAdd = new();
-    private List<EntityRoleAssignmentsEntryHistory> _entriesToAdd = new();
     private List<EntityRoleAssignmentsAggregateHistory> _aggregatesToAdd = new();
+    private List<EntityRoleAssignmentsEntryHistory> _entriesToAdd = new();
+    private List<EntityRoleAssignmentsOwnerRoleHistory> _ownersToAdd = new();
 
-    public void AcceptUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public Dumpyard_EntityRoleAssignment(Dumpyard_Context context)
+    {
+        _context = context;
+    }
+
+    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
     {
         if (substateData is CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate accessRulesFieldOwnerRole)
         {
             _changePointers
                 .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
                 {
-                    _changes.Add(lookup);
+                    _changeOrder.Add(lookup);
 
-                    return new RoleAssignmentsChangePointer(referencedEntity, stateVersion);
+                    return new RoleAssignmentsChangePointer(referencedEntity);
                 })
                 .OwnerRole = accessRulesFieldOwnerRole;
         }
@@ -50,37 +56,30 @@ internal class Dumpyard_EntityRoleAssignment
             _changePointers
                 .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
                 {
-                    _changes.Add(lookup);
+                    _changeOrder.Add(lookup);
 
-                    return new RoleAssignmentsChangePointer(referencedEntity, stateVersion);
+                    return new RoleAssignmentsChangePointer(referencedEntity);
                 })
-                .Entries
-                .Add(roleAssignmentEntry);
+                .Entries.Add(roleAssignmentEntry);
         }
     }
 
-    public async Task LoadMostRecents(ReadHelper readHelper, CancellationToken token = default)
+    public void ProcessChanges()
     {
-        _mostRecentEntries = await readHelper.MostRecentEntityRoleAssignmentsEntryHistoryFor(_changePointers.Values, token);
-        _mostRecentAggregates = await readHelper.MostRecentEntityRoleAssignmentsAggregateHistoryFor(_changes, token);
-    }
-
-    public void PrepareAdd(SequencesHolder sequences)
-    {
-        foreach (var lookup in _changes)
+        foreach (var lookup in _changeOrder)
         {
-            var accessRuleChange = _changePointers[lookup];
+            var change = _changePointers[lookup];
 
             EntityRoleAssignmentsOwnerRoleHistory? ownerRole = null;
 
-            if (accessRuleChange.OwnerRole != null)
+            if (change.OwnerRole != null)
             {
                 ownerRole = new EntityRoleAssignmentsOwnerRoleHistory
                 {
-                    Id = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence++,
+                    Id = _context.Sequences.EntityRoleAssignmentsOwnerRoleHistorySequence++,
                     FromStateVersion = lookup.StateVersion,
                     EntityId = lookup.EntityId,
-                    RoleAssignments = accessRuleChange.OwnerRole.Value.OwnerRole.ToJson(),
+                    RoleAssignments = change.OwnerRole.Value.OwnerRole.ToJson(),
                 };
 
                 _ownersToAdd.Add(ownerRole);
@@ -92,7 +91,7 @@ internal class Dumpyard_EntityRoleAssignment
             {
                 aggregate = new EntityRoleAssignmentsAggregateHistory
                 {
-                    Id = sequences.EntityRoleAssignmentsAggregateHistorySequence++,
+                    Id = _context.Sequences.EntityRoleAssignmentsAggregateHistorySequence++,
                     FromStateVersion = lookup.StateVersion,
                     EntityId = lookup.EntityId,
                     OwnerRoleId = ownerRole?.Id ?? previousAggregate?.OwnerRoleId ?? throw new InvalidOperationException("Unable to determine OwnerRoleId"),
@@ -112,12 +111,12 @@ internal class Dumpyard_EntityRoleAssignment
                 aggregate = previousAggregate;
             }
 
-            foreach (var entry in accessRuleChange.Entries)
+            foreach (var entry in change.Entries)
             {
                 var entryLookup = new RoleAssignmentEntryDbLookup(lookup.EntityId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel());
                 var entryHistory = new EntityRoleAssignmentsEntryHistory
                 {
-                    Id = sequences.EntityRoleAssignmentsEntryHistorySequence++,
+                    Id = _context.Sequences.EntityRoleAssignmentsEntryHistorySequence++,
                     FromStateVersion = lookup.StateVersion,
                     EntityId = lookup.EntityId,
                     KeyRole = entry.Key.RoleKey,
@@ -138,7 +137,7 @@ internal class Dumpyard_EntityRoleAssignment
                     }
                 }
 
-                // !entry.IsDeleted
+                // TODO introduce entry.IsDeleted extension method
                 if (entry.Value != null)
                 {
                     aggregate.EntryIds.Insert(0, entryHistory.Id);
@@ -149,13 +148,19 @@ internal class Dumpyard_EntityRoleAssignment
         }
     }
 
-    public async Task<int> WriteNew(WriteHelper writeHelper, CancellationToken token)
+    public async Task LoadMostRecent()
+    {
+        _mostRecentEntries = await _context.ReadHelper.MostRecentEntityRoleAssignmentsEntryHistoryFor(_changePointers.Values, _context.Token);
+        _mostRecentAggregates = await _context.ReadHelper.MostRecentEntityRoleAssignmentsAggregateHistoryFor(_changeOrder, _context.Token);
+    }
+
+    public async Task<int> SaveEntities()
     {
         var rowsInserted = 0;
 
-        rowsInserted += await writeHelper.CopyEntityRoleAssignmentsOwnerRoleHistory(_ownersToAdd, token);
-        rowsInserted += await writeHelper.CopyEntityRoleAssignmentsRulesEntryHistory(_entriesToAdd, token);
-        rowsInserted += await writeHelper.CopyEntityRoleAssignmentsAggregateHistory(_aggregatesToAdd, token);
+        rowsInserted += await _context.WriteHelper.CopyEntityRoleAssignmentsOwnerRoleHistory(_ownersToAdd, _context.Token);
+        rowsInserted += await _context.WriteHelper.CopyEntityRoleAssignmentsRulesEntryHistory(_entriesToAdd, _context.Token);
+        rowsInserted += await _context.WriteHelper.CopyEntityRoleAssignmentsAggregateHistory(_aggregatesToAdd, _context.Token);
 
         return rowsInserted;
     }

@@ -749,10 +749,11 @@ UPDATE pending_transactions
         var accountResourcePreferenceRuleHistoryToAdd = new List<AccountResourcePreferenceRuleHistory>();
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
-        var d_cmr = new Dumpyard_ComponentMethodRoyalty();
-        var d_era = new Dumpyard_EntityRoleAssignment();
-        var d_pc = new Dumpyard_PackageCode(networkConfiguration.Id);
-        var d_pb = new Dumpyard_PackageBlueprint(referencedEntities);
+        var d_ctx = new Dumpyard_Context(sequences, readHelper, writeHelper, token);
+        var d_cmr = new Dumpyard_ComponentMethodRoyalty(d_ctx);
+        var d_era = new Dumpyard_EntityRoleAssignment(d_ctx);
+        var d_pc = new Dumpyard_PackageCode(d_ctx, networkConfiguration.Id);
+        var d_pb = new Dumpyard_PackageBlueprint(d_ctx, referencedEntities);
 
         // step: scan all substates & events to figure out changes
         {
@@ -1071,10 +1072,10 @@ UPDATE pending_transactions
                             });
                         }
 
-                        d_cmr.AcceptUpsert(substateData, referencedEntity, stateVersion);
-                        d_era.AcceptUpsert(substateData, referencedEntity, stateVersion);
-                        d_pc.AcceptUpsert(substateData, referencedEntity, stateVersion);
-                        d_pb.AcceptUpsert(substateData, referencedEntity, stateVersion);
+                        d_cmr.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        d_era.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        d_pc.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        d_pb.VisitUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -1091,7 +1092,7 @@ UPDATE pending_transactions
                             vaultSnapshots.Add(new NonFungibleVaultSnapshot(referencedEntity, resourceEntity, simpleRep, true, stateVersion));
                         }
 
-                        d_pc.AcceptDeleted(substateId, referencedEntity, stateVersion);
+                        d_pc.VisitDelete(substateId, referencedEntity, stateVersion);
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
@@ -1292,10 +1293,10 @@ UPDATE pending_transactions
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
 
-            await d_cmr.LoadMostRecents(readHelper, token);
-            await d_era.LoadMostRecents(readHelper, token);
-            await d_pc.LoadMostRecents(readHelper, token);
-            await d_pb.LoadMostRecents(readHelper, token);
+            await d_cmr.LoadMostRecents();
+            await d_era.LoadMostRecent();
+            await d_pc.LoadMostRecent();
+            await d_pb.LoadMostRecents();
 
             dbReadDuration += sw.Elapsed;
 
@@ -1369,10 +1370,10 @@ UPDATE pending_transactions
                 mostRecentMetadataHistory[lookup] = metadataHistory;
             }
 
-            d_cmr.PrepareAdd(sequences);
-            d_era.PrepareAdd(sequences);
-            d_pc.PrepareAdd(sequences);
-            d_pb.PrepareAdd(sequences);
+            d_cmr.ProcessChanges();
+            d_era.ProcessChanges();
+            d_pc.ProcessChanges();
+            d_pb.ProcessChanges();
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1734,10 +1735,10 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
 
-            rowsInserted += await d_cmr.WriteNew(writeHelper, token);
-            rowsInserted += await d_era.WriteNew(writeHelper, token);
-            rowsInserted += await d_pc.WriteNew(writeHelper, token);
-            rowsInserted += await d_pb.WriteNew(writeHelper, token);
+            rowsInserted += await d_cmr.SaveEntities();
+            rowsInserted += await d_era.SaveEntities();
+            rowsInserted += await d_pc.SaveEntities();
+            rowsInserted += await d_pb.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);
 

@@ -1,57 +1,57 @@
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct ComponentMethodRoyaltyChangePointerLookup(long EntityId, long StateVersion);
-
 internal record struct ComponentMethodRoyaltyEntryDbLookup(long EntityId, string MethodName);
 
-internal record ComponentMethodRoyaltyChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
+internal record struct ComponentMethodRoyaltyChangePointerLookup(long EntityId, long StateVersion);
+
+internal record ComponentMethodRoyaltyChangePointer(ReferencedEntity ReferencedEntity)
 {
     public IList<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate> Entries { get; } = new List<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate>();
 }
 
 internal class Dumpyard_ComponentMethodRoyalty
 {
+    private readonly Dumpyard_Context _context;
+
     private Dictionary<ComponentMethodRoyaltyChangePointerLookup, ComponentMethodRoyaltyChangePointer> _changePointers = new();
-    private List<ComponentMethodRoyaltyChangePointerLookup> _changes = new();
+    private List<ComponentMethodRoyaltyChangePointerLookup> _changeOrder = new();
 
-    private Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory> _mostRecentEntries = new();
     private Dictionary<long, ComponentMethodRoyaltyAggregateHistory> _mostRecentAggregates = new();
+    private Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory> _mostRecentEntries = new();
 
-    private List<ComponentMethodRoyaltyEntryHistory> _entriesToAdd = new();
     private List<ComponentMethodRoyaltyAggregateHistory> _aggregatesToAdd = new();
+    private List<ComponentMethodRoyaltyEntryHistory> _entriesToAdd = new();
 
-    public void AcceptUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public Dumpyard_ComponentMethodRoyalty(Dumpyard_Context context)
+    {
+        _context = context;
+    }
+
+    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
     {
         if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
         {
             _changePointers
                 .GetOrAdd(new ComponentMethodRoyaltyChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
                 {
-                    _changes.Add(lookup);
+                    _changeOrder.Add(lookup);
 
-                    return new ComponentMethodRoyaltyChangePointer(referencedEntity, stateVersion);
+                    return new ComponentMethodRoyaltyChangePointer(referencedEntity);
                 })
                 .Entries.Add(methodRoyaltyEntry);
         }
     }
 
-    public async Task LoadMostRecents(ReadHelper readHelper, CancellationToken token = default)
+    public void ProcessChanges()
     {
-        _mostRecentEntries = await readHelper.MostRecentComponentMethodRoyaltyEntryHistoryFor(_changePointers.Values, token);
-        _mostRecentAggregates = await readHelper.MostRecentComponentMethodRoyaltyAggregateHistoryFor(_changes, token);
-    }
-
-    public void PrepareAdd(SequencesHolder sequences)
-    {
-        foreach (var lookup in _changes)
+        foreach (var lookup in _changeOrder)
         {
-            var componentMethodRoyaltyChange = _changePointers[lookup];
+            var change = _changePointers[lookup];
 
             ComponentMethodRoyaltyAggregateHistory aggregate;
 
@@ -59,7 +59,7 @@ internal class Dumpyard_ComponentMethodRoyalty
             {
                 aggregate = new ComponentMethodRoyaltyAggregateHistory
                 {
-                    Id = sequences.ComponentMethodRoyaltyAggregateHistorySequence++,
+                    Id = _context.Sequences.ComponentMethodRoyaltyAggregateHistorySequence++,
                     FromStateVersion = lookup.StateVersion,
                     EntityId = lookup.EntityId,
                     EntryIds = new List<long>(),
@@ -78,12 +78,12 @@ internal class Dumpyard_ComponentMethodRoyalty
                 aggregate = previousAggregate;
             }
 
-            foreach (var entry in componentMethodRoyaltyChange.Entries)
+            foreach (var entry in change.Entries)
             {
                 var entryLookup = new ComponentMethodRoyaltyEntryDbLookup(lookup.EntityId, entry.Key.MethodName);
                 var entryHistory = new ComponentMethodRoyaltyEntryHistory
                 {
-                    Id = sequences.ComponentMethodRoyaltyEntryHistorySequence++,
+                    Id = _context.Sequences.ComponentMethodRoyaltyEntryHistorySequence++,
                     FromStateVersion = lookup.StateVersion,
                     EntityId = lookup.EntityId,
                     MethodName = entry.Key.MethodName,
@@ -103,19 +103,29 @@ internal class Dumpyard_ComponentMethodRoyalty
                     }
                 }
 
-                aggregate.EntryIds.Insert(0, entryHistory.Id);
+                // TODO introduce entry.IsDeleted extension method
+                if (entry.Value != null)
+                {
+                    aggregate.EntryIds.Insert(0, entryHistory.Id);
+                }
 
                 _mostRecentEntries[entryLookup] = entryHistory;
             }
         }
     }
 
-    public async Task<int> WriteNew(WriteHelper writeHelper, CancellationToken token)
+    public async Task LoadMostRecents()
+    {
+        _mostRecentEntries = await _context.ReadHelper.MostRecentComponentMethodRoyaltyEntryHistoryFor(_changePointers.Values, _context.Token);
+        _mostRecentAggregates = await _context.ReadHelper.MostRecentComponentMethodRoyaltyAggregateHistoryFor(_changeOrder, _context.Token);
+    }
+
+    public async Task<int> SaveEntities()
     {
         var rowsInserted = 0;
 
-        rowsInserted += await writeHelper.CopyComponentMethodRoyaltyEntryHistory(_entriesToAdd, token);
-        rowsInserted += await writeHelper.CopyComponentMethodRoyaltyAggregateHistory(_aggregatesToAdd, token);
+        rowsInserted += await _context.WriteHelper.CopyComponentMethodRoyaltyEntryHistory(_entriesToAdd, _context.Token);
+        rowsInserted += await _context.WriteHelper.CopyComponentMethodRoyaltyAggregateHistory(_aggregatesToAdd, _context.Token);
 
         return rowsInserted;
     }
