@@ -5,15 +5,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-bookworm-slim AS base
 WORKDIR /app
 
-# Fixes CVE-2023-4911 can be removed when we update the base OS image to include this fix
-# docker run -it mcr.microsoft.com/dotnet/aspnet:7.0-bookworm-slim ldd --version
-# This fix can be removed as long as the version printed in the above command is 2.36-9+deb12u3 or above
-RUN apt-get update -y \
-  && apt-get -y --no-install-recommends install \    
-    libc6=2.36-9+deb12u3 \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-
 FROM mcr.microsoft.com/dotnet/sdk:7.0-bookworm-slim AS build
 WORKDIR /src
 COPY . .
