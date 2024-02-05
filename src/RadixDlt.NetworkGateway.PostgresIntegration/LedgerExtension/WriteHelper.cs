@@ -861,7 +861,7 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyComponentMethodRoyalties(List<ComponentMethodRoyaltyEntryHistory> entities, CancellationToken token)
+    public async Task<int> CopyComponentMethodRoyaltyEntryHistory(List<ComponentMethodRoyaltyEntryHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
@@ -887,7 +887,35 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyComponentMethodRoyalties), Stopwatch.GetElapsedTime(sw), entities.Count));
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyComponentMethodRoyaltyEntryHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
+        return entities.Count;
+    }
+
+    public async Task<int> CopyComponentMethodRoyaltyAggregateHistory(List<ComponentMethodRoyaltyAggregateHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+
+        await using var writer = await _connection.BeginBinaryImportAsync(
+            "COPY component_method_royalty_aggregate_history (id, from_state_version, entity_id, entry_ids) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntryIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyComponentMethodRoyaltyAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
 
         return entities.Count;
     }
@@ -1318,6 +1346,7 @@ SELECT
     setval('entity_role_assignments_entry_history_id_seq', @entityRoleAssignmentsEntryHistorySequence),
     setval('entity_role_assignments_owner_role_history_id_seq', @entityRoleAssignmentsOwnerRoleHistorySequence),
     setval('component_method_royalty_entry_history_id_seq', @componentMethodRoyaltyEntryHistorySequence),
+    setval('component_method_royalty_aggregate_history_id_seq', @componentMethodRoyaltyAggregateHistorySequence),
     setval('resource_entity_supply_history_id_seq', @resourceEntitySupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
@@ -1352,6 +1381,7 @@ SELECT
                 entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
                 entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,
                 componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
+                componentMethodRoyaltyAggregateHistorySequence = sequences.ComponentMethodRoyaltyAggregateHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                 nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,

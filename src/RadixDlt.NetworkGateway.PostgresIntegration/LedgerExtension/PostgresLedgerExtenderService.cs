@@ -741,7 +741,6 @@ UPDATE pending_transactions
         var stateToAdd = new List<StateHistory>();
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
         var keyValueStoreEntryHistoryToAdd = new List<KeyValueStoreEntryHistory>();
-        var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
         var schemaHistoryToAdd = new List<SchemaHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
@@ -752,8 +751,9 @@ UPDATE pending_transactions
         var roleAssignmentChanges = new List<RoleAssignmentsChangePointerLookup>();
         var packageCodeChanges = new Dictionary<PackageCodeLookup, PackageCodeChange>();
         var packageBlueprintChanges = new Dictionary<PackageBlueprintLookup, PackageBlueprintChange>();
-
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
+        var componentMethodRoyaltyChangePointers = new Dictionary<ComponentMethodRoyaltyChangePointerLookup, ComponentMethodRoyaltyChangePointer>();
+        var componentMethodRoyaltyChanges = new List<ComponentMethodRoyaltyChangePointerLookup>();
 
         // step: scan all substates & events to figure out changes
         {
@@ -1066,15 +1066,14 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
                         {
-                            componentMethodRoyaltiesToAdd.Add(new ComponentMethodRoyaltyEntryHistory
-                            {
-                                Id = sequences.ComponentMethodRoyaltyEntryHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                EntityId = referencedEntity.DatabaseId,
-                                MethodName = methodRoyaltyEntry.Key.MethodName,
-                                RoyaltyAmount = methodRoyaltyEntry.Value?.ToJson(),
-                                IsLocked = methodRoyaltyEntry.IsLocked,
-                            });
+                            componentMethodRoyaltyChangePointers
+                                .GetOrAdd(new ComponentMethodRoyaltyChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
+                                {
+                                    componentMethodRoyaltyChanges.Add(lookup);
+
+                                    return new ComponentMethodRoyaltyChangePointer(referencedEntity, stateVersion);
+                                })
+                                .Entries.Add(methodRoyaltyEntry);
                         }
 
                         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
@@ -1415,6 +1414,8 @@ UPDATE pending_transactions
             var mostRecentPackageBlueprintHistory = await readHelper.MostRecentPackageBlueprintHistoryFor(packageBlueprintChanges.Keys, token);
             var mostRecentPackageCodeHistory = await readHelper.MostRecentPackageCodeHistoryFor(packageCodeChanges.Keys, token);
             var mostRecentPackageCodeAggregateHistory = await readHelper.MostRecentPackageCodeAggregateHistoryFor(packageCodeChanges.Keys, token);
+            var mostRecentComponentMethodRoyaltyEntryHistory = await readHelper.MostRecentComponentMethodRoyaltyEntryHistoryFor(componentMethodRoyaltyChangePointers.Values, token);
+            var mostRecentComponentMethodRoyaltyAggregateHistory = await readHelper.MostRecentComponentMethodRoyaltyAggregateHistoryFor(componentMethodRoyaltyChanges, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -1430,6 +1431,8 @@ UPDATE pending_transactions
             var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
             var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
+            var componentMethodRoyaltyEntryHistoryToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
+            var componentMethodRoyaltyAggregateHistoryToAdd = new List<ComponentMethodRoyaltyAggregateHistory>();
 
             var (packageBlueprintHistoryToAdd, packageBlueprintAggregateHistoryToAdd) =
                 PackageBlueprintAggregator.AggregatePackageBlueprint(packageBlueprintChanges, mostRecentPackageBlueprintHistory, mostRecentPackageBlueprintAggregateHistory, referencedEntities, sequences);
@@ -1575,6 +1578,66 @@ UPDATE pending_transactions
                     }
 
                     mostRecentAccessRulesEntryHistory[entryLookup] = entryHistory;
+                }
+            }
+
+            foreach (var lookup in componentMethodRoyaltyChanges)
+            {
+                var componentMethodRoyaltyChange = componentMethodRoyaltyChangePointers[lookup];
+
+                ComponentMethodRoyaltyAggregateHistory aggregate;
+
+                if (!mostRecentComponentMethodRoyaltyAggregateHistory.TryGetValue(lookup.EntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
+                {
+                    aggregate = new ComponentMethodRoyaltyAggregateHistory
+                    {
+                        Id = sequences.ComponentMethodRoyaltyAggregateHistorySequence++,
+                        FromStateVersion = lookup.StateVersion,
+                        EntityId = lookup.EntityId,
+                        EntryIds = new List<long>(),
+                    };
+
+                    if (previousAggregate != null)
+                    {
+                        aggregate.EntryIds.AddRange(previousAggregate.EntryIds);
+                    }
+
+                    componentMethodRoyaltyAggregateHistoryToAdd.Add(aggregate);
+                    mostRecentComponentMethodRoyaltyAggregateHistory[lookup.EntityId] = aggregate;
+                }
+                else
+                {
+                    aggregate = previousAggregate;
+                }
+
+                foreach (var entry in componentMethodRoyaltyChange.Entries)
+                {
+                    var entryLookup = new ComponentMethodRoyaltyEntryDbLookup(lookup.EntityId, entry.Key.MethodName);
+                    var entryHistory = new ComponentMethodRoyaltyEntryHistory
+                    {
+                        Id = sequences.ComponentMethodRoyaltyEntryHistorySequence++,
+                        FromStateVersion = lookup.StateVersion,
+                        EntityId = lookup.EntityId,
+                        MethodName = entry.Key.MethodName,
+                        RoyaltyAmount = entry.Value?.ToJson(),
+                        IsLocked = entry.IsLocked,
+                    };
+
+                    componentMethodRoyaltyEntryHistoryToAdd.Add(entryHistory);
+
+                    if (mostRecentComponentMethodRoyaltyEntryHistory.TryGetValue(entryLookup, out var previousEntry))
+                    {
+                        var currentPosition = aggregate.EntryIds.IndexOf(previousEntry.Id);
+
+                        if (currentPosition != -1)
+                        {
+                            aggregate.EntryIds.RemoveAt(currentPosition);
+                        }
+                    }
+
+                    aggregate.EntryIds.Insert(0, entryHistory.Id);
+
+                    mostRecentComponentMethodRoyaltyEntryHistory[entryLookup] = entryHistory;
                 }
             }
 
@@ -1926,7 +1989,8 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityVaultHistory(vaultHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyComponentMethodRoyalties(componentMethodRoyaltiesToAdd, token);
+            rowsInserted += await writeHelper.CopyComponentMethodRoyaltyEntryHistory(componentMethodRoyaltyEntryHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyComponentMethodRoyaltyAggregateHistory(componentMethodRoyaltyAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdData(nonFungibleIdDataToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);

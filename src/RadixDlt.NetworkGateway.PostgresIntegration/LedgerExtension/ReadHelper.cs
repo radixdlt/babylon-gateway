@@ -784,6 +784,94 @@ INNER JOIN LATERAL (
         return result;
     }
 
+    public async Task<Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>> MostRecentComponentMethodRoyaltyEntryHistoryFor(
+        ICollection<ComponentMethodRoyaltyChangePointer> changePointers,
+        CancellationToken token)
+    {
+        if (!changePointers.Any())
+        {
+            return new Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>();
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+        var lookupSet = new HashSet<ComponentMethodRoyaltyEntryDbLookup>();
+        var entityIds = new List<long>();
+        var methodNames = new List<string>();
+
+        foreach (var changePointer in changePointers)
+        {
+            foreach (var entry in changePointer.Entries)
+            {
+                lookupSet.Add(new ComponentMethodRoyaltyEntryDbLookup(changePointer.ReferencedEntity.DatabaseId, entry.Key.MethodName));
+            }
+        }
+
+        foreach (var lookup in lookupSet)
+        {
+            entityIds.Add(lookup.EntityId);
+            methodNames.Add(lookup.MethodName);
+        }
+
+        var result = await _dbContext
+            .ComponentEntityMethodRoyaltyEntryHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id, method_name) AS (
+    SELECT UNNEST({entityIds}), UNNEST({methodNames})
+)
+SELECT cmreh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM component_method_royalty_entry_history
+    WHERE entity_id = variables.entity_id AND method_name = variables.method_name
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) cmreh ON true;")
+            .AsNoTracking()
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => new ComponentMethodRoyaltyEntryDbLookup(e.EntityId, e.MethodName), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentComponentMethodRoyaltyEntryHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
+    }
+
+    public async Task<Dictionary<long, ComponentMethodRoyaltyAggregateHistory>> MostRecentComponentMethodRoyaltyAggregateHistoryFor(
+        List<ComponentMethodRoyaltyChangePointerLookup> lookups,
+        CancellationToken token)
+    {
+        if (!lookups.Any())
+        {
+            return new Dictionary<long, ComponentMethodRoyaltyAggregateHistory>();
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+        var entityIds = lookups.Select(x => x.EntityId).Distinct().ToList();
+
+        var result = await _dbContext
+            .ComponentEntityMethodRoyaltyAggregateHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id) AS (
+    SELECT UNNEST({entityIds})
+)
+SELECT cmrah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM component_method_royalty_aggregate_history
+    WHERE entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) cmrah ON true;")
+            .AsNoTracking()
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => e.EntityId, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentComponentMethodRoyaltyAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
+    }
+
     public async Task<SequencesHolder> LoadSequences(CancellationToken token)
     {
         var sw = Stopwatch.GetTimestamp();
@@ -804,6 +892,7 @@ SELECT
     nextval('entity_role_assignments_entry_history_id_seq') AS EntityRoleAssignmentsEntryHistorySequence,
     nextval('entity_role_assignments_owner_role_history_id_seq') AS EntityRoleAssignmentsOwnerRoleHistorySequence,
     nextval('component_method_royalty_entry_history_id_seq') AS ComponentMethodRoyaltyEntryHistorySequence,
+    nextval('component_method_royalty_aggregate_history_id_seq') AS ComponentMethodRoyaltyAggregateHistorySequence,
     nextval('resource_entity_supply_history_id_seq') AS ResourceEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_data_history_id_seq') AS NonFungibleIdDataHistorySequence,
