@@ -229,7 +229,7 @@ jobs:
     needs:
       - docker-gateway-api-private
       - docker-gateway-api-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@DO-2181
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
       amd_meta_data_json: ${{ needs.docker-gateway-api-private.outputs.json }}
       aws_dockerhub_secret: github-actions/common/dockerhub-credentials
@@ -241,7 +241,7 @@ jobs:
     needs:
       - docker-data-aggregator-private
       - docker-data-aggregator-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@DO-2181
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
       amd_meta_data_json: ${{ needs.docker-data-aggregator-private.outputs.json }}
       aws_dockerhub_secret: github-actions/common/dockerhub-credentials
@@ -253,7 +253,7 @@ jobs:
     needs:
       - docker-database-migrations-private
       - docker-database-migrations-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@DO-2181
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
       amd_meta_data_json: ${{ needs.docker-database-migrations-private.outputs.json }}
       aws_dockerhub_secret: github-actions/common/dockerhub-credentials
