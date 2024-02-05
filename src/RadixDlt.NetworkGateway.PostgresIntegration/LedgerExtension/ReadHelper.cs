@@ -330,26 +330,26 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    public async Task<Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityRoleAssignmentsEntryHistoryFor(
+    public async Task<Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityRoleAssignmentsEntryHistoryFor(
         ICollection<RoleAssignmentsChangePointer> roleAssignmentsChangePointers,
         CancellationToken token)
     {
         if (!roleAssignmentsChangePointers.Any())
         {
-            return new Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>();
+            return new Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>();
         }
 
         var sw = Stopwatch.GetTimestamp();
         var entityIds = new List<long>();
         var keyRoles = new List<string>();
         var keyModuleIds = new List<ModuleId>();
-        var lookupSet = new HashSet<RoleAssignmentEntryLookup>();
+        var lookupSet = new HashSet<RoleAssignmentEntryDbLookup>();
 
         foreach (var roleAssignmentsChangePointer in roleAssignmentsChangePointers)
         {
             foreach (var entry in roleAssignmentsChangePointer.Entries)
             {
-                lookupSet.Add(new RoleAssignmentEntryLookup(roleAssignmentsChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
+                lookupSet.Add(new RoleAssignmentEntryDbLookup(roleAssignmentsChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
             }
         }
 
@@ -377,7 +377,7 @@ INNER JOIN LATERAL (
 ) eareh ON true;")
             .AsNoTracking()
             .AnnotateMetricName()
-            .ToDictionaryAsync(e => new RoleAssignmentEntryLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
+            .ToDictionaryAsync(e => new RoleAssignmentEntryDbLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityRoleAssignmentsEntryHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 

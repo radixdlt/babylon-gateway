@@ -747,13 +747,12 @@ UPDATE pending_transactions
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern to ensure proper order of ingestion
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var accountResourcePreferenceRuleHistoryToAdd = new List<AccountResourcePreferenceRuleHistory>();
-        var roleAssignmentsChangePointers = new Dictionary<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer>();
-        var roleAssignmentChanges = new List<RoleAssignmentsChangePointerLookup>();
         var packageCodeChanges = new Dictionary<PackageCodeLookup, PackageCodeChange>();
         var packageBlueprintChanges = new Dictionary<PackageBlueprintLookup, PackageBlueprintChange>();
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
         var d_cmr = new Dumpyard_ComponentMethodRoyalty();
+        var d_era = new Dumpyard_EntityRoleAssignment();
 
         // step: scan all substates & events to figure out changes
         {
@@ -967,31 +966,6 @@ UPDATE pending_transactions
                             });
                         }
 
-                        if (substateData is CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate accessRulesFieldOwnerRole)
-                        {
-                            roleAssignmentsChangePointers
-                                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
-                                {
-                                    roleAssignmentChanges.Add(lookup);
-
-                                    return new RoleAssignmentsChangePointer(referencedEntity, stateVersion);
-                                })
-                                .OwnerRole = accessRulesFieldOwnerRole;
-                        }
-
-                        if (substateData is CoreModel.RoleAssignmentModuleRuleEntrySubstate roleAssignmentEntry)
-                        {
-                            roleAssignmentsChangePointers
-                                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
-                                {
-                                    roleAssignmentChanges.Add(lookup);
-
-                                    return new RoleAssignmentsChangePointer(referencedEntity, stateVersion);
-                                })
-                                .Entries
-                                .Add(roleAssignmentEntry);
-                        }
-
                         if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
                         {
                             packageBlueprintChanges
@@ -1158,6 +1132,7 @@ UPDATE pending_transactions
                         }
 
                         d_cmr.AcceptUpsert(substateData, referencedEntity, stateVersion);
+                        d_era.AcceptUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -1390,8 +1365,6 @@ UPDATE pending_transactions
 
             var mostRecentMetadataHistory = await readHelper.MostRecentEntityMetadataHistoryFor(metadataChanges, token);
             var mostRecentAggregatedMetadataHistory = await readHelper.MostRecentEntityAggregateMetadataHistoryFor(metadataChanges, token);
-            var mostRecentAccessRulesEntryHistory = await readHelper.MostRecentEntityRoleAssignmentsEntryHistoryFor(roleAssignmentsChangePointers.Values, token);
-            var mostRecentAccessRulesAggregateHistory = await readHelper.MostRecentEntityRoleAssignmentsAggregateHistoryFor(roleAssignmentChanges, token);
             var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(vaultSnapshots, token);
             var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(vaultChanges, token);
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(vaultSnapshots, token);
@@ -1406,6 +1379,7 @@ UPDATE pending_transactions
             var mostRecentPackageCodeAggregateHistory = await readHelper.MostRecentPackageCodeAggregateHistoryFor(packageCodeChanges.Keys, token);
 
             await d_cmr.LoadMostRecents(readHelper, token);
+            await d_era.LoadMostRecents(readHelper, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -1414,9 +1388,6 @@ UPDATE pending_transactions
             var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
             var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
             var entityResourceVaultAggregateHistoryCandidates = new List<EntityResourceVaultAggregateHistory>();
-            var entityAccessRulesOwnerRoleHistoryToAdd = new List<EntityRoleAssignmentsOwnerRoleHistory>();
-            var entityAccessRulesEntryHistoryToAdd = new List<EntityRoleAssignmentsEntryHistory>();
-            var entityAccessRulesAggregateHistoryToAdd = new List<EntityRoleAssignmentsAggregateHistory>();
             var nonFungibleIdStoreHistoryToAdd = new Dictionary<NonFungibleStoreLookup, NonFungibleIdStoreHistory>();
             var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
             var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
@@ -1488,88 +1459,8 @@ UPDATE pending_transactions
                 mostRecentMetadataHistory[lookup] = metadataHistory;
             }
 
-            foreach (var lookup in roleAssignmentChanges)
-            {
-                var accessRuleChange = roleAssignmentsChangePointers[lookup];
-
-                EntityRoleAssignmentsOwnerRoleHistory? ownerRole = null;
-
-                if (accessRuleChange.OwnerRole != null)
-                {
-                    ownerRole = new EntityRoleAssignmentsOwnerRoleHistory
-                    {
-                        Id = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence++,
-                        FromStateVersion = lookup.StateVersion,
-                        EntityId = lookup.EntityId,
-                        RoleAssignments = accessRuleChange.OwnerRole.Value.OwnerRole.ToJson(),
-                    };
-
-                    entityAccessRulesOwnerRoleHistoryToAdd.Add(ownerRole);
-                }
-
-                EntityRoleAssignmentsAggregateHistory aggregate;
-
-                if (!mostRecentAccessRulesAggregateHistory.TryGetValue(lookup.EntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
-                {
-                    aggregate = new EntityRoleAssignmentsAggregateHistory
-                    {
-                        Id = sequences.EntityRoleAssignmentsAggregateHistorySequence++,
-                        FromStateVersion = lookup.StateVersion,
-                        EntityId = lookup.EntityId,
-                        OwnerRoleId = ownerRole?.Id ?? previousAggregate?.OwnerRoleId ?? throw new InvalidOperationException("Unable to determine OwnerRoleId"),
-                        EntryIds = new List<long>(),
-                    };
-
-                    if (previousAggregate != null)
-                    {
-                        aggregate.EntryIds.AddRange(previousAggregate.EntryIds);
-                    }
-
-                    entityAccessRulesAggregateHistoryToAdd.Add(aggregate);
-                    mostRecentAccessRulesAggregateHistory[lookup.EntityId] = aggregate;
-                }
-                else
-                {
-                    aggregate = previousAggregate;
-                }
-
-                foreach (var entry in accessRuleChange.Entries)
-                {
-                    var entryLookup = new RoleAssignmentEntryLookup(lookup.EntityId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel());
-                    var entryHistory = new EntityRoleAssignmentsEntryHistory
-                    {
-                        Id = sequences.EntityRoleAssignmentsEntryHistorySequence++,
-                        FromStateVersion = lookup.StateVersion,
-                        EntityId = lookup.EntityId,
-                        KeyRole = entry.Key.RoleKey,
-                        KeyModule = entry.Key.ObjectModuleId.ToModel(),
-                        RoleAssignments = entry.Value?.AccessRule.ToJson(),
-                        IsDeleted = entry.Value == null,
-                    };
-
-                    entityAccessRulesEntryHistoryToAdd.Add(entryHistory);
-
-                    if (mostRecentAccessRulesEntryHistory.TryGetValue(entryLookup, out var previousEntry))
-                    {
-                        var currentPosition = aggregate.EntryIds.IndexOf(previousEntry.Id);
-
-                        if (currentPosition != -1)
-                        {
-                            aggregate.EntryIds.RemoveAt(currentPosition);
-                        }
-                    }
-
-                    // !entry.IsDeleted
-                    if (entry.Value != null)
-                    {
-                        aggregate.EntryIds.Insert(0, entryHistory.Id);
-                    }
-
-                    mostRecentAccessRulesEntryHistory[entryLookup] = entryHistory;
-                }
-            }
-
             d_cmr.PrepareAdd(sequences);
+            d_era.PrepareAdd(sequences);
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1912,9 +1803,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyStateHistory(stateToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(entityMetadataAggregateHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityRoleAssignmentsOwnerRoleHistory(entityAccessRulesOwnerRoleHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityRoleAssignmentsRulesEntryHistory(entityAccessRulesEntryHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityRoleAssignmentsAggregateHistory(entityAccessRulesAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(entityResourceAggregatedVaultsHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
@@ -1939,6 +1827,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyPackageBlueprintAggregateHistory(packageBlueprintAggregateHistoryToAdd, token);
 
             rowsInserted += await d_cmr.WriteNew(writeHelper, token);
+            rowsInserted += await d_era.WriteNew(writeHelper, token);
 
             await writeHelper.UpdateSequences(sequences, token);
 
