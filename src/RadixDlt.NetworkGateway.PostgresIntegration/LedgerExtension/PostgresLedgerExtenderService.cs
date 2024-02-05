@@ -752,8 +752,8 @@ UPDATE pending_transactions
         var packageCodeChanges = new Dictionary<PackageCodeLookup, PackageCodeChange>();
         var packageBlueprintChanges = new Dictionary<PackageBlueprintLookup, PackageBlueprintChange>();
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
-        var componentMethodRoyaltyChangePointers = new Dictionary<ComponentMethodRoyaltyChangePointerLookup, ComponentMethodRoyaltyChangePointer>();
-        var componentMethodRoyaltyChanges = new List<ComponentMethodRoyaltyChangePointerLookup>();
+
+        var d_cmr = new Dumpyard_ComponentMethodRoyalty();
 
         // step: scan all substates & events to figure out changes
         {
@@ -1064,18 +1064,6 @@ UPDATE pending_transactions
                             });
                         }
 
-                        if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
-                        {
-                            componentMethodRoyaltyChangePointers
-                                .GetOrAdd(new ComponentMethodRoyaltyChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
-                                {
-                                    componentMethodRoyaltyChanges.Add(lookup);
-
-                                    return new ComponentMethodRoyaltyChangePointer(referencedEntity, stateVersion);
-                                })
-                                .Entries.Add(methodRoyaltyEntry);
-                        }
-
                         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
                         {
                             if (typeInfoSubstate.TryGetNonFungibleDataSchemaDetails(out var nonFungibleDataSchemaDetails))
@@ -1168,6 +1156,8 @@ UPDATE pending_transactions
                                 JsonState = multiResourcePoolFieldStateSubstate.Value.ToJson(),
                             });
                         }
+
+                        d_cmr.AcceptUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -1414,8 +1404,8 @@ UPDATE pending_transactions
             var mostRecentPackageBlueprintHistory = await readHelper.MostRecentPackageBlueprintHistoryFor(packageBlueprintChanges.Keys, token);
             var mostRecentPackageCodeHistory = await readHelper.MostRecentPackageCodeHistoryFor(packageCodeChanges.Keys, token);
             var mostRecentPackageCodeAggregateHistory = await readHelper.MostRecentPackageCodeAggregateHistoryFor(packageCodeChanges.Keys, token);
-            var mostRecentComponentMethodRoyaltyEntryHistory = await readHelper.MostRecentComponentMethodRoyaltyEntryHistoryFor(componentMethodRoyaltyChangePointers.Values, token);
-            var mostRecentComponentMethodRoyaltyAggregateHistory = await readHelper.MostRecentComponentMethodRoyaltyAggregateHistoryFor(componentMethodRoyaltyChanges, token);
+
+            await d_cmr.LoadMostRecents(readHelper, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -1431,8 +1421,6 @@ UPDATE pending_transactions
             var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
             var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
-            var componentMethodRoyaltyEntryHistoryToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
-            var componentMethodRoyaltyAggregateHistoryToAdd = new List<ComponentMethodRoyaltyAggregateHistory>();
 
             var (packageBlueprintHistoryToAdd, packageBlueprintAggregateHistoryToAdd) =
                 PackageBlueprintAggregator.AggregatePackageBlueprint(packageBlueprintChanges, mostRecentPackageBlueprintHistory, mostRecentPackageBlueprintAggregateHistory, referencedEntities, sequences);
@@ -1581,65 +1569,7 @@ UPDATE pending_transactions
                 }
             }
 
-            foreach (var lookup in componentMethodRoyaltyChanges)
-            {
-                var componentMethodRoyaltyChange = componentMethodRoyaltyChangePointers[lookup];
-
-                ComponentMethodRoyaltyAggregateHistory aggregate;
-
-                if (!mostRecentComponentMethodRoyaltyAggregateHistory.TryGetValue(lookup.EntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
-                {
-                    aggregate = new ComponentMethodRoyaltyAggregateHistory
-                    {
-                        Id = sequences.ComponentMethodRoyaltyAggregateHistorySequence++,
-                        FromStateVersion = lookup.StateVersion,
-                        EntityId = lookup.EntityId,
-                        EntryIds = new List<long>(),
-                    };
-
-                    if (previousAggregate != null)
-                    {
-                        aggregate.EntryIds.AddRange(previousAggregate.EntryIds);
-                    }
-
-                    componentMethodRoyaltyAggregateHistoryToAdd.Add(aggregate);
-                    mostRecentComponentMethodRoyaltyAggregateHistory[lookup.EntityId] = aggregate;
-                }
-                else
-                {
-                    aggregate = previousAggregate;
-                }
-
-                foreach (var entry in componentMethodRoyaltyChange.Entries)
-                {
-                    var entryLookup = new ComponentMethodRoyaltyEntryDbLookup(lookup.EntityId, entry.Key.MethodName);
-                    var entryHistory = new ComponentMethodRoyaltyEntryHistory
-                    {
-                        Id = sequences.ComponentMethodRoyaltyEntryHistorySequence++,
-                        FromStateVersion = lookup.StateVersion,
-                        EntityId = lookup.EntityId,
-                        MethodName = entry.Key.MethodName,
-                        RoyaltyAmount = entry.Value?.ToJson(),
-                        IsLocked = entry.IsLocked,
-                    };
-
-                    componentMethodRoyaltyEntryHistoryToAdd.Add(entryHistory);
-
-                    if (mostRecentComponentMethodRoyaltyEntryHistory.TryGetValue(entryLookup, out var previousEntry))
-                    {
-                        var currentPosition = aggregate.EntryIds.IndexOf(previousEntry.Id);
-
-                        if (currentPosition != -1)
-                        {
-                            aggregate.EntryIds.RemoveAt(currentPosition);
-                        }
-                    }
-
-                    aggregate.EntryIds.Insert(0, entryHistory.Id);
-
-                    mostRecentComponentMethodRoyaltyEntryHistory[entryLookup] = entryHistory;
-                }
-            }
+            d_cmr.PrepareAdd(sequences);
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1989,8 +1919,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityVaultHistory(vaultHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyComponentMethodRoyaltyEntryHistory(componentMethodRoyaltyEntryHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyComponentMethodRoyaltyAggregateHistory(componentMethodRoyaltyAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdData(nonFungibleIdDataToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
@@ -2009,6 +1937,9 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyPackageBlueprintAggregateHistory(packageBlueprintAggregateHistoryToAdd, token);
+
+            rowsInserted += await d_cmr.WriteNew(writeHelper, token);
+
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;

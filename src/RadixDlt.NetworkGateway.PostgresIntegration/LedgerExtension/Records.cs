@@ -129,12 +129,3 @@ internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity, 
 
     public IList<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.RoleAssignmentModuleRuleEntrySubstate>();
 }
-
-internal record struct ComponentMethodRoyaltyEntryDbLookup(long EntityId, string MethodName);
-
-internal record struct ComponentMethodRoyaltyChangePointerLookup(long EntityId, long StateVersion);
-
-internal record ComponentMethodRoyaltyChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
-{
-    public IList<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate> Entries { get; } = new List<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate>();
-}
