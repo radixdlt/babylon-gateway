@@ -67,6 +67,11 @@ jobs:
     name: AMD DatabaseMigrations
     needs:
       - setup-tags
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      packages: write
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -90,6 +95,11 @@ jobs:
     name: ARM DatabaseMigrations
     needs:
       - setup-tags
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      packages: write
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: babylon-gateway-arm
@@ -115,6 +125,11 @@ jobs:
     name: AMD DataAggregator
     needs:
       - setup-tags
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      packages: write
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -138,6 +153,11 @@ jobs:
     name: ARM DataAggregator
     needs:
       - setup-tags
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      packages: write
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: babylon-gateway-arm
@@ -163,6 +183,11 @@ jobs:
     name: AMD GatewayApi
     needs:
       - setup-tags
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      packages: write
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -186,6 +211,11 @@ jobs:
     name: ARM GatewayApi
     needs:
       - setup-tags
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      packages: write
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: babylon-gateway-arm
@@ -212,6 +242,10 @@ jobs:
     needs:
       - docker-gateway-api-dockerhub
       - docker-gateway-api-dockerhub-arm
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join_multiarch_image_by_metadata.yml@DO-2181
     with:
       amd_meta_data_json: ${{ needs.docker-gateway-api-dockerhub.outputs.json }}
@@ -225,6 +259,10 @@ jobs:
       - setup-tags
       - docker-data-aggregator-dockerhub
       - docker-data-aggregator-dockerhub-arm
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join_multiarch_image_by_metadata.yml@DO-2181
     with:
       amd_meta_data_json: ${{ needs.docker-data-aggregator-dockerhub.outputs.json }}
@@ -238,6 +276,10 @@ jobs:
       - setup-tags
       - docker-database-migrations-dockerhub
       - docker-database-migrations-dockerhub-arm
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join_multiarch_image_by_metadata.yml@DO-2181
     with:
       amd_meta_data_json: ${{ needs.docker-database-migrations-dockerhub.outputs.json }}

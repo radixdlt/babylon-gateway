@@ -13,11 +13,11 @@ on:
       - release\/*
 
 permissions:
-      id-token: write
-      pull-requests: write
-      contents: read
-      deployments: write
-      packages: write
+  id-token: write
+  pull-requests: write
+  contents: read
+  deployments: write
+  packages: write
 
 env:
   DOTNET_VERSION: "7.0.x"
