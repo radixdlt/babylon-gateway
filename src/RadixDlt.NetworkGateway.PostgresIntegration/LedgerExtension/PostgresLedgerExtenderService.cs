@@ -748,12 +748,12 @@ UPDATE pending_transactions
         var accountResourcePreferenceRuleHistoryToAdd = new List<AccountResourcePreferenceRuleHistory>();
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
-        var d_ctx = new Dumpyard_Context(sequences, readHelper, writeHelper, token);
-        var d_s = new Dumpyard_EntityState(d_ctx, referencedEntities);
-        var d_cmr = new Dumpyard_ComponentMethodRoyalty(d_ctx);
-        var d_era = new Dumpyard_EntityRoleAssignment(d_ctx);
-        var d_pc = new Dumpyard_PackageCode(d_ctx, networkConfiguration.Id);
-        var d_pb = new Dumpyard_PackageBlueprint(d_ctx, referencedEntities);
+        var d_ctx = new ProcessorContext(sequences, readHelper, writeHelper, token);
+        var d_s = new EntityStateProcessor(d_ctx, referencedEntities);
+        var d_cmr = new ComponentMethodRoyaltyProcessor(d_ctx);
+        var d_era = new EntityRoleAssignmentProcessor(d_ctx);
+        var d_pc = new PackageCodeProcessor(d_ctx, networkConfiguration.Id);
+        var d_pb = new PackageBlueprintProcessor(d_ctx, referencedEntities);
 
         // step: scan all substates & events to figure out changes
         {

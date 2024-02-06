@@ -10,14 +10,14 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class Dumpyard_EntityState
+internal class EntityStateProcessor
 {
-    private readonly Dumpyard_Context _context;
+    private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
 
     private List<StateHistory> _toAdd = new();
 
-    public Dumpyard_EntityState(Dumpyard_Context context, ReferencedEntityDictionary referencedEntities)
+    public EntityStateProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
     {
         _context = context;
         _referencedEntities = referencedEntities;

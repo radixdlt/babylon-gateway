@@ -16,9 +16,9 @@ internal record ComponentMethodRoyaltyChangePointer(ReferencedEntity ReferencedE
     public IList<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate> Entries { get; } = new List<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate>();
 }
 
-internal class Dumpyard_ComponentMethodRoyalty
+internal class ComponentMethodRoyaltyProcessor
 {
-    private readonly Dumpyard_Context _context;
+    private readonly ProcessorContext _context;
 
     private Dictionary<ComponentMethodRoyaltyChangePointerLookup, ComponentMethodRoyaltyChangePointer> _changePointers = new();
     private List<ComponentMethodRoyaltyChangePointerLookup> _changeOrder = new();
@@ -29,7 +29,7 @@ internal class Dumpyard_ComponentMethodRoyalty
     private List<ComponentMethodRoyaltyAggregateHistory> _aggregatesToAdd = new();
     private List<ComponentMethodRoyaltyEntryHistory> _entriesToAdd = new();
 
-    public Dumpyard_ComponentMethodRoyalty(Dumpyard_Context context)
+    public ComponentMethodRoyaltyProcessor(ProcessorContext context)
     {
         _context = context;
     }

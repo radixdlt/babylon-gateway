@@ -20,9 +20,9 @@ internal record PackageBlueprintChangePointer(long StateVersion)
     public CoreModel.PackageBlueprintAuthTemplateEntrySubstate? PackageBlueprintAuthTemplate { get; set; }
 }
 
-internal class Dumpyard_PackageBlueprint
+internal class PackageBlueprintProcessor
 {
-    private readonly Dumpyard_Context _context;
+    private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
 
     private Dictionary<PackageBlueprintDbLookup, PackageBlueprintChangePointer> _changePointers = new();
@@ -34,7 +34,7 @@ internal class Dumpyard_PackageBlueprint
     private List<PackageBlueprintAggregateHistory> _aggregatesToAdd = new();
     private List<PackageBlueprintHistory> _entriesToAdd = new();
 
-    public Dumpyard_PackageBlueprint(Dumpyard_Context context, ReferencedEntityDictionary referencedEntities)
+    public PackageBlueprintProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
     {
         _context = context;
         _referencedEntities = referencedEntities;

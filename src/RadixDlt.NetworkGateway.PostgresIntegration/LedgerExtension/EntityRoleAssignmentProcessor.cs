@@ -18,9 +18,9 @@ internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity)
     public List<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new();
 }
 
-internal class Dumpyard_EntityRoleAssignment
+internal class EntityRoleAssignmentProcessor
 {
-    private readonly Dumpyard_Context _context;
+    private readonly ProcessorContext _context;
 
     private Dictionary<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer> _changePointers = new();
     private List<RoleAssignmentsChangePointerLookup> _changeOrder = new();
@@ -32,7 +32,7 @@ internal class Dumpyard_EntityRoleAssignment
     private List<EntityRoleAssignmentsEntryHistory> _entriesToAdd = new();
     private List<EntityRoleAssignmentsOwnerRoleHistory> _ownersToAdd = new();
 
-    public Dumpyard_EntityRoleAssignment(Dumpyard_Context context)
+    public EntityRoleAssignmentProcessor(ProcessorContext context)
     {
         _context = context;
     }

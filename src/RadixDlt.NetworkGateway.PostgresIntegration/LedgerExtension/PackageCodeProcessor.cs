@@ -21,9 +21,9 @@ internal record PackageCodeChangePointer(long StateVersion)
     public bool PackageCodeIsDeleted { get; set; }
 }
 
-internal class Dumpyard_PackageCode
+internal class PackageCodeProcessor
 {
-    private readonly Dumpyard_Context _context;
+    private readonly ProcessorContext _context;
     private readonly byte _networkId;
 
     private Dictionary<PackageCodeDbLookup, PackageCodeChangePointer> _changePointers = new();
@@ -35,7 +35,7 @@ internal class Dumpyard_PackageCode
     private List<PackageCodeAggregateHistory> _aggregatesToAdd = new();
     private List<PackageCodeHistory> _entriesToAdd = new();
 
-    public Dumpyard_PackageCode(Dumpyard_Context context, byte networkId)
+    public PackageCodeProcessor(ProcessorContext context, byte networkId)
     {
         _context = context;
         _networkId = networkId;
