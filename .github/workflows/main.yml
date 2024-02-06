@@ -13,11 +13,11 @@ on:
       - release\/*
 
 permissions:
-      id-token: write
-      pull-requests: write
-      contents: read
-      deployments: write
-      packages: write
+  id-token: write
+  pull-requests: write
+  contents: read
+  deployments: write
+  packages: write
 
 env:
   DOTNET_VERSION: "7.0.x"
@@ -227,15 +227,11 @@ jobs:
   join-gateway-images:
     name: Gateway
     needs:
-      - setup-tags
       - docker-gateway-api-private
       - docker-gateway-api-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
-      image_name: private-babylon-ng-gateway-api
-      image_tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
-      tag_suffix_1: amd64
-      tag_suffix_2: arm64
+      amd_meta_data_json: ${{ needs.docker-gateway-api-private.outputs.json }}
       aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
@@ -243,15 +239,11 @@ jobs:
   join-aggregator-images:
     name: Aggregator
     needs:
-      - setup-tags
       - docker-data-aggregator-private
       - docker-data-aggregator-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
-      image_name: private-babylon-ng-data-aggregator
-      image_tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
-      tag_suffix_1: amd64
-      tag_suffix_2: arm64
+      amd_meta_data_json: ${{ needs.docker-data-aggregator-private.outputs.json }}
       aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
@@ -259,19 +251,14 @@ jobs:
   join-migrations-images:
     name: Migration
     needs:
-      - setup-tags
       - docker-database-migrations-private
       - docker-database-migrations-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
-      image_name: private-babylon-ng-database-migrations
-      image_tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
-      tag_suffix_1: amd64
-      tag_suffix_2: arm64
+      amd_meta_data_json: ${{ needs.docker-database-migrations-private.outputs.json }}
       aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
-
 
   deploy-on-mardunet:
     runs-on: ubuntu-22.04
