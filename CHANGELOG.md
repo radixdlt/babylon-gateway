@@ -1,4 +1,4 @@
-## 2.0.0
+## 1.4.0
 Release Date: _unreleased_
 
 - Return components effective role assignments only for assigned modules.
