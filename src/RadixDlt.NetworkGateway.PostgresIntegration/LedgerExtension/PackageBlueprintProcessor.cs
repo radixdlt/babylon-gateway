@@ -1,5 +1,7 @@
+using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -189,9 +191,38 @@ internal class PackageBlueprintProcessor
     {
         var rowsInserted = 0;
 
-        rowsInserted += await _context.WriteHelper.CopyPackageBlueprintHistory(_entriesToAdd, _context.Token);
-        rowsInserted += await _context.WriteHelper.CopyPackageBlueprintAggregateHistory(_aggregatesToAdd, _context.Token);
+        rowsInserted += await CopyPackageBlueprintHistory();
+        rowsInserted += await CopyPackageBlueprintAggregateHistory();
 
         return rowsInserted;
     }
+
+    private Task<int> CopyPackageBlueprintHistory() => _context.WriteHelper.Copy(
+        _entriesToAdd,
+        "COPY package_blueprint_history (id, from_state_version, package_entity_id, name, version, definition, dependant_entity_ids, auth_template, auth_template_is_locked, royalty_config, royalty_config_is_locked) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Name, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.Version, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.Definition, NpgsqlDbType.Jsonb, token);
+            await writer.WriteNullableAsync(e.DependantEntityIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AuthTemplate, NpgsqlDbType.Jsonb, token);
+            await writer.WriteNullableAsync(e.AuthTemplateIsLocked, NpgsqlDbType.Boolean, token);
+            await writer.WriteAsync(e.RoyaltyConfig, NpgsqlDbType.Jsonb, token);
+            await writer.WriteNullableAsync(e.RoyaltyConfigIsLocked, NpgsqlDbType.Boolean, token);
+        });
+
+    private Task<int> CopyPackageBlueprintAggregateHistory() => _context.WriteHelper.Copy(
+        _aggregatesToAdd,
+        "COPY package_blueprint_aggregate_history (id, from_state_version, package_entity_id, package_blueprint_ids) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.PackageBlueprintIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+        });
 }

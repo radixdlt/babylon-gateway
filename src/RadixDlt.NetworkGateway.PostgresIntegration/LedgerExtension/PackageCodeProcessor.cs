@@ -1,3 +1,4 @@
+using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -198,9 +199,34 @@ internal class PackageCodeProcessor
     {
         var rowsInserted = 0;
 
-        rowsInserted += await _context.WriteHelper.CopyPackageCodeHistory(_entriesToAdd, _context.Token);
-        rowsInserted += await _context.WriteHelper.CopyPackageCodeAggregateHistory(_aggregatesToAdd, _context.Token);
+        rowsInserted += await CopyPackageCodeHistory();
+        rowsInserted += await CopyPackageCodeAggregateHistory();
 
         return rowsInserted;
     }
+
+    private Task<int> CopyPackageCodeHistory() => _context.WriteHelper.Copy(
+        _entriesToAdd,
+        "COPY package_code_history (id, from_state_version, package_entity_id, code_hash, code, vm_type, is_deleted) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.CodeHash, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Code, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.VmType, "package_vm_type", token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+        });
+
+    private Task<int> CopyPackageCodeAggregateHistory() => _context.WriteHelper.Copy(
+        _aggregatesToAdd,
+        "COPY package_code_aggregate_history (id, from_state_version, package_entity_id, package_code_ids) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.PackageCodeIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+        });
 }

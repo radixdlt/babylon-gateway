@@ -1,3 +1,4 @@
+using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -158,10 +159,47 @@ internal class EntityRoleAssignmentProcessor
     {
         var rowsInserted = 0;
 
-        rowsInserted += await _context.WriteHelper.CopyEntityRoleAssignmentsOwnerRoleHistory(_ownersToAdd, _context.Token);
-        rowsInserted += await _context.WriteHelper.CopyEntityRoleAssignmentsRulesEntryHistory(_entriesToAdd, _context.Token);
-        rowsInserted += await _context.WriteHelper.CopyEntityRoleAssignmentsAggregateHistory(_aggregatesToAdd, _context.Token);
+        rowsInserted += await CopyEntityRoleAssignmentsOwnerRoleHistory();
+        rowsInserted += await CopyEntityRoleAssignmentsRulesEntryHistory();
+        rowsInserted += await CopyEntityRoleAssignmentsAggregateHistory();
 
         return rowsInserted;
     }
+
+    private Task<int> CopyEntityRoleAssignmentsOwnerRoleHistory() => _context.WriteHelper.Copy(
+        _ownersToAdd,
+        "COPY entity_role_assignments_owner_role_history (id, from_state_version, entity_id, role_assignments) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.RoleAssignments, NpgsqlDbType.Jsonb, token);
+        });
+
+    private Task<int> CopyEntityRoleAssignmentsRulesEntryHistory() => _context.WriteHelper.Copy(
+        _entriesToAdd,
+        "COPY entity_role_assignments_entry_history (id, from_state_version, entity_id, key_role, key_module, role_assignments, is_deleted) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.KeyRole, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.KeyModule, "module_id", token);
+            await writer.WriteAsync(e.RoleAssignments, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+        });
+
+    private Task<int> CopyEntityRoleAssignmentsAggregateHistory() => _context.WriteHelper.Copy(
+        _aggregatesToAdd,
+        "COPY entity_role_assignments_aggregate_history (id, from_state_version, entity_id, owner_role_id, entry_ids) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.OwnerRoleId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntryIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+        });
 }
