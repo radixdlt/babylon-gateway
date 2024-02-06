@@ -4,6 +4,7 @@ Release Date: _unreleased_
 - Dropped internal `balance_changes` fallback mechanism. As of right now this information is ingested as part of regular transaction ingestion process.
 - Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
 - Reworked (partially) internal mechanism used to ingest ledger data by Data Aggregator to improve maintainability and simplify future extensions.
+- Fixed `state_version`-based ledger state `at_ledger_state`/`from_ledger_state` constraints which could result in inaccurate lookups previously. Attempt to read from non-existent state version will result in HTTP 400 Bad Request. Previously the nearest state version would be used.
 
 ### API Changes
 - Return components effective role assignments only for assigned modules.
