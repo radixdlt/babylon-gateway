@@ -1228,6 +1228,33 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyKeyValueStoreAggregateHistory(ICollection<KeyValueStoreAggregateHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY key_value_store_aggregate_history (id, from_state_version, key_value_store_entity_id, key_value_store_entry_ids) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.KeyValueStoreEntryIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityMetadataAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
+
+        return entities.Count;
+    }
+
     public async Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -1334,7 +1361,8 @@ SELECT
     setval('non_fungible_schema_history_id_seq', @NonFungibleSchemaHistorySequence),
     setval('key_value_store_schema_history_id_seq', @KeyValueSchemaHistorySequence),
     setval('package_blueprint_aggregate_history_id_seq', @packageBlueprintAggregateHistorySequence),
-    setval('package_code_aggregate_history_id_seq', @PackageCodeAggregateHistorySequence)
+    setval('package_code_aggregate_history_id_seq', @PackageCodeAggregateHistorySequence),
+    setval('key_value_store_aggregate_history_id_seq', @KeyValueStoreAggregateHistorySequence)
 ",
             parameters: new
             {
@@ -1369,6 +1397,7 @@ SELECT
                 keyValueSchemaHistorySequence = sequences.KeyValueSchemaHistorySequence,
                 packageBlueprintAggregateHistorySequence = sequences.PackageBlueprintAggregateHistorySequence,
                 packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
+                keyValueStoreAggregateHistorySequence = sequences.KeyValueStoreAggregateHistorySequence,
             },
             cancellationToken: token);
 

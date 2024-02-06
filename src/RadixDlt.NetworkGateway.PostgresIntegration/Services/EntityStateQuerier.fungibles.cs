@@ -181,7 +181,7 @@ ORDER BY vah.resource_order, vah.vault_order;
                     resourceAddress: vm.ResourceEntityAddress,
                     vaults: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(
                         totalCount: vm.VaultTotalCount,
-                        nextCursor: GenerateOffsetCursor(vaultOffset, vaultLimit, vm.VaultTotalCount),
+                        nextCursor: CursorGenerator.GenerateOffsetCursor(vaultOffset, vaultLimit, vm.VaultTotalCount),
                         items: new List<GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem>()));
 
                 resources[vm.ResourceEntityAddress] = existingRecord;
@@ -195,7 +195,7 @@ ORDER BY vah.resource_order, vah.vault_order;
 
         var items = resources.Values.Cast<GatewayModel.FungibleResourcesCollectionItem>().ToList();
 
-        return new GatewayModel.FungibleResourcesCollection(resourcesTotalCount, GenerateOffsetCursor(resourceOffset, resourceLimit, resourcesTotalCount), items);
+        return new GatewayModel.FungibleResourcesCollection(resourcesTotalCount, CursorGenerator.GenerateOffsetCursor(resourceOffset, resourceLimit, resourcesTotalCount), items);
     }
 
     private async Task<GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault> GetFungibleResourceVaults(
@@ -264,7 +264,7 @@ ORDER BY vah.ord;
                     lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion))
             .ToList();
 
-        return new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(vaultsTotalCount, GenerateOffsetCursor(offset, limit, vaultsTotalCount), castedResult);
+        return new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(vaultsTotalCount, CursorGenerator.GenerateOffsetCursor(offset, limit, vaultsTotalCount), castedResult);
     }
 
     private async Task<Dictionary<long, FungibleVaultViewModel>> GetFungibleVaultsHistory(List<InternalFungibleVaultEntity> fungibleVaultEntities, GatewayModel.LedgerState ledgerState, CancellationToken token)

@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
@@ -111,7 +112,7 @@ internal static class PackageCodeAggregator
                     Id = sequences.PackageCodeAggregateHistorySequence++,
                     FromStateVersion = stateVersion,
                     PackageEntityId = packageEntityId,
-                    PackageCodeIds = existingPackageCodeAggregate?.PackageCodeIds ?? new List<long>(),
+                    PackageCodeIds = existingPackageCodeAggregate?.PackageCodeIds.ToList() ?? new List<long>(),
                 };
 
                 mostRecentPackageCodeAggregateHistory[packageEntityId] = packageCodeAggregate;
@@ -161,7 +162,7 @@ internal static class PackageCodeAggregator
             }
             else
             {
-                packageCodeAggregate.PackageCodeIds.Add(packageCodeHistory.Id);
+                packageCodeAggregate.PackageCodeIds.Insert(0, packageCodeHistory.Id);
 
                 if (change.Value.PackageCodeVmType != null)
                 {

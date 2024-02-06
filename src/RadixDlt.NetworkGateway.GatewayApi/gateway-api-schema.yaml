@@ -1378,6 +1378,30 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /state/key-value-store/keys/:
+    post:
+      operationId: KeyValueStoreKeys
+      summary: Get KeyValueStore Keys
+      description: |
+        Allows to iterate over key value store keys.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateKeyValueStoreKeysRequest"
+      responses:
+        "200":
+          description: Non-Fungible ID Data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateKeyValueStoreKeysResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
   /state/key-value-store/data:
     post:
       operationId: KeyValueStoreData
@@ -3657,6 +3681,56 @@ components:
         non_fungible_id:
           $ref: "#/components/schemas/NonFungibleId"
         data:
+          $ref: "#/components/schemas/ScryptoSborValue"
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
+    StateKeyValueStoreKeysRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - key_value_store_address
+          properties:
+            key_value_store_address:
+              $ref: "#/components/schemas/Address"
+      example:
+        key_value_store_address: "<key-value-store-address>"
+
+    StateKeyValueStoreKeysResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - key_value_store_address
+            - entries
+          properties:
+            key_value_store_address:
+              $ref: "#/components/schemas/Address"
+            entries:
+              $ref: "#/components/schemas/StateKeyValueStoreKeysCollection"
+
+    StateKeyValueStoreKeysCollection:
+      description: Key value store items collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateKeyValueStoreKeysResponseItem"
+
+    StateKeyValueStoreKeysResponseItem:
+      type: object
+      required:
+        - key
+        - last_updated_at_state_version
+      properties:
+        key:
           $ref: "#/components/schemas/ScryptoSborValue"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"

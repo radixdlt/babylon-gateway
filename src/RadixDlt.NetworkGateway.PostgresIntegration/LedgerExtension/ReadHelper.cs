@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -733,6 +734,82 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
         return result;
     }
 
+    public async Task<Dictionary<KeyValueStoreEntryLookup, KeyValueStoreEntryHistory>> MostRecentKeyValueStoreEntryHistoryFor(ICollection<KeyValueStoreEntryLookup> keyValueStoreLookups, CancellationToken token)
+    {
+        if (!keyValueStoreLookups.Any())
+        {
+            return new Dictionary<KeyValueStoreEntryLookup, KeyValueStoreEntryHistory>();
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+
+        var keyValueStoreEntityIds = new List<long>();
+        var keys = new List<byte[]>();
+
+        foreach (var lookup in keyValueStoreLookups)
+        {
+            keyValueStoreEntityIds.Add(lookup.KeyValueStoreEntityId);
+            keys.Add(lookup.Key);
+        }
+
+        var result = await _dbContext
+            .KeyValueStoreEntryHistory
+            .FromSqlInterpolated(@$"
+WITH variables (key_value_store_entity_id, key) AS (
+    SELECT UNNEST({keyValueStoreEntityIds}), UNNEST({keys})
+)
+SELECT kvseh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM key_value_store_entry_history
+    WHERE key_value_store_entity_id = variables.key_value_store_entity_id AND key = variables.key
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) kvseh ON true;")
+            .AsNoTracking()
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => new KeyValueStoreEntryLookup(e.KeyValueStoreEntityId, (ValueBytes)e.Key), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentKeyValueStoreEntryHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
+    }
+
+    public async Task<Dictionary<long, KeyValueStoreAggregateHistory>> MostRecentKeyValueStoreAggregateHistoryFor(ICollection<KeyValueStoreEntryLookup> keyValueStoreLookups, CancellationToken token)
+    {
+        if (!keyValueStoreLookups.Any())
+        {
+            return new Dictionary<long, KeyValueStoreAggregateHistory>();
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+        var packageEntityIds = keyValueStoreLookups.Select(x => x.KeyValueStoreEntityId).Distinct().ToList();
+
+        var result = await _dbContext
+            .KeyValueStoreAggregateHistory
+            .FromSqlInterpolated(@$"
+WITH variables (key_value_store_entity_id) AS (
+    SELECT UNNEST({packageEntityIds})
+)
+SELECT kvsah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM key_value_store_aggregate_history
+    WHERE key_value_store_entity_id = variables.key_value_store_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) kvsah ON true;")
+            .AsNoTracking()
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => e.KeyValueStoreEntityId, token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentKeyValueStoreAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
+    }
+
     public async Task<Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token)
     {
         if (!validatorKeyLookups.Any())
@@ -820,7 +897,9 @@ SELECT
     nextval('non_fungible_schema_history_id_seq') AS NonFungibleSchemaHistorySequence,
     nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence,
     nextval('package_blueprint_aggregate_history_id_seq') AS PackageBlueprintAggregateHistorySequence,
-    nextval('package_code_aggregate_history_id_seq') AS PackageCodeAggregateHistorySequence",
+    nextval('package_code_aggregate_history_id_seq') AS PackageCodeAggregateHistorySequence,
+    nextval('key_value_store_aggregate_history_id_seq') AS KeyValueStoreAggregateHistorySequence
+",
             cancellationToken: token);
 
         var result = await _connection.QueryFirstAsync<SequencesHolder>(cd);

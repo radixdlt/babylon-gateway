@@ -110,7 +110,7 @@ internal static class PackageBlueprintAggregator
                     Id = sequences.PackageBlueprintAggregateHistorySequence++,
                     FromStateVersion = stateVersion,
                     PackageEntityId = packageEntityId,
-                    PackageBlueprintIds = existingPackageBlueprintAggregate?.PackageBlueprintIds ?? new List<long>(),
+                    PackageBlueprintIds = existingPackageBlueprintAggregate?.PackageBlueprintIds.ToList() ?? new List<long>(),
                 };
 
                 mostRecentPackageBlueprintAggregateHistory[packageEntityId] = packageBlueprintAggregate;
@@ -148,7 +148,7 @@ internal static class PackageBlueprintAggregator
                 };
                 mostRecentPackageBlueprintHistory[change.Key] = packageBlueprintHistory;
 
-                packageBlueprintAggregate.PackageBlueprintIds.Add(packageBlueprintHistory.Id);
+                packageBlueprintAggregate.PackageBlueprintIds.Insert(0, packageBlueprintHistory.Id);
             }
 
             if (change.Value.PackageBlueprintDefinition != null)

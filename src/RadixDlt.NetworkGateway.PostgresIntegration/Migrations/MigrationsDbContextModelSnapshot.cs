@@ -614,6 +614,35 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreAggregateHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("KeyValueStoreEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("key_value_store_entity_id");
+
+                    b.Property<List<long>>("KeyValueStoreEntryIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("key_value_store_entry_ids");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KeyValueStoreEntityId", "FromStateVersion");
+
+                    b.ToTable("key_value_store_aggregate_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntryHistory", b =>
                 {
                     b.Property<long>("Id")
