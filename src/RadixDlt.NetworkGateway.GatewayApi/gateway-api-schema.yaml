@@ -1378,7 +1378,7 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /state/key-value-store/keys/:
+  /state/key-value-store/keys:
     post:
       operationId: KeyValueStoreKeys
       summary: Get KeyValueStore Keys
@@ -1394,7 +1394,7 @@ paths:
               $ref: "#/components/schemas/StateKeyValueStoreKeysRequest"
       responses:
         "200":
-          description: Non-Fungible ID Data
+          description: KeyValueStore keys collection
           content:
             application/json:
               schema:
@@ -3701,15 +3701,13 @@ components:
     StateKeyValueStoreKeysResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/StateKeyValueStoreKeysCollection"
         - type: object
           required:
             - key_value_store_address
-            - entries
           properties:
             key_value_store_address:
               $ref: "#/components/schemas/Address"
-            entries:
-              $ref: "#/components/schemas/StateKeyValueStoreKeysCollection"
 
     StateKeyValueStoreKeysCollection:
       description: Key value store items collection.

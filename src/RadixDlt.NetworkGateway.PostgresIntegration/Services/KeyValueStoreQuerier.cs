@@ -157,11 +157,10 @@ ORDER BY key_value_store_join.ordinality ASC
         return new GatewayApiSdk.Model.StateKeyValueStoreKeysResponse(
             ledgerState: ledgerState,
             keyValueStoreAddress: keyValueStoreAddress,
-            entries: new GatewayModel.StateKeyValueStoreKeysCollection(
-                totalCount: totalCount,
-                nextCursor: CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount),
-                items: mappedItems
-            ));
+            totalCount: totalCount,
+            nextCursor: CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount),
+            items: mappedItems
+        );
     }
 
     public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(

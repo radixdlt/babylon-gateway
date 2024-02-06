@@ -1,17 +1,21 @@
 ## 1.4.0
 Release Date: _unreleased_
 
-- Return components effective role assignments only for assigned modules.
 - Dropped internal `balance_changes` fallback mechanism. As of right now this information is ingested as part of regular transaction ingestion process.
 - Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
 
-### What’s new?
+### API Changes
+- Return components effective role assignments only for assigned modules.
 - Added new filters for the `/stream/transactions` endpoint: `accounts_with_manifest_owner_method_calls`, `accounts_without_manifest_owner_method_calls` and `manifest_class_filter`.
 - Extended response models returned by `/transaction/committed-details` and `/stream/transactions` endpoints:
-  - added `manifest_instructions` optional property and a corresponding opt-in for returning original manifest of user transactions,
-  - added optional `manifest_classes` property: a collection of zero or more manifest classes ordered from the most specific class to the least specific one.
-- added `permanently_rejects_at_epoch` to `/transaction/status` response for pending transactions. 
+    - added `manifest_instructions` optional property and a corresponding opt-in for returning original manifest of user transactions,
+    - added optional `manifest_classes` property: a collection of zero or more manifest classes ordered from the most specific class to the least specific one.
+- Added `permanently_rejects_at_epoch` to `/transaction/status` response for pending transactions.
 - Added new endpoint `/state/key-value-store/keys/` that allows iterating over `KeyValueStore` keys.
+
+### Database changes
+- Creates new `key_value_store_aggregate_history` table which will hold pointers to all key_value_store keys.
+- Drops `network_configuration` table.
 
 ### Deprecations
 - Obsoleted incorrectly named `access_rules_package` in favor of `role_assignment_module_package` on `NetworkConfigurationResponse.well_known_addresses`. Obsoleted property will contain effective copy of the new one for backwards compability.

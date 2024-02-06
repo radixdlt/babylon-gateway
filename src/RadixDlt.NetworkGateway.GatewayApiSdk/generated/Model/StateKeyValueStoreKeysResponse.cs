@@ -104,9 +104,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateKeyValueStoreKeysResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
+        /// <param name="items">items (required).</param>
         /// <param name="keyValueStoreAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="entries">entries (required).</param>
-        public StateKeyValueStoreKeysResponse(LedgerState ledgerState = default(LedgerState), string keyValueStoreAddress = default(string), StateKeyValueStoreKeysCollection entries = default(StateKeyValueStoreKeysCollection))
+        public StateKeyValueStoreKeysResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string nextCursor = default(string), List<StateKeyValueStoreKeysResponseItem> items = default(List<StateKeyValueStoreKeysResponseItem>), string keyValueStoreAddress = default(string))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -114,18 +116,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("ledgerState is a required property for StateKeyValueStoreKeysResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
+            // to ensure "items" is required (not null)
+            if (items == null)
+            {
+                throw new ArgumentNullException("items is a required property for StateKeyValueStoreKeysResponse and cannot be null");
+            }
+            this.Items = items;
             // to ensure "keyValueStoreAddress" is required (not null)
             if (keyValueStoreAddress == null)
             {
                 throw new ArgumentNullException("keyValueStoreAddress is a required property for StateKeyValueStoreKeysResponse and cannot be null");
             }
             this.KeyValueStoreAddress = keyValueStoreAddress;
-            // to ensure "entries" is required (not null)
-            if (entries == null)
-            {
-                throw new ArgumentNullException("entries is a required property for StateKeyValueStoreKeysResponse and cannot be null");
-            }
-            this.Entries = entries;
+            this.TotalCount = totalCount;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
@@ -135,17 +139,31 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
+
+        /// <summary>
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Items
+        /// </summary>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateKeyValueStoreKeysResponseItem> Items { get; set; }
+
+        /// <summary>
         /// Bech32m-encoded human readable version of the address.
         /// </summary>
         /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "key_value_store_address", IsRequired = true, EmitDefaultValue = true)]
         public string KeyValueStoreAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Entries
-        /// </summary>
-        [DataMember(Name = "entries", IsRequired = true, EmitDefaultValue = true)]
-        public StateKeyValueStoreKeysCollection Entries { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -156,8 +174,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateKeyValueStoreKeysResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("  KeyValueStoreAddress: ").Append(KeyValueStoreAddress).Append("\n");
-            sb.Append("  Entries: ").Append(Entries).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -199,14 +219,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
+                ) && 
+                (
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
+                ) && 
+                (
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
+                ) && 
+                (
                     this.KeyValueStoreAddress == input.KeyValueStoreAddress ||
                     (this.KeyValueStoreAddress != null &&
                     this.KeyValueStoreAddress.Equals(input.KeyValueStoreAddress))
-                ) && 
-                (
-                    this.Entries == input.Entries ||
-                    (this.Entries != null &&
-                    this.Entries.Equals(input.Entries))
                 );
         }
 
@@ -223,13 +254,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
+                if (this.TotalCount != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                }
+                if (this.NextCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                }
+                if (this.Items != null)
+                {
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                }
                 if (this.KeyValueStoreAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.KeyValueStoreAddress.GetHashCode();
-                }
-                if (this.Entries != null)
-                {
-                    hashCode = (hashCode * 59) + this.Entries.GetHashCode();
                 }
                 return hashCode;
             }

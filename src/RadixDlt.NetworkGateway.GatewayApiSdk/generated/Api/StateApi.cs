@@ -1746,7 +1746,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<StateKeyValueStoreKeysResponse>("/state/key-value-store/keys/", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<StateKeyValueStoreKeysResponse>("/state/key-value-store/keys", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1807,7 +1807,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<StateKeyValueStoreKeysResponse>("/state/key-value-store/keys/", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateKeyValueStoreKeysResponse>("/state/key-value-store/keys", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
