@@ -76,6 +76,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -436,14 +437,6 @@ UPDATE pending_transactions
                                 e.PendingOwnerStakeUnitUnlockVault = referencedEntities.Get((EntityAddress)validator.Value.PendingOwnerStakeUnitUnlockVault.EntityAddress).DatabaseId;
                             });
                         }
-
-                        if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
-                        {
-                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
-                            {
-                                e.VmType = packageCodeVmType.Value.VmType.ToModel();
-                            });
-                        }
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -460,6 +453,14 @@ UPDATE pending_transactions
                     foreach (var @event in events)
                     {
                         foreach (var entityAddress in @event.Type.GetEntityAddresses())
+                        {
+                            referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
+                        }
+                    }
+
+                    if (committedTransaction.BalanceChanges != null)
+                    {
+                        foreach (var entityAddress in committedTransaction.BalanceChanges.GetEntityAddresses())
                         {
                             referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
                         }
@@ -504,7 +505,8 @@ UPDATE pending_transactions
                             RawPayload = ult.NotarizedTransaction.GetPayloadBytes(),
                         },
                         CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
-                        _ => throw new UnreachableException(),
+                        CoreModel.FlashLedgerTransaction => new FlashLedgerTransaction(),
+                        _ => throw new UnreachableException($"Unsupported transaction type: {committedTransaction.LedgerTransaction.GetType()}"),
                     };
 
                     ledgerTransaction.StateVersion = stateVersion;
@@ -529,6 +531,7 @@ UPDATE pending_transactions
                     ledgerTransaction.ReceiptNextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson();
                     ledgerTransaction.ReceiptCostingParameters = committedTransaction.Receipt.CostingParameters.ToJson();
                     ledgerTransaction.ReceiptFeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson();
+                    ledgerTransaction.BalanceChanges = committedTransaction.BalanceChanges?.ToJson();
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
 
                     if (committedTransaction.Receipt.NextEpoch != null)
@@ -703,8 +706,6 @@ UPDATE pending_transactions
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
         var keyValueStoreEntryHistoryToAdd = new List<KeyValueStoreEntryHistory>();
         var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
-        var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
-        var packageCodeHistoryToAdd = new List<PackageCodeHistory>();
         var schemaHistoryToAdd = new List<SchemaHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
@@ -713,6 +714,9 @@ UPDATE pending_transactions
         var accountResourcePreferenceRuleHistoryToAdd = new List<AccountResourcePreferenceRuleHistory>();
         var roleAssignmentsChangePointers = new Dictionary<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer>();
         var roleAssignmentChanges = new List<RoleAssignmentsChangePointerLookup>();
+        var packageCodeChanges = new Dictionary<PackageCodeLookup, PackageCodeChange>();
+        var packageBlueprintChanges = new Dictionary<PackageBlueprintLookup, PackageBlueprintChange>();
+
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
         // step: scan all substates & events to figure out changes
@@ -773,10 +777,10 @@ UPDATE pending_transactions
                         {
                             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
                             var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
-                            var amount = long.Parse(nonFungibleVaultFieldBalanceSubstate.Value.Amount);
+                            var amount = long.Parse(nonFungibleVaultFieldBalanceSubstate.Value.Amount, NumberFormatInfo.InvariantInfo);
 
                             var previousAmountRaw = (substate.PreviousValue?.SubstateData as CoreModel.NonFungibleVaultFieldBalanceSubstate)?.Value.Amount;
-                            var previousAmount = previousAmountRaw == null ? 0 : long.Parse(previousAmountRaw);
+                            var previousAmount = previousAmountRaw == null ? 0 : long.Parse(previousAmountRaw, NumberFormatInfo.InvariantInfo);
                             var delta = amount - previousAmount;
 
                             vaultChanges.Add(new EntityNonFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseGlobalAncestorId, resourceEntity.DatabaseId, delta, stateVersion));
@@ -801,7 +805,7 @@ UPDATE pending_transactions
                             var resourceManagerEntityId = substateId.EntityAddress;
                             var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
 
-                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
+                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex);
 
                             nonFungibleIdChanges.Add(new NonFungibleIdChange(
                                 resourceManagerEntity,
@@ -954,78 +958,62 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
                         {
-                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion);
-
-                            packageBlueprintHistoryToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                                {
-                                    Id = sequences.PackageBlueprintHistorySequence++,
-                                    FromStateVersion = stateVersion,
-                                    PackageEntityId = referencedEntity.DatabaseId,
-                                    Name = lookup.Name,
-                                    Version = lookup.BlueprintVersion,
-                                })
-                                .Definition = packageBlueprintDefinition.Value.Definition.ToJson();
+                            packageBlueprintChanges
+                                .GetOrAdd(
+                                    new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion),
+                                    _ => new PackageBlueprintChange(stateVersion)
+                                )
+                                .PackageBlueprintDefinition = packageBlueprintDefinition;
                         }
 
                         if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate packageBlueprintDependencies)
                         {
-                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
-
-                            packageBlueprintHistoryToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                                {
-                                    Id = sequences.PackageBlueprintHistorySequence++,
-                                    FromStateVersion = stateVersion,
-                                    PackageEntityId = referencedEntity.DatabaseId,
-                                    Name = lookup.Name,
-                                    Version = lookup.BlueprintVersion,
-                                })
-                                .DependantEntityIds = packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                            packageBlueprintChanges
+                                .GetOrAdd(
+                                    new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion),
+                                    _ => new PackageBlueprintChange(stateVersion)
+                                )
+                                .PackageBlueprintDependencies = packageBlueprintDependencies;
                         }
 
                         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
                         {
-                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion);
-                            var pb = packageBlueprintHistoryToAdd.GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                            {
-                                Id = sequences.PackageBlueprintHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                PackageEntityId = referencedEntity.DatabaseId,
-                                Name = lookup.Name,
-                                Version = lookup.BlueprintVersion,
-                            });
-
-                            pb.RoyaltyConfig = packageBlueprintRoyalty.Value.RoyaltyConfig.ToJson();
-                            pb.RoyaltyConfigIsLocked = packageBlueprintRoyalty.IsLocked;
+                            packageBlueprintChanges
+                                .GetOrAdd(
+                                    new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion),
+                                    _ => new PackageBlueprintChange(stateVersion)
+                                )
+                                .PackageBlueprintRoyalty = packageBlueprintRoyalty;
                         }
 
                         if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate packageBlueprintAuthTemplate)
                         {
-                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion);
-                            var pb = packageBlueprintHistoryToAdd.GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                            {
-                                Id = sequences.PackageBlueprintHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                PackageEntityId = referencedEntity.DatabaseId,
-                                Name = lookup.Name,
-                                Version = lookup.BlueprintVersion,
-                            });
-
-                            pb.AuthTemplate = packageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
-                            pb.AuthTemplateIsLocked = packageBlueprintAuthTemplate.IsLocked;
+                            packageBlueprintChanges
+                                .GetOrAdd(
+                                    new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion),
+                                    _ => new PackageBlueprintChange(stateVersion)
+                                    )
+                                .PackageBlueprintAuthTemplate = packageBlueprintAuthTemplate;
                         }
 
                         if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
                         {
-                            packageCodeHistoryToAdd.Add(new PackageCodeHistory
-                            {
-                                Id = sequences.PackageCodeHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                PackageEntityId = referencedEntity.DatabaseId,
-                                CodeHash = packageCodeOriginalCode.Key.CodeHash.ConvertFromHex(),
-                                Code = packageCodeOriginalCode.Value.CodeHex.ConvertFromHex(),
-                            });
+                            packageCodeChanges
+                                .GetOrAdd(
+                                    new PackageCodeLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeOriginalCode.Key.CodeHash.ConvertFromHex()),
+                                    _ => new PackageCodeChange(stateVersion)
+                                    )
+                                .PackageCodeOriginalCode = packageCodeOriginalCode;
+                        }
+
+                        if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
+                        {
+                            packageCodeChanges
+                                .GetOrAdd(
+                                    new PackageCodeLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeVmType.Key.CodeHash.ConvertFromHex()),
+                                    _ => new PackageCodeChange(stateVersion)
+                                    )
+                                .PackageCodeVmType = packageCodeVmType;
                         }
 
                         if (substateData is CoreModel.SchemaEntrySubstate schema)
@@ -1156,9 +1144,35 @@ UPDATE pending_transactions
                         if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
                             var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
-                            var simpleRep = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
+                            var simpleRep = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex);
 
                             vaultSnapshots.Add(new NonFungibleVaultSnapshot(referencedEntity, resourceEntity, simpleRep, true, stateVersion));
+                        }
+
+                        if (substateId.SubstateType == CoreModel.SubstateType.PackageCodeVmTypeEntry)
+                        {
+                            var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
+                            var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkConfigurationProvider.GetNetworkId());
+
+                            packageCodeChanges
+                                .GetOrAdd(
+                                    new PackageCodeLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()),
+                                    _ => new PackageCodeChange(stateVersion)
+                                )
+                                .CodeVmTypeIsDeleted = true;
+                        }
+
+                        if (substateId.SubstateType == CoreModel.SubstateType.PackageCodeOriginalCodeEntry)
+                        {
+                            var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
+                            var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkConfigurationProvider.GetNetworkId());
+
+                            packageCodeChanges
+                                .GetOrAdd(
+                                    new PackageCodeLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()),
+                                    _ => new PackageCodeChange(stateVersion)
+                                )
+                                .PackageCodeIsDeleted = true;
                         }
                     }
 
@@ -1347,6 +1361,10 @@ UPDATE pending_transactions
             var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
+            var mostRecentPackageBlueprintAggregateHistory = await readHelper.MostRecentPackageBlueprintAggregateHistoryFor(packageBlueprintChanges.Keys, token);
+            var mostRecentPackageBlueprintHistory = await readHelper.MostRecentPackageBlueprintHistoryFor(packageBlueprintChanges.Keys, token);
+            var mostRecentPackageCodeHistory = await readHelper.MostRecentPackageCodeHistoryFor(packageCodeChanges.Keys, token);
+            var mostRecentPackageCodeAggregateHistory = await readHelper.MostRecentPackageCodeAggregateHistoryFor(packageCodeChanges.Keys, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -1362,6 +1380,12 @@ UPDATE pending_transactions
             var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
             var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
+
+            var (packageBlueprintHistoryToAdd, packageBlueprintAggregateHistoryToAdd) =
+                PackageBlueprintAggregator.AggregatePackageBlueprint(packageBlueprintChanges, mostRecentPackageBlueprintHistory, mostRecentPackageBlueprintAggregateHistory, referencedEntities, sequences);
+
+            var (packageCodeHistoryToAdd, packageCodeAggregateHistoryToAdd) =
+                PackageCodeAggregator.AggregatePackageCode(packageCodeChanges, mostRecentPackageCodeHistory, mostRecentPackageCodeAggregateHistory, sequences);
 
             foreach (var metadataChange in metadataChanges)
             {
@@ -1860,8 +1884,9 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyPackageCodeHistory(packageCodeHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyPackageCodeAggregateHistory(packageCodeAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopySchemaHistory(schemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreEntryHistory(keyValueStoreEntryHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
@@ -1869,6 +1894,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyPackageBlueprintAggregateHistory(packageBlueprintAggregateHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;

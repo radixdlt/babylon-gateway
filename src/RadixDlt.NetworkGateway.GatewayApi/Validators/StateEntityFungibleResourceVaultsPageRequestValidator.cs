@@ -74,15 +74,16 @@ internal class StateEntityFungibleResourceVaultsPageRequestValidator : AbstractV
     public StateEntityFungibleResourceVaultsPageRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        PaginableRequestValidator paginableRequestValidator)
+        PaginableRequestValidator paginableRequestValidator,
+        RadixAddressValidator radixAddressValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.ResourceAddress)
             .NotEmpty()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);

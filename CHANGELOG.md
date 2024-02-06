@@ -1,5 +1,51 @@
+
+## 1.3.0
+Release Date: 29.01.2024
+
+Adds support for protocol updates (in general) and the anemone update in particular.
+
+### API Changes
+
+- Adds support for a new transaction type (flash transactions) that occur during protocol updates.
+- Extends well known addresses returned from `/status/network-configuration` to include the transaction tracker address.
+- **DEPRECATION** - Obsoletes the `vm_type`, `code_hash_hex` and `code_hex` properties of `StateEntityDetailsResponsePackageDetails` in favor of the `codes` collection. With the upcoming protocol upgrade it will be possible to have multiple codes per package. The obsoleted properties will contain an effective copy of the first element of the new collection for backwards compability.
+
+### Database changes
+
+- Moves `vm_type` to `package_code_history` table from package in `entity` table.
+- Creates new `package_blueprint_aggregate_history` table which will hold pointers to all package blueprints.
+- Creates new `package_code_aggregate_history` table which will hold pointers to all package codes.
+
+## 1.2.5
+Release Date: 26.01.2024
+
+- Fixed broken (incompatible) Core API SDK
+
+## 1.2.4
+Release Date: 4.01.2024
+
+- Extended validator's data returned from `/state/validators/list`: added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
+- Enable retries on transient database connectivity issues in gateway api.
+- Enable retries on core api calls in gateway api.
+- Optimized transaction balance changes; if available they're read from internal database, otherwise they use existing fallback mechanism
+
+## 1.2.3
+Release Date: 19.12.2023
+
+- Fixed exception thrown on empty validator set in the `/state/validator/list` endpoint.
+- `524` status code returned instead of `500` if request takes longer than configured timeout.
+- Validate if addresses provided in requests to API belong to network it is running on. 
+- Fixed `500` status code returned from `/transaction/submit` when Transaction got committed before Gateway was able to store pending transaction node submission result. It'll return 200 status code from now on and log exception as information.
+
+## 1.2.2
+Release Date: 22.11.2023
+
+- Fixed invalid foreign key between `pending_transactions` and `pending_transaction_payloads` tables.
+- Fixed package detail lookups to return all the blueprints and schemas.
+- Optimized transaction balance changes fetch time (parallelized).
+
 ## 1.2.1 
-Release Date: _unreleased_
+Release Date: 06.11.2023
 
 - Fixed local development environment setup.
 - Fixed missing `state` property on non-global entity state details.

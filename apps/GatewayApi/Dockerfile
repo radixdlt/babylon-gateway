@@ -7,7 +7,15 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0-bookworm-slim AS build
 WORKDIR /src
-COPY . .
+COPY babylon-gateway.sln \
+     babylon-gateway.sln.DotSettings \
+     CHANGELOG.md \
+     Directory.Packages.props \
+     .editorconfig \
+     stylecop.json /src/
+COPY src /src/src
+COPY apps /src/apps
+COPY Directory.Build.props /src/Directory.Build.props
 RUN dotnet restore "apps/GatewayApi/GatewayApi.csproj"
 RUN dotnet build "apps/GatewayApi/GatewayApi.csproj" -c Release -o /app/build
 

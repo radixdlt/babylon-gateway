@@ -180,6 +180,9 @@ internal abstract class LedgerTransaction
     [Column("receipt_event_sbor_type_kinds")]
     public SborTypeKind[] ReceiptEventSborTypeKinds { get; set; }
 
+    [Column("balance_changes", TypeName = "jsonb")]
+    public string? BalanceChanges { get; set; }
+
     [Column("transaction_tree_hash")]
     public string TransactionTreeHash { get; set; }
 
@@ -232,6 +235,10 @@ internal class UserLedgerTransaction : LedgerTransaction
 }
 
 internal class RoundUpdateLedgerTransaction : LedgerTransaction
+{
+}
+
+internal class FlashLedgerTransaction : LedgerTransaction
 {
 }
 

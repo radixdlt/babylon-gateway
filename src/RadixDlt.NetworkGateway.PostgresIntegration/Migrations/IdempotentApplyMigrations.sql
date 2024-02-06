@@ -981,3 +981,196 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    ALTER TABLE pending_transactions DROP CONSTRAINT "FK_pending_transactions_pending_transaction_payloads_payload_id";
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    DROP INDEX "IX_pending_transactions_payload_id";
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    ALTER TABLE pending_transactions ALTER COLUMN payload_id DROP NOT NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    ALTER TABLE pending_transaction_payloads ADD pending_transaction_id bigint NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    CREATE UNIQUE INDEX "IX_pending_transaction_payloads_pending_transaction_id" ON pending_transaction_payloads (pending_transaction_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    ALTER TABLE pending_transaction_payloads ADD CONSTRAINT "FK_pending_transaction_payloads_pending_transactions_pending_t~" FOREIGN KEY (pending_transaction_id) REFERENCES pending_transactions (id) ON DELETE CASCADE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    UPDATE pending_transaction_payloads ptp SET pending_transaction_id = pt.id FROM pending_transactions pt WHERE pt.payload_id = ptp.id;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    DELETE FROM pending_transaction_payloads WHERE id IN (SELECT ptp.id FROM pending_transaction_payloads ptp LEFT JOIN pending_transactions pt ON ptp.id = pt.payload_id WHERE pt.id IS NULL);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231101101154_InversePendingTransactionPayloadRelationship') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20231101101154_InversePendingTransactionPayloadRelationship', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231122094710_AddLedgerTransactionBalanceChanges') THEN
+    ALTER TABLE ledger_transactions ADD balance_changes jsonb NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231122094710_AddLedgerTransactionBalanceChanges') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20231122094710_AddLedgerTransactionBalanceChanges', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    ALTER TABLE network_configuration ADD network_hrp_suffix text NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    update network_configuration set network_hrp_suffix = (select substring(recordset."HrpPrefix"::text,'_(.+)') from network_configuration, jsonb_to_recordset(address_type_definitions) as recordset("HrpPrefix" TEXT) WHERE recordset."HrpPrefix" like '%account%' limit 1)
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20231130132946_AddNetworkHrpSuffixToNetworkConfiguration') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20231130132946_AddNetworkHrpSuffixToNetworkConfiguration', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240119095226_SupportProtocolUpdate') THEN
+    ALTER TABLE entities DROP COLUMN vm_type;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240119095226_SupportProtocolUpdate') THEN
+    ALTER TYPE ledger_transaction_type ADD VALUE 'flash';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240119095226_SupportProtocolUpdate') THEN
+    ALTER TABLE package_code_history ADD is_deleted boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240119095226_SupportProtocolUpdate') THEN
+    ALTER TABLE package_code_history ADD vm_type package_vm_type NOT NULL DEFAULT 'native'::package_vm_type;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240119095226_SupportProtocolUpdate') THEN
+    CREATE TABLE package_blueprint_aggregate_history (
+        id bigint GENERATED BY DEFAULT AS IDENTITY,
+        from_state_version bigint NOT NULL,
+        package_entity_id bigint NOT NULL,
+        package_blueprint_ids bigint[] NOT NULL,
+        CONSTRAINT "PK_package_blueprint_aggregate_history" PRIMARY KEY (id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240119095226_SupportProtocolUpdate') THEN
+    CREATE TABLE package_code_aggregate_history (
+        id bigint GENERATED BY DEFAULT AS IDENTITY,
+        from_state_version bigint NOT NULL,
+        package_entity_id bigint NOT NULL,
+        package_code_ids bigint[] NOT NULL,
+        CONSTRAINT "PK_package_code_aggregate_history" PRIMARY KEY (id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240119095226_SupportProtocolUpdate') THEN
+    CREATE INDEX "IX_package_blueprint_aggregate_history_package_entity_id_from_~" ON package_blueprint_aggregate_history (package_entity_id, from_state_version);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240119095226_SupportProtocolUpdate') THEN
+    CREATE INDEX "IX_package_code_aggregate_history_package_entity_id_from_state~" ON package_code_aggregate_history (package_entity_id, from_state_version);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240119095226_SupportProtocolUpdate') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20240119095226_SupportProtocolUpdate', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+

@@ -73,11 +73,12 @@ internal class StateNonFungibleLocationRequestValidator : AbstractValidator<Gate
 {
     public StateNonFungibleLocationRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        RadixAddressValidator radixAddressValidator,
         LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.ResourceAddress)
             .NotEmpty()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.NonFungibleIds)
             .NotEmpty()

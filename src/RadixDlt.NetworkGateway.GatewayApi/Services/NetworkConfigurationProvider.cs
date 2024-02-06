@@ -85,6 +85,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 public sealed record CapturedConfig(
     byte NetworkId,
     string NetworkName,
+    string NetworkHrpSuffix,
     HrpDefinition HrpDefinition,
     WellKnownAddresses WellKnownAddresses,
     AddressTypeDefinition[] AddressTypeDefinitions,
@@ -124,6 +125,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     public string GetNetworkName()
     {
         return GetCapturedConfig().NetworkName;
+    }
+
+    public string GetNetworkHrpSuffix()
+    {
+        return GetCapturedConfig().NetworkHrpSuffix;
     }
 
     public HrpDefinition GetHrpDefinition()

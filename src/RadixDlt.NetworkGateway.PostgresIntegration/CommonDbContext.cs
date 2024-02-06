@@ -101,6 +101,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityMetadataAggregateHistory> EntityMetadataAggregateHistory => Set<EntityMetadataAggregateHistory>();
 
+    public DbSet<PackageBlueprintAggregateHistory> PackageBlueprintAggregateHistory => Set<PackageBlueprintAggregateHistory>();
+
+    public DbSet<PackageCodeAggregateHistory> PackageCodeAggregateHistory => Set<PackageCodeAggregateHistory>();
+
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
     public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
@@ -210,7 +214,8 @@ internal abstract class CommonDbContext : DbContext
             .HasDiscriminator<LedgerTransactionType>(DiscriminatorColumnName)
             .HasValue<UserLedgerTransaction>(LedgerTransactionType.User)
             .HasValue<RoundUpdateLedgerTransaction>(LedgerTransactionType.RoundUpdate)
-            .HasValue<GenesisLedgerTransaction>(LedgerTransactionType.Genesis);
+            .HasValue<GenesisLedgerTransaction>(LedgerTransactionType.Genesis)
+            .HasValue<FlashLedgerTransaction>(LedgerTransactionType.Flash);
 
         modelBuilder
             .Entity<UserLedgerTransaction>()
@@ -358,6 +363,14 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<EntityMetadataAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<PackageBlueprintAggregateHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<PackageCodeAggregateHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<EntityResourceAggregateHistory>()

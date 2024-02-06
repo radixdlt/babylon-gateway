@@ -74,20 +74,20 @@ internal class StateEntityNonFungibleIdsPageRequestValidator : AbstractValidator
     public StateEntityNonFungibleIdsPageRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator,
         PaginableRequestValidator paginableRequestValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.ResourceAddress)
             .NotEmpty()
-            .RadixAddress();
+            .SetValidator(radixAddressValidator);
 
         RuleFor(x => x.VaultAddress)
             .NotEmpty()
-            .RadixAddress();
-
+            .SetValidator(radixAddressValidator);
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
 

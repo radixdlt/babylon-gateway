@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.NetworkGateway.Abstractions;
@@ -85,17 +86,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 internal class SubmissionTrackingService : ISubmissionTrackingService
 {
     private readonly ReadWriteDbContext _dbContext;
+    private readonly ILogger<SubmissionTrackingService> _logger;
     private readonly IReadOnlyCollection<ISubmissionTrackingServiceObserver> _observers;
     private readonly IClock _clock;
 
     public SubmissionTrackingService(
         ReadWriteDbContext dbContext,
         IEnumerable<ISubmissionTrackingServiceObserver> observers,
-        IClock clock)
+        IClock clock,
+        ILogger<SubmissionTrackingService> logger)
     {
         _dbContext = dbContext;
         _observers = observers.ToArray();
         _clock = clock;
+        _logger = logger;
     }
 
     public async Task<SubmissionResult> ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
@@ -214,20 +218,34 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         CancellationToken token
     )
     {
-        var nodeSubmissionResult = await TransactionSubmitter.Submit(
-            submitContext,
-            notarizedTransactionBytes,
-            _observers,
-            token
-        );
+        try
+        {
+            var nodeSubmissionResult = await TransactionSubmitter.Submit(
+                submitContext,
+                notarizedTransactionBytes,
+                _observers,
+                token
+            );
 
-        pendingTransaction.HandleNodeSubmissionResult(
-            handlingConfig,
-            nodeName,
-            nodeSubmissionResult,
-            _clock.UtcNow,
-            currentEpoch < 0 ? null : (ulong)currentEpoch);
+            pendingTransaction.HandleNodeSubmissionResult(
+                handlingConfig,
+                nodeName,
+                nodeSubmissionResult,
+                _clock.UtcNow,
+                currentEpoch < 0 ? null : (ulong)currentEpoch);
 
-        await _dbContext.SaveChangesAsync(token);
+            await _dbContext.SaveChangesAsync(token);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // We catch an error so that we can return a successful response to the user - which is correct
+            // because the submission to the Gateway, and indeed the network, was successful.
+            // The fact we couldn't persist this submission result doesn't matter particularly, as the system is
+            // designed to work even if the Gateway API crashes after persisting the pending transaction.
+            // A submission to the network will be retried by the PendingTransactionResubmissionWorker in due course
+            // if still required, because ResubmitFromTimestamp was set as part of creating the PendingTransaction.
+            // The only difference is that an extra re-submission will occur, because this initial submission was not tracked.
+            _logger.LogInformation(ex, "Gateway failed to store submission result. Other process already modified that transaction (it got either committed and processed by PostgresLedgerExtenderService or by PendingTransactionResubmissionWorker)");
+        }
     }
 }

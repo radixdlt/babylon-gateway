@@ -140,6 +140,7 @@ models/NotSyncedUpErrorAllOf.ts
 models/ObjectModuleId.ts
 models/OptionalNonFungibleIdsCollection.ts
 models/OptionalNonFungibleIdsCollectionAllOf.ts
+models/PackageCodeCollectionItem.ts
 models/PackageVmType.ts
 models/ProgrammaticScryptoSborValue.ts
 models/ProgrammaticScryptoSborValueArray.ts
@@ -233,6 +234,8 @@ models/StateEntityDetailsResponsePackageDetailsAllOf.ts
 models/StateEntityDetailsResponsePackageDetailsBlueprintCollection.ts
 models/StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf.ts
 models/StateEntityDetailsResponsePackageDetailsBlueprintItem.ts
+models/StateEntityDetailsResponsePackageDetailsCodeCollection.ts
+models/StateEntityDetailsResponsePackageDetailsCodeCollectionAllOf.ts
 models/StateEntityDetailsResponsePackageDetailsSchemaCollection.ts
 models/StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf.ts
 models/StateEntityDetailsResponsePackageDetailsSchemaItem.ts
@@ -319,6 +322,9 @@ models/ValidatorCollection.ts
 models/ValidatorCollectionAllOf.ts
 models/ValidatorCollectionItem.ts
 models/ValidatorCollectionItemActiveInEpoch.ts
+models/ValidatorCollectionItemEffectiveFeeFactor.ts
+models/ValidatorCollectionItemEffectiveFeeFactorCurrent.ts
+models/ValidatorCollectionItemEffectiveFeeFactorPending.ts
 models/ValidatorUptimeCollection.ts
 models/ValidatorUptimeCollectionItem.ts
 models/ValidatorVaultItem.ts
