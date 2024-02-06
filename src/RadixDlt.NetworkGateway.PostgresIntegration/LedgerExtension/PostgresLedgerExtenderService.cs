@@ -990,7 +990,7 @@ UPDATE pending_transactions
                             }
                         }
 
-                        d_s.VisitUpsert(substate, stateVersion);
+                        d_s.VisitUpsert(substate, referencedEntity, stateVersion);
                         d_cmr.VisitUpsert(substateData, referencedEntity, stateVersion);
                         d_era.VisitUpsert(substateData, referencedEntity, stateVersion);
                         d_pc.VisitUpsert(substateData, referencedEntity, stateVersion);

@@ -23,9 +23,8 @@ internal class Dumpyard_EntityState
         _referencedEntities = referencedEntities;
     }
 
-    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
-        var substateId = substate.SubstateId;
         var substateData = substate.Value.SubstateData;
 
         if (substateData is CoreModel.GenericScryptoComponentFieldStateSubstate componentState)
@@ -41,7 +40,7 @@ internal class Dumpyard_EntityState
             {
                 Id = _context.Sequences.StateHistorySequence++,
                 FromStateVersion = stateVersion,
-                EntityId = _referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                EntityId = referencedEntity.DatabaseId,
                 SborState = componentState.Value.DataStruct.StructData.GetDataBytes(),
                 SchemaHash = schemaDetails.SchemaHash.ConvertFromHex(),
                 SborTypeKind = schemaDetails.SborTypeKind.ToModel(),
@@ -56,7 +55,7 @@ internal class Dumpyard_EntityState
             {
                 Id = _context.Sequences.StateHistorySequence++,
                 FromStateVersion = stateVersion,
-                EntityId = _referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                EntityId = referencedEntity.DatabaseId,
                 JsonState = validator.Value.ToJson(),
             });
         }
@@ -67,7 +66,7 @@ internal class Dumpyard_EntityState
             {
                 Id = _context.Sequences.StateHistorySequence++,
                 FromStateVersion = stateVersion,
-                EntityId = _referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                EntityId = referencedEntity.DatabaseId,
                 JsonState = accountFieldState.Value.ToJson(),
             });
         }
@@ -78,7 +77,7 @@ internal class Dumpyard_EntityState
             {
                 Id = _context.Sequences.StateHistorySequence++,
                 FromStateVersion = stateVersion,
-                EntityId = _referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                EntityId = referencedEntity.DatabaseId,
                 JsonState = accessControllerFieldState.Value.ToJson(),
             });
         }
@@ -89,7 +88,7 @@ internal class Dumpyard_EntityState
             {
                 Id = _context.Sequences.StateHistorySequence++,
                 FromStateVersion = stateVersion,
-                EntityId = _referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                EntityId = referencedEntity.DatabaseId,
                 JsonState = oneResourcePoolFieldStateSubstate.Value.ToJson(),
             });
         }
@@ -100,7 +99,7 @@ internal class Dumpyard_EntityState
             {
                 Id = _context.Sequences.StateHistorySequence++,
                 FromStateVersion = stateVersion,
-                EntityId = _referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                EntityId = referencedEntity.DatabaseId,
                 JsonState = twoResourcePoolFieldStateSubstate.Value.ToJson(),
             });
         }
@@ -111,7 +110,7 @@ internal class Dumpyard_EntityState
             {
                 Id = _context.Sequences.StateHistorySequence++,
                 FromStateVersion = stateVersion,
-                EntityId = _referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                EntityId = referencedEntity.DatabaseId,
                 JsonState = multiResourcePoolFieldStateSubstate.Value.ToJson(),
             });
         }
