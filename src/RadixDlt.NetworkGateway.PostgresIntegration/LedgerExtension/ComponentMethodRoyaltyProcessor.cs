@@ -136,11 +136,11 @@ internal class ComponentMethodRoyaltyProcessor
     {
         var lookupSet = new HashSet<ComponentMethodRoyaltyEntryDbLookup>();
 
-        foreach (var x in _changePointers.Values)
+        foreach (var change in _changePointers.Values)
         {
-            foreach (var y in x.Entries)
+            foreach (var entry in change.Entries)
             {
-                lookupSet.Add(new ComponentMethodRoyaltyEntryDbLookup(x.ReferencedEntity.DatabaseId, y.Key.MethodName));
+                lookupSet.Add(new ComponentMethodRoyaltyEntryDbLookup(change.ReferencedEntity.DatabaseId, entry.Key.MethodName));
             }
         }
 

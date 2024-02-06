@@ -4,6 +4,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -191,8 +192,8 @@ internal class PackageCodeProcessor
 
     public async Task LoadMostRecent()
     {
-        _mostRecentEntries = await _context.ReadHelper.MostRecentPackageCodeHistoryFor(_changeOrder, _context.Token);
-        _mostRecentAggregates = await _context.ReadHelper.MostRecentPackageCodeAggregateHistoryFor(_changeOrder, _context.Token);
+        _mostRecentEntries = await MostRecentPackageCodeHistory();
+        _mostRecentAggregates = await MostRecentPackageCodeAggregateHistory();
     }
 
     public async Task<int> SaveEntities()
@@ -203,6 +204,58 @@ internal class PackageCodeProcessor
         rowsInserted += await CopyPackageCodeAggregateHistory();
 
         return rowsInserted;
+    }
+
+    private Task<Dictionary<PackageCodeDbLookup, PackageCodeHistory>> MostRecentPackageCodeHistory()
+    {
+        var lookupSet = _changeOrder.ToHashSet();
+
+        if (!lookupSet.Unzip(x => x.PackageEntityId, x => (byte[])x.CodeHash, out var packageEntityIds, out var codeHashes))
+        {
+            return Task.FromResult(new Dictionary<PackageCodeDbLookup, PackageCodeHistory>());
+        }
+
+        return _context.ReadHelper.MostRecent<PackageCodeDbLookup, PackageCodeHistory>(
+            @$"
+WITH variables (package_entity_id, code_hash) AS (
+    SELECT UNNEST({packageEntityIds}), UNNEST({codeHashes})
+)
+SELECT pbh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM package_code_history
+    WHERE package_entity_id = variables.package_entity_id AND code_hash = variables.code_hash
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) pbh ON true;",
+            e => new PackageCodeDbLookup(e.PackageEntityId, e.CodeHash));
+    }
+
+    private Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistory()
+    {
+        var packageEntityIds = _changeOrder.Select(x => x.PackageEntityId).ToHashSet().ToList();
+
+        if (!packageEntityIds.Any())
+        {
+            return Task.FromResult(new Dictionary<long, PackageCodeAggregateHistory>());
+        }
+
+        return _context.ReadHelper.MostRecent<long, PackageCodeAggregateHistory>(
+            $@"
+WITH variables (package_entity_id) AS (
+    SELECT UNNEST({packageEntityIds})
+)
+SELECT pbah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM package_code_aggregate_history
+    WHERE package_entity_id = variables.package_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) pbah ON true;",
+            e => e.PackageEntityId);
     }
 
     private Task<int> CopyPackageCodeHistory() => _context.WriteHelper.Copy(

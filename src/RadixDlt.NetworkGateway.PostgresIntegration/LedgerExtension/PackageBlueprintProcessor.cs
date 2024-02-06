@@ -183,8 +183,8 @@ internal class PackageBlueprintProcessor
 
     public async Task LoadMostRecent()
     {
-        _mostRecentEntries = await _context.ReadHelper.MostRecentPackageBlueprintHistoryFor(_changePointers.Keys, _context.Token);
-        _mostRecentAggregates = await _context.ReadHelper.MostRecentPackageBlueprintAggregateHistoryFor(_changePointers.Keys, _context.Token);
+        _mostRecentEntries = await MostRecentPackageCodeHistory();
+        _mostRecentAggregates = await MostRecentPackageBlueprintAggregateHistory();
     }
 
     public async Task<int> SaveEntities()
@@ -195,6 +195,58 @@ internal class PackageBlueprintProcessor
         rowsInserted += await CopyPackageBlueprintAggregateHistory();
 
         return rowsInserted;
+    }
+
+    private Task<Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>> MostRecentPackageCodeHistory()
+    {
+        var lookupSet = _changeOrder.ToHashSet();
+
+        if (!lookupSet.Unzip(x => x.PackageEntityId, x => x.Name, x => x.Version, out var packageEntityIds, out var names, out var versions))
+        {
+            return Task.FromResult(new Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>());
+        }
+
+        return _context.ReadHelper.MostRecent<PackageBlueprintDbLookup, PackageBlueprintHistory>(
+            @$"
+WITH variables (package_entity_id, name, version) AS (
+    SELECT UNNEST({packageEntityIds}), UNNEST({names}), UNNEST({versions})
+)
+SELECT pbh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM package_blueprint_history
+    WHERE package_entity_id = variables.package_entity_id AND name = variables.name AND version = variables.version
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) pbh ON true;",
+            e => new PackageBlueprintDbLookup(e.PackageEntityId, e.Name, e.Version));
+    }
+
+    private Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistory()
+    {
+        var packageEntityIds = _changePointers.Keys.Select(x => x.PackageEntityId).ToHashSet().ToList();
+
+        if (!packageEntityIds.Any())
+        {
+            return Task.FromResult(new Dictionary<long, PackageBlueprintAggregateHistory>());
+        }
+
+        return _context.ReadHelper.MostRecent<long, PackageBlueprintAggregateHistory>(
+            $@"
+WITH variables (package_entity_id) AS (
+    SELECT UNNEST({packageEntityIds})
+)
+SELECT pbah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM package_blueprint_aggregate_history
+    WHERE package_entity_id = variables.package_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) pbah ON true;",
+            e => e.PackageEntityId);
     }
 
     private Task<int> CopyPackageBlueprintHistory() => _context.WriteHelper.Copy(

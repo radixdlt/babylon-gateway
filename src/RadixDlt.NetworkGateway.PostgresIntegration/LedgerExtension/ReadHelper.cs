@@ -116,94 +116,6 @@ internal class ReadHelper
         return result;
     }
 
-    public async Task<Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>> MostRecentPackageBlueprintHistoryFor(ICollection<PackageBlueprintDbLookup> packageBlueprintLookups, CancellationToken token)
-    {
-        if (!packageBlueprintLookups.Any())
-        {
-            return new Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        var entityIds = new List<long>();
-        var names = new List<string>();
-        var versions = new List<string>();
-        var lookupSet = packageBlueprintLookups.ToHashSet();
-
-        foreach (var lookup in lookupSet)
-        {
-            entityIds.Add(lookup.PackageEntityId);
-            names.Add(lookup.Name);
-            versions.Add(lookup.Version);
-        }
-
-        var result = await _dbContext
-            .PackageBlueprintHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, name, version) AS (
-    SELECT UNNEST({entityIds}), UNNEST({names}), UNNEST({versions})
-)
-SELECT pbh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM package_blueprint_history
-    WHERE package_entity_id = variables.entity_id AND name = variables.name AND version = variables.version
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) pbh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new PackageBlueprintDbLookup(e.PackageEntityId, e.Name, e.Version), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageBlueprintHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<PackageCodeDbLookup, PackageCodeHistory>> MostRecentPackageCodeHistoryFor(ICollection<PackageCodeDbLookup> packageCodeChanges, CancellationToken token)
-    {
-        if (!packageCodeChanges.Any())
-        {
-            return new Dictionary<PackageCodeDbLookup, PackageCodeHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        var entityIds = new List<long>();
-        var codeHashes = new List<byte[]>();
-        var lookupSet = packageCodeChanges.ToHashSet();
-
-        foreach (var lookup in lookupSet)
-        {
-            entityIds.Add(lookup.PackageEntityId);
-            codeHashes.Add(lookup.CodeHash);
-        }
-
-        var result = await _dbContext
-            .PackageCodeHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, code_hash) AS (
-    SELECT UNNEST({entityIds}), UNNEST({codeHashes})
-)
-SELECT pbh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM package_code_history
-    WHERE package_entity_id = variables.entity_id AND code_hash = variables.code_hash
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) pbh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new PackageCodeDbLookup(e.PackageEntityId, e.CodeHash), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageCodeHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
     public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
     {
         if (!metadataChanges.Any())
@@ -298,18 +210,7 @@ INNER JOIN LATERAL (
         var result = await _dbContext
             .PackageBlueprintAggregateHistory
             .FromSqlInterpolated(@$"
-WITH variables (package_entity_id) AS (
-    SELECT UNNEST({packageEntityIds})
-)
-SELECT pbah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM package_blueprint_aggregate_history
-    WHERE package_entity_id = variables.package_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) pbah ON true;")
+")
             .AsNoTracking()
             .AnnotateMetricName()
             .ToDictionaryAsync(e => e.PackageEntityId, token);
@@ -349,96 +250,6 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityAggregateMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityRoleAssignmentsEntryHistoryFor(
-        ICollection<RoleAssignmentsChangePointer> roleAssignmentsChangePointers,
-        CancellationToken token)
-    {
-        if (!roleAssignmentsChangePointers.Any())
-        {
-            return new Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = new List<long>();
-        var keyRoles = new List<string>();
-        var keyModuleIds = new List<ModuleId>();
-        var lookupSet = new HashSet<RoleAssignmentEntryDbLookup>();
-
-        foreach (var roleAssignmentsChangePointer in roleAssignmentsChangePointers)
-        {
-            foreach (var entry in roleAssignmentsChangePointer.Entries)
-            {
-                lookupSet.Add(new RoleAssignmentEntryDbLookup(roleAssignmentsChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
-            }
-        }
-
-        foreach (var lookup in lookupSet)
-        {
-            entityIds.Add(lookup.EntityId);
-            keyRoles.Add(lookup.KeyRole);
-            keyModuleIds.Add(lookup.KeyModule);
-        }
-
-        var result = await _dbContext
-            .EntityRoleAssignmentsEntryHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, key_role, module_id) AS (
-    SELECT UNNEST({entityIds}), UNNEST({keyRoles}), UNNEST({keyModuleIds})
-)
-SELECT eareh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_role_assignments_entry_history
-    WHERE entity_id = variables.entity_id AND key_role = variables.key_role AND key_module = variables.module_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) eareh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new RoleAssignmentEntryDbLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityRoleAssignmentsEntryHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityRoleAssignmentsAggregateHistoryFor(
-        List<RoleAssignmentsChangePointerLookup> roleAssignmentChanges,
-        CancellationToken token)
-    {
-        if (!roleAssignmentChanges.Any())
-        {
-            return new Dictionary<long, EntityRoleAssignmentsAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = roleAssignmentChanges.Select(x => x.EntityId).Distinct().ToList();
-
-        var result = await _dbContext
-            .EntityRoleAssignmentsAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id) AS (
-    SELECT UNNEST({entityIds})
-)
-SELECT earah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_role_assignments_aggregate_history
-    WHERE entity_id = variables.entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) earah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.EntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityRoleAssignmentsAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }

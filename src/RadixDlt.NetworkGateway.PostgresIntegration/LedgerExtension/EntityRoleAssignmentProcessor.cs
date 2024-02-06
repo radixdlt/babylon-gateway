@@ -3,6 +3,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -151,8 +152,8 @@ internal class EntityRoleAssignmentProcessor
 
     public async Task LoadMostRecent()
     {
-        _mostRecentEntries = await _context.ReadHelper.MostRecentEntityRoleAssignmentsEntryHistoryFor(_changePointers.Values, _context.Token);
-        _mostRecentAggregates = await _context.ReadHelper.MostRecentEntityRoleAssignmentsAggregateHistoryFor(_changeOrder, _context.Token);
+        _mostRecentEntries = await MostRecentEntityRoleAssignmentsEntryHistory();
+        _mostRecentAggregates = await MostRecentEntityRoleAssignmentsAggregateHistory();
     }
 
     public async Task<int> SaveEntities()
@@ -164,6 +165,66 @@ internal class EntityRoleAssignmentProcessor
         rowsInserted += await CopyEntityRoleAssignmentsAggregateHistory();
 
         return rowsInserted;
+    }
+
+    private Task<Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityRoleAssignmentsEntryHistory()
+    {
+        var lookupSet = new HashSet<RoleAssignmentEntryDbLookup>();
+
+        foreach (var change in _changePointers.Values)
+        {
+            foreach (var entry in change.Entries)
+            {
+                lookupSet.Add(new RoleAssignmentEntryDbLookup(change.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
+            }
+        }
+
+        if (!lookupSet.Unzip(x => x.EntityId, x => x.KeyRole, x => x.KeyModule, out var entityIds, out var keyRoles, out var keyModuleIds))
+        {
+            return Task.FromResult(new Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>());
+        }
+
+        return _context.ReadHelper.MostRecent<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>(
+            @$"
+WITH variables (entity_id, key_role, module_id) AS (
+    SELECT UNNEST({entityIds}), UNNEST({keyRoles}), UNNEST({keyModuleIds})
+)
+SELECT eareh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_role_assignments_entry_history
+    WHERE entity_id = variables.entity_id AND key_role = variables.key_role AND key_module = variables.module_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) eareh ON true;",
+            e => new RoleAssignmentEntryDbLookup(e.EntityId, e.KeyRole, e.KeyModule));
+    }
+
+    private Task<Dictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityRoleAssignmentsAggregateHistory()
+    {
+        var entityIds = _changeOrder.Select(x => x.EntityId).ToHashSet().ToList();
+
+        if (!entityIds.Any())
+        {
+            return Task.FromResult(new Dictionary<long, EntityRoleAssignmentsAggregateHistory>());
+        }
+
+        return _context.ReadHelper.MostRecent<long, EntityRoleAssignmentsAggregateHistory>(
+            @$"
+WITH variables (entity_id) AS (
+    SELECT UNNEST({entityIds})
+)
+SELECT earah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_role_assignments_aggregate_history
+    WHERE entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) earah ON true;",
+            e => e.EntityId);
     }
 
     private Task<int> CopyEntityRoleAssignmentsOwnerRoleHistory() => _context.WriteHelper.Copy(
