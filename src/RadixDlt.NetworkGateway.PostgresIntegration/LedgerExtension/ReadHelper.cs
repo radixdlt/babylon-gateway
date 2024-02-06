@@ -64,6 +64,7 @@
 
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
@@ -71,9 +72,11 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
@@ -85,12 +88,32 @@ internal class ReadHelper
     private readonly ReadWriteDbContext _dbContext;
     private readonly NpgsqlConnection _connection;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
+    private readonly CancellationToken _token;
 
-    public ReadHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers)
+    public ReadHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers, CancellationToken token = default)
     {
         _dbContext = dbContext;
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
         _observers = observers;
+        _token = token;
+    }
+
+    public async Task<Dictionary<TKey, TValue>> MostRecent<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
+        where TKey : notnull
+        where TValue : class
+    {
+        var sw = Stopwatch.GetTimestamp();
+
+        var result = await _dbContext
+            .Set<TValue>()
+            .FromSqlInterpolated(sql)
+            .AsNoTracking()
+            .AnnotateMetricName(stageName)
+            .ToDictionaryAsync(keySelector, _token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(stageName, Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
     }
 
     public async Task<Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>> MostRecentPackageBlueprintHistoryFor(ICollection<PackageBlueprintDbLookup> packageBlueprintLookups, CancellationToken token)
@@ -780,94 +803,6 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => new ValidatorKeyLookup(e.ValidatorEntityId, e.KeyType, e.Key), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingValidatorKeysFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>> MostRecentComponentMethodRoyaltyEntryHistoryFor(
-        ICollection<ComponentMethodRoyaltyChangePointer> changePointers,
-        CancellationToken token)
-    {
-        if (!changePointers.Any())
-        {
-            return new Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var lookupSet = new HashSet<ComponentMethodRoyaltyEntryDbLookup>();
-        var entityIds = new List<long>();
-        var methodNames = new List<string>();
-
-        foreach (var changePointer in changePointers)
-        {
-            foreach (var entry in changePointer.Entries)
-            {
-                lookupSet.Add(new ComponentMethodRoyaltyEntryDbLookup(changePointer.ReferencedEntity.DatabaseId, entry.Key.MethodName));
-            }
-        }
-
-        foreach (var lookup in lookupSet)
-        {
-            entityIds.Add(lookup.EntityId);
-            methodNames.Add(lookup.MethodName);
-        }
-
-        var result = await _dbContext
-            .ComponentEntityMethodRoyaltyEntryHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, method_name) AS (
-    SELECT UNNEST({entityIds}), UNNEST({methodNames})
-)
-SELECT cmreh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM component_method_royalty_entry_history
-    WHERE entity_id = variables.entity_id AND method_name = variables.method_name
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) cmreh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new ComponentMethodRoyaltyEntryDbLookup(e.EntityId, e.MethodName), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentComponentMethodRoyaltyEntryHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, ComponentMethodRoyaltyAggregateHistory>> MostRecentComponentMethodRoyaltyAggregateHistoryFor(
-        List<ComponentMethodRoyaltyChangePointerLookup> lookups,
-        CancellationToken token)
-    {
-        if (!lookups.Any())
-        {
-            return new Dictionary<long, ComponentMethodRoyaltyAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = lookups.Select(x => x.EntityId).Distinct().ToList();
-
-        var result = await _dbContext
-            .ComponentEntityMethodRoyaltyAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id) AS (
-    SELECT UNNEST({entityIds})
-)
-SELECT cmrah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM component_method_royalty_aggregate_history
-    WHERE entity_id = variables.entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) cmrah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.EntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentComponentMethodRoyaltyAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }

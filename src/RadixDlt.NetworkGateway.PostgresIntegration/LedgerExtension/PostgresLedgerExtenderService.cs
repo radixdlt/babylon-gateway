@@ -223,8 +223,8 @@ UPDATE pending_transactions
         var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
         var manifestClasses = new Dictionary<long, List<LedgerTransactionManifestClass>>();
 
-        var readHelper = new ReadHelper(dbContext, _observers);
-        var writeHelper = new WriteHelper(dbContext, _observers);
+        var readHelper = new ReadHelper(dbContext, _observers, token);
+        var writeHelper = new WriteHelper(dbContext, _observers, token);
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
 
@@ -1212,10 +1212,10 @@ UPDATE pending_transactions
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
 
-            await d_cmr.LoadMostRecents();
+            await d_cmr.LoadMostRecent();
             await d_era.LoadMostRecent();
             await d_pc.LoadMostRecent();
-            await d_pb.LoadMostRecents();
+            await d_pb.LoadMostRecent();
 
             dbReadDuration += sw.Elapsed;
 

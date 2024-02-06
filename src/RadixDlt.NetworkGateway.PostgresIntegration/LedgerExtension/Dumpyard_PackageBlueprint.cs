@@ -179,7 +179,7 @@ internal class Dumpyard_PackageBlueprint
         }
     }
 
-    public async Task LoadMostRecents()
+    public async Task LoadMostRecent()
     {
         _mostRecentEntries = await _context.ReadHelper.MostRecentPackageBlueprintHistoryFor(_changePointers.Keys, _context.Token);
         _mostRecentAggregates = await _context.ReadHelper.MostRecentPackageBlueprintAggregateHistoryFor(_changePointers.Keys, _context.Token);
