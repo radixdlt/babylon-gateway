@@ -748,12 +748,12 @@ UPDATE pending_transactions
         var accountResourcePreferenceRuleHistoryToAdd = new List<AccountResourcePreferenceRuleHistory>();
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
-        var d_ctx = new ProcessorContext(sequences, readHelper, writeHelper, token);
-        var d_s = new EntityStateProcessor(d_ctx, referencedEntities);
-        var d_cmr = new ComponentMethodRoyaltyProcessor(d_ctx);
-        var d_era = new EntityRoleAssignmentProcessor(d_ctx);
-        var d_pc = new PackageCodeProcessor(d_ctx, networkConfiguration.Id);
-        var d_pb = new PackageBlueprintProcessor(d_ctx, referencedEntities);
+        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, token);
+        var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
+        var componentMethodRoyaltyProcessor = new ComponentMethodRoyaltyProcessor(processorContext);
+        var entityRoleAssignmentProcessor = new EntityRoleAssignmentProcessor(processorContext);
+        var packageCodeProcessor = new PackageCodeProcessor(processorContext, networkConfiguration.Id);
+        var packageBlueprintProcessor = new PackageBlueprintProcessor(processorContext, referencedEntities);
 
         // step: scan all substates & events to figure out changes
         {
@@ -990,11 +990,11 @@ UPDATE pending_transactions
                             }
                         }
 
-                        d_s.VisitUpsert(substate, referencedEntity, stateVersion);
-                        d_cmr.VisitUpsert(substateData, referencedEntity, stateVersion);
-                        d_era.VisitUpsert(substateData, referencedEntity, stateVersion);
-                        d_pc.VisitUpsert(substateData, referencedEntity, stateVersion);
-                        d_pb.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        entityStateProcessor.VisitUpsert(substate, referencedEntity, stateVersion);
+                        componentMethodRoyaltyProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        entityRoleAssignmentProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        packageCodeProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        packageBlueprintProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -1011,7 +1011,7 @@ UPDATE pending_transactions
                             vaultSnapshots.Add(new NonFungibleVaultSnapshot(referencedEntity, resourceEntity, simpleRep, true, stateVersion));
                         }
 
-                        d_pc.VisitDelete(substateId, referencedEntity, stateVersion);
+                        packageCodeProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
@@ -1212,10 +1212,10 @@ UPDATE pending_transactions
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
 
-            await d_cmr.LoadMostRecent();
-            await d_era.LoadMostRecent();
-            await d_pc.LoadMostRecent();
-            await d_pb.LoadMostRecent();
+            await componentMethodRoyaltyProcessor.LoadMostRecent();
+            await entityRoleAssignmentProcessor.LoadMostRecent();
+            await packageCodeProcessor.LoadMostRecent();
+            await packageBlueprintProcessor.LoadMostRecent();
 
             dbReadDuration += sw.Elapsed;
 
@@ -1289,10 +1289,10 @@ UPDATE pending_transactions
                 mostRecentMetadataHistory[lookup] = metadataHistory;
             }
 
-            d_cmr.ProcessChanges();
-            d_era.ProcessChanges();
-            d_pc.ProcessChanges();
-            d_pb.ProcessChanges();
+            componentMethodRoyaltyProcessor.ProcessChanges();
+            entityRoleAssignmentProcessor.ProcessChanges();
+            packageCodeProcessor.ProcessChanges();
+            packageBlueprintProcessor.ProcessChanges();
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1653,11 +1653,11 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
 
-            rowsInserted += await d_s.SaveEntities();
-            rowsInserted += await d_cmr.SaveEntities();
-            rowsInserted += await d_era.SaveEntities();
-            rowsInserted += await d_pc.SaveEntities();
-            rowsInserted += await d_pb.SaveEntities();
+            rowsInserted += await entityStateProcessor.SaveEntities();
+            rowsInserted += await componentMethodRoyaltyProcessor.SaveEntities();
+            rowsInserted += await entityRoleAssignmentProcessor.SaveEntities();
+            rowsInserted += await packageCodeProcessor.SaveEntities();
+            rowsInserted += await packageBlueprintProcessor.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);
 
