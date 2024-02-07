@@ -3,6 +3,7 @@ Release Date: _unreleased_
 
 - Dropped internal `balance_changes` fallback mechanism. As of right now this information is ingested as part of regular transaction ingestion process.
 - Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
+- Reworked (partially) internal mechanism used to ingest ledger data by Data Aggregator to improve maintainability and simplify future extensions.
 
 ### API Changes
 - Return components effective role assignments only for assigned modules.
@@ -16,6 +17,7 @@ Release Date: _unreleased_
 ### Database changes
 - Created new `key_value_store_aggregate_history` table which will hold pointers to all key_value_store keys.
 - Dropped `network_configuration` table.
+- Fixed component's method royalty aggregation, added missing `component_method_royalty_aggregate_history` table.
 
 ### Deprecations
 - Obsoleted incorrectly named `access_rules_package` in favor of `role_assignment_module_package` on `NetworkConfigurationResponse.well_known_addresses`. Obsoleted property will contain effective copy of the new one for backwards compability.

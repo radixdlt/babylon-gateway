@@ -62,73 +62,95 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System.Collections.Generic;
+using Xunit;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.UnitTests.PostgresIntegration.LedgerExtension;
+
+public class ExtensionsTests
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    [Fact]
+    public void GetOrAdd_Specs()
+    {
+        var factoryCalls = 0;
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+        int Factory(int key)
+        {
+            factoryCalls++;
 
-    public long StateHistorySequence { get; set; }
+            return 3;
+        }
 
-    public long EntitySequence { get; set; }
+        var dict = new Dictionary<int, int>();
+        var a = dict.GetOrAdd(5, Factory);
+        var b = dict.GetOrAdd(5, Factory);
 
-    public long EntityMetadataHistorySequence { get; set; }
+        a.Should().Be(3);
+        b.Should().Be(3);
+        factoryCalls.Should().Be(1);
+    }
 
-    public long EntityMetadataAggregateHistorySequence { get; set; }
+    private record MyTuple(byte A, int B);
 
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
+    private record MyTriple(byte A, int B, long C);
 
-    public long EntityResourceAggregateHistorySequence { get; set; }
+    [Fact]
+    public void Unzip2_ShouldNotAllocateOnEmpty()
+    {
+        var lookupSet = new HashSet<MyTuple>();
+        var res = lookupSet.Unzip(x => x.A, x => x.B, out var a, out var b);
 
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
+        res.Should().BeFalse();
+        a.Should().BeNull();
+        b.Should().BeNull();
+    }
 
-    public long EntityVaultHistorySequence { get; set; }
+    [Fact]
+    public void Unzip2_Specs()
+    {
+        var lookupSet = new HashSet<MyTuple>
+        {
+            new MyTuple(1, 2),
+            new MyTuple(3, 2),
+            new MyTuple(1, 1),
+        };
 
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
+        var res = lookupSet.Unzip(x => x.A, x => x.B, out var a, out var b);
 
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
+        res.Should().BeTrue();
+        a.Should().Equal(new List<byte> { 1, 3, 1 });
+        b.Should().Equal(new List<int> { 2, 2, 1 });
+    }
 
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
+    [Fact]
+    public void Unzip3_ShouldNotAllocateOnEmpty()
+    {
+        var lookupSet = new HashSet<MyTriple>();
+        var res = lookupSet.Unzip(x => x.A, x => x.B, x => x.C, out var a, out var b, out var c);
 
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
+        res.Should().BeFalse();
+        a.Should().BeNull();
+        b.Should().BeNull();
+        c.Should().BeNull();
+    }
 
-    public long ComponentMethodRoyaltyAggregateHistorySequence { get; set; }
+    [Fact]
+    public void Unzip3_Specs()
+    {
+        var lookupSet = new HashSet<MyTriple>
+        {
+            new MyTriple(1, 2, 3),
+            new MyTriple(3, 2, 1),
+            new MyTriple(1, 1, 1),
+        };
 
-    public long ResourceEntitySupplyHistorySequence { get; set; }
+        var res = lookupSet.Unzip(x => x.A, x => x.B, x => x.C, out var a, out var b, out var c);
 
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long NonFungibleIdLocationHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long SchemaHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorEmissionStatisticsSequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
-
-    public long PackageBlueprintAggregateHistorySequence { get; set; }
-
-    public long PackageCodeAggregateHistorySequence { get; set; }
-
-    public long KeyValueStoreAggregateHistorySequence { get; set; }
+        res.Should().BeTrue();
+        a.Should().Equal(new List<byte> { 1, 3, 1 });
+        b.Should().Equal(new List<int> { 2, 2, 1 });
+        c.Should().Equal(new List<long> { 3, 1, 1 });
+    }
 }

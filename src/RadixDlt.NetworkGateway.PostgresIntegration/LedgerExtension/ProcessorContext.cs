@@ -62,73 +62,8 @@
  * permissions under this License.
  */
 
+using System.Threading;
+
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class SequencesHolder
-{
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
-
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
-
-    public long StateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyAggregateHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long NonFungibleIdLocationHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long SchemaHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorEmissionStatisticsSequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
-
-    public long PackageBlueprintAggregateHistorySequence { get; set; }
-
-    public long PackageCodeAggregateHistorySequence { get; set; }
-
-    public long KeyValueStoreAggregateHistorySequence { get; set; }
-}
+internal record ProcessorContext(SequencesHolder Sequences, ReadHelper ReadHelper, WriteHelper WriteHelper, CancellationToken Token);

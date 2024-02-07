@@ -76,6 +76,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -86,12 +87,38 @@ internal class WriteHelper
     private readonly NpgsqlConnection _connection;
     private readonly IModel _model;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
+    private readonly CancellationToken _token;
 
-    public WriteHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers)
+    public WriteHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers, CancellationToken token = default)
     {
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
         _model = dbContext.Model;
         _observers = observers;
+        _token = token;
+    }
+
+    public async Task<int> Copy<T>(ICollection<T> entities, string copy, Func<NpgsqlBinaryImporter, T, CancellationToken, Task> callback, [CallerMemberName] string stageName = "")
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+
+        await using var writer = await _connection.BeginBinaryImportAsync(copy, _token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(_token);
+            await callback(writer, e, _token);
+        }
+
+        await writer.CompleteAsync(_token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(stageName, Stopwatch.GetElapsedTime(sw), entities.Count));
+
+        return entities.Count;
     }
 
     public async Task<int> CopyEntity(ICollection<Entity> entities, CancellationToken token)
@@ -399,60 +426,6 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyPackageBlueprintAggregateHistory(ICollection<PackageBlueprintAggregateHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_blueprint_aggregate_history (id, from_state_version, package_entity_id, package_blueprint_ids) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.PackageBlueprintIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityMetadataAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyPackageCodeAggregateHistory(ICollection<PackageCodeAggregateHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_code_aggregate_history (id, from_state_version, package_entity_id, package_code_ids) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.PackageCodeIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityMetadataAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyEntityMetadataAggregateHistory(ICollection<EntityMetadataAggregateHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -476,145 +449,6 @@ internal class WriteHelper
         await writer.CompleteAsync(token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityMetadataAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyEntityRoleAssignmentsOwnerRoleHistory(List<EntityRoleAssignmentsOwnerRoleHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY entity_role_assignments_owner_role_history (id, from_state_version, entity_id, role_assignments) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.RoleAssignments, NpgsqlDbType.Jsonb, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityRoleAssignmentsOwnerRoleHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyEntityRoleAssignmentsRulesEntryHistory(List<EntityRoleAssignmentsEntryHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY entity_role_assignments_entry_history (id, from_state_version, entity_id, key_role, key_module, role_assignments, is_deleted) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.KeyRole, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.KeyModule, "module_id", token);
-            await writer.WriteAsync(e.RoleAssignments, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityRoleAssignmentsRulesEntryHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyEntityRoleAssignmentsAggregateHistory(List<EntityRoleAssignmentsAggregateHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY entity_role_assignments_aggregate_history (id, from_state_version, entity_id, owner_role_id, entry_ids) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.OwnerRoleId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntryIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityRoleAssignmentsAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyStateHistory(ICollection<StateHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY state_history (id, from_state_version, entity_id, discriminator, json_state, sbor_state, type_index, schema_hash, sbor_type_kind, schema_defining_entity_id) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<StateType>(e.GetType()), "state_type", token);
-
-            switch (e)
-            {
-                case JsonStateHistory jsonStateHistory:
-                    await writer.WriteAsync(jsonStateHistory.JsonState, NpgsqlDbType.Jsonb, token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case SborStateHistory sborStateHistory:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(sborStateHistory.SborState, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(sborStateHistory.TypeIndex, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(sborStateHistory.SchemaHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(sborStateHistory.SborTypeKind, "sbor_type_kind", token);
-                    await writer.WriteAsync(sborStateHistory.SchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
-                    break;
-            }
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyStateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
 
         return entities.Count;
     }
@@ -861,37 +695,6 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyComponentMethodRoyalties(List<ComponentMethodRoyaltyEntryHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY component_method_royalty_entry_history (id, from_state_version, entity_id, method_name, royalty_amount, is_locked) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.MethodName, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.RoyaltyAmount, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyComponentMethodRoyalties), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyAccountDefaultDepositRuleHistory(List<AccountDefaultDepositRuleHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -1100,73 +903,6 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyPackageBlueprintHistory(ICollection<PackageBlueprintHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY package_blueprint_history (id, from_state_version, package_entity_id, name, version, definition, dependant_entity_ids, auth_template, auth_template_is_locked, royalty_config, royalty_config_is_locked) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Name, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.Version, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.Definition, NpgsqlDbType.Jsonb, token);
-            await writer.WriteNullableAsync(e.DependantEntityIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.AuthTemplate, NpgsqlDbType.Jsonb, token);
-            await writer.WriteNullableAsync(e.AuthTemplateIsLocked, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(e.RoyaltyConfig, NpgsqlDbType.Jsonb, token);
-            await writer.WriteNullableAsync(e.RoyaltyConfigIsLocked, NpgsqlDbType.Boolean, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyPackageBlueprintHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyPackageCodeHistory(ICollection<PackageCodeHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_code_history (id, from_state_version, package_entity_id, code_hash, code, vm_type, is_deleted) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.CodeHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.Code, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.VmType, "package_vm_type", token);
-            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyPackageCodeHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopySchemaHistory(ICollection<SchemaHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -1345,6 +1081,7 @@ SELECT
     setval('entity_role_assignments_entry_history_id_seq', @entityRoleAssignmentsEntryHistorySequence),
     setval('entity_role_assignments_owner_role_history_id_seq', @entityRoleAssignmentsOwnerRoleHistorySequence),
     setval('component_method_royalty_entry_history_id_seq', @componentMethodRoyaltyEntryHistorySequence),
+    setval('component_method_royalty_aggregate_history_id_seq', @componentMethodRoyaltyAggregateHistorySequence),
     setval('resource_entity_supply_history_id_seq', @resourceEntitySupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
@@ -1380,6 +1117,7 @@ SELECT
                 entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
                 entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,
                 componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
+                componentMethodRoyaltyAggregateHistorySequence = sequences.ComponentMethodRoyaltyAggregateHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                 nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
@@ -1406,7 +1144,7 @@ SELECT
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdateSequences), Stopwatch.GetElapsedTime(sw), null));
     }
 
-    private T GetDiscriminator<T>(Type type)
+    internal T GetDiscriminator<T>(Type type)
     {
         if (_model.FindEntityType(type)?.GetDiscriminatorValue() is not T discriminator)
         {

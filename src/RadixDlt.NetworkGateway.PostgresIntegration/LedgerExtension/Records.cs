@@ -118,14 +118,3 @@ internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long Sta
 internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
 
 internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
-
-internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
-
-internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ModuleId KeyModule);
-
-internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
-{
-    public CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
-
-    public IList<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.RoleAssignmentModuleRuleEntrySubstate>();
-}

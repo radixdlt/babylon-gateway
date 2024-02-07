@@ -62,73 +62,25 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("component_method_royalty_aggregate_history")]
+public class ComponentMethodRoyaltyAggregateHistory
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public long StateHistorySequence { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyAggregateHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long NonFungibleIdLocationHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long SchemaHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorEmissionStatisticsSequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
-
-    public long PackageBlueprintAggregateHistorySequence { get; set; }
-
-    public long PackageCodeAggregateHistorySequence { get; set; }
-
-    public long KeyValueStoreAggregateHistorySequence { get; set; }
+    [Column("entry_ids")]
+    public List<long> EntryIds { get; set; }
 }

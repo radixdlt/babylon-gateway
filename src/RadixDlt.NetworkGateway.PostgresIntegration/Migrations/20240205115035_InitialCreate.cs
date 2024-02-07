@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -131,6 +131,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_account_resource_preference_rule_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "component_method_royalty_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_method_royalty_aggregate_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -785,6 +800,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "account_entity_id", "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_component_method_royalty_aggregate_history_entity_id_from_s~",
+                table: "component_method_royalty_aggregate_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_component_method_royalty_entry_history_entity_id_from_state~",
                 table: "component_method_royalty_entry_history",
                 columns: new[] { "entity_id", "from_state_version" });
@@ -1090,6 +1110,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "account_resource_preference_rule_history");
+
+            migrationBuilder.DropTable(
+                name: "component_method_royalty_aggregate_history");
 
             migrationBuilder.DropTable(
                 name: "component_method_royalty_entry_history");
