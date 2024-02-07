@@ -88,37 +88,35 @@ internal static class DbQueryExtensions
     }
 
     /// <summary>
-    /// Returns most recently committed ledger transaction at or before given state version.
+    /// Returns ledger transaction committed at given state version.
     /// </summary>
     /// <remarks>
     /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
     /// ledger transaction row, to avoid possible performance issues.
     /// </remarks>
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeStateVersion<TDbContext>(this TDbContext dbContext, long beforeStateVersion)
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionAtStateVersion<TDbContext>(this TDbContext dbContext, long stateVersion)
         where TDbContext : CommonDbContext
     {
         return dbContext
             .LedgerTransactions
-            .Where(lt => lt.StateVersion <= beforeStateVersion)
-            .OrderByDescending(lt => lt.StateVersion)
+            .Where(lt => lt.StateVersion == stateVersion)
             .Take(1)
             .AnnotateMetricName();
     }
 
     /// <summary>
-    /// Returns the first committed ledger transaction at or after given state version.
+    /// Returns ledger transaction committed at given epoch and round.
     /// </summary>
     /// <remarks>
     /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
     /// ledger transaction row, to avoid possible performance issues.
     /// </remarks>
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterStateVersion<TDbContext>(this TDbContext dbContext, long afterStateVersion)
+    public static IQueryable<LedgerTransaction> GetLedgerTransactionAtEpochAndRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
         where TDbContext : CommonDbContext
     {
         return dbContext
             .LedgerTransactions
-            .Where(lt => lt.StateVersion >= afterStateVersion)
-            .OrderBy(lt => lt.StateVersion)
+            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch == round && lt.IndexInRound == 0)
             .Take(1)
             .AnnotateMetricName();
     }
@@ -157,23 +155,6 @@ internal static class DbQueryExtensions
             .Where(lt => lt.RoundTimestamp >= timestamp)
             .OrderBy(lt => lt.RoundTimestamp)
             .ThenBy(lt => lt.StateVersion)
-            .Take(1)
-            .AnnotateMetricName();
-    }
-
-    /// <summary>
-    /// Returns ledger transaction committed at given epoch and round.
-    /// </summary>
-    /// <remarks>
-    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
-    /// ledger transaction row, to avoid possible performance issues.
-    /// </remarks>
-    public static IQueryable<LedgerTransaction> GetLedgerTransactionAtEpochAndRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
-        where TDbContext : CommonDbContext
-    {
-        return dbContext
-            .LedgerTransactions
-            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch == round && lt.IndexInRound == 0)
             .Take(1)
             .AnnotateMetricName();
     }
