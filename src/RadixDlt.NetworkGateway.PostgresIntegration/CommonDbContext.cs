@@ -149,6 +149,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
 
+    public DbSet<KeyValueStoreAggregateHistory> KeyValueStoreAggregateHistory => Set<KeyValueStoreAggregateHistory>();
+
     public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
 
     public DbSet<NonFungibleSchemaHistory> NonFungibleSchemaHistory => Set<NonFungibleSchemaHistory>();
@@ -522,6 +524,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<KeyValueStoreEntryHistory>()
             .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<KeyValueStoreAggregateHistory>()
+            .HasIndex(e => new { e.KeyValueStoreEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<KeyValueStoreSchemaHistory>()

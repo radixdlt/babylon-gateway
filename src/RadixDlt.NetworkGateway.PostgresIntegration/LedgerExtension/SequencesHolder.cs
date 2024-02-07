@@ -129,4 +129,6 @@ internal class SequencesHolder
     public long PackageBlueprintAggregateHistorySequence { get; set; }
 
     public long PackageCodeAggregateHistorySequence { get; set; }
+
+    public long KeyValueStoreAggregateHistorySequence { get; set; }
 }
