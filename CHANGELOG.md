@@ -14,8 +14,8 @@ Release Date: _unreleased_
 - Added new endpoint `/state/key-value-store/keys/` that allows iterating over `KeyValueStore` keys.
 
 ### Database changes
-- Creates new `key_value_store_aggregate_history` table which will hold pointers to all key_value_store keys.
-- Drops `network_configuration` table.
+- Created new `key_value_store_aggregate_history` table which will hold pointers to all key_value_store keys.
+- Dropped `network_configuration` table.
 
 ### Deprecations
 - Obsoleted incorrectly named `access_rules_package` in favor of `role_assignment_module_package` on `NetworkConfigurationResponse.well_known_addresses`. Obsoleted property will contain effective copy of the new one for backwards compability.
