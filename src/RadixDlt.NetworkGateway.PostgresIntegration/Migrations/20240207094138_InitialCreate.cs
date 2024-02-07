@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -1089,7 +1089,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_validator_emission_statistics_validator_entity_id_epoch_num~",
                 table: "validator_emission_statistics",
-                columns: new[] { "validator_entity_id", "epoch_number" });
+                columns: new[] { "validator_entity_id", "epoch_number" })
+                .Annotation("Npgsql:IndexInclude", new[] { "proposals_made", "proposals_missed" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_validator_public_key_history_validator_entity_id_from_state~",

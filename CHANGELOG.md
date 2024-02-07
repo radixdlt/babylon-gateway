@@ -19,6 +19,7 @@ Release Date: _unreleased_
 - Created new `key_value_store_aggregate_history` table which will hold pointers to all key_value_store keys.
 - Dropped `network_configuration` table.
 - Fixed component's method royalty aggregation, added missing `component_method_royalty_aggregate_history` table.
+- Changed `IX_validator_emission_statistics_validator_entity_id_epoch_num~` index to include `proposals_made` and `proposals_missed` columns in order to optimize `/statistics/validators/update` endpoint.
 
 ### Deprecations
 - Obsoleted incorrectly named `access_rules_package` in favor of `role_assignment_module_package` on `NetworkConfigurationResponse.well_known_addresses`. Obsoleted property will contain effective copy of the new one for backwards compability.
