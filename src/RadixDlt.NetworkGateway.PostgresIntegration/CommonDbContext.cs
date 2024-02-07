@@ -137,7 +137,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityRoleAssignmentsAggregateHistory> EntityRoleAssignmentsAggregateHistory => Set<EntityRoleAssignmentsAggregateHistory>();
 
-    public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
+    public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentEntityMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
+
+    public DbSet<ComponentMethodRoyaltyAggregateHistory> ComponentEntityMethodRoyaltyAggregateHistory => Set<ComponentMethodRoyaltyAggregateHistory>();
 
     public DbSet<PackageBlueprintHistory> PackageBlueprintHistory => Set<PackageBlueprintHistory>();
 
@@ -447,6 +449,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<ComponentMethodRoyaltyEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.MethodName, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<ComponentMethodRoyaltyAggregateHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<ResourceEntitySupplyHistory>()

@@ -62,59 +62,25 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal interface IVaultSnapshot
+[Table("component_method_royalty_aggregate_history")]
+public class ComponentMethodRoyaltyAggregateHistory
 {
-    public ReferencedEntity ReferencedVault { get; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public ReferencedEntity ReferencedResource { get; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public long StateVersion { get; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("entry_ids")]
+    public List<long> EntryIds { get; set; }
 }
-
-internal interface IVaultChange
-{
-    public long EntityId { get; }
-
-    public long ResourceEntityId { get; }
-
-    public long StateVersion { get; }
-}
-
-internal record FungibleVaultSnapshot(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion) : IVaultSnapshot;
-
-internal record NonFungibleVaultSnapshot(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion) : IVaultSnapshot;
-
-internal record EntityFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, TokenAmount Delta, long StateVersion) : IVaultChange;
-
-internal record EntityNonFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, long Delta, long StateVersion) : IVaultChange;
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
-
-internal record NonFungibleIdDeletion(ReferencedEntity ReferencedResource, string NonFungibleId, long StateVersion);
-
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
-
-internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? Minted = null, TokenAmount? Burned = null);
-
-internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record struct MetadataLookup(long EntityId, string Key);
-
-internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
-
-internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
-
-internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
-
-internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
-
-internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
