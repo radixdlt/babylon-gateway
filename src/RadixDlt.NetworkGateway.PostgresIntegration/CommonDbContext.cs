@@ -542,6 +542,7 @@ internal abstract class CommonDbContext : DbContext
     {
         modelBuilder
             .Entity<ValidatorEmissionStatistics>()
-            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
+            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber })
+            .IncludeProperties(e => new { e.ProposalsMade, e.ProposalsMissed });
     }
 }
