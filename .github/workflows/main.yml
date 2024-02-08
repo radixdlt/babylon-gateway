@@ -371,7 +371,6 @@ jobs:
       - join-aggregator-images
       - join-migrations-images
       - setup-tags
-    if: github.event_name == 'pull_request' && github.base_ref == 'develop'
     permissions:
       id-token: write
       contents: read
