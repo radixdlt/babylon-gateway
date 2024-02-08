@@ -1,5 +1,5 @@
 ## 1.4.0
-Release Date: _unreleased_
+Release Date: 08.02.2024
 
 - Dropped internal `balance_changes` fallback mechanism. As of right now this information is ingested as part of regular transaction ingestion process.
 - Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
