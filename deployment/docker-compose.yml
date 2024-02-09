@@ -51,13 +51,13 @@ services:
       retries: 3
 
   database_migrations: # This is the base -- the _image and _built containers are defined below
-    image: "radixdlt/babylon-ng-database-migrations:v1.3.0"
+    image: "radixdlt/babylon-ng-database-migrations:v1.4.0"
     profiles: ["NONE"]
     environment:
       ConnectionStrings__NetworkGatewayMigrations: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
 
   data_aggregator: # This is the base -- the _image and _built containers are defined below
-    image: "radixdlt/babylon-ng-data-aggregator:v1.3.0"
+    image: "radixdlt/babylon-ng-data-aggregator:v1.4.0"
     profiles: ["NONE"]
     deploy:
       restart_policy:
@@ -76,33 +76,28 @@ services:
       DataAggregator__Network__CoreApiNodes__0__Name: "${NODE_0_NAME}"
       DataAggregator__Network__CoreApiNodes__0__CoreApiAddress: "${NODE_0_CORE_API_ADDRESS}"
       DataAggregator__Network__CoreApiNodes__0__CoreApiAuthorizationHeader: "${NODE_0_CORE_API_AUTHORIZATION_HEADER}"
-      DataAggregator__Network__CoreApiNodes__0__TrustWeighting: "1"
       DataAggregator__Network__CoreApiNodes__0__Enabled: "${NODE_0_ENABLED}"
       DataAggregator__Network__CoreApiNodes__1__Name: "${NODE_1_NAME}"
       DataAggregator__Network__CoreApiNodes__1__CoreApiAddress: "${NODE_1_CORE_API_ADDRESS}"
       DataAggregator__Network__CoreApiNodes__1__CoreApiAuthorizationHeader: "${NODE_1_CORE_API_AUTHORIZATION_HEADER}"
-      DataAggregator__Network__CoreApiNodes__1__TrustWeighting: "1"
       DataAggregator__Network__CoreApiNodes__1__Enabled: "${NODE_1_ENABLED}"
       DataAggregator__Network__CoreApiNodes__2__Name: "${NODE_2_NAME}"
       DataAggregator__Network__CoreApiNodes__2__CoreApiAddress: "${NODE_2_CORE_API_ADDRESS}"
       DataAggregator__Network__CoreApiNodes__2__CoreApiAuthorizationHeader: "${NODE_2_CORE_API_AUTHORIZATION_HEADER}"
-      DataAggregator__Network__CoreApiNodes__2__TrustWeighting: "1"
       DataAggregator__Network__CoreApiNodes__2__Enabled: "${NODE_2_ENABLED}"
       DataAggregator__Network__CoreApiNodes__3__Name: "${NODE_3_NAME}"
       DataAggregator__Network__CoreApiNodes__3__CoreApiAddress: "${NODE_3_CORE_API_ADDRESS}"
       DataAggregator__Network__CoreApiNodes__3__CoreApiAuthorizationHeader: "${NODE_3_CORE_API_AUTHORIZATION_HEADER}"
-      DataAggregator__Network__CoreApiNodes__3__TrustWeighting: "1"
       DataAggregator__Network__CoreApiNodes__3__Enabled: "${NODE_3_ENABLED}"
       DataAggregator__Network__CoreApiNodes__4__Name: "${NODE_4_NAME}"
       DataAggregator__Network__CoreApiNodes__4__CoreApiAddress: "${NODE_4_CORE_API_ADDRESS}"
       DataAggregator__Network__CoreApiNodes__4__CoreApiAuthorizationHeader: "${NODE_4_CORE_API_AUTHORIZATION_HEADER}"
-      DataAggregator__Network__CoreApiNodes__4__TrustWeighting: "1"
       DataAggregator__Network__CoreApiNodes__4__Enabled: "${NODE_4_ENABLED}"
     volumes:
       - ./data-aggregator-fixed-configuration.json:/home/radixdlt/network-gateway/config.json
 
   gateway_api: # This is the base -- the _image and _built containers are defined below
-    image: "radixdlt/babylon-ng-gateway-api:v1.3.0"
+    image: "radixdlt/babylon-ng-gateway-api:v1.4.0"
     profiles: ["NONE"]
     ports:
       - "127.0.0.1:5308:8080" # This allows you to connect to the API at http://localhost:5308

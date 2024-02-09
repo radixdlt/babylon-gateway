@@ -94,6 +94,8 @@ internal class SequencesHolder
 
     public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
 
+    public long ComponentMethodRoyaltyAggregateHistorySequence { get; set; }
+
     public long ResourceEntitySupplyHistorySequence { get; set; }
 
     public long NonFungibleIdDataSequence { get; set; }
@@ -127,4 +129,6 @@ internal class SequencesHolder
     public long PackageBlueprintAggregateHistorySequence { get; set; }
 
     public long PackageCodeAggregateHistorySequence { get; set; }
+
+    public long KeyValueStoreAggregateHistorySequence { get; set; }
 }

@@ -63,8 +63,10 @@
  */
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Collections.Generic;
@@ -79,14 +81,33 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IEntityStateQuerier _entityStateQuerier;
+    private readonly IKeyValueStoreQuerier _keyValueStoreQuerier;
     private readonly ILogger _logger;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
-    public DefaultKeyValueStoreHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier, ILogger<DefaultKeyValueStoreHandler> logger)
+    public DefaultKeyValueStoreHandler(
+        ILedgerStateQuerier ledgerStateQuerier,
+        IKeyValueStoreQuerier keyValueStoreQuerier,
+        ILogger<DefaultKeyValueStoreHandler> logger,
+        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
-        _entityStateQuerier = entityStateQuerier;
+        _keyValueStoreQuerier = keyValueStoreQuerier;
         _logger = logger;
+        _endpointConfiguration = endpointConfiguration;
+    }
+
+    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> Keys(GatewayModel.StateKeyValueStoreKeysRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var cursor = GatewayModel.StateKeyValueStoreItemsCursor.FromCursorString(request.Cursor);
+
+        return await _keyValueStoreQuerier.KeyValueStoreItems(
+            (EntityAddress)request.KeyValueStoreAddress,
+            ledgerState,
+            GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
+            token);
     }
 
     public async Task<GatewayModel.StateKeyValueStoreDataResponse> Data(GatewayModel.StateKeyValueStoreDataRequest request, CancellationToken token = default)
@@ -94,7 +115,7 @@ internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
         var keys = ExtractKeys(request.Keys).ToArray();
 
-        return await _entityStateQuerier.KeyValueStoreData((EntityAddress)request.KeyValueStoreAddress, keys, ledgerState, token);
+        return await _keyValueStoreQuerier.KeyValueStoreData((EntityAddress)request.KeyValueStoreAddress, keys, ledgerState, token);
     }
 
     private IEnumerable<ValueBytes> ExtractKeys(List<GatewayModel.StateKeyValueStoreDataRequestKeyItem> keys)

@@ -107,6 +107,17 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
             .NotNull()
             .SetValidator(radixAddressValidator);
 
+        RuleForEach(x => x.AccountsWithManifestOwnerMethodCalls)
+            .NotNull()
+            .SetValidator(radixAddressValidator);
+
+        RuleForEach(x => x.AccountsWithoutManifestOwnerMethodCalls)
+            .NotNull()
+            .SetValidator(radixAddressValidator);
+
+        RuleFor(x => x.ManifestClassFilter)
+            .SetValidator(new ManifestClassFilterValidator());
+
         RuleForEach(x => x.EventsFilter)
             .NotNull()
             .SetValidator(new StreamTransactionsRequestEventItemValidator(radixAddressValidator));

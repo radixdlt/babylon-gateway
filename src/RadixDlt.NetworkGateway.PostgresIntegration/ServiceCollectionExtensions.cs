@@ -104,6 +104,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<EntityType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
                 dataSourceBuilder.MapEnum<LedgerTransactionType>();
+                dataSourceBuilder.MapEnum<LedgerTransactionManifestClass>();
                 dataSourceBuilder.MapEnum<LedgerTransactionMarkerType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionMarkerEventType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionMarkerOperationType>();

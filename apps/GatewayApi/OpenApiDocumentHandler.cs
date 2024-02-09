@@ -67,6 +67,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
 using Microsoft.OpenApi.Writers;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -171,14 +172,14 @@ public static class OpenApiDocumentHandler
         CancellationToken token)
     {
         var placeholderReplacements = new PlaceholderReplacements();
+        var networkConfiguration = await networkConfigurationProvider.GetNetworkConfiguration(token);
 
         try
         {
-            var wellKnownAddresses = networkConfigurationProvider.GetWellKnownAddresses();
-            placeholderReplacements.ResourceAddress = wellKnownAddresses.Xrd;
-            placeholderReplacements.ComponentAddress = wellKnownAddresses.ConsensusManager;
-            placeholderReplacements.NetworkId = networkConfigurationProvider.GetNetworkId();
-            placeholderReplacements.NetworkName = networkConfigurationProvider.GetNetworkName();
+            placeholderReplacements.ResourceAddress = networkConfiguration.WellKnownAddresses.Xrd;
+            placeholderReplacements.ComponentAddress = networkConfiguration.WellKnownAddresses.ConsensusManager;
+            placeholderReplacements.NetworkId = networkConfiguration.Id;
+            placeholderReplacements.NetworkName = networkConfiguration.Name;
         }
         catch (Exception)
         {

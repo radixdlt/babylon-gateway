@@ -70,10 +70,9 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -82,7 +81,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -204,7 +202,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private List<PendingTransactionWithChosenNode> UpdateTransactionsForPotentialSubmissionOrRetirement(
         PendingTransactionHandlingConfig handlingConfig,
         List<PendingTransaction> transactionsWantingResubmission,
-        ulong currentEpoch,
+        long currentEpoch,
         DateTime currentTime
     )
     {
@@ -217,7 +215,10 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
             if (canResubmit)
             {
                 _observers.ForEach(x => x.TransactionMarkedAsSubmissionPending());
-                transactionsToResubmitWithNodes.Add(new PendingTransactionWithChosenNode(transaction, GetRandomCoreApi()));
+
+                var coreApiNode = _networkOptionsMonitor.CurrentValue.CoreApiNodes.GetRandomEnabledNodeForConstruction();
+
+                transactionsToResubmitWithNodes.Add(new PendingTransactionWithChosenNode(transaction, coreApiNode));
             }
             else
             {
@@ -241,7 +242,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private async Task ResubmitAllAndUpdateTransactionStatusesOnFailure(
         List<PendingTransactionWithChosenNode> transactionsToResubmitWithNodes,
         PendingTransactionHandlingConfig handlingConfig,
-        ulong currentEpoch,
+        long currentEpoch,
         CancellationToken token
     )
     {
@@ -280,14 +281,14 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         }
 
         using var nodeScope = _services.CreateScope();
-        nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = chosenNode;
+        nodeScope.ServiceProvider.GetRequiredService<ICoreApiNodeConfigurator>().CoreApiNode = chosenNode;
         var coreApiProvider = nodeScope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
 
         var result = await TransactionSubmitter.Submit(
             new SubmitContext(
-                TransactionApi: coreApiProvider.TransactionsApi,
+                TransactionApi: coreApiProvider.TransactionApi,
                 TargetNode: chosenNode.Name,
-                NetworkName: _networkConfigurationProvider.GetNetworkName(),
+                NetworkName: (await _networkConfigurationProvider.GetNetworkConfiguration(cancellationToken)).Name,
                 SubmissionTimeout: _mempoolOptionsMonitor.CurrentValue.ResubmissionNodeRequestTimeout,
                 IsResubmission: true,
                 ForceNodeToRecalculateResult: false),
@@ -299,19 +300,10 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         return new ContextualSubmissionResult(transaction, chosenNode.Name, result);
     }
 
-    private CoreApiNode GetRandomCoreApi()
-    {
-        return _networkOptionsMonitor
-            .CurrentValue
-            .CoreApiNodes
-            .Where(n => n.Enabled && !n.DisabledForConstruction)
-            .GetRandomBy(n => (double)n.RequestWeighting);
-    }
-
-    private async Task<ulong> GetCurrentEpoch(CancellationToken cancellationToken)
+    private async Task<long> GetCurrentEpoch(CancellationToken cancellationToken)
     {
         var topOfLedger = await _topOfLedgerProvider.GetTopOfLedger(cancellationToken);
         var signedEpoch = topOfLedger.Epoch;
-        return (signedEpoch >= 0) ? (ulong)signedEpoch : throw new InvalidStateException($"Epoch was negative: {signedEpoch}");
+        return (signedEpoch >= 0) ? signedEpoch : throw new InvalidStateException($"Epoch was negative: {signedEpoch}");
     }
 }

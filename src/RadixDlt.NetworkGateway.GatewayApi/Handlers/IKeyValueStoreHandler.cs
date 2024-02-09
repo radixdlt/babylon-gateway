@@ -70,5 +70,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface IKeyValueStoreHandler
 {
+    Task<GatewayModel.StateKeyValueStoreKeysResponse> Keys(GatewayModel.StateKeyValueStoreKeysRequest request, CancellationToken token = default);
+
     Task<GatewayModel.StateKeyValueStoreDataResponse> Data(GatewayModel.StateKeyValueStoreDataRequest request, CancellationToken token = default);
 }

@@ -90,7 +90,6 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<INodeStatusProvider, NodeStatusProvider>()
             .AddSingleton<ICommittedStateIdentifiersReader, CommittedStateIdentifiersReader>()
             .AddSingleton<ITopOfLedgerProvider, TopOfLedgerProvider>()
-            .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
             .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()
             .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>()
             .AddSingleton<MetricsInterceptor>()

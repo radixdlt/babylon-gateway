@@ -80,8 +80,6 @@ internal abstract class CommonDbContext : DbContext
 {
     private const string DiscriminatorColumnName = "discriminator";
 
-    public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
-
     /// <summary>
     /// Gets LedgerTransactions.
     /// </summary>
@@ -139,7 +137,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityRoleAssignmentsAggregateHistory> EntityRoleAssignmentsAggregateHistory => Set<EntityRoleAssignmentsAggregateHistory>();
 
-    public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
+    public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentEntityMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
+
+    public DbSet<ComponentMethodRoyaltyAggregateHistory> ComponentEntityMethodRoyaltyAggregateHistory => Set<ComponentMethodRoyaltyAggregateHistory>();
 
     public DbSet<PackageBlueprintHistory> PackageBlueprintHistory => Set<PackageBlueprintHistory>();
 
@@ -148,6 +148,8 @@ internal abstract class CommonDbContext : DbContext
     public DbSet<SchemaHistory> SchemaHistory => Set<SchemaHistory>();
 
     public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
+
+    public DbSet<KeyValueStoreAggregateHistory> KeyValueStoreAggregateHistory => Set<KeyValueStoreAggregateHistory>();
 
     public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
 
@@ -169,6 +171,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<EntityType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionManifestClass>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerEventType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOperationType>();
@@ -246,6 +249,7 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)
             .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
             .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress)
+            .HasValue<ManifestClassMarker>(LedgerTransactionMarkerType.ManifestClass)
             .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity);
 
         modelBuilder
@@ -271,6 +275,11 @@ internal abstract class CommonDbContext : DbContext
             .Entity<AffectedGlobalEntityTransactionMarker>()
             .HasIndex(e => new { e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'affected_global_entity'");
+
+        modelBuilder
+            .Entity<ManifestClassMarker>()
+            .HasIndex(e => new { TransactionType = e.LedgerTransactionManifestClass, e.IsMostSpecific, e.StateVersion })
+            .HasFilter("discriminator = 'manifest_class'");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
@@ -444,6 +453,10 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.MethodName, e.FromStateVersion });
 
         modelBuilder
+            .Entity<ComponentMethodRoyaltyAggregateHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder
             .Entity<ResourceEntitySupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
@@ -513,6 +526,10 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key, e.FromStateVersion });
 
         modelBuilder
+            .Entity<KeyValueStoreAggregateHistory>()
+            .HasIndex(e => new { e.KeyValueStoreEntityId, e.FromStateVersion });
+
+        modelBuilder
             .Entity<KeyValueStoreSchemaHistory>()
             .HasIndex(e => new { e.KeyValueStoreEntityId, e.FromStateVersion });
 
@@ -525,6 +542,7 @@ internal abstract class CommonDbContext : DbContext
     {
         modelBuilder
             .Entity<ValidatorEmissionStatistics>()
-            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
+            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber })
+            .IncludeProperties(e => new { e.ProposalsMade, e.ProposalsMissed });
     }
 }

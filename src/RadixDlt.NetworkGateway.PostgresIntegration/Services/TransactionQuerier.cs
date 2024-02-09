@@ -63,9 +63,11 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -89,18 +91,15 @@ internal class TransactionQuerier : ITransactionQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ITransactionBalanceChangesService _transactionBalanceChangesService;
 
     public TransactionQuerier(
         ReadOnlyDbContext dbContext,
         ReadWriteDbContext rwDbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        ITransactionBalanceChangesService transactionBalanceChangesService)
+        INetworkConfigurationProvider networkConfigurationProvider)
     {
         _dbContext = dbContext;
         _rwDbContext = rwDbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _transactionBalanceChangesService = transactionBalanceChangesService;
     }
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
@@ -108,6 +107,8 @@ internal class TransactionQuerier : ITransactionQuerier
         var referencedAddresses = request
             .SearchCriteria
             .ManifestAccountsDepositedInto
+            .Concat(request.SearchCriteria.AccountsWithManifestOwnerMethodCalls)
+            .Concat(request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls)
             .Concat(request.SearchCriteria.ManifestAccountsWithdrawnFrom)
             .Concat(request.SearchCriteria.ManifestResources)
             .Concat(request.SearchCriteria.AffectedGlobalEntities)
@@ -270,6 +271,76 @@ internal class TransactionQuerier : ITransactionQuerier
             }
         }
 
+        if (request.SearchCriteria.ManifestClassFilter != null)
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            var manifestClass = request.SearchCriteria.ManifestClassFilter.Class switch
+            {
+                LedgerTransactionManifestClass.General => LedgerTransactionManifestClass.General,
+                LedgerTransactionManifestClass.Transfer => LedgerTransactionManifestClass.Transfer,
+                LedgerTransactionManifestClass.ValidatorStake => LedgerTransactionManifestClass.ValidatorStake,
+                LedgerTransactionManifestClass.ValidatorUnstake => LedgerTransactionManifestClass.ValidatorUnstake,
+                LedgerTransactionManifestClass.ValidatorClaim => LedgerTransactionManifestClass.ValidatorClaim,
+                LedgerTransactionManifestClass.AccountDepositSettingsUpdate => LedgerTransactionManifestClass.AccountDepositSettingsUpdate,
+                LedgerTransactionManifestClass.PoolContribution => LedgerTransactionManifestClass.PoolContribution,
+                LedgerTransactionManifestClass.PoolRedemption => LedgerTransactionManifestClass.PoolRedemption,
+                _ => throw new UnreachableException($"Didn't expect {request.SearchCriteria.ManifestClassFilter.Class} value"),
+            };
+
+            searchQuery = searchQuery
+                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                .OfType<ManifestClassMarker>()
+                .Where(ttm => ttm.LedgerTransactionManifestClass == manifestClass)
+                .Where(ttm => (request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType)
+                .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
+                .Select(eltm => eltm.StateVersion);
+        }
+
+        if (request.SearchCriteria.AccountsWithManifestOwnerMethodCalls.Any())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityAddress in request.SearchCriteria.AccountsWithManifestOwnerMethodCalls)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = searchQuery
+                    .Join(
+                        _dbContext.LedgerTransactionMarkers,
+                        stateVersion => stateVersion,
+                        ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
+                        (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
+                    .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls.Any())
+        {
+            foreach (var entityAddress in request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                var withManifestOwnerCall = _dbContext
+                    .LedgerTransactionMarkers
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
+                    .Select(y => y.StateVersion);
+
+                searchQuery = searchQuery.Where(x => withManifestOwnerCall.All(y => y != x));
+            }
+        }
+
         if (request.SearchCriteria.Kind == LedgerTransactionKindFilter.UserOnly && userKindFilterImplicitlyApplied)
         {
             // already handled
@@ -344,218 +415,11 @@ internal class TransactionQuerier : ITransactionQuerier
         return transactions.First();
     }
 
-    private record CommittedTransactionSummary(
+    internal record CommittedTransactionSummary(
         long StateVersion,
         string PayloadHash,
         LedgerTransactionStatus Status,
         string? ErrorMessage);
-
-    private record PendingTransactionSummary(
-        string PayloadHash,
-        ulong EndEpochExclusive,
-        DateTime? ResubmitFromTimestamp,
-        string? HandlingStatusReason,
-        PendingTransactionPayloadLedgerStatus PayloadStatus,
-        PendingTransactionIntentLedgerStatus IntentStatus,
-        string? InitialRejectionReason,
-        string? LatestRejectionReason,
-        string? LastSubmissionError);
-
-    private class PendingTransactionResponseAggregator
-    {
-        private readonly GatewayModel.LedgerState _ledgerState;
-        private readonly string? _committedPayloadHash;
-        private readonly long? _committedStateVersion;
-        private readonly List<GatewayModel.TransactionStatusResponseKnownPayloadItem> _knownPayloads = new();
-        private readonly GatewayModel.TransactionIntentStatus? _committedIntentStatus;
-        private readonly string? _committedErrorMessage;
-        private PendingTransactionIntentLedgerStatus _mostAccuratePendingTransactionIntentLedgerStatus = PendingTransactionIntentLedgerStatus.Unknown;
-        private string? _rejectionReasonForMostAccurateIntentLedgerStatus;
-
-        internal PendingTransactionResponseAggregator(GatewayModel.LedgerState ledgerState, CommittedTransactionSummary? committedTransactionSummary)
-        {
-            _ledgerState = ledgerState;
-
-            if (committedTransactionSummary is null)
-            {
-                return;
-            }
-
-            _committedPayloadHash = committedTransactionSummary.PayloadHash;
-            _committedStateVersion = committedTransactionSummary.StateVersion;
-
-            var (legacyStatus, payloadStatus, intentStatus) = committedTransactionSummary.Status switch
-            {
-                LedgerTransactionStatus.Succeeded => (GatewayModel.TransactionStatus.CommittedSuccess, GatewayModel.TransactionPayloadStatus.CommittedSuccess, GatewayModel.TransactionIntentStatus.CommittedSuccess),
-                LedgerTransactionStatus.Failed => (GatewayModel.TransactionStatus.CommittedFailure, GatewayModel.TransactionPayloadStatus.CommittedFailure, GatewayModel.TransactionIntentStatus.CommittedFailure),
-            };
-
-            _committedIntentStatus = intentStatus;
-            _committedErrorMessage = committedTransactionSummary.ErrorMessage;
-
-            _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
-                payloadHash: committedTransactionSummary.PayloadHash,
-                status: legacyStatus,
-                payloadStatus: payloadStatus,
-                payloadStatusDescription: GetPayloadStatusDescription(payloadStatus),
-                errorMessage: committedTransactionSummary.ErrorMessage,
-                handlingStatus: GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
-                handlingStatusReason: "The transaction is committed",
-                submissionError: null
-            ));
-        }
-
-        internal void AddPendingTransaction(PendingTransactionSummary pendingTransactionSummary)
-        {
-            if (pendingTransactionSummary.PayloadHash == _committedPayloadHash)
-            {
-                return;
-            }
-
-            var (legacyStatus, payloadStatus) = pendingTransactionSummary.PayloadStatus switch
-            {
-                PendingTransactionPayloadLedgerStatus.Unknown => (GatewayModel.TransactionStatus.Unknown, GatewayModel.TransactionPayloadStatus.Unknown),
-                PendingTransactionPayloadLedgerStatus.Committed => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
-                PendingTransactionPayloadLedgerStatus.CommitPending => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown),
-                PendingTransactionPayloadLedgerStatus.ClashingCommit => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionPayloadStatus.PermanentlyRejected),
-                PendingTransactionPayloadLedgerStatus.PermanentlyRejected => (GatewayModel.TransactionStatus.Rejected, GatewayModel.TransactionPayloadStatus.PermanentlyRejected),
-                PendingTransactionPayloadLedgerStatus.TransientlyAccepted => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.Pending),
-                PendingTransactionPayloadLedgerStatus.TransientlyRejected => (GatewayModel.TransactionStatus.Pending, GatewayModel.TransactionPayloadStatus.TemporarilyRejected),
-            };
-
-            var handlingStatus = pendingTransactionSummary.ResubmitFromTimestamp switch
-            {
-                not null => GatewayModel.TransactionPayloadGatewayHandlingStatus.HandlingSubmission,
-                null => GatewayModel.TransactionPayloadGatewayHandlingStatus.Concluded,
-            };
-
-            if (pendingTransactionSummary.IntentStatus.AggregationPriorityAcrossKnownPayloads() >= _mostAccuratePendingTransactionIntentLedgerStatus.AggregationPriorityAcrossKnownPayloads())
-            {
-                _mostAccuratePendingTransactionIntentLedgerStatus = pendingTransactionSummary.IntentStatus;
-                _rejectionReasonForMostAccurateIntentLedgerStatus = pendingTransactionSummary.LatestRejectionReason;
-            }
-
-            var initialRejectionReason = pendingTransactionSummary.InitialRejectionReason;
-            var latestRejectionReason = pendingTransactionSummary.LatestRejectionReason;
-
-            // If the intent's EndEpochExclusive has been reached, then the payload and intent must be permanently rejected (assuming they're not already committed).
-            if ((ulong)_ledgerState.Epoch >= pendingTransactionSummary.EndEpochExclusive)
-            {
-                // The if statement is defence-in-depth to avoid replacing a Committed status with PermanentlyRejected.
-                // This shouldn't matter, because we'd see a committed transaction in this case, which would trump the _mostAccuratePendingTransactionIntentLedgerStatus when we
-                // resolve the status. But best to be defensive anyway.
-                if (PendingTransactionIntentLedgerStatus.PermanentRejection.AggregationPriorityAcrossKnownPayloads() >=
-                    _mostAccuratePendingTransactionIntentLedgerStatus.AggregationPriorityAcrossKnownPayloads())
-                {
-                    _mostAccuratePendingTransactionIntentLedgerStatus = PendingTransactionIntentLedgerStatus.PermanentRejection;
-                    _rejectionReasonForMostAccurateIntentLedgerStatus = $"Transaction has expired, as its expiry epoch of {pendingTransactionSummary.EndEpochExclusive} has been reached.";
-                }
-
-                // The if statement is defence-in-depth to avoid replacing a Committed status with PermanentlyRejected.
-                // (Even though this shouldn't be possible because of the early return if pendingTransactionSummary.PayloadHash == _committedPayloadHash)
-                if (PendingTransactionPayloadLedgerStatus.PermanentlyRejected.ReplacementPriority() >= pendingTransactionSummary.PayloadStatus.ReplacementPriority())
-                {
-                    payloadStatus = GatewayModel.TransactionPayloadStatus.PermanentlyRejected;
-                    legacyStatus = GatewayModel.TransactionStatus.Rejected;
-                    latestRejectionReason = $"Transaction has expired, as its expiry epoch of {pendingTransactionSummary.EndEpochExclusive} has been reached.";
-                    initialRejectionReason ??= latestRejectionReason;
-                }
-            }
-
-            _knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
-                payloadHash: pendingTransactionSummary.PayloadHash,
-                status: legacyStatus,
-                payloadStatus: payloadStatus,
-                payloadStatusDescription: GetPayloadStatusDescription(payloadStatus),
-                errorMessage: initialRejectionReason,
-                latestErrorMessage: latestRejectionReason == initialRejectionReason ? null : latestRejectionReason,
-                handlingStatus: handlingStatus,
-                handlingStatusReason: pendingTransactionSummary.HandlingStatusReason,
-                submissionError: pendingTransactionSummary.LastSubmissionError
-            ));
-        }
-
-        internal GatewayModel.TransactionStatusResponse IntoResponse()
-        {
-            var (intentStatus, errorMessage) = _committedIntentStatus != null
-                ? (_committedIntentStatus.Value, _committedErrorMessage)
-                : (
-                    _mostAccuratePendingTransactionIntentLedgerStatus switch
-                    {
-                        PendingTransactionIntentLedgerStatus.Unknown => GatewayModel.TransactionIntentStatus.Unknown,
-                        PendingTransactionIntentLedgerStatus.Committed => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
-                        PendingTransactionIntentLedgerStatus.CommitPending => GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown,
-                        PendingTransactionIntentLedgerStatus.PermanentRejection => GatewayModel.TransactionIntentStatus.PermanentlyRejected,
-                        PendingTransactionIntentLedgerStatus.PossibleToCommit => GatewayModel.TransactionIntentStatus.Pending,
-                        PendingTransactionIntentLedgerStatus.LikelyButNotCertainRejection => GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection,
-                    },
-                    _rejectionReasonForMostAccurateIntentLedgerStatus
-                );
-
-            var legacyIntentStatus = intentStatus switch
-            {
-                GatewayModel.TransactionIntentStatus.Unknown => GatewayModel.TransactionStatus.Unknown,
-                GatewayModel.TransactionIntentStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
-                GatewayModel.TransactionIntentStatus.CommittedFailure => GatewayModel.TransactionStatus.CommittedFailure,
-                GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown => GatewayModel.TransactionStatus.Pending,
-                GatewayModel.TransactionIntentStatus.PermanentlyRejected => GatewayModel.TransactionStatus.Rejected,
-                GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection => GatewayModel.TransactionStatus.Pending,
-                GatewayModel.TransactionIntentStatus.Pending => GatewayModel.TransactionStatus.Pending,
-            };
-
-            return new GatewayModel.TransactionStatusResponse(
-                ledgerState: _ledgerState,
-                status: legacyIntentStatus,
-                intentStatus,
-                intentStatusDescription: GetIntentStatusDescription(intentStatus),
-                knownPayloads: _knownPayloads,
-                committedStateVersion: _committedStateVersion,
-                errorMessage
-            );
-        }
-
-        private string GetPayloadStatusDescription(GatewayModel.TransactionPayloadStatus payloadStatus)
-        {
-            return payloadStatus switch
-            {
-                GatewayModel.TransactionPayloadStatus.Unknown =>
-                    "No information is known about the possible outcome of this transaction payload.",
-                GatewayModel.TransactionPayloadStatus.CommittedSuccess =>
-                    "This particular payload for this transaction has been committed to the ledger as a success. For more information, use the /transaction/committed-details endpoint.",
-                GatewayModel.TransactionPayloadStatus.CommittedFailure =>
-                    "This particular payload for this transaction has been committed to the ledger as a failure. For more information, use the /transaction/committed-details endpoint.",
-                GatewayModel.TransactionPayloadStatus.CommitPendingOutcomeUnknown =>
-                    "This particular payload for this transaction has been committed to the ledger, but the Gateway is still waiting for further details about its result.",
-                GatewayModel.TransactionPayloadStatus.PermanentlyRejected =>
-                    "This particular payload for this transaction has been permanently rejected. It is not possible for this particular transaction payload to be committed to this network.",
-                GatewayModel.TransactionPayloadStatus.TemporarilyRejected =>
-                    "This particular payload for this transaction was rejected at its last execution. It may still be possible for this transaction payload to be committed to this network.",
-                GatewayModel.TransactionPayloadStatus.Pending =>
-                    "This particular payload for this transaction has been accepted into a node's mempool on the network. It's possible but not certain that it will be committed to this network.",
-            };
-        }
-
-        private string GetIntentStatusDescription(GatewayModel.TransactionIntentStatus intentStatus)
-        {
-            return intentStatus switch
-            {
-                GatewayModel.TransactionIntentStatus.Unknown =>
-                    "No information is known about the possible outcome of this transaction.",
-                GatewayModel.TransactionIntentStatus.CommittedSuccess =>
-                    "This transaction has been committed to the ledger as a success. For more information, use the /transaction/committed-details endpoint.",
-                GatewayModel.TransactionIntentStatus.CommittedFailure =>
-                    "This transaction has been committed to the ledger as a failure. For more information, use the /transaction/committed-details endpoint.",
-                GatewayModel.TransactionIntentStatus.CommitPendingOutcomeUnknown =>
-                    "This transaction has been committed to the ledger, but the Gateway is still waiting for further details about its result.",
-                GatewayModel.TransactionIntentStatus.PermanentlyRejected =>
-                    "This transaction is permanently rejected, so can never be committed to this network.",
-                GatewayModel.TransactionIntentStatus.Pending =>
-                    "A payload for this transaction has been accepted into a node's mempool on the network. It's possible but not certain that it will be committed to this network.",
-                GatewayModel.TransactionIntentStatus.LikelyButNotCertainRejection =>
-                    "All known payload/s for this transaction have been temporarily rejected at their last execution. It may still be possible for this transaction to be committed to this network.",
-            };
-        }
-    }
 
     public async Task<GatewayModel.TransactionStatusResponse> ResolveTransactionStatusResponse(GatewayModel.LedgerState ledgerState, string intentHash, CancellationToken token = default)
     {
@@ -623,7 +487,8 @@ WITH configuration AS (
         {optIns.ReceiptOutput} AS with_receipt_output,
         {optIns.ReceiptStateChanges} AS with_receipt_state_updates,
         {optIns.ReceiptEvents} AS with_receipt_events,
-        {optIns.BalanceChanges} AS with_balance_changes
+        {optIns.BalanceChanges} AS with_balance_changes,
+        {optIns.ManifestInstructions} AS with_manifest_instructions
 )
 SELECT
     state_version, epoch, round_in_epoch, index_in_epoch,
@@ -631,7 +496,7 @@ SELECT
     round_timestamp, created_timestamp, normalized_round_timestamp,
     receipt_status, receipt_fee_source, receipt_fee_destination, receipt_error_message,
     transaction_tree_hash, receipt_tree_hash, state_tree_hash,
-    discriminator, payload_hash, intent_hash, signed_intent_hash, message,
+    discriminator, payload_hash, intent_hash, signed_intent_hash, message, manifest_classes,
     CASE WHEN configuration.with_raw_payload THEN raw_payload ELSE ''::bytea END AS raw_payload,
     CASE WHEN configuration.with_receipt_costing_parameters THEN receipt_costing_parameters ELSE '{{}}'::jsonb END AS receipt_costing_parameters,
     CASE WHEN configuration.with_receipt_fee_summary THEN receipt_fee_summary ELSE '{{}}'::jsonb END AS receipt_fee_summary,
@@ -645,7 +510,8 @@ SELECT
     CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_hashes ELSE '{{}}'::bytea[] END AS receipt_event_schema_hashes,
     CASE WHEN configuration.with_receipt_events THEN receipt_event_type_indexes ELSE '{{}}'::bigint[] END AS receipt_event_type_indexes,
     CASE WHEN configuration.with_receipt_events THEN receipt_event_sbor_type_kinds ELSE '{{}}'::sbor_type_kind[] END AS receipt_event_sbor_type_kinds,
-    CASE WHEN configuration.with_balance_changes THEN balance_changes ELSE '{{}}'::jsonb END AS balance_changes
+    CASE WHEN configuration.with_balance_changes THEN balance_changes ELSE '{{}}'::jsonb END AS balance_changes,
+    CASE WHEN configuration.with_manifest_instructions THEN manifest_instructions ELSE ''::text END AS manifest_instructions
 FROM ledger_transactions, configuration
 WHERE state_version = ANY({transactionStateVersions})")
             .AnnotateMetricName("GetTransactions")
@@ -678,20 +544,23 @@ INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash 
         }
 
         List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
-        var networkId = _networkConfigurationProvider.GetNetworkId();
-
-        Dictionary<long, GatewayModel.TransactionBalanceChanges>? balanceChangesPerTransaction = null;
-
-        if (optIns.BalanceChanges)
-        {
-            balanceChangesPerTransaction = await _transactionBalanceChangesService.GetTransactionBalanceChanges(transactions, token);
-        }
+        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
 
         foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)).ToList())
         {
             GatewayModel.TransactionBalanceChanges? balanceChanges = null;
 
-            balanceChangesPerTransaction?.TryGetValue(transaction.StateVersion, out balanceChanges);
+            if (optIns.BalanceChanges && transaction.BalanceChanges != null)
+            {
+                var storedBalanceChanges = JsonConvert.DeserializeObject<CoreModel.CommittedTransactionBalanceChanges>(transaction.BalanceChanges);
+
+                if (storedBalanceChanges == null)
+                {
+                    throw new InvalidOperationException("Unable to deserialize stored balance changes into CoreModel.CommittedTransactionBalanceChanges");
+                }
+
+                balanceChanges = storedBalanceChanges.ToGatewayModel();
+            }
 
             if (!optIns.ReceiptEvents || schemaLookups?.Any() == false)
             {

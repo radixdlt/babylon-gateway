@@ -1,3 +1,28 @@
+## 1.4.0
+Release Date: 08.02.2024
+
+- Dropped internal `balance_changes` fallback mechanism. As of right now this information is ingested as part of regular transaction ingestion process.
+- Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
+- Reworked (partially) internal mechanism used to ingest ledger data by Data Aggregator to improve maintainability and simplify future extensions.
+- Fixed `state_version`-based ledger state `at_ledger_state`/`from_ledger_state` constraints which could result in inaccurate lookups previously. Attempt to read from non-existent state version will result in HTTP 400 Bad Request. Previously the nearest state version would be used.
+
+### API Changes
+- Return components effective role assignments only for assigned modules.
+- Added new filters for the `/stream/transactions` endpoint: `accounts_with_manifest_owner_method_calls`, `accounts_without_manifest_owner_method_calls` and `manifest_class_filter`.
+- Extended response models returned by `/transaction/committed-details` and `/stream/transactions` endpoints:
+    - added `manifest_instructions` optional property and a corresponding opt-in for returning original manifest of user transactions,
+    - added optional `manifest_classes` property: a collection of zero or more manifest classes ordered from the most specific class to the least specific one.
+- Added `permanently_rejects_at_epoch` to `/transaction/status` response for pending transactions.
+- Added new endpoint `/state/key-value-store/keys/` that allows iterating over `KeyValueStore` keys.
+
+### Database changes
+- Created new `key_value_store_aggregate_history` table which will hold pointers to all key_value_store keys.
+- Dropped `network_configuration` table.
+- Fixed component's method royalty aggregation, added missing `component_method_royalty_aggregate_history` table.
+- Changed `IX_validator_emission_statistics_validator_entity_id_epoch_num~` index to include `proposals_made` and `proposals_missed` columns in order to optimize `/statistics/validators/update` endpoint.
+
+### Deprecations
+- Obsoleted incorrectly named `access_rules_package` in favor of `role_assignment_module_package` on `NetworkConfigurationResponse.well_known_addresses`. Obsoleted property will contain effective copy of the new one for backwards compability.
 
 ## 1.3.0
 Release Date: 29.01.2024

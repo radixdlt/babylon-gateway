@@ -65,7 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
@@ -78,7 +77,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
 using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
@@ -103,7 +102,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
     }
 
     public async Task<SubmissionResult> ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
-        TransactionApi transactionApi,
+        CoreApi.TransactionApi transactionApi,
         string networkName,
         string nodeName,
         PendingTransactionHandlingConfig handlingConfig,
@@ -186,7 +185,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             handlingConfig,
             payloadHash,
             notarizedTransaction.IntentHash().AsStr(),
-            notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive,
+            (long)notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive,
             notarizedTransactionBytes,
             submittedTimestamp
         );
@@ -232,7 +231,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
                 nodeName,
                 nodeSubmissionResult,
                 _clock.UtcNow,
-                currentEpoch < 0 ? null : (ulong)currentEpoch);
+                currentEpoch < 0 ? null : currentEpoch);
 
             await _dbContext.SaveChangesAsync(token);
         }

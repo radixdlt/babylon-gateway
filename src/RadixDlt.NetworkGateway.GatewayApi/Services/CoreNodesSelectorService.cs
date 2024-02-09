@@ -64,8 +64,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -105,8 +105,7 @@ internal class CoreNodesSelectorService : ICoreNodesSelectorService
 
         _allEnabledCoreNodes = networkOptions
             .CoreApiNodes
-            .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
-            .ToList();
+            .GetEnabledNodes();
 
         _nodesInTheTopTierStatus = new List<CoreApiNode>(_allEnabledCoreNodes);
     }

@@ -173,7 +173,7 @@ order by ah.ord;
                 lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
         }
 
-        return new GatewayModel.NonFungibleResourcesCollection(totalCount, GenerateOffsetCursor(offset, limit, totalCount), items);
+        return new GatewayModel.NonFungibleResourcesCollection(totalCount, CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount), items);
     }
 
     private async Task<List<NonFungibleAggregatedPerVaultViewModel>> GetNonFungiblesSliceAggregatedPerVault(
@@ -371,7 +371,7 @@ order by ord
             })
             .ToList();
 
-        return new GatewayModel.NonFungibleIdsCollection(totalCount, GenerateOffsetCursor(offset, limit, totalCount), items);
+        return new GatewayModel.NonFungibleIdsCollection(totalCount, CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount), items);
     }
 
     private async Task<List<NonFungibleIdWithOwnerDataViewModel>> GetNonFungibleIdsFirstPageAndOneMore(
@@ -521,7 +521,7 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = un.unnested_non_fungible_id
                     resourceAddress: vm.ResourceEntityAddress,
                     vaults: new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVault(
                         totalCount: vm.VaultTotalCount,
-                        nextCursor: GenerateOffsetCursor(vaultOffset, vaultLimit, vm.VaultTotalCount),
+                        nextCursor: CursorGenerator.GenerateOffsetCursor(vaultOffset, vaultLimit, vm.VaultTotalCount),
                         items: new List<GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>()));
 
                 resources[vm.ResourceEntityAddress] = existingRecord;
@@ -535,7 +535,7 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = un.unnested_non_fungible_id
 
             existingRecord.Vaults.Items.Add(new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
                 totalCount: vm.NonFungibleIdsCount,
-                nextCursor: GenerateOffsetCursor(vaultOffset, vaultLimit, vm.NonFungibleIdsCount),
+                nextCursor: CursorGenerator.GenerateOffsetCursor(vaultOffset, vaultLimit, vm.NonFungibleIdsCount),
                 items: ids,
                 vaultAddress: vm.VaultAddress,
                 lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
@@ -543,7 +543,7 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = un.unnested_non_fungible_id
 
         var items = resources.Values.Cast<GatewayApiSdk.Model.NonFungibleResourcesCollectionItem>().ToList();
 
-        return new GatewayModel.NonFungibleResourcesCollection(resourcesTotalCount, GenerateOffsetCursor(resourceOffset, resourceLimit, resourcesTotalCount), items);
+        return new GatewayModel.NonFungibleResourcesCollection(resourcesTotalCount, CursorGenerator.GenerateOffsetCursor(resourceOffset, resourceLimit, resourcesTotalCount), items);
     }
 
     private GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse MapToStateEntityNonFungibleResourceVaultsPageResponse(
@@ -565,7 +565,7 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = un.unnested_non_fungible_id
                     if (nonFungibleIdsAndOneMore?.TryGetValue(x.VaultEntityId, out var nfids) == true)
                     {
                         items = nfids.Take(nonFungibleIdsLimit).Select(y => y.NonFungibleId).ToList();
-                        nextCursor = GenerateOffsetCursor(0, nonFungibleIdsLimit, x.NonFungibleIdsCount);
+                        nextCursor = CursorGenerator.GenerateOffsetCursor(0, nonFungibleIdsLimit, x.NonFungibleIdsCount);
                     }
 
                     return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
@@ -580,7 +580,7 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = un.unnested_non_fungible_id
             .ToList();
 
         var vaultsTotalCount = input.FirstOrDefault()?.VaultTotalCount ?? 0;
-        var nextCursor = GenerateOffsetCursor(offset, limit, vaultsTotalCount);
+        var nextCursor = CursorGenerator.GenerateOffsetCursor(offset, limit, vaultsTotalCount);
 
         return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(ledgerState, vaultsTotalCount, nextCursor, mapped, entityGlobalAddress, resourceGlobalAddress);
     }

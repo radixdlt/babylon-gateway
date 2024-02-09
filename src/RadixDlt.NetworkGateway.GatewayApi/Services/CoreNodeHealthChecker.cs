@@ -64,9 +64,9 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,7 +82,7 @@ public interface ICoreNodeHealthChecker
     Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken);
 }
 
-public sealed record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>> CoreApiNodesByStatus);
+public sealed record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<CoreApiNode>> CoreApiNodesByStatus);
 
 // Using explicit integers for enum values
 // because they're used for ordering the nodes (from best to worst).
@@ -100,40 +100,37 @@ public enum CoreNodeStatus
 /// </summary>
 internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
 {
-    private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
     private readonly IEnumerable<ICoreNodeHealthCheckerObserver> _observers;
+    private readonly ILogger _logger;
 
     public CoreNodeHealthChecker(
-        ILogger<CoreNodesSelectorService> logger,
         HttpClient httpClient,
         ILedgerStateQuerier ledgerStateQuerier,
         IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
-        IEnumerable<ICoreNodeHealthCheckerObserver> observers)
+        IEnumerable<ICoreNodeHealthCheckerObserver> observers,
+        ILogger<CoreNodeHealthChecker> logger)
     {
-        _logger = logger;
         _httpClient = httpClient;
         _ledgerStateQuerier = ledgerStateQuerier;
         _networkOptionsMonitor = networkOptionsMonitor;
         _observers = observers;
+        _logger = logger;
     }
 
     public async Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken)
     {
-        var coreNodes = _networkOptionsMonitor.CurrentValue.CoreApiNodes;
-        var enabledCoreNodes = coreNodes
-            .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
-            .ToList();
+        var enabledCoreNodes = _networkOptionsMonitor.CurrentValue.CoreApiNodes.GetEnabledNodes();
 
         if (!enabledCoreNodes.Any())
         {
             _logger.LogError("No Core API Nodes have been defined as enabled");
-            return new CoreNodeHealthResult(new Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>>());
+            return new CoreNodeHealthResult(new Dictionary<CoreNodeStatus, List<CoreApiNode>>());
         }
 
-        var enabledCoreNodeStateVersionLookupTasks = coreNodes
+        var enabledCoreNodeStateVersionLookupTasks = enabledCoreNodes
             .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .Select(n => GetCoreNodeStateVersion(n, _networkOptionsMonitor.CurrentValue.NetworkName, cancellationToken));
 
@@ -171,7 +168,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
         return new CoreNodeHealthResult(coreNodesByStatus);
     }
 
-    private CoreNodeStatus DetermineNodeStatus((Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, System.Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
+    private CoreNodeStatus DetermineNodeStatus((CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
     {
         if (healthCheckData.NodeStateVersion == null)
         {
@@ -225,7 +222,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
         string networkName,
         CancellationToken cancellationToken)
     {
-        var coreApiProvider = new CoreApiProvider(coreApiNode, _httpClient);
+        var coreApiProvider = new CoreApiProvider(new CoreApiNodeProvider { CoreApiNode = coreApiNode, }, _httpClient);
         var timeoutSeconds = 5;
         try
         {

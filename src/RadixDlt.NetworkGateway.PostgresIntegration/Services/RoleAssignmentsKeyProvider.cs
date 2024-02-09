@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
 using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -78,7 +77,11 @@ internal record BlueprintDefinitionIdentifier(string Name, string Version, long 
 
 internal interface IRoleAssignmentsKeyProvider
 {
-    List<RoleAssignmentEntry> GetNativeModulesKeys();
+    List<RoleAssignmentEntry> AllNativeModulesKeys { get; }
+
+    List<RoleAssignmentEntry> MetadataModulesKeys { get; }
+
+    List<RoleAssignmentEntry> RoyaltyModulesKeys { get; }
 
     List<RoleAssignmentEntry> ExtractKeysFromBlueprintAuthConfig(CoreModel.AuthConfig authConfig);
 }
@@ -89,19 +92,21 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     private static readonly string[] _royaltyRuleKeys = { "royalty_setter", "royalty_locker", "royalty_claimer", };
 
-    private readonly List<RoleAssignmentEntry> _nativeModulesKeys;
+    public List<RoleAssignmentEntry> AllNativeModulesKeys { get; }
+
+    public List<RoleAssignmentEntry> MetadataModulesKeys { get; }
+
+    public List<RoleAssignmentEntry> RoyaltyModulesKeys { get; }
 
     public RoleAssignmentsKeyProvider()
     {
-        var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, GatewayModel.ModuleId.Metadata);
-        var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, GatewayModel.ModuleId.Royalty);
+        MetadataModulesKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, GatewayModel.ModuleId.Metadata);
+        RoyaltyModulesKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, GatewayModel.ModuleId.Royalty);
 
-        _nativeModulesKeys = metadataWithUpdaterKeys
-            .Concat(royaltyWithUpdaterKeys)
+        AllNativeModulesKeys = MetadataModulesKeys
+            .Concat(RoyaltyModulesKeys)
             .ToList();
     }
-
-    public List<RoleAssignmentEntry> GetNativeModulesKeys() => _nativeModulesKeys;
 
     public List<RoleAssignmentEntry> ExtractKeysFromBlueprintAuthConfig(CoreModel.AuthConfig authConfig)
     {
@@ -110,8 +115,8 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
             ?.Roles
             ?.Select(x =>
                 new RoleAssignmentEntry(
-                    new RoleAssignmentRuleKey(x.Key, ModuleId.Main),
-                    x.Value.UpdaterRoles.Select(u => new RoleAssignmentRuleKey(u, ModuleId.Main)).ToArray()
+                    new RoleAssignmentRuleKey(x.Key, GatewayModel.ModuleId.Main),
+                    x.Value.UpdaterRoles.Select(u => new RoleAssignmentRuleKey(u, GatewayModel.ModuleId.Main)).ToArray()
                 ))
             .ToList() ?? new List<RoleAssignmentEntry>();
     }
