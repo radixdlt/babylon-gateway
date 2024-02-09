@@ -62,13 +62,13 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreApi = RadixDlt.CoreApiSdk.Api;
 using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -77,29 +77,26 @@ namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 internal class TransactionStreamReader : ITransactionStreamReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly CoreApi.StreamApi _streamApi;
-    private readonly INodeConfigProvider _nodeConfigProvider;
+    private readonly ICoreApiProvider _coreApiProvider;
     private readonly IEnumerable<ITransactionStreamReaderObserver> _observers;
 
     public TransactionStreamReader(
         INetworkConfigurationProvider networkConfigurationProvider,
         ICoreApiProvider coreApiProvider,
-        INodeConfigProvider nodeConfigProvider,
         IEnumerable<ITransactionStreamReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _nodeConfigProvider = nodeConfigProvider;
+        _coreApiProvider = coreApiProvider;
         _observers = observers;
-        _streamApi = coreApiProvider.StreamApi;
     }
 
     public async Task<CoreClient.ApiResponse<CoreModel.StreamTransactionsResponse>> GetTransactionStream(long fromStateVersion, int count, CancellationToken token)
     {
         try
         {
-            return await _streamApi.StreamTransactionsPostWithHttpInfoAsync(
+            return await _coreApiProvider.StreamApi.StreamTransactionsPostWithHttpInfoAsync(
                 new CoreModel.StreamTransactionsRequest(
-                    network: _networkConfigurationProvider.GetNetworkName(),
+                    network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
                     fromStateVersion: fromStateVersion,
                     limit: count,
                     transactionFormatOptions: new CoreModel.TransactionFormatOptions
@@ -130,7 +127,7 @@ internal class TransactionStreamReader : ITransactionStreamReader
         }
         catch (Exception ex)
         {
-            await _observers.ForEachAsync(x => x.GetTransactionsFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
+            await _observers.ForEachAsync(x => x.GetTransactionsFailed(_coreApiProvider.CoreApiNode.Name, ex));
 
             throw;
         }

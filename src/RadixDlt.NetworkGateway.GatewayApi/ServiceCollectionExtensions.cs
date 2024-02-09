@@ -74,7 +74,6 @@ using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Net;
@@ -97,7 +96,8 @@ public static class ServiceCollectionExtensions
     public static GatewayApiBuilder AddNetworkGatewayApiCore(this IServiceCollection services)
     {
         services
-            .AddNetworkGatewayAbstractions();
+            .AddNetworkGatewayAbstractions()
+            .AddNetworkGatewayCoreServices();
 
         services
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
@@ -122,6 +122,9 @@ public static class ServiceCollectionExtensions
         // Request-scoped services
         AddRequestServices(services);
 
+        // Node-Scoped services
+        AddNodeScopedServices(services);
+
         // Transient (pooled) services
         AddCoreApiHttpClient(services, out var coreApiHttpClientBuilder, out var coreNodeHealthCheckerClientBuilder);
 
@@ -130,13 +133,16 @@ public static class ServiceCollectionExtensions
 
     private static void AddSingletonServices(IServiceCollection services)
     {
-        // Should only contain services without any DBContext or HttpClient - as these both need to be recycled
-        // semi-regularly
-        services.TryAddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
-        services.TryAddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.TryAddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.TryAddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
         services.TryAddSingleton<RequestTimeoutMiddleware>();
+    }
+
+    private static void AddNodeScopedServices(IServiceCollection services)
+    {
+        services.TryAddScoped<CoreApiNodeProvider>();
+        services.TryAddScoped<ICoreApiNodeProvider>(sp => sp.GetRequiredService<CoreApiNodeProvider>());
+        services.TryAddScoped<ICoreApiNodeConfigurator>(sp => sp.GetRequiredService<CoreApiNodeProvider>());
     }
 
     private static void AddRequestServices(IServiceCollection services)
@@ -154,10 +160,16 @@ public static class ServiceCollectionExtensions
 
     private static void AddCoreApiHttpClient(IServiceCollection services, out IHttpClientBuilder coreApiHttpClientBuilder, out IHttpClientBuilder coreNodeHealthCheckerClientBuilder)
     {
-        // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
-        // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         coreApiHttpClientBuilder = services
-            .AddHttpClient<ICoreApiHandler, CoreApiHandler>()
+            .AddHttpClient<ICoreApiProvider, CoreApiProvider>((httpClient, serviceProvider) =>
+            {
+                var nodeProvider = new CoreApiNodeProvider
+                {
+                    CoreApiNode = serviceProvider.GetRequiredService<ICoreNodesSelectorService>().GetRandomTopTierCoreNode(),
+                };
+
+                return new CoreApiProvider(nodeProvider, httpClient);
+            })
             .AddPolicyHandler((serviceProvider, _) =>
             {
                 var retryCount = serviceProvider.GetRequiredService<IOptions<CoreApiIntegrationOptions>>().Value.MaxTransientErrorRetryCount;

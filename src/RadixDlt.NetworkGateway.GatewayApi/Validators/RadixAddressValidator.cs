@@ -63,8 +63,8 @@
  */
 
 using FluentValidation;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using System;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
@@ -72,10 +72,8 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 public sealed class RadixAddressValidator : AbstractValidator<string>
 {
-    public RadixAddressValidator(INetworkAddressConfigProvider networkAddressConfigProvider)
+    public RadixAddressValidator(INetworkConfigurationProvider networkConfigurationProvider)
     {
-        var networkHrpSuffix = networkAddressConfigProvider.GetNetworkHrpSuffix();
-
         RuleFor(x => x)
             .Custom((address, context) =>
             {
@@ -83,13 +81,13 @@ public sealed class RadixAddressValidator : AbstractValidator<string>
 
                 try
                 {
+                    var networkHrpSuffix = networkConfigurationProvider.GetNetworkConfiguration().GetAwaiter().GetResult().HrpSuffix;
                     var decodedAddress = RadixAddressCodec.Decode(address);
 
                     if (!decodedAddress.Hrp.EndsWith(networkHrpSuffix, StringComparison.OrdinalIgnoreCase))
                     {
                         context.MessageFormatter.AppendArgument("networkHrpSuffix", networkHrpSuffix);
                         context.AddFailure("'{PropertyName}' doesn't belong to this network. Expected network Hrp suffix: {networkHrpSuffix}");
-                        return;
                     }
                 }
                 catch (AddressException)

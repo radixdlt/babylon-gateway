@@ -157,13 +157,13 @@ public static class EventDecoder
         return ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToTypedNativeEvent(eventIdentifier, @event.Data.GetDataBytes(), networkId);
     }
 
-    private static ToolkitModel.ObjectModuleId MapModuleId(CoreModel.ModuleId core) =>
+    private static ToolkitModel.ModuleId MapModuleId(CoreModel.ModuleId core) =>
         core switch
         {
-            CoreModel.ModuleId.Main => ToolkitModel.ObjectModuleId.MAIN,
-            CoreModel.ModuleId.Metadata => ToolkitModel.ObjectModuleId.METADATA,
-            CoreModel.ModuleId.Royalty => ToolkitModel.ObjectModuleId.ROYALTY,
-            CoreModel.ModuleId.RoleAssignment => ToolkitModel.ObjectModuleId.ROLE_ASSIGNMENT,
+            CoreModel.ModuleId.Main => ToolkitModel.ModuleId.Main,
+            CoreModel.ModuleId.Metadata => ToolkitModel.ModuleId.Metadata,
+            CoreModel.ModuleId.Royalty => ToolkitModel.ModuleId.Royalty,
+            CoreModel.ModuleId.RoleAssignment => ToolkitModel.ModuleId.RoleAssignment,
             _ => throw new ArgumentOutOfRangeException(nameof(core), core, null),
         };
 }

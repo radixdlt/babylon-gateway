@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -85,6 +86,7 @@ internal enum LedgerTransactionMarkerOperationType
     ResourceInUse,
     AccountDepositedInto,
     AccountWithdrawnFrom,
+    AccountOwnerMethodCall,
 }
 
 [Table("ledger_transaction_markers")]
@@ -117,6 +119,15 @@ internal class EventLedgerTransactionMarker : LedgerTransactionMarker
 
     [Column("quantity")]
     public TokenAmount Quantity { get; set; }
+}
+
+internal class ManifestClassMarker : LedgerTransactionMarker
+{
+    [Column("manifest_class")]
+    public LedgerTransactionManifestClass LedgerTransactionManifestClass { get; set; }
+
+    [Column("is_most_specific")]
+    public bool IsMostSpecific { get; set; }
 }
 
 internal class ManifestAddressLedgerTransactionMarker : LedgerTransactionMarker

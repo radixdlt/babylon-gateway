@@ -67,6 +67,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -127,7 +128,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
         return new GatewayModel.GatewayStatusResponse(
             new GatewayModel.LedgerState(
-                _networkConfigurationProvider.GetNetworkName(),
+                (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
                 topLedgerTransaction.StateVersion,
                 topLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 topLedgerTransaction.Epoch,
@@ -180,15 +181,15 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
         if (fromLedgerStateIdentifier?.HasStateVersion() == true)
         {
-            ledgerStateReport = await GetLedgerStateAfterStateVersion(fromLedgerStateIdentifier.StateVersion.Value, token);
-        }
-        else if (fromLedgerStateIdentifier?.HasTimestamp() == true)
-        {
-            ledgerStateReport = await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp.Value, token);
+            ledgerStateReport = await GetLedgerStateAtStateVersion(fromLedgerStateIdentifier.StateVersion.Value, token);
         }
         else if (fromLedgerStateIdentifier?.HasEpoch() == true)
         {
             ledgerStateReport = await GetLedgerStateAtEpochAndRound(fromLedgerStateIdentifier.Epoch.Value, fromLedgerStateIdentifier.Round ?? 1, token);
+        }
+        else if (fromLedgerStateIdentifier?.HasTimestamp() == true)
+        {
+            ledgerStateReport = await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp.Value, token);
         }
 
         return ledgerStateReport?.LedgerState;
@@ -292,15 +293,15 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
         if (at?.HasStateVersion() == true)
         {
-            result = await GetLedgerStateBeforeStateVersion(at.StateVersion.Value, token);
-        }
-        else if (at?.HasTimestamp() == true)
-        {
-            result = await GetLedgerStateBeforeTimestamp(at.Timestamp.Value, token);
+            result = await GetLedgerStateAtStateVersion(at.StateVersion.Value, token);
         }
         else if (at?.HasEpoch() == true)
         {
             result = await GetLedgerStateAtEpochAndRound(at.Epoch.Value, at.Round ?? 1, token);
+        }
+        else if (at?.HasTimestamp() == true)
+        {
+            result = await GetLedgerStateBeforeTimestamp(at.Timestamp.Value, token);
         }
         else
         {
@@ -322,21 +323,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateBeforeStateVersion(long stateVersion, CancellationToken token)
+    private async Task<LedgerStateReport> GetLedgerStateAtStateVersion(long stateVersion, CancellationToken token)
     {
-        var ledgerState = await SelectLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeStateVersion(stateVersion), false, token);
-
-        if (ledgerState == null)
-        {
-            throw new InvalidStateException("There are no transactions in the database");
-        }
-
-        return ledgerState;
-    }
-
-    private async Task<LedgerStateReport> GetLedgerStateAfterStateVersion(long stateVersion, CancellationToken token)
-    {
-        var ledgerState = await SelectLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterStateVersion(stateVersion), false, token);
+        var ledgerState = await SelectLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionAtStateVersion(stateVersion), false, token);
 
         if (ledgerState == null)
         {
@@ -355,6 +344,8 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
             throw InvalidRequestException.FromOtherError("Timestamp was before the start of the ledger");
         }
 
+        DetectTimestampDrift(timestamp, ledgerState.RoundTimestamp);
+
         return ledgerState;
     }
 
@@ -366,6 +357,8 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         {
             throw InvalidRequestException.FromOtherError("Timestamp is beyond the end of the known ledger");
         }
+
+        DetectTimestampDrift(timestamp, ledgerState.RoundTimestamp);
 
         return ledgerState;
     }
@@ -398,7 +391,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
             ? null
             : new LedgerStateReport(
                 new GatewayModel.LedgerState(
-                    _networkConfigurationProvider.GetNetworkName(),
+                    (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
                     lt.StateVersion,
                     lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                     lt.Epoch,
@@ -407,5 +400,13 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 lt.RoundTimestamp,
                 resolvesTopOfLedger
             );
+    }
+
+    private void DetectTimestampDrift(DateTime timestamp, DateTime roundTimestamp)
+    {
+        if ((roundTimestamp - timestamp).Absolute() > TimeSpan.FromSeconds(5))
+        {
+            _logger.LogWarning("Detected possibly invalid timestamp-based ledger state lookup. {Expected} falls outside of 5 second boundary for round timestamp {Actual}", timestamp.ToString("O"), roundTimestamp.ToString("O"));
+        }
     }
 }

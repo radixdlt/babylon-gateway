@@ -65,6 +65,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -123,11 +125,7 @@ public sealed class NodeConfigurationMonitorWorker : BaseGlobalWorker
 
     private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
     {
-        var nodeConfiguration = _networkOptions.CurrentValue.CoreApiNodes;
-
-        var enabledNodes = nodeConfiguration
-            .Where(n => n.Enabled)
-            .ToList();
+        var enabledNodes = _networkOptions.CurrentValue.CoreApiNodes.GetEnabledNodes();
 
         await _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, stoppingToken);
     }

@@ -97,6 +97,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionManifestClass>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerEventType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOperationType>();

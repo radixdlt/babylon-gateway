@@ -99,7 +99,7 @@ internal class PendingTransaction
     /// The epoch at which this transaction will no longer be valid.
     /// </summary>
     [Column("end_epoch_exclusive")]
-    public ulong EndEpochExclusive { get; private set; }
+    public long EndEpochExclusive { get; private set; }
 
     [Obsolete($"Use {nameof(PendingTransactionPayload.PendingTransaction)} to navigate.")]
     [Column("payload_id")]
@@ -126,7 +126,7 @@ internal class PendingTransaction
         PendingTransactionHandlingConfig handlingConfig,
         string payloadHash,
         string intentHash,
-        ulong endEpochExclusive,
+        long endEpochExclusive,
         byte[] notarizedTransaction,
         DateTime timestamp
     )
@@ -151,7 +151,7 @@ internal class PendingTransaction
         string submittedToNodeName,
         NodeSubmissionResult nodeSubmissionResult,
         DateTime handledAt,
-        ulong? currentEpoch
+        long? currentEpoch
     )
     {
         LedgerDetails.HandleSubmissionResult(nodeSubmissionResult, handledAt);
@@ -175,7 +175,7 @@ internal class PendingTransaction
     public bool UpdateForPendingSubmissionOrRetirement(
         PendingTransactionHandlingConfig handlingConfig,
         DateTime currentTime,
-        ulong? currentEpoch)
+        long? currentEpoch)
     {
         var retired = RetireIfNecessary(handlingConfig, currentTime, currentEpoch);
         if (!retired)
@@ -193,7 +193,7 @@ internal class PendingTransaction
     private bool RetireIfNecessary(
         PendingTransactionHandlingConfig handlingConfig,
         DateTime currentTime,
-        ulong? currentEpoch)
+        long? currentEpoch)
     {
         if (LedgerDetails.PayloadLedgerStatus.ShouldStopSubmittingTransactionToNetwork())
         {

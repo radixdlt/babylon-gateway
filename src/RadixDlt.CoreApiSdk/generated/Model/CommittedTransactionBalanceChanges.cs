@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionBalanceChanges
+    /// The fee-related and non-fee-related balance changes of a transaction, aggregated by resource and global entity within which the change occurred. 
     /// </summary>
     [DataContract(Name = "CommittedTransactionBalanceChanges")]
     public partial class CommittedTransactionBalanceChanges : IEquatable<CommittedTransactionBalanceChanges>

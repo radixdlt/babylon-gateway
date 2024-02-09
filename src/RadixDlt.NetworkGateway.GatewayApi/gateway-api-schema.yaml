@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.3.0
+  version: v1.4.0
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
@@ -502,6 +502,12 @@ tags:
 
       * `manifest_resources_filter` - allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
 
+      * `accounts_with_manifest_owner_method_calls` - allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
+
+      * `accounts_without_manifest_owner_method_calls` - allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
+
+      * `manifest_class_filter` - allows filtering to transactions which match the given manifest classification. If specified, the response will contain only transactions which have a class that matches the filter. If `match_only_most_specific` set to true, only transactions where the queried class is most specific will be returned. See the [docs on manifest classification](https://docs.radixdlt.com/docs/conforming-transaction-manifest-types) for more information.
+
       * `affected_global_entities_filter` - allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as "affected" by a transaction if any of its state (or its descendents' state) was modified as a result of the transaction.
 
       * `events_filter` - filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
@@ -873,11 +879,99 @@ tags:
             }
       ```
 
+      ### Iterating over all `KeyValueStore` keys
+
+      You can use `/state/key-value-store/keys` endpoint to iterate over all keys in certain `KeyValueStore`.
+      If the queried `KeyValueStore` contains more than one page of keys, a `next_cursor` will be returned, which can be used as `cursor` in the request to fetch further pages.
+
+      i.e:
+      ```
+      /state/key-value-store/keys
+
+      {
+        "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk"
+      }
+      ```
+
+      Will respond with list of all keys (in both `hex` and `programmatic_json` form) and state version when they were last updated.
+
+      ```
+      {
+        ...
+        "total_count": 8,
+        "items": [
+          {
+            "key": {
+              "raw_hex": "5c0c0131",
+              "programmatic_json": {
+                "value": "1",
+                "kind": "String"
+              }
+            },
+            "last_updated_at_state_version": 4939670
+          },
+          ...
+        ],
+        "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk"
+      }
+      ```
+
       ### Querying for the content under specific keys
 
-      After that you can use `/state/key-value-store/data` endpoint to query the content for given keys. To do that you can either use key in form of `json` or `hex`.
+      You can either rely on keys returned from `/state/key-value-store/keys` endpoint or construct keys in json form on your own. It's possible if you created that `KeyValueStore` and you know what is the form of keys.
 
-      The gateway doesn't currently support iterating over keys, although we plan to add APIs which can support this in the near future. For now, a client would need to keep track on their own of all created keys or use lower level APIs to extract that data.
+      #### Querying using hex keys
+
+      Simply grab `raw_hex` key returned from `/state/key-value-store/keys` endpoint and call `/state/key-value-store/data` with it as parameter.
+
+      i.e:
+      ```
+      /state/key-value-store/data
+
+      {
+        "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk",
+        "keys": [
+          {
+            "key_hex": "5c0c0131"
+          }
+        ]
+      }
+      ```
+
+      Will respond with data held under that key:
+
+      ```
+      {
+        ...
+        "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk",
+        "entries": [
+          {
+            "key": {
+              "raw_hex": "5c0c0131",
+              "programmatic_json": {
+                "value": "1",
+                "kind": "String"
+              }
+            },
+            "value": {
+              "raw_hex": "5c90588c6d59227f64bd7fc68e38bf7c7013cf179a78d5562ce9378b1378e2fa",
+              "programmatic_json": {
+                "value": "internal_vault_tdx_2_1tzxx6kfz0ajt6l7x3cut7lrsz0830xnc64tze6fh3vfh3ch6587c5d",
+                "kind": "Own",
+                "type_name": "Vault"
+              }
+            },
+            "last_updated_at_state_version": 4939415,
+            "is_locked": false
+          }
+        ]
+      }
+      ```
+
+      In our case, we may want to look up information about the vault (for example, the vault's resource address and balance).
+      This can be done with the `/state/entity/details` endpoint.
+
+      #### Constructing json keys
 
       The json keys are specified as programmatic SBOR JSON (which is a recursive data format, with each layer being a discriminated union with the `kind` discriminator). Search for [SBOR on our docs site](https://docs.radixdlt.com) for more information on SBOR and the programmatic SBOR JSON format.
 
@@ -1372,6 +1466,30 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /state/key-value-store/keys:
+    post:
+      operationId: KeyValueStoreKeys
+      summary: Get KeyValueStore Keys
+      description: |
+        Allows to iterate over key value store keys.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateKeyValueStoreKeysRequest"
+      responses:
+        "200":
+          description: KeyValueStore keys collection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateKeyValueStoreKeysResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
   /state/key-value-store/data:
     post:
       operationId: KeyValueStoreData
@@ -1655,6 +1773,28 @@ components:
     #
     # Common Response Types
     #
+
+    ManifestClass:
+      description: |
+        High-level manifest class type:
+          * `General`: A general manifest that involves any amount of arbitrary components and packages where nothing more concrete can be said about the manifest and its nature.
+          * `Transfer`: A manifest of a 1-to-1 transfer to a one-to-many transfer of resources.
+          * `PoolContribution`: A manifest that contributed some amount of resources to a liquidity pool that can be a one-resource pool, two-resource pool, or a multi-resource pool.
+          * `PoolRedemption`: A manifest that redeemed resources from a liquidity pool. Similar to contributions, this can be any of the three pool blueprints available in the pool package.
+          * `ValidatorStake`: A manifest where XRD is staked to one or more validators.
+          * `ValidatorUnstake`: A manifest where XRD is unstaked from one or more validators.
+          * `ValidatorClaim`: A manifest where XRD is claimed from one or more validators.
+          * `AccountDepositSettingsUpdate`: A manifest that updated the deposit settings of the account.
+      type: string
+      enum:
+        - General
+        - Transfer
+        - PoolContribution
+        - PoolRedemption
+        - ValidatorStake
+        - ValidatorUnstake
+        - ValidatorClaim
+        - AccountDepositSettingsUpdate
 
     ObjectModuleId:
       type: string
@@ -2072,6 +2212,20 @@ components:
           $ref: "#/components/schemas/HexString"
         receipt:
           $ref: "#/components/schemas/TransactionReceipt"
+        manifest_instructions:
+          description: |
+            A text-representation of a transaction manifest.
+            This field will be present only for user transactions and when explicitly opted-in using `manifest_instructions` flag.
+          type: string
+          nullable: true
+        manifest_classes:
+          description: |
+            A collection of zero or more manifest classes ordered from the most specific class to the least specific one.
+            This field will be present only for user transactions.
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/ManifestClass"
         message:
           type: object
           description: |
@@ -2354,6 +2508,7 @@ components:
             - metadata_module_package
             - royalty_module_package
             - access_rules_package
+            - role_assignment_module_package
             - genesis_helper_package
             - faucet_package
             - consensus_manager
@@ -2401,6 +2556,10 @@ components:
             royalty_module_package:
               $ref: "#/components/schemas/Address"
             access_rules_package:
+              description: "Obsolete! Use `role_assignment_module_package` instead."
+              deprecated: true
+              $ref: "#/components/schemas/Address"
+            role_assignment_module_package:
               $ref: "#/components/schemas/Address"
             genesis_helper_package:
               $ref: "#/components/schemas/Address"
@@ -2615,6 +2774,13 @@ components:
               type: integer
               format: int64
               nullable: true
+            permanently_rejects_at_epoch:
+              description: The epoch number at which the transaction is guaranteed to get permanently rejected by the Network due to exceeded epoch range defined when submitting transaction.
+              nullable: true
+              type: integer
+              format: int64
+              minimum: 0
+              maximum: 10000000000
             error_message:
               description: |
                 The most relevant error message received, due to a rejection or commit as failure.
@@ -2726,6 +2892,10 @@ components:
           default: true
         affected_global_entities:
           description: if set to `true`, all affected global entities by given transaction are returned.
+          type: boolean
+          default: false
+        manifest_instructions:
+          description: if set to `true`, manifest instructions for user transactions are returned.
           type: boolean
           default: false
         balance_changes:
@@ -2879,6 +3049,24 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/StreamTransactionsRequestEventFilterItem"
+            accounts_with_manifest_owner_method_calls:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            accounts_without_manifest_owner_method_calls:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            manifest_class_filter:
+              type: object
+              required:
+                - class
+              properties:
+                class:
+                  $ref: "#/components/schemas/ManifestClass"
+                match_only_most_specific:
+                  type: boolean
+                  default: false
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
@@ -3122,15 +3310,15 @@ components:
             codes:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsCodeCollection"
             vm_type:
-              description: "Obsolete! Use codes collection"
+              description: "Obsolete! Use `codes` collection instead."
               deprecated: true
               $ref: "#/components/schemas/PackageVmType"
             code_hash_hex:
-              description: "Obsolete! Use codes collection"
+              description: "Obsolete! Use `codes` collection instead."
               deprecated: true
               $ref: "#/components/schemas/HexString"
             code_hex:
-              description: "Obsolete! Use codes collection"
+              description: "Obsolete! Use `codes` collection instead."
               deprecated: true
               $ref: "#/components/schemas/HexString"
             royalty_vault_balance:
@@ -3581,6 +3769,54 @@ components:
         non_fungible_id:
           $ref: "#/components/schemas/NonFungibleId"
         data:
+          $ref: "#/components/schemas/ScryptoSborValue"
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
+    StateKeyValueStoreKeysRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - key_value_store_address
+          properties:
+            key_value_store_address:
+              $ref: "#/components/schemas/Address"
+      example:
+        key_value_store_address: "<key-value-store-address>"
+
+    StateKeyValueStoreKeysResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/StateKeyValueStoreKeysCollection"
+        - type: object
+          required:
+            - key_value_store_address
+          properties:
+            key_value_store_address:
+              $ref: "#/components/schemas/Address"
+
+    StateKeyValueStoreKeysCollection:
+      description: Key value store items collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateKeyValueStoreKeysResponseItem"
+
+    StateKeyValueStoreKeysResponseItem:
+      type: object
+      required:
+        - key
+        - last_updated_at_state_version
+      properties:
+        key:
           $ref: "#/components/schemas/ScryptoSborValue"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"

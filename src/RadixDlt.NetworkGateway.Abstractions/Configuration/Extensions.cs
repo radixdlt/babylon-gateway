@@ -64,11 +64,44 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions.Exceptions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
 public static class Extensions
 {
+    public static List<CoreApiNode> GetEnabledNodes(this ICollection<CoreApiNode> nodes)
+    {
+        var availableNodes = nodes.Where(n => n.Enabled).ToList();
+
+        if (!availableNodes.Any())
+        {
+            throw new InvalidConfigurationException("No Core API Nodes have been defined as enabled.");
+        }
+
+        return availableNodes;
+    }
+
+    public static CoreApiNode GetRandomEnabledNode(this ICollection<CoreApiNode> nodes)
+    {
+        return GetEnabledNodes(nodes).GetRandomBy(x => (double)x.RequestWeighting);
+    }
+
+    public static CoreApiNode GetRandomEnabledNodeForConstruction(this ICollection<CoreApiNode> nodes)
+    {
+        var availableNodes = GetEnabledNodes(nodes).Where(n => !n.DisabledForConstruction).ToArray();
+
+        if (!availableNodes.Any())
+        {
+            throw new InvalidConfigurationException("No Core API Nodes have been enabled for construction.");
+        }
+
+        return availableNodes.GetRandomBy(x => (double)x.RequestWeighting);
+    }
+
     public static IServiceCollection AddValidatableOptionsAtSection<TOptions, TValidator>(this IServiceCollection services, string configSectionPath)
         where TOptions : class
         where TValidator : AbstractOptionsValidator<TOptions>

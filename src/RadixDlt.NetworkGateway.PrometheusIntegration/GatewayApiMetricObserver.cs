@@ -67,16 +67,13 @@ using Microsoft.AspNetCore.Routing;
 using Prometheus;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
@@ -85,7 +82,6 @@ internal class GatewayApiMetricObserver :
     ICoreNodeHealthCheckerObserver,
     ISubmissionServiceObserver,
     ITransactionPreviewServiceObserver,
-    ITransactionOutcomeServiceObserver,
     ILedgerStateQuerierObserver,
     ISubmissionTrackingServiceObserver,
     ISqlQueryObserver
@@ -154,27 +150,6 @@ internal class GatewayApiMetricObserver :
         .CreateCounter(
             "ng_construction_transaction_preview_error_count",
             "Number of transaction preview errors",
-            new CounterConfiguration { LabelNames = new[] { "target_node" } }
-        );
-
-    private static readonly Counter _transactionOutcomeRequestCount = Metrics
-        .CreateCounter(
-            "ng_transaction_outcome_request_count",
-            "Number of transaction outcome requests",
-            new CounterConfiguration { LabelNames = new[] { "target_node" } }
-        );
-
-    private static readonly Counter _transactionOutcomeSuccessCount = Metrics
-        .CreateCounter(
-            "ng_transaction_outcome_success_count",
-            "Number of transaction outcome successes",
-            new CounterConfiguration { LabelNames = new[] { "target_node" } }
-        );
-
-    private static readonly Counter _transactionOutcomeErrorCount = Metrics
-        .CreateCounter(
-            "ng_transaction_outome_error_count",
-            "Number of transaction outcome errors",
             new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
@@ -257,17 +232,17 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    void ICoreNodeHealthCheckerObserver.NodeUnhealthy((CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
+    void ICoreNodeHealthCheckerObserver.NodeUnhealthy((Abstractions.Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
     {
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0);
     }
 
-    void ICoreNodeHealthCheckerObserver.NodeHealthyButLagging((CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
+    void ICoreNodeHealthCheckerObserver.NodeHealthyButLagging((Abstractions.Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
     {
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0.5);
     }
 
-    void ICoreNodeHealthCheckerObserver.NodeHealthyAndSynced((CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
+    void ICoreNodeHealthCheckerObserver.NodeHealthyAndSynced((Abstractions.Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
     {
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(1);
     }
@@ -296,27 +271,6 @@ internal class GatewayApiMetricObserver :
     ValueTask ITransactionPreviewServiceObserver.HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, string targetNode, Exception exception)
     {
         _transactionPreviewErrorCount.WithLabels(targetNode).Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ITransactionOutcomeServiceObserver.PreHandleOutcomeRequest(long stateVersion, string targetNode)
-    {
-        _transactionOutcomeRequestCount.WithLabels(targetNode).Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ITransactionOutcomeServiceObserver.PostHandleOutcomeRequest(long stateVersion, string targetNode)
-    {
-        _transactionOutcomeSuccessCount.WithLabels(targetNode).Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask ITransactionOutcomeServiceObserver.HandleOutcomeRequestFailed(long stateVersion, string targetNode, Exception exception)
-    {
-        _transactionOutcomeErrorCount.WithLabels(targetNode).Inc();
 
         return ValueTask.CompletedTask;
     }

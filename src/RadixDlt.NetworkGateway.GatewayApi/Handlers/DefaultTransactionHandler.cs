@@ -180,6 +180,16 @@ internal class DefaultTransactionHandler : ITransactionHandler
                 ResourceAddress = ef.ResourceAddress != null ? (EntityAddress)ef.ResourceAddress : null,
             });
         });
+        request.AccountsWithManifestOwnerMethodCalls?.ForEach(a => searchCriteria.AccountsWithManifestOwnerMethodCalls.Add((EntityAddress)a));
+        request.AccountsWithoutManifestOwnerMethodCalls?.ForEach(a => searchCriteria.AccountsWithoutManifestOwnerMethodCalls.Add((EntityAddress)a));
+
+        searchCriteria.ManifestClassFilter = request.ManifestClassFilter == null
+            ? null
+            : new ManifestClassFilter
+            {
+                Class = request.ManifestClassFilter.Class.ToModel(),
+                MatchOnlyMostSpecificType = request.ManifestClassFilter.MatchOnlyMostSpecific,
+            };
 
         var transactionsPageRequest = new TransactionStreamPageRequest(
             FromStateVersion: fromLedgerState?.StateVersion,

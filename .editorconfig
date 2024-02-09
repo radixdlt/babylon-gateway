@@ -279,6 +279,7 @@ dotnet_diagnostic.SA1611.severity = none # SA1611ElementParametersMustBeDocument
 dotnet_diagnostic.SA1618.severity = none # SA1618GenericTypeParametersMustBeDocumented
 dotnet_diagnostic.SA1602.severity = none # SA1602EnumerationItemsMustBeDocumented
 dotnet_diagnostic.SA1601.severity = none # SA1601PartialElementsMustBeDocumented
+dotnet_diagnostic.SA1623.severity = none # SA1623PropertySummaryDocumentationMustMatchAccessors
 
 # Other
 dotnet_diagnostic.SA1200.severity = none # SA1200UsingDirectivesMustBePlacedCorrectly - Don't care about this now that there are flattened namespaces

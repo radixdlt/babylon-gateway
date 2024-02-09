@@ -96,7 +96,7 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
         ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
         ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
     {
-        var nativeModulesKeys = _roleAssignmentsKeyProvider.GetNativeModulesKeys();
+        var nativeModulesKeys = _roleAssignmentsKeyProvider.AllNativeModulesKeys;
 
         return componentEntities.ToDictionary(entity => entity.Id, entity =>
         {
@@ -116,7 +116,8 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
 
             var mainModuleKeys = _roleAssignmentsKeyProvider.ExtractKeysFromBlueprintAuthConfig(authConfig!);
 
-            var allModulesKeys = mainModuleKeys.Concat(nativeModulesKeys).ToList();
+            var assignedNativeModuleKeys = nativeModulesKeys.Where(x => entity.AssignedModuleIds.Contains(x.Key.ModuleId));
+            var allModulesKeys = mainModuleKeys.Concat(assignedNativeModuleKeys).ToList();
 
             return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
                 new JRaw(ownerRole),

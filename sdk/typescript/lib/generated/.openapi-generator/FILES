@@ -50,6 +50,7 @@ models/InvalidTransactionErrorAllOf.ts
 models/LedgerState.ts
 models/LedgerStateMixin.ts
 models/LedgerStateSelector.ts
+models/ManifestClass.ts
 models/MetadataBoolArrayValue.ts
 models/MetadataBoolArrayValueAllOf.ts
 models/MetadataBoolValue.ts
@@ -266,6 +267,12 @@ models/StateKeyValueStoreDataRequestKeyItem.ts
 models/StateKeyValueStoreDataResponse.ts
 models/StateKeyValueStoreDataResponseAllOf.ts
 models/StateKeyValueStoreDataResponseItem.ts
+models/StateKeyValueStoreKeysCollection.ts
+models/StateKeyValueStoreKeysCollectionAllOf.ts
+models/StateKeyValueStoreKeysRequest.ts
+models/StateKeyValueStoreKeysRequestAllOf.ts
+models/StateKeyValueStoreKeysResponse.ts
+models/StateKeyValueStoreKeysResponseItem.ts
 models/StateNonFungibleDataRequest.ts
 models/StateNonFungibleDataResponse.ts
 models/StateNonFungibleDataResponseAllOf.ts
@@ -285,6 +292,7 @@ models/StateValidatorsListResponse.ts
 models/StateValidatorsListResponseAllOf.ts
 models/StreamTransactionsRequest.ts
 models/StreamTransactionsRequestAllOf.ts
+models/StreamTransactionsRequestAllOfManifestClassFilter.ts
 models/StreamTransactionsRequestEventFilterItem.ts
 models/StreamTransactionsResponse.ts
 models/StreamTransactionsResponseAllOf.ts

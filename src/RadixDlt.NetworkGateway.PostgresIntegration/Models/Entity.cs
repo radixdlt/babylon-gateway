@@ -145,6 +145,9 @@ internal abstract class ComponentEntity : Entity
     [Column("blueprint_version")]
     public string BlueprintVersion { get; set; }
 
+    [Column("assigned_module_ids")]
+    public List<ModuleId> AssignedModuleIds { get; set; }
+
     public override List<long> CorrelatedEntities
     {
         get
