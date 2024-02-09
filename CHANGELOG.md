@@ -1,3 +1,12 @@
+## 1.5.0
+Release Date: Not published yet
+
+### API Changes
+
+### Database changes
+
+### Deprecations
+
 ## 1.4.0
 Release Date: 08.02.2024
 
