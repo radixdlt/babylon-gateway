@@ -879,11 +879,99 @@ tags:
             }
       ```
 
+      ### Iterating over all key value store keys
+
+      You can use `/state/key-value-store/keys` endpoint to iterate over all keys in certain key value store.
+      If the queried key value store contains more than one page of keys, a next_cursor will be returned, which can be used as cursor in the request to fetch further pages.
+
+      i.e:
+      ```
+      /state/key-value-store/keys
+
+      {
+        "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk"
+      }
+      ```
+
+      Will respond with list of all keys (in both `hex` and `programmatic_json` form) and state version when they were last updated.
+
+      ```
+      {
+        ...
+        "total_count": 8,
+        "items": [
+          {
+            "key": {
+              "raw_hex": "5c0c0131",
+              "programmatic_json": {
+                "value": "1",
+                "kind": "String"
+              }
+            },
+            "last_updated_at_state_version": 4939670
+          },
+          ...
+        ],
+        "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk"
+      }
+      ```
+
       ### Querying for the content under specific keys
 
-      After that you can use `/state/key-value-store/data` endpoint to query the content for given keys. To do that you can either use key in form of `json` or `hex`.
+      You can either rely on keys returned from `/state/key-value-store/keys` endpoint or construct keys in json form on your own. It's possible if you created that key value store and you know what is the form of keys.
 
-      The gateway doesn't currently support iterating over keys, although we plan to add APIs which can support this in the near future. For now, a client would need to keep track on their own of all created keys or use lower level APIs to extract that data.
+      #### Querying using hex keys
+
+      Simply grab `raw_hex` key returned from `/state/key-value-store/keys` endpoint and call `/state/key-value-store/data` with it as parameter.
+
+      i.e:
+      ```
+      /state/key-value-store/data
+
+      {
+        "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk",
+        "keys": [
+          {
+            "key_hex": "5c0c0131"
+          }
+        ]
+      }
+      ```
+
+      Will respond with data held under that key:
+
+      ```
+      {
+        ...
+        "key_value_store_address": "internal_keyvaluestore_tdx_2_1kzjd929eqlzd9n02uuj8jd48705vcrpvhv4mgxnaltrgystnca3qxk",
+        "entries": [
+          {
+            "key": {
+              "raw_hex": "5c0c0131",
+              "programmatic_json": {
+                "value": "1",
+                "kind": "String"
+              }
+            },
+            "value": {
+              "raw_hex": "5c90588c6d59227f64bd7fc68e38bf7c7013cf179a78d5562ce9378b1378e2fa",
+              "programmatic_json": {
+                "value": "internal_vault_tdx_2_1tzxx6kfz0ajt6l7x3cut7lrsz0830xnc64tze6fh3vfh3ch6587c5d",
+                "kind": "Own",
+                "type_name": "Vault"
+              }
+            },
+            "last_updated_at_state_version": 4939415,
+            "is_locked": false
+          }
+        ]
+      }
+      ```
+
+      In our case, we may want to look up information about the vault (for example, the vault's resource address and balance).
+      This can be done with the `/state/entity/details` endpoint.
+
+      #### Constructing json keys
 
       The json keys are specified as programmatic SBOR JSON (which is a recursive data format, with each layer being a discriminated union with the `kind` discriminator). Search for [SBOR on our docs site](https://docs.radixdlt.com) for more information on SBOR and the programmatic SBOR JSON format.
 
