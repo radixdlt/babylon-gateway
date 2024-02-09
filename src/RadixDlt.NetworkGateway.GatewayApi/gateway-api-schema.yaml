@@ -879,10 +879,10 @@ tags:
             }
       ```
 
-      ### Iterating over all key value store keys
+      ### Iterating over all `KeyValueStore` keys
 
-      You can use `/state/key-value-store/keys` endpoint to iterate over all keys in certain key value store.
-      If the queried key value store contains more than one page of keys, a next_cursor will be returned, which can be used as cursor in the request to fetch further pages.
+      You can use `/state/key-value-store/keys` endpoint to iterate over all keys in certain `KeyValueStore`.
+      If the queried `KeyValueStore` contains more than one page of keys, a `next_cursor` will be returned, which can be used as `cursor` in the request to fetch further pages.
 
       i.e:
       ```
@@ -918,7 +918,7 @@ tags:
 
       ### Querying for the content under specific keys
 
-      You can either rely on keys returned from `/state/key-value-store/keys` endpoint or construct keys in json form on your own. It's possible if you created that key value store and you know what is the form of keys.
+      You can either rely on keys returned from `/state/key-value-store/keys` endpoint or construct keys in json form on your own. It's possible if you created that `KeyValueStore` and you know what is the form of keys.
 
       #### Querying using hex keys
 
