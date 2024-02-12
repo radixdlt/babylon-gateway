@@ -116,53 +116,6 @@ internal class ReadHelper
         return result;
     }
 
-    public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
-    {
-        if (!metadataChanges.Any())
-        {
-            return new Dictionary<MetadataLookup, EntityMetadataHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = new List<long>();
-        var keys = new List<string>();
-        var lookupSet = new HashSet<MetadataLookup>();
-
-        foreach (var metadataChange in metadataChanges)
-        {
-            lookupSet.Add(new MetadataLookup(metadataChange.ReferencedEntity.DatabaseId, metadataChange.Key));
-        }
-
-        foreach (var lookup in lookupSet)
-        {
-            entityIds.Add(lookup.EntityId);
-            keys.Add(lookup.Key);
-        }
-
-        var result = await _dbContext
-            .EntityMetadataHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, key) AS (
-    SELECT UNNEST({entityIds}), UNNEST({keys})
-)
-SELECT emh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_metadata_history
-    WHERE entity_id = variables.entity_id AND key = variables.key
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new MetadataLookup(e.EntityId, e.Key), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
     public async Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(ICollection<PackageCodeDbLookup> packageCodeChanges, CancellationToken token)
     {
         if (!packageCodeChanges.Any())
@@ -220,7 +173,7 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
+    public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChangePointer> metadataChanges, CancellationToken token)
     {
         if (!metadataChanges.Any())
         {

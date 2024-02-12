@@ -77,7 +77,7 @@ internal record struct ComponentMethodRoyaltyChangePointerLookup(long EntityId, 
 
 internal record ComponentMethodRoyaltyChangePointer(ReferencedEntity ReferencedEntity)
 {
-    public IList<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate> Entries { get; } = new List<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate>();
+    public List<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate> Entries { get; } = new();
 }
 
 internal class ComponentMethodRoyaltyProcessor
