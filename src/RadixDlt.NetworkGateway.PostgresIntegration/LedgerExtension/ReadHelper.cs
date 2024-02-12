@@ -69,7 +69,6 @@ using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -112,63 +111,6 @@ internal class ReadHelper
             .ToDictionaryAsync(keySelector, _token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(stageName, Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(ICollection<PackageCodeDbLookup> packageCodeChanges, CancellationToken token)
-    {
-        if (!packageCodeChanges.Any())
-        {
-            return new Dictionary<long, PackageCodeAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageCodeChanges.Select(x => x.PackageEntityId).Distinct().ToList();
-
-        var result = await _dbContext
-            .PackageCodeAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (package_entity_id) AS (
-    SELECT UNNEST({packageEntityIds})
-)
-SELECT pbah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM package_code_aggregate_history
-    WHERE package_entity_id = variables.package_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) pbah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.PackageEntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageCodeAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(ICollection<PackageBlueprintDbLookup> packageBlueprintChanges, CancellationToken token)
-    {
-        if (!packageBlueprintChanges.Any())
-        {
-            return new Dictionary<long, PackageBlueprintAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageBlueprintChanges.Select(x => x.PackageEntityId).Distinct().ToList();
-
-        var result = await _dbContext
-            .PackageBlueprintAggregateHistory
-            .FromSqlInterpolated(@$"
-")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.PackageEntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageBlueprintAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }
