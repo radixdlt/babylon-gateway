@@ -1,5 +1,5 @@
 ## 1.4.0
-Release Date: 08.02.2024
+Release built: 08.02.2024
 
 - Dropped internal `balance_changes` fallback mechanism. As of right now this information is ingested as part of regular transaction ingestion process.
 - Reworked internal mechanism used to fetch network configuration. Is no longer stored in the underlying database and it is shared across all services.
@@ -25,7 +25,7 @@ Release Date: 08.02.2024
 - Obsoleted incorrectly named `access_rules_package` in favor of `role_assignment_module_package` on `NetworkConfigurationResponse.well_known_addresses`. Obsoleted property will contain effective copy of the new one for backwards compability.
 
 ## 1.3.0
-Release Date: 29.01.2024
+Release built: 29.01.2024
 
 Adds support for protocol updates (in general) and the anemone update in particular.
 
@@ -42,12 +42,12 @@ Adds support for protocol updates (in general) and the anemone update in particu
 - Creates new `package_code_aggregate_history` table which will hold pointers to all package codes.
 
 ## 1.2.5
-Release Date: 26.01.2024
+Release built: 26.01.2024
 
 - Fixed broken (incompatible) Core API SDK
 
 ## 1.2.4
-Release Date: 4.01.2024
+Release built: 4.01.2024
 
 - Extended validator's data returned from `/state/validators/list`: added `effective_fee_factor` field which returns `current` fee_factor and optionally `pending` change.
 - Enable retries on transient database connectivity issues in gateway api.
@@ -55,7 +55,7 @@ Release Date: 4.01.2024
 - Optimized transaction balance changes; if available they're read from internal database, otherwise they use existing fallback mechanism
 
 ## 1.2.3
-Release Date: 19.12.2023
+Release built: 19.12.2023
 
 - Fixed exception thrown on empty validator set in the `/state/validator/list` endpoint.
 - `524` status code returned instead of `500` if request takes longer than configured timeout.
@@ -63,20 +63,20 @@ Release Date: 19.12.2023
 - Fixed `500` status code returned from `/transaction/submit` when Transaction got committed before Gateway was able to store pending transaction node submission result. It'll return 200 status code from now on and log exception as information.
 
 ## 1.2.2
-Release Date: 22.11.2023
+Release built: 22.11.2023
 
 - Fixed invalid foreign key between `pending_transactions` and `pending_transaction_payloads` tables.
 - Fixed package detail lookups to return all the blueprints and schemas.
 - Optimized transaction balance changes fetch time (parallelized).
 
 ## 1.2.1 
-Release Date: 06.11.2023
+Release built: 06.11.2023
 
 - Fixed local development environment setup.
 - Fixed missing `state` property on non-global entity state details.
 
 ## 1.2.0
-Release Date: 27.10.2023
+Release built: 27.10.2023
 
 - Added more strongly-typed OAS definitions for `programmatic_json` and types derived from the Core API.
 - Added `resource_address` to fungible and non-fungible vault entity details in the `/state/entity/details` endpoint.
@@ -87,7 +87,7 @@ Release Date: 27.10.2023
 *Warning* This release contains a fix for a non-critical bug in the data ingestion mechanism where resource vaults were not ordered correctly by last change descending. Already ingested data will remain with the old ordering, i.e. the bugfix will only affect newly ingested data. If this matters to you, you will need to resync your database from scratch.
 
 ## 1.1.0
-Release Date: ~20.10.2023~ (scrapped)
+Release built: ~20.10.2023~ (scrapped)
 
 - Fixed invalid HTTP status code on input validation failure.
 - Changed default configuration value of MaxPageSize for endpoints to 100. Validate if max page size is higher than DefaultPageSize.
@@ -99,21 +99,21 @@ Release Date: ~20.10.2023~ (scrapped)
 - Tuned documentation and constraints of various OAS type definitions.
 
 ## 1.0.1 
-Release Date: 10.10.2023
+Release built: 10.10.2023
 
 - Fixed missing `RecordTopOfDbLedger` observer call in `LedgerTransactionsProcessor`.
 - Fixed invalid response model for HTTP 400 Bad Request responses on input parameter validation failure.
 - Return 400 with validation error instead of 500 if `from_ledger_state` `state_version` is beyond known ledger tip.
 
 ## 1.0.0 - Babylon Launch
-Release Date: 28.09.2023
+Release built: 28.09.2023
 
 ### What’s new?
 - log warning if sql query takes longer than configured threshold (default to 250ms) for both entity framework and dapper queries.
 - gather execution time metrics for all sql queries (both entity framework and dapper).
 
 ## 1.0.0-rc3 - Babylon Launch (Release Candidate 3)
-Release Date: Friday 22nd September 2023
+Release built: Friday 22nd September 2023
 
 ### Breaking changes
 - Instead of returning only the event data payload from `/stream/transactions` and `/transaction/committed-details`, the event data is now a complex object, wrapping the data payload, but also containing the emitter and event name. This allows you to properly determine which entity emitted the event.
@@ -124,19 +124,19 @@ Release Date: Friday 22nd September 2023
 - Pending transaction handling has been reworked, and `/transaction/status` returns some additional fields with a lot more information regarding the status of the intent and submitted payloads. Check out the `intent_status` and `payload_status` fields. Each status is also associated with a description to help developers understand the meaning of the returned status.
 
 ## 0.5.5 RCNet v3.1 revision 4
-Release Date: 18.09.2023
+Release built: 18.09.2023
 
 - fix `/state/entity/details` endpoint when querying for multiple components with same schema.
 
 ## 0.5.4 RCNet v3.1 revision 3
-Release Date: 15.09.2023
+Release built: 15.09.2023
 
 - Fix event schema lookup in `/stream/transactions` and `/transaction/committed-details`.
 - Add `non_fungible_id_location_history` table to improve NFID lookup performance.
 - Add missing index to `entity_vault_history` table to improve royalty vault lookup performance.
 
 ## 0.5.3 RCNet v3.1 revision 2
-Release Date: 13.09.2023
+Release built: 13.09.2023
 
 - Fix incomplete entity type mapping.
 - Fix non-fungible resource aggregation.
@@ -144,7 +144,7 @@ Release Date: 13.09.2023
 - support remote schema assignment for generic (key value store, non fungible data) substitution.
 
 ## 0.5.2 RCNet v3.1
-Release Date: 07.09.2023
+Release built: 07.09.2023
 
 ### What’s New?
 - Add `from_state_version` to `validator_emission_statistics`.
@@ -155,12 +155,12 @@ Release Date: 07.09.2023
 - Fixed how TX total fee paid is calculated.
 
 ## 0.5.1 RCNet v3 revision 2
-Release Date: 01.09.2023
+Release built: 01.09.2023
 
 - Fix data aggregator processing custom events.
 
 # 0.5.0 - RCNet v3
-Release Date: 31.08.2023
+Release built: 31.08.2023
 
 ## RCNet v2 to RCNet v3 Migration Guide
 
@@ -212,7 +212,7 @@ Now:
 -------
 
 # 0.4.0 - RCNet v2
-Release Date: 26.07.2023
+Release built: 26.07.2023
 
 ## RCNet v1 to RCNet v2 Migration Guide
 ### What’s New?
@@ -285,7 +285,7 @@ Release Date: 26.07.2023
 -------
 
 # 0.3.0 - RCNet v1
-Release Date: 31.03.2023
+Release built: 31.03.2023
 
 - `/entity/overview` and `/entity/details` endpoints replaced with single `/state/entity/details`.
 - Fungible and non-fungible resources are now ordered by the most recently updated.
@@ -302,7 +302,7 @@ Release Date: 31.03.2023
 -------
 
 # 0.1.1 - Betanet v2
-Release Date: 14.02.2023
+Release built: 14.02.2023
 
 - Added `/state/validators/list` endpoint: returns paginable collection of all validators ever observed; validators that are part of so called active-set (i.e. participate in consensus for current/requested epoch) are decorated with some extra information like their public_key and stake.
 - `NonFungibleIdType`s `u32` and `u64` have been replaced with single `Number`.
