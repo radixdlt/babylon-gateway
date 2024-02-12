@@ -881,8 +881,8 @@ tags:
 
       ### Iterating over all `KeyValueStore` keys
 
-      You can use `/state/key-value-store/keys` endpoint to iterate over all keys in certain `KeyValueStore`.
-      If the queried `KeyValueStore` contains more than one page of keys, a `next_cursor` will be returned, which can be used as `cursor` in the request to fetch further pages.
+      You can use the `/state/key-value-store/keys` endpoint to iterate over all the keys in a certain key value store.
+      If the queried key value store contains more than one page of keys, a `next_cursor` will be returned, which can be used as a cursor in the request to fetch further pages.
 
       i.e:
       ```
@@ -893,9 +893,7 @@ tags:
       }
       ```
 
-      Will respond with list of all keys (in both `hex` and `programmatic_json` form) and state version when they were last updated.
-
-      ```
+      Will respond with a first page of all keys (in both `hex` and `programmatic_json` form) and the state version when they were last updated. Returned keys are ordered by their last change, first key on a list will be one that was most recently updated/created.      ```
       {
         ...
         "total_count": 8,
@@ -918,11 +916,11 @@ tags:
 
       ### Querying for the content under specific keys
 
-      You can either rely on keys returned from `/state/key-value-store/keys` endpoint or construct keys in json form on your own. It's possible if you created that `KeyValueStore` and you know what is the form of keys.
+      You can either use the keys returned from the `/state/key-value-store/keys` endpoint or construct keys in json form on your own, if you know the key type of the `KeyValueStore`.
 
       #### Querying using hex keys
 
-      Simply grab `raw_hex` key returned from `/state/key-value-store/keys` endpoint and call `/state/key-value-store/data` with it as parameter.
+      Simply grab the `raw_hex` key returned from the `/state/key-value-store/keys` endpoint and call `/state/key-value-store/data` with it as a parameter.
 
       i.e:
       ```
