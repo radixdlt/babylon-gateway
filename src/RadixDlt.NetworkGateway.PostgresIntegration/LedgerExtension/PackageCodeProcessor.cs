@@ -66,6 +66,7 @@ using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -92,8 +93,7 @@ internal class PackageCodeProcessor
     private readonly ProcessorContext _context;
     private readonly byte _networkId;
 
-    private Dictionary<PackageCodeDbLookup, PackageCodeChangePointer> _changePointers = new();
-    private List<PackageCodeDbLookup> _changeOrder = new();
+    private ChangeTracker<PackageCodeDbLookup, PackageCodeChangePointer> _changes = new();
 
     private Dictionary<long, PackageCodeAggregateHistory> _mostRecentAggregates = new();
     private Dictionary<PackageCodeDbLookup, PackageCodeHistory> _mostRecentEntries = new();
@@ -111,25 +111,15 @@ internal class PackageCodeProcessor
     {
         if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
         {
-            _changePointers
-                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeOriginalCode.Key.CodeHash.ConvertFromHex()), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new PackageCodeChangePointer(stateVersion);
-                })
+            _changes
+                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeOriginalCode.Key.CodeHash.ConvertFromHex()), _ => new PackageCodeChangePointer(stateVersion))
                 .PackageCodeOriginalCode = packageCodeOriginalCode;
         }
 
         if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
         {
-            _changePointers
-                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeVmType.Key.CodeHash.ConvertFromHex()), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new PackageCodeChangePointer(stateVersion);
-                })
+            _changes
+                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeVmType.Key.CodeHash.ConvertFromHex()), _ => new PackageCodeChangePointer(stateVersion))
                 .PackageCodeVmType = packageCodeVmType;
         }
     }
@@ -141,13 +131,8 @@ internal class PackageCodeProcessor
             var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
             var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkId);
 
-            _changePointers
-                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new PackageCodeChangePointer(stateVersion);
-                })
+            _changes
+                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()), _ => new PackageCodeChangePointer(stateVersion))
                 .CodeVmTypeIsDeleted = true;
         }
 
@@ -156,23 +141,16 @@ internal class PackageCodeProcessor
             var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
             var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkId);
 
-            _changePointers
-                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new PackageCodeChangePointer(stateVersion);
-                })
+            _changes
+                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()), _ => new PackageCodeChangePointer(stateVersion))
                 .PackageCodeIsDeleted = true;
         }
     }
 
     public void ProcessChanges()
     {
-        foreach (var lookup in _changeOrder)
+        foreach (var (lookup, change) in _changes.AsEnumerable())
         {
-            var change = _changePointers[lookup];
-
             PackageCodeAggregateHistory aggregate;
 
             if (!_mostRecentAggregates.TryGetValue(lookup.PackageEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != change.StateVersion)
@@ -272,11 +250,11 @@ internal class PackageCodeProcessor
 
     private Task<Dictionary<PackageCodeDbLookup, PackageCodeHistory>> MostRecentPackageCodeHistory()
     {
-        var lookupSet = _changeOrder.ToHashSet();
+        var lookupSet = _changes.Keys.ToHashSet();
 
         if (!lookupSet.Unzip(x => x.PackageEntityId, x => (byte[])x.CodeHash, out var packageEntityIds, out var codeHashes))
         {
-            return Task.FromResult(new Dictionary<PackageCodeDbLookup, PackageCodeHistory>());
+            return Task.FromResult(EmptyDictionary<PackageCodeDbLookup, PackageCodeHistory>.Instance);
         }
 
         return _context.ReadHelper.MostRecent<PackageCodeDbLookup, PackageCodeHistory>(
@@ -298,11 +276,11 @@ INNER JOIN LATERAL (
 
     private Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistory()
     {
-        var packageEntityIds = _changeOrder.Select(x => x.PackageEntityId).ToHashSet().ToList();
+        var packageEntityIds = _changes.Keys.Select(x => x.PackageEntityId).ToHashSet().ToList();
 
         if (!packageEntityIds.Any())
         {
-            return Task.FromResult(new Dictionary<long, PackageCodeAggregateHistory>());
+            return Task.FromResult(EmptyDictionary<long, PackageCodeAggregateHistory>.Instance);
         }
 
         return _context.ReadHelper.MostRecent<long, PackageCodeAggregateHistory>(

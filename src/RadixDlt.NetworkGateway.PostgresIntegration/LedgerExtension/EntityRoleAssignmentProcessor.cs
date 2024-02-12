@@ -88,8 +88,7 @@ internal class EntityRoleAssignmentProcessor
 {
     private readonly ProcessorContext _context;
 
-    private Dictionary<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer> _changePointers = new();
-    private List<RoleAssignmentsChangePointerLookup> _changeOrder = new();
+    private ChangeTracker<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer> _changes = new();
 
     private Dictionary<long, EntityRoleAssignmentsAggregateHistory> _mostRecentAggregates = new();
     private Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory> _mostRecentEntries = new();
@@ -107,35 +106,23 @@ internal class EntityRoleAssignmentProcessor
     {
         if (substateData is CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate accessRulesFieldOwnerRole)
         {
-            _changePointers
-                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new RoleAssignmentsChangePointer(referencedEntity);
-                })
+            _changes
+                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new RoleAssignmentsChangePointer(referencedEntity))
                 .OwnerRole = accessRulesFieldOwnerRole;
         }
 
         if (substateData is CoreModel.RoleAssignmentModuleRuleEntrySubstate roleAssignmentEntry)
         {
-            _changePointers
-                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new RoleAssignmentsChangePointer(referencedEntity);
-                })
+            _changes
+                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new RoleAssignmentsChangePointer(referencedEntity))
                 .Entries.Add(roleAssignmentEntry);
         }
     }
 
     public void ProcessChanges()
     {
-        foreach (var lookup in _changeOrder)
+        foreach (var (lookup, change) in _changes.AsEnumerable())
         {
-            var change = _changePointers[lookup];
-
             EntityRoleAssignmentsOwnerRoleHistory? ownerRole = null;
 
             if (change.OwnerRole != null)
@@ -235,7 +222,7 @@ internal class EntityRoleAssignmentProcessor
     {
         var lookupSet = new HashSet<RoleAssignmentEntryDbLookup>();
 
-        foreach (var change in _changePointers.Values)
+        foreach (var (_, change) in _changes.AsEnumerable())
         {
             foreach (var entry in change.Entries)
             {
@@ -245,7 +232,7 @@ internal class EntityRoleAssignmentProcessor
 
         if (!lookupSet.Unzip(x => x.EntityId, x => x.KeyRole, x => x.KeyModule, out var entityIds, out var keyRoles, out var keyModuleIds))
         {
-            return Task.FromResult(new Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>());
+            return Task.FromResult(EmptyDictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>.Instance);
         }
 
         return _context.ReadHelper.MostRecent<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>(
@@ -267,11 +254,11 @@ INNER JOIN LATERAL (
 
     private Task<Dictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityRoleAssignmentsAggregateHistory()
     {
-        var entityIds = _changeOrder.Select(x => x.EntityId).ToHashSet().ToList();
+        var entityIds = _changes.Keys.Select(x => x.EntityId).ToHashSet().ToList();
 
         if (!entityIds.Any())
         {
-            return Task.FromResult(new Dictionary<long, EntityRoleAssignmentsAggregateHistory>());
+            return Task.FromResult(EmptyDictionary<long, EntityRoleAssignmentsAggregateHistory>.Instance);
         }
 
         return _context.ReadHelper.MostRecent<long, EntityRoleAssignmentsAggregateHistory>(
