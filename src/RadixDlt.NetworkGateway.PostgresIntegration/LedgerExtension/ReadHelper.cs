@@ -115,40 +115,6 @@ internal class ReadHelper
         return result;
     }
 
-    public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChangePointer> metadataChanges, CancellationToken token)
-    {
-        if (!metadataChanges.Any())
-        {
-            return new Dictionary<long, EntityMetadataAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
-
-        var result = await _dbContext
-            .EntityMetadataAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id) AS (
-    SELECT UNNEST({entityIds})
-)
-SELECT emah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_metadata_aggregate_history
-    WHERE entity_id = variables.entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.EntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityAggregateMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
     public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<IVaultSnapshot> vaultSnapshots, CancellationToken token)
     {
         if (!vaultSnapshots.Any())
