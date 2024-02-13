@@ -1,5 +1,8 @@
 ## 1.5.0
-Release Date: Not published yet
+Release Date: _not published yet_
+
+- Fixed unstable package blueprint and code aggregation.
+- Reworked internal data aggregation mechanism.
 
 - Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
 
@@ -10,6 +13,7 @@ Release Date: Not published yet
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
 
 ### Deprecations
+TBD
 
 ## 1.4.0
 Release Date: 08.02.2024
