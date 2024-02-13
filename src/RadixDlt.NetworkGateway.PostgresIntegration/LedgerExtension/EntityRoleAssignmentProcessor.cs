@@ -77,7 +77,7 @@ internal record struct RoleAssignmentEntryDbLookup(long EntityId, string KeyRole
 
 internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
 
-internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity)
+internal record RoleAssignmentsChangePointer
 {
     public CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
 
@@ -107,14 +107,14 @@ internal class EntityRoleAssignmentProcessor
         if (substateData is CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate accessRulesFieldOwnerRole)
         {
             _changes
-                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new RoleAssignmentsChangePointer(referencedEntity))
+                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new RoleAssignmentsChangePointer())
                 .OwnerRole = accessRulesFieldOwnerRole;
         }
 
         if (substateData is CoreModel.RoleAssignmentModuleRuleEntrySubstate roleAssignmentEntry)
         {
             _changes
-                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new RoleAssignmentsChangePointer(referencedEntity))
+                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new RoleAssignmentsChangePointer())
                 .Entries.Add(roleAssignmentEntry);
         }
     }
@@ -222,11 +222,11 @@ internal class EntityRoleAssignmentProcessor
     {
         var lookupSet = new HashSet<RoleAssignmentEntryDbLookup>();
 
-        foreach (var (_, change) in _changes.AsEnumerable())
+        foreach (var (lookup, change) in _changes.AsEnumerable())
         {
             foreach (var entry in change.Entries)
             {
-                lookupSet.Add(new RoleAssignmentEntryDbLookup(change.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
+                lookupSet.Add(new RoleAssignmentEntryDbLookup(lookup.EntityId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
             }
         }
 

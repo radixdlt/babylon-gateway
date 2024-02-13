@@ -13,7 +13,7 @@ internal record struct MetadataEntryDbLookup(long EntityId, string Key);
 
 internal record struct MetadataChangePointerLookup(long EntityId, long StateVersion);
 
-internal record MetadataChangePointer(ReferencedEntity ReferencedEntity)
+internal record MetadataChangePointer
 {
     public List<CoreModel.MetadataModuleEntrySubstate> Entries { get; } = new();
 }
@@ -40,7 +40,7 @@ internal class EntityMetadataProcessor
         if (substateData is CoreModel.MetadataModuleEntrySubstate metadataEntry)
         {
             _changes
-                .GetOrAdd(new MetadataChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new MetadataChangePointer(referencedEntity))
+                .GetOrAdd(new MetadataChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new MetadataChangePointer())
                 .Entries.Add(metadataEntry);
         }
     }
@@ -131,11 +131,11 @@ internal class EntityMetadataProcessor
     {
         var lookupSet = new HashSet<MetadataEntryDbLookup>();
 
-        foreach (var (_, change) in _changes.AsEnumerable())
+        foreach (var (lookup, change) in _changes.AsEnumerable())
         {
             foreach (var entry in change.Entries)
             {
-                lookupSet.Add(new MetadataEntryDbLookup(change.ReferencedEntity.DatabaseId, entry.Key.Name));
+                lookupSet.Add(new MetadataEntryDbLookup(lookup.EntityId, entry.Key.Name));
             }
         }
 

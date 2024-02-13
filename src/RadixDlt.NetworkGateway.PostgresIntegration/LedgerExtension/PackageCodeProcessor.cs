@@ -66,7 +66,6 @@ using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -75,9 +74,11 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
+internal record struct PackageCodeChangePointerLookup(long PackageEntityId, ValueBytes CodeHash, long StateVersion);
+
 internal record struct PackageCodeDbLookup(long PackageEntityId, ValueBytes CodeHash);
 
-internal record PackageCodeChangePointer(long StateVersion)
+internal record PackageCodeChangePointer
 {
     public CoreModel.PackageCodeOriginalCodeEntrySubstate? PackageCodeOriginalCode { get; set; }
 
@@ -93,7 +94,7 @@ internal class PackageCodeProcessor
     private readonly ProcessorContext _context;
     private readonly byte _networkId;
 
-    private ChangeTracker<PackageCodeDbLookup, PackageCodeChangePointer> _changes = new();
+    private ChangeTracker<PackageCodeChangePointerLookup, PackageCodeChangePointer> _changes = new();
 
     private Dictionary<long, PackageCodeAggregateHistory> _mostRecentAggregates = new();
     private Dictionary<PackageCodeDbLookup, PackageCodeHistory> _mostRecentEntries = new();
@@ -112,14 +113,14 @@ internal class PackageCodeProcessor
         if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
         {
             _changes
-                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeOriginalCode.Key.CodeHash.ConvertFromHex()), _ => new PackageCodeChangePointer(stateVersion))
+                .GetOrAdd(new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeOriginalCode.Key.CodeHash.ConvertFromHex(), stateVersion), _ => new PackageCodeChangePointer())
                 .PackageCodeOriginalCode = packageCodeOriginalCode;
         }
 
         if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
         {
             _changes
-                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeVmType.Key.CodeHash.ConvertFromHex()), _ => new PackageCodeChangePointer(stateVersion))
+                .GetOrAdd(new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeVmType.Key.CodeHash.ConvertFromHex(), stateVersion), _ => new PackageCodeChangePointer())
                 .PackageCodeVmType = packageCodeVmType;
         }
     }
@@ -132,7 +133,7 @@ internal class PackageCodeProcessor
             var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkId);
 
             _changes
-                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()), _ => new PackageCodeChangePointer(stateVersion))
+                .GetOrAdd(new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex(), stateVersion), _ => new PackageCodeChangePointer())
                 .CodeVmTypeIsDeleted = true;
         }
 
@@ -142,7 +143,7 @@ internal class PackageCodeProcessor
             var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkId);
 
             _changes
-                .GetOrAdd(new PackageCodeDbLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex()), _ => new PackageCodeChangePointer(stateVersion))
+                .GetOrAdd(new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex(), stateVersion), _ => new PackageCodeChangePointer())
                 .PackageCodeIsDeleted = true;
         }
     }
@@ -153,12 +154,12 @@ internal class PackageCodeProcessor
         {
             PackageCodeAggregateHistory aggregate;
 
-            if (!_mostRecentAggregates.TryGetValue(lookup.PackageEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != change.StateVersion)
+            if (!_mostRecentAggregates.TryGetValue(lookup.PackageEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
             {
                 aggregate = new PackageCodeAggregateHistory
                 {
                     Id = _context.Sequences.PackageCodeAggregateHistorySequence++,
-                    FromStateVersion = change.StateVersion,
+                    FromStateVersion = lookup.StateVersion,
                     PackageEntityId = lookup.PackageEntityId,
                     PackageCodeIds = new List<long>(),
                 };
@@ -176,59 +177,66 @@ internal class PackageCodeProcessor
                 aggregate = previousAggregate;
             }
 
-            // TODO change all the code below and follow the existing pattern
-            PackageCodeHistory packageCodeHistory;
+            // WARNING! PackageCode[Entry]History can be partially updated, therefore we must optionally clone previous entity similarly to how we handle aggregates
+            var entryLookup = new PackageCodeDbLookup(lookup.PackageEntityId, lookup.CodeHash);
+            PackageCodeHistory entryHistory;
 
-            _mostRecentEntries.TryGetValue(lookup, out var existingPackageCode);
-
-            if (existingPackageCode != null)
+            if (!_mostRecentEntries.TryGetValue(entryLookup, out var previousEntryHistory) || previousEntryHistory.FromStateVersion != lookup.StateVersion)
             {
-                var previousPackageCodeId = existingPackageCode.Id;
-
-                packageCodeHistory = existingPackageCode;
-                packageCodeHistory.Id = _context.Sequences.PackageCodeHistorySequence++;
-                packageCodeHistory.FromStateVersion = change.StateVersion;
-
-                aggregate.PackageCodeIds.Remove(previousPackageCodeId);
-            }
-            else
-            {
-                packageCodeHistory = new PackageCodeHistory
+                entryHistory = new PackageCodeHistory
                 {
                     Id = _context.Sequences.PackageCodeHistorySequence++,
+                    FromStateVersion = lookup.StateVersion,
                     PackageEntityId = lookup.PackageEntityId,
-                    FromStateVersion = change.StateVersion,
                     CodeHash = lookup.CodeHash,
                 };
 
-                _mostRecentEntries[lookup] = packageCodeHistory;
-            }
+                _entriesToAdd.Add(entryHistory);
 
-            var isDeleted = change.PackageCodeIsDeleted && change.CodeVmTypeIsDeleted;
-            if (isDeleted)
-            {
-                packageCodeHistory.IsDeleted = true;
-            }
-            else if (change.PackageCodeIsDeleted != change.CodeVmTypeIsDeleted)
-            {
-                throw new UnreachableException($"Unexpected situation where PackageCode was deleted but VmType wasn't. PackageId: {lookup.PackageEntityId}, CodeHashHex: {lookup.CodeHash.ToHex()}, StateVersion: {change.StateVersion}");
+                if (previousEntryHistory != null)
+                {
+                    entryHistory.CodeHash = previousEntryHistory.CodeHash;
+                    entryHistory.Code = previousEntryHistory.Code;
+                    entryHistory.VmType = previousEntryHistory.VmType;
+                    entryHistory.IsDeleted = previousEntryHistory.IsDeleted;
+
+                    var currentPosition = aggregate.PackageCodeIds.IndexOf(previousEntryHistory.Id);
+
+                    if (currentPosition != -1)
+                    {
+                        aggregate.PackageCodeIds.RemoveAt(currentPosition);
+                    }
+                }
+
+                _mostRecentEntries[entryLookup] = entryHistory;
             }
             else
             {
-                aggregate.PackageCodeIds.Add(packageCodeHistory.Id);
-
-                if (change.PackageCodeVmType != null)
-                {
-                    packageCodeHistory.VmType = change.PackageCodeVmType.Value.VmType.ToModel();
-                }
-
-                if (change.PackageCodeOriginalCode != null)
-                {
-                    packageCodeHistory.Code = change.PackageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
-                }
+                entryHistory = previousEntryHistory;
             }
 
-            _entriesToAdd.Add(packageCodeHistory);
+            if (change.PackageCodeIsDeleted && change.CodeVmTypeIsDeleted)
+            {
+                entryHistory.IsDeleted = true;
+            }
+            else if (change.PackageCodeIsDeleted != change.CodeVmTypeIsDeleted)
+            {
+                throw new UnreachableException($"Unexpected situation where PackageCode was deleted but VmType wasn't. PackageId: {lookup.PackageEntityId}, CodeHashHex: {lookup.CodeHash.ToHex()}, StateVersion: {lookup.StateVersion}");
+            }
+            else
+            {
+                aggregate.PackageCodeIds.Insert(0, entryHistory.Id);
+            }
+
+            if (change.PackageCodeVmType != null)
+            {
+                entryHistory.VmType = change.PackageCodeVmType.Value.VmType.ToModel();
+            }
+
+            if (change.PackageCodeOriginalCode != null)
+            {
+                entryHistory.Code = change.PackageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
+            }
         }
     }
 
