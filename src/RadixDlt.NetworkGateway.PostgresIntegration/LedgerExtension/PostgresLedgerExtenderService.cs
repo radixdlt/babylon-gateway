@@ -1125,6 +1125,20 @@ UPDATE pending_transactions
 
                     if (manifestExtractedAddresses.TryGetValue(stateVersion, out var extractedAddresses))
                     {
+                        foreach (var proofResourceAddress in extractedAddresses.PresentedProofs.Select(x => x.ResourceAddress).ToHashSet())
+                        {
+                            if (referencedEntities.TryGet(proofResourceAddress, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.BadgePresented,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
+
                         foreach (var address in extractedAddresses.ResourceAddresses)
                         {
                             if (referencedEntities.TryGet(address, out var re))

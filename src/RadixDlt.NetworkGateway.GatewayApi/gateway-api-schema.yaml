@@ -502,6 +502,8 @@ tags:
 
       * `manifest_resources_filter` - allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
 
+      * `manifest_badges_presented_filter` - allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented.
+
       * `accounts_with_manifest_owner_method_calls` - allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
 
       * `accounts_without_manifest_owner_method_calls` - allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
@@ -3034,6 +3036,10 @@ components:
               items:
                 $ref: "#/components/schemas/Address"
             manifest_accounts_deposited_into_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            manifest_badges_presented_filter:
               type: array
               items:
                 $ref: "#/components/schemas/Address"

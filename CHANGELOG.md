@@ -2,8 +2,10 @@
 Release Date: Not published yet
 
 ### API Changes
+- Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented.
 
 ### Database changes
+- Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
 
 ### Deprecations
 
