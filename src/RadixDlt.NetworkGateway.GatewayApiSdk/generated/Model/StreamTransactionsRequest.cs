@@ -167,6 +167,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="kindFilter">Limit returned transactions by their kind. Defaults to &#x60;user&#x60;..</param>
         /// <param name="manifestAccountsWithdrawnFromFilter">manifestAccountsWithdrawnFromFilter.</param>
         /// <param name="manifestAccountsDepositedIntoFilter">manifestAccountsDepositedIntoFilter.</param>
+        /// <param name="manifestBadgesPresentedFilter">manifestBadgesPresentedFilter.</param>
         /// <param name="manifestResourcesFilter">manifestResourcesFilter.</param>
         /// <param name="affectedGlobalEntitiesFilter">affectedGlobalEntitiesFilter.</param>
         /// <param name="eventsFilter">eventsFilter.</param>
@@ -175,7 +176,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="manifestClassFilter">manifestClassFilter.</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
         /// <param name="optIns">optIns.</param>
-        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), List<string> accountsWithManifestOwnerMethodCalls = default(List<string>), List<string> accountsWithoutManifestOwnerMethodCalls = default(List<string>), StreamTransactionsRequestAllOfManifestClassFilter manifestClassFilter = default(StreamTransactionsRequestAllOfManifestClassFilter), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
+        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestBadgesPresentedFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), List<string> accountsWithManifestOwnerMethodCalls = default(List<string>), List<string> accountsWithoutManifestOwnerMethodCalls = default(List<string>), StreamTransactionsRequestAllOfManifestClassFilter manifestClassFilter = default(StreamTransactionsRequestAllOfManifestClassFilter), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
         {
             this.AtLedgerState = atLedgerState;
             this.FromLedgerState = fromLedgerState;
@@ -184,6 +185,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.KindFilter = kindFilter;
             this.ManifestAccountsWithdrawnFromFilter = manifestAccountsWithdrawnFromFilter;
             this.ManifestAccountsDepositedIntoFilter = manifestAccountsDepositedIntoFilter;
+            this.ManifestBadgesPresentedFilter = manifestBadgesPresentedFilter;
             this.ManifestResourcesFilter = manifestResourcesFilter;
             this.AffectedGlobalEntitiesFilter = affectedGlobalEntitiesFilter;
             this.EventsFilter = eventsFilter;
@@ -231,6 +233,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "manifest_accounts_deposited_into_filter", EmitDefaultValue = true)]
         public List<string> ManifestAccountsDepositedIntoFilter { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ManifestBadgesPresentedFilter
+        /// </summary>
+        [DataMember(Name = "manifest_badges_presented_filter", EmitDefaultValue = true)]
+        public List<string> ManifestBadgesPresentedFilter { get; set; }
 
         /// <summary>
         /// Gets or Sets ManifestResourcesFilter
@@ -289,6 +297,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  KindFilter: ").Append(KindFilter).Append("\n");
             sb.Append("  ManifestAccountsWithdrawnFromFilter: ").Append(ManifestAccountsWithdrawnFromFilter).Append("\n");
             sb.Append("  ManifestAccountsDepositedIntoFilter: ").Append(ManifestAccountsDepositedIntoFilter).Append("\n");
+            sb.Append("  ManifestBadgesPresentedFilter: ").Append(ManifestBadgesPresentedFilter).Append("\n");
             sb.Append("  ManifestResourcesFilter: ").Append(ManifestResourcesFilter).Append("\n");
             sb.Append("  AffectedGlobalEntitiesFilter: ").Append(AffectedGlobalEntitiesFilter).Append("\n");
             sb.Append("  EventsFilter: ").Append(EventsFilter).Append("\n");
@@ -369,6 +378,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ManifestAccountsDepositedIntoFilter.SequenceEqual(input.ManifestAccountsDepositedIntoFilter)
                 ) && 
                 (
+                    this.ManifestBadgesPresentedFilter == input.ManifestBadgesPresentedFilter ||
+                    this.ManifestBadgesPresentedFilter != null &&
+                    input.ManifestBadgesPresentedFilter != null &&
+                    this.ManifestBadgesPresentedFilter.SequenceEqual(input.ManifestBadgesPresentedFilter)
+                ) && 
+                (
                     this.ManifestResourcesFilter == input.ManifestResourcesFilter ||
                     this.ManifestResourcesFilter != null &&
                     input.ManifestResourcesFilter != null &&
@@ -447,6 +462,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.ManifestAccountsDepositedIntoFilter != null)
                 {
                     hashCode = (hashCode * 59) + this.ManifestAccountsDepositedIntoFilter.GetHashCode();
+                }
+                if (this.ManifestBadgesPresentedFilter != null)
+                {
+                    hashCode = (hashCode * 59) + this.ManifestBadgesPresentedFilter.GetHashCode();
                 }
                 if (this.ManifestResourcesFilter != null)
                 {
