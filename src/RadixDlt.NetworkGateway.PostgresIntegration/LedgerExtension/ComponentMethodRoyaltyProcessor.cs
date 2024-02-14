@@ -65,6 +65,7 @@
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -174,8 +175,8 @@ internal class ComponentMethodRoyaltyProcessor
 
     public async Task LoadMostRecent()
     {
-        _mostRecentEntries = await MostRecentComponentMethodRoyaltyEntryHistory();
-        _mostRecentAggregates = await MostRecentComponentMethodRoyaltyAggregateHistory();
+        _mostRecentEntries.AddRange(await MostRecentComponentMethodRoyaltyEntryHistory());
+        _mostRecentAggregates.AddRange(await MostRecentComponentMethodRoyaltyAggregateHistory());
     }
 
     public async Task<int> SaveEntities()
@@ -188,7 +189,7 @@ internal class ComponentMethodRoyaltyProcessor
         return rowsInserted;
     }
 
-    private Task<Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>> MostRecentComponentMethodRoyaltyEntryHistory()
+    private async Task<IDictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>> MostRecentComponentMethodRoyaltyEntryHistory()
     {
         var lookupSet = new HashSet<ComponentMethodRoyaltyEntryDbLookup>();
 
@@ -202,10 +203,10 @@ internal class ComponentMethodRoyaltyProcessor
 
         if (!lookupSet.Unzip(x => x.EntityId, x => x.MethodName, out var entityIds, out var methodNames))
         {
-            return Task.FromResult(EmptyDictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>.Instance);
+            return ImmutableDictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>(
+        return await _context.ReadHelper.MostRecent<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>(
             @$"
 WITH variables (entity_id, method_name) AS (
     SELECT UNNEST({entityIds}), UNNEST({methodNames})
@@ -222,16 +223,16 @@ INNER JOIN LATERAL (
             e => new ComponentMethodRoyaltyEntryDbLookup(e.EntityId, e.MethodName));
     }
 
-    private Task<Dictionary<long, ComponentMethodRoyaltyAggregateHistory>> MostRecentComponentMethodRoyaltyAggregateHistory()
+    private async Task<IDictionary<long, ComponentMethodRoyaltyAggregateHistory>> MostRecentComponentMethodRoyaltyAggregateHistory()
     {
         var entityIds = _changes.Keys.Select(x => x.EntityId).ToHashSet().ToList();
 
         if (!entityIds.Any())
         {
-            return Task.FromResult(EmptyDictionary<long, ComponentMethodRoyaltyAggregateHistory>.Instance);
+            return ImmutableDictionary<long, ComponentMethodRoyaltyAggregateHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<long, ComponentMethodRoyaltyAggregateHistory>(
+        return await _context.ReadHelper.MostRecent<long, ComponentMethodRoyaltyAggregateHistory>(
             $@"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})

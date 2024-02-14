@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -242,8 +243,8 @@ internal class PackageCodeProcessor
 
     public async Task LoadMostRecent()
     {
-        _mostRecentEntries = await MostRecentPackageCodeHistory();
-        _mostRecentAggregates = await MostRecentPackageCodeAggregateHistory();
+        _mostRecentEntries.AddRange(await MostRecentPackageCodeHistory());
+        _mostRecentAggregates.AddRange(await MostRecentPackageCodeAggregateHistory());
     }
 
     public async Task<int> SaveEntities()
@@ -256,16 +257,16 @@ internal class PackageCodeProcessor
         return rowsInserted;
     }
 
-    private Task<Dictionary<PackageCodeDbLookup, PackageCodeHistory>> MostRecentPackageCodeHistory()
+    private async Task<IDictionary<PackageCodeDbLookup, PackageCodeHistory>> MostRecentPackageCodeHistory()
     {
         var lookupSet = _changes.Keys.ToHashSet();
 
         if (!lookupSet.Unzip(x => x.PackageEntityId, x => (byte[])x.CodeHash, out var packageEntityIds, out var codeHashes))
         {
-            return Task.FromResult(EmptyDictionary<PackageCodeDbLookup, PackageCodeHistory>.Instance);
+            return ImmutableDictionary<PackageCodeDbLookup, PackageCodeHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<PackageCodeDbLookup, PackageCodeHistory>(
+        return await _context.ReadHelper.MostRecent<PackageCodeDbLookup, PackageCodeHistory>(
             @$"
 WITH variables (package_entity_id, code_hash) AS (
     SELECT UNNEST({packageEntityIds}), UNNEST({codeHashes})
@@ -282,16 +283,16 @@ INNER JOIN LATERAL (
             e => new PackageCodeDbLookup(e.PackageEntityId, e.CodeHash));
     }
 
-    private Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistory()
+    private async Task<IDictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistory()
     {
         var packageEntityIds = _changes.Keys.Select(x => x.PackageEntityId).ToHashSet().ToList();
 
         if (!packageEntityIds.Any())
         {
-            return Task.FromResult(EmptyDictionary<long, PackageCodeAggregateHistory>.Instance);
+            return ImmutableDictionary<long, PackageCodeAggregateHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<long, PackageCodeAggregateHistory>(
+        return await _context.ReadHelper.MostRecent<long, PackageCodeAggregateHistory>(
             $@"
 WITH variables (package_entity_id) AS (
     SELECT UNNEST({packageEntityIds})

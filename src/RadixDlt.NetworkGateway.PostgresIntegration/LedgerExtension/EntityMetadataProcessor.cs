@@ -3,6 +3,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -113,8 +114,8 @@ internal class EntityMetadataProcessor
 
     public async Task LoadMostRecent()
     {
-        _mostRecentEntries = await MostRecentEntityMetadataHistory();
-        _mostRecentAggregates = await MostRecentEntityAggregateMetadataHistory();
+        _mostRecentEntries.AddRange(await MostRecentEntityMetadataHistory());
+        _mostRecentAggregates.AddRange(await MostRecentEntityAggregateMetadataHistory());
     }
 
     public async Task<int> SaveEntities()
@@ -127,7 +128,7 @@ internal class EntityMetadataProcessor
         return rowsInserted;
     }
 
-    private Task<Dictionary<MetadataEntryDbLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistory()
+    private async Task<IDictionary<MetadataEntryDbLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistory()
     {
         var lookupSet = new HashSet<MetadataEntryDbLookup>();
 
@@ -141,10 +142,10 @@ internal class EntityMetadataProcessor
 
         if (!lookupSet.Unzip(x => x.EntityId, x => x.Key, out var entityIds, out var keys))
         {
-            return Task.FromResult(EmptyDictionary<MetadataEntryDbLookup, EntityMetadataHistory>.Instance);
+            return ImmutableDictionary<MetadataEntryDbLookup, EntityMetadataHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<MetadataEntryDbLookup, EntityMetadataHistory>(
+        return await _context.ReadHelper.MostRecent<MetadataEntryDbLookup, EntityMetadataHistory>(
             @$"
 WITH variables (entity_id, key) AS (
     SELECT UNNEST({entityIds}), UNNEST({keys})
@@ -161,16 +162,16 @@ INNER JOIN LATERAL (
             e => new MetadataEntryDbLookup(e.EntityId, e.Key));
     }
 
-    private Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistory()
+    private async Task<IDictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistory()
     {
         var entityIds = _changes.Keys.Select(x => x.EntityId).ToHashSet().ToList();
 
         if (!entityIds.Any())
         {
-            return Task.FromResult(EmptyDictionary<long, EntityMetadataAggregateHistory>.Instance);
+            return ImmutableDictionary<long, EntityMetadataAggregateHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<long, EntityMetadataAggregateHistory>(
+        return await _context.ReadHelper.MostRecent<long, EntityMetadataAggregateHistory>(
             @$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
