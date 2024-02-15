@@ -64,6 +64,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -81,7 +82,14 @@ public class StateKeyValueStoreController : ControllerBase
         _keyValueStoreHandler = keyValueStoreHandler;
     }
 
-    [HttpPost("keys")] // TODO follow regular PAGE pattern (obsolete this endpoint in schema)
+    [HttpPost("page/keys")]
+    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeysPage(GatewayModel.StateKeyValueStoreKeysRequest request, CancellationToken token)
+    {
+        return await _keyValueStoreHandler.Keys(request, token);
+    }
+
+    [HttpPost("keys")]
+    [Obsolete("Use KeysPage instead.")]
     public async Task<GatewayModel.StateKeyValueStoreKeysResponse> Keys(GatewayModel.StateKeyValueStoreKeysRequest request, CancellationToken token)
     {
         return await _keyValueStoreHandler.Keys(request, token);
