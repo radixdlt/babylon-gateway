@@ -81,7 +81,7 @@ public class StateNonFungibleController : ControllerBase
         _nonFungibleHandler = nonFungibleHandler;
     }
 
-    [HttpPost("ids")]
+    [HttpPost("ids")] // TODO follow regular PAGE pattern (obsolete this endpoint in schema)
     public async Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token)
     {
         return await _nonFungibleHandler.Ids(request, token);

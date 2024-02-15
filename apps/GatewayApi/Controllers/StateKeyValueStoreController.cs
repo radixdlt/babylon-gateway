@@ -81,7 +81,7 @@ public class StateKeyValueStoreController : ControllerBase
         _keyValueStoreHandler = keyValueStoreHandler;
     }
 
-    [HttpPost("keys")]
+    [HttpPost("keys")] // TODO follow regular PAGE pattern (obsolete this endpoint in schema)
     public async Task<GatewayModel.StateKeyValueStoreKeysResponse> Keys(GatewayModel.StateKeyValueStoreKeysRequest request, CancellationToken token)
     {
         return await _keyValueStoreHandler.Keys(request, token);
