@@ -6,6 +6,8 @@ Release Date: _not published yet_
 
 - Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
 
+- Fixed `StateKeyValueStoreController` method name from `items` to `keys`. It has no effect in API route (preserved as `/state/key-value-store/keys/`) but prometheus label `action` for `http_requests_received_total` metric will change from `items` to `keys` for this endpoint.
+
 ### API Changes
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented.
 
