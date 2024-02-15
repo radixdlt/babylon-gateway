@@ -101,7 +101,6 @@ internal class EntityMetadataProcessor
                     }
                 }
 
-                // TODO introduce entry.IsDeleted extension method
                 if (entry.Value != null)
                 {
                     aggregate.MetadataIds.Insert(0, entryHistory.Id);

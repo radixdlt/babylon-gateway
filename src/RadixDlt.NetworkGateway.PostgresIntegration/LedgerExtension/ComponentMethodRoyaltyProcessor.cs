@@ -162,7 +162,6 @@ internal class ComponentMethodRoyaltyProcessor
                     }
                 }
 
-                // TODO introduce entry.IsDeleted extension method
                 if (entry.Value != null)
                 {
                     aggregate.EntryIds.Insert(0, entryHistory.Id);
