@@ -1,6 +1,8 @@
 ## 1.5.0
 Release Date: Not published yet
 
+- Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
+
 ### API Changes
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented.
 
