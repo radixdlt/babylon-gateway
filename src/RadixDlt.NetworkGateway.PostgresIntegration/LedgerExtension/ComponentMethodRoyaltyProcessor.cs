@@ -65,6 +65,7 @@
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -77,15 +78,14 @@ internal record struct ComponentMethodRoyaltyChangePointerLookup(long EntityId, 
 
 internal record ComponentMethodRoyaltyChangePointer(ReferencedEntity ReferencedEntity)
 {
-    public IList<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate> Entries { get; } = new List<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate>();
+    public List<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate> Entries { get; } = new();
 }
 
 internal class ComponentMethodRoyaltyProcessor
 {
     private readonly ProcessorContext _context;
 
-    private Dictionary<ComponentMethodRoyaltyChangePointerLookup, ComponentMethodRoyaltyChangePointer> _changePointers = new();
-    private List<ComponentMethodRoyaltyChangePointerLookup> _changeOrder = new();
+    private ChangeTracker<ComponentMethodRoyaltyChangePointerLookup, ComponentMethodRoyaltyChangePointer> _changes = new();
 
     private Dictionary<long, ComponentMethodRoyaltyAggregateHistory> _mostRecentAggregates = new();
     private Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory> _mostRecentEntries = new();
@@ -102,23 +102,16 @@ internal class ComponentMethodRoyaltyProcessor
     {
         if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
         {
-            _changePointers
-                .GetOrAdd(new ComponentMethodRoyaltyChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new ComponentMethodRoyaltyChangePointer(referencedEntity);
-                })
+            _changes
+                .GetOrAdd(new ComponentMethodRoyaltyChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new ComponentMethodRoyaltyChangePointer(referencedEntity))
                 .Entries.Add(methodRoyaltyEntry);
         }
     }
 
     public void ProcessChanges()
     {
-        foreach (var lookup in _changeOrder)
+        foreach (var (lookup, change) in _changes.AsEnumerable())
         {
-            var change = _changePointers[lookup];
-
             ComponentMethodRoyaltyAggregateHistory aggregate;
 
             if (!_mostRecentAggregates.TryGetValue(lookup.EntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
@@ -169,7 +162,6 @@ internal class ComponentMethodRoyaltyProcessor
                     }
                 }
 
-                // TODO introduce entry.IsDeleted extension method
                 if (entry.Value != null)
                 {
                     aggregate.EntryIds.Insert(0, entryHistory.Id);
@@ -182,8 +174,8 @@ internal class ComponentMethodRoyaltyProcessor
 
     public async Task LoadMostRecent()
     {
-        _mostRecentEntries = await MostRecentComponentMethodRoyaltyEntryHistory();
-        _mostRecentAggregates = await MostRecentComponentMethodRoyaltyAggregateHistory();
+        _mostRecentEntries.AddRange(await MostRecentComponentMethodRoyaltyEntryHistory());
+        _mostRecentAggregates.AddRange(await MostRecentComponentMethodRoyaltyAggregateHistory());
     }
 
     public async Task<int> SaveEntities()
@@ -196,11 +188,11 @@ internal class ComponentMethodRoyaltyProcessor
         return rowsInserted;
     }
 
-    private Task<Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>> MostRecentComponentMethodRoyaltyEntryHistory()
+    private async Task<IDictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>> MostRecentComponentMethodRoyaltyEntryHistory()
     {
         var lookupSet = new HashSet<ComponentMethodRoyaltyEntryDbLookup>();
 
-        foreach (var change in _changePointers.Values)
+        foreach (var (_, change) in _changes.AsEnumerable())
         {
             foreach (var entry in change.Entries)
             {
@@ -210,10 +202,10 @@ internal class ComponentMethodRoyaltyProcessor
 
         if (!lookupSet.Unzip(x => x.EntityId, x => x.MethodName, out var entityIds, out var methodNames))
         {
-            return Task.FromResult(new Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>());
+            return ImmutableDictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>(
+        return await _context.ReadHelper.MostRecent<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>(
             @$"
 WITH variables (entity_id, method_name) AS (
     SELECT UNNEST({entityIds}), UNNEST({methodNames})
@@ -230,16 +222,16 @@ INNER JOIN LATERAL (
             e => new ComponentMethodRoyaltyEntryDbLookup(e.EntityId, e.MethodName));
     }
 
-    private Task<Dictionary<long, ComponentMethodRoyaltyAggregateHistory>> MostRecentComponentMethodRoyaltyAggregateHistory()
+    private async Task<IDictionary<long, ComponentMethodRoyaltyAggregateHistory>> MostRecentComponentMethodRoyaltyAggregateHistory()
     {
-        var entityIds = _changeOrder.Select(x => x.EntityId).ToHashSet().ToList();
+        var entityIds = _changes.Keys.Select(x => x.EntityId).ToHashSet().ToList();
 
         if (!entityIds.Any())
         {
-            return Task.FromResult(new Dictionary<long, ComponentMethodRoyaltyAggregateHistory>());
+            return ImmutableDictionary<long, ComponentMethodRoyaltyAggregateHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<long, ComponentMethodRoyaltyAggregateHistory>(
+        return await _context.ReadHelper.MostRecent<long, ComponentMethodRoyaltyAggregateHistory>(
             $@"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})

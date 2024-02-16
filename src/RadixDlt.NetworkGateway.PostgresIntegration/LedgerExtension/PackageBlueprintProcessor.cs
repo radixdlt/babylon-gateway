@@ -67,15 +67,18 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
+internal record struct PackageBlueprintChangePointerLookup(long PackageEntityId, string Name, string Version, long StateVersion);
+
 internal record struct PackageBlueprintDbLookup(long PackageEntityId, string Name, string Version);
 
-internal record PackageBlueprintChangePointer(long StateVersion)
+internal record PackageBlueprintChangePointer
 {
     public CoreModel.PackageBlueprintDefinitionEntrySubstate? PackageBlueprintDefinition { get; set; }
 
@@ -91,8 +94,7 @@ internal class PackageBlueprintProcessor
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
 
-    private Dictionary<PackageBlueprintDbLookup, PackageBlueprintChangePointer> _changePointers = new();
-    private List<PackageBlueprintDbLookup> _changeOrder = new();
+    private ChangeTracker<PackageBlueprintChangePointerLookup, PackageBlueprintChangePointer> _changes = new();
 
     private Dictionary<long, PackageBlueprintAggregateHistory> _mostRecentAggregates = new();
     private Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory> _mostRecentEntries = new();
@@ -110,67 +112,45 @@ internal class PackageBlueprintProcessor
     {
         if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
         {
-            _changePointers
-                .GetOrAdd(new PackageBlueprintDbLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new PackageBlueprintChangePointer(stateVersion);
-                })
+            _changes
+                .GetOrAdd(new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion, stateVersion), _ => new PackageBlueprintChangePointer())
                 .PackageBlueprintDefinition = packageBlueprintDefinition;
         }
 
         if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate packageBlueprintDependencies)
         {
-            _changePointers
-                .GetOrAdd(new PackageBlueprintDbLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new PackageBlueprintChangePointer(stateVersion);
-                })
+            _changes
+                .GetOrAdd(new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion, stateVersion), _ => new PackageBlueprintChangePointer())
                 .PackageBlueprintDependencies = packageBlueprintDependencies;
         }
 
         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
         {
-            _changePointers
-                .GetOrAdd(new PackageBlueprintDbLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new PackageBlueprintChangePointer(stateVersion);
-                })
+            _changes
+                .GetOrAdd(new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion, stateVersion), _ => new PackageBlueprintChangePointer())
                 .PackageBlueprintRoyalty = packageBlueprintRoyalty;
         }
 
         if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate packageBlueprintAuthTemplate)
         {
-            _changePointers
-                .GetOrAdd(new PackageBlueprintDbLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new PackageBlueprintChangePointer(stateVersion);
-                })
+            _changes
+                .GetOrAdd(new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion, stateVersion), _ => new PackageBlueprintChangePointer())
                 .PackageBlueprintAuthTemplate = packageBlueprintAuthTemplate;
         }
     }
 
     public void ProcessChanges()
     {
-        foreach (var lookup in _changeOrder)
+        foreach (var (lookup, change) in _changes.AsEnumerable())
         {
-            var change = _changePointers[lookup];
-
             PackageBlueprintAggregateHistory aggregate;
 
-            if (!_mostRecentAggregates.TryGetValue(lookup.PackageEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != change.StateVersion)
+            if (!_mostRecentAggregates.TryGetValue(lookup.PackageEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
             {
                 aggregate = new PackageBlueprintAggregateHistory
                 {
                     Id = _context.Sequences.PackageBlueprintAggregateHistorySequence++,
-                    FromStateVersion = change.StateVersion,
+                    FromStateVersion = lookup.StateVersion,
                     PackageEntityId = lookup.PackageEntityId,
                     PackageBlueprintIds = new List<long>(),
                 };
@@ -180,75 +160,85 @@ internal class PackageBlueprintProcessor
                     aggregate.PackageBlueprintIds.AddRange(previousAggregate.PackageBlueprintIds);
                 }
 
-                _mostRecentAggregates[lookup.PackageEntityId] = aggregate;
                 _aggregatesToAdd.Add(aggregate);
+                _mostRecentAggregates[lookup.PackageEntityId] = aggregate;
             }
             else
             {
                 aggregate = previousAggregate;
             }
 
-            // TODO change all the code below and follow the existing pattern
-            PackageBlueprintHistory packageBlueprintHistory;
+            // WARNING! PackageBlueprint[Entry]History can be partially updated, therefore we must optionally clone previous entity similarly to how we handle aggregates
+            var entryLookup = new PackageBlueprintDbLookup(lookup.PackageEntityId, lookup.Name, lookup.Version);
+            PackageBlueprintHistory entryHistory;
 
-            _mostRecentEntries.TryGetValue(lookup, out var existingPackageBlueprint);
-
-            if (existingPackageBlueprint != null)
+            if (!_mostRecentEntries.TryGetValue(entryLookup, out var previousEntryHistory) || previousEntryHistory.FromStateVersion != lookup.StateVersion)
             {
-                var previousPackageBlueprintHistoryId = existingPackageBlueprint.Id;
-
-                packageBlueprintHistory = existingPackageBlueprint;
-                packageBlueprintHistory.Id = _context.Sequences.PackageBlueprintHistorySequence++;
-                packageBlueprintHistory.FromStateVersion = change.StateVersion;
-
-                aggregate.PackageBlueprintIds.Remove(previousPackageBlueprintHistoryId);
-                aggregate.PackageBlueprintIds.Add(packageBlueprintHistory.Id);
-            }
-            else
-            {
-                packageBlueprintHistory = new PackageBlueprintHistory
+                entryHistory = new PackageBlueprintHistory
                 {
                     Id = _context.Sequences.PackageBlueprintHistorySequence++,
+                    FromStateVersion = lookup.StateVersion,
                     PackageEntityId = lookup.PackageEntityId,
-                    FromStateVersion = change.StateVersion,
                     Name = lookup.Name,
                     Version = lookup.Version,
                 };
 
-                _mostRecentEntries[lookup] = packageBlueprintHistory;
-                aggregate.PackageBlueprintIds.Add(packageBlueprintHistory.Id);
+                _entriesToAdd.Add(entryHistory);
+
+                if (previousEntryHistory != null)
+                {
+                    entryHistory.Definition = previousEntryHistory.Definition;
+                    entryHistory.DependantEntityIds = previousEntryHistory.DependantEntityIds?.ToList();
+                    entryHistory.AuthTemplate = previousEntryHistory.AuthTemplate;
+                    entryHistory.AuthTemplateIsLocked = previousEntryHistory.AuthTemplateIsLocked;
+                    entryHistory.RoyaltyConfig = previousEntryHistory.RoyaltyConfig;
+                    entryHistory.RoyaltyConfigIsLocked = previousEntryHistory.RoyaltyConfigIsLocked;
+
+                    var currentPosition = aggregate.PackageBlueprintIds.IndexOf(previousEntryHistory.Id);
+
+                    if (currentPosition != -1)
+                    {
+                        aggregate.PackageBlueprintIds.RemoveAt(currentPosition);
+                    }
+                }
+
+                aggregate.PackageBlueprintIds.Insert(0, entryHistory.Id);
+
+                _mostRecentEntries[entryLookup] = entryHistory;
+            }
+            else
+            {
+                entryHistory = previousEntryHistory;
             }
 
             if (change.PackageBlueprintDefinition != null)
             {
-                packageBlueprintHistory.Definition = change.PackageBlueprintDefinition.Value.Definition.ToJson();
+                entryHistory.Definition = change.PackageBlueprintDefinition.Value.Definition.ToJson();
             }
 
             if (change.PackageBlueprintDependencies != null)
             {
-                packageBlueprintHistory.DependantEntityIds = change.PackageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                entryHistory.DependantEntityIds = change.PackageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
             }
 
             if (change.PackageBlueprintRoyalty != null)
             {
-                packageBlueprintHistory.RoyaltyConfig = change.PackageBlueprintRoyalty.Value.RoyaltyConfig.ToJson();
-                packageBlueprintHistory.RoyaltyConfigIsLocked = change.PackageBlueprintRoyalty.IsLocked;
+                entryHistory.RoyaltyConfig = change.PackageBlueprintRoyalty.Value.RoyaltyConfig.ToJson();
+                entryHistory.RoyaltyConfigIsLocked = change.PackageBlueprintRoyalty.IsLocked;
             }
 
             if (change.PackageBlueprintAuthTemplate != null)
             {
-                packageBlueprintHistory.AuthTemplate = change.PackageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
-                packageBlueprintHistory.AuthTemplateIsLocked = change.PackageBlueprintAuthTemplate.IsLocked;
+                entryHistory.AuthTemplate = change.PackageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
+                entryHistory.AuthTemplateIsLocked = change.PackageBlueprintAuthTemplate.IsLocked;
             }
-
-            _entriesToAdd.Add(packageBlueprintHistory);
         }
     }
 
     public async Task LoadMostRecent()
     {
-        _mostRecentEntries = await MostRecentPackageCodeHistory();
-        _mostRecentAggregates = await MostRecentPackageBlueprintAggregateHistory();
+        _mostRecentEntries.AddRange(await MostRecentPackageCodeHistory());
+        _mostRecentAggregates.AddRange(await MostRecentPackageBlueprintAggregateHistory());
     }
 
     public async Task<int> SaveEntities()
@@ -261,16 +251,16 @@ internal class PackageBlueprintProcessor
         return rowsInserted;
     }
 
-    private Task<Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>> MostRecentPackageCodeHistory()
+    private async Task<IDictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>> MostRecentPackageCodeHistory()
     {
-        var lookupSet = _changeOrder.ToHashSet();
+        var lookupSet = _changes.Keys.ToHashSet();
 
         if (!lookupSet.Unzip(x => x.PackageEntityId, x => x.Name, x => x.Version, out var packageEntityIds, out var names, out var versions))
         {
-            return Task.FromResult(new Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>());
+            return ImmutableDictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<PackageBlueprintDbLookup, PackageBlueprintHistory>(
+        return await _context.ReadHelper.MostRecent<PackageBlueprintDbLookup, PackageBlueprintHistory>(
             @$"
 WITH variables (package_entity_id, name, version) AS (
     SELECT UNNEST({packageEntityIds}), UNNEST({names}), UNNEST({versions})
@@ -287,16 +277,16 @@ INNER JOIN LATERAL (
             e => new PackageBlueprintDbLookup(e.PackageEntityId, e.Name, e.Version));
     }
 
-    private Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistory()
+    private async Task<IDictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistory()
     {
-        var packageEntityIds = _changePointers.Keys.Select(x => x.PackageEntityId).ToHashSet().ToList();
+        var packageEntityIds = _changes.Keys.Select(x => x.PackageEntityId).ToHashSet().ToList();
 
         if (!packageEntityIds.Any())
         {
-            return Task.FromResult(new Dictionary<long, PackageBlueprintAggregateHistory>());
+            return ImmutableDictionary<long, PackageBlueprintAggregateHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<long, PackageBlueprintAggregateHistory>(
+        return await _context.ReadHelper.MostRecent<long, PackageBlueprintAggregateHistory>(
             $@"
 WITH variables (package_entity_id) AS (
     SELECT UNNEST({packageEntityIds})
