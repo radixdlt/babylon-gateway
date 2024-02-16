@@ -162,8 +162,11 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)
         var stateHistory = await GetStateHistory(persistedComponentEntities, ledgerState, token);
-        var royaltyVaultsBalance = globalPersistedComponentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
-            ? await RoyaltyVaultBalance(globalPersistedComponentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
+        var royaltyVaultsBalances = globalPersistedComponentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
+            ? await GetRoyaltyVaultBalances(globalPersistedComponentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
+            : null;
+        var componentRoyaltyConfigs = globalPersistedComponentEntities.Any() && optIns.ComponentRoyaltyConfig
+            ? await GetComponentRoyaltyConfigs(globalPersistedComponentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
             : null;
 
         // fetch [non-]fungible resource collections for all components, even internal ones, for backwards compability
@@ -212,23 +215,14 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     break;
 
                 case GlobalPackageEntity pe:
-                    var packageRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == pe.Id)?.Balance;
+                    var packageRoyaltyVaultBalance = royaltyVaultsBalances?.SingleOrDefault(x => x.OwnerEntityId == pe.Id)?.Balance;
                     var blueprints = new List<GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem>();
                     var schemas = new List<GatewayModel.StateEntityDetailsResponsePackageDetailsSchemaItem>();
                     var codeItems = new List<GatewayModel.PackageCodeCollectionItem>();
 
                     if (packageBlueprintHistory.TryGetValue(pe.Id, out var packageBlueprints))
                     {
-                        blueprints.AddRange(packageBlueprints.Select(pb => new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem(
-                            name: pb.Name,
-                            version: pb.Version,
-                            definition: new JRaw(pb.Definition),
-                            dependantEntities: pb.DependantEntityIds?.Select(de => correlatedAddresses[de].ToString()).ToList(),
-                            authTemplate: pb.AuthTemplate != null ? new JRaw(pb.AuthTemplate) : null,
-                            authTemplateIsLocked: pb.AuthTemplateIsLocked,
-                            royaltyConfig: pb.RoyaltyConfig != null ? new JRaw(pb.RoyaltyConfig) : null,
-                            royaltyConfigIsLocked: pb.RoyaltyConfigIsLocked
-                        )));
+                        blueprints.AddRange(packageBlueprints.Select(pb => pb.ToGatewayModel(correlatedAddresses)));
                     }
 
                     if (packageCodeHistory.TryGetValue(pe.Id, out var packageCodes))
@@ -298,9 +292,12 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     break;
 
                 case ComponentEntity ce:
+                    ComponentMethodRoyaltyEntryHistory[]? componentRoyaltyConfig = null;
+
                     stateHistory.TryGetValue(ce.Id, out var state);
                     roleAssignmentsHistory.TryGetValue(ce.Id, out var roleAssignments);
-                    var componentRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
+                    componentRoyaltyConfigs?.TryGetValue(ce.Id, out componentRoyaltyConfig);
+                    var componentRoyaltyVaultBalance = royaltyVaultsBalances?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         packageAddress: correlatedAddresses[ce.PackageId],
@@ -308,7 +305,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         blueprintVersion: ce.BlueprintVersion,
                         state: state != null ? new JRaw(state) : null,
                         roleAssignments: roleAssignments,
-                        royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
+                        royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null,
+                        royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null
                     );
                     break;
             }
@@ -930,7 +928,7 @@ INNER JOIN LATERAL (
         return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, nextCursor, items));
     }
 
-    private async Task<List<RoyaltyVaultBalanceViewModel>> RoyaltyVaultBalance(long[] ownerIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<List<RoyaltyVaultBalanceViewModel>> GetRoyaltyVaultBalances(long[] ownerIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var cd = new CommandDefinition(
             commandText: @"
@@ -1423,6 +1421,41 @@ ORDER BY array_position(mrpc.package_code_ids, pch.id)")
                 .AnnotateMetricName()
                 .ToListAsync(token))
             .GroupBy(b => b.PackageEntityId)
+            .ToDictionary(g => g.Key, g => g.ToArray());
+    }
+
+    private async Task<Dictionary<long, ComponentMethodRoyaltyEntryHistory[]>> GetComponentRoyaltyConfigs(long[] componentEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        if (!componentEntityIds.Any())
+        {
+            return new Dictionary<long, ComponentMethodRoyaltyEntryHistory[]>();
+        }
+
+        return (await _dbContext
+                .ComponentEntityMethodRoyaltyEntryHistory
+                .FromSqlInterpolated($@"
+WITH variables (component_entity_id) AS (
+   SELECT UNNEST({componentEntityIds})
+),
+aggregates AS (
+   SELECT cmrah.*
+   FROM variables
+   INNER JOIN LATERAL (
+        SELECT *
+        FROM component_method_royalty_aggregate_history
+        WHERE entity_id = variables.component_entity_id AND from_state_version <= {ledgerState.StateVersion}
+        ORDER BY from_state_version DESC
+        LIMIT 1
+   ) cmrah ON TRUE
+)
+SELECT cmreh.*
+FROM aggregates
+INNER JOIN LATERAL UNNEST(entry_ids) WITH ORDINALITY AS component_method_royalty_join(id, ordinality) ON TRUE
+INNER JOIN component_method_royalty_entry_history cmreh ON cmreh.id = component_method_royalty_join.id
+ORDER BY component_method_royalty_join.ordinality ASC;")
+                .AnnotateMetricName()
+                .ToListAsync(token))
+            .GroupBy(b => b.EntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
     }
 

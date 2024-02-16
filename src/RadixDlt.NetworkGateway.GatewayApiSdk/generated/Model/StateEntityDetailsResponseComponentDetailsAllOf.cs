@@ -109,7 +109,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="state">A representation of a component&#39;s inner state. If this entity is a &#x60;GenericComponent&#x60;, this field will be in a programmatic JSON structure (you can deserialize it as a &#x60;ProgrammaticScryptoSborValue&#x60;). Otherwise, for \&quot;native\&quot; components such as &#x60;Account&#x60;, &#x60;Validator&#x60;, &#x60;AccessController&#x60;, &#x60;OneResourcePool&#x60;, &#x60;TwoResourcePool&#x60;, and &#x60;MultiResourcePool&#x60;, this field will be a custom JSON model defined in the Core API schema. .</param>
         /// <param name="roleAssignments">roleAssignments.</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string))
+        /// <param name="royaltyConfig">royaltyConfig.</param>
+        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig))
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -127,6 +128,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.State = state;
             this.RoleAssignments = roleAssignments;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
+            this.RoyaltyConfig = royaltyConfig;
         }
 
         /// <summary>
@@ -169,6 +171,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string RoyaltyVaultBalance { get; set; }
 
         /// <summary>
+        /// Gets or Sets RoyaltyConfig
+        /// </summary>
+        [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
+        public ComponentRoyaltyConfig RoyaltyConfig { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -182,6 +190,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
+            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -246,6 +255,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
                     (this.RoyaltyVaultBalance != null &&
                     this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
+                ) && 
+                (
+                    this.RoyaltyConfig == input.RoyaltyConfig ||
+                    (this.RoyaltyConfig != null &&
+                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
                 );
         }
 
@@ -281,6 +295,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.RoyaltyVaultBalance != null)
                 {
                     hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
+                }
+                if (this.RoyaltyConfig != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
                 }
                 return hashCode;
             }

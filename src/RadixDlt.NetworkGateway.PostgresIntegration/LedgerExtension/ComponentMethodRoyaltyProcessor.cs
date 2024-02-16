@@ -146,7 +146,7 @@ internal class ComponentMethodRoyaltyProcessor
                     FromStateVersion = lookup.StateVersion,
                     EntityId = lookup.EntityId,
                     MethodName = entry.Key.MethodName,
-                    RoyaltyAmount = entry.Value?.ToJson(),
+                    RoyaltyAmount = entry.Value?.RoyaltyAmount?.ToJson(),
                     IsLocked = entry.IsLocked,
                 };
 

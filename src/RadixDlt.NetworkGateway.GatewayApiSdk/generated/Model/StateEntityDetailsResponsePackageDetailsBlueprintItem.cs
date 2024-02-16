@@ -109,9 +109,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="dependantEntities">dependantEntities.</param>
         /// <param name="authTemplate">This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="authTemplateIsLocked">authTemplateIsLocked.</param>
-        /// <param name="royaltyConfig">This type is defined in the Core API as &#x60;BlueprintRoyaltyConfig&#x60;. See the Core API documentation for more details. .</param>
+        /// <param name="royaltyConfig">royaltyConfig.</param>
         /// <param name="royaltyConfigIsLocked">royaltyConfigIsLocked.</param>
-        public StateEntityDetailsResponsePackageDetailsBlueprintItem(string name = default(string), string version = default(string), Object definition = default(Object), List<string> dependantEntities = default(List<string>), Object authTemplate = default(Object), bool? authTemplateIsLocked = default(bool?), Object royaltyConfig = default(Object), bool? royaltyConfigIsLocked = default(bool?))
+        public StateEntityDetailsResponsePackageDetailsBlueprintItem(string name = default(string), string version = default(string), Object definition = default(Object), List<string> dependantEntities = default(List<string>), Object authTemplate = default(Object), bool? authTemplateIsLocked = default(bool?), BlueprintRoyaltyConfig royaltyConfig = default(BlueprintRoyaltyConfig), bool? royaltyConfigIsLocked = default(bool?))
         {
             // to ensure "name" is required (not null)
             if (name == null)
@@ -177,11 +177,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool? AuthTemplateIsLocked { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;BlueprintRoyaltyConfig&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets RoyaltyConfig
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;BlueprintRoyaltyConfig&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
-        public Object RoyaltyConfig { get; set; }
+        public BlueprintRoyaltyConfig RoyaltyConfig { get; set; }
 
         /// <summary>
         /// Gets or Sets RoyaltyConfigIsLocked
