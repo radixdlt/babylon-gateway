@@ -72,11 +72,11 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("state/validators")]
-public class ValidatorController : ControllerBase
+public class StateValidatorsController : ControllerBase
 {
     private readonly IValidatorStateHandler _validatorStateHandler;
 
-    public ValidatorController(IValidatorStateHandler validatorStateHandler)
+    public StateValidatorsController(IValidatorStateHandler validatorStateHandler)
     {
         _validatorStateHandler = validatorStateHandler;
     }

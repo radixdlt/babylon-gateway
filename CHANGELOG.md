@@ -3,17 +3,22 @@ Release Date: _not published yet_
 
 - Fixed unstable package blueprint and code aggregation.
 - Reworked internal data aggregation mechanism.
-
 - Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
+- Changed MVC controller and action names. It has no effect on the API but prometheus label `controler`/`action` will differ now.
+  - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.Keys`,
+  - `StatisticsController.Uptime` renamed to `StatisticsController.ValidatorsUptime`,
+  - `StateController` renamed to `StateEntityController`,
+  - `ValidatorStateController` renamed to `StateValidatorsComponent`.
 
 ### API Changes
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented.
+- Added `/state/key-value-store/page/keys` and `/state/non-fungible/page/ids` endpoints to replace now obsoleted `/state/key-value-store/keys` and `/state/non-fungible/ids`.
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
 
 ### Deprecations
-TBD
+- Obsoleted non-conforming API endpoints `/state/key-value-store/keys` and `/state/non-fungible/ids` in place of `/state/key-value-store/page/keys` and `/state/non-fungible/page/ids`. 
 
 ## 1.4.0
 Release Date: 08.02.2024

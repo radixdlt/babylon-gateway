@@ -242,15 +242,38 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get KeyValueStore Keys
         /// </summary>
         /// <remarks>
+        /// **Obsolete!** Use &#x60;/state/key-value-store/page/keys&#x60; instead. Allows to iterate over key value store keys. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreKeysRequest"></param>
+        /// <returns>StateKeyValueStoreKeysResponse</returns>
+        [Obsolete]
+        StateKeyValueStoreKeysResponse KeyValueStoreKeys(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest);
+
+        /// <summary>
+        /// Get KeyValueStore Keys
+        /// </summary>
+        /// <remarks>
+        /// **Obsolete!** Use &#x60;/state/key-value-store/page/keys&#x60; instead. Allows to iterate over key value store keys. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreKeysRequest"></param>
+        /// <returns>ApiResponse of StateKeyValueStoreKeysResponse</returns>
+        [Obsolete]
+        ApiResponse<StateKeyValueStoreKeysResponse> KeyValueStoreKeysWithHttpInfo(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest);
+        /// <summary>
+        /// Get page of KeyValueStore Keys
+        /// </summary>
+        /// <remarks>
         /// Allows to iterate over key value store keys. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreKeysRequest"></param>
         /// <returns>StateKeyValueStoreKeysResponse</returns>
-        StateKeyValueStoreKeysResponse KeyValueStoreKeys(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest);
+        StateKeyValueStoreKeysResponse KeyValueStoreKeysPage(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest);
 
         /// <summary>
-        /// Get KeyValueStore Keys
+        /// Get page of KeyValueStore Keys
         /// </summary>
         /// <remarks>
         /// Allows to iterate over key value store keys. 
@@ -258,7 +281,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreKeysRequest"></param>
         /// <returns>ApiResponse of StateKeyValueStoreKeysResponse</returns>
-        ApiResponse<StateKeyValueStoreKeysResponse> KeyValueStoreKeysWithHttpInfo(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest);
+        ApiResponse<StateKeyValueStoreKeysResponse> KeyValueStoreKeysPageWithHttpInfo(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest);
         /// <summary>
         /// Get Non-Fungible Data
         /// </summary>
@@ -284,12 +307,35 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get page of Non-Fungible Ids in Resource Collection
         /// </summary>
         /// <remarks>
+        /// **Obsolete!** Use &#x60;/state/non-fungible/page/ids&#x60; instead. Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <returns>StateNonFungibleIdsResponse</returns>
+        [Obsolete]
+        StateNonFungibleIdsResponse NonFungibleIds(StateNonFungibleIdsRequest stateNonFungibleIdsRequest);
+
+        /// <summary>
+        /// Get page of Non-Fungible Ids in Resource Collection
+        /// </summary>
+        /// <remarks>
+        /// **Obsolete!** Use &#x60;/state/non-fungible/page/ids&#x60; instead. Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <returns>ApiResponse of StateNonFungibleIdsResponse</returns>
+        [Obsolete]
+        ApiResponse<StateNonFungibleIdsResponse> NonFungibleIdsWithHttpInfo(StateNonFungibleIdsRequest stateNonFungibleIdsRequest);
+        /// <summary>
+        /// Get page of Non-Fungible Ids in Resource Collection
+        /// </summary>
+        /// <remarks>
         /// Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateNonFungibleIdsRequest"></param>
         /// <returns>StateNonFungibleIdsResponse</returns>
-        StateNonFungibleIdsResponse NonFungibleIds(StateNonFungibleIdsRequest stateNonFungibleIdsRequest);
+        StateNonFungibleIdsResponse NonFungibleIdsPage(StateNonFungibleIdsRequest stateNonFungibleIdsRequest);
 
         /// <summary>
         /// Get page of Non-Fungible Ids in Resource Collection
@@ -300,7 +346,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateNonFungibleIdsRequest"></param>
         /// <returns>ApiResponse of StateNonFungibleIdsResponse</returns>
-        ApiResponse<StateNonFungibleIdsResponse> NonFungibleIdsWithHttpInfo(StateNonFungibleIdsRequest stateNonFungibleIdsRequest);
+        ApiResponse<StateNonFungibleIdsResponse> NonFungibleIdsPageWithHttpInfo(StateNonFungibleIdsRequest stateNonFungibleIdsRequest);
         /// <summary>
         /// Get Non-Fungible Location
         /// </summary>
@@ -535,16 +581,41 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get KeyValueStore Keys
         /// </summary>
         /// <remarks>
+        /// **Obsolete!** Use &#x60;/state/key-value-store/page/keys&#x60; instead. Allows to iterate over key value store keys. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreKeysRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateKeyValueStoreKeysResponse</returns>
+        [Obsolete]
+        System.Threading.Tasks.Task<StateKeyValueStoreKeysResponse> KeyValueStoreKeysAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get KeyValueStore Keys
+        /// </summary>
+        /// <remarks>
+        /// **Obsolete!** Use &#x60;/state/key-value-store/page/keys&#x60; instead. Allows to iterate over key value store keys. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreKeysRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateKeyValueStoreKeysResponse)</returns>
+        [Obsolete]
+        System.Threading.Tasks.Task<ApiResponse<StateKeyValueStoreKeysResponse>> KeyValueStoreKeysWithHttpInfoAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get page of KeyValueStore Keys
+        /// </summary>
+        /// <remarks>
         /// Allows to iterate over key value store keys. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreKeysRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of StateKeyValueStoreKeysResponse</returns>
-        System.Threading.Tasks.Task<StateKeyValueStoreKeysResponse> KeyValueStoreKeysAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<StateKeyValueStoreKeysResponse> KeyValueStoreKeysPageAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get KeyValueStore Keys
+        /// Get page of KeyValueStore Keys
         /// </summary>
         /// <remarks>
         /// Allows to iterate over key value store keys. 
@@ -553,7 +624,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="stateKeyValueStoreKeysRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateKeyValueStoreKeysResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<StateKeyValueStoreKeysResponse>> KeyValueStoreKeysWithHttpInfoAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<StateKeyValueStoreKeysResponse>> KeyValueStoreKeysPageWithHttpInfoAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Non-Fungible Data
         /// </summary>
@@ -581,13 +652,38 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get page of Non-Fungible Ids in Resource Collection
         /// </summary>
         /// <remarks>
+        /// **Obsolete!** Use &#x60;/state/non-fungible/page/ids&#x60; instead. Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateNonFungibleIdsResponse</returns>
+        [Obsolete]
+        System.Threading.Tasks.Task<StateNonFungibleIdsResponse> NonFungibleIdsAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get page of Non-Fungible Ids in Resource Collection
+        /// </summary>
+        /// <remarks>
+        /// **Obsolete!** Use &#x60;/state/non-fungible/page/ids&#x60; instead. Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateNonFungibleIdsResponse)</returns>
+        [Obsolete]
+        System.Threading.Tasks.Task<ApiResponse<StateNonFungibleIdsResponse>> NonFungibleIdsWithHttpInfoAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get page of Non-Fungible Ids in Resource Collection
+        /// </summary>
+        /// <remarks>
         /// Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateNonFungibleIdsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of StateNonFungibleIdsResponse</returns>
-        System.Threading.Tasks.Task<StateNonFungibleIdsResponse> NonFungibleIdsAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<StateNonFungibleIdsResponse> NonFungibleIdsPageAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Get page of Non-Fungible Ids in Resource Collection
@@ -599,7 +695,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="stateNonFungibleIdsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateNonFungibleIdsResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<StateNonFungibleIdsResponse>> NonFungibleIdsWithHttpInfoAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<StateNonFungibleIdsResponse>> NonFungibleIdsPageWithHttpInfoAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Non-Fungible Location
         /// </summary>
@@ -1702,11 +1798,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get KeyValueStore Keys Allows to iterate over key value store keys. 
+        /// Get KeyValueStore Keys **Obsolete!** Use &#x60;/state/key-value-store/page/keys&#x60; instead. Allows to iterate over key value store keys. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreKeysRequest"></param>
         /// <returns>StateKeyValueStoreKeysResponse</returns>
+        [Obsolete]
         public StateKeyValueStoreKeysResponse KeyValueStoreKeys(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest)
         {
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreKeysResponse> localVarResponse = KeyValueStoreKeysWithHttpInfo(stateKeyValueStoreKeysRequest);
@@ -1714,11 +1811,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get KeyValueStore Keys Allows to iterate over key value store keys. 
+        /// Get KeyValueStore Keys **Obsolete!** Use &#x60;/state/key-value-store/page/keys&#x60; instead. Allows to iterate over key value store keys. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreKeysRequest"></param>
         /// <returns>ApiResponse of StateKeyValueStoreKeysResponse</returns>
+        [Obsolete]
         public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreKeysResponse> KeyValueStoreKeysWithHttpInfo(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest)
         {
             // verify the required parameter 'stateKeyValueStoreKeysRequest' is set
@@ -1758,12 +1856,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get KeyValueStore Keys Allows to iterate over key value store keys. 
+        /// Get KeyValueStore Keys **Obsolete!** Use &#x60;/state/key-value-store/page/keys&#x60; instead. Allows to iterate over key value store keys. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreKeysRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of StateKeyValueStoreKeysResponse</returns>
+        [Obsolete]
         public async System.Threading.Tasks.Task<StateKeyValueStoreKeysResponse> KeyValueStoreKeysAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreKeysResponse> localVarResponse = await KeyValueStoreKeysWithHttpInfoAsync(stateKeyValueStoreKeysRequest, cancellationToken).ConfigureAwait(false);
@@ -1771,12 +1870,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get KeyValueStore Keys Allows to iterate over key value store keys. 
+        /// Get KeyValueStore Keys **Obsolete!** Use &#x60;/state/key-value-store/page/keys&#x60; instead. Allows to iterate over key value store keys. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreKeysRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateKeyValueStoreKeysResponse)</returns>
+        [Obsolete]
         public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreKeysResponse>> KeyValueStoreKeysWithHttpInfoAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'stateKeyValueStoreKeysRequest' is set
@@ -1812,6 +1912,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("KeyValueStoreKeys", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get page of KeyValueStore Keys Allows to iterate over key value store keys. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreKeysRequest"></param>
+        /// <returns>StateKeyValueStoreKeysResponse</returns>
+        public StateKeyValueStoreKeysResponse KeyValueStoreKeysPage(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreKeysResponse> localVarResponse = KeyValueStoreKeysPageWithHttpInfo(stateKeyValueStoreKeysRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get page of KeyValueStore Keys Allows to iterate over key value store keys. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreKeysRequest"></param>
+        /// <returns>ApiResponse of StateKeyValueStoreKeysResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreKeysResponse> KeyValueStoreKeysPageWithHttpInfo(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest)
+        {
+            // verify the required parameter 'stateKeyValueStoreKeysRequest' is set
+            if (stateKeyValueStoreKeysRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateKeyValueStoreKeysRequest' when calling StateApi->KeyValueStoreKeysPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateKeyValueStoreKeysRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateKeyValueStoreKeysResponse>("/state/key-value-store/page/keys", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("KeyValueStoreKeysPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get page of KeyValueStore Keys Allows to iterate over key value store keys. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreKeysRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateKeyValueStoreKeysResponse</returns>
+        public async System.Threading.Tasks.Task<StateKeyValueStoreKeysResponse> KeyValueStoreKeysPageAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreKeysResponse> localVarResponse = await KeyValueStoreKeysPageWithHttpInfoAsync(stateKeyValueStoreKeysRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get page of KeyValueStore Keys Allows to iterate over key value store keys. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreKeysRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateKeyValueStoreKeysResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreKeysResponse>> KeyValueStoreKeysPageWithHttpInfoAsync(StateKeyValueStoreKeysRequest stateKeyValueStoreKeysRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateKeyValueStoreKeysRequest' is set
+            if (stateKeyValueStoreKeysRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateKeyValueStoreKeysRequest' when calling StateApi->KeyValueStoreKeysPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateKeyValueStoreKeysRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateKeyValueStoreKeysResponse>("/state/key-value-store/page/keys", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("KeyValueStoreKeysPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -1936,11 +2153,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get page of Non-Fungible Ids in Resource Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// Get page of Non-Fungible Ids in Resource Collection **Obsolete!** Use &#x60;/state/non-fungible/page/ids&#x60; instead. Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateNonFungibleIdsRequest"></param>
         /// <returns>StateNonFungibleIdsResponse</returns>
+        [Obsolete]
         public StateNonFungibleIdsResponse NonFungibleIds(StateNonFungibleIdsRequest stateNonFungibleIdsRequest)
         {
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse> localVarResponse = NonFungibleIdsWithHttpInfo(stateNonFungibleIdsRequest);
@@ -1948,11 +2166,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get page of Non-Fungible Ids in Resource Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// Get page of Non-Fungible Ids in Resource Collection **Obsolete!** Use &#x60;/state/non-fungible/page/ids&#x60; instead. Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateNonFungibleIdsRequest"></param>
         /// <returns>ApiResponse of StateNonFungibleIdsResponse</returns>
+        [Obsolete]
         public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse> NonFungibleIdsWithHttpInfo(StateNonFungibleIdsRequest stateNonFungibleIdsRequest)
         {
             // verify the required parameter 'stateNonFungibleIdsRequest' is set
@@ -1992,12 +2211,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get page of Non-Fungible Ids in Resource Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// Get page of Non-Fungible Ids in Resource Collection **Obsolete!** Use &#x60;/state/non-fungible/page/ids&#x60; instead. Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateNonFungibleIdsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of StateNonFungibleIdsResponse</returns>
+        [Obsolete]
         public async System.Threading.Tasks.Task<StateNonFungibleIdsResponse> NonFungibleIdsAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse> localVarResponse = await NonFungibleIdsWithHttpInfoAsync(stateNonFungibleIdsRequest, cancellationToken).ConfigureAwait(false);
@@ -2005,12 +2225,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get page of Non-Fungible Ids in Resource Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// Get page of Non-Fungible Ids in Resource Collection **Obsolete!** Use &#x60;/state/non-fungible/page/ids&#x60; instead. Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateNonFungibleIdsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateNonFungibleIdsResponse)</returns>
+        [Obsolete]
         public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse>> NonFungibleIdsWithHttpInfoAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'stateNonFungibleIdsRequest' is set
@@ -2046,6 +2267,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("NonFungibleIds", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get page of Non-Fungible Ids in Resource Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <returns>StateNonFungibleIdsResponse</returns>
+        public StateNonFungibleIdsResponse NonFungibleIdsPage(StateNonFungibleIdsRequest stateNonFungibleIdsRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse> localVarResponse = NonFungibleIdsPageWithHttpInfo(stateNonFungibleIdsRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get page of Non-Fungible Ids in Resource Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <returns>ApiResponse of StateNonFungibleIdsResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse> NonFungibleIdsPageWithHttpInfo(StateNonFungibleIdsRequest stateNonFungibleIdsRequest)
+        {
+            // verify the required parameter 'stateNonFungibleIdsRequest' is set
+            if (stateNonFungibleIdsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateNonFungibleIdsRequest' when calling StateApi->NonFungibleIdsPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateNonFungibleIdsRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateNonFungibleIdsResponse>("/state/non-fungible/page/ids", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("NonFungibleIdsPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get page of Non-Fungible Ids in Resource Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateNonFungibleIdsResponse</returns>
+        public async System.Threading.Tasks.Task<StateNonFungibleIdsResponse> NonFungibleIdsPageAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse> localVarResponse = await NonFungibleIdsPageWithHttpInfoAsync(stateNonFungibleIdsRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get page of Non-Fungible Ids in Resource Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateNonFungibleIdsResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse>> NonFungibleIdsPageWithHttpInfoAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateNonFungibleIdsRequest' is set
+            if (stateNonFungibleIdsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateNonFungibleIdsRequest' when calling StateApi->NonFungibleIdsPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateNonFungibleIdsRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateNonFungibleIdsResponse>("/state/non-fungible/page/ids", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("NonFungibleIdsPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

@@ -64,6 +64,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -81,7 +82,14 @@ public class StateNonFungibleController : ControllerBase
         _nonFungibleHandler = nonFungibleHandler;
     }
 
+    [HttpPost("page/ids")]
+    public async Task<GatewayModel.StateNonFungibleIdsResponse> IdsPage(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token)
+    {
+        return await _nonFungibleHandler.Ids(request, token);
+    }
+
     [HttpPost("ids")]
+    [Obsolete("Use IdsPage instead.")]
     public async Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token)
     {
         return await _nonFungibleHandler.Ids(request, token);
