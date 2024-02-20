@@ -352,9 +352,14 @@ internal static class GatewayModelExtensions
             return null;
         }
 
-        var methodRules = coreModel.MethodRules.Select(mr => new GatewayModel.BlueprintMethodRoyalty(
-            methodName: mr.MethodName,
-            royaltyAmount: mr.RoyaltyAmount.ToGatewayModel())).ToList();
+        List<GatewayModel.BlueprintMethodRoyalty>? methodRules = null;
+
+        if (coreModel.MethodRules != null)
+        {
+            methodRules = coreModel.MethodRules
+                .Select(mr => new GatewayModel.BlueprintMethodRoyalty(mr.MethodName, mr.RoyaltyAmount.ToGatewayModel()))
+                .ToList();
+        }
 
         return new GatewayModel.BlueprintRoyaltyConfig(coreModel.IsEnabled, methodRules);
     }
