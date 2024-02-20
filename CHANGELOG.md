@@ -12,9 +12,9 @@ Release Date: _not published yet_
 
 ### API Changes
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented.
-- Added `/state/key-value-store/page/keys` and `/state/non-fungible/page/ids` endpoints to replace now obsoleted `/state/key-value-store/keys` and `/state/non-fungible/ids`.
-- Added strong type definition of `royalty_config` for package blueprints and general components. 
+- Added `/state/key-value-store/page/keys` and `/state/non-fungible/page/ids` endpoints to replace now obsoleted `/state/key-value-store/keys` and `/state/non-fungible/ids`. 
 - Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
+- Use strong type definition of `royalty_config` for package blueprints and general components. This is a change to OAS definition only and does not impact returned data format.
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
