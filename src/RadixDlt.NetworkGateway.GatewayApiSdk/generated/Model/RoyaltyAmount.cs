@@ -90,71 +90,64 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Check detailed [OptIns](#section/Using-endpoints-with-opt-in-features) documentation for more details
+    /// RoyaltyAmount
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsOptIns")]
-    public partial class StateEntityDetailsOptIns : IEquatable<StateEntityDetailsOptIns>
+    [DataContract(Name = "RoyaltyAmount")]
+    public partial class RoyaltyAmount : IEquatable<RoyaltyAmount>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsOptIns" /> class.
+        /// Defines Unit
         /// </summary>
-        /// <param name="ancestorIdentities">if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned. (default to false).</param>
-        /// <param name="componentRoyaltyConfig">if set to &#x60;true&#x60;, &#x60;royalty_config&#x60; for component entities is returned. (default to false).</param>
-        /// <param name="componentRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned. (default to false).</param>
-        /// <param name="packageRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned. (default to false).</param>
-        /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint. (default to false).</param>
-        /// <param name="explicitMetadata">allows specifying explicitly metadata properties which should be returned in response..</param>
-        public StateEntityDetailsOptIns(bool ancestorIdentities = false, bool componentRoyaltyConfig = false, bool componentRoyaltyVaultBalance = false, bool packageRoyaltyVaultBalance = false, bool nonFungibleIncludeNfids = false, List<string> explicitMetadata = default(List<string>))
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum UnitEnum
         {
-            this.AncestorIdentities = ancestorIdentities;
-            this.ComponentRoyaltyConfig = componentRoyaltyConfig;
-            this.ComponentRoyaltyVaultBalance = componentRoyaltyVaultBalance;
-            this.PackageRoyaltyVaultBalance = packageRoyaltyVaultBalance;
-            this.NonFungibleIncludeNfids = nonFungibleIncludeNfids;
-            this.ExplicitMetadata = explicitMetadata;
+            /// <summary>
+            /// Enum XRD for value: XRD
+            /// </summary>
+            [EnumMember(Value = "XRD")]
+            XRD = 1,
+
+            /// <summary>
+            /// Enum USD for value: USD
+            /// </summary>
+            [EnumMember(Value = "USD")]
+            USD = 2
+
+        }
+
+
+        /// <summary>
+        /// Gets or Sets Unit
+        /// </summary>
+        [DataMember(Name = "unit", IsRequired = true, EmitDefaultValue = true)]
+        public UnitEnum Unit { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoyaltyAmount" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected RoyaltyAmount() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoyaltyAmount" /> class.
+        /// </summary>
+        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        /// <param name="unit">unit (required).</param>
+        public RoyaltyAmount(string amount = default(string), UnitEnum unit = default(UnitEnum))
+        {
+            // to ensure "amount" is required (not null)
+            if (amount == null)
+            {
+                throw new ArgumentNullException("amount is a required property for RoyaltyAmount and cannot be null");
+            }
+            this.Amount = amount;
+            this.Unit = unit;
         }
 
         /// <summary>
-        /// if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned.
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
-        /// <value>if set to &#x60;true&#x60;, ancestor addresses - &#x60;parent_address&#x60;, &#x60;owner_address&#x60; and &#x60;global_address&#x60; for entities are returned.</value>
-        [DataMember(Name = "ancestor_identities", EmitDefaultValue = true)]
-        public bool AncestorIdentities { get; set; }
-
-        /// <summary>
-        /// if set to &#x60;true&#x60;, &#x60;royalty_config&#x60; for component entities is returned.
-        /// </summary>
-        /// <value>if set to &#x60;true&#x60;, &#x60;royalty_config&#x60; for component entities is returned.</value>
-        [DataMember(Name = "component_royalty_config", EmitDefaultValue = true)]
-        public bool ComponentRoyaltyConfig { get; set; }
-
-        /// <summary>
-        /// if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned.
-        /// </summary>
-        /// <value>if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for component entities is returned.</value>
-        [DataMember(Name = "component_royalty_vault_balance", EmitDefaultValue = true)]
-        public bool ComponentRoyaltyVaultBalance { get; set; }
-
-        /// <summary>
-        /// if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned.
-        /// </summary>
-        /// <value>if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned.</value>
-        [DataMember(Name = "package_royalty_vault_balance", EmitDefaultValue = true)]
-        public bool PackageRoyaltyVaultBalance { get; set; }
-
-        /// <summary>
-        /// if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.
-        /// </summary>
-        /// <value>if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint.</value>
-        [DataMember(Name = "non_fungible_include_nfids", EmitDefaultValue = true)]
-        public bool NonFungibleIncludeNfids { get; set; }
-
-        /// <summary>
-        /// allows specifying explicitly metadata properties which should be returned in response.
-        /// </summary>
-        /// <value>allows specifying explicitly metadata properties which should be returned in response.</value>
-        [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
-        public List<string> ExplicitMetadata { get; set; }
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -163,13 +156,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsOptIns {\n");
-            sb.Append("  AncestorIdentities: ").Append(AncestorIdentities).Append("\n");
-            sb.Append("  ComponentRoyaltyConfig: ").Append(ComponentRoyaltyConfig).Append("\n");
-            sb.Append("  ComponentRoyaltyVaultBalance: ").Append(ComponentRoyaltyVaultBalance).Append("\n");
-            sb.Append("  PackageRoyaltyVaultBalance: ").Append(PackageRoyaltyVaultBalance).Append("\n");
-            sb.Append("  NonFungibleIncludeNfids: ").Append(NonFungibleIncludeNfids).Append("\n");
-            sb.Append("  ExplicitMetadata: ").Append(ExplicitMetadata).Append("\n");
+            sb.Append("class RoyaltyAmount {\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  Unit: ").Append(Unit).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -190,15 +179,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsOptIns);
+            return this.Equals(input as RoyaltyAmount);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsOptIns instances are equal
+        /// Returns true if RoyaltyAmount instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsOptIns to be compared</param>
+        /// <param name="input">Instance of RoyaltyAmount to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsOptIns input)
+        public bool Equals(RoyaltyAmount input)
         {
             if (input == null)
             {
@@ -206,30 +195,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AncestorIdentities == input.AncestorIdentities ||
-                    this.AncestorIdentities.Equals(input.AncestorIdentities)
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 ) && 
                 (
-                    this.ComponentRoyaltyConfig == input.ComponentRoyaltyConfig ||
-                    this.ComponentRoyaltyConfig.Equals(input.ComponentRoyaltyConfig)
-                ) && 
-                (
-                    this.ComponentRoyaltyVaultBalance == input.ComponentRoyaltyVaultBalance ||
-                    this.ComponentRoyaltyVaultBalance.Equals(input.ComponentRoyaltyVaultBalance)
-                ) && 
-                (
-                    this.PackageRoyaltyVaultBalance == input.PackageRoyaltyVaultBalance ||
-                    this.PackageRoyaltyVaultBalance.Equals(input.PackageRoyaltyVaultBalance)
-                ) && 
-                (
-                    this.NonFungibleIncludeNfids == input.NonFungibleIncludeNfids ||
-                    this.NonFungibleIncludeNfids.Equals(input.NonFungibleIncludeNfids)
-                ) && 
-                (
-                    this.ExplicitMetadata == input.ExplicitMetadata ||
-                    this.ExplicitMetadata != null &&
-                    input.ExplicitMetadata != null &&
-                    this.ExplicitMetadata.SequenceEqual(input.ExplicitMetadata)
+                    this.Unit == input.Unit ||
+                    this.Unit.Equals(input.Unit)
                 );
         }
 
@@ -242,15 +214,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.AncestorIdentities.GetHashCode();
-                hashCode = (hashCode * 59) + this.ComponentRoyaltyConfig.GetHashCode();
-                hashCode = (hashCode * 59) + this.ComponentRoyaltyVaultBalance.GetHashCode();
-                hashCode = (hashCode * 59) + this.PackageRoyaltyVaultBalance.GetHashCode();
-                hashCode = (hashCode * 59) + this.NonFungibleIncludeNfids.GetHashCode();
-                if (this.ExplicitMetadata != null)
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.ExplicitMetadata.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.Unit.GetHashCode();
                 return hashCode;
             }
         }
