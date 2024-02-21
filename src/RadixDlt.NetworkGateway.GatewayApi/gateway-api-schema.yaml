@@ -148,6 +148,8 @@ tags:
       - `next_cursor` *(optional)* if present indicates that the next chunk (page) exists and can be fetched using collection-specific endpoint and cursor value,
       - `items` a chunk (page) of underlying collection items.
 
+      To provide consistent reads when querying for the next pages, it's required to provide the `at_ledger_state` parameter. It will enforce that data returned for all pages is generated using the same ledger state.
+
       ## State consistency and versioning
 
       Each response from a state endpoint returns data from a single "snapshot" of the ledger. By default, the latest available ledger version is used.
@@ -193,6 +195,115 @@ tags:
         }
       }
       ```
+
+      ## Consistent reads
+
+      As described in [Browsing historical data](#section/Browsing-historical-data) it is possible to specify the exact ledger state by providing the `at_ledger_state` parameter.
+
+      It can be used to browse historical data but it also allows consistent reads when making multiple requests (either when paginating or when collecting data from multiple endpoints).
+
+      Imagine a situation when your key value store contains 128 keys. To fetch all the keys and it is data you would need to make at least 4 requests (2 to paginate through all keys and 2 to fetch all the data). Using the same `at_ledger_state` parameter value it is guaranteed that you are fetching all the data from exactly the same ledger state.
+
+      Example requests:
+
+      First page of keys:
+      ```
+      /state/key-value-store/keys
+
+      {
+        "key_value_store_address": "internal_keyvaluestore_rdx1kprq4hx5892fuezay6tyajyu0gr2jeu8j7alauxen46xu8ufzvecph"
+      }
+      ```
+
+      Response:
+      ```
+      {
+        "ledger_state": {
+          "network": "mainnet",
+          "state_version": 50576725,
+          "proposer_round_timestamp": "2024-02-20T16:46:22.343Z",
+          "epoch": 74324,
+          "round": 84
+        },
+        "total_count": 128,
+        "next_cursor": "eyJvIjoxMDB9",
+        "items": [...]
+      }
+      ```
+
+      Second page of keys:
+      ```
+      /state/key-value-store/keys
+
+      {
+        "key_value_store_address": "internal_keyvaluestore_rdx1kprq4hx5892fuezay6tyajyu0gr2jeu8j7alauxen46xu8ufzvecph",
+        "cursor": "eyJvIjoxMDB9",
+        "at_ledger_state": {
+          "state_version": 50576725
+        }
+      }
+      ```
+
+      Response:
+      ```
+      {
+        "ledger_state": {
+          "network": "mainnet",
+          "state_version": 50576725,
+          "proposer_round_timestamp": "2024-02-20T16:46:22.343Z",
+          "epoch": 74324,
+          "round": 84
+        },
+        "total_count": 128,
+        "items": []
+      }
+      ```
+
+      Get data for one of the keys:
+      ```
+      /state/key-value-store/data
+
+      {
+        "key_value_store_address": "internal_keyvaluestore_rdx1kprq4hx5892fuezay6tyajyu0gr2jeu8j7alauxen46xu8ufzvecph",
+        "keys": [
+          {
+            "key_hex": "5c80c0c72cd2cbca7263e84e9ec83a6c9cee2121d466bf3cc8640d4d06909af6"
+          }
+        ],
+        "at_ledger_state": {
+          "state_version": 50576725
+        }
+      }
+      ```
+
+      Response:
+      ```
+      {
+        "ledger_state": {
+          "network": "mainnet",
+          "state_version": 50577454,
+          "proposer_round_timestamp": "2024-02-20T16:49:22.861Z",
+          "epoch": 74324,
+          "round": 795
+        },
+        "key_value_store_address": "internal_keyvaluestore_rdx1kprq4hx5892fuezay6tyajyu0gr2jeu8j7alauxen46xu8ufzvecph",
+        "entries": [
+          {
+            "key": {
+                ...
+              }
+            },
+            "value": {
+              ...
+            },
+            "last_updated_at_state_version": 1351581,
+            "is_locked": false
+          }
+        ]
+      }
+      ```
+
+      All the above requests were executed against exactly the same ledger snapshot (state version `50577454`).
 
       ## Using endpoints with opt-in features
 
@@ -883,8 +994,8 @@ tags:
 
       ### Iterating over all `KeyValueStore` keys
 
-      You can use `/state/key-value-store/keys` endpoint to iterate over all keys in certain `KeyValueStore`.
-      If the queried `KeyValueStore` contains more than one page of keys, a `next_cursor` will be returned, which can be used as `cursor` in the request to fetch further pages.
+      You can use the `/state/key-value-store/keys` endpoint to iterate over all the keys in a certain key value store.
+      If the queried key value store contains more than one page of keys, a `next_cursor` will be returned, which can be used as a cursor in the request to fetch further pages.
 
       i.e:
       ```
@@ -895,7 +1006,7 @@ tags:
       }
       ```
 
-      Will respond with list of all keys (in both `hex` and `programmatic_json` form) and state version when they were last updated.
+      Will respond with a first page of the keys of the current entries of the key value store. This collection is ordered by the state version of the entry's last update, descending. In other words, the first entry on the list will be one that was most recently updated/created. Each item includes the entry's key (in both `hex` and `programmatic_json` form) and the state version when it was last updated.
 
       ```
       {
@@ -920,11 +1031,11 @@ tags:
 
       ### Querying for the content under specific keys
 
-      You can either rely on keys returned from `/state/key-value-store/keys` endpoint or construct keys in json form on your own. It's possible if you created that `KeyValueStore` and you know what is the form of keys.
+      You can either use the keys returned from the `/state/key-value-store/keys` endpoint or construct keys in json form on your own, if you know the key type of the `KeyValueStore`.
 
       #### Querying using hex keys
 
-      Simply grab `raw_hex` key returned from `/state/key-value-store/keys` endpoint and call `/state/key-value-store/data` with it as parameter.
+      Simply grab the `raw_hex` key returned from the `/state/key-value-store/keys` endpoint and call `/state/key-value-store/data` with it as a parameter.
 
       i.e:
       ```
