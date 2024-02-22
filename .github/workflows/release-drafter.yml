@@ -3,6 +3,11 @@ on:
  push:
    branches:
      - develop
+
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   release-drafter:
     uses: ./.github/workflows/release-drafter-reusable.yml
