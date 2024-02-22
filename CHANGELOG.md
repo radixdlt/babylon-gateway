@@ -4,15 +4,15 @@ Release Date: _not published yet_
 - Fixed unstable package blueprint and code aggregation.
 - Reworked internal data aggregation mechanism.
 - Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
-- Changed MVC controller and action names. It has no effect on the API but prometheus label `controler`/`action` will differ now.
-  - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.Keys`,
+- Changed MVC controller and action names. It has no effect on the API itself, but alters prometheus `controler` and `action` labels.
+  - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.KeysPage`,
+  - `StateNonFungibleController.Ids` renamed to `StateNonFungibleController.IdsPage`,
   - `StatisticsController.Uptime` renamed to `StatisticsController.ValidatorsUptime`,
   - `StateController` renamed to `StateEntityController`,
   - `ValidatorStateController` renamed to `StateValidatorsComponent`.
 
 ### API Changes
-- Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented.
-- Added `/state/key-value-store/page/keys` and `/state/non-fungible/page/ids` endpoints to replace now obsoleted `/state/key-value-store/keys` and `/state/non-fungible/ids`. 
+- Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
 - Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
 - Use strong type definition for the `royalty_config` property of package blueprint and general components details. This is a change to OAS definition only and does not impact returned data format.
 

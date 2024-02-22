@@ -1508,37 +1508,11 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /state/non-fungible/page/ids:
-    post:
-      operationId: NonFungibleIdsPage
-      summary: Get page of Non-Fungible Ids in Resource Collection
-      description: |
-        Returns the non-fungible IDs of a given non-fungible resource.
-        Returned response is in a paginated format, ordered by their first appearance on the ledger.
-      tags:
-        - State
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/StateNonFungibleIdsRequest"
-      responses:
-        "200":
-          description: Non-Fungible IDs (paginated)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StateNonFungibleIdsResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
   /state/non-fungible/ids:
     post:
       operationId: NonFungibleIds
-      deprecated: true
       summary: Get page of Non-Fungible Ids in Resource Collection
       description: |
-        **Obsolete!** Use `/state/non-fungible/page/ids` instead.
         Returns the non-fungible IDs of a given non-fungible resource.
         Returned response is in a paginated format, ordered by their first appearance on the ledger.
       tags:
@@ -1605,37 +1579,11 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /state/key-value-store/page/keys:
-    post:
-      operationId: KeyValueStoreKeysPage
-      summary: Get page of KeyValueStore Keys
-      description: |
-        Allows to iterate over key value store keys.
-      tags:
-        - State
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/StateKeyValueStoreKeysRequest"
-      responses:
-        "200":
-          description: KeyValueStore keys collection
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StateKeyValueStoreKeysResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
   /state/key-value-store/keys:
     post:
       operationId: KeyValueStoreKeys
-      deprecated: true
       summary: Get KeyValueStore Keys
-      description: |
-        **Obsolete!** Use `/state/key-value-store/page/keys` instead.
-        Allows to iterate over key value store keys.
+      description: Allows to iterate over key value store keys.
       tags:
         - State
       requestBody:
