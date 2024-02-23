@@ -10,6 +10,7 @@ Release Date: _not published yet_
   - `StatisticsController.Uptime` renamed to `StatisticsController.ValidatorsUptime`,
   - `StateController` renamed to `StateEntityController`,
   - `ValidatorStateController` renamed to `StateValidatorsComponent`.
+- Upgraded to .NET8 
 
 ### API Changes
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
