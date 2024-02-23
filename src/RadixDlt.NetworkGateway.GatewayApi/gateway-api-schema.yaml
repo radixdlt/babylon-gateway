@@ -3836,10 +3836,13 @@ components:
         non_fungible_id:
           $ref: "#/components/schemas/NonFungibleId"
         owning_vault_address:
+          description: The address of the Vault containing (owning) this NFID.
           $ref: "#/components/schemas/Address"
         owning_vault_parent_ancestor_address:
+          description: The address of the parent ancestor of the Vault containing (owning) this NFID.
           $ref: "#/components/schemas/Address"
         owning_vault_global_ancestor_address:
+          description: The address of the global ancestor of the Vault containing (owning) this NFID.
           $ref: "#/components/schemas/Address"
         is_burned:
           type: boolean
