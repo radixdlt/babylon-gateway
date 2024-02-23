@@ -10,7 +10,10 @@ Release Date: _not published yet_
   - `StatisticsController.Uptime` renamed to `StatisticsController.ValidatorsUptime`,
   - `StateController` renamed to `StateEntityController`,
   - `ValidatorStateController` renamed to `StateValidatorsComponent`.
-- Upgraded to .NET8 
+- Upgraded to .NET 8:
+  - Upgraded runtime and libraries
+  - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
+  - Removed now-obsolete or no-longer-needed code.
 
 ### API Changes
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
