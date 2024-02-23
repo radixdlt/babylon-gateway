@@ -71,7 +71,6 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -143,10 +142,10 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Address.ToString(), NpgsqlDbType.Text, token);
             await writer.WriteAsync(e.IsGlobal, NpgsqlDbType.Boolean, token);
-            await writer.WriteNullableAsync(e.AncestorIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.ParentAncestorId, NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.GlobalAncestorId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AncestorIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ParentAncestorId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.GlobalAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.CorrelatedEntities.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(discriminator, "entity_type", token);
 
@@ -200,12 +199,12 @@ internal class WriteHelper
 
             if (e is InternalFungibleVaultEntity fve)
             {
-                await writer.WriteNullableAsync(fve.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                await writer.WriteNullableAsync(fve.RoyaltyVaultOfEntityId, NpgsqlDbType.Bigint, token);
+                await writer.WriteAsync(fve.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                await writer.WriteAsync(fve.RoyaltyVaultOfEntityId, NpgsqlDbType.Bigint, token);
             }
             else if (e is InternalNonFungibleVaultEntity nfve)
             {
-                await writer.WriteNullableAsync(nfve.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                await writer.WriteAsync(nfve.ResourceEntityId, NpgsqlDbType.Bigint, token);
                 await writer.WriteNullAsync(token);
             }
             else
@@ -717,7 +716,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.AccountResourcePreferenceRule, "account_resource_preference_rule", token);
+            await writer.WriteAsync(e.AccountResourcePreferenceRule, "account_resource_preference_rule", token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
         }
 
@@ -776,7 +775,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.Data, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Data, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         }
@@ -894,7 +893,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Key.ToArray(), NpgsqlDbType.Bytea, token);
-            await writer.WriteNullableAsync(e.Value?.ToArray(), NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Value?.ToArray(), NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         }

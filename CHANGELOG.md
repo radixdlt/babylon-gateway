@@ -10,6 +10,11 @@ Release Date: _not published yet_
   - `StatisticsController.Uptime` renamed to `StatisticsController.ValidatorsUptime`,
   - `StateController` renamed to `StateEntityController`,
   - `ValidatorStateController` renamed to `StateValidatorsComponent`.
+- Upgraded to .NET 8:
+  - Upgraded runtime and libraries
+  - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
+  - Removed now-obsolete or no-longer-needed code.
+- Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
 
 ### API Changes
 - Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.

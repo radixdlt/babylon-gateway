@@ -65,7 +65,6 @@
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -260,7 +259,7 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Key, NpgsqlDbType.Text, token);
-            await writer.WriteNullableAsync(e.Value, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Value, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         });

@@ -66,7 +66,6 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Npgsql;
-using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -358,10 +357,7 @@ INNER JOIN LATERAL (
         var sw = Stopwatch.GetTimestamp();
         var entityAddressesToLoad = referencedEntities.Addresses.Select(x => (string)x).ToList();
         var knownAddressesToLoad = referencedEntities.KnownAddresses.Select(x => (string)x).ToList();
-        var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Text)
-        {
-            Value = entityAddressesToLoad.Concat(knownAddressesToLoad).ToArray(),
-        };
+        var addressesToLoad = entityAddressesToLoad.Concat(knownAddressesToLoad).ToList();
 
         var result = await _dbContext
             .Entities
@@ -371,7 +367,7 @@ FROM entities
 WHERE id IN(
     SELECT UNNEST(id || correlated_entities) AS id
     FROM entities
-    WHERE address = ANY({entityAddressesParameter})
+    WHERE address = ANY({addressesToLoad})
 )")
             .AsNoTracking()
             .AnnotateMetricName()
