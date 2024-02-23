@@ -105,9 +105,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
         /// <param name="owningVaultAddress">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="owningVaultParentAncestorAddress">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="owningVaultGlobalAncestorAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="isBurned">isBurned (required).</param>
         /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        public StateNonFungibleLocationResponseItem(string nonFungibleId = default(string), string owningVaultAddress = default(string), bool isBurned = default(bool), long lastUpdatedAtStateVersion = default(long))
+        public StateNonFungibleLocationResponseItem(string nonFungibleId = default(string), string owningVaultAddress = default(string), string owningVaultParentAncestorAddress = default(string), string owningVaultGlobalAncestorAddress = default(string), bool isBurned = default(bool), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "nonFungibleId" is required (not null)
             if (nonFungibleId == null)
@@ -118,6 +120,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.IsBurned = isBurned;
             this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
             this.OwningVaultAddress = owningVaultAddress;
+            this.OwningVaultParentAncestorAddress = owningVaultParentAncestorAddress;
+            this.OwningVaultGlobalAncestorAddress = owningVaultGlobalAncestorAddress;
         }
 
         /// <summary>
@@ -133,6 +137,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "owning_vault_address", EmitDefaultValue = true)]
         public string OwningVaultAddress { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "owning_vault_parent_ancestor_address", EmitDefaultValue = true)]
+        public string OwningVaultParentAncestorAddress { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "owning_vault_global_ancestor_address", EmitDefaultValue = true)]
+        public string OwningVaultGlobalAncestorAddress { get; set; }
 
         /// <summary>
         /// Gets or Sets IsBurned
@@ -157,6 +175,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class StateNonFungibleLocationResponseItem {\n");
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  OwningVaultAddress: ").Append(OwningVaultAddress).Append("\n");
+            sb.Append("  OwningVaultParentAncestorAddress: ").Append(OwningVaultParentAncestorAddress).Append("\n");
+            sb.Append("  OwningVaultGlobalAncestorAddress: ").Append(OwningVaultGlobalAncestorAddress).Append("\n");
             sb.Append("  IsBurned: ").Append(IsBurned).Append("\n");
             sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
@@ -205,6 +225,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.OwningVaultAddress.Equals(input.OwningVaultAddress))
                 ) && 
                 (
+                    this.OwningVaultParentAncestorAddress == input.OwningVaultParentAncestorAddress ||
+                    (this.OwningVaultParentAncestorAddress != null &&
+                    this.OwningVaultParentAncestorAddress.Equals(input.OwningVaultParentAncestorAddress))
+                ) && 
+                (
+                    this.OwningVaultGlobalAncestorAddress == input.OwningVaultGlobalAncestorAddress ||
+                    (this.OwningVaultGlobalAncestorAddress != null &&
+                    this.OwningVaultGlobalAncestorAddress.Equals(input.OwningVaultGlobalAncestorAddress))
+                ) && 
+                (
                     this.IsBurned == input.IsBurned ||
                     this.IsBurned.Equals(input.IsBurned)
                 ) && 
@@ -230,6 +260,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.OwningVaultAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.OwningVaultAddress.GetHashCode();
+                }
+                if (this.OwningVaultParentAncestorAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.OwningVaultParentAncestorAddress.GetHashCode();
+                }
+                if (this.OwningVaultGlobalAncestorAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.OwningVaultGlobalAncestorAddress.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.IsBurned.GetHashCode();
                 hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();

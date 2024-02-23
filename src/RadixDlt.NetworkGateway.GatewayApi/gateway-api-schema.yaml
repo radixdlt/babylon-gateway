@@ -3830,12 +3830,16 @@ components:
       type: object
       required:
         - non_fungible_id
-        - last_updated_at_state_version
         - is_burned
+        - last_updated_at_state_version
       properties:
         non_fungible_id:
           $ref: "#/components/schemas/NonFungibleId"
         owning_vault_address:
+          $ref: "#/components/schemas/Address"
+        owning_vault_parent_ancestor_address:
+          $ref: "#/components/schemas/Address"
+        owning_vault_global_ancestor_address:
           $ref: "#/components/schemas/Address"
         is_burned:
           type: boolean
