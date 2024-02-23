@@ -1,7 +1,7 @@
 <Project>
   <ItemGroup>
     <!-- runtime dependencies -->
-    <PackageVersion Include="Dapper" Version="2.0.151" />
+    <PackageVersion Include="Dapper" Version="2.1.28" />
     <PackageVersion Include="FluentValidation" Version="11.7.1" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageVersion Include="JsonSubTypes" Version="2.0.1" />
@@ -26,7 +26,7 @@
     <PackageVersion Include="RadixDlt.RadixEngineToolkit" Version="1.0.10" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <!-- build time dependencies -->
-    <PackageVersion Include="coverlet.collector" Version="6.0.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageVersion Include="Moq" Version="4.18.2" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
