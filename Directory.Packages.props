@@ -20,9 +20,9 @@
     <PackageVersion Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
     <PackageVersion Include="Polly" Version="8.3.0" />
-    <PackageVersion Include="prometheus-net" Version="8.0.1" />
-    <PackageVersion Include="prometheus-net.AspNetCore" Version="8.0.1" />
-    <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.0.1" />
+    <PackageVersion Include="prometheus-net" Version="8.2.1" />
+    <PackageVersion Include="prometheus-net.AspNetCore" Version="8.2.1" />
+    <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.2.1" />
     <PackageVersion Include="RadixDlt.RadixEngineToolkit" Version="1.0.10" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <!-- build time dependencies -->

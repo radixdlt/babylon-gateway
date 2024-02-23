@@ -14,6 +14,7 @@ Release Date: _not published yet_
   - Upgraded runtime and libraries
   - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
   - Removed now-obsolete or no-longer-needed code.
+- Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
 
 ### API Changes
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented. 

@@ -102,6 +102,9 @@ public class DataAggregatorStartup
         services
             .AddHealthChecks()
             .ForwardToPrometheus();
+
+        services
+            .UseHttpClientMetrics();
     }
 
     public void Configure(IApplicationBuilder application, ILogger<DataAggregatorStartup> logger)
