@@ -688,7 +688,7 @@ ORDER BY nfid.from_state_version DESC
     {
         var resourceEntity = await GetEntity<GlobalNonFungibleResourceEntity>(resourceAddress, ledgerState, token);
 
-        var cd = new CommandDefinition(
+        var vaultLocationsCd = new CommandDefinition(
             commandText: @"
 WITH variables (non_fungible_id) AS (
     SELECT UNNEST(@nonFungibleIds)
@@ -730,15 +730,39 @@ INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @
             },
             cancellationToken: token);
 
-        var result = await _dapperWrapper.QueryAsync<NonFungibleIdLocationViewModel>(_dbContext.Database.GetDbConnection(), cd);
+        var vaultLocationResults = (await _dapperWrapper.QueryAsync<NonFungibleIdLocationViewModel>(_dbContext.Database.GetDbConnection(), vaultLocationsCd))
+            .ToList();
+
+        var vaultAncestorsCd = new CommandDefinition(
+            commandText: @"
+SELECT
+    e.id AS VaultId,
+    pae.id AS VaultParentAncestorId,
+    pae.address AS VaultParentAncestorAddress,
+    gae.id AS VaultGlobalAncestorId,
+    gae.address AS VaultGlobalAncestorAddress
+FROM entities e
+INNER JOIN entities pae ON e.parent_ancestor_id = pae.id
+INNER JOIN entities gae ON e.global_ancestor_id = gae.id
+WHERE e.id = ANY(@vaultIds)",
+            parameters: new
+            {
+                vaultIds = vaultLocationResults.Select(x => x.OwnerVaultId).Distinct().ToList(),
+            },
+            cancellationToken: token);
+
+        var vaultAncestorResults = (await _dapperWrapper.QueryAsync<NonFungibleIdLocationVaultOwnerViewModel>(_dbContext.Database.GetDbConnection(), vaultAncestorsCd))
+            .ToDictionary(e => e.VaultId);
 
         return new GatewayModel.StateNonFungibleLocationResponse(
             ledgerState: ledgerState,
             resourceAddress: resourceAddress.ToString(),
-            nonFungibleIds: result
+            nonFungibleIds: vaultLocationResults
                 .Select(x => new GatewayModel.StateNonFungibleLocationResponseItem(
                     nonFungibleId: x.NonFungibleId,
                     owningVaultAddress: !x.IsDeleted ? x.OwnerVaultAddress : null,
+                    owningVaultParentAncestorAddress: !x.IsDeleted ? vaultAncestorResults[x.OwnerVaultId].VaultParentAncestorAddress : null,
+                    owningVaultGlobalAncestorAddress: !x.IsDeleted ? vaultAncestorResults[x.OwnerVaultId].VaultGlobalAncestorAddress : null,
                     isBurned: x.IsDeleted,
                     lastUpdatedAtStateVersion: x.FromStateVersion
                 ))
