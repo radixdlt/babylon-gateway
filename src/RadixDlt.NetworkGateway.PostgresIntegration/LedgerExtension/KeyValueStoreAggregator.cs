@@ -149,6 +149,7 @@ internal static class KeyValueStoreAggregator
             {
                 keyValueStoreAggregate.KeyValueStoreEntryIds.Insert(0, keyValueStoreEntryHistory.Id);
 
+                keyValueStoreEntryHistory.IsDeleted = false;
                 keyValueStoreEntryHistory.Value = change.Value.KeyValueStoreEntry.Value.Data.StructData.GetDataBytes();
                 keyValueStoreEntryHistory.IsLocked = change.Value.KeyValueStoreEntry.IsLocked;
             }

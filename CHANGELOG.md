@@ -11,6 +11,9 @@ Release Date: _not published yet_
   - `StateController` renamed to `StateEntityController`,
   - `ValidatorStateController` renamed to `StateValidatorsComponent`.
 
+### Bug Fixes
+- allow to recreate key value store key. Previously Gateway did not return keys that were deleted and then recreated. 
+
 ### API Changes
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
 - Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
