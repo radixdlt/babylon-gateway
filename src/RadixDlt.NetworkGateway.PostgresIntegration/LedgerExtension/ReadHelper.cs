@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -81,18 +82,22 @@ using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
+internal record NonFungibleMap(EntityAddress ResourceAddress, string SimpleRepresentation, long ResourceEntityId, long NonFungibleIdDataId);
+
 internal class ReadHelper : IReadHelper
 {
     private readonly ReadWriteDbContext _dbContext;
     private readonly NpgsqlConnection _connection;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly CancellationToken _token;
+    private readonly IDapperWrapper _dapperWrapper;
 
-    public ReadHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers, CancellationToken token = default)
+    public ReadHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers, IDapperWrapper dapperWrapper, CancellationToken token = default)
     {
         _dbContext = dbContext;
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
         _observers = observers;
+        _dapperWrapper = dapperWrapper;
         _token = token;
     }
 
@@ -378,6 +383,59 @@ WHERE id IN(
         return result;
     }
 
+    public async Task<Dictionary<NonFungibleGlobalIdLookup, NonFungibleIdGlobalIdDatabaseId>> ReadNonFungibleData(
+        HashSet<NonFungibleGlobalIdLookup> referencedNonFungibleIds,
+        CancellationToken token)
+    {
+        if (!referencedNonFungibleIds.Any())
+        {
+            return new Dictionary<NonFungibleGlobalIdLookup, NonFungibleIdGlobalIdDatabaseId>();
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+
+        var resourceAddresses = new List<string>();
+        var nonFungibleIds = new List<string>();
+
+        foreach (var nf in referencedNonFungibleIds)
+        {
+            resourceAddresses.Add(nf.ResourceAddress);
+            nonFungibleIds.Add(nf.SimpleRepresentation);
+        }
+
+        var cd = new CommandDefinition(
+            commandText: $@"
+WITH var (non_fungible_resource_address, non_fungible_id) AS (
+    SELECT UNNEST(@resourceAddresses), UNNEST(@nonFungibleIds)
+)
+SELECT
+    var.non_fungible_resource_address AS ResourceAddress,
+    var.non_fungible_id AS SimpleRepresentation,
+    nfid.non_fungible_resource_entity_id AS ResourceEntityId,
+    nfid.id AS NonFungibleIdDataId
+FROM var
+INNER JOIN entities e ON e.address = var.non_fungible_resource_address
+INNER JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_data
+    WHERE non_fungible_resource_entity_id = e.id  AND non_fungible_id = var.non_fungible_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) nfid ON TRUE",
+            parameters: new
+            {
+                resourceAddresses = resourceAddresses,
+                nonFungibleIds = nonFungibleIds,
+            },
+            cancellationToken: token);
+
+        var result = (await _dapperWrapper.QueryAsync<NonFungibleMap>(_connection, cd)).ToList();
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ReadNonFungibleData), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result.ToDictionary(x => new NonFungibleGlobalIdLookup(x.ResourceAddress, x.SimpleRepresentation), x => new NonFungibleIdGlobalIdDatabaseId(x.ResourceEntityId, x.NonFungibleIdDataId));
+    }
+
     public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
         List<NonFungibleIdChange> nonFungibleIdStoreChanges,
         List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
@@ -431,7 +489,8 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
             commandText: @"
 SELECT
     nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
-    nextval('account_resource_preference_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
+    nextval('account_resource_preference_rule_history_id_seq') AS AccountResourcePreferenceRuleHistorySequence,
+    nextval('account_resource_preference_rule_aggregate_history_id_seq') AS AccountResourcePreferenceRuleAggregateHistorySequence,
     nextval('state_history_id_seq') AS StateHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
@@ -462,7 +521,9 @@ SELECT
     nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence,
     nextval('package_blueprint_aggregate_history_id_seq') AS PackageBlueprintAggregateHistorySequence,
     nextval('package_code_aggregate_history_id_seq') AS PackageCodeAggregateHistorySequence,
-    nextval('key_value_store_aggregate_history_id_seq') AS KeyValueStoreAggregateHistorySequence
+    nextval('key_value_store_aggregate_history_id_seq') AS KeyValueStoreAggregateHistorySequence,
+    nextval('account_authorized_depositor_history_id_seq') AS AccountAuthorizedDepositorHistorySequence,
+    nextval('account_authorized_depositor_aggregate_history_id_seq') AS AccountAuthorizedDepositorAggregateHistorySequence
 ",
             cancellationToken: token);
 

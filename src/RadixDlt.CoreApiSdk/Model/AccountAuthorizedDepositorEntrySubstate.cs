@@ -62,68 +62,40 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.CoreApiSdk.Model;
 
-public static class ServiceCollectionExtensions
+public partial class AccountAuthorizedDepositorEntrySubstate : IEntityAddressPointer
 {
-    public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
+    public IEnumerable<string> GetEntityAddresses()
     {
-        CustomTypes.EnsureConfigured();
+        return Key.Badge.GetEntityAddresses();
+    }
+}
 
-        services
-            .AddNpgsqlDataSourceHolder<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
-            .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(
-                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<MigrationsDbContext>>().NpgsqlDataSource,
-                    o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name));
-            });
+public abstract partial class AuthorizedDepositorBadge : IEntityAddressPointer
+{
+    public abstract IEnumerable<string> GetEntityAddresses();
+}
+
+public partial class NonFungibleAuthorizedDepositorBadge : IEntityAddressPointer, INonFungibleGlobalIdPointer
+{
+    public override IEnumerable<string> GetEntityAddresses()
+    {
+        yield return NonFungibleGlobalId.ResourceAddress;
     }
 
-    internal static IServiceCollection AddNpgsqlDataSourceHolder<T>(this IServiceCollection services, string connectionStringName)
+    public NonFungibleGlobalId GetNonFungibleId()
     {
-        services.TryAdd(new ServiceDescriptor(
-            typeof(NpgsqlDataSourceHolder<T>),
-            sp =>
-            {
-                var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionStringName);
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        return NonFungibleGlobalId;
+    }
+}
 
-                dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
-                dataSourceBuilder.MapEnum<AccountDefaultDepositRule>();
-                dataSourceBuilder.MapEnum<AccountResourcePreferenceRule>();
-                dataSourceBuilder.MapEnum<EntityType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
-                dataSourceBuilder.MapEnum<LedgerTransactionType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionManifestClass>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerEventType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOperationType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOriginType>();
-                dataSourceBuilder.MapEnum<NonFungibleIdType>();
-                dataSourceBuilder.MapEnum<PackageVmType>();
-                dataSourceBuilder.MapEnum<PendingTransactionPayloadLedgerStatus>();
-                dataSourceBuilder.MapEnum<PendingTransactionIntentLedgerStatus>();
-                dataSourceBuilder.MapEnum<PublicKeyType>();
-                dataSourceBuilder.MapEnum<ResourceType>();
-                dataSourceBuilder.MapEnum<ModuleId>();
-                dataSourceBuilder.MapEnum<SborTypeKind>();
-                dataSourceBuilder.MapEnum<StateType>();
-                dataSourceBuilder.MapEnum<AuthorizedDepositorBadgeType>();
-
-                return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
-            },
-            ServiceLifetime.Singleton));
-
-        return services;
+public partial class ResourceAuthorizedDepositorBadge : IEntityAddressPointer
+{
+    public override IEnumerable<string> GetEntityAddresses()
+    {
+        yield return ResourceAddress;
     }
 }

@@ -82,6 +82,11 @@ public interface IEntityAddressPointer
     public IEnumerable<string> GetEntityAddresses();
 }
 
+public interface INonFungibleGlobalIdPointer
+{
+    public NonFungibleGlobalId GetNonFungibleId();
+}
+
 public interface IUpsertedSubstate
 {
     public SubstateId SubstateId { get; }

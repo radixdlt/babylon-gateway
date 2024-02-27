@@ -1671,6 +1671,54 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /state/account/page/resource-preferences:
+    post:
+      operationId: AccountResourcePreferencesPage
+      summary: Get Account resource preferences
+      description: |
+        Returns paginable collection of resource preference rules for given account.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateAccountResourcePreferencesPageRequest"
+      responses:
+        "200":
+          description: Account resource preferences page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateAccountResourcePreferencesPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /state/account/page/authorized-depositors:
+    post:
+      operationId: AccountAuthorizedDepositorsPage
+      summary: Get Account authorized depositors
+      description: |
+        Returns paginable collection of authorized depositors for given account.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateAccountAuthorizedDepositorsPageRequest"
+      responses:
+        "200":
+          description: Account resource preferences page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateAccountAuthorizedDepositorsPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
   /statistics/validators/uptime:
     post:
       operationId: ValidatorsUptime
@@ -2288,6 +2336,96 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/NonFungibleId"
+
+    AccountResourcePreferencesCollection:
+      description: Account resource preferences collection
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/AccountResourcePreferencesResponseItem"
+
+    AccountResourcePreferencesResponseItem:
+      type: object
+      required:
+        - resource_address
+        - resource_preference_rule
+        - last_updated_at_state_version
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        resource_preference_rule:
+          type: string
+          enum:
+          - Allowed
+          - Disallowed
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
+    AccountAuthorizedDepositorsCollection:
+      description: Account resource preferences collection
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/AccountAuthorizedDepositorsResponseItem"
+
+    AccountAuthorizedDepositorType:
+      type: string
+      enum:
+        - ResourceBadge
+        - NonFungibleResourceBadge
+
+    AccountAuthorizedDepositorsResponseItem:
+      type: object
+      required:
+        - badge_type
+      properties:
+        badge_type:
+          $ref: "#/components/schemas/AccountAuthorizedDepositorType"
+      discriminator:
+        propertyName: badge_type
+        mapping:
+          # Must match AccountAuthorizedDepositorType
+          ResourceBadge: "#/components/schemas/AccountAuthorizedDepositorsResourceBadge"
+          NonFungibleResourceBadge: "#/components/schemas/AccountAuthorizedDepositorsNonFungibleResourceBadge"
+    AccountAuthorizedDepositorsResourceBadge:
+      allOf:
+        - $ref: "#/components/schemas/AccountAuthorizedDepositorsResponseItem"
+        - type: object
+          required:
+            - resource_address
+            - last_updated_at_state_version
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+            last_updated_at_state_version:
+              $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+    AccountAuthorizedDepositorsNonFungibleResourceBadge:
+      allOf:
+        - $ref: "#/components/schemas/AccountAuthorizedDepositorsResponseItem"
+        - type: object
+          required:
+            - resource_address
+            - non_fungible_id
+            - last_updated_at_state_version
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+            non_fungible_id:
+              $ref: "#/components/schemas/NonFungibleId"
+            last_updated_at_state_version:
+              $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
     NonFungibleIdsCollection:
       description: Non-fungible resource IDs collection.
@@ -3586,6 +3724,54 @@ components:
               $ref: "#/components/schemas/BigDecimal"
             royalty_config:
               $ref: "#/components/schemas/ComponentRoyaltyConfig"
+
+    StateAccountResourcePreferencesPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - account_address
+          properties:
+            account_address:
+              $ref: "#/components/schemas/Address"
+      example:
+        account_address: null
+
+    StateAccountResourcePreferencesPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/AccountResourcePreferencesCollection"
+        - type: object
+          required:
+            - account_address
+          properties:
+            account_address:
+              $ref: "#/components/schemas/Address"
+
+    StateAccountAuthorizedDepositorsPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - account_address
+          properties:
+            account_address:
+              $ref: "#/components/schemas/Address"
+      example:
+        account_address: null
+
+    StateAccountAuthorizedDepositorsPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/AccountAuthorizedDepositorsCollection"
+        - type: object
+          required:
+            - account_address
+          properties:
+            account_address:
+              $ref: "#/components/schemas/Address"
 
     StateEntityMetadataPageRequest:
       allOf:

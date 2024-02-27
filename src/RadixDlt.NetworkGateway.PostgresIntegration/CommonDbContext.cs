@@ -113,6 +113,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountResourcePreferenceRuleHistory> AccountDepositRuleHistory => Set<AccountResourcePreferenceRuleHistory>();
 
+    public DbSet<AccountResourcePreferenceRuleAggregateHistory> AccountResourcePreferenceRuleAggregateHistory => Set<AccountResourcePreferenceRuleAggregateHistory>();
+
     public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
     public DbSet<ResourceEntitySupplyHistory> ResourceEntitySupplyHistory => Set<ResourceEntitySupplyHistory>();
@@ -157,6 +159,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<KeyValueStoreSchemaHistory> KeyValueStoreSchemaHistory => Set<KeyValueStoreSchemaHistory>();
 
+    public DbSet<AccountAuthorizedDepositorHistory> AccountAuthorizedDepositorHistory => Set<AccountAuthorizedDepositorHistory>();
+
+    public DbSet<AccountAuthorizedDepositorAggregateHistory> AccountAuthorizedDepositorAggregateHistory => Set<AccountAuthorizedDepositorAggregateHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -185,6 +191,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<ModuleId>();
         modelBuilder.HasPostgresEnum<SborTypeKind>();
         modelBuilder.HasPostgresEnum<StateType>();
+        modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -367,10 +374,6 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<AccountResourcePreferenceRuleHistory>()
-            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
-
-        modelBuilder
             .Entity<EntityMetadataHistory>()
             .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
 
@@ -541,6 +544,38 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<NonFungibleSchemaHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountAuthorizedDepositorHistory>()
+            .HasDiscriminator<AuthorizedDepositorBadgeType>(DiscriminatorColumnName)
+            .HasValue<AccountAuthorizedNonFungibleBadgeDepositorHistory>(AuthorizedDepositorBadgeType.NonFungible)
+            .HasValue<AccountAuthorizedResourceBadgeDepositorHistory>(AuthorizedDepositorBadgeType.Resource);
+
+        modelBuilder
+            .Entity<AccountAuthorizedDepositorHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountAuthorizedDepositorAggregateHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountResourcePreferenceRuleHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountResourcePreferenceRuleAggregateHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountAuthorizedNonFungibleBadgeDepositorHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.NonFungibleResourceEntityId, e.NonFungibleIdDataId, e.FromStateVersion })
+            .HasFilter("discriminator = 'non_fungible'");
+
+        modelBuilder
+            .Entity<AccountAuthorizedResourceBadgeDepositorHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion })
+            .HasFilter("discriminator = 'resource'");
     }
 
     private static void HookupStatistics(ModelBuilder modelBuilder)

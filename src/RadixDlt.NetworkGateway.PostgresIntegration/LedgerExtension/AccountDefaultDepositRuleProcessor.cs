@@ -62,68 +62,85 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Npgsql;
+using NpgsqlTypes;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-public static class ServiceCollectionExtensions
+internal record struct AccountDefaultDepositRuleChangePointerLookup(long AccountEntityId, long StateVersion);
+
+internal record AccountDefaultDepositRuleChangePointer
 {
-    public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
-    {
-        CustomTypes.EnsureConfigured();
+    public List<CoreModel.AccountFieldStateSubstate> AccountFieldStateEntries { get; } = new();
+}
 
-        services
-            .AddNpgsqlDataSourceHolder<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
-            .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(
-                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<MigrationsDbContext>>().NpgsqlDataSource,
-                    o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name));
-            });
+internal class AccountDefaultDepositRuleProcessor
+{
+    private readonly ProcessorContext _context;
+    private readonly ChangeTracker<AccountDefaultDepositRuleChangePointerLookup, AccountDefaultDepositRuleChangePointer> _accountSettingChanges = new();
+    private readonly List<AccountDefaultDepositRuleHistory> _accountDefaultDepositRulesToAdd = new();
+
+    public AccountDefaultDepositRuleProcessor(ProcessorContext context)
+    {
+        _context = context;
     }
 
-    internal static IServiceCollection AddNpgsqlDataSourceHolder<T>(this IServiceCollection services, string connectionStringName)
+    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
     {
-        services.TryAdd(new ServiceDescriptor(
-            typeof(NpgsqlDataSourceHolder<T>),
-            sp =>
-            {
-                var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionStringName);
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-
-                dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
-                dataSourceBuilder.MapEnum<AccountDefaultDepositRule>();
-                dataSourceBuilder.MapEnum<AccountResourcePreferenceRule>();
-                dataSourceBuilder.MapEnum<EntityType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
-                dataSourceBuilder.MapEnum<LedgerTransactionType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionManifestClass>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerEventType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOperationType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOriginType>();
-                dataSourceBuilder.MapEnum<NonFungibleIdType>();
-                dataSourceBuilder.MapEnum<PackageVmType>();
-                dataSourceBuilder.MapEnum<PendingTransactionPayloadLedgerStatus>();
-                dataSourceBuilder.MapEnum<PendingTransactionIntentLedgerStatus>();
-                dataSourceBuilder.MapEnum<PublicKeyType>();
-                dataSourceBuilder.MapEnum<ResourceType>();
-                dataSourceBuilder.MapEnum<ModuleId>();
-                dataSourceBuilder.MapEnum<SborTypeKind>();
-                dataSourceBuilder.MapEnum<StateType>();
-                dataSourceBuilder.MapEnum<AuthorizedDepositorBadgeType>();
-
-                return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
-            },
-            ServiceLifetime.Singleton));
-
-        return services;
+        if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
+        {
+            _accountSettingChanges
+                .GetOrAdd(
+                    new AccountDefaultDepositRuleChangePointerLookup(referencedEntity.DatabaseId, stateVersion),
+                    _ => new AccountDefaultDepositRuleChangePointer())
+                .AccountFieldStateEntries
+                .Add(accountFieldState);
+        }
     }
+
+    public void ProcessChanges()
+    {
+        foreach (var (lookup, change) in _accountSettingChanges.AsEnumerable())
+        {
+            foreach (var accountFieldStateChange in change.AccountFieldStateEntries)
+            {
+                _accountDefaultDepositRulesToAdd.Add(
+                    new AccountDefaultDepositRuleHistory
+                    {
+                        Id = _context.Sequences.AccountDefaultDepositRuleHistorySequence++,
+                        FromStateVersion = lookup.StateVersion,
+                        AccountEntityId = lookup.AccountEntityId,
+                        DefaultDepositRule = accountFieldStateChange.Value.DefaultDepositRule.ToModel(),
+                    });
+            }
+        }
+    }
+
+    public async Task<int> SaveEntities()
+    {
+        var rowsInserted = 0;
+
+        rowsInserted += await CopyAccountDefaultDepositRuleHistory();
+
+        return rowsInserted;
+    }
+
+    private Task<int> CopyAccountDefaultDepositRuleHistory() => _context.WriteHelper.Copy(
+        _accountDefaultDepositRulesToAdd,
+        "COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.DefaultDepositRule, "account_default_deposit_rule", token);
+        });
 }

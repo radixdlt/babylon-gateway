@@ -62,36 +62,57 @@
  * permissions under this License.
  */
 
-using FluentValidation;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-internal class StateKeyValueStoreItemsRequestValidator : AbstractValidator<StateKeyValueStoreKeysRequest>
+public interface IAccountHandler
 {
-    public StateKeyValueStoreItemsRequestValidator(
-        LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        RadixAddressValidator radixAddressValidator,
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
-        PaginableRequestValidator paginableRequestValidator)
+    Task<GatewayModel.StateAccountResourcePreferencesPageResponse> ResourcePreferences(GatewayModel.StateAccountResourcePreferencesPageRequest request, CancellationToken token = default);
+
+    Task<GatewayModel.StateAccountAuthorizedDepositorsPageResponse> AuthorizedDepositors(GatewayModel.StateAccountAuthorizedDepositorsPageRequest request, CancellationToken token = default);
+}
+
+internal class DefaultAccountHandler : IAccountHandler
+{
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
+    private readonly IAccountStateQuerier _accountStateQuerier;
+
+    public DefaultAccountHandler(ILedgerStateQuerier ledgerStateQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration, IAccountStateQuerier accountStateQuerier)
     {
-        RuleFor(x => x.KeyValueStoreAddress)
-            .NotEmpty()
-            .SetValidator(radixAddressValidator);
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _endpointConfiguration = endpointConfiguration;
+        _accountStateQuerier = accountStateQuerier;
+    }
 
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+    public async Task<GatewayModel.StateAccountResourcePreferencesPageResponse> ResourcePreferences(GatewayModel.StateAccountResourcePreferencesPageRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        return await _accountStateQuerier.AccountResourcePreferences(
+            accountAddress: (EntityAddress)request.AccountAddress,
+            ledgerState: ledgerState,
+            offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
+            token: token);
+    }
 
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x)
-            .SetValidator(paginableRequestValidator);
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+    public async Task<GatewayModel.StateAccountAuthorizedDepositorsPageResponse> AuthorizedDepositors(
+        GatewayModel.StateAccountAuthorizedDepositorsPageRequest request,
+        CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        return await _accountStateQuerier.AccountAuthorizedDepositors(
+            accountAddress: (EntityAddress)request.AccountAddress,
+            ledgerState: ledgerState,
+            offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
+            token: token);
     }
 }
