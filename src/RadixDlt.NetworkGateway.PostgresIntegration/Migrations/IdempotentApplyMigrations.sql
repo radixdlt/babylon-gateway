@@ -1060,3 +1060,29 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240227124203_FixIsDeletedFlagOnRecreatedKVStoreKeys') THEN
+    update key_value_store_entry_history entry_history SET is_deleted = false where is_deleted = true AND entry_history.id in (select unnest(key_value_store_entry_ids) from key_value_store_aggregate_history aggregate_history where aggregate_history.key_value_store_entity_id = entry_history.key_value_store_entity_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240227124203_FixIsDeletedFlagOnRecreatedKVStoreKeys') THEN
+    update key_value_store_entry_history SET value = null where is_deleted = true;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240227124203_FixIsDeletedFlagOnRecreatedKVStoreKeys') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20240227124203_FixIsDeletedFlagOnRecreatedKVStoreKeys', '7.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
