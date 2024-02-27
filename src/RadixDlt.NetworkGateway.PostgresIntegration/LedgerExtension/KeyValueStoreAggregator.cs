@@ -144,6 +144,8 @@ internal static class KeyValueStoreAggregator
             if (change.Value.KeyValueStoreEntry.Value == null)
             {
                 keyValueStoreEntryHistory.IsDeleted = true;
+                keyValueStoreEntryHistory.Value = null;
+                keyValueStoreEntryHistory.IsLocked = change.Value.KeyValueStoreEntry.IsLocked;
             }
             else
             {

@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("UPDATE key_value_store_entry_history SET is_deleted = false WHERE value is NOT NULL;");
+            migrationBuilder.Sql("update key_value_store_entry_history entry_history SET is_deleted = false where is_deleted = true AND entry_history.id in (select unnest(key_value_store_entry_ids) from key_value_store_aggregate_history aggregate_history where aggregate_history.key_value_store_entity_id = entry_history.key_value_store_entity_id);");
         }
 
         /// <inheritdoc />
