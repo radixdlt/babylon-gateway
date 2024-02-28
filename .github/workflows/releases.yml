@@ -7,6 +7,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     steps:
       - uses: RDXWorks-actions/checkout@main
       - name: Setup .NET SDK
