@@ -82,7 +82,7 @@ public class StatisticsController : ControllerBase
     }
 
     [HttpPost("validators/uptime")]
-    public async Task<GatewayModel.ValidatorsUptimeResponse> Uptime(GatewayModel.ValidatorsUptimeRequest request, CancellationToken token)
+    public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptime(GatewayModel.ValidatorsUptimeRequest request, CancellationToken token)
     {
         return await _validatorHandler.Uptime(request, token);
     }

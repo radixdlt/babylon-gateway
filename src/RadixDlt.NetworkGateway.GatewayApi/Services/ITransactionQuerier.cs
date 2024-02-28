@@ -113,6 +113,8 @@ public class TransactionStreamPageRequestSearchCriteria
 
     public List<EntityAddress> ManifestResources { get; set; } = new();
 
+    public List<EntityAddress> BadgesPresented { get; set; } = new();
+
     public List<EntityAddress> AffectedGlobalEntities { get; set; } = new();
 
     public List<EntityAddress> AccountsWithoutManifestOwnerMethodCalls { get; set; } = new();

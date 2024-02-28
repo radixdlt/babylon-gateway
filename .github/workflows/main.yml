@@ -20,7 +20,7 @@ permissions:
   packages: write
 
 env:
-  DOTNET_VERSION: "7.0.x"
+  DOTNET_VERSION: "8.0.x"
 
 jobs:
   snyk-scan:
@@ -123,7 +123,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: babylon-gateway-arm
+      runs_on: selfhosted-ubuntu-22.04-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-database-migrations"
@@ -166,7 +166,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: babylon-gateway-arm
+      runs_on: selfhosted-ubuntu-22.04-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-data-aggregator"
@@ -209,7 +209,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: babylon-gateway-arm
+      runs_on: selfhosted-ubuntu-22.04-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-gateway-api"
@@ -371,7 +371,6 @@ jobs:
       - join-aggregator-images
       - join-migrations-images
       - setup-tags
-    if: github.event_name == 'pull_request' && github.base_ref == 'develop'
     permissions:
       id-token: write
       contents: read

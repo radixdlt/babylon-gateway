@@ -103,6 +103,10 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
             .NotNull()
             .SetValidator(radixAddressValidator);
 
+        RuleForEach(x => x.ManifestBadgesPresentedFilter)
+            .NotNull()
+            .SetValidator(radixAddressValidator);
+
         RuleForEach(x => x.ManifestResourcesFilter)
             .NotNull()
             .SetValidator(radixAddressValidator);

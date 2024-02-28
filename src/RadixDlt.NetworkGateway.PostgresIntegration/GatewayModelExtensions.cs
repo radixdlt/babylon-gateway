@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -214,6 +216,27 @@ internal static class GatewayModelExtensions
         };
     }
 
+    public static GatewayModel.ComponentRoyaltyConfig ToGatewayModel(this ComponentMethodRoyaltyEntryHistory[]? input)
+    {
+        return new GatewayModel.ComponentRoyaltyConfig(
+            isEnabled: input != null,
+            methodRules: input?.Select(e => new GatewayModel.ComponentMethodRoyalty(e.MethodName, TranscodeRoyaltyAmount(e.RoyaltyAmount))).ToList());
+    }
+
+    public static GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem ToGatewayModel(this PackageBlueprintHistory input, Dictionary<long, EntityAddress> correlatedAddresses)
+    {
+        return new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem(
+            name: input.Name,
+            version: input.Version,
+            definition: new JRaw(input.Definition),
+            dependantEntities: input.DependantEntityIds?.Select(de => correlatedAddresses[de].ToString()).ToList(),
+            authTemplate: input.AuthTemplate != null ? new JRaw(input.AuthTemplate) : null,
+            authTemplateIsLocked: input.AuthTemplateIsLocked,
+            royaltyConfig: input.RoyaltyConfig != null ? TranscodeBlueprintRoyaltyConfig(input.RoyaltyConfig) : null,
+            royaltyConfigIsLocked: input.RoyaltyConfigIsLocked
+        );
+    }
+
     public static GatewayModel.PublicKey ToGatewayModel(this ToolkitModel.PublicKey publicKey)
     {
         return publicKey switch
@@ -276,6 +299,23 @@ internal static class GatewayModelExtensions
         return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
     }
 
+    private static GatewayModel.RoyaltyAmount? ToGatewayModel(this CoreModel.RoyaltyAmount? input)
+    {
+        if (input == null)
+        {
+            return null;
+        }
+
+        var unit = input.Unit switch
+        {
+            CoreModel.RoyaltyAmount.UnitEnum.XRD => GatewayModel.RoyaltyAmount.UnitEnum.XRD,
+            CoreModel.RoyaltyAmount.UnitEnum.USD => GatewayModel.RoyaltyAmount.UnitEnum.USD,
+            _ => throw new UnreachableException($"Didn't expect {input.Unit} value"),
+        };
+
+        return new GatewayModel.RoyaltyAmount(input.Amount, unit);
+    }
+
     private static GatewayModel.TransactionFungibleFeeBalanceChangeType ToGatewayModel(this CoreModel.LtsFeeFungibleResourceBalanceChangeType input)
     {
         return input switch
@@ -286,5 +326,41 @@ internal static class GatewayModelExtensions
             CoreModel.LtsFeeFungibleResourceBalanceChangeType.RoyaltyDistributed => GatewayModel.TransactionFungibleFeeBalanceChangeType.RoyaltyDistributed,
             _ => throw new UnreachableException($"Didn't expect {input} value"),
         };
+    }
+
+    private static GatewayModel.RoyaltyAmount? TranscodeRoyaltyAmount(string? input)
+    {
+        if (input == null)
+        {
+            return null;
+        }
+
+        return JsonConvert.DeserializeObject<CoreModel.RoyaltyAmount>(input).ToGatewayModel();
+    }
+
+    private static GatewayModel.BlueprintRoyaltyConfig? TranscodeBlueprintRoyaltyConfig(string? input)
+    {
+        if (input == null)
+        {
+            return null;
+        }
+
+        var coreModel = JsonConvert.DeserializeObject<CoreModel.BlueprintRoyaltyConfig>(input);
+
+        if (coreModel == null)
+        {
+            return null;
+        }
+
+        List<GatewayModel.BlueprintMethodRoyalty>? methodRules = null;
+
+        if (coreModel.MethodRules != null)
+        {
+            methodRules = coreModel.MethodRules
+                .Select(mr => new GatewayModel.BlueprintMethodRoyalty(mr.MethodName, mr.RoyaltyAmount.ToGatewayModel()))
+                .ToList();
+        }
+
+        return new GatewayModel.BlueprintRoyaltyConfig(coreModel.IsEnabled, methodRules);
     }
 }

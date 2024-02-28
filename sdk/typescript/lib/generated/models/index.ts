@@ -1,10 +1,14 @@
 /* tslint:disable */
 /* eslint-disable */
 export * from './AtLedgerStateMixin';
+export * from './BlueprintMethodRoyalty';
+export * from './BlueprintRoyaltyConfig';
 export * from './CommittedTransactionInfo';
 export * from './ComponentEntityRoleAssignmentEntry';
 export * from './ComponentEntityRoleAssignmentEntryAssignment';
 export * from './ComponentEntityRoleAssignments';
+export * from './ComponentMethodRoyalty';
+export * from './ComponentRoyaltyConfig';
 export * from './CursorLimitMixin';
 export * from './EntityMetadataCollection';
 export * from './EntityMetadataCollectionAllOf';
@@ -203,6 +207,7 @@ export * from './ResourceAggregationLevel';
 export * from './ResultSetCursorMixin';
 export * from './RoleAssignmentResolution';
 export * from './RoleKey';
+export * from './RoyaltyAmount';
 export * from './ScryptoSborValue';
 export * from './StateEntityDetailsOptIns';
 export * from './StateEntityDetailsRequest';
