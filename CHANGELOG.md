@@ -33,7 +33,7 @@ Release Date: _not published yet_
 Release built: 27.02.2024
 
 ### Bug fixes
-- Recreated key value store keys are properly returned from `/state/key-value-store/keys` and `/state/key-value-store/keys`. Previously Gateway did not return keys that were deleted and then recreated. This release fixes existing data in the database and makes sure new ingested data is properly stored in the database.
+- Recreated key value store keys are properly returned from `/state/key-value-store/keys` and `/state/key-value-store/data`. Previously Gateway did not return keys that were deleted and then recreated. This release fixes existing data in the database and makes sure new ingested data is properly stored in the database.
 
 ## 1.4.0
 Release built: 08.02.2024
