@@ -29,6 +29,12 @@ Release Date: _not published yet_
 ### Deprecations
 - Obsoleted non-conforming API endpoints `/state/key-value-store/keys` and `/state/non-fungible/ids` in place of `/state/key-value-store/page/keys` and `/state/non-fungible/page/ids`. 
 
+## 1.4.1
+Release built: 27.02.2024
+
+### Bug fixes
+- Recreated key value store keys are properly returned from `/state/key-value-store/keys` and `/state/key-value-store/data`. Previously Gateway did not return keys that were deleted and then recreated. This release fixes existing data in the database and makes sure new ingested data is properly stored in the database.
+
 ## 1.4.0
 Release built: 08.02.2024
 
