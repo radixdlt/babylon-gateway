@@ -82,7 +82,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class WriteHelper
+internal class WriteHelper : IWriteHelper
 {
     private readonly NpgsqlConnection _connection;
     private readonly IModel _model;
@@ -1085,7 +1085,7 @@ SELECT
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdateSequences), Stopwatch.GetElapsedTime(sw), null));
     }
 
-    internal T GetDiscriminator<T>(Type type)
+    public T GetDiscriminator<T>(Type type)
     {
         if (_model.FindEntityType(type)?.GetDiscriminatorValue() is not T discriminator)
         {

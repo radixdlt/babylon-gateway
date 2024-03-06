@@ -62,8 +62,87 @@
  * permissions under this License.
  */
 
-using System.Threading;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record ProcessorContext(SequencesHolder Sequences, IReadHelper ReadHelper, IWriteHelper WriteHelper, CancellationToken Token);
+internal static class KeyValueStoreAggregator
+{
+    internal static (List<KeyValueStoreEntryHistory> EntriesToAdd, List<KeyValueStoreAggregateHistory> AggregatesToAdd) Aggregate(
+        ProcessorContext context,
+        List<KeyValueStoreChangePointerLookup> changeOrder,
+        Dictionary<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> changePointers,
+        Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory> mostRecentEntries,
+        Dictionary<long, KeyValueStoreAggregateHistory> mostRecentAggregates
+    )
+    {
+        List<KeyValueStoreAggregateHistory> aggregatesToAdd = new();
+        List<KeyValueStoreEntryHistory> entriesToAdd = new();
+
+        foreach (var lookup in changeOrder)
+        {
+            var change = changePointers[lookup];
+
+            KeyValueStoreAggregateHistory aggregate;
+
+            if (!mostRecentAggregates.TryGetValue(lookup.KeyValueStoreEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
+            {
+                aggregate = new KeyValueStoreAggregateHistory
+                {
+                    Id = context.Sequences.KeyValueStoreAggregateHistorySequence++,
+                    FromStateVersion = lookup.StateVersion,
+                    KeyValueStoreEntityId = lookup.KeyValueStoreEntityId,
+                    KeyValueStoreEntryIds = new List<long>(),
+                };
+
+                if (previousAggregate != null)
+                {
+                    aggregate.KeyValueStoreEntryIds.AddRange(previousAggregate.KeyValueStoreEntryIds);
+                }
+
+                aggregatesToAdd.Add(aggregate);
+                mostRecentAggregates[lookup.KeyValueStoreEntityId] = aggregate;
+            }
+            else
+            {
+                aggregate = previousAggregate;
+            }
+
+            var entryLookup = new KeyValueStoreEntryDbLookup(lookup.KeyValueStoreEntityId, lookup.Key);
+
+            var isDeleted = change.KeyValueStoreEntry.Value == null;
+            var entry = new KeyValueStoreEntryHistory
+            {
+                Id = context.Sequences.KeyValueStoreEntryHistorySequence++,
+                KeyValueStoreEntityId = lookup.KeyValueStoreEntityId,
+                FromStateVersion = lookup.StateVersion,
+                Key = change.KeyValueStoreEntry.Key.KeyData.GetDataBytes(),
+                IsLocked = change.KeyValueStoreEntry.IsLocked,
+                IsDeleted = isDeleted,
+                Value = isDeleted ? null : change.KeyValueStoreEntry.Value!.Data.StructData.GetDataBytes(),
+            };
+
+            entriesToAdd.Add(entry);
+
+            if (mostRecentEntries.TryGetValue(entryLookup, out var previousEntry))
+            {
+                var currentPosition = aggregate.KeyValueStoreEntryIds.IndexOf(previousEntry.Id);
+
+                if (currentPosition != -1)
+                {
+                    aggregate.KeyValueStoreEntryIds.RemoveAt(currentPosition);
+                }
+            }
+
+            if (entry.Value != null)
+            {
+                aggregate.KeyValueStoreEntryIds.Insert(0, entry.Id);
+            }
+
+            mostRecentEntries[entryLookup] = entry;
+        }
+
+        return (entriesToAdd, aggregatesToAdd);
+    }
+}

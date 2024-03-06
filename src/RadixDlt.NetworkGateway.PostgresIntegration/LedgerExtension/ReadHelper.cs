@@ -83,7 +83,7 @@ using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class ReadHelper
+internal class ReadHelper : IReadHelper
 {
     private readonly ReadWriteDbContext _dbContext;
     private readonly NpgsqlConnection _connection;
@@ -197,7 +197,9 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(ICollection<PackageBlueprintDbLookup> packageBlueprintChanges, CancellationToken token)
+    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(
+        ICollection<PackageBlueprintDbLookup> packageBlueprintChanges,
+        CancellationToken token)
     {
         if (!packageBlueprintChanges.Any())
         {

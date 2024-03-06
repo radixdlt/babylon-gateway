@@ -118,68 +118,7 @@ internal class KeyValueStoreProcessor
 
     public void ProcessChanges()
     {
-        foreach (var lookup in _changeOrder)
-        {
-            var change = _changePointers[lookup];
-
-            KeyValueStoreAggregateHistory aggregate;
-
-            if (!_mostRecentAggregates.TryGetValue(lookup.KeyValueStoreEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
-            {
-                aggregate = new KeyValueStoreAggregateHistory
-                {
-                    Id = _context.Sequences.KeyValueStoreAggregateHistorySequence++,
-                    FromStateVersion = lookup.StateVersion,
-                    KeyValueStoreEntityId = lookup.KeyValueStoreEntityId,
-                    KeyValueStoreEntryIds = new List<long>(),
-                };
-
-                if (previousAggregate != null)
-                {
-                    aggregate.KeyValueStoreEntryIds.AddRange(previousAggregate.KeyValueStoreEntryIds);
-                }
-
-                _aggregatesToAdd.Add(aggregate);
-                _mostRecentAggregates[lookup.KeyValueStoreEntityId] = aggregate;
-            }
-            else
-            {
-                aggregate = previousAggregate;
-            }
-
-            var entryLookup = new KeyValueStoreEntryDbLookup(lookup.KeyValueStoreEntityId, lookup.Key);
-
-            var isDeleted = change.KeyValueStoreEntry.Value == null;
-            var entry = new KeyValueStoreEntryHistory
-            {
-                Id = _context.Sequences.KeyValueStoreEntryHistorySequence++,
-                KeyValueStoreEntityId = lookup.KeyValueStoreEntityId,
-                FromStateVersion = lookup.StateVersion,
-                Key = change.KeyValueStoreEntry.Key.KeyData.GetDataBytes(),
-                IsLocked = change.KeyValueStoreEntry.IsLocked,
-                IsDeleted = isDeleted,
-                Value = isDeleted ? null : change.KeyValueStoreEntry.Value!.Data.StructData.GetDataBytes(),
-            };
-
-            _entriesToAdd.Add(entry);
-
-            if (_mostRecentEntries.TryGetValue(entryLookup, out var previousEntry))
-            {
-                var currentPosition = aggregate.KeyValueStoreEntryIds.IndexOf(previousEntry.Id);
-
-                if (currentPosition != -1)
-                {
-                    aggregate.KeyValueStoreEntryIds.RemoveAt(currentPosition);
-                }
-            }
-
-            if (entry.Value != null)
-            {
-                aggregate.KeyValueStoreEntryIds.Insert(0, entry.Id);
-            }
-
-            _mostRecentEntries[entryLookup] = entry;
-        }
+        (_entriesToAdd, _aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(_context, _changeOrder, _changePointers, _mostRecentEntries, _mostRecentAggregates);
     }
 
     public async Task LoadMostRecent()

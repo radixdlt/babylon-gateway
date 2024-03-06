@@ -65,3 +65,4 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("RadixDlt.NetworkGateway.UnitTests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] // Moq.
