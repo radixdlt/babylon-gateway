@@ -139,7 +139,7 @@ internal class KeyValueStoreProcessor
 
     private Task<Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>> MostRecentKeyValueStoreEntryHistoryFor()
     {
-        var lookupSet = _changeOrder.ToHashSet();
+        var lookupSet = _changeOrder.Select(x => new KeyValueStoreEntryDbLookup(x.KeyValueStoreEntityId, x.Key)).ToHashSet();
 
         if (!lookupSet.Unzip(
                 x => x.KeyValueStoreEntityId,
