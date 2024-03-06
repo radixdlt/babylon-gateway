@@ -1,5 +1,5 @@
 ## 1.4.2
-Release built: _not published yet_
+Release built: 06.03.2024
 
 ### Bug fixes
 - Properly indexes key value store keys in `key_value_store_entry_history` and `key_value_store_aggregate_history` tables. Previously it was possible that if the key was updated multiple times in one processed transaction batch some updates might not be indexed properly. This release fixes those issues and makes sure they are properly indexed and each change is properly returned from `/state/key-value-store/keys` and `/state/key-value-store/keys` endpoints.
