@@ -1,4 +1,4 @@
-## 1.4.2
+## 1.4.3
 Release built: 06.03.2024
 
 ### Bug fixes
