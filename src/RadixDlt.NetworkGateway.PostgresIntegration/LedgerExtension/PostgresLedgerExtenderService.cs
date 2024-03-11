@@ -219,6 +219,8 @@ UPDATE pending_transactions
         var dbWriteDuration = TimeSpan.Zero;
         var outerStopwatch = Stopwatch.StartNew();
         var referencedEntities = new ReferencedEntityDictionary();
+        var referencedValidatorPublicKeys = new HashSet<ValidatorPublicKeyLookup>();
+        var referencedNonFungibleIds = new HashSet<NonFungibleIdLookup>();
         var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
         var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
         var manifestClasses = new Dictionary<long, List<LedgerTransactionManifestClass>>();
@@ -736,12 +738,10 @@ UPDATE pending_transactions
         var vaultChanges = new List<IVaultChange>();
         var nonFungibleIdChanges = new List<NonFungibleIdChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
-        var validatorSetChanges = new List<ValidatorSetChange>();
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
         var schemaHistoryToAdd = new List<SchemaHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
-        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern to ensure proper order of ingestion
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var accountResourcePreferenceRuleHistoryToAdd = new List<AccountResourcePreferenceRuleHistory>();
         var keyValueStoreChanges = new Dictionary<KeyValueStoreEntryLookup, KeyValueStoreChange>();
@@ -754,6 +754,7 @@ UPDATE pending_transactions
         var entityRoleAssignmentProcessor = new EntityRoleAssignmentProcessor(processorContext);
         var packageCodeProcessor = new PackageCodeProcessor(processorContext, networkConfiguration.Id);
         var packageBlueprintProcessor = new PackageBlueprintProcessor(processorContext, referencedEntities);
+        var validatorProcessor = new ValidatorProcessor(processorContext, referencedEntities);
 
         // step: scan all substates & events to figure out changes
         {
@@ -852,21 +853,6 @@ UPDATE pending_transactions
                                 );
                         }
 
-                        if (substateData is CoreModel.ValidatorFieldStateSubstate validator)
-                        {
-                            var lookup = new ValidatorKeyLookup(referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId, validator.Value.PublicKey.KeyType.ToModel(),
-                                validator.Value.PublicKey.GetKeyBytes());
-
-                            validatorKeyHistoryToAdd[lookup] = new ValidatorPublicKeyHistory
-                            {
-                                Id = sequences.ValidatorPublicKeyHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                ValidatorEntityId = lookup.ValidatorEntityId,
-                                KeyType = lookup.PublicKeyType,
-                                Key = lookup.PublicKey,
-                            };
-                        }
-
                         if (substateData is CoreModel.ConsensusManagerFieldStateSubstate consensusManagerFieldStateSubstate)
                         {
                             if (consensusManagerFieldStateSubstate.Value.Round == 0)
@@ -874,21 +860,6 @@ UPDATE pending_transactions
                                 newEpoch = consensusManagerFieldStateSubstate.Value.Epoch;
                                 passingEpoch = newEpoch - 1;
                             }
-                        }
-
-                        if (substateData is CoreModel.ConsensusManagerFieldCurrentValidatorSetSubstate validatorSet)
-                        {
-                            var change = validatorSet.Value.ValidatorSet
-                                .ToDictionary(
-                                    v =>
-                                    {
-                                        var vid = referencedEntities.Get((EntityAddress)v.Address).DatabaseId;
-
-                                        return new ValidatorKeyLookup(vid, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
-                                    },
-                                    v => TokenAmount.FromDecimalString(v.Stake));
-
-                            validatorSetChanges.Add(new ValidatorSetChange(passingEpoch!.Value, change, stateVersion));
                         }
 
                         if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
@@ -982,7 +953,8 @@ UPDATE pending_transactions
                         entityRoleAssignmentProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         packageCodeProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         packageBlueprintProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
-                        }
+                        validatorProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, passingEpoch);
+                    }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                     {
@@ -999,7 +971,7 @@ UPDATE pending_transactions
                         }
 
                         packageCodeProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
-                        }
+                    }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
 
@@ -1209,7 +1181,6 @@ UPDATE pending_transactions
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
             var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
-            var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
             var mostRecentKeyValueStoreEntryHistory = await readHelper.MostRecentKeyValueStoreEntryHistoryFor(keyValueStoreChanges.Keys, token);
             var mostRecentKeyValueStoreAggregateHistory = await readHelper.MostRecentKeyValueStoreAggregateHistoryFor(keyValueStoreChanges.Keys, token);
 
@@ -1218,6 +1189,7 @@ UPDATE pending_transactions
             await entityRoleAssignmentProcessor.LoadMostRecent();
             await packageCodeProcessor.LoadMostRecent();
             await packageBlueprintProcessor.LoadMostRecent();
+            await validatorProcessor.LoadMostRecent();
 
             dbReadDuration += sw.Elapsed;
 
@@ -1237,6 +1209,7 @@ UPDATE pending_transactions
             entityRoleAssignmentProcessor.ProcessChanges();
             packageCodeProcessor.ProcessChanges();
             packageBlueprintProcessor.ProcessChanges();
+            validatorProcessor.ProcessChanges();
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1552,20 +1525,6 @@ UPDATE pending_transactions
                 })
                 .ToList();
 
-            var validatorActiveSetHistoryToAdd = validatorSetChanges
-                .SelectMany(e =>
-                {
-                    return e.ValidatorSet.Select(vs => new ValidatorActiveSetHistory
-                    {
-                        Id = sequences.ValidatorActiveSetHistorySequence++,
-                        FromStateVersion = e.StateVersion,
-                        Epoch = e.Epoch,
-                        ValidatorPublicKeyHistoryId = existingValidatorKeys.GetOrAdd(vs.Key, _ => validatorKeyHistoryToAdd[vs.Key]).Id,
-                        Stake = vs.Value,
-                    });
-                })
-                .ToList();
-
             var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
             var entityResourceVaultAggregateHistoryToAdd = entityResourceVaultAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
 
@@ -1585,8 +1544,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
-            rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
             rowsInserted += await writeHelper.CopySchemaHistory(schemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreEntryHistory(keyValueStoreEntryHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreAggregateHistory(keyValueStoreAggregateHistoryToAdd, token);
@@ -1602,6 +1559,7 @@ UPDATE pending_transactions
             rowsInserted += await entityRoleAssignmentProcessor.SaveEntities();
             rowsInserted += await packageCodeProcessor.SaveEntities();
             rowsInserted += await packageBlueprintProcessor.SaveEntities();
+            rowsInserted += await validatorProcessor.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);
 
