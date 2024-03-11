@@ -72,11 +72,11 @@ using System.Linq;
 
 namespace RadixDlt.NetworkGateway.UnitTests.PostgresIntegration.LedgerExtension;
 
-internal record Change(long KeyValueStoreEntityId, long StateVersion, KeyValueStoreEntry Entry);
+internal record KeyValueStoreChange(long KeyValueStoreEntityId, long StateVersion, KeyValueStoreEntry Entry);
 
 internal record KeyValueStoreEntry(ValueBytes Key, ValueBytes? Value);
 
-internal static class Extensions
+internal static class KeyValueStoreExtensions
 {
     internal static KeyValueStoreEntryHistory CreateDatabaseHistoryEntry(
         long id,
@@ -96,7 +96,7 @@ internal static class Extensions
             Value = keyData.Value,
         };
 
-    internal static ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> PrepareChanges(List<Change> changes)
+    internal static ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> PrepareChanges(List<KeyValueStoreChange> changes)
     {
         var changeTracker = new ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer>();
 
