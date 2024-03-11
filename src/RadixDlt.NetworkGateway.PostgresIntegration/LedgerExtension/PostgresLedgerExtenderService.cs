@@ -219,8 +219,6 @@ UPDATE pending_transactions
         var dbWriteDuration = TimeSpan.Zero;
         var outerStopwatch = Stopwatch.StartNew();
         var referencedEntities = new ReferencedEntityDictionary();
-        var referencedValidatorPublicKeys = new HashSet<ValidatorPublicKeyLookup>();
-        var referencedNonFungibleIds = new HashSet<NonFungibleIdLookup>();
         var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
         var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
         var manifestClasses = new Dictionary<long, List<LedgerTransactionManifestClass>>();
