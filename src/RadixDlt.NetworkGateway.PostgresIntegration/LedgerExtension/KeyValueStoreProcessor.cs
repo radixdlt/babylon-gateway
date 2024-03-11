@@ -142,7 +142,7 @@ internal class KeyValueStoreProcessor
             return Task.FromResult(new Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>());
         }
 
-        return _context.ReadHelper.MostRecent<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>(
+        return _context.ReadHelper.LoadDependencies<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>(
             @$"
 WITH variables (key_value_store_entity_id, key) AS (
     SELECT UNNEST({keyValueStoreEntityIds}), UNNEST({keys})
@@ -168,7 +168,7 @@ INNER JOIN LATERAL (
             return Task.FromResult(new Dictionary<long, KeyValueStoreAggregateHistory>());
         }
 
-        return _context.ReadHelper.MostRecent<long, KeyValueStoreAggregateHistory>(
+        return _context.ReadHelper.LoadDependencies<long, KeyValueStoreAggregateHistory>(
             @$"
 WITH variables (key_value_store_entity_id) AS (
     SELECT UNNEST({entityIds})

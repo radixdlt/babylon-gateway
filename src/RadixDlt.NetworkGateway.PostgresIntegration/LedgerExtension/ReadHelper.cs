@@ -96,7 +96,7 @@ internal class ReadHelper : IReadHelper
         _token = token;
     }
 
-    public async Task<Dictionary<TKey, TValue>> MostRecent<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
+    public async Task<Dictionary<TKey, TValue>> LoadDependencies<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
         where TKey : notnull
         where TValue : class
     {
@@ -420,57 +420,6 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
             .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceEntityId, e.NonFungibleId), token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingNonFungibleIdDataFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token)
-    {
-        if (!validatorKeyLookups.Any())
-        {
-            return new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var validatorEntityIds = new List<long>();
-        var validatorKeyTypes = new List<PublicKeyType>();
-        var validatorKeys = new List<byte[]>();
-
-        var lookupSet = new HashSet<ValidatorKeyLookup>();
-
-        foreach (var (lookup, _) in validatorKeyLookups.SelectMany(change => change.ValidatorSet))
-        {
-            lookupSet.Add(lookup);
-        }
-
-        foreach (var lookup in lookupSet)
-        {
-            validatorEntityIds.Add(lookup.ValidatorEntityId);
-            validatorKeyTypes.Add(lookup.PublicKeyType);
-            validatorKeys.Add(lookup.PublicKey);
-        }
-
-        var result = await _dbContext
-            .ValidatorKeyHistory
-            .FromSqlInterpolated(@$"
-WITH variables (validator_entity_id, key_type, key) AS (
-    SELECT UNNEST({validatorEntityIds}), UNNEST({validatorKeyTypes}), UNNEST({validatorKeys})
-)
-SELECT vpkh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM validator_public_key_history
-    WHERE validator_entity_id = variables.validator_entity_id AND key_type = variables.key_type AND key = variables.key
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) vpkh ON true;
-")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new ValidatorKeyLookup(e.ValidatorEntityId, e.KeyType, e.Key), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingValidatorKeysFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }

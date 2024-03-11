@@ -75,7 +75,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal interface IReadHelper
 {
-    Task<Dictionary<TKey, TValue>> MostRecent<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
+    Task<Dictionary<TKey, TValue>> LoadDependencies<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
         where TKey : notnull
         where TValue : class;
 
@@ -101,8 +101,6 @@ internal interface IReadHelper
         List<NonFungibleIdChange> nonFungibleIdStoreChanges,
         List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
         CancellationToken token);
-
-    Task<Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token);
 
     Task<SequencesHolder> LoadSequences(CancellationToken token);
 }

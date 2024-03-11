@@ -2,6 +2,7 @@
 Release Date: _not published yet_
 
 - Fixed unstable package blueprint and code aggregation.
+- Fixed validator public key and active set aggregation, where unnecessary copy of the key was stored on each epoch change.
 - Reworked internal data aggregation mechanism.
 - Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
 - Changed MVC controller and action names. It has no effect on the API itself, but alters prometheus `controler` and `action` labels.

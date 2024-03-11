@@ -149,6 +149,12 @@ internal class PackageCodeProcessor
         }
     }
 
+    public async Task LoadDependencies()
+    {
+        _mostRecentEntries.AddRange(await MostRecentPackageCodeHistory());
+        _mostRecentAggregates.AddRange(await MostRecentPackageCodeAggregateHistory());
+    }
+
     public void ProcessChanges()
     {
         foreach (var (lookup, change) in _changes.AsEnumerable())
@@ -241,12 +247,6 @@ internal class PackageCodeProcessor
         }
     }
 
-    public async Task LoadMostRecent()
-    {
-        _mostRecentEntries.AddRange(await MostRecentPackageCodeHistory());
-        _mostRecentAggregates.AddRange(await MostRecentPackageCodeAggregateHistory());
-    }
-
     public async Task<int> SaveEntities()
     {
         var rowsInserted = 0;
@@ -266,7 +266,7 @@ internal class PackageCodeProcessor
             return ImmutableDictionary<PackageCodeDbLookup, PackageCodeHistory>.Empty;
         }
 
-        return await _context.ReadHelper.MostRecent<PackageCodeDbLookup, PackageCodeHistory>(
+        return await _context.ReadHelper.LoadDependencies<PackageCodeDbLookup, PackageCodeHistory>(
             @$"
 WITH variables (package_entity_id, code_hash) AS (
     SELECT UNNEST({packageEntityIds}), UNNEST({codeHashes})
@@ -292,7 +292,7 @@ INNER JOIN LATERAL (
             return ImmutableDictionary<long, PackageCodeAggregateHistory>.Empty;
         }
 
-        return await _context.ReadHelper.MostRecent<long, PackageCodeAggregateHistory>(
+        return await _context.ReadHelper.LoadDependencies<long, PackageCodeAggregateHistory>(
             $@"
 WITH variables (package_entity_id) AS (
     SELECT UNNEST({packageEntityIds})

@@ -62,57 +62,15 @@
  * permissions under this License.
  */
 
-using Npgsql;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.CoreApiSdk.Model;
 
-internal interface IWriteHelper
+public partial class ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate : IEntityAddressPointer
 {
-    Task<int> Copy<T>(ICollection<T> entities, string copy, Func<NpgsqlBinaryImporter, T, CancellationToken, Task> callback, [CallerMemberName] string stageName = "");
-
-    Task<int> CopyEntity(ICollection<Entity> entities, CancellationToken token);
-
-    Task<int> CopyLedgerTransaction(ICollection<LedgerTransaction> entities, CancellationToken token);
-
-    Task<int> CopyLedgerTransactionMarkers(ICollection<LedgerTransactionMarker> entities, CancellationToken token);
-
-    Task<int> CopyResourceEntitySupplyHistory(ICollection<ResourceEntitySupplyHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityResourceAggregatedVaultsHistory(ICollection<EntityResourceAggregatedVaultsHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityResourceAggregateHistory(ICollection<EntityResourceAggregateHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityResourceVaultAggregateHistory(ICollection<EntityResourceVaultAggregateHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityVaultHistory(ICollection<EntityVaultHistory> entities, CancellationToken token);
-
-    Task<int> CopyAccountDefaultDepositRuleHistory(List<AccountDefaultDepositRuleHistory> entities, CancellationToken token);
-
-    Task<int> CopyValidatorEmissionStatistics(ICollection<ValidatorEmissionStatistics> entities, CancellationToken token);
-
-    Task<int> CopyAccountResourcePreferenceRuleHistory(List<AccountResourcePreferenceRuleHistory> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleIdData(ICollection<NonFungibleIdData> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleIdDataHistory(ICollection<NonFungibleIdDataHistory> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleIdStoreHistory(ICollection<NonFungibleIdStoreHistory> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleIdLocationHistory(List<NonFungibleIdLocationHistory> entities, CancellationToken token);
-
-    Task<int> CopySchemaHistory(ICollection<SchemaHistory> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token);
-
-    Task<int> CopyKeyValueStoreSchemaHistory(ICollection<KeyValueStoreSchemaHistory> entities, CancellationToken token);
-
-    Task UpdateSequences(SequencesHolder sequences, CancellationToken token);
-
-    T GetDiscriminator<T>(Type type);
+    public IEnumerable<string> GetEntityAddresses()
+    {
+        yield return Key.ValidatorAddress;
+        yield return Value.ActiveValidator.Address;
+    }
 }

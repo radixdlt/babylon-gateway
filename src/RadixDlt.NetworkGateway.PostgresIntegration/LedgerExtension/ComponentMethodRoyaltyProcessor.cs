@@ -108,6 +108,12 @@ internal class ComponentMethodRoyaltyProcessor
         }
     }
 
+    public async Task LoadDependencies()
+    {
+        _mostRecentEntries.AddRange(await MostRecentComponentMethodRoyaltyEntryHistory());
+        _mostRecentAggregates.AddRange(await MostRecentComponentMethodRoyaltyAggregateHistory());
+    }
+
     public void ProcessChanges()
     {
         foreach (var (lookup, change) in _changes.AsEnumerable())
@@ -172,12 +178,6 @@ internal class ComponentMethodRoyaltyProcessor
         }
     }
 
-    public async Task LoadMostRecent()
-    {
-        _mostRecentEntries.AddRange(await MostRecentComponentMethodRoyaltyEntryHistory());
-        _mostRecentAggregates.AddRange(await MostRecentComponentMethodRoyaltyAggregateHistory());
-    }
-
     public async Task<int> SaveEntities()
     {
         var rowsInserted = 0;
@@ -205,7 +205,7 @@ internal class ComponentMethodRoyaltyProcessor
             return ImmutableDictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>.Empty;
         }
 
-        return await _context.ReadHelper.MostRecent<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>(
+        return await _context.ReadHelper.LoadDependencies<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>(
             @$"
 WITH variables (entity_id, method_name) AS (
     SELECT UNNEST({entityIds}), UNNEST({methodNames})
@@ -231,7 +231,7 @@ INNER JOIN LATERAL (
             return ImmutableDictionary<long, ComponentMethodRoyaltyAggregateHistory>.Empty;
         }
 
-        return await _context.ReadHelper.MostRecent<long, ComponentMethodRoyaltyAggregateHistory>(
+        return await _context.ReadHelper.LoadDependencies<long, ComponentMethodRoyaltyAggregateHistory>(
             $@"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})

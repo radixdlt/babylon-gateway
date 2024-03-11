@@ -109,6 +109,12 @@ internal class EntityMetadataProcessor
         }
     }
 
+    public async Task LoadDependencies()
+    {
+        _mostRecentEntries.AddRange(await MostRecentEntityMetadataHistory());
+        _mostRecentAggregates.AddRange(await MostRecentEntityAggregateMetadataHistory());
+    }
+
     public void ProcessChanges()
     {
         foreach (var (lookup, change) in _changes.AsEnumerable())
@@ -174,12 +180,6 @@ internal class EntityMetadataProcessor
         }
     }
 
-    public async Task LoadMostRecent()
-    {
-        _mostRecentEntries.AddRange(await MostRecentEntityMetadataHistory());
-        _mostRecentAggregates.AddRange(await MostRecentEntityAggregateMetadataHistory());
-    }
-
     public async Task<int> SaveEntities()
     {
         var rowsInserted = 0;
@@ -207,7 +207,7 @@ internal class EntityMetadataProcessor
             return ImmutableDictionary<MetadataEntryDbLookup, EntityMetadataHistory>.Empty;
         }
 
-        return await _context.ReadHelper.MostRecent<MetadataEntryDbLookup, EntityMetadataHistory>(
+        return await _context.ReadHelper.LoadDependencies<MetadataEntryDbLookup, EntityMetadataHistory>(
             @$"
 WITH variables (entity_id, key) AS (
     SELECT UNNEST({entityIds}), UNNEST({keys})
@@ -233,7 +233,7 @@ INNER JOIN LATERAL (
             return ImmutableDictionary<long, EntityMetadataAggregateHistory>.Empty;
         }
 
-        return await _context.ReadHelper.MostRecent<long, EntityMetadataAggregateHistory>(
+        return await _context.ReadHelper.LoadDependencies<long, EntityMetadataAggregateHistory>(
             @$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
