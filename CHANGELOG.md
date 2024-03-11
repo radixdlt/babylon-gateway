@@ -30,6 +30,12 @@ Release Date: _not published yet_
 ### Deprecations
 - Obsoleted non-conforming API endpoints `/state/key-value-store/keys` and `/state/non-fungible/ids` in place of `/state/key-value-store/page/keys` and `/state/non-fungible/page/ids`. 
 
+## 1.4.3
+Release built: 06.03.2024
+
+### Bug fixes
+- Properly indexes key value store keys in `key_value_store_entry_history` and `key_value_store_aggregate_history` tables. Previously it was possible that if the key was updated multiple times in one processed transaction batch some updates might not be indexed properly. This release fixes those issues and makes sure they are properly indexed and each change is properly returned from `/state/key-value-store/keys` and `/state/key-value-store/keys` endpoints.
+
 ## 1.4.1
 Release built: 27.02.2024
 

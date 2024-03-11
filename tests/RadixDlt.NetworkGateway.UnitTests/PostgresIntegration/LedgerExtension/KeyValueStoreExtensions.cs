@@ -62,8 +62,91 @@
  * permissions under this License.
  */
 
-using System.Threading;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.UnitTests.PostgresIntegration.LedgerExtension;
 
-internal record ProcessorContext(SequencesHolder Sequences, IReadHelper ReadHelper, IWriteHelper WriteHelper, CancellationToken Token);
+internal record KeyValueStoreChange(long KeyValueStoreEntityId, long StateVersion, KeyValueStoreEntry Entry);
+
+internal record KeyValueStoreEntry(ValueBytes Key, ValueBytes? Value);
+
+internal static class KeyValueStoreExtensions
+{
+    internal static KeyValueStoreEntryHistory CreateDatabaseHistoryEntry(
+        long id,
+        long keyValueStoreEntityId,
+        long fromStateVersion,
+        KeyValueStoreEntry keyData,
+        bool isDeleted = false,
+        bool isLocked = false) =>
+        new()
+        {
+            Id = id,
+            KeyValueStoreEntityId = keyValueStoreEntityId,
+            FromStateVersion = fromStateVersion,
+            IsDeleted = isDeleted,
+            IsLocked = isLocked,
+            Key = keyData.Key,
+            Value = keyData.Value,
+        };
+
+    internal static ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> PrepareChanges(List<KeyValueStoreChange> changes)
+    {
+        var changeTracker = new ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer>();
+
+        foreach (var change in changes)
+        {
+            changeTracker.Add(
+                new KeyValueStoreChangePointerLookup(change.KeyValueStoreEntityId, change.StateVersion, change.Entry.Key),
+                new KeyValueStoreChangePointer(CrateKeyValueStoreSubstate(change.Entry.Key, change.Entry.Value))
+            );
+        }
+
+        return changeTracker;
+    }
+
+    internal static KeyValueStoreEntry GenerateKeyEntry(long seed)
+    {
+        return GenerateKeyEntry(seed, seed);
+    }
+
+    internal static KeyValueStoreEntry GenerateKeyEntry(long keySeed, long valueSeed)
+    {
+        return new KeyValueStoreEntry((ValueBytes)Enumerable.Repeat((byte)keySeed, 10).ToArray(), (ValueBytes)Enumerable.Repeat((byte)keySeed, 20).ToArray());
+    }
+
+    internal static KeyValueStoreEntry GenerateDeletedKeyEntry(long seed)
+    {
+        return new KeyValueStoreEntry((ValueBytes)Enumerable.Repeat((byte)seed, 10).ToArray(), null);
+    }
+
+    internal static ReferencedEntity KeyValueStoreReferencedEntity(long stateVersion)
+    {
+        return new ReferencedEntity((EntityAddress)string.Empty, EntityType.InternalKeyValueStore, stateVersion);
+    }
+
+    internal static GenericKeyValueStoreEntrySubstate CrateKeyValueStoreSubstate(byte[] key, byte[]? value)
+    {
+        var genericKey = new GenericKey(new SborData(Convert.ToHexString(key)));
+
+        if (value == null)
+        {
+            return new GenericKeyValueStoreEntrySubstate(genericKey);
+        }
+
+        var entryValue = new GenericKeyValueStoreEntryValue(
+            new DataStruct(
+                new SborData(Convert.ToHexString(value)),
+                new List<EntityReference>(),
+                new List<EntityReference>()
+            )
+        );
+        return new GenericKeyValueStoreEntrySubstate(genericKey, entryValue);
+    }
+}
