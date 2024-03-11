@@ -88,8 +88,14 @@ internal class ChangeTracker<TKey, TValue>
 
     public void Add(TKey key, TValue value)
     {
-        _insertionOrder.Add(key);
-        _store.Add(key, value);
+        if (_store.TryAdd(key, value))
+        {
+            _insertionOrder.Add(key);
+        }
+        else
+        {
+            throw new InvalidOperationException($"Changes tracker already contains given key: {key}");
+        }
     }
 
     public IEnumerable<KeyValuePair<TKey, TValue>> AsEnumerable()

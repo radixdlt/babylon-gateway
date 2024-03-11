@@ -104,8 +104,7 @@ internal static class KeyValueStoreExtensions
         {
             changeTracker.Add(
                 new KeyValueStoreChangePointerLookup(change.KeyValueStoreEntityId, change.StateVersion, change.Entry.Key),
-                new KeyValueStoreChangePointer(CrateKeyValueStoreSubstate(change.Entry.Key, change.Entry.Value)
-                )
+                new KeyValueStoreChangePointer(CrateKeyValueStoreSubstate(change.Entry.Key, change.Entry.Value))
             );
         }
 
