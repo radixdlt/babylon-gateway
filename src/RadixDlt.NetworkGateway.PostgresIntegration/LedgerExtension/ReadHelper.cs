@@ -96,8 +96,7 @@ internal class ReadHelper
         _token = token;
     }
 
-    // TODO rename into LoadDependencies() ?
-    public async Task<Dictionary<TKey, TValue>> MostRecent<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
+    public async Task<Dictionary<TKey, TValue>> LoadDependencies<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
         where TKey : notnull
         where TValue : class
     {

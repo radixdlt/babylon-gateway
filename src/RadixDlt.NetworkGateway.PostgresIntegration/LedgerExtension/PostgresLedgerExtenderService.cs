@@ -1184,12 +1184,12 @@ UPDATE pending_transactions
             var mostRecentKeyValueStoreEntryHistory = await readHelper.MostRecentKeyValueStoreEntryHistoryFor(keyValueStoreChanges.Keys, token);
             var mostRecentKeyValueStoreAggregateHistory = await readHelper.MostRecentKeyValueStoreAggregateHistoryFor(keyValueStoreChanges.Keys, token);
 
-            await entityMetadataProcessor.LoadMostRecent();
-            await componentMethodRoyaltyProcessor.LoadMostRecent();
-            await entityRoleAssignmentProcessor.LoadMostRecent();
-            await packageCodeProcessor.LoadMostRecent();
-            await packageBlueprintProcessor.LoadMostRecent();
-            await validatorProcessor.LoadMostRecent();
+            await entityMetadataProcessor.LoadDependencies();
+            await componentMethodRoyaltyProcessor.LoadDependencies();
+            await entityRoleAssignmentProcessor.LoadDependencies();
+            await packageCodeProcessor.LoadDependencies();
+            await packageBlueprintProcessor.LoadDependencies();
+            await validatorProcessor.LoadDependencies();
 
             dbReadDuration += sw.Elapsed;
 

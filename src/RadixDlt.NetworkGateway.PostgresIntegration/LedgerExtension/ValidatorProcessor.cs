@@ -138,6 +138,11 @@ internal class ValidatorProcessor
         }
     }
 
+    public async Task LoadDependencies()
+    {
+        _existingPublicKeys.AddRange(await ExistingValidatorPublicKeys());
+    }
+
     public void ProcessChanges()
     {
         foreach (var lookup in _seenPublicKeys.Keys.Except(_existingPublicKeys.Keys))
@@ -171,12 +176,6 @@ internal class ValidatorProcessor
         }
     }
 
-    // TODO rename everything into LoadDependencies() ?
-    public async Task LoadMostRecent()
-    {
-        _existingPublicKeys.AddRange(await ExistingValidatorPublicKeys());
-    }
-
     public async Task<int> SaveEntities()
     {
         var rowsInserted = 0;
@@ -194,7 +193,7 @@ internal class ValidatorProcessor
             return ImmutableDictionary<ValidatorPublicKeyLookup, ValidatorPublicKeyHistory>.Empty;
         }
 
-        return await _context.ReadHelper.MostRecent<ValidatorPublicKeyLookup, ValidatorPublicKeyHistory>(
+        return await _context.ReadHelper.LoadDependencies<ValidatorPublicKeyLookup, ValidatorPublicKeyHistory>(
             @$"
 WITH variables (validator_entity_id, key_type, key) AS (
     SELECT UNNEST({entityIds}), UNNEST({keyTypes}), UNNEST({keys})
