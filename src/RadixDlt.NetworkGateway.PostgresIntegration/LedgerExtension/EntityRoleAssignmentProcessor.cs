@@ -120,6 +120,12 @@ internal class EntityRoleAssignmentProcessor
         }
     }
 
+    public async Task LoadDependencies()
+    {
+        _mostRecentEntries.AddRange(await MostRecentEntityRoleAssignmentsEntryHistory());
+        _mostRecentAggregates.AddRange(await MostRecentEntityRoleAssignmentsAggregateHistory());
+    }
+
     public void ProcessChanges()
     {
         foreach (var (lookup, change) in _changes.AsEnumerable())
@@ -201,12 +207,6 @@ internal class EntityRoleAssignmentProcessor
         }
     }
 
-    public async Task LoadMostRecent()
-    {
-        _mostRecentEntries.AddRange(await MostRecentEntityRoleAssignmentsEntryHistory());
-        _mostRecentAggregates.AddRange(await MostRecentEntityRoleAssignmentsAggregateHistory());
-    }
-
     public async Task<int> SaveEntities()
     {
         var rowsInserted = 0;
@@ -235,7 +235,7 @@ internal class EntityRoleAssignmentProcessor
             return ImmutableDictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>.Empty;
         }
 
-        return await _context.ReadHelper.MostRecent<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>(
+        return await _context.ReadHelper.LoadDependencies<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>(
             @$"
 WITH variables (entity_id, key_role, module_id) AS (
     SELECT UNNEST({entityIds}), UNNEST({keyRoles}), UNNEST({keyModuleIds})
@@ -261,7 +261,7 @@ INNER JOIN LATERAL (
             return ImmutableDictionary<long, EntityRoleAssignmentsAggregateHistory>.Empty;
         }
 
-        return await _context.ReadHelper.MostRecent<long, EntityRoleAssignmentsAggregateHistory>(
+        return await _context.ReadHelper.LoadDependencies<long, EntityRoleAssignmentsAggregateHistory>(
             @$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
