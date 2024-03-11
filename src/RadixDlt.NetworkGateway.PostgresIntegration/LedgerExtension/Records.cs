@@ -101,13 +101,9 @@ internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string 
 
 internal record NonFungibleIdDeletion(ReferencedEntity ReferencedResource, string NonFungibleId, long StateVersion);
 
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
-
 internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? Minted = null, TokenAmount? Burned = null);
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record struct MetadataLookup(long EntityId, string Key);
 
 internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
 

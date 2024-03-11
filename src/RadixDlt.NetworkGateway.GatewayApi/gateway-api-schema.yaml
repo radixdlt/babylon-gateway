@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.4.3
+  version: v1.5.0
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
@@ -612,6 +612,8 @@ tags:
       * `manifest_accounts_deposited_into_filter` - similar to withdrawn, but will return only transactions with a manifest containing deposits to the given accounts.
 
       * `manifest_resources_filter` - allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
+
+      * `manifest_badges_presented_filter` - allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented.
 
       * `accounts_with_manifest_owner_method_calls` - allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
 
@@ -1581,8 +1583,7 @@ paths:
     post:
       operationId: KeyValueStoreKeys
       summary: Get KeyValueStore Keys
-      description: |
-        Allows to iterate over key value store keys.
+      description: Allows to iterate over key value store keys.
       tags:
         - State
       requestBody:
@@ -1600,7 +1601,6 @@ paths:
                 $ref: "#/components/schemas/StateKeyValueStoreKeysResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-
   /state/key-value-store/data:
     post:
       operationId: KeyValueStoreData
@@ -2667,7 +2667,7 @@ components:
             royalty_module_package:
               $ref: "#/components/schemas/Address"
             access_rules_package:
-              description: "Obsolete! Use `role_assignment_module_package` instead."
+              description: "**Obsolete!** Use `role_assignment_module_package` instead."
               deprecated: true
               $ref: "#/components/schemas/Address"
             role_assignment_module_package:
@@ -3148,6 +3148,10 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/Address"
+            manifest_badges_presented_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
             manifest_resources_filter:
               type: array
               items:
@@ -3242,6 +3246,7 @@ components:
         aggregation_level: "Vault"
         opt_ins:
           ancestor_identities: true
+          component_royalty_config: true
           component_royalty_vault_balance: true
           package_royalty_vault_balance: true
           non_fungible_include_nfids: true
@@ -3254,6 +3259,10 @@ components:
       properties:
         ancestor_identities:
           description: if set to `true`, ancestor addresses - `parent_address`, `owner_address` and `global_address` for entities are returned.
+          type: boolean
+          default: false
+        component_royalty_config:
+          description: if set to `true`, `royalty_config` for component entities is returned.
           type: boolean
           default: false
         component_royalty_vault_balance:
@@ -3421,15 +3430,15 @@ components:
             codes:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsCodeCollection"
             vm_type:
-              description: "Obsolete! Use `codes` collection instead."
+              description: "**Obsolete!** Use `codes` collection instead."
               deprecated: true
               $ref: "#/components/schemas/PackageVmType"
             code_hash_hex:
-              description: "Obsolete! Use `codes` collection instead."
+              description: "**Obsolete!** Use `codes` collection instead."
               deprecated: true
               $ref: "#/components/schemas/HexString"
             code_hex:
-              description: "Obsolete! Use `codes` collection instead."
+              description: "**Obsolete!** Use `codes` collection instead."
               deprecated: true
               $ref: "#/components/schemas/HexString"
             royalty_vault_balance:
@@ -3500,9 +3509,7 @@ components:
           type: boolean
           nullable: true
         royalty_config:
-          type: object
-          description: |
-            This type is defined in the Core API as `BlueprintRoyaltyConfig`. See the Core API documentation for more details.
+          $ref: "#/components/schemas/BlueprintRoyaltyConfig"
         royalty_config_is_locked:
           type: boolean
           nullable: true
@@ -3552,6 +3559,8 @@ components:
               $ref: "#/components/schemas/ComponentEntityRoleAssignments"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
+            royalty_config:
+              $ref: "#/components/schemas/ComponentRoyaltyConfig"
 
     StateEntityMetadataPageRequest:
       allOf:
@@ -3821,12 +3830,19 @@ components:
       type: object
       required:
         - non_fungible_id
-        - last_updated_at_state_version
         - is_burned
+        - last_updated_at_state_version
       properties:
         non_fungible_id:
           $ref: "#/components/schemas/NonFungibleId"
         owning_vault_address:
+          description: The address of the Vault containing (owning) this NFID.
+          $ref: "#/components/schemas/Address"
+        owning_vault_parent_ancestor_address:
+          description: The address of the parent ancestor of the Vault containing (owning) this NFID.
+          $ref: "#/components/schemas/Address"
+        owning_vault_global_ancestor_address:
+          description: The address of the global ancestor of the Vault containing (owning) this NFID.
           $ref: "#/components/schemas/Address"
         is_burned:
           type: boolean
@@ -4930,3 +4946,65 @@ components:
           properties:
             value:
               type: string
+
+    #
+    # Royalties (partially copied from Core API)
+    #
+
+    BlueprintRoyaltyConfig:
+      type: object
+      required:
+        - is_enabled
+      properties:
+        is_enabled:
+          type: boolean
+        method_rules:
+          description: The royalty rules by method. The array is only present if royalties are enabled.
+          type: array
+          items:
+            $ref: "#/components/schemas/BlueprintMethodRoyalty"
+    BlueprintMethodRoyalty:
+      type: object
+      required:
+        - method_name
+      properties:
+        method_name:
+          type: string
+        royalty_amount:
+          description: The due royalty; missing field denotes a free method.
+          $ref: "#/components/schemas/RoyaltyAmount"
+    ComponentRoyaltyConfig:
+      type: object
+      required:
+        - is_enabled
+      properties:
+        is_enabled:
+          type: boolean
+        method_rules:
+          description: The royalty rules by method. The array is only present if royalties are enabled.
+          type: array
+          items:
+            $ref: "#/components/schemas/ComponentMethodRoyalty"
+    ComponentMethodRoyalty:
+      type: object
+      required:
+        - method_name
+      properties:
+        method_name:
+          type: string
+        royalty_amount:
+          description: The due royalty; missing field denotes a free method.
+          $ref: "#/components/schemas/RoyaltyAmount"
+    RoyaltyAmount:
+      type: object
+      required:
+        - amount
+        - unit
+      properties:
+        amount:
+          $ref: "#/components/schemas/BigDecimal"
+        unit:
+          type: string
+          enum:
+            - XRD
+            - USD

@@ -79,16 +79,6 @@ internal interface IReadHelper
         where TKey : notnull
         where TValue : class;
 
-    Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token);
-
-    Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(ICollection<PackageCodeDbLookup> packageCodeChanges, CancellationToken token);
-
-    Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(
-        ICollection<PackageBlueprintDbLookup> packageBlueprintChanges,
-        CancellationToken token);
-
-    Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token);
-
     Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<IVaultSnapshot> vaultSnapshots, CancellationToken token);
 
     Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(

@@ -735,7 +735,6 @@ UPDATE pending_transactions
         var vaultSnapshots = new List<IVaultSnapshot>();
         var vaultChanges = new List<IVaultChange>();
         var nonFungibleIdChanges = new List<NonFungibleIdChange>();
-        var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
@@ -749,6 +748,7 @@ UPDATE pending_transactions
 
         var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, token);
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
+        var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
         var componentMethodRoyaltyProcessor = new ComponentMethodRoyaltyProcessor(processorContext);
         var entityRoleAssignmentProcessor = new EntityRoleAssignmentProcessor(processorContext);
         var packageCodeProcessor = new PackageCodeProcessor(processorContext, networkConfiguration.Id);
@@ -776,15 +776,6 @@ UPDATE pending_transactions
                         var substateData = substate.Value.SubstateData;
                         var referencedEntity = referencedEntities.Get((EntityAddress)substateId.EntityAddress);
                         affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
-
-                        if (substateData is CoreModel.MetadataModuleEntrySubstate metadata)
-                        {
-                            var isDeleted = metadata.Value == null;
-                            var key = metadata.Key.Name;
-                            var value = metadata.Value?.DataStruct.StructData.Hex.ConvertFromHex();
-
-                            metadataChanges.Add(new MetadataChange(referencedEntity, key, value, isDeleted, metadata.IsLocked, stateVersion));
-                        }
 
                         if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleVaultFieldBalanceSubstate)
                         {
@@ -977,6 +968,7 @@ UPDATE pending_transactions
                         }
 
                         entityStateProcessor.VisitUpsert(substate, referencedEntity, stateVersion);
+                        entityMetadataProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         componentMethodRoyaltyProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         entityRoleAssignmentProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         packageCodeProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
@@ -1117,6 +1109,20 @@ UPDATE pending_transactions
 
                     if (manifestExtractedAddresses.TryGetValue(stateVersion, out var extractedAddresses))
                     {
+                        foreach (var proofResourceAddress in extractedAddresses.PresentedProofs.Select(x => x.ResourceAddress).ToHashSet())
+                        {
+                            if (referencedEntities.TryGet(proofResourceAddress, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.BadgePresented,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
+
                         foreach (var address in extractedAddresses.ResourceAddresses)
                         {
                             if (referencedEntities.TryGet(address, out var re))
@@ -1188,8 +1194,6 @@ UPDATE pending_transactions
         {
             var sw = Stopwatch.StartNew();
 
-            var mostRecentMetadataHistory = await readHelper.MostRecentEntityMetadataHistoryFor(metadataChanges, token);
-            var mostRecentAggregatedMetadataHistory = await readHelper.MostRecentEntityAggregateMetadataHistoryFor(metadataChanges, token);
             var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(vaultSnapshots, token);
             var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(vaultChanges, token);
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(vaultSnapshots, token);
@@ -1199,6 +1203,7 @@ UPDATE pending_transactions
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
 
+            await entityMetadataProcessor.LoadMostRecent();
             await componentMethodRoyaltyProcessor.LoadMostRecent();
             await entityRoleAssignmentProcessor.LoadMostRecent();
             await packageCodeProcessor.LoadMostRecent();
@@ -1207,8 +1212,6 @@ UPDATE pending_transactions
 
             dbReadDuration += sw.Elapsed;
 
-            var entityMetadataHistoryToAdd = new List<EntityMetadataHistory>();
-            var entityMetadataAggregateHistoryToAdd = new List<EntityMetadataAggregateHistory>();
             var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
             var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
             var entityResourceVaultAggregateHistoryCandidates = new List<EntityResourceVaultAggregateHistory>();
@@ -1217,66 +1220,7 @@ UPDATE pending_transactions
             var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
 
-            foreach (var metadataChange in metadataChanges)
-            {
-                var lookup = new MetadataLookup(metadataChange.ReferencedEntity.DatabaseId, metadataChange.Key);
-                var metadataHistory = new EntityMetadataHistory
-                {
-                    Id = sequences.EntityMetadataHistorySequence++,
-                    FromStateVersion = metadataChange.StateVersion,
-                    EntityId = metadataChange.ReferencedEntity.DatabaseId,
-                    Key = metadataChange.Key,
-                    Value = metadataChange.Value,
-                    IsDeleted = metadataChange.IsDeleted,
-                    IsLocked = metadataChange.IsLocked,
-                };
-
-                entityMetadataHistoryToAdd.Add(metadataHistory);
-
-                EntityMetadataAggregateHistory aggregate;
-
-                if (!mostRecentAggregatedMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previousAggregate) ||
-                    previousAggregate.FromStateVersion != metadataChange.StateVersion)
-                {
-                    aggregate = new EntityMetadataAggregateHistory
-                    {
-                        Id = sequences.EntityMetadataAggregateHistorySequence++,
-                        FromStateVersion = metadataChange.StateVersion,
-                        EntityId = metadataChange.ReferencedEntity.DatabaseId,
-                        MetadataIds = new List<long>(),
-                    };
-
-                    if (previousAggregate != null)
-                    {
-                        aggregate.MetadataIds.AddRange(previousAggregate.MetadataIds);
-                    }
-
-                    entityMetadataAggregateHistoryToAdd.Add(aggregate);
-                    mostRecentAggregatedMetadataHistory[metadataChange.ReferencedEntity.DatabaseId] = aggregate;
-                }
-                else
-                {
-                    aggregate = previousAggregate;
-                }
-
-                if (mostRecentMetadataHistory.TryGetValue(lookup, out var previous))
-                {
-                    var currentPosition = aggregate.MetadataIds.IndexOf(previous.Id);
-
-                    if (currentPosition != -1)
-                    {
-                        aggregate.MetadataIds.RemoveAt(currentPosition);
-                    }
-                }
-
-                if (!metadataChange.IsDeleted)
-                {
-                    aggregate.MetadataIds.Insert(0, metadataHistory.Id);
-                }
-
-                mostRecentMetadataHistory[lookup] = metadataHistory;
-            }
-
+            entityMetadataProcessor.ProcessChanges();
             componentMethodRoyaltyProcessor.ProcessChanges();
             entityRoleAssignmentProcessor.ProcessChanges();
             packageCodeProcessor.ProcessChanges();
@@ -1621,8 +1565,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(entityMetadataAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(entityResourceAggregatedVaultsHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
@@ -1642,6 +1584,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
 
             rowsInserted += await entityStateProcessor.SaveEntities();
+            rowsInserted += await entityMetadataProcessor.SaveEntities();
             rowsInserted += await componentMethodRoyaltyProcessor.SaveEntities();
             rowsInserted += await entityRoleAssignmentProcessor.SaveEntities();
             rowsInserted += await packageCodeProcessor.SaveEntities();

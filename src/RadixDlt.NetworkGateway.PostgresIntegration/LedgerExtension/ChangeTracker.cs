@@ -62,28 +62,32 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-[ApiController]
-[Route("state/validators")]
-public class ValidatorController : ControllerBase
+internal class ChangeTracker<TKey, TValue>
+    where TKey : notnull
 {
-    private readonly IValidatorStateHandler _validatorStateHandler;
+    private readonly Dictionary<TKey, TValue> _store = new();
+    private readonly List<TKey> _insertionOrder = new();
 
-    public ValidatorController(IValidatorStateHandler validatorStateHandler)
+    public IList<TKey> Keys => _insertionOrder;
+
+    public TValue GetOrAdd(TKey key, Func<TKey, TValue> factory)
     {
-        _validatorStateHandler = validatorStateHandler;
+        return _store.GetOrAdd(key, _ =>
+        {
+            _insertionOrder.Add(key);
+
+            return factory(key);
+        });
     }
 
-    [HttpPost("list")]
-    public async Task<GatewayModel.StateValidatorsListResponse> List(GatewayModel.StateValidatorsListRequest request, CancellationToken token)
+    public IEnumerable<KeyValuePair<TKey, TValue>> AsEnumerable()
     {
-        return await _validatorStateHandler.List(request, token);
+        return _insertionOrder.Select(key => new KeyValuePair<TKey, TValue>(key, _store[key]));
     }
 }

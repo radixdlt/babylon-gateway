@@ -85,7 +85,7 @@ public interface IDapperWrapper
         string operationName = "",
         [CallerMemberName] string methodName = "");
 
-    Task<T> QueryFirstOrDefaultAsync<T>(
+    Task<T?> QueryFirstOrDefaultAsync<T>(
         IDbConnection connection,
         CommandDefinition command,
         string operationName = "",
@@ -128,14 +128,14 @@ public class DapperWrapper : IDapperWrapper
         {
             var parameters = JsonConvert.SerializeObject(command.Parameters);
             _logger.LogWarning(
-                "Long running query: {query}, parameters: {queryParameters} duration: {queryDuration} seconds",
+                "Long running query: {Query}, parameters: {QueryParameters} duration: {QueryDuration} seconds",
                 command.CommandText, parameters, elapsed);
         }
 
         return result;
     }
 
-    public async Task<T> QueryFirstOrDefaultAsync<T>(
+    public async Task<T?> QueryFirstOrDefaultAsync<T>(
         IDbConnection connection,
         CommandDefinition command,
         string operationName = "",
@@ -154,7 +154,7 @@ public class DapperWrapper : IDapperWrapper
         {
             var parameters = JsonConvert.SerializeObject(command.Parameters);
             _logger.LogWarning(
-                "Long running query: {query}, parameters: {queryParameters} duration: {queryDuration} milliseconds",
+                "Long running query: {Query}, parameters: {QueryParameters} duration: {QueryDuration} milliseconds",
                 command.CommandText, parameters, elapsed);
         }
 

@@ -82,10 +82,6 @@ internal interface IWriteHelper
 
     Task<int> CopyLedgerTransactionMarkers(ICollection<LedgerTransactionMarker> entities, CancellationToken token);
 
-    Task<int> CopyEntityMetadataHistory(ICollection<EntityMetadataHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityMetadataAggregateHistory(ICollection<EntityMetadataAggregateHistory> entities, CancellationToken token);
-
     Task<int> CopyValidatorKeyHistory(ICollection<ValidatorPublicKeyHistory> entities, CancellationToken token);
 
     Task<int> CopyValidatorActiveSetHistory(ICollection<ValidatorActiveSetHistory> entities, CancellationToken token);

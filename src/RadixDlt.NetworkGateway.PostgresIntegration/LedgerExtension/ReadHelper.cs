@@ -66,10 +66,8 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Npgsql;
-using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -112,146 +110,6 @@ internal class ReadHelper : IReadHelper
             .ToDictionaryAsync(keySelector, _token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(stageName, Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
-    {
-        if (!metadataChanges.Any())
-        {
-            return new Dictionary<MetadataLookup, EntityMetadataHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = new List<long>();
-        var keys = new List<string>();
-        var lookupSet = new HashSet<MetadataLookup>();
-
-        foreach (var metadataChange in metadataChanges)
-        {
-            lookupSet.Add(new MetadataLookup(metadataChange.ReferencedEntity.DatabaseId, metadataChange.Key));
-        }
-
-        foreach (var lookup in lookupSet)
-        {
-            entityIds.Add(lookup.EntityId);
-            keys.Add(lookup.Key);
-        }
-
-        var result = await _dbContext
-            .EntityMetadataHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, key) AS (
-    SELECT UNNEST({entityIds}), UNNEST({keys})
-)
-SELECT emh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_metadata_history
-    WHERE entity_id = variables.entity_id AND key = variables.key
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new MetadataLookup(e.EntityId, e.Key), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(ICollection<PackageCodeDbLookup> packageCodeChanges, CancellationToken token)
-    {
-        if (!packageCodeChanges.Any())
-        {
-            return new Dictionary<long, PackageCodeAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageCodeChanges.Select(x => x.PackageEntityId).Distinct().ToList();
-
-        var result = await _dbContext
-            .PackageCodeAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (package_entity_id) AS (
-    SELECT UNNEST({packageEntityIds})
-)
-SELECT pbah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM package_code_aggregate_history
-    WHERE package_entity_id = variables.package_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) pbah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.PackageEntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageCodeAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(
-        ICollection<PackageBlueprintDbLookup> packageBlueprintChanges,
-        CancellationToken token)
-    {
-        if (!packageBlueprintChanges.Any())
-        {
-            return new Dictionary<long, PackageBlueprintAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageBlueprintChanges.Select(x => x.PackageEntityId).Distinct().ToList();
-
-        var result = await _dbContext
-            .PackageBlueprintAggregateHistory
-            .FromSqlInterpolated(@$"
-")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.PackageEntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageBlueprintAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
-    {
-        if (!metadataChanges.Any())
-        {
-            return new Dictionary<long, EntityMetadataAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
-
-        var result = await _dbContext
-            .EntityMetadataAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id) AS (
-    SELECT UNNEST({entityIds})
-)
-SELECT emah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_metadata_aggregate_history
-    WHERE entity_id = variables.entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.EntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityAggregateMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }
@@ -499,10 +357,7 @@ INNER JOIN LATERAL (
         var sw = Stopwatch.GetTimestamp();
         var entityAddressesToLoad = referencedEntities.Addresses.Select(x => (string)x).ToList();
         var knownAddressesToLoad = referencedEntities.KnownAddresses.Select(x => (string)x).ToList();
-        var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Text)
-        {
-            Value = entityAddressesToLoad.Concat(knownAddressesToLoad).ToArray(),
-        };
+        var addressesToLoad = entityAddressesToLoad.Concat(knownAddressesToLoad).ToList();
 
         var result = await _dbContext
             .Entities
@@ -512,7 +367,7 @@ FROM entities
 WHERE id IN(
     SELECT UNNEST(id || correlated_entities) AS id
     FROM entities
-    WHERE address = ANY({entityAddressesParameter})
+    WHERE address = ANY({addressesToLoad})
 )")
             .AsNoTracking()
             .AnnotateMetricName()

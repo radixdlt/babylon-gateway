@@ -62,63 +62,43 @@
  * permissions under this License.
  */
 
-using Npgsql;
-using NpgsqlTypes;
-using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System.Collections.Generic;
+using Xunit;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.UnitTests.PostgresIntegration.LedgerExtension;
 
-internal static class NpgsqlBinaryImporterExtensions
+public class ChangeTrackerTests
 {
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, bool? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    [Fact]
+    public void PreservesInsertionOrder()
     {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
+        var expected = new List<KeyValuePair<string, int>>
+        {
+            new("b", 1),
+            new("a", 2),
+            new("c", 3),
+        };
+
+        var ct = new ChangeTracker<string, int>();
+
+        foreach (var kvp in expected)
+        {
+            ct.GetOrAdd(kvp.Key, _ => kvp.Value);
+        }
+
+        ct.AsEnumerable().Should().Equal(expected);
     }
 
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, int? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    [Fact]
+    public void ReturnsExistingElement()
     {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
+        var ct = new ChangeTracker<string, int>();
+        var a = ct.GetOrAdd("a", _ => 1);
+        var b = ct.GetOrAdd("a", _ => 2);
 
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, long? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
-    {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
-
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, BigInteger? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
-    {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
-
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, byte[]? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
-    {
-        return value != null
-            ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
-
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, long[]? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
-    {
-        return value != null
-            ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
-
-    public static Task WriteNullableAsync<T>(this NpgsqlBinaryImporter writer, T? value, string dataTypeName, CancellationToken cancellationToken = default)
-        where T : struct
-    {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, dataTypeName, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
+        a.Should().Be(1);
+        b.Should().Be(1);
     }
 }

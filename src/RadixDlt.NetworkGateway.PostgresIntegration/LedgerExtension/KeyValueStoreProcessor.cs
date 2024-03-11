@@ -202,7 +202,7 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Key.ToArray(), NpgsqlDbType.Bytea, token);
-            await writer.WriteNullableAsync(e.Value?.ToArray(), NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Value?.ToArray(), NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         });

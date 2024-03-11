@@ -62,25 +62,28 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-#nullable disable
+namespace GatewayApi.Controllers;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+[ApiController]
+[Route("state/validators")]
+public class StateValidatorsController : ControllerBase
 {
-    /// <inheritdoc />
-    public partial class FixIsDeletedFlagOnRecreatedKVStoreKeys : Migration
-    {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.Sql("update key_value_store_entry_history entry_history SET is_deleted = false where is_deleted = true AND entry_history.id in (select unnest(key_value_store_entry_ids) from key_value_store_aggregate_history aggregate_history where aggregate_history.key_value_store_entity_id = entry_history.key_value_store_entity_id);");
-            migrationBuilder.Sql("update key_value_store_entry_history SET value = null where is_deleted = true;");
-        }
+    private readonly IValidatorStateHandler _validatorStateHandler;
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-        }
+    public StateValidatorsController(IValidatorStateHandler validatorStateHandler)
+    {
+        _validatorStateHandler = validatorStateHandler;
+    }
+
+    [HttpPost("list")]
+    public async Task<GatewayModel.StateValidatorsListResponse> List(GatewayModel.StateValidatorsListRequest request, CancellationToken token)
+    {
+        return await _validatorStateHandler.List(request, token);
     }
 }

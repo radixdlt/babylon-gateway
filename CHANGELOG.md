@@ -1,3 +1,34 @@
+## 1.5.0
+Release Date: _not published yet_
+
+- Fixed unstable package blueprint and code aggregation.
+- Reworked internal data aggregation mechanism.
+- Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
+- Changed MVC controller and action names. It has no effect on the API itself, but alters prometheus `controler` and `action` labels.
+  - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.KeysPage`,
+  - `StateNonFungibleController.Ids` renamed to `StateNonFungibleController.IdsPage`,
+  - `StatisticsController.Uptime` renamed to `StatisticsController.ValidatorsUptime`,
+  - `StateController` renamed to `StateEntityController`,
+  - `ValidatorStateController` renamed to `StateValidatorsComponent`.
+- Upgraded to .NET 8:
+  - Upgraded runtime and libraries
+  - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
+  - Removed now-obsolete or no-longer-needed code.
+- Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
+
+### API Changes
+- Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.
+- Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
+- Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
+- Use strong type definition for the `royalty_config` property of package blueprint and general components details. This is a change to OAS definition only and does not impact returned data format.
+
+### Database changes
+- Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
+- Column `component_method_royalty_entry_history.royalty_amount` contains now the JSON payload representing the royalty amount without wrapping object. 
+
+### Deprecations
+- Obsoleted non-conforming API endpoints `/state/key-value-store/keys` and `/state/non-fungible/ids` in place of `/state/key-value-store/page/keys` and `/state/non-fungible/page/ids`. 
+
 ## 1.4.3
 Release built: 06.03.2024
 
@@ -8,7 +39,7 @@ Release built: 06.03.2024
 Release built: 27.02.2024
 
 ### Bug fixes
-- Recreated key value store keys are properly returned from `/state/key-value-store/keys` and `/state/key-value-store/keys`. Previously Gateway did not return keys that were deleted and then recreated. This release fixes existing data in the database and makes sure new ingested data is properly stored in the database.
+- Recreated key value store keys are properly returned from `/state/key-value-store/keys` and `/state/key-value-store/data`. Previously Gateway did not return keys that were deleted and then recreated. This release fixes existing data in the database and makes sure new ingested data is properly stored in the database.
 
 ## 1.4.0
 Release built: 08.02.2024
