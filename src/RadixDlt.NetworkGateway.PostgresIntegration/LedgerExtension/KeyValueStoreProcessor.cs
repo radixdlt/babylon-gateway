@@ -77,7 +77,7 @@ internal record struct KeyValueStoreEntryDbLookup(long KeyValueStoreEntityId, Va
 
 internal record struct KeyValueStoreChangePointerLookup(long KeyValueStoreEntityId, long StateVersion, ValueBytes Key);
 
-internal record KeyValueStoreChangePointer(ReferencedEntity ReferencedEntity, CoreModel.GenericKeyValueStoreEntrySubstate KeyValueStoreEntry);
+internal record KeyValueStoreChangePointer(CoreModel.GenericKeyValueStoreEntrySubstate KeyValueStoreEntry);
 
 internal class KeyValueStoreProcessor
 {
@@ -104,7 +104,7 @@ internal class KeyValueStoreProcessor
                 (ValueBytes)genericKeyValueStoreEntry.Key.KeyData.GetDataBytes()
             );
 
-            _changes.GetOrAdd(kvStoreEntryLookup, l => new KeyValueStoreChangePointer(referencedEntity, genericKeyValueStoreEntry));
+            _changes.Add(kvStoreEntryLookup, new KeyValueStoreChangePointer(genericKeyValueStoreEntry));
         }
     }
 

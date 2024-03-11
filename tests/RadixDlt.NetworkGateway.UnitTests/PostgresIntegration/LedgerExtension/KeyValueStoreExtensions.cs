@@ -102,11 +102,9 @@ internal static class KeyValueStoreExtensions
 
         foreach (var change in changes)
         {
-            changeTracker.GetOrAdd(
+            changeTracker.Add(
                 new KeyValueStoreChangePointerLookup(change.KeyValueStoreEntityId, change.StateVersion, change.Entry.Key),
-                y => new KeyValueStoreChangePointer(
-                    KeyValueStoreReferencedEntity(y.StateVersion),
-                    CrateKeyValueStoreSubstate(change.Entry.Key, change.Entry.Value)
+                new KeyValueStoreChangePointer(CrateKeyValueStoreSubstate(change.Entry.Key, change.Entry.Value)
                 )
             );
         }

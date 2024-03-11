@@ -86,6 +86,12 @@ internal class ChangeTracker<TKey, TValue>
         });
     }
 
+    public void Add(TKey key, TValue value)
+    {
+        _insertionOrder.Add(key);
+        _store.Add(key, value);
+    }
+
     public IEnumerable<KeyValuePair<TKey, TValue>> AsEnumerable()
     {
         return _insertionOrder.Select(key => new KeyValuePair<TKey, TValue>(key, _store[key]));
