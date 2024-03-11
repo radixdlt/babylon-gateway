@@ -117,10 +117,10 @@ public class KeyValueStoreAggregatorTests
             new() { Id = 102, FromStateVersion = 110, KeyValueStoreEntityId = 12, KeyValueStoreEntryIds = new List<long> { 205 } },
         };
 
-        var (changeOrder, changePointers) = Extensions.PrepareChanges(changes);
+        var changeTracker = Extensions.PrepareChanges(changes);
 
         // Act.
-        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeOrder, changePointers, mostRecentEntries, mostRecentAggregates);
+        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeTracker, mostRecentEntries, mostRecentAggregates);
 
         // Assert.
         entriesToAdd.Should().BeEquivalentTo(expectedEntries);
@@ -172,10 +172,10 @@ public class KeyValueStoreAggregatorTests
             new() { Id = 100, FromStateVersion = 200, KeyValueStoreEntityId = 10, KeyValueStoreEntryIds = new List<long> { 101 } },
         };
 
-        var (changeOrder, changePointers) = Extensions.PrepareChanges(changes);
+        var changeTracker = Extensions.PrepareChanges(changes);
 
         // Act.
-        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeOrder, changePointers, mostRecentEntries, mostRecentAggregates);
+        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeTracker, mostRecentEntries, mostRecentAggregates);
 
         // Assert.
         entriesToAdd.Should().BeEquivalentTo(expectedEntriesToAdd);
@@ -236,10 +236,10 @@ public class KeyValueStoreAggregatorTests
             new() { Id = 103, FromStateVersion = 350, KeyValueStoreEntityId = 10, KeyValueStoreEntryIds = new List<long> { 101, 203 } },
         };
 
-        var (changeOrder, changePointers) = Extensions.PrepareChanges(changes);
+        var changeTracker = Extensions.PrepareChanges(changes);
 
         // Act.
-        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeOrder, changePointers, mostRecentEntries, mostRecentAggregates);
+        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeTracker, mostRecentEntries, mostRecentAggregates);
 
         // Assert.
         entriesToAdd.Should().BeEquivalentTo(expectedEntriesToAdd);
@@ -338,10 +338,10 @@ public class KeyValueStoreAggregatorTests
             new() { Id = 110, FromStateVersion = 401, KeyValueStoreEntityId = 10, KeyValueStoreEntryIds = new List<long> { 214 } },
         };
 
-        var (changeOrder, changePointers) = Extensions.PrepareChanges(changes);
+        var changeTracker = Extensions.PrepareChanges(changes);
 
         // Act.
-        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeOrder, changePointers, mostRecentEntries, mostRecentAggregates);
+        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeTracker, mostRecentEntries, mostRecentAggregates);
 
         // Assert.
         entriesToAdd.Should().BeEquivalentTo(expectedEntriesToAdd);

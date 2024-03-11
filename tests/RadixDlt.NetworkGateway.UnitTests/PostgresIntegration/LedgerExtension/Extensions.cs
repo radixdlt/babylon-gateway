@@ -96,20 +96,22 @@ internal static class Extensions
             Value = keyData.Value,
         };
 
-    internal static (List<KeyValueStoreChangePointerLookup> ChangeOrder, Dictionary<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> ChangePointers) PrepareChanges(List<Change> changes)
+    internal static ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> PrepareChanges(List<Change> changes)
     {
-        var changeOrder = changes
-            .Select(x => new KeyValueStoreChangePointerLookup(x.KeyValueStoreEntityId, x.StateVersion, x.Entry.Key))
-            .ToList();
+        var changeTracker = new ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer>();
 
-        var changePointers = changes.ToDictionary(
-            x => new KeyValueStoreChangePointerLookup(x.KeyValueStoreEntityId, x.StateVersion, x.Entry.Key),
-            y => new KeyValueStoreChangePointer(
-                KeyValueStoreReferencedEntity(y.StateVersion),
-                CrateKeyValueStoreSubstate(y.Entry.Key, y.Entry.Value))
-        );
+        foreach (var change in changes)
+        {
+            changeTracker.GetOrAdd(
+                new KeyValueStoreChangePointerLookup(change.KeyValueStoreEntityId, change.StateVersion, change.Entry.Key),
+                y => new KeyValueStoreChangePointer(
+                    KeyValueStoreReferencedEntity(y.StateVersion),
+                    CrateKeyValueStoreSubstate(change.Entry.Key, change.Entry.Value)
+                )
+            );
+        }
 
-        return (changeOrder, changePointers);
+        return changeTracker;
     }
 
     internal static KeyValueStoreEntry GenerateKeyEntry(long seed)

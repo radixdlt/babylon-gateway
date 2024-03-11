@@ -82,10 +82,7 @@ internal record KeyValueStoreChangePointer(ReferencedEntity ReferencedEntity, Co
 internal class KeyValueStoreProcessor
 {
     private readonly ProcessorContext _context;
-
-    private Dictionary<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changePointers = new();
-    private List<KeyValueStoreChangePointerLookup> _changeOrder = new();
-
+    private ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changes = new();
     private Dictionary<long, KeyValueStoreAggregateHistory> _mostRecentAggregates = new();
     private Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory> _mostRecentEntries = new();
 
@@ -107,18 +104,13 @@ internal class KeyValueStoreProcessor
                 (ValueBytes)genericKeyValueStoreEntry.Key.KeyData.GetDataBytes()
             );
 
-            _changePointers.GetOrAdd(kvStoreEntryLookup, l =>
-            {
-                _changeOrder.Add(kvStoreEntryLookup);
-
-                return new KeyValueStoreChangePointer(referencedEntity, genericKeyValueStoreEntry);
-            });
+            _changes.GetOrAdd(kvStoreEntryLookup, l => new KeyValueStoreChangePointer(referencedEntity, genericKeyValueStoreEntry));
         }
     }
 
     public void ProcessChanges()
     {
-        (_entriesToAdd, _aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(_context, _changeOrder, _changePointers, _mostRecentEntries, _mostRecentAggregates);
+        (_entriesToAdd, _aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(_context, _changes, _mostRecentEntries, _mostRecentAggregates);
     }
 
     public async Task LoadMostRecent()
@@ -139,7 +131,7 @@ internal class KeyValueStoreProcessor
 
     private Task<Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>> MostRecentKeyValueStoreEntryHistoryFor()
     {
-        var lookupSet = _changeOrder.Select(x => new KeyValueStoreEntryDbLookup(x.KeyValueStoreEntityId, x.Key)).ToHashSet();
+        var lookupSet = _changes.Keys.Select(x => new KeyValueStoreEntryDbLookup(x.KeyValueStoreEntityId, x.Key)).ToHashSet();
 
         if (!lookupSet.Unzip(
                 x => x.KeyValueStoreEntityId,
@@ -169,7 +161,7 @@ INNER JOIN LATERAL (
 
     private Task<Dictionary<long, KeyValueStoreAggregateHistory>> MostRecentKeyValueStoreAggregateHistoryFor()
     {
-        var entityIds = _changeOrder.Select(x => x.KeyValueStoreEntityId).ToHashSet().ToList();
+        var entityIds = _changes.Keys.Select(x => x.KeyValueStoreEntityId).ToHashSet().ToList();
 
         if (!entityIds.Any())
         {
