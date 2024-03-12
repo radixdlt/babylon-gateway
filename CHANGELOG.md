@@ -22,13 +22,11 @@ Release Date: _not published yet_
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
 - Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
 - Use strong type definition for the `royalty_config` property of package blueprint and general components details. This is a change to OAS definition only and does not impact returned data format.
+- Introduced upper limit to the overall number of the filters used in the `/stream/transactions` endpoint.
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
 - Column `component_method_royalty_entry_history.royalty_amount` contains now the JSON payload representing the royalty amount without wrapping object. 
-
-### Deprecations
-- Obsoleted non-conforming API endpoints `/state/key-value-store/keys` and `/state/non-fungible/ids` in place of `/state/key-value-store/page/keys` and `/state/non-fungible/page/ids`. 
 
 ## 1.4.3
 Release built: 06.03.2024
