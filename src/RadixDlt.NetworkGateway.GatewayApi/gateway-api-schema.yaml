@@ -601,7 +601,7 @@ tags:
 
       ### Supported filters
 
-      The transaction stream endpoint allows additional filters. A transaction has to satisfy all filters in order to be returned.
+      The transaction stream endpoint allows additional filters. A transaction has to satisfy all filters in order to be returned. The overall number of applied filters can be limited. By default up to 10 filters can be specified.
 
       The currently supported filters are:
 
