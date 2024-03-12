@@ -116,7 +116,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="blueprints">blueprints.</param>
         /// <param name="schemas">schemas.</param>
-        public StateEntityDetailsResponsePackageDetailsAllOf(StateEntityDetailsResponsePackageDetailsCodeCollection codes = default(StateEntityDetailsResponsePackageDetailsCodeCollection), PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection))
+        /// <param name="roleAssignments">roleAssignments.</param>
+        public StateEntityDetailsResponsePackageDetailsAllOf(StateEntityDetailsResponsePackageDetailsCodeCollection codes = default(StateEntityDetailsResponsePackageDetailsCodeCollection), PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments))
         {
             // to ensure "codes" is required (not null)
             if (codes == null)
@@ -140,6 +141,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.RoyaltyVaultBalance = royaltyVaultBalance;
             this.Blueprints = blueprints;
             this.Schemas = schemas;
+            this.RoleAssignments = roleAssignments;
         }
 
         /// <summary>
@@ -182,6 +184,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public StateEntityDetailsResponsePackageDetailsSchemaCollection Schemas { get; set; }
 
         /// <summary>
+        /// Gets or Sets RoleAssignments
+        /// </summary>
+        [DataMember(Name = "role_assignments", EmitDefaultValue = true)]
+        public ComponentEntityRoleAssignments RoleAssignments { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -196,6 +204,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
             sb.Append("  Schemas: ").Append(Schemas).Append("\n");
+            sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -264,6 +273,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Schemas == input.Schemas ||
                     (this.Schemas != null &&
                     this.Schemas.Equals(input.Schemas))
+                ) && 
+                (
+                    this.RoleAssignments == input.RoleAssignments ||
+                    (this.RoleAssignments != null &&
+                    this.RoleAssignments.Equals(input.RoleAssignments))
                 );
         }
 
@@ -300,6 +314,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Schemas != null)
                 {
                     hashCode = (hashCode * 59) + this.Schemas.GetHashCode();
+                }
+                if (this.RoleAssignments != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoleAssignments.GetHashCode();
                 }
                 return hashCode;
             }

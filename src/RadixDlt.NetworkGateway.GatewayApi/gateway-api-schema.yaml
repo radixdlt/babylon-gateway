@@ -3470,6 +3470,8 @@ components:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
             schemas:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaCollection"
+            role_assignments:
+              $ref: "#/components/schemas/ComponentEntityRoleAssignments"
     StateEntityDetailsResponsePackageDetailsCodeCollection:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
