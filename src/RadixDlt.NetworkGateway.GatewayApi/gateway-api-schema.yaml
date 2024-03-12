@@ -651,6 +651,29 @@ tags:
       }
       ```
 
+      #### Request Validation
+
+      The overall number of the applied filters can be limited. In a case of collection-based filters every item counts as a separate filter. By default up to 10 filters can be specified.
+      The sample query below uses 5 filters in total: 1 `kind_filter`, 3 `manifest_resources_filter`s and 1 `events_filter`.
+
+      ```
+      {
+        "kind_filter": "All",
+        "manifest_resources_filter": [
+          "resource_rdx1t5l4s99hpc6vvskktu2uy9egk86tszjnnez62zfu9t7z7tsqqtvpvp",
+          "resource_rdx1t4w8ds79tkdjpq26z9v4w0tnv78jaxmy5vvrumdh3qeqzwqkgj6lvs",
+          "resource_rdx1t5ha0254q4j5t0rxnev9f9vdt8jx6ud6caavrhcvvehg28ny90ku3x",
+        ],
+        "events_filter": [
+          {
+            "event": "Deposit",
+            "emitter_address": "account_rdx12x5vk07qcez6xj0zt8ve0x2g20mrssk0vrest3vf0qljd76r6zfvsx",
+            "resource_address": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+          }
+        ]
+      }
+      ```
+
       ### Pagination
 
       If the `limit_per_page` request parameter is lower than the number of transactions to be returned, a `next_cursor` will be returned. It can be used in subsequent requests as the `cursor` parameter to fetch further pages.

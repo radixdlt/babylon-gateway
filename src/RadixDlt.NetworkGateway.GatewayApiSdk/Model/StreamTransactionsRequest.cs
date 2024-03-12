@@ -62,64 +62,28 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
-
-public interface ITransactionQuerier
+public partial class StreamTransactionsRequest
 {
-    Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
+    public int TotalFilterCount
+    {
+        get
+        {
+            var result = 0;
 
-    Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
-        string intentHash,
-        GatewayModel.TransactionDetailsOptIns optIns,
-        GatewayModel.LedgerState ledgerState,
-        bool withDetails,
-        CancellationToken token = default);
+            result += KindFilter.HasValue ? 1 : 0;
+            result += ManifestAccountsWithdrawnFromFilter?.Count ?? 0;
+            result += ManifestAccountsDepositedIntoFilter?.Count ?? 0;
+            result += ManifestBadgesPresentedFilter?.Count ?? 0;
+            result += ManifestResourcesFilter?.Count ?? 0;
+            result += AffectedGlobalEntitiesFilter?.Count ?? 0;
+            result += EventsFilter?.Count ?? 0;
+            result += AccountsWithManifestOwnerMethodCalls?.Count ?? 0;
+            result += AccountsWithoutManifestOwnerMethodCalls?.Count ?? 0;
+            result += ManifestClassFilter != null ? 1 : 0;
 
-    Task<GatewayModel.TransactionStatusResponse> ResolveTransactionStatusResponse(
-        GatewayModel.LedgerState ledgerState,
-        string intentHash,
-        CancellationToken token = default);
-}
-
-public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions)
-{
-    public static readonly TransactionPageWithoutTotal Empty = new(null, new List<GatewayModel.CommittedTransactionInfo>());
-}
-
-public sealed record TransactionStreamPageRequest(
-    long? FromStateVersion,
-    GatewayModel.LedgerTransactionsCursor? Cursor,
-    int PageSize,
-    bool AscendingOrder,
-    TransactionStreamPageRequestSearchCriteria SearchCriteria,
-    GatewayModel.TransactionDetailsOptIns OptIns);
-
-public class TransactionStreamPageRequestSearchCriteria
-{
-    public LedgerTransactionKindFilter Kind { get; set; }
-
-    public HashSet<LedgerTransactionEventFilter> Events { get; set; } = new();
-
-    public HashSet<EntityAddress> ManifestAccountsDepositedInto { get; set; } = new();
-
-    public HashSet<EntityAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
-
-    public HashSet<EntityAddress> ManifestResources { get; set; } = new();
-
-    public HashSet<EntityAddress> BadgesPresented { get; set; } = new();
-
-    public HashSet<EntityAddress> AffectedGlobalEntities { get; set; } = new();
-
-    public HashSet<EntityAddress> AccountsWithoutManifestOwnerMethodCalls { get; set; } = new();
-
-    public HashSet<EntityAddress> AccountsWithManifestOwnerMethodCalls { get; set; } = new();
-
-    public ManifestClassFilter? ManifestClassFilter { get; set; }
+            return result;
+        }
+    }
 }
