@@ -248,7 +248,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         codes: new GatewayModel.StateEntityDetailsResponsePackageDetailsCodeCollection(totalCount: codeItems.Count, items: codeItems),
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null,
                         blueprints: new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintCollection(totalCount: blueprints.Count, items: blueprints),
-                        schemas: new GatewayModel.StateEntityDetailsResponsePackageDetailsSchemaCollection(totalCount: schemas.Count, items: schemas));
+                        schemas: new GatewayModel.StateEntityDetailsResponsePackageDetailsSchemaCollection(totalCount: schemas.Count, items: schemas),
+                        roleAssignments: roleAssignmentsHistory[pe.Id]);
                     break;
 
                 case VirtualIdentityEntity:

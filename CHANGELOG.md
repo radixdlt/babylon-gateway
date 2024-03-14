@@ -18,6 +18,7 @@ Release Date: _not published yet_
 - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
 
 ### API Changes
+- Added `role_assignments` property to the `StateEntityDetailsResponsePackageDetails`. All global component details returned by the `/state/entity/details` endpoint contain role assignments now.
 - Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.
 - Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
 - Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
