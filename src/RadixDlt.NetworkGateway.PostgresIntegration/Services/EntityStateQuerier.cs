@@ -782,7 +782,7 @@ WHERE e.id = ANY(@vaultIds)",
             .Entities
             .OfType<GlobalValidatorEntity>()
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .Where(e => e.FromStateVersion > fromStateVersion)
+            .Where(e => e.FromStateVersion >= fromStateVersion)
             .OrderBy(e => e.FromStateVersion)
             .ThenBy(e => e.Id)
             .Take(validatorsPageSize + 1)
@@ -947,7 +947,7 @@ INNER JOIN LATERAL (
             .ToList();
 
         var nextCursor = validatorsAndOneMore.Count == validatorsPageSize + 1
-            ? new GatewayModel.StateValidatorsListCursor(validatorsAndOneMore.Last().Id).ToCursorString()
+            ? new GatewayModel.StateValidatorsListCursor(validatorsAndOneMore.Last().FromStateVersion).ToCursorString()
             : null;
 
         return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, nextCursor, items));
