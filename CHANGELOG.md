@@ -1,9 +1,9 @@
 ## 1.5.0
 Release Date: _not published yet_
 
-- Fixed unstable package blueprint and code aggregation.
-- Fixed validator public key and active set aggregation, where unnecessary copy of the key was stored on each epoch change.
-- Reworked internal data aggregation mechanism.
+- Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
+- Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.
+- Reworked internal data aggregation mechanism to ease up maintenance burden.
 - Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
 - Changed MVC controller and action names. It has no effect on the API itself, but alters prometheus `controler` and `action` labels.
   - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.KeysPage`,
@@ -15,19 +15,19 @@ Release Date: _not published yet_
   - Upgraded runtime and libraries
   - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
   - Removed now-obsolete or no-longer-needed code.
-- Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
+  - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
 
 ### API Changes
 - Added `role_assignments` property to the `StateEntityDetailsResponsePackageDetails`. All global component details returned by the `/state/entity/details` endpoint contain role assignments now.
 - Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.
-- Added new filter `manifest_badges_presented_filter` to `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
+- Added new filter `manifest_badges_presented_filter` to the `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
 - Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
 - Use strong type definition for the `royalty_config` property of package blueprint and general components details. This is a change to OAS definition only and does not impact returned data format.
-- Introduced upper limit to the overall number of the filters used in the `/stream/transactions` endpoint.
+- Introduced upper limit to the overall number of the filters used in the `/stream/transactions` endpoint, defaults to 10.
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
-- Column `component_method_royalty_entry_history.royalty_amount` contains now the JSON payload representing the royalty amount without wrapping object. 
+- Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object. 
 
 ## 1.4.3
 Release built: 06.03.2024
