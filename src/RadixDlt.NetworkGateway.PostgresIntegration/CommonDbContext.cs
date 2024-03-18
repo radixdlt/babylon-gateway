@@ -278,7 +278,12 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<ManifestClassMarker>()
-            .HasIndex(e => new { TransactionType = e.LedgerTransactionManifestClass, e.IsMostSpecific, e.StateVersion })
+            .HasIndex(e => new { a = e.ManifestClass, b = e.StateVersion }, "IX_ledger_transaction_markers_manifest_class_is_most_specific")
+            .HasFilter("discriminator = 'manifest_class' and is_most_specific = true");
+
+        modelBuilder
+            .Entity<ManifestClassMarker>()
+            .HasIndex(e => new { c = e.ManifestClass, d = e.StateVersion }, "IX_ledger_transaction_markers_manifest_class")
             .HasFilter("discriminator = 'manifest_class'");
     }
 
