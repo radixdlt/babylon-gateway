@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -927,10 +927,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'event'");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transaction_markers_manifest_class_is_most_specific_~",
+                name: "IX_ledger_transaction_markers_manifest_class",
                 table: "ledger_transaction_markers",
-                columns: new[] { "manifest_class", "is_most_specific", "state_version" },
+                columns: new[] { "manifest_class", "state_version" },
                 filter: "discriminator = 'manifest_class'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_manifest_class_is_most_specific",
+                table: "ledger_transaction_markers",
+                columns: new[] { "manifest_class", "state_version" },
+                filter: "discriminator = 'manifest_class' and is_most_specific = true");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_markers_operation_type_entity_id_state_v~",

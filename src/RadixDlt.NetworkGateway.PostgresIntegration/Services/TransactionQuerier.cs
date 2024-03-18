@@ -292,7 +292,7 @@ internal class TransactionQuerier : ITransactionQuerier
             searchQuery = searchQuery
                 .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                 .OfType<ManifestClassMarker>()
-                .Where(ttm => ttm.LedgerTransactionManifestClass == manifestClass)
+                .Where(ttm => ttm.ManifestClass == manifestClass)
                 .Where(ttm => (request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType)
                 .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
                 .Select(eltm => eltm.StateVersion);
