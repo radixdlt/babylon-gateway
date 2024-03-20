@@ -93,10 +93,10 @@ internal class AccountAuthorizedDepositorsProcessor
     private readonly ChangeTracker<AccountAuthorizedDepositorsChangePointerLookup, AccountAuthorizedDepositorsChangePointer> _accountAuthorizedDepositorsChanges = new();
 
     private readonly Dictionary<long, AccountAuthorizedDepositorAggregateHistory> _mostRecentAuthorizedDepositorAggregates = new();
-    private readonly Dictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorHistory> _mostRecentAuthorizedDepositorEntries = new();
+    private readonly Dictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorEntryHistory> _mostRecentAuthorizedDepositorEntries = new();
 
     private readonly List<AccountAuthorizedDepositorAggregateHistory> _accountAuthorizedDepositorAggregatesToAdd = new();
-    private readonly List<AccountAuthorizedDepositorHistory> _accountAuthorizedDepositorHistoryToAdd = new();
+    private readonly List<AccountAuthorizedDepositorEntryHistory> _accountAuthorizedDepositorHistoryToAdd = new();
 
     public AccountAuthorizedDepositorsProcessor(
         ProcessorContext context,
@@ -152,15 +152,15 @@ internal class AccountAuthorizedDepositorsProcessor
 
             foreach (var authorizedDepositorEntry in change.AuthorizedDepositorEntries)
             {
-                AccountAuthorizedDepositorHistory entryHistory;
+                AccountAuthorizedDepositorEntryHistory entryHistory;
                 AccountAuthorizedDepositorsDbLookup entryDbLookup = GetDbLookup(authorizedDepositorEntry, lookup);
 
                 if (authorizedDepositorEntry.Key.Badge is CoreModel.ResourceAuthorizedDepositorBadge resourceBadge)
                 {
                     var resourceEntityId = _referencedEntityDictionary.Get((EntityAddress)resourceBadge.ResourceAddress).DatabaseId;
-                    entryHistory = new AccountAuthorizedResourceBadgeDepositorHistory
+                    entryHistory = new AccountAuthorizedResourceBadgeDepositorEntryHistory
                     {
-                        Id = _context.Sequences.AccountAuthorizedDepositorHistorySequence++,
+                        Id = _context.Sequences.AccountAuthorizedDepositorEntryHistorySequence++,
                         FromStateVersion = lookup.StateVersion,
                         AccountEntityId = lookup.AccountEntityId,
                         ResourceEntityId = resourceEntityId,
@@ -175,9 +175,9 @@ internal class AccountAuthorizedDepositorsProcessor
                             nonFungibleBadge.NonFungibleGlobalId.LocalId.SimpleRep)
                     );
 
-                    entryHistory = new AccountAuthorizedNonFungibleBadgeDepositorHistory
+                    entryHistory = new AccountAuthorizedNonFungibleBadgeDepositorEntryHistory
                     {
-                        Id = _context.Sequences.AccountAuthorizedDepositorHistorySequence++,
+                        Id = _context.Sequences.AccountAuthorizedDepositorEntryHistorySequence++,
                         FromStateVersion = lookup.StateVersion,
                         AccountEntityId = lookup.AccountEntityId,
                         ResourceEntityId = globalIdDatabaseId.ResourceEntityId,
@@ -213,7 +213,7 @@ internal class AccountAuthorizedDepositorsProcessor
         }
     }
 
-    public async Task LoadMostRecent()
+    public async Task LoadDependencies()
     {
         _mostRecentAuthorizedDepositorEntries.AddRange(await MostRecentAccountAuthorizedDepositorHistory());
         _mostRecentAuthorizedDepositorAggregates.AddRange(await MostRecentAccountAuthorizedDepositorAggregateHistory());
@@ -274,7 +274,7 @@ internal class AccountAuthorizedDepositorsProcessor
         return entryLookup;
     }
 
-    private async Task<IDictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorHistory>> MostRecentAccountAuthorizedDepositorHistory()
+    private async Task<IDictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorEntryHistory>> MostRecentAccountAuthorizedDepositorHistory()
     {
         var lookupSet = new HashSet<AccountAuthorizedDepositorsDbLookup>();
 
@@ -295,10 +295,10 @@ internal class AccountAuthorizedDepositorsProcessor
                 out var nonFungibleIdDataIds)
             )
         {
-            return ImmutableDictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorHistory>.Empty;
+            return ImmutableDictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorEntryHistory>.Empty;
         }
 
-        return await _context.ReadHelper.LoadDependencies<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorHistory>(
+        return await _context.ReadHelper.LoadDependencies<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorEntryHistory>(
             @$"
 WITH variables (account_entity_id, resource_entity_id, non_fungible_id_data_id) AS (
     SELECT UNNEST({entityIds}), UNNEST({resourceEntityIds}), UNNEST({nonFungibleIdDataIds}::bigint[])
@@ -307,7 +307,7 @@ SELECT aadh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM account_authorized_depositor_history
+    FROM account_authorized_depositor_entry_history
     WHERE account_entity_id = variables.account_entity_id AND resource_entity_id = variables.resource_entity_id AND (non_fungible_id_data_id = variables.non_fungible_id_data_id OR variables.non_fungible_id_data_id IS NULL)
     ORDER BY from_state_version DESC
     LIMIT 1
@@ -316,12 +316,12 @@ INNER JOIN LATERAL (
             {
                 return e switch
                 {
-                    AccountAuthorizedNonFungibleBadgeDepositorHistory accountAuthorizedNonFungibleBadgeDepositorHistory
+                    AccountAuthorizedNonFungibleBadgeDepositorEntryHistory accountAuthorizedNonFungibleBadgeDepositorHistory
                         => new AccountAuthorizedDepositorsDbLookup(
                             e.AccountEntityId,
                             accountAuthorizedNonFungibleBadgeDepositorHistory.ResourceEntityId,
                             accountAuthorizedNonFungibleBadgeDepositorHistory.NonFungibleIdDataId),
-                    AccountAuthorizedResourceBadgeDepositorHistory accountAuthorizedResourceBadgeDepositorHistory
+                    AccountAuthorizedResourceBadgeDepositorEntryHistory accountAuthorizedResourceBadgeDepositorHistory
                         => new AccountAuthorizedDepositorsDbLookup(
                             e.AccountEntityId,
                             accountAuthorizedResourceBadgeDepositorHistory.ResourceEntityId,
@@ -359,7 +359,7 @@ INNER JOIN LATERAL (
 
     private Task<int> CopyAccountAuthorizedDepositorHistory() => _context.WriteHelper.Copy(
         _accountAuthorizedDepositorHistoryToAdd,
-        "COPY account_authorized_depositor_history (id, from_state_version, account_entity_id, is_deleted, discriminator, resource_entity_id, non_fungible_id_data_id) FROM STDIN (FORMAT BINARY)",
+        "COPY account_authorized_depositor_entry_history (id, from_state_version, account_entity_id, is_deleted, discriminator, resource_entity_id, non_fungible_id_data_id) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             var discriminator = _context.WriteHelper.GetDiscriminator<AuthorizedDepositorBadgeType>(e.GetType());
@@ -372,11 +372,11 @@ INNER JOIN LATERAL (
 
             switch (e)
             {
-                case AccountAuthorizedNonFungibleBadgeDepositorHistory accountAuthorizedNonFungibleBadgeDepositorHistory:
+                case AccountAuthorizedNonFungibleBadgeDepositorEntryHistory accountAuthorizedNonFungibleBadgeDepositorHistory:
                     await writer.WriteAsync(accountAuthorizedNonFungibleBadgeDepositorHistory.ResourceEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(accountAuthorizedNonFungibleBadgeDepositorHistory.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
                     break;
-                case AccountAuthorizedResourceBadgeDepositorHistory accountAuthorizedResourceBadgeDepositorHistory:
+                case AccountAuthorizedResourceBadgeDepositorEntryHistory accountAuthorizedResourceBadgeDepositorHistory:
                     await writer.WriteAsync(accountAuthorizedResourceBadgeDepositorHistory.ResourceEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullAsync(token);
                     break;

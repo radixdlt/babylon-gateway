@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240320142212_InitialCreate")]
+    [Migration("20240320145337_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -142,7 +142,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("account_authorized_depositor_aggregate_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorEntryHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -170,7 +170,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("AccountEntityId", "FromStateVersion");
 
-                    b.ToTable("account_authorized_depositor_history");
+                    b.ToTable("account_authorized_depositor_entry_history");
 
                     b.HasDiscriminator<AuthorizedDepositorBadgeType>("discriminator");
 
@@ -234,7 +234,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("account_resource_preference_rule_aggregate_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountResourcePreferenceRuleHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountResourcePreferenceRuleEntryHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -267,7 +267,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("AccountEntityId", "ResourceEntityId", "FromStateVersion");
 
-                    b.ToTable("account_resource_preference_rule_history");
+                    b.ToTable("account_resource_preference_rule_entry_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentMethodRoyaltyAggregateHistory", b =>
@@ -1667,9 +1667,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("validator_public_key_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedNonFungibleBadgeDepositorHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedNonFungibleBadgeDepositorEntryHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorEntryHistory");
 
                     b.Property<long>("NonFungibleIdDataId")
                         .HasColumnType("bigint")
@@ -1681,16 +1681,17 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("resource_entity_id");
 
                     b.HasIndex("AccountEntityId", "ResourceEntityId", "NonFungibleIdDataId", "FromStateVersion")
+                        .HasDatabaseName("IX_account_authorized_depositor_entry_history_account_entity_~1")
                         .HasFilter("discriminator = 'non_fungible'");
 
-                    b.ToTable("account_authorized_depositor_history");
+                    b.ToTable("account_authorized_depositor_entry_history");
 
                     b.HasDiscriminator().HasValue(AuthorizedDepositorBadgeType.NonFungible);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedResourceBadgeDepositorHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedResourceBadgeDepositorEntryHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorEntryHistory");
 
                     b.Property<long>("ResourceEntityId")
                         .ValueGeneratedOnUpdateSometimes()
@@ -1698,10 +1699,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("resource_entity_id");
 
                     b.HasIndex("AccountEntityId", "ResourceEntityId", "FromStateVersion")
-                        .HasDatabaseName("IX_account_authorized_depositor_history_account_entity_id_res~1")
+                        .HasDatabaseName("IX_account_authorized_depositor_entry_history_account_entity_~2")
                         .HasFilter("discriminator = 'resource'");
 
-                    b.ToTable("account_authorized_depositor_history");
+                    b.ToTable("account_authorized_depositor_entry_history");
 
                     b.HasDiscriminator().HasValue(AuthorizedDepositorBadgeType.Resource);
                 });

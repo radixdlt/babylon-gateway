@@ -838,7 +838,7 @@ internal class WriteHelper : IWriteHelper
             commandText: @"
 SELECT
     setval('account_default_deposit_rule_history_id_seq', @accountDefaultDepositRuleHistorySequence),
-    setval('account_resource_preference_rule_history_id_seq', @accountResourcePreferenceRuleHistorySequence),
+    setval('account_resource_preference_rule_entry_history_id_seq', @accountResourcePreferenceRuleEntryHistorySequence),
     setval('account_resource_preference_rule_aggregate_history_id_seq', @accountResourcePreferenceRuleAggregateHistorySequence),
     setval('state_history_id_seq', @stateHistorySequence),
     setval('entities_id_seq', @entitySequence),
@@ -871,13 +871,13 @@ SELECT
     setval('package_blueprint_aggregate_history_id_seq', @packageBlueprintAggregateHistorySequence),
     setval('package_code_aggregate_history_id_seq', @packageCodeAggregateHistorySequence),
     setval('key_value_store_aggregate_history_id_seq', @keyValueStoreAggregateHistorySequence),
-    setval('account_authorized_depositor_history_id_seq', @accountAuthorizedDepositorHistorySequence),
+    setval('account_authorized_depositor_entry_history_id_seq', @accountAuthorizedDepositorEntryHistorySequence),
     setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence)
 ",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
-                accountResourcePreferenceRuleHistorySequence = sequences.AccountResourcePreferenceRuleHistorySequence,
+                accountResourcePreferenceRuleEntryHistorySequence = sequences.AccountResourcePreferenceRuleEntryHistorySequence,
                 accountResourcePreferenceRuleAggregateHistorySequence = sequences.AccountResourcePreferenceRuleAggregateHistorySequence,
                 stateHistorySequence = sequences.StateHistorySequence,
                 entitySequence = sequences.EntitySequence,
@@ -910,7 +910,7 @@ SELECT
                 packageBlueprintAggregateHistorySequence = sequences.PackageBlueprintAggregateHistorySequence,
                 packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
                 keyValueStoreAggregateHistorySequence = sequences.KeyValueStoreAggregateHistorySequence,
-                accountAuthorizedDepositorHistorySequence = sequences.AccountAuthorizedDepositorHistorySequence,
+                accountAuthorizedDepositorEntryHistorySequence = sequences.AccountAuthorizedDepositorEntryHistorySequence,
                 accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
             },
             cancellationToken: token);

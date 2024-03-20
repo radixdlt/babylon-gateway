@@ -483,7 +483,7 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
             commandText: @"
 SELECT
     nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
-    nextval('account_resource_preference_rule_history_id_seq') AS AccountResourcePreferenceRuleHistorySequence,
+    nextval('account_resource_preference_rule_entry_history_id_seq') AS AccountResourcePreferenceRuleEntryHistorySequence,
     nextval('account_resource_preference_rule_aggregate_history_id_seq') AS AccountResourcePreferenceRuleAggregateHistorySequence,
     nextval('state_history_id_seq') AS StateHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
@@ -516,7 +516,7 @@ SELECT
     nextval('package_blueprint_aggregate_history_id_seq') AS PackageBlueprintAggregateHistorySequence,
     nextval('package_code_aggregate_history_id_seq') AS PackageCodeAggregateHistorySequence,
     nextval('key_value_store_aggregate_history_id_seq') AS KeyValueStoreAggregateHistorySequence,
-    nextval('account_authorized_depositor_history_id_seq') AS AccountAuthorizedDepositorHistorySequence,
+    nextval('account_authorized_depositor_entry_history_id_seq') AS AccountAuthorizedDepositorEntryHistorySequence,
     nextval('account_authorized_depositor_aggregate_history_id_seq') AS AccountAuthorizedDepositorAggregateHistorySequence
 ",
             cancellationToken: token);

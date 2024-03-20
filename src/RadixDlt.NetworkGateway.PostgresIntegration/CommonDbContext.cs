@@ -111,7 +111,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountDefaultDepositRuleHistory> AccountDefaultDepositRuleHistory => Set<AccountDefaultDepositRuleHistory>();
 
-    public DbSet<AccountResourcePreferenceRuleHistory> AccountDepositRuleHistory => Set<AccountResourcePreferenceRuleHistory>();
+    public DbSet<AccountResourcePreferenceRuleEntryHistory> AccountDepositRuleHistory => Set<AccountResourcePreferenceRuleEntryHistory>();
 
     public DbSet<AccountResourcePreferenceRuleAggregateHistory> AccountResourcePreferenceRuleAggregateHistory => Set<AccountResourcePreferenceRuleAggregateHistory>();
 
@@ -159,7 +159,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<KeyValueStoreSchemaHistory> KeyValueStoreSchemaHistory => Set<KeyValueStoreSchemaHistory>();
 
-    public DbSet<AccountAuthorizedDepositorHistory> AccountAuthorizedDepositorHistory => Set<AccountAuthorizedDepositorHistory>();
+    public DbSet<AccountAuthorizedDepositorEntryHistory> AccountAuthorizedDepositorHistory => Set<AccountAuthorizedDepositorEntryHistory>();
 
     public DbSet<AccountAuthorizedDepositorAggregateHistory> AccountAuthorizedDepositorAggregateHistory => Set<AccountAuthorizedDepositorAggregateHistory>();
 
@@ -546,13 +546,13 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<AccountAuthorizedDepositorHistory>()
+            .Entity<AccountAuthorizedDepositorEntryHistory>()
             .HasDiscriminator<AuthorizedDepositorBadgeType>(DiscriminatorColumnName)
-            .HasValue<AccountAuthorizedNonFungibleBadgeDepositorHistory>(AuthorizedDepositorBadgeType.NonFungible)
-            .HasValue<AccountAuthorizedResourceBadgeDepositorHistory>(AuthorizedDepositorBadgeType.Resource);
+            .HasValue<AccountAuthorizedNonFungibleBadgeDepositorEntryHistory>(AuthorizedDepositorBadgeType.NonFungible)
+            .HasValue<AccountAuthorizedResourceBadgeDepositorEntryHistory>(AuthorizedDepositorBadgeType.Resource);
 
         modelBuilder
-            .Entity<AccountAuthorizedDepositorHistory>()
+            .Entity<AccountAuthorizedDepositorEntryHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
 
         modelBuilder
@@ -560,7 +560,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<AccountResourcePreferenceRuleHistory>()
+            .Entity<AccountResourcePreferenceRuleEntryHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder
@@ -568,12 +568,12 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<AccountAuthorizedNonFungibleBadgeDepositorHistory>()
+            .Entity<AccountAuthorizedNonFungibleBadgeDepositorEntryHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.NonFungibleIdDataId, e.FromStateVersion })
             .HasFilter("discriminator = 'non_fungible'");
 
         modelBuilder
-            .Entity<AccountAuthorizedResourceBadgeDepositorHistory>()
+            .Entity<AccountAuthorizedResourceBadgeDepositorEntryHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion })
             .HasFilter("discriminator = 'resource'");
     }

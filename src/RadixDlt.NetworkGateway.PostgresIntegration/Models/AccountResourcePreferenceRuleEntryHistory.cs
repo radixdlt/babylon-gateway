@@ -62,13 +62,15 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("account_authorized_depositor_history")]
-internal abstract class AccountAuthorizedDepositorHistory
+[Table("account_resource_preference_rule_entry_history")]
+public class AccountResourcePreferenceRuleEntryHistory
 {
     [Key]
     [Column("id")]
@@ -80,21 +82,13 @@ internal abstract class AccountAuthorizedDepositorHistory
     [Column("account_entity_id")]
     public long AccountEntityId { get; set; }
 
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("account_resource_preference_rule")]
+    public AccountResourcePreferenceRule? AccountResourcePreferenceRule { get; set; }
+
+    [MemberNotNullWhen(false, nameof(AccountResourcePreferenceRule))]
     [Column("is_deleted")]
     public bool IsDeleted { get; set; }
-}
-
-internal class AccountAuthorizedNonFungibleBadgeDepositorHistory : AccountAuthorizedDepositorHistory
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("non_fungible_id_data_id")]
-    public long NonFungibleIdDataId { get; set; }
-}
-
-internal class AccountAuthorizedResourceBadgeDepositorHistory : AccountAuthorizedDepositorHistory
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
 }

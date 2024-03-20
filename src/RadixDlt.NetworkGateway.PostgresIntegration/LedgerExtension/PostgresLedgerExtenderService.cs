@@ -1219,9 +1219,9 @@ UPDATE pending_transactions
             await packageCodeProcessor.LoadDependencies();
             await packageBlueprintProcessor.LoadDependencies();
             await validatorProcessor.LoadDependencies();
-            await keyValueStoreProcessor.LoadMostRecent();
-            await accountAuthorizedDepositorsProcessor.LoadMostRecent();
-            await accountResourcePreferenceRulesProcessor.LoadMostRecent();
+            await keyValueStoreProcessor.LoadDependencies();
+            await accountAuthorizedDepositorsProcessor.LoadDependencies();
+            await accountResourcePreferenceRulesProcessor.LoadDependencies();
 
             dbReadDuration += sw.Elapsed;
 

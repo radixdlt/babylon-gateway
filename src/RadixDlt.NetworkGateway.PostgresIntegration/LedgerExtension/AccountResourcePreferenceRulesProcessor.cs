@@ -90,10 +90,10 @@ internal class AccountResourcePreferenceRulesProcessor
     private readonly ChangeTracker<AccountResourcePreferenceRuleChangePointerLookup, AccountResourcePreferenceRuleChangePointer> _changes = new();
 
     private readonly Dictionary<long, AccountResourcePreferenceRuleAggregateHistory> _mostRecentAggregates = new();
-    private readonly Dictionary<AccountResourcePreferenceRuleDbLookup, AccountResourcePreferenceRuleHistory> _mostRecentEntries = new();
+    private readonly Dictionary<AccountResourcePreferenceRuleDbLookup, AccountResourcePreferenceRuleEntryHistory> _mostRecentEntries = new();
 
     private readonly List<AccountResourcePreferenceRuleAggregateHistory> _accountResourcePreferenceAggregatesToAdd = new();
-    private readonly List<AccountResourcePreferenceRuleHistory> _accountResourcePreferenceEntriesToAdd = new();
+    private readonly List<AccountResourcePreferenceRuleEntryHistory> _accountResourcePreferenceEntriesToAdd = new();
 
     public AccountResourcePreferenceRulesProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntityDictionary)
     {
@@ -151,9 +151,9 @@ internal class AccountResourcePreferenceRulesProcessor
             {
                 var entryLookup = new AccountResourcePreferenceRuleDbLookup(lookup.AccountEntityId, lookup.ResourceEntityId);
 
-                var entryHistory = new AccountResourcePreferenceRuleHistory
+                var entryHistory = new AccountResourcePreferenceRuleEntryHistory
                 {
-                    Id = _context.Sequences.AccountResourcePreferenceRuleHistorySequence++,
+                    Id = _context.Sequences.AccountResourcePreferenceRuleEntryHistorySequence++,
                     FromStateVersion = lookup.StateVersion,
                     AccountEntityId = lookup.AccountEntityId,
                     ResourceEntityId = lookup.ResourceEntityId,
@@ -183,7 +183,7 @@ internal class AccountResourcePreferenceRulesProcessor
         }
     }
 
-    public async Task LoadMostRecent()
+    public async Task LoadDependencies()
     {
         _mostRecentEntries.AddRange(await MostRecentAccountResourcePreferenceRuleHistory());
         _mostRecentAggregates.AddRange(await MostRecentAccountResourcePreferenceRuleAggregateHistory());
@@ -199,7 +199,7 @@ internal class AccountResourcePreferenceRulesProcessor
         return rowsInserted;
     }
 
-    private async Task<IDictionary<AccountResourcePreferenceRuleDbLookup, AccountResourcePreferenceRuleHistory>> MostRecentAccountResourcePreferenceRuleHistory()
+    private async Task<IDictionary<AccountResourcePreferenceRuleDbLookup, AccountResourcePreferenceRuleEntryHistory>> MostRecentAccountResourcePreferenceRuleHistory()
     {
         var lookupSet = new HashSet<AccountResourcePreferenceRuleDbLookup>();
 
@@ -217,10 +217,10 @@ internal class AccountResourcePreferenceRulesProcessor
                 out var accountEntityIds,
                 out var resourceEntityIds))
         {
-            return ImmutableDictionary<AccountResourcePreferenceRuleDbLookup, AccountResourcePreferenceRuleHistory>.Empty;
+            return ImmutableDictionary<AccountResourcePreferenceRuleDbLookup, AccountResourcePreferenceRuleEntryHistory>.Empty;
         }
 
-        return await _context.ReadHelper.LoadDependencies<AccountResourcePreferenceRuleDbLookup, AccountResourcePreferenceRuleHistory>(
+        return await _context.ReadHelper.LoadDependencies<AccountResourcePreferenceRuleDbLookup, AccountResourcePreferenceRuleEntryHistory>(
             @$"
 WITH variables (account_entity_id, resource_entity_id) AS (
     SELECT UNNEST({accountEntityIds}), UNNEST({resourceEntityIds})
@@ -229,7 +229,7 @@ SELECT arprh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM account_resource_preference_rule_history
+    FROM account_resource_preference_rule_entry_history
     WHERE account_entity_id = variables.account_entity_id AND variables.resource_entity_id = resource_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
@@ -265,7 +265,7 @@ INNER JOIN LATERAL (
 
     private Task<int> CopyAccountResourcePreferenceRuleHistory() => _context.WriteHelper.Copy(
         _accountResourcePreferenceEntriesToAdd,
-        "COPY account_resource_preference_rule_history (id, from_state_version, account_entity_id,  resource_entity_id, account_resource_preference_rule, is_deleted) FROM STDIN (FORMAT BINARY)",
+        "COPY account_resource_preference_rule_entry_history (id, from_state_version, account_entity_id,  resource_entity_id, account_resource_preference_rule, is_deleted) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
