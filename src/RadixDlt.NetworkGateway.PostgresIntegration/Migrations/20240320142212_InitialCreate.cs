@@ -127,9 +127,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     account_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     discriminator = table.Column<AuthorizedDepositorBadgeType>(type: "authorized_depositor_badge_type", nullable: false),
-                    non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
-                    non_fungible_id_data_id = table.Column<long>(type: "bigint", nullable: true),
-                    resource_entity_id = table.Column<long>(type: "bigint", nullable: true)
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    non_fungible_id_data_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -850,16 +849,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "account_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_authorized_depositor_history_account_entity_id_non_~",
+                name: "IX_account_authorized_depositor_history_account_entity_id_res~1",
                 table: "account_authorized_depositor_history",
-                columns: new[] { "account_entity_id", "non_fungible_resource_entity_id", "non_fungible_id_data_id", "from_state_version" },
-                filter: "discriminator = 'non_fungible'");
+                columns: new[] { "account_entity_id", "resource_entity_id", "from_state_version" },
+                filter: "discriminator = 'resource'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_authorized_depositor_history_account_entity_id_reso~",
                 table: "account_authorized_depositor_history",
-                columns: new[] { "account_entity_id", "resource_entity_id", "from_state_version" },
-                filter: "discriminator = 'resource'");
+                columns: new[] { "account_entity_id", "resource_entity_id", "non_fungible_id_data_id", "from_state_version" },
+                filter: "discriminator = 'non_fungible'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_default_deposit_rule_history_account_entity_id_from~",

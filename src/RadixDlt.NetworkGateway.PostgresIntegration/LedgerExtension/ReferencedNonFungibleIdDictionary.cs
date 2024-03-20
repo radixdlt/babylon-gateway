@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
+using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
@@ -84,7 +85,12 @@ internal class ReferencedNonFungibleIdDictionary
 
     public NonFungibleIdGlobalIdDatabaseId Get(NonFungibleGlobalIdLookup address)
     {
-        return _storage[address];
+        if (_storage.TryGetValue(address, out var value))
+        {
+            return value;
+        }
+
+        throw new InvalidOperationException($"Non Fungible with Address: {address.ResourceAddress} and Id: {address.SimpleRepresentation} not found.");
     }
 
     public void MarkSeen(NonFungibleGlobalIdLookup entityAddress)

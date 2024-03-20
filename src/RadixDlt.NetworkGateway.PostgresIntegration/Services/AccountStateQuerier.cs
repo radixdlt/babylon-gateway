@@ -198,7 +198,7 @@ FROM slices
          INNER JOIN account_authorized_depositor_history aadh ON aadh.id = resource_authorized_depositors_join.id
          LEFT JOIN non_fungible_id_data nfid on nfid.id = aadh.non_fungible_id_data_id
          LEFT JOIN entities resource_entity on aadh.resource_entity_id = resource_entity.id
-         LEFT JOIN entities non_fungible_resource_entity on aadh.non_fungible_resource_entity_id = non_fungible_resource_entity.id
+         LEFT JOIN entities non_fungible_resource_entity on aadh.resource_entity_id = non_fungible_resource_entity.id
 ORDER BY resource_authorized_depositors_join.ordinality ASC;",
             parameters: new
             {

@@ -180,7 +180,7 @@ internal class AccountAuthorizedDepositorsProcessor
                         Id = _context.Sequences.AccountAuthorizedDepositorHistorySequence++,
                         FromStateVersion = lookup.StateVersion,
                         AccountEntityId = lookup.AccountEntityId,
-                        NonFungibleResourceEntityId = globalIdDatabaseId.ResourceEntityId,
+                        ResourceEntityId = globalIdDatabaseId.ResourceEntityId,
                         NonFungibleIdDataId = globalIdDatabaseId.NonFungibleIdDataId,
                         IsDeleted = authorizedDepositorEntry.Value == null,
                     };
@@ -286,21 +286,29 @@ internal class AccountAuthorizedDepositorsProcessor
             }
         }
 
-        var entityIds = lookupSet.Select(x => x.AccountEntityId).ToList();
-        var resourceEntityIds = lookupSet.Select(x => x.ResourceEntityId).ToList();
-        var nonFungibleIdDataIds = lookupSet.Select(x => x.NonFungibleIdDataId).ToList();
+        if (!lookupSet.Unzip(
+                x => x.AccountEntityId,
+                x => x.ResourceEntityId,
+                x => x.NonFungibleIdDataId,
+                out var entityIds,
+                out var resourceEntityIds,
+                out var nonFungibleIdDataIds)
+            )
+        {
+            return ImmutableDictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorHistory>.Empty;
+        }
 
         return await _context.ReadHelper.LoadDependencies<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorHistory>(
             @$"
 WITH variables (account_entity_id, resource_entity_id, non_fungible_id_data_id) AS (
-    SELECT UNNEST({entityIds}), UNNEST({resourceEntityIds}), UNNEST({nonFungibleIdDataIds})
+    SELECT UNNEST({entityIds}), UNNEST({resourceEntityIds}), UNNEST({nonFungibleIdDataIds}::bigint[])
 )
 SELECT aadh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
     FROM account_authorized_depositor_history
-    WHERE account_entity_id = variables.account_entity_id
+    WHERE account_entity_id = variables.account_entity_id AND resource_entity_id = variables.resource_entity_id AND (non_fungible_id_data_id = variables.non_fungible_id_data_id OR variables.non_fungible_id_data_id IS NULL)
     ORDER BY from_state_version DESC
     LIMIT 1
 ) aadh ON true;",
@@ -311,7 +319,7 @@ INNER JOIN LATERAL (
                     AccountAuthorizedNonFungibleBadgeDepositorHistory accountAuthorizedNonFungibleBadgeDepositorHistory
                         => new AccountAuthorizedDepositorsDbLookup(
                             e.AccountEntityId,
-                            accountAuthorizedNonFungibleBadgeDepositorHistory.NonFungibleResourceEntityId,
+                            accountAuthorizedNonFungibleBadgeDepositorHistory.ResourceEntityId,
                             accountAuthorizedNonFungibleBadgeDepositorHistory.NonFungibleIdDataId),
                     AccountAuthorizedResourceBadgeDepositorHistory accountAuthorizedResourceBadgeDepositorHistory
                         => new AccountAuthorizedDepositorsDbLookup(
@@ -351,7 +359,7 @@ INNER JOIN LATERAL (
 
     private Task<int> CopyAccountAuthorizedDepositorHistory() => _context.WriteHelper.Copy(
         _accountAuthorizedDepositorHistoryToAdd,
-        "COPY account_authorized_depositor_history (id, from_state_version, account_entity_id, is_deleted, discriminator, non_fungible_resource_entity_id, non_fungible_id_data_id, resource_entity_id) FROM STDIN (FORMAT BINARY)",
+        "COPY account_authorized_depositor_history (id, from_state_version, account_entity_id, is_deleted, discriminator, resource_entity_id, non_fungible_id_data_id) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             var discriminator = _context.WriteHelper.GetDiscriminator<AuthorizedDepositorBadgeType>(e.GetType());
@@ -365,14 +373,12 @@ INNER JOIN LATERAL (
             switch (e)
             {
                 case AccountAuthorizedNonFungibleBadgeDepositorHistory accountAuthorizedNonFungibleBadgeDepositorHistory:
-                    await writer.WriteAsync(accountAuthorizedNonFungibleBadgeDepositorHistory.NonFungibleResourceEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(accountAuthorizedNonFungibleBadgeDepositorHistory.ResourceEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(accountAuthorizedNonFungibleBadgeDepositorHistory.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteNullAsync(token);
                     break;
                 case AccountAuthorizedResourceBadgeDepositorHistory accountAuthorizedResourceBadgeDepositorHistory:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
                     await writer.WriteAsync(accountAuthorizedResourceBadgeDepositorHistory.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
                     break;
             }
         });

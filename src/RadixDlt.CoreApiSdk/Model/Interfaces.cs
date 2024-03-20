@@ -84,7 +84,7 @@ public interface IEntityAddressPointer
 
 public interface INonFungibleGlobalIdPointer
 {
-    public NonFungibleGlobalId GetNonFungibleId();
+    public NonFungibleGlobalId GetNonFungibleGlobalId();
 }
 
 public interface IUpsertedSubstate

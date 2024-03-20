@@ -488,7 +488,7 @@ UPDATE pending_transactions
                         {
                             if (accountAuthorizedDepositorEntrySubstate.Key.Badge is CoreModel.NonFungibleAuthorizedDepositorBadge nonFungibleGlobalAuthorizedDepositorBadge)
                             {
-                                var nonFungibleId = nonFungibleGlobalAuthorizedDepositorBadge.GetNonFungibleId();
+                                var nonFungibleId = nonFungibleGlobalAuthorizedDepositorBadge.GetNonFungibleGlobalId();
 
                                 referencedNonFungibleIdDictionary.MarkSeen(
                                     new NonFungibleGlobalIdLookup(

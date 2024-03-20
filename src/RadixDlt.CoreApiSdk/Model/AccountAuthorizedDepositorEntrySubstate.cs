@@ -86,7 +86,7 @@ public partial class NonFungibleAuthorizedDepositorBadge : IEntityAddressPointer
         yield return NonFungibleGlobalId.ResourceAddress;
     }
 
-    public NonFungibleGlobalId GetNonFungibleId()
+    public NonFungibleGlobalId GetNonFungibleGlobalId()
     {
         return NonFungibleGlobalId;
     }

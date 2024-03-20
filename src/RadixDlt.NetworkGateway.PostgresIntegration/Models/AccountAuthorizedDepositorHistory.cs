@@ -86,8 +86,8 @@ internal abstract class AccountAuthorizedDepositorHistory
 
 internal class AccountAuthorizedNonFungibleBadgeDepositorHistory : AccountAuthorizedDepositorHistory
 {
-    [Column("non_fungible_resource_entity_id")]
-    public long NonFungibleResourceEntityId { get; set; }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
     [Column("non_fungible_id_data_id")]
     public long NonFungibleIdDataId { get; set; }

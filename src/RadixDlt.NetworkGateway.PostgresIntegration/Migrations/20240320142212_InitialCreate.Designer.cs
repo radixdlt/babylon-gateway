@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240319155548_InitialCreate")]
+    [Migration("20240320142212_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1675,11 +1675,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("non_fungible_id_data_id");
 
-                    b.Property<long>("NonFungibleResourceEntityId")
+                    b.Property<long>("ResourceEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
-                        .HasColumnName("non_fungible_resource_entity_id");
+                        .HasColumnName("resource_entity_id");
 
-                    b.HasIndex("AccountEntityId", "NonFungibleResourceEntityId", "NonFungibleIdDataId", "FromStateVersion")
+                    b.HasIndex("AccountEntityId", "ResourceEntityId", "NonFungibleIdDataId", "FromStateVersion")
                         .HasFilter("discriminator = 'non_fungible'");
 
                     b.ToTable("account_authorized_depositor_history");
@@ -1692,10 +1693,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorHistory");
 
                     b.Property<long>("ResourceEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
                         .HasColumnName("resource_entity_id");
 
                     b.HasIndex("AccountEntityId", "ResourceEntityId", "FromStateVersion")
+                        .HasDatabaseName("IX_account_authorized_depositor_history_account_entity_id_res~1")
                         .HasFilter("discriminator = 'resource'");
 
                     b.ToTable("account_authorized_depositor_history");

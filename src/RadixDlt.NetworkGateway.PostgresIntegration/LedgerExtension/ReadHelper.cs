@@ -415,13 +415,7 @@ SELECT
     nfid.id AS NonFungibleIdDataId
 FROM var
 INNER JOIN entities e ON e.address = var.non_fungible_resource_address
-INNER JOIN LATERAL (
-    SELECT *
-    FROM non_fungible_id_data
-    WHERE non_fungible_resource_entity_id = e.id  AND non_fungible_id = var.non_fungible_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) nfid ON TRUE",
+INNER JOIN non_fungible_id_data nfid ON nfid.non_fungible_resource_entity_id = e.id AND nfid.non_fungible_id = var.non_fungible_id",
             parameters: new
             {
                 resourceAddresses = resourceAddresses,
