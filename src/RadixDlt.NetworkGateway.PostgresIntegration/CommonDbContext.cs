@@ -111,7 +111,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountDefaultDepositRuleHistory> AccountDefaultDepositRuleHistory => Set<AccountDefaultDepositRuleHistory>();
 
-    public DbSet<AccountResourcePreferenceRuleEntryHistory> AccountDepositRuleHistory => Set<AccountResourcePreferenceRuleEntryHistory>();
+    public DbSet<AccountResourcePreferenceRuleEntryHistory> AccountResourcePreferenceRuleEntryHistory => Set<AccountResourcePreferenceRuleEntryHistory>();
 
     public DbSet<AccountResourcePreferenceRuleAggregateHistory> AccountResourcePreferenceRuleAggregateHistory => Set<AccountResourcePreferenceRuleAggregateHistory>();
 
@@ -159,7 +159,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<KeyValueStoreSchemaHistory> KeyValueStoreSchemaHistory => Set<KeyValueStoreSchemaHistory>();
 
-    public DbSet<AccountAuthorizedDepositorEntryHistory> AccountAuthorizedDepositorHistory => Set<AccountAuthorizedDepositorEntryHistory>();
+    public DbSet<AccountAuthorizedDepositorEntryHistory> AccountAuthorizedDepositorEntryHistory => Set<AccountAuthorizedDepositorEntryHistory>();
 
     public DbSet<AccountAuthorizedDepositorAggregateHistory> AccountAuthorizedDepositorAggregateHistory => Set<AccountAuthorizedDepositorAggregateHistory>();
 

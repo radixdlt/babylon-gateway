@@ -90,13 +90,13 @@ internal class AccountAuthorizedDepositorsProcessor
     private readonly ReferencedNonFungibleIdDictionary _referencedNonFungibleIdDictionary;
     private readonly ReferencedEntityDictionary _referencedEntityDictionary;
 
-    private readonly ChangeTracker<AccountAuthorizedDepositorsChangePointerLookup, AccountAuthorizedDepositorsChangePointer> _accountAuthorizedDepositorsChanges = new();
+    private readonly ChangeTracker<AccountAuthorizedDepositorsChangePointerLookup, AccountAuthorizedDepositorsChangePointer> _changeTracker = new();
 
-    private readonly Dictionary<long, AccountAuthorizedDepositorAggregateHistory> _mostRecentAuthorizedDepositorAggregates = new();
-    private readonly Dictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorEntryHistory> _mostRecentAuthorizedDepositorEntries = new();
+    private readonly Dictionary<long, AccountAuthorizedDepositorAggregateHistory> _mostRecentAggregates = new();
+    private readonly Dictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorEntryHistory> _mostRecentEntries = new();
 
-    private readonly List<AccountAuthorizedDepositorAggregateHistory> _accountAuthorizedDepositorAggregatesToAdd = new();
-    private readonly List<AccountAuthorizedDepositorEntryHistory> _accountAuthorizedDepositorHistoryToAdd = new();
+    private readonly List<AccountAuthorizedDepositorAggregateHistory> _aggregatesToAdd = new();
+    private readonly List<AccountAuthorizedDepositorEntryHistory> _entriesToAdd = new();
 
     public AccountAuthorizedDepositorsProcessor(
         ProcessorContext context,
@@ -112,7 +112,7 @@ internal class AccountAuthorizedDepositorsProcessor
     {
         if (substateData is CoreModel.AccountAuthorizedDepositorEntrySubstate accountAuthorizedDepositorEntry)
         {
-            _accountAuthorizedDepositorsChanges
+            _changeTracker
                 .GetOrAdd(
                     new AccountAuthorizedDepositorsChangePointerLookup(referencedEntity.DatabaseId, stateVersion),
                     _ => new AccountAuthorizedDepositorsChangePointer())
@@ -123,11 +123,11 @@ internal class AccountAuthorizedDepositorsProcessor
 
     public void ProcessChanges()
     {
-        foreach (var (lookup, change) in _accountAuthorizedDepositorsChanges.AsEnumerable())
+        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
         {
             AccountAuthorizedDepositorAggregateHistory aggregate;
 
-            if (!_mostRecentAuthorizedDepositorAggregates.TryGetValue(lookup.AccountEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
+            if (!_mostRecentAggregates.TryGetValue(lookup.AccountEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
             {
                 aggregate = new AccountAuthorizedDepositorAggregateHistory
                 {
@@ -142,8 +142,8 @@ internal class AccountAuthorizedDepositorsProcessor
                     aggregate.EntryIds.AddRange(previousAggregate.EntryIds);
                 }
 
-                _accountAuthorizedDepositorAggregatesToAdd.Add(aggregate);
-                _mostRecentAuthorizedDepositorAggregates[lookup.AccountEntityId] = aggregate;
+                _aggregatesToAdd.Add(aggregate);
+                _mostRecentAggregates[lookup.AccountEntityId] = aggregate;
             }
             else
             {
@@ -191,9 +191,9 @@ internal class AccountAuthorizedDepositorsProcessor
                         $"Expected either ResourceAuthorizedDepositorBadge or NonFungibleGlobalAuthorizedDepositorBadge but found {authorizedDepositorEntry.Key.Badge.GetType()}");
                 }
 
-                _accountAuthorizedDepositorHistoryToAdd.Add(entryHistory);
+                _entriesToAdd.Add(entryHistory);
 
-                if (_mostRecentAuthorizedDepositorEntries.TryGetValue(entryDbLookup, out var previousEntry))
+                if (_mostRecentEntries.TryGetValue(entryDbLookup, out var previousEntry))
                 {
                     var currentPosition = aggregate.EntryIds.IndexOf(previousEntry.Id);
 
@@ -208,15 +208,15 @@ internal class AccountAuthorizedDepositorsProcessor
                     aggregate.EntryIds.Insert(0, entryHistory.Id);
                 }
 
-                _mostRecentAuthorizedDepositorEntries[entryDbLookup] = entryHistory;
+                _mostRecentEntries[entryDbLookup] = entryHistory;
             }
         }
     }
 
     public async Task LoadDependencies()
     {
-        _mostRecentAuthorizedDepositorEntries.AddRange(await MostRecentAccountAuthorizedDepositorHistory());
-        _mostRecentAuthorizedDepositorAggregates.AddRange(await MostRecentAccountAuthorizedDepositorAggregateHistory());
+        _mostRecentEntries.AddRange(await MostRecentAccountAuthorizedDepositorHistory());
+        _mostRecentAggregates.AddRange(await MostRecentAccountAuthorizedDepositorAggregateHistory());
     }
 
     public async Task<int> SaveEntities()
@@ -278,7 +278,7 @@ internal class AccountAuthorizedDepositorsProcessor
     {
         var lookupSet = new HashSet<AccountAuthorizedDepositorsDbLookup>();
 
-        foreach (var (lookup, change) in _accountAuthorizedDepositorsChanges.AsEnumerable())
+        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
         {
             foreach (var entry in change.AuthorizedDepositorEntries)
             {
@@ -333,7 +333,7 @@ INNER JOIN LATERAL (
 
     private async Task<IDictionary<long, AccountAuthorizedDepositorAggregateHistory>> MostRecentAccountAuthorizedDepositorAggregateHistory()
     {
-        var accountEntityId = _accountAuthorizedDepositorsChanges.Keys.Select(x => x.AccountEntityId).ToHashSet().ToList();
+        var accountEntityId = _changeTracker.Keys.Select(x => x.AccountEntityId).ToHashSet().ToList();
 
         if (!accountEntityId.Any())
         {
@@ -358,7 +358,7 @@ INNER JOIN LATERAL (
     }
 
     private Task<int> CopyAccountAuthorizedDepositorHistory() => _context.WriteHelper.Copy(
-        _accountAuthorizedDepositorHistoryToAdd,
+        _entriesToAdd,
         "COPY account_authorized_depositor_entry_history (id, from_state_version, account_entity_id, is_deleted, discriminator, resource_entity_id, non_fungible_id_data_id) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
@@ -384,7 +384,7 @@ INNER JOIN LATERAL (
         });
 
     private Task<int> CopyAccountAuthorizedDepositorAggregateHistory() => _context.WriteHelper.Copy(
-        _accountAuthorizedDepositorAggregatesToAdd,
+        _aggregatesToAdd,
         "COPY account_authorized_depositor_aggregate_history (id, from_state_version, account_entity_id, entry_ids) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {

@@ -85,8 +85,8 @@ internal record AccountDefaultDepositRuleChangePointer
 internal class AccountDefaultDepositRuleProcessor
 {
     private readonly ProcessorContext _context;
-    private readonly ChangeTracker<AccountDefaultDepositRuleChangePointerLookup, AccountDefaultDepositRuleChangePointer> _accountSettingChanges = new();
-    private readonly List<AccountDefaultDepositRuleHistory> _accountDefaultDepositRulesToAdd = new();
+    private readonly ChangeTracker<AccountDefaultDepositRuleChangePointerLookup, AccountDefaultDepositRuleChangePointer> _changeTracker = new();
+    private readonly List<AccountDefaultDepositRuleHistory> _rulesToAdd = new();
 
     public AccountDefaultDepositRuleProcessor(ProcessorContext context)
     {
@@ -97,7 +97,7 @@ internal class AccountDefaultDepositRuleProcessor
     {
         if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
         {
-            _accountSettingChanges
+            _changeTracker
                 .GetOrAdd(
                     new AccountDefaultDepositRuleChangePointerLookup(referencedEntity.DatabaseId, stateVersion),
                     _ => new AccountDefaultDepositRuleChangePointer())
@@ -108,11 +108,11 @@ internal class AccountDefaultDepositRuleProcessor
 
     public void ProcessChanges()
     {
-        foreach (var (lookup, change) in _accountSettingChanges.AsEnumerable())
+        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
         {
             foreach (var accountFieldStateChange in change.AccountFieldStateEntries)
             {
-                _accountDefaultDepositRulesToAdd.Add(
+                _rulesToAdd.Add(
                     new AccountDefaultDepositRuleHistory
                     {
                         Id = _context.Sequences.AccountDefaultDepositRuleHistorySequence++,
@@ -134,7 +134,7 @@ internal class AccountDefaultDepositRuleProcessor
     }
 
     private Task<int> CopyAccountDefaultDepositRuleHistory() => _context.WriteHelper.Copy(
-        _accountDefaultDepositRulesToAdd,
+        _rulesToAdd,
         "COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {

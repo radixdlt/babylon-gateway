@@ -87,13 +87,13 @@ internal class AccountResourcePreferenceRulesProcessor
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntityDictionary;
 
-    private readonly ChangeTracker<AccountResourcePreferenceRuleChangePointerLookup, AccountResourcePreferenceRuleChangePointer> _changes = new();
+    private readonly ChangeTracker<AccountResourcePreferenceRuleChangePointerLookup, AccountResourcePreferenceRuleChangePointer> _changeTracker = new();
 
     private readonly Dictionary<long, AccountResourcePreferenceRuleAggregateHistory> _mostRecentAggregates = new();
     private readonly Dictionary<AccountResourcePreferenceRuleDbLookup, AccountResourcePreferenceRuleEntryHistory> _mostRecentEntries = new();
 
-    private readonly List<AccountResourcePreferenceRuleAggregateHistory> _accountResourcePreferenceAggregatesToAdd = new();
-    private readonly List<AccountResourcePreferenceRuleEntryHistory> _accountResourcePreferenceEntriesToAdd = new();
+    private readonly List<AccountResourcePreferenceRuleAggregateHistory> _aggregatesToAdd = new();
+    private readonly List<AccountResourcePreferenceRuleEntryHistory> _entriesToAdd = new();
 
     public AccountResourcePreferenceRulesProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntityDictionary)
     {
@@ -105,7 +105,7 @@ internal class AccountResourcePreferenceRulesProcessor
     {
         if (substateData is CoreModel.AccountResourcePreferenceEntrySubstate accountResourcePreferenceEntry)
         {
-            _changes
+            _changeTracker
                 .GetOrAdd(
                     new AccountResourcePreferenceRuleChangePointerLookup(
                         referencedEntity.DatabaseId,
@@ -120,7 +120,7 @@ internal class AccountResourcePreferenceRulesProcessor
 
     public void ProcessChanges()
     {
-        foreach (var (lookup, change) in _changes.AsEnumerable())
+        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
         {
             AccountResourcePreferenceRuleAggregateHistory aggregate;
 
@@ -139,7 +139,7 @@ internal class AccountResourcePreferenceRulesProcessor
                     aggregate.EntryIds.AddRange(previousAggregate.EntryIds);
                 }
 
-                _accountResourcePreferenceAggregatesToAdd.Add(aggregate);
+                _aggregatesToAdd.Add(aggregate);
                 _mostRecentAggregates[lookup.AccountEntityId] = aggregate;
             }
             else
@@ -161,7 +161,7 @@ internal class AccountResourcePreferenceRulesProcessor
                     IsDeleted = entry.Value == null,
                 };
 
-                _accountResourcePreferenceEntriesToAdd.Add(entryHistory);
+                _entriesToAdd.Add(entryHistory);
 
                 if (_mostRecentEntries.TryGetValue(entryLookup, out var previousEntry))
                 {
@@ -203,7 +203,7 @@ internal class AccountResourcePreferenceRulesProcessor
     {
         var lookupSet = new HashSet<AccountResourcePreferenceRuleDbLookup>();
 
-        foreach (var (lookup, change) in _changes.AsEnumerable())
+        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
         {
             foreach (var entry in change.Entries)
             {
@@ -239,7 +239,7 @@ INNER JOIN LATERAL (
 
     private async Task<IDictionary<long, AccountResourcePreferenceRuleAggregateHistory>> MostRecentAccountResourcePreferenceRuleAggregateHistory()
     {
-        var accountEntityId = _changes.Keys.Select(x => x.AccountEntityId).ToHashSet().ToList();
+        var accountEntityId = _changeTracker.Keys.Select(x => x.AccountEntityId).ToHashSet().ToList();
 
         if (!accountEntityId.Any())
         {
@@ -264,7 +264,7 @@ INNER JOIN LATERAL (
     }
 
     private Task<int> CopyAccountResourcePreferenceRuleHistory() => _context.WriteHelper.Copy(
-        _accountResourcePreferenceEntriesToAdd,
+        _entriesToAdd,
         "COPY account_resource_preference_rule_entry_history (id, from_state_version, account_entity_id,  resource_entity_id, account_resource_preference_rule, is_deleted) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
@@ -277,7 +277,7 @@ INNER JOIN LATERAL (
         });
 
     private Task<int> CopyAccountResourcePreferenceRuleAggregateHistory() => _context.WriteHelper.Copy(
-        _accountResourcePreferenceAggregatesToAdd,
+        _aggregatesToAdd,
         "COPY account_resource_preference_rule_aggregate_history (id, from_state_version, account_entity_id, entry_ids) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
