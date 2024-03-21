@@ -94,16 +94,16 @@ public interface IDapperWrapper
 
 public class DapperWrapper : IDapperWrapper
 {
-    private readonly SlowQueryLoggingOptions _slowQueriesLoggingOptions;
+    private readonly IOptionsMonitor<SlowQueryLoggingOptions> _slowQueriesLoggingOptions;
     private readonly ILogger<DapperWrapper> _logger;
     private readonly ISqlQueryObserver _sqlQueryObserver;
 
     public DapperWrapper(
-        IOptionsSnapshot<SlowQueryLoggingOptions> slowQueriesLoggingOptions,
+        IOptionsMonitor<SlowQueryLoggingOptions> slowQueriesLoggingOptions,
         ILogger<DapperWrapper> logger,
         ISqlQueryObserver sqlQueryObserver)
     {
-        _slowQueriesLoggingOptions = slowQueriesLoggingOptions.Value;
+        _slowQueriesLoggingOptions = slowQueriesLoggingOptions;
         _logger = logger;
         _sqlQueryObserver = sqlQueryObserver;
     }
@@ -123,7 +123,7 @@ public class DapperWrapper : IDapperWrapper
 
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, elapsed);
 
-        var logQueriesLongerThan = _slowQueriesLoggingOptions.SlowQueryThreshold;
+        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueryThreshold;
         if (elapsed > logQueriesLongerThan)
         {
             var parameters = JsonConvert.SerializeObject(command.Parameters);
@@ -149,7 +149,7 @@ public class DapperWrapper : IDapperWrapper
         var queryName = SqlQueryMetricsHelper.GetQueryNameValue(operationName, methodName);
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, elapsed);
 
-        var logQueriesLongerThan = _slowQueriesLoggingOptions.SlowQueryThreshold;
+        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueryThreshold;
         if (elapsed > logQueriesLongerThan)
         {
             var parameters = JsonConvert.SerializeObject(command.Parameters);

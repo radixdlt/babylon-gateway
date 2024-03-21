@@ -25,6 +25,8 @@ Release Date: _not published yet_
 - Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
 - Use strong type definition for the `royalty_config` property of package blueprint and general components details. This is a change to OAS definition only and does not impact returned data format.
 - Introduced upper limit to the overall number of the filters used in the `/stream/transactions` endpoint, defaults to 10.
+- Added new endpoint `/state/account/page/resource-preferences` which allows to read resource preferences for given account.
+- Added new endpoint `/state/account/page/authorized-depositors` which allows to read authorized depositors for given account.
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.

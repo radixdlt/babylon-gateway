@@ -62,68 +62,34 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace GatewayApi.Controllers;
 
-public static class ServiceCollectionExtensions
+[ApiController]
+[Route("state/account")]
+public class StateAccountController : ControllerBase
 {
-    public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
-    {
-        CustomTypes.EnsureConfigured();
+    private readonly IAccountHandler _accountHandler;
 
-        services
-            .AddNpgsqlDataSourceHolder<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
-            .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(
-                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<MigrationsDbContext>>().NpgsqlDataSource,
-                    o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name));
-            });
+    public StateAccountController(IAccountHandler accountHandler)
+    {
+        _accountHandler = accountHandler;
     }
 
-    internal static IServiceCollection AddNpgsqlDataSourceHolder<T>(this IServiceCollection services, string connectionStringName)
+    [HttpPost("page/resource-preferences")]
+    public async Task<IActionResult> ResourcePreferencesPage(GatewayModel.StateAccountResourcePreferencesPageRequest request, CancellationToken token = default)
     {
-        services.TryAdd(new ServiceDescriptor(
-            typeof(NpgsqlDataSourceHolder<T>),
-            sp =>
-            {
-                var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionStringName);
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        return Ok(await _accountHandler.ResourcePreferences(request, token));
+    }
 
-                dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
-                dataSourceBuilder.MapEnum<AccountDefaultDepositRule>();
-                dataSourceBuilder.MapEnum<AccountResourcePreferenceRule>();
-                dataSourceBuilder.MapEnum<EntityType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
-                dataSourceBuilder.MapEnum<LedgerTransactionType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionManifestClass>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerEventType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOperationType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOriginType>();
-                dataSourceBuilder.MapEnum<NonFungibleIdType>();
-                dataSourceBuilder.MapEnum<PackageVmType>();
-                dataSourceBuilder.MapEnum<PendingTransactionPayloadLedgerStatus>();
-                dataSourceBuilder.MapEnum<PendingTransactionIntentLedgerStatus>();
-                dataSourceBuilder.MapEnum<PublicKeyType>();
-                dataSourceBuilder.MapEnum<ResourceType>();
-                dataSourceBuilder.MapEnum<ModuleId>();
-                dataSourceBuilder.MapEnum<SborTypeKind>();
-                dataSourceBuilder.MapEnum<StateType>();
-                dataSourceBuilder.MapEnum<AuthorizedDepositorBadgeType>();
-
-                return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
-            },
-            ServiceLifetime.Singleton));
-
-        return services;
+    [HttpPost("page/authorized-depositors")]
+    public async Task<IActionResult> AuthorizedDepositorsPage(GatewayModel.StateAccountAuthorizedDepositorsPageRequest request, CancellationToken token = default)
+    {
+        return Ok(await _accountHandler.AuthorizedDepositors(request, token));
     }
 }

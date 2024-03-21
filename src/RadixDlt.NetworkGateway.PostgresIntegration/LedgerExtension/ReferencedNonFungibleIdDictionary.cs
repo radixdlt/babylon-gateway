@@ -62,68 +62,39 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.Abstractions;
+using System;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-public static class ServiceCollectionExtensions
+internal record NonFungibleGlobalIdLookup(EntityAddress ResourceAddress, string SimpleRepresentation);
+
+internal record NonFungibleIdGlobalIdDatabaseId(long ResourceEntityId, long NonFungibleIdDataId);
+
+internal class ReferencedNonFungibleIdDictionary
 {
-    public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
-    {
-        CustomTypes.EnsureConfigured();
+    private readonly Dictionary<NonFungibleGlobalIdLookup, NonFungibleIdGlobalIdDatabaseId> _storage = new();
 
-        services
-            .AddNpgsqlDataSourceHolder<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
-            .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(
-                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<MigrationsDbContext>>().NpgsqlDataSource,
-                    o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name));
-            });
+    public HashSet<NonFungibleGlobalIdLookup> Observed { get; } = new();
+
+    public void Add(NonFungibleGlobalIdLookup nonFungibleGlobalIdLookup, NonFungibleIdGlobalIdDatabaseId value)
+    {
+        _storage.Add(nonFungibleGlobalIdLookup, value);
     }
 
-    internal static IServiceCollection AddNpgsqlDataSourceHolder<T>(this IServiceCollection services, string connectionStringName)
+    public NonFungibleIdGlobalIdDatabaseId Get(NonFungibleGlobalIdLookup address)
     {
-        services.TryAdd(new ServiceDescriptor(
-            typeof(NpgsqlDataSourceHolder<T>),
-            sp =>
-            {
-                var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionStringName);
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        if (_storage.TryGetValue(address, out var value))
+        {
+            return value;
+        }
 
-                dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
-                dataSourceBuilder.MapEnum<AccountDefaultDepositRule>();
-                dataSourceBuilder.MapEnum<AccountResourcePreferenceRule>();
-                dataSourceBuilder.MapEnum<EntityType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
-                dataSourceBuilder.MapEnum<LedgerTransactionType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionManifestClass>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerEventType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOperationType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOriginType>();
-                dataSourceBuilder.MapEnum<NonFungibleIdType>();
-                dataSourceBuilder.MapEnum<PackageVmType>();
-                dataSourceBuilder.MapEnum<PendingTransactionPayloadLedgerStatus>();
-                dataSourceBuilder.MapEnum<PendingTransactionIntentLedgerStatus>();
-                dataSourceBuilder.MapEnum<PublicKeyType>();
-                dataSourceBuilder.MapEnum<ResourceType>();
-                dataSourceBuilder.MapEnum<ModuleId>();
-                dataSourceBuilder.MapEnum<SborTypeKind>();
-                dataSourceBuilder.MapEnum<StateType>();
-                dataSourceBuilder.MapEnum<AuthorizedDepositorBadgeType>();
+        throw new InvalidOperationException($"Non Fungible with Address: {address.ResourceAddress} and Id: {address.SimpleRepresentation} not found.");
+    }
 
-                return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
-            },
-            ServiceLifetime.Singleton));
-
-        return services;
+    public void MarkSeen(NonFungibleGlobalIdLookup entityAddress)
+    {
+        Observed.Add(entityAddress);
     }
 }

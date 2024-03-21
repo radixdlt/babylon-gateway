@@ -92,6 +92,48 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Get Account authorized depositors
+        /// </summary>
+        /// <remarks>
+        /// Returns paginable collection of authorized depositors for given account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountAuthorizedDepositorsPageRequest"></param>
+        /// <returns>StateAccountAuthorizedDepositorsPageResponse</returns>
+        StateAccountAuthorizedDepositorsPageResponse AccountAuthorizedDepositorsPage(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest);
+
+        /// <summary>
+        /// Get Account authorized depositors
+        /// </summary>
+        /// <remarks>
+        /// Returns paginable collection of authorized depositors for given account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountAuthorizedDepositorsPageRequest"></param>
+        /// <returns>ApiResponse of StateAccountAuthorizedDepositorsPageResponse</returns>
+        ApiResponse<StateAccountAuthorizedDepositorsPageResponse> AccountAuthorizedDepositorsPageWithHttpInfo(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest);
+        /// <summary>
+        /// Get Account resource preferences
+        /// </summary>
+        /// <remarks>
+        /// Returns paginable collection of resource preference rules for given account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountResourcePreferencesPageRequest"></param>
+        /// <returns>StateAccountResourcePreferencesPageResponse</returns>
+        StateAccountResourcePreferencesPageResponse AccountResourcePreferencesPage(StateAccountResourcePreferencesPageRequest stateAccountResourcePreferencesPageRequest);
+
+        /// <summary>
+        /// Get Account resource preferences
+        /// </summary>
+        /// <remarks>
+        /// Returns paginable collection of resource preference rules for given account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountResourcePreferencesPageRequest"></param>
+        /// <returns>ApiResponse of StateAccountResourcePreferencesPageResponse</returns>
+        ApiResponse<StateAccountResourcePreferencesPageResponse> AccountResourcePreferencesPageWithHttpInfo(StateAccountResourcePreferencesPageRequest stateAccountResourcePreferencesPageRequest);
+        /// <summary>
         /// Get page of Global Entity Fungible Resource Vaults
         /// </summary>
         /// <remarks>
@@ -370,6 +412,52 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     public interface IStateApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
+        /// <summary>
+        /// Get Account authorized depositors
+        /// </summary>
+        /// <remarks>
+        /// Returns paginable collection of authorized depositors for given account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountAuthorizedDepositorsPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountAuthorizedDepositorsPageResponse</returns>
+        System.Threading.Tasks.Task<StateAccountAuthorizedDepositorsPageResponse> AccountAuthorizedDepositorsPageAsync(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Account authorized depositors
+        /// </summary>
+        /// <remarks>
+        /// Returns paginable collection of authorized depositors for given account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountAuthorizedDepositorsPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountAuthorizedDepositorsPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateAccountAuthorizedDepositorsPageResponse>> AccountAuthorizedDepositorsPageWithHttpInfoAsync(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Account resource preferences
+        /// </summary>
+        /// <remarks>
+        /// Returns paginable collection of resource preference rules for given account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountResourcePreferencesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountResourcePreferencesPageResponse</returns>
+        System.Threading.Tasks.Task<StateAccountResourcePreferencesPageResponse> AccountResourcePreferencesPageAsync(StateAccountResourcePreferencesPageRequest stateAccountResourcePreferencesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Account resource preferences
+        /// </summary>
+        /// <remarks>
+        /// Returns paginable collection of resource preference rules for given account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountResourcePreferencesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountResourcePreferencesPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateAccountResourcePreferencesPageResponse>> AccountResourcePreferencesPageWithHttpInfoAsync(StateAccountResourcePreferencesPageRequest stateAccountResourcePreferencesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get page of Global Entity Fungible Resource Vaults
         /// </summary>
@@ -880,6 +968,240 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
                 return _exceptionFactory;
             }
             set { _exceptionFactory = value; }
+        }
+
+        /// <summary>
+        /// Get Account authorized depositors Returns paginable collection of authorized depositors for given account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountAuthorizedDepositorsPageRequest"></param>
+        /// <returns>StateAccountAuthorizedDepositorsPageResponse</returns>
+        public StateAccountAuthorizedDepositorsPageResponse AccountAuthorizedDepositorsPage(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountAuthorizedDepositorsPageResponse> localVarResponse = AccountAuthorizedDepositorsPageWithHttpInfo(stateAccountAuthorizedDepositorsPageRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Account authorized depositors Returns paginable collection of authorized depositors for given account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountAuthorizedDepositorsPageRequest"></param>
+        /// <returns>ApiResponse of StateAccountAuthorizedDepositorsPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountAuthorizedDepositorsPageResponse> AccountAuthorizedDepositorsPageWithHttpInfo(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest)
+        {
+            // verify the required parameter 'stateAccountAuthorizedDepositorsPageRequest' is set
+            if (stateAccountAuthorizedDepositorsPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountAuthorizedDepositorsPageRequest' when calling StateApi->AccountAuthorizedDepositorsPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountAuthorizedDepositorsPageRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateAccountAuthorizedDepositorsPageResponse>("/state/account/page/authorized-depositors", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountAuthorizedDepositorsPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Account authorized depositors Returns paginable collection of authorized depositors for given account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountAuthorizedDepositorsPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountAuthorizedDepositorsPageResponse</returns>
+        public async System.Threading.Tasks.Task<StateAccountAuthorizedDepositorsPageResponse> AccountAuthorizedDepositorsPageAsync(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountAuthorizedDepositorsPageResponse> localVarResponse = await AccountAuthorizedDepositorsPageWithHttpInfoAsync(stateAccountAuthorizedDepositorsPageRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Account authorized depositors Returns paginable collection of authorized depositors for given account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountAuthorizedDepositorsPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountAuthorizedDepositorsPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountAuthorizedDepositorsPageResponse>> AccountAuthorizedDepositorsPageWithHttpInfoAsync(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateAccountAuthorizedDepositorsPageRequest' is set
+            if (stateAccountAuthorizedDepositorsPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountAuthorizedDepositorsPageRequest' when calling StateApi->AccountAuthorizedDepositorsPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountAuthorizedDepositorsPageRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateAccountAuthorizedDepositorsPageResponse>("/state/account/page/authorized-depositors", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountAuthorizedDepositorsPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Account resource preferences Returns paginable collection of resource preference rules for given account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountResourcePreferencesPageRequest"></param>
+        /// <returns>StateAccountResourcePreferencesPageResponse</returns>
+        public StateAccountResourcePreferencesPageResponse AccountResourcePreferencesPage(StateAccountResourcePreferencesPageRequest stateAccountResourcePreferencesPageRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountResourcePreferencesPageResponse> localVarResponse = AccountResourcePreferencesPageWithHttpInfo(stateAccountResourcePreferencesPageRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Account resource preferences Returns paginable collection of resource preference rules for given account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountResourcePreferencesPageRequest"></param>
+        /// <returns>ApiResponse of StateAccountResourcePreferencesPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountResourcePreferencesPageResponse> AccountResourcePreferencesPageWithHttpInfo(StateAccountResourcePreferencesPageRequest stateAccountResourcePreferencesPageRequest)
+        {
+            // verify the required parameter 'stateAccountResourcePreferencesPageRequest' is set
+            if (stateAccountResourcePreferencesPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountResourcePreferencesPageRequest' when calling StateApi->AccountResourcePreferencesPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountResourcePreferencesPageRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateAccountResourcePreferencesPageResponse>("/state/account/page/resource-preferences", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountResourcePreferencesPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Account resource preferences Returns paginable collection of resource preference rules for given account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountResourcePreferencesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountResourcePreferencesPageResponse</returns>
+        public async System.Threading.Tasks.Task<StateAccountResourcePreferencesPageResponse> AccountResourcePreferencesPageAsync(StateAccountResourcePreferencesPageRequest stateAccountResourcePreferencesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountResourcePreferencesPageResponse> localVarResponse = await AccountResourcePreferencesPageWithHttpInfoAsync(stateAccountResourcePreferencesPageRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Account resource preferences Returns paginable collection of resource preference rules for given account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountResourcePreferencesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountResourcePreferencesPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountResourcePreferencesPageResponse>> AccountResourcePreferencesPageWithHttpInfoAsync(StateAccountResourcePreferencesPageRequest stateAccountResourcePreferencesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateAccountResourcePreferencesPageRequest' is set
+            if (stateAccountResourcePreferencesPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountResourcePreferencesPageRequest' when calling StateApi->AccountResourcePreferencesPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountResourcePreferencesPageRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateAccountResourcePreferencesPageResponse>("/state/account/page/resource-preferences", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountResourcePreferencesPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
         }
 
         /// <summary>

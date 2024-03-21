@@ -148,6 +148,7 @@ public static class ServiceCollectionExtensions
     private static void AddRequestServices(IServiceCollection services)
     {
         services.TryAddScoped<IEntityHandler, DefaultEntityHandler>();
+        services.TryAddScoped<IAccountHandler, DefaultAccountHandler>();
         services.TryAddScoped<IValidatorHandler, DefaultValidatorHandler>();
         services.TryAddScoped<IStatusHandler, DefaultStatusHandler>();
         services.TryAddScoped<ITransactionHandler, DefaultTransactionHandler>();

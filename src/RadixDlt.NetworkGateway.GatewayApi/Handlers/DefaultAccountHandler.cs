@@ -62,33 +62,57 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-[Table("account_resource_preference_rule_history")]
-public class AccountResourcePreferenceRuleHistory
+public interface IAccountHandler
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    Task<GatewayModel.StateAccountResourcePreferencesPageResponse> ResourcePreferences(GatewayModel.StateAccountResourcePreferencesPageRequest request, CancellationToken token = default);
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+    Task<GatewayModel.StateAccountAuthorizedDepositorsPageResponse> AuthorizedDepositors(GatewayModel.StateAccountAuthorizedDepositorsPageRequest request, CancellationToken token = default);
+}
 
-    [Column("account_entity_id")]
-    public long AccountEntityId { get; set; }
+internal class DefaultAccountHandler : IAccountHandler
+{
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
+    private readonly IAccountStateQuerier _accountStateQuerier;
 
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
+    public DefaultAccountHandler(ILedgerStateQuerier ledgerStateQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration, IAccountStateQuerier accountStateQuerier)
+    {
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _endpointConfiguration = endpointConfiguration;
+        _accountStateQuerier = accountStateQuerier;
+    }
 
-    [Column("account_resource_preference_rule")]
-    public AccountResourcePreferenceRule? AccountResourcePreferenceRule { get; set; }
+    public async Task<GatewayModel.StateAccountResourcePreferencesPageResponse> ResourcePreferences(GatewayModel.StateAccountResourcePreferencesPageRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        return await _accountStateQuerier.AccountResourcePreferences(
+            accountAddress: (EntityAddress)request.AccountAddress,
+            ledgerState: ledgerState,
+            offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
+            token: token);
+    }
 
-    [MemberNotNullWhen(false, nameof(AccountResourcePreferenceRule))]
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
+    public async Task<GatewayModel.StateAccountAuthorizedDepositorsPageResponse> AuthorizedDepositors(
+        GatewayModel.StateAccountAuthorizedDepositorsPageRequest request,
+        CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        return await _accountStateQuerier.AccountAuthorizedDepositors(
+            accountAddress: (EntityAddress)request.AccountAddress,
+            ledgerState: ledgerState,
+            offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
+            token: token);
+    }
 }

@@ -405,7 +405,8 @@ internal class WriteHelper : IWriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY resource_entity_supply_history (id, from_state_version, resource_entity_id, total_supply, total_minted, total_burned) FROM STDIN (FORMAT BINARY)", token);
+                "COPY resource_entity_supply_history (id, from_state_version, resource_entity_id, total_supply, total_minted, total_burned) FROM STDIN (FORMAT BINARY)",
+                token);
 
         foreach (var e in entities)
         {
@@ -436,7 +437,8 @@ internal class WriteHelper : IWriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY entity_resource_aggregated_vaults_history (id, from_state_version, entity_id, resource_entity_id, discriminator, balance, total_count) FROM STDIN (FORMAT BINARY)", token);
+                "COPY entity_resource_aggregated_vaults_history (id, from_state_version, entity_id, resource_entity_id, discriminator, balance, total_count) FROM STDIN (FORMAT BINARY)",
+                token);
 
         foreach (var e in entities)
         {
@@ -510,7 +512,8 @@ internal class WriteHelper : IWriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY entity_resource_vault_aggregate_history (id, from_state_version, entity_id, resource_entity_id, vault_entity_ids) FROM STDIN (FORMAT BINARY)", token);
+                "COPY entity_resource_vault_aggregate_history (id, from_state_version, entity_id, resource_entity_id, vault_entity_ids) FROM STDIN (FORMAT BINARY)",
+                token);
 
         foreach (var e in entities)
         {
@@ -578,34 +581,6 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyAccountDefaultDepositRuleHistory(List<AccountDefaultDepositRuleHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.DefaultDepositRule, "account_default_deposit_rule", token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyAccountDefaultDepositRuleHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyValidatorEmissionStatistics(ICollection<ValidatorEmissionStatistics> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -617,7 +592,8 @@ internal class WriteHelper : IWriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
+                "COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)",
+                token);
 
         foreach (var e in entities)
         {
@@ -633,38 +609,6 @@ internal class WriteHelper : IWriteHelper
         await writer.CompleteAsync(token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyValidatorEmissionStatistics), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyAccountResourcePreferenceRuleHistory(List<AccountResourcePreferenceRuleHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY account_resource_preference_rule_history (id, from_state_version, account_entity_id, resource_entity_id, account_resource_preference_rule, is_deleted) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.AccountResourcePreferenceRule, "account_resource_preference_rule", token);
-            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyAccountResourcePreferenceRuleHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
 
         return entities.Count;
     }
@@ -740,7 +684,8 @@ internal class WriteHelper : IWriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY non_fungible_id_store_history (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id_data_ids) FROM STDIN (FORMAT BINARY)", token);
+                "COPY non_fungible_id_store_history (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id_data_ids) FROM STDIN (FORMAT BINARY)",
+                token);
 
         foreach (var e in entities)
         {
@@ -826,7 +771,8 @@ internal class WriteHelper : IWriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY non_fungible_schema_history (id, from_state_version, resource_entity_id, schema_defining_entity_id, schema_hash, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
+                "COPY non_fungible_schema_history (id, from_state_version, resource_entity_id, schema_defining_entity_id, schema_hash, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)",
+                token);
 
         foreach (var e in entities)
         {
@@ -892,7 +838,8 @@ internal class WriteHelper : IWriteHelper
             commandText: @"
 SELECT
     setval('account_default_deposit_rule_history_id_seq', @accountDefaultDepositRuleHistorySequence),
-    setval('account_resource_preference_rule_history_id_seq', @accountResourceDepositRuleHistorySequence),
+    setval('account_resource_preference_rule_entry_history_id_seq', @accountResourcePreferenceRuleEntryHistorySequence),
+    setval('account_resource_preference_rule_aggregate_history_id_seq', @accountResourcePreferenceRuleAggregateHistorySequence),
     setval('state_history_id_seq', @stateHistorySequence),
     setval('entities_id_seq', @entitySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
@@ -922,13 +869,16 @@ SELECT
     setval('non_fungible_schema_history_id_seq', @NonFungibleSchemaHistorySequence),
     setval('key_value_store_schema_history_id_seq', @KeyValueSchemaHistorySequence),
     setval('package_blueprint_aggregate_history_id_seq', @packageBlueprintAggregateHistorySequence),
-    setval('package_code_aggregate_history_id_seq', @PackageCodeAggregateHistorySequence),
-    setval('key_value_store_aggregate_history_id_seq', @KeyValueStoreAggregateHistorySequence)
+    setval('package_code_aggregate_history_id_seq', @packageCodeAggregateHistorySequence),
+    setval('key_value_store_aggregate_history_id_seq', @keyValueStoreAggregateHistorySequence),
+    setval('account_authorized_depositor_entry_history_id_seq', @accountAuthorizedDepositorEntryHistorySequence),
+    setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence)
 ",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
-                accountResourceDepositRuleHistorySequence = sequences.AccountResourceDepositRuleHistorySequence,
+                accountResourcePreferenceRuleEntryHistorySequence = sequences.AccountResourcePreferenceRuleEntryHistorySequence,
+                accountResourcePreferenceRuleAggregateHistorySequence = sequences.AccountResourcePreferenceRuleAggregateHistorySequence,
                 stateHistorySequence = sequences.StateHistorySequence,
                 entitySequence = sequences.EntitySequence,
                 entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
@@ -960,6 +910,8 @@ SELECT
                 packageBlueprintAggregateHistorySequence = sequences.PackageBlueprintAggregateHistorySequence,
                 packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
                 keyValueStoreAggregateHistorySequence = sequences.KeyValueStoreAggregateHistorySequence,
+                accountAuthorizedDepositorEntryHistorySequence = sequences.AccountAuthorizedDepositorEntryHistorySequence,
+                accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
             },
             cancellationToken: token);
 

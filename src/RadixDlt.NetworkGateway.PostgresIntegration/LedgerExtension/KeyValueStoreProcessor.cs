@@ -113,7 +113,7 @@ internal class KeyValueStoreProcessor
         (_entriesToAdd, _aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(_context, _changes, _mostRecentEntries, _mostRecentAggregates);
     }
 
-    public async Task LoadMostRecent()
+    public async Task LoadDependencies()
     {
         _mostRecentEntries = await MostRecentKeyValueStoreEntryHistoryFor();
         _mostRecentAggregates = await MostRecentKeyValueStoreAggregateHistoryFor();

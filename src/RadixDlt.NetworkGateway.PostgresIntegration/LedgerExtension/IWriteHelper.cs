@@ -92,11 +92,7 @@ internal interface IWriteHelper
 
     Task<int> CopyEntityVaultHistory(ICollection<EntityVaultHistory> entities, CancellationToken token);
 
-    Task<int> CopyAccountDefaultDepositRuleHistory(List<AccountDefaultDepositRuleHistory> entities, CancellationToken token);
-
     Task<int> CopyValidatorEmissionStatistics(ICollection<ValidatorEmissionStatistics> entities, CancellationToken token);
-
-    Task<int> CopyAccountResourcePreferenceRuleHistory(List<AccountResourcePreferenceRuleHistory> entities, CancellationToken token);
 
     Task<int> CopyNonFungibleIdData(ICollection<NonFungibleIdData> entities, CancellationToken token);
 

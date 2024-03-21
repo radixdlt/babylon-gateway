@@ -85,6 +85,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
+    public static GatewayModel.AccountResourcePreferenceRule ToGatewayModel(this AccountResourcePreferenceRule input)
+    {
+        return input switch
+        {
+            AccountResourcePreferenceRule.Allowed => GatewayModel.AccountResourcePreferenceRule.Allowed,
+            AccountResourcePreferenceRule.Disallowed => GatewayModel.AccountResourcePreferenceRule.Disallowed,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
+    }
+
     public static GatewayModel.ManifestClass ToGatewayModel(this LedgerTransactionManifestClass input)
     {
         return input switch
