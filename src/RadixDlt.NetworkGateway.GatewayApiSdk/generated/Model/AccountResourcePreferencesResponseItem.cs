@@ -95,32 +95,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "AccountResourcePreferencesResponseItem")]
     public partial class AccountResourcePreferencesResponseItem : IEquatable<AccountResourcePreferencesResponseItem>
     {
-        /// <summary>
-        /// Defines ResourcePreferenceRule
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum ResourcePreferenceRuleEnum
-        {
-            /// <summary>
-            /// Enum Allowed for value: Allowed
-            /// </summary>
-            [EnumMember(Value = "Allowed")]
-            Allowed = 1,
-
-            /// <summary>
-            /// Enum Disallowed for value: Disallowed
-            /// </summary>
-            [EnumMember(Value = "Disallowed")]
-            Disallowed = 2
-
-        }
-
 
         /// <summary>
         /// Gets or Sets ResourcePreferenceRule
         /// </summary>
         [DataMember(Name = "resource_preference_rule", IsRequired = true, EmitDefaultValue = true)]
-        public ResourcePreferenceRuleEnum ResourcePreferenceRule { get; set; }
+        public AccountResourcePreferenceRule ResourcePreferenceRule { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountResourcePreferencesResponseItem" /> class.
         /// </summary>
@@ -132,7 +112,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="resourcePreferenceRule">resourcePreferenceRule (required).</param>
         /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        public AccountResourcePreferencesResponseItem(string resourceAddress = default(string), ResourcePreferenceRuleEnum resourcePreferenceRule = default(ResourcePreferenceRuleEnum), long lastUpdatedAtStateVersion = default(long))
+        public AccountResourcePreferencesResponseItem(string resourceAddress = default(string), AccountResourcePreferenceRule resourcePreferenceRule = default(AccountResourcePreferenceRule), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)

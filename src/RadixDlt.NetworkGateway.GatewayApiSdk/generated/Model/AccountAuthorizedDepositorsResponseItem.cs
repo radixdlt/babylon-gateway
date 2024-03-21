@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets BadgeType
         /// </summary>
         [DataMember(Name = "badge_type", IsRequired = true, EmitDefaultValue = true)]
-        public AccountAuthorizedDepositorType BadgeType { get; set; }
+        public AccountAuthorizedDepositorBadgeType BadgeType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
         /// </summary>
@@ -116,7 +116,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
         /// </summary>
         /// <param name="badgeType">badgeType (required).</param>
-        public AccountAuthorizedDepositorsResponseItem(AccountAuthorizedDepositorType badgeType = default(AccountAuthorizedDepositorType))
+        public AccountAuthorizedDepositorsResponseItem(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType))
         {
             this.BadgeType = badgeType;
         }

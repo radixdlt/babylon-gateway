@@ -2350,6 +2350,12 @@ components:
               items:
                 $ref: "#/components/schemas/AccountResourcePreferencesResponseItem"
 
+    AccountResourcePreferenceRule:
+      type: string
+      enum:
+        - Allowed
+        - Disallowed
+
     AccountResourcePreferencesResponseItem:
       type: object
       required:
@@ -2360,10 +2366,7 @@ components:
         resource_address:
           $ref: "#/components/schemas/Address"
         resource_preference_rule:
-          type: string
-          enum:
-          - Allowed
-          - Disallowed
+          $ref: "#/components/schemas/AccountResourcePreferenceRule"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
@@ -2380,7 +2383,7 @@ components:
               items:
                 $ref: "#/components/schemas/AccountAuthorizedDepositorsResponseItem"
 
-    AccountAuthorizedDepositorType:
+    AccountAuthorizedDepositorBadgeType:
       type: string
       enum:
         - ResourceBadge
@@ -2392,11 +2395,11 @@ components:
         - badge_type
       properties:
         badge_type:
-          $ref: "#/components/schemas/AccountAuthorizedDepositorType"
+          $ref: "#/components/schemas/AccountAuthorizedDepositorBadgeType"
       discriminator:
         propertyName: badge_type
         mapping:
-          # Must match AccountAuthorizedDepositorType
+          # Must match AccountAuthorizedDepositorBadgeType
           ResourceBadge: "#/components/schemas/AccountAuthorizedDepositorsResourceBadge"
           NonFungibleResourceBadge: "#/components/schemas/AccountAuthorizedDepositorsNonFungibleResourceBadge"
     AccountAuthorizedDepositorsResourceBadge:

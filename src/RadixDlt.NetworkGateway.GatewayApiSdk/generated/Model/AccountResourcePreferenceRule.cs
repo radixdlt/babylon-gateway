@@ -84,131 +84,28 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountAuthorizedDepositorsResourceBadge
+    /// Defines AccountResourcePreferenceRule
     /// </summary>
-    [DataContract(Name = "AccountAuthorizedDepositorsResourceBadge")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleResourceBadge), "NonFungibleResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "ResourceBadge")]
-    public partial class AccountAuthorizedDepositorsResourceBadge : AccountAuthorizedDepositorsResponseItem, IEquatable<AccountAuthorizedDepositorsResourceBadge>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum AccountResourcePreferenceRule
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResourceBadge" /> class.
+        /// Enum Allowed for value: Allowed
         /// </summary>
-        [JsonConstructorAttribute]
-        protected AccountAuthorizedDepositorsResourceBadge() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResourceBadge" /> class.
-        /// </summary>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        /// <param name="badgeType">badgeType (required) (default to AccountAuthorizedDepositorBadgeType.ResourceBadge).</param>
-        public AccountAuthorizedDepositorsResourceBadge(string resourceAddress = default(string), long lastUpdatedAtStateVersion = default(long), AccountAuthorizedDepositorBadgeType badgeType = AccountAuthorizedDepositorBadgeType.ResourceBadge) : base(badgeType)
-        {
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
-            {
-                throw new ArgumentNullException("resourceAddress is a required property for AccountAuthorizedDepositorsResourceBadge and cannot be null");
-            }
-            this.ResourceAddress = resourceAddress;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
-        }
+        [EnumMember(Value = "Allowed")]
+        Allowed = 1,
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Enum Disallowed for value: Disallowed
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
-
-        /// <summary>
-        /// The most recent state version underlying object was modified at.
-        /// </summary>
-        /// <value>The most recent state version underlying object was modified at.</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
-
-        /// <summary>
-        /// Returns the string presentation of the object
-        /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountAuthorizedDepositorsResourceBadge {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as AccountAuthorizedDepositorsResourceBadge);
-        }
-
-        /// <summary>
-        /// Returns true if AccountAuthorizedDepositorsResourceBadge instances are equal
-        /// </summary>
-        /// <param name="input">Instance of AccountAuthorizedDepositorsResourceBadge to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(AccountAuthorizedDepositorsResourceBadge input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return base.Equals(input) && 
-                (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && base.Equals(input) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = base.GetHashCode();
-                if (this.ResourceAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "Disallowed")]
+        Disallowed = 2
 
     }
 

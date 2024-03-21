@@ -90,10 +90,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines AccountAuthorizedDepositorType
+    /// Defines AccountAuthorizedDepositorBadgeType
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum AccountAuthorizedDepositorType
+    public enum AccountAuthorizedDepositorBadgeType
     {
         /// <summary>
         /// Enum ResourceBadge for value: ResourceBadge

@@ -110,8 +110,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
         /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        /// <param name="badgeType">badgeType (required) (default to AccountAuthorizedDepositorType.NonFungibleResourceBadge).</param>
-        public AccountAuthorizedDepositorsNonFungibleResourceBadge(string resourceAddress = default(string), string nonFungibleId = default(string), long lastUpdatedAtStateVersion = default(long), AccountAuthorizedDepositorType badgeType = AccountAuthorizedDepositorType.NonFungibleResourceBadge) : base(badgeType)
+        /// <param name="badgeType">badgeType (required) (default to AccountAuthorizedDepositorBadgeType.NonFungibleResourceBadge).</param>
+        public AccountAuthorizedDepositorsNonFungibleResourceBadge(string resourceAddress = default(string), string nonFungibleId = default(string), long lastUpdatedAtStateVersion = default(long), AccountAuthorizedDepositorBadgeType badgeType = AccountAuthorizedDepositorBadgeType.NonFungibleResourceBadge) : base(badgeType)
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
