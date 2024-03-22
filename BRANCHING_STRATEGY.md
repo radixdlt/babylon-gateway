@@ -16,7 +16,7 @@ Once you have read the [contributing guide](CONTRIBUTING.md), if you want to sta
 
 ### The base branches
 
-We use a variant of `git-flow`, where there are three types of base branches: the `main`, `develop`, and `release/*` branches.
+We follow `git-flow` strategy, where there are three main types of base branches: the `main`, `develop`, and `release/*` branches.
 
 * The `main` branch is the public-facing base branch and **represents the last official release**. It's also used for docs.
 * The `develop` branch is the primary integration branch, for work targeting the next releases.
