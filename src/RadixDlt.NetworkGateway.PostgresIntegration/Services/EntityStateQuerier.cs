@@ -776,15 +776,14 @@ WHERE e.id = ANY(@vaultIds)",
         CancellationToken token = default)
     {
         var validatorsPageSize = _endpointConfiguration.Value.ValidatorsPageSize;
-        var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
+        var idBoundary = cursor?.IdBoundary ?? 0;
 
         var validatorsAndOneMore = await _dbContext
             .Entities
             .OfType<GlobalValidatorEntity>()
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .Where(e => e.FromStateVersion >= fromStateVersion)
-            .OrderBy(e => e.FromStateVersion)
-            .ThenBy(e => e.Id)
+            .Where(e => e.Id >= idBoundary)
+            .OrderBy(e => e.Id)
             .Take(validatorsPageSize + 1)
             .AnnotateMetricName("GetValidators")
             .ToListAsync(token);
@@ -947,7 +946,7 @@ INNER JOIN LATERAL (
             .ToList();
 
         var nextCursor = validatorsAndOneMore.Count == validatorsPageSize + 1
-            ? new GatewayModel.StateValidatorsListCursor(validatorsAndOneMore.Last().FromStateVersion).ToCursorString()
+            ? new GatewayModel.StateValidatorsListCursor(validatorsAndOneMore.Last().Id).ToCursorString()
             : null;
 
         return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, nextCursor, items));
