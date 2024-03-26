@@ -76,7 +76,8 @@ export interface ValidatorCollectionItem {
     pending_owner_stake_unit_unlock_vault: ValidatorVaultItem;
     /**
      * Validator inner state representation.
-     * This type is defined in the Core API as `ValidatorFieldStateValue`. See the Core API documentation for more details.
+This type is defined in the Core API as `ValidatorFieldStateValue`. See the Core API documentation for more details.
+
      * @type {object}
      * @memberof ValidatorCollectionItem
      */

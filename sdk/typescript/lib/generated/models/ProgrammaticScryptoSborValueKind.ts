@@ -15,6 +15,7 @@
 
 /**
  * These are the Scrypto SBOR `ValueKind`s, but with `Bytes` added as an alias for `Vec`, to display such values as hex-encoded strings.
+
  * @export
  */
 export const ProgrammaticScryptoSborValueKind = {

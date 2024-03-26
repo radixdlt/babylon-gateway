@@ -1,5 +1,18 @@
 /* tslint:disable */
 /* eslint-disable */
+export * from './AccountAuthorizedDepositorBadgeType';
+export * from './AccountAuthorizedDepositorsCollection';
+export * from './AccountAuthorizedDepositorsCollectionAllOf';
+export * from './AccountAuthorizedDepositorsNonFungibleResourceBadge';
+export * from './AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf';
+export * from './AccountAuthorizedDepositorsResourceBadge';
+export * from './AccountAuthorizedDepositorsResourceBadgeAllOf';
+export * from './AccountAuthorizedDepositorsResponseItem';
+export * from './AccountAuthorizedDepositorsResponseItemBase';
+export * from './AccountResourcePreferenceRule';
+export * from './AccountResourcePreferencesCollection';
+export * from './AccountResourcePreferencesCollectionAllOf';
+export * from './AccountResourcePreferencesResponseItem';
 export * from './AtLedgerStateMixin';
 export * from './BlueprintMethodRoyalty';
 export * from './BlueprintRoyaltyConfig';
@@ -209,6 +222,11 @@ export * from './RoleAssignmentResolution';
 export * from './RoleKey';
 export * from './RoyaltyAmount';
 export * from './ScryptoSborValue';
+export * from './StateAccountAuthorizedDepositorsPageRequest';
+export * from './StateAccountAuthorizedDepositorsPageResponse';
+export * from './StateAccountResourcePreferencesPageRequest';
+export * from './StateAccountResourcePreferencesPageRequestAllOf';
+export * from './StateAccountResourcePreferencesPageResponse';
 export * from './StateEntityDetailsOptIns';
 export * from './StateEntityDetailsRequest';
 export * from './StateEntityDetailsRequestAllOf';

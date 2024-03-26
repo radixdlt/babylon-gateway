@@ -14,32 +14,25 @@
 
 
 /**
- * A more specific intent status. See the description field for further information.
-Note that `CommitPendingOutcomeUnknown` can either result in `CommittedSuccess` or `CommittedFailure`.
-
+ * 
  * @export
  */
-export const TransactionIntentStatus = {
-    Unknown: 'Unknown',
-    CommittedSuccess: 'CommittedSuccess',
-    CommittedFailure: 'CommittedFailure',
-    CommitPendingOutcomeUnknown: 'CommitPendingOutcomeUnknown',
-    PermanentlyRejected: 'PermanentlyRejected',
-    LikelyButNotCertainRejection: 'LikelyButNotCertainRejection',
-    Pending: 'Pending'
+export const AccountResourcePreferenceRule = {
+    Allowed: 'Allowed',
+    Disallowed: 'Disallowed'
 } as const;
-export type TransactionIntentStatus = typeof TransactionIntentStatus[keyof typeof TransactionIntentStatus];
+export type AccountResourcePreferenceRule = typeof AccountResourcePreferenceRule[keyof typeof AccountResourcePreferenceRule];
 
 
-export function TransactionIntentStatusFromJSON(json: any): TransactionIntentStatus {
-    return TransactionIntentStatusFromJSONTyped(json, false);
+export function AccountResourcePreferenceRuleFromJSON(json: any): AccountResourcePreferenceRule {
+    return AccountResourcePreferenceRuleFromJSONTyped(json, false);
 }
 
-export function TransactionIntentStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionIntentStatus {
-    return json as TransactionIntentStatus;
+export function AccountResourcePreferenceRuleFromJSONTyped(json: any, ignoreDiscriminator: boolean): AccountResourcePreferenceRule {
+    return json as AccountResourcePreferenceRule;
 }
 
-export function TransactionIntentStatusToJSON(value?: TransactionIntentStatus | null): any {
+export function AccountResourcePreferenceRuleToJSON(value?: AccountResourcePreferenceRule | null): any {
     return value as any;
 }
 

@@ -13,67 +13,52 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { LedgerStateSelector } from './LedgerStateSelector';
+import type { AccountResourcePreferencesResponseItem } from './AccountResourcePreferencesResponseItem';
 import {
-    LedgerStateSelectorFromJSON,
-    LedgerStateSelectorFromJSONTyped,
-    LedgerStateSelectorToJSON,
-} from './LedgerStateSelector';
+    AccountResourcePreferencesResponseItemFromJSON,
+    AccountResourcePreferencesResponseItemFromJSONTyped,
+    AccountResourcePreferencesResponseItemToJSON,
+} from './AccountResourcePreferencesResponseItem';
 
 /**
- * For `at_ledger_state` and `from_ledger_state` you can use one of `state_version`, `epoch`, `epoch` and `round`, or `timestamp`, but then ongoing epoch will be selected and used for querying data.
-i.e for request with `{ "from_state_version" = { "state_version" = 100 }, "at_state_version" = { "state_version" = 300} }` gateway api will check in which epoch transactions with state version 100 and 300 were and then use that as inclusive boundary for request.
-
+ * 
  * @export
- * @interface ValidatorsUptimeRequest
+ * @interface AccountResourcePreferencesCollectionAllOf
  */
-export interface ValidatorsUptimeRequest {
+export interface AccountResourcePreferencesCollectionAllOf {
     /**
      * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
+     * @type {Array<AccountResourcePreferencesResponseItem>}
+     * @memberof AccountResourcePreferencesCollectionAllOf
      */
-    at_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
-     */
-    from_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ValidatorsUptimeRequest
-     */
-    validator_addresses?: Array<string>;
+    items: Array<AccountResourcePreferencesResponseItem>;
 }
 
 /**
- * Check if a given object implements the ValidatorsUptimeRequest interface.
+ * Check if a given object implements the AccountResourcePreferencesCollectionAllOf interface.
  */
-export function instanceOfValidatorsUptimeRequest(value: object): boolean {
+export function instanceOfAccountResourcePreferencesCollectionAllOf(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "items" in value;
 
     return isInstance;
 }
 
-export function ValidatorsUptimeRequestFromJSON(json: any): ValidatorsUptimeRequest {
-    return ValidatorsUptimeRequestFromJSONTyped(json, false);
+export function AccountResourcePreferencesCollectionAllOfFromJSON(json: any): AccountResourcePreferencesCollectionAllOf {
+    return AccountResourcePreferencesCollectionAllOfFromJSONTyped(json, false);
 }
 
-export function ValidatorsUptimeRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorsUptimeRequest {
+export function AccountResourcePreferencesCollectionAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): AccountResourcePreferencesCollectionAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'from_ledger_state': !exists(json, 'from_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['from_ledger_state']),
-        'validator_addresses': !exists(json, 'validator_addresses') ? undefined : json['validator_addresses'],
+        'items': ((json['items'] as Array<any>).map(AccountResourcePreferencesResponseItemFromJSON)),
     };
 }
 
-export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | null): any {
+export function AccountResourcePreferencesCollectionAllOfToJSON(value?: AccountResourcePreferencesCollectionAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -82,9 +67,7 @@ export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | 
     }
     return {
         
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'from_ledger_state': LedgerStateSelectorToJSON(value.from_ledger_state),
-        'validator_addresses': value.validator_addresses,
+        'items': ((value.items as Array<any>).map(AccountResourcePreferencesResponseItemToJSON)),
     };
 }
 

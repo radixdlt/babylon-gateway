@@ -32,6 +32,18 @@ export interface StateNonFungibleLocationResponseItem {
      */
     owning_vault_address?: string;
     /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof StateNonFungibleLocationResponseItem
+     */
+    owning_vault_parent_ancestor_address?: string;
+    /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof StateNonFungibleLocationResponseItem
+     */
+    owning_vault_global_ancestor_address?: string;
+    /**
      * 
      * @type {boolean}
      * @memberof StateNonFungibleLocationResponseItem
@@ -69,6 +81,8 @@ export function StateNonFungibleLocationResponseItemFromJSONTyped(json: any, ign
         
         'non_fungible_id': json['non_fungible_id'],
         'owning_vault_address': !exists(json, 'owning_vault_address') ? undefined : json['owning_vault_address'],
+        'owning_vault_parent_ancestor_address': !exists(json, 'owning_vault_parent_ancestor_address') ? undefined : json['owning_vault_parent_ancestor_address'],
+        'owning_vault_global_ancestor_address': !exists(json, 'owning_vault_global_ancestor_address') ? undefined : json['owning_vault_global_ancestor_address'],
         'is_burned': json['is_burned'],
         'last_updated_at_state_version': json['last_updated_at_state_version'],
     };
@@ -85,6 +99,8 @@ export function StateNonFungibleLocationResponseItemToJSON(value?: StateNonFungi
         
         'non_fungible_id': value.non_fungible_id,
         'owning_vault_address': value.owning_vault_address,
+        'owning_vault_parent_ancestor_address': value.owning_vault_parent_ancestor_address,
+        'owning_vault_global_ancestor_address': value.owning_vault_global_ancestor_address,
         'is_burned': value.is_burned,
         'last_updated_at_state_version': value.last_updated_at_state_version,
     };

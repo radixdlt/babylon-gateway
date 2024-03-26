@@ -13,67 +13,66 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { LedgerStateSelector } from './LedgerStateSelector';
+import type { AccountResourcePreferencesResponseItem } from './AccountResourcePreferencesResponseItem';
 import {
-    LedgerStateSelectorFromJSON,
-    LedgerStateSelectorFromJSONTyped,
-    LedgerStateSelectorToJSON,
-} from './LedgerStateSelector';
+    AccountResourcePreferencesResponseItemFromJSON,
+    AccountResourcePreferencesResponseItemFromJSONTyped,
+    AccountResourcePreferencesResponseItemToJSON,
+} from './AccountResourcePreferencesResponseItem';
 
 /**
- * For `at_ledger_state` and `from_ledger_state` you can use one of `state_version`, `epoch`, `epoch` and `round`, or `timestamp`, but then ongoing epoch will be selected and used for querying data.
-i.e for request with `{ "from_state_version" = { "state_version" = 100 }, "at_state_version" = { "state_version" = 300} }` gateway api will check in which epoch transactions with state version 100 and 300 were and then use that as inclusive boundary for request.
-
+ * Account resource preferences collection
  * @export
- * @interface ValidatorsUptimeRequest
+ * @interface AccountResourcePreferencesCollection
  */
-export interface ValidatorsUptimeRequest {
+export interface AccountResourcePreferencesCollection {
+    /**
+     * Total number of items in underlying collection, fragment of which is available in `items` collection.
+     * @type {number}
+     * @memberof AccountResourcePreferencesCollection
+     */
+    total_count?: number | null;
+    /**
+     * If specified, contains a cursor to query next page of the `items` collection.
+     * @type {string}
+     * @memberof AccountResourcePreferencesCollection
+     */
+    next_cursor?: string | null;
     /**
      * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
+     * @type {Array<AccountResourcePreferencesResponseItem>}
+     * @memberof AccountResourcePreferencesCollection
      */
-    at_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
-     */
-    from_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ValidatorsUptimeRequest
-     */
-    validator_addresses?: Array<string>;
+    items: Array<AccountResourcePreferencesResponseItem>;
 }
 
 /**
- * Check if a given object implements the ValidatorsUptimeRequest interface.
+ * Check if a given object implements the AccountResourcePreferencesCollection interface.
  */
-export function instanceOfValidatorsUptimeRequest(value: object): boolean {
+export function instanceOfAccountResourcePreferencesCollection(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "items" in value;
 
     return isInstance;
 }
 
-export function ValidatorsUptimeRequestFromJSON(json: any): ValidatorsUptimeRequest {
-    return ValidatorsUptimeRequestFromJSONTyped(json, false);
+export function AccountResourcePreferencesCollectionFromJSON(json: any): AccountResourcePreferencesCollection {
+    return AccountResourcePreferencesCollectionFromJSONTyped(json, false);
 }
 
-export function ValidatorsUptimeRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorsUptimeRequest {
+export function AccountResourcePreferencesCollectionFromJSONTyped(json: any, ignoreDiscriminator: boolean): AccountResourcePreferencesCollection {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'from_ledger_state': !exists(json, 'from_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['from_ledger_state']),
-        'validator_addresses': !exists(json, 'validator_addresses') ? undefined : json['validator_addresses'],
+        'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
+        'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
+        'items': ((json['items'] as Array<any>).map(AccountResourcePreferencesResponseItemFromJSON)),
     };
 }
 
-export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | null): any {
+export function AccountResourcePreferencesCollectionToJSON(value?: AccountResourcePreferencesCollection | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -82,9 +81,9 @@ export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | 
     }
     return {
         
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'from_ledger_state': LedgerStateSelectorToJSON(value.from_ledger_state),
-        'validator_addresses': value.validator_addresses,
+        'total_count': value.total_count,
+        'next_cursor': value.next_cursor,
+        'items': ((value.items as Array<any>).map(AccountResourcePreferencesResponseItemToJSON)),
     };
 }
 

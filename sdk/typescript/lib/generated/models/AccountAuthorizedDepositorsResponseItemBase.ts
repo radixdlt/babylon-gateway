@@ -13,67 +13,52 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { LedgerStateSelector } from './LedgerStateSelector';
+import type { AccountAuthorizedDepositorBadgeType } from './AccountAuthorizedDepositorBadgeType';
 import {
-    LedgerStateSelectorFromJSON,
-    LedgerStateSelectorFromJSONTyped,
-    LedgerStateSelectorToJSON,
-} from './LedgerStateSelector';
+    AccountAuthorizedDepositorBadgeTypeFromJSON,
+    AccountAuthorizedDepositorBadgeTypeFromJSONTyped,
+    AccountAuthorizedDepositorBadgeTypeToJSON,
+} from './AccountAuthorizedDepositorBadgeType';
 
 /**
- * For `at_ledger_state` and `from_ledger_state` you can use one of `state_version`, `epoch`, `epoch` and `round`, or `timestamp`, but then ongoing epoch will be selected and used for querying data.
-i.e for request with `{ "from_state_version" = { "state_version" = 100 }, "at_state_version" = { "state_version" = 300} }` gateway api will check in which epoch transactions with state version 100 and 300 were and then use that as inclusive boundary for request.
-
+ * 
  * @export
- * @interface ValidatorsUptimeRequest
+ * @interface AccountAuthorizedDepositorsResponseItemBase
  */
-export interface ValidatorsUptimeRequest {
+export interface AccountAuthorizedDepositorsResponseItemBase {
     /**
      * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
+     * @type {AccountAuthorizedDepositorBadgeType}
+     * @memberof AccountAuthorizedDepositorsResponseItemBase
      */
-    at_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
-     */
-    from_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ValidatorsUptimeRequest
-     */
-    validator_addresses?: Array<string>;
+    badge_type: AccountAuthorizedDepositorBadgeType;
 }
 
 /**
- * Check if a given object implements the ValidatorsUptimeRequest interface.
+ * Check if a given object implements the AccountAuthorizedDepositorsResponseItemBase interface.
  */
-export function instanceOfValidatorsUptimeRequest(value: object): boolean {
+export function instanceOfAccountAuthorizedDepositorsResponseItemBase(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "badge_type" in value;
 
     return isInstance;
 }
 
-export function ValidatorsUptimeRequestFromJSON(json: any): ValidatorsUptimeRequest {
-    return ValidatorsUptimeRequestFromJSONTyped(json, false);
+export function AccountAuthorizedDepositorsResponseItemBaseFromJSON(json: any): AccountAuthorizedDepositorsResponseItemBase {
+    return AccountAuthorizedDepositorsResponseItemBaseFromJSONTyped(json, false);
 }
 
-export function ValidatorsUptimeRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorsUptimeRequest {
+export function AccountAuthorizedDepositorsResponseItemBaseFromJSONTyped(json: any, ignoreDiscriminator: boolean): AccountAuthorizedDepositorsResponseItemBase {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'from_ledger_state': !exists(json, 'from_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['from_ledger_state']),
-        'validator_addresses': !exists(json, 'validator_addresses') ? undefined : json['validator_addresses'],
+        'badge_type': AccountAuthorizedDepositorBadgeTypeFromJSON(json['badge_type']),
     };
 }
 
-export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | null): any {
+export function AccountAuthorizedDepositorsResponseItemBaseToJSON(value?: AccountAuthorizedDepositorsResponseItemBase | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -82,9 +67,7 @@ export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | 
     }
     return {
         
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'from_ledger_state': LedgerStateSelectorToJSON(value.from_ledger_state),
-        'validator_addresses': value.validator_addresses,
+        'badge_type': AccountAuthorizedDepositorBadgeTypeToJSON(value.badge_type),
     };
 }
 
