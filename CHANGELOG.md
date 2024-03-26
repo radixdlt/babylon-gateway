@@ -1,3 +1,7 @@
+## 1.6.0
+Release built: _not published yet_
+
+
 ## 1.5.0
 Release built: 26.03.2024
 
