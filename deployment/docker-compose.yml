@@ -51,13 +51,13 @@ services:
       retries: 3
 
   database_migrations: # This is the base -- the _image and _built containers are defined below
-    image: "radixdlt/babylon-ng-database-migrations:v1.4.3"
+    image: "radixdlt/babylon-ng-database-migrations:v1.5.0"
     profiles: ["NONE"]
     environment:
       ConnectionStrings__NetworkGatewayMigrations: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
 
   data_aggregator: # This is the base -- the _image and _built containers are defined below
-    image: "radixdlt/babylon-ng-data-aggregator:v1.4.3"
+    image: "radixdlt/babylon-ng-data-aggregator:v1.5.0"
     profiles: ["NONE"]
     deploy:
       restart_policy:
@@ -97,7 +97,7 @@ services:
       - ./data-aggregator-fixed-configuration.json:/home/radixdlt/network-gateway/config.json
 
   gateway_api: # This is the base -- the _image and _built containers are defined below
-    image: "radixdlt/babylon-ng-gateway-api:v1.4.3"
+    image: "radixdlt/babylon-ng-gateway-api:v1.5.0"
     profiles: ["NONE"]
     ports:
       - "127.0.0.1:5308:8080" # This allows you to connect to the API at http://localhost:5308

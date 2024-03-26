@@ -1,5 +1,5 @@
 ## 1.5.0
-Release Date: _not published yet_
+Release built: 26.03.2024
 
 - Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
 - Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.

@@ -13,67 +13,70 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { LedgerStateSelector } from './LedgerStateSelector';
-import {
-    LedgerStateSelectorFromJSON,
-    LedgerStateSelectorFromJSONTyped,
-    LedgerStateSelectorToJSON,
-} from './LedgerStateSelector';
-
 /**
- * For `at_ledger_state` and `from_ledger_state` you can use one of `state_version`, `epoch`, `epoch` and `round`, or `timestamp`, but then ongoing epoch will be selected and used for querying data.
-i.e for request with `{ "from_state_version" = { "state_version" = 100 }, "at_state_version" = { "state_version" = 300} }` gateway api will check in which epoch transactions with state version 100 and 300 were and then use that as inclusive boundary for request.
-
+ * 
  * @export
- * @interface ValidatorsUptimeRequest
+ * @interface AccountAuthorizedDepositorsResourceBadgeAllOf
  */
-export interface ValidatorsUptimeRequest {
+export interface AccountAuthorizedDepositorsResourceBadgeAllOf {
+    /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof AccountAuthorizedDepositorsResourceBadgeAllOf
+     */
+    resource_address: string;
+    /**
+     * The most recent state version underlying object was modified at.
+     * @type {number}
+     * @memberof AccountAuthorizedDepositorsResourceBadgeAllOf
+     */
+    last_updated_at_state_version: number;
     /**
      * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
+     * @type {string}
+     * @memberof AccountAuthorizedDepositorsResourceBadgeAllOf
      */
-    at_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
-     */
-    from_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ValidatorsUptimeRequest
-     */
-    validator_addresses?: Array<string>;
+    badge_type?: AccountAuthorizedDepositorsResourceBadgeAllOfBadgeTypeEnum;
 }
 
+
 /**
- * Check if a given object implements the ValidatorsUptimeRequest interface.
+ * @export
  */
-export function instanceOfValidatorsUptimeRequest(value: object): boolean {
+export const AccountAuthorizedDepositorsResourceBadgeAllOfBadgeTypeEnum = {
+    ResourceBadge: 'ResourceBadge'
+} as const;
+export type AccountAuthorizedDepositorsResourceBadgeAllOfBadgeTypeEnum = typeof AccountAuthorizedDepositorsResourceBadgeAllOfBadgeTypeEnum[keyof typeof AccountAuthorizedDepositorsResourceBadgeAllOfBadgeTypeEnum];
+
+
+/**
+ * Check if a given object implements the AccountAuthorizedDepositorsResourceBadgeAllOf interface.
+ */
+export function instanceOfAccountAuthorizedDepositorsResourceBadgeAllOf(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "resource_address" in value;
+    isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
 }
 
-export function ValidatorsUptimeRequestFromJSON(json: any): ValidatorsUptimeRequest {
-    return ValidatorsUptimeRequestFromJSONTyped(json, false);
+export function AccountAuthorizedDepositorsResourceBadgeAllOfFromJSON(json: any): AccountAuthorizedDepositorsResourceBadgeAllOf {
+    return AccountAuthorizedDepositorsResourceBadgeAllOfFromJSONTyped(json, false);
 }
 
-export function ValidatorsUptimeRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorsUptimeRequest {
+export function AccountAuthorizedDepositorsResourceBadgeAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): AccountAuthorizedDepositorsResourceBadgeAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'from_ledger_state': !exists(json, 'from_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['from_ledger_state']),
-        'validator_addresses': !exists(json, 'validator_addresses') ? undefined : json['validator_addresses'],
+        'resource_address': json['resource_address'],
+        'last_updated_at_state_version': json['last_updated_at_state_version'],
+        'badge_type': !exists(json, 'badge_type') ? undefined : json['badge_type'],
     };
 }
 
-export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | null): any {
+export function AccountAuthorizedDepositorsResourceBadgeAllOfToJSON(value?: AccountAuthorizedDepositorsResourceBadgeAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -82,9 +85,9 @@ export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | 
     }
     return {
         
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'from_ledger_state': LedgerStateSelectorToJSON(value.from_ledger_state),
-        'validator_addresses': value.validator_addresses,
+        'resource_address': value.resource_address,
+        'last_updated_at_state_version': value.last_updated_at_state_version,
+        'badge_type': value.badge_type,
     };
 }
 

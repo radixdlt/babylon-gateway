@@ -14,82 +14,77 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * The ledger state against which the response was generated.
-Can be used to detect if the Network Gateway is returning up-to-date information.
-
+ * 
  * @export
- * @interface LedgerState
+ * @interface AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf
  */
-export interface LedgerState {
+export interface AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf {
     /**
-     * The logical name of the network
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof LedgerState
+     * @memberof AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf
      */
-    network: string;
+    resource_address: string;
     /**
-     * The state version of the ledger. Each transaction increments the state version by 1.
-     * @type {number}
-     * @memberof LedgerState
-     */
-    state_version: number;
-    /**
-     * The proposer round timestamp of the consensus round when this transaction was committed to ledger.
-This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set.
-If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated
-information, or the network has stalled.
-
+     * String-encoded non-fungible ID.
      * @type {string}
-     * @memberof LedgerState
+     * @memberof AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf
      */
-    proposer_round_timestamp: string;
+    non_fungible_id: string;
     /**
-     * The epoch number of the ledger at this state version.
+     * The most recent state version underlying object was modified at.
      * @type {number}
-     * @memberof LedgerState
+     * @memberof AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf
      */
-    epoch: number;
+    last_updated_at_state_version: number;
     /**
-     * The consensus round in the epoch that this state version was committed in.
-     * @type {number}
-     * @memberof LedgerState
+     * 
+     * @type {string}
+     * @memberof AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf
      */
-    round: number;
+    badge_type?: AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOfBadgeTypeEnum;
 }
 
+
 /**
- * Check if a given object implements the LedgerState interface.
+ * @export
  */
-export function instanceOfLedgerState(value: object): boolean {
+export const AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOfBadgeTypeEnum = {
+    NonFungibleResourceBadge: 'NonFungibleResourceBadge'
+} as const;
+export type AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOfBadgeTypeEnum = typeof AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOfBadgeTypeEnum[keyof typeof AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOfBadgeTypeEnum];
+
+
+/**
+ * Check if a given object implements the AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf interface.
+ */
+export function instanceOfAccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "network" in value;
-    isInstance = isInstance && "state_version" in value;
-    isInstance = isInstance && "proposer_round_timestamp" in value;
-    isInstance = isInstance && "epoch" in value;
-    isInstance = isInstance && "round" in value;
+    isInstance = isInstance && "resource_address" in value;
+    isInstance = isInstance && "non_fungible_id" in value;
+    isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
 }
 
-export function LedgerStateFromJSON(json: any): LedgerState {
-    return LedgerStateFromJSONTyped(json, false);
+export function AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOfFromJSON(json: any): AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf {
+    return AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOfFromJSONTyped(json, false);
 }
 
-export function LedgerStateFromJSONTyped(json: any, ignoreDiscriminator: boolean): LedgerState {
+export function AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'network': json['network'],
-        'state_version': json['state_version'],
-        'proposer_round_timestamp': json['proposer_round_timestamp'],
-        'epoch': json['epoch'],
-        'round': json['round'],
+        'resource_address': json['resource_address'],
+        'non_fungible_id': json['non_fungible_id'],
+        'last_updated_at_state_version': json['last_updated_at_state_version'],
+        'badge_type': !exists(json, 'badge_type') ? undefined : json['badge_type'],
     };
 }
 
-export function LedgerStateToJSON(value?: LedgerState | null): any {
+export function AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOfToJSON(value?: AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -98,11 +93,10 @@ export function LedgerStateToJSON(value?: LedgerState | null): any {
     }
     return {
         
-        'network': value.network,
-        'state_version': value.state_version,
-        'proposer_round_timestamp': value.proposer_round_timestamp,
-        'epoch': value.epoch,
-        'round': value.round,
+        'resource_address': value.resource_address,
+        'non_fungible_id': value.non_fungible_id,
+        'last_updated_at_state_version': value.last_updated_at_state_version,
+        'badge_type': value.badge_type,
     };
 }
 

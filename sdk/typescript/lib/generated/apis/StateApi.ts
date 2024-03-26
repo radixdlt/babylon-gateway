@@ -16,6 +16,10 @@
 import * as runtime from '../runtime';
 import type {
   ErrorResponse,
+  StateAccountAuthorizedDepositorsPageRequest,
+  StateAccountAuthorizedDepositorsPageResponse,
+  StateAccountResourcePreferencesPageRequest,
+  StateAccountResourcePreferencesPageResponse,
   StateEntityDetailsRequest,
   StateEntityDetailsResponse,
   StateEntityFungibleResourceVaultsPageRequest,
@@ -46,6 +50,14 @@ import type {
 import {
     ErrorResponseFromJSON,
     ErrorResponseToJSON,
+    StateAccountAuthorizedDepositorsPageRequestFromJSON,
+    StateAccountAuthorizedDepositorsPageRequestToJSON,
+    StateAccountAuthorizedDepositorsPageResponseFromJSON,
+    StateAccountAuthorizedDepositorsPageResponseToJSON,
+    StateAccountResourcePreferencesPageRequestFromJSON,
+    StateAccountResourcePreferencesPageRequestToJSON,
+    StateAccountResourcePreferencesPageResponseFromJSON,
+    StateAccountResourcePreferencesPageResponseToJSON,
     StateEntityDetailsRequestFromJSON,
     StateEntityDetailsRequestToJSON,
     StateEntityDetailsResponseFromJSON,
@@ -99,6 +111,14 @@ import {
     StateValidatorsListResponseFromJSON,
     StateValidatorsListResponseToJSON,
 } from '../models';
+
+export interface AccountAuthorizedDepositorsPageRequest {
+    stateAccountAuthorizedDepositorsPageRequest: StateAccountAuthorizedDepositorsPageRequest;
+}
+
+export interface AccountResourcePreferencesPageRequest {
+    stateAccountResourcePreferencesPageRequest: StateAccountResourcePreferencesPageRequest;
+}
 
 export interface EntityFungibleResourceVaultPageRequest {
     stateEntityFungibleResourceVaultsPageRequest: StateEntityFungibleResourceVaultsPageRequest;
@@ -156,6 +176,76 @@ export interface StateValidatorsListOperationRequest {
  * 
  */
 export class StateApi extends runtime.BaseAPI {
+
+    /**
+     * Returns paginable collection of authorized depositors for given account. 
+     * Get Account authorized depositors
+     */
+    async accountAuthorizedDepositorsPageRaw(requestParameters: AccountAuthorizedDepositorsPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateAccountAuthorizedDepositorsPageResponse>> {
+        if (requestParameters.stateAccountAuthorizedDepositorsPageRequest === null || requestParameters.stateAccountAuthorizedDepositorsPageRequest === undefined) {
+            throw new runtime.RequiredError('stateAccountAuthorizedDepositorsPageRequest','Required parameter requestParameters.stateAccountAuthorizedDepositorsPageRequest was null or undefined when calling accountAuthorizedDepositorsPage.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/state/account/page/authorized-depositors`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: StateAccountAuthorizedDepositorsPageRequestToJSON(requestParameters.stateAccountAuthorizedDepositorsPageRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateAccountAuthorizedDepositorsPageResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns paginable collection of authorized depositors for given account. 
+     * Get Account authorized depositors
+     */
+    async accountAuthorizedDepositorsPage(requestParameters: AccountAuthorizedDepositorsPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateAccountAuthorizedDepositorsPageResponse> {
+        const response = await this.accountAuthorizedDepositorsPageRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Returns paginable collection of resource preference rules for given account. 
+     * Get Account resource preferences
+     */
+    async accountResourcePreferencesPageRaw(requestParameters: AccountResourcePreferencesPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateAccountResourcePreferencesPageResponse>> {
+        if (requestParameters.stateAccountResourcePreferencesPageRequest === null || requestParameters.stateAccountResourcePreferencesPageRequest === undefined) {
+            throw new runtime.RequiredError('stateAccountResourcePreferencesPageRequest','Required parameter requestParameters.stateAccountResourcePreferencesPageRequest was null or undefined when calling accountResourcePreferencesPage.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/state/account/page/resource-preferences`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: StateAccountResourcePreferencesPageRequestToJSON(requestParameters.stateAccountResourcePreferencesPageRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateAccountResourcePreferencesPageResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns paginable collection of resource preference rules for given account. 
+     * Get Account resource preferences
+     */
+    async accountResourcePreferencesPage(requestParameters: AccountResourcePreferencesPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateAccountResourcePreferencesPageResponse> {
+        const response = await this.accountResourcePreferencesPageRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 

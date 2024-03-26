@@ -13,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { ComponentEntityRoleAssignments } from './ComponentEntityRoleAssignments';
+import {
+    ComponentEntityRoleAssignmentsFromJSON,
+    ComponentEntityRoleAssignmentsFromJSONTyped,
+    ComponentEntityRoleAssignmentsToJSON,
+} from './ComponentEntityRoleAssignments';
 import type { PackageVmType } from './PackageVmType';
 import {
     PackageVmTypeFromJSON,
@@ -88,6 +94,12 @@ export interface StateEntityDetailsResponsePackageDetailsAllOf {
     schemas?: StateEntityDetailsResponsePackageDetailsSchemaCollection;
     /**
      * 
+     * @type {ComponentEntityRoleAssignments}
+     * @memberof StateEntityDetailsResponsePackageDetailsAllOf
+     */
+    role_assignments?: ComponentEntityRoleAssignments;
+    /**
+     * 
      * @type {string}
      * @memberof StateEntityDetailsResponsePackageDetailsAllOf
      */
@@ -134,6 +146,7 @@ export function StateEntityDetailsResponsePackageDetailsAllOfFromJSONTyped(json:
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
         'blueprints': !exists(json, 'blueprints') ? undefined : StateEntityDetailsResponsePackageDetailsBlueprintCollectionFromJSON(json['blueprints']),
         'schemas': !exists(json, 'schemas') ? undefined : StateEntityDetailsResponsePackageDetailsSchemaCollectionFromJSON(json['schemas']),
+        'role_assignments': !exists(json, 'role_assignments') ? undefined : ComponentEntityRoleAssignmentsFromJSON(json['role_assignments']),
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -154,6 +167,7 @@ export function StateEntityDetailsResponsePackageDetailsAllOfToJSON(value?: Stat
         'royalty_vault_balance': value.royalty_vault_balance,
         'blueprints': StateEntityDetailsResponsePackageDetailsBlueprintCollectionToJSON(value.blueprints),
         'schemas': StateEntityDetailsResponsePackageDetailsSchemaCollectionToJSON(value.schemas),
+        'role_assignments': ComponentEntityRoleAssignmentsToJSON(value.role_assignments),
         'type': value.type,
     };
 }

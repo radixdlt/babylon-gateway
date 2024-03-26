@@ -15,7 +15,8 @@
 
 /**
  * A top-level intent status, left in for backwards compatibility.
- * It doesn't give much information. Rejected means PermanentRejection.
+It doesn't give much information. Rejected means PermanentRejection.
+
  * @export
  */
 export const TransactionStatus = {

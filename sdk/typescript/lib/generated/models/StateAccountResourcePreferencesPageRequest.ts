@@ -21,59 +21,65 @@ import {
 } from './LedgerStateSelector';
 
 /**
- * For `at_ledger_state` and `from_ledger_state` you can use one of `state_version`, `epoch`, `epoch` and `round`, or `timestamp`, but then ongoing epoch will be selected and used for querying data.
-i.e for request with `{ "from_state_version" = { "state_version" = 100 }, "at_state_version" = { "state_version" = 300} }` gateway api will check in which epoch transactions with state version 100 and 300 were and then use that as inclusive boundary for request.
-
+ * 
  * @export
- * @interface ValidatorsUptimeRequest
+ * @interface StateAccountResourcePreferencesPageRequest
  */
-export interface ValidatorsUptimeRequest {
+export interface StateAccountResourcePreferencesPageRequest {
     /**
      * 
      * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
+     * @memberof StateAccountResourcePreferencesPageRequest
      */
     at_ledger_state?: LedgerStateSelector | null;
     /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
+     * This cursor allows forward pagination, by providing the cursor from the previous request.
+     * @type {string}
+     * @memberof StateAccountResourcePreferencesPageRequest
      */
-    from_ledger_state?: LedgerStateSelector | null;
+    cursor?: string | null;
     /**
-     * 
-     * @type {Array<string>}
-     * @memberof ValidatorsUptimeRequest
+     * The page size requested.
+     * @type {number}
+     * @memberof StateAccountResourcePreferencesPageRequest
      */
-    validator_addresses?: Array<string>;
+    limit_per_page?: number | null;
+    /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof StateAccountResourcePreferencesPageRequest
+     */
+    account_address: string;
 }
 
 /**
- * Check if a given object implements the ValidatorsUptimeRequest interface.
+ * Check if a given object implements the StateAccountResourcePreferencesPageRequest interface.
  */
-export function instanceOfValidatorsUptimeRequest(value: object): boolean {
+export function instanceOfStateAccountResourcePreferencesPageRequest(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "account_address" in value;
 
     return isInstance;
 }
 
-export function ValidatorsUptimeRequestFromJSON(json: any): ValidatorsUptimeRequest {
-    return ValidatorsUptimeRequestFromJSONTyped(json, false);
+export function StateAccountResourcePreferencesPageRequestFromJSON(json: any): StateAccountResourcePreferencesPageRequest {
+    return StateAccountResourcePreferencesPageRequestFromJSONTyped(json, false);
 }
 
-export function ValidatorsUptimeRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorsUptimeRequest {
+export function StateAccountResourcePreferencesPageRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateAccountResourcePreferencesPageRequest {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
         'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'from_ledger_state': !exists(json, 'from_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['from_ledger_state']),
-        'validator_addresses': !exists(json, 'validator_addresses') ? undefined : json['validator_addresses'],
+        'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
+        'limit_per_page': !exists(json, 'limit_per_page') ? undefined : json['limit_per_page'],
+        'account_address': json['account_address'],
     };
 }
 
-export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | null): any {
+export function StateAccountResourcePreferencesPageRequestToJSON(value?: StateAccountResourcePreferencesPageRequest | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -83,8 +89,9 @@ export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | 
     return {
         
         'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'from_ledger_state': LedgerStateSelectorToJSON(value.from_ledger_state),
-        'validator_addresses': value.validator_addresses,
+        'cursor': value.cursor,
+        'limit_per_page': value.limit_per_page,
+        'account_address': value.account_address,
     };
 }
 

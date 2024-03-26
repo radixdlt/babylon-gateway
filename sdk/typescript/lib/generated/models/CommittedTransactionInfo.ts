@@ -124,21 +124,24 @@ export interface CommittedTransactionInfo {
     receipt?: TransactionReceipt;
     /**
      * A text-representation of a transaction manifest.
-     * This field will be present only for user transactions and when explicitly opted-in using `manifest_instructions` flag.
+This field will be present only for user transactions and when explicitly opted-in using `manifest_instructions` flag.
+
      * @type {string}
      * @memberof CommittedTransactionInfo
      */
     manifest_instructions?: string | null;
     /**
      * A collection of zero or more manifest classes ordered from the most specific class to the least specific one.
-     * This field will be present only for user transactions.
+This field will be present only for user transactions.
+
      * @type {Array<ManifestClass>}
      * @memberof CommittedTransactionInfo
      */
     manifest_classes?: Array<ManifestClass> | null;
     /**
      * The optional transaction message.
-     * This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
+This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
+
      * @type {object}
      * @memberof CommittedTransactionInfo
      */

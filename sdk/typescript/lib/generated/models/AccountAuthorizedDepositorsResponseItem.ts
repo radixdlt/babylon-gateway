@@ -12,79 +12,61 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
-import type { LedgerStateSelector } from './LedgerStateSelector';
 import {
-    LedgerStateSelectorFromJSON,
-    LedgerStateSelectorFromJSONTyped,
-    LedgerStateSelectorToJSON,
-} from './LedgerStateSelector';
+    AccountAuthorizedDepositorsNonFungibleResourceBadge,
+    instanceOfAccountAuthorizedDepositorsNonFungibleResourceBadge,
+    AccountAuthorizedDepositorsNonFungibleResourceBadgeFromJSON,
+    AccountAuthorizedDepositorsNonFungibleResourceBadgeFromJSONTyped,
+    AccountAuthorizedDepositorsNonFungibleResourceBadgeToJSON,
+} from './AccountAuthorizedDepositorsNonFungibleResourceBadge';
+import {
+    AccountAuthorizedDepositorsResourceBadge,
+    instanceOfAccountAuthorizedDepositorsResourceBadge,
+    AccountAuthorizedDepositorsResourceBadgeFromJSON,
+    AccountAuthorizedDepositorsResourceBadgeFromJSONTyped,
+    AccountAuthorizedDepositorsResourceBadgeToJSON,
+} from './AccountAuthorizedDepositorsResourceBadge';
 
 /**
- * For `at_ledger_state` and `from_ledger_state` you can use one of `state_version`, `epoch`, `epoch` and `round`, or `timestamp`, but then ongoing epoch will be selected and used for querying data.
-i.e for request with `{ "from_state_version" = { "state_version" = 100 }, "at_state_version" = { "state_version" = 300} }` gateway api will check in which epoch transactions with state version 100 and 300 were and then use that as inclusive boundary for request.
-
+ * @type AccountAuthorizedDepositorsResponseItem
+ * 
  * @export
- * @interface ValidatorsUptimeRequest
  */
-export interface ValidatorsUptimeRequest {
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
-     */
-    at_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof ValidatorsUptimeRequest
-     */
-    from_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ValidatorsUptimeRequest
-     */
-    validator_addresses?: Array<string>;
+export type AccountAuthorizedDepositorsResponseItem = { badge_type: 'NonFungibleResourceBadge' } & AccountAuthorizedDepositorsNonFungibleResourceBadge | { badge_type: 'ResourceBadge' } & AccountAuthorizedDepositorsResourceBadge;
+
+export function AccountAuthorizedDepositorsResponseItemFromJSON(json: any): AccountAuthorizedDepositorsResponseItem {
+    return AccountAuthorizedDepositorsResponseItemFromJSONTyped(json, false);
 }
 
-/**
- * Check if a given object implements the ValidatorsUptimeRequest interface.
- */
-export function instanceOfValidatorsUptimeRequest(value: object): boolean {
-    let isInstance = true;
-
-    return isInstance;
-}
-
-export function ValidatorsUptimeRequestFromJSON(json: any): ValidatorsUptimeRequest {
-    return ValidatorsUptimeRequestFromJSONTyped(json, false);
-}
-
-export function ValidatorsUptimeRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorsUptimeRequest {
+export function AccountAuthorizedDepositorsResponseItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): AccountAuthorizedDepositorsResponseItem {
     if ((json === undefined) || (json === null)) {
         return json;
     }
-    return {
-        
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'from_ledger_state': !exists(json, 'from_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['from_ledger_state']),
-        'validator_addresses': !exists(json, 'validator_addresses') ? undefined : json['validator_addresses'],
-    };
+    switch (json['badge_type']) {
+        case 'NonFungibleResourceBadge':
+            return {...AccountAuthorizedDepositorsNonFungibleResourceBadgeFromJSONTyped(json, true), badge_type: 'NonFungibleResourceBadge'};
+        case 'ResourceBadge':
+            return {...AccountAuthorizedDepositorsResourceBadgeFromJSONTyped(json, true), badge_type: 'ResourceBadge'};
+        default:
+            throw new Error(`No variant of AccountAuthorizedDepositorsResponseItem exists with 'badge_type=${json['badge_type']}'`);
+    }
 }
 
-export function ValidatorsUptimeRequestToJSON(value?: ValidatorsUptimeRequest | null): any {
+export function AccountAuthorizedDepositorsResponseItemToJSON(value?: AccountAuthorizedDepositorsResponseItem | null): any {
     if (value === undefined) {
         return undefined;
     }
     if (value === null) {
         return null;
     }
-    return {
-        
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'from_ledger_state': LedgerStateSelectorToJSON(value.from_ledger_state),
-        'validator_addresses': value.validator_addresses,
-    };
+    switch (value['badge_type']) {
+        case 'NonFungibleResourceBadge':
+            return AccountAuthorizedDepositorsNonFungibleResourceBadgeToJSON(value);
+        case 'ResourceBadge':
+            return AccountAuthorizedDepositorsResourceBadgeToJSON(value);
+        default:
+            throw new Error(`No variant of AccountAuthorizedDepositorsResponseItem exists with 'badge_type=${value['badge_type']}'`);
+    }
+
 }
 
