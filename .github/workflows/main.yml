@@ -52,7 +52,7 @@ jobs:
       - name: Generate SBOM # check SBOM can be generated but nothing is done with it
         uses: RDXWorks-actions/snyk-actions/dotnet@master
         with:
-          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json --json-file-output sbom.json
+          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json > sbom.json
           command: sbom
 
   build:
