@@ -80,23 +80,24 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240227124203_FixIsDeletedFlagOnRecreatedKVStoreKeys")]
-    partial class FixIsDeletedFlagOnRecreatedKVStoreKeys
+    [Migration("20240320145337_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.11")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_default_deposit_rule", new[] { "accept", "reject", "allow_existing" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_resource_preference_rule", new[] { "allowed", "disallowed" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "authorized_depositor_badge_type", new[] { "resource", "non_fungible" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity", "global_one_resource_pool", "global_two_resource_pool", "global_multi_resource_pool", "global_transaction_tracker" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from", "account_owner_method_call" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from", "account_owner_method_call", "badge_presented" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_origin_type", new[] { "user", "epoch_change" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address", "affected_global_entity", "manifest_class" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
@@ -111,6 +112,70 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "sbor_type_kind", new[] { "well_known", "schema_local" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "state_type", new[] { "json", "sbor" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorAggregateHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_entity_id");
+
+                    b.Property<List<long>>("EntryIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("entry_ids");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountEntityId", "FromStateVersion");
+
+                    b.ToTable("account_authorized_depositor_aggregate_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorEntryHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<AuthorizedDepositorBadgeType>("discriminator")
+                        .HasColumnType("authorized_depositor_badge_type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountEntityId", "FromStateVersion");
+
+                    b.ToTable("account_authorized_depositor_entry_history");
+
+                    b.HasDiscriminator<AuthorizedDepositorBadgeType>("discriminator");
+
+                    b.UseTphMappingStrategy();
+                });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountDefaultDepositRuleHistory", b =>
                 {
@@ -140,7 +205,36 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("account_default_deposit_rule_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountResourcePreferenceRuleHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountResourcePreferenceRuleAggregateHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_entity_id");
+
+                    b.Property<List<long>>("EntryIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("entry_ids");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountEntityId", "FromStateVersion");
+
+                    b.ToTable("account_resource_preference_rule_aggregate_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountResourcePreferenceRuleEntryHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -173,7 +267,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("AccountEntityId", "ResourceEntityId", "FromStateVersion");
 
-                    b.ToTable("account_resource_preference_rule_history");
+                    b.ToTable("account_resource_preference_rule_entry_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentMethodRoyaltyAggregateHistory", b =>
@@ -1573,6 +1667,46 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("validator_public_key_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedNonFungibleBadgeDepositorEntryHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorEntryHistory");
+
+                    b.Property<long>("NonFungibleIdDataId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("non_fungible_id_data_id");
+
+                    b.Property<long>("ResourceEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.HasIndex("AccountEntityId", "ResourceEntityId", "NonFungibleIdDataId", "FromStateVersion")
+                        .HasDatabaseName("IX_account_authorized_depositor_entry_history_account_entity_~1")
+                        .HasFilter("discriminator = 'non_fungible'");
+
+                    b.ToTable("account_authorized_depositor_entry_history");
+
+                    b.HasDiscriminator().HasValue(AuthorizedDepositorBadgeType.NonFungible);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedResourceBadgeDepositorEntryHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorEntryHistory");
+
+                    b.Property<long>("ResourceEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.HasIndex("AccountEntityId", "ResourceEntityId", "FromStateVersion")
+                        .HasDatabaseName("IX_account_authorized_depositor_entry_history_account_entity_~2")
+                        .HasFilter("discriminator = 'resource'");
+
+                    b.ToTable("account_authorized_depositor_entry_history");
+
+                    b.HasDiscriminator().HasValue(AuthorizedDepositorBadgeType.Resource);
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalAccessControllerEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
@@ -2342,12 +2476,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_most_specific");
 
-                    b.Property<LedgerTransactionManifestClass>("LedgerTransactionManifestClass")
+                    b.Property<LedgerTransactionManifestClass>("ManifestClass")
                         .HasColumnType("ledger_transaction_manifest_class")
                         .HasColumnName("manifest_class");
 
-                    b.HasIndex("LedgerTransactionManifestClass", "IsMostSpecific", "StateVersion")
+                    b.HasIndex(new[] { "ManifestClass", "StateVersion" }, "IX_ledger_transaction_markers_manifest_class")
                         .HasFilter("discriminator = 'manifest_class'");
+
+                    b.HasIndex(new[] { "ManifestClass", "StateVersion" }, "IX_ledger_transaction_markers_manifest_class_is_most_specific")
+                        .HasFilter("discriminator = 'manifest_class' and is_most_specific = true");
 
                     b.ToTable("ledger_transaction_markers");
 

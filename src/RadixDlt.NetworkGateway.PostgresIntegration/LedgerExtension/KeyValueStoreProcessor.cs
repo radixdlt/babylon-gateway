@@ -77,15 +77,12 @@ internal record struct KeyValueStoreEntryDbLookup(long KeyValueStoreEntityId, Va
 
 internal record struct KeyValueStoreChangePointerLookup(long KeyValueStoreEntityId, long StateVersion, ValueBytes Key);
 
-internal record KeyValueStoreChangePointer(ReferencedEntity ReferencedEntity, CoreModel.GenericKeyValueStoreEntrySubstate KeyValueStoreEntry);
+internal record KeyValueStoreChangePointer(CoreModel.GenericKeyValueStoreEntrySubstate KeyValueStoreEntry);
 
 internal class KeyValueStoreProcessor
 {
     private readonly ProcessorContext _context;
-
-    private Dictionary<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changePointers = new();
-    private List<KeyValueStoreChangePointerLookup> _changeOrder = new();
-
+    private ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changes = new();
     private Dictionary<long, KeyValueStoreAggregateHistory> _mostRecentAggregates = new();
     private Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory> _mostRecentEntries = new();
 
@@ -107,21 +104,16 @@ internal class KeyValueStoreProcessor
                 (ValueBytes)genericKeyValueStoreEntry.Key.KeyData.GetDataBytes()
             );
 
-            _changePointers.GetOrAdd(kvStoreEntryLookup, l =>
-            {
-                _changeOrder.Add(kvStoreEntryLookup);
-
-                return new KeyValueStoreChangePointer(referencedEntity, genericKeyValueStoreEntry);
-            });
+            _changes.Add(kvStoreEntryLookup, new KeyValueStoreChangePointer(genericKeyValueStoreEntry));
         }
     }
 
     public void ProcessChanges()
     {
-        (_entriesToAdd, _aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(_context, _changeOrder, _changePointers, _mostRecentEntries, _mostRecentAggregates);
+        (_entriesToAdd, _aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(_context, _changes, _mostRecentEntries, _mostRecentAggregates);
     }
 
-    public async Task LoadMostRecent()
+    public async Task LoadDependencies()
     {
         _mostRecentEntries = await MostRecentKeyValueStoreEntryHistoryFor();
         _mostRecentAggregates = await MostRecentKeyValueStoreAggregateHistoryFor();
@@ -139,7 +131,7 @@ internal class KeyValueStoreProcessor
 
     private Task<Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>> MostRecentKeyValueStoreEntryHistoryFor()
     {
-        var lookupSet = _changeOrder.Select(x => new KeyValueStoreEntryDbLookup(x.KeyValueStoreEntityId, x.Key)).ToHashSet();
+        var lookupSet = _changes.Keys.Select(x => new KeyValueStoreEntryDbLookup(x.KeyValueStoreEntityId, x.Key)).ToHashSet();
 
         if (!lookupSet.Unzip(
                 x => x.KeyValueStoreEntityId,
@@ -150,7 +142,7 @@ internal class KeyValueStoreProcessor
             return Task.FromResult(new Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>());
         }
 
-        return _context.ReadHelper.MostRecent<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>(
+        return _context.ReadHelper.LoadDependencies<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>(
             @$"
 WITH variables (key_value_store_entity_id, key) AS (
     SELECT UNNEST({keyValueStoreEntityIds}), UNNEST({keys})
@@ -169,14 +161,14 @@ INNER JOIN LATERAL (
 
     private Task<Dictionary<long, KeyValueStoreAggregateHistory>> MostRecentKeyValueStoreAggregateHistoryFor()
     {
-        var entityIds = _changeOrder.Select(x => x.KeyValueStoreEntityId).ToHashSet().ToList();
+        var entityIds = _changes.Keys.Select(x => x.KeyValueStoreEntityId).ToHashSet().ToList();
 
         if (!entityIds.Any())
         {
             return Task.FromResult(new Dictionary<long, KeyValueStoreAggregateHistory>());
         }
 
-        return _context.ReadHelper.MostRecent<long, KeyValueStoreAggregateHistory>(
+        return _context.ReadHelper.LoadDependencies<long, KeyValueStoreAggregateHistory>(
             @$"
 WITH variables (key_value_store_entity_id) AS (
     SELECT UNNEST({entityIds})
@@ -202,7 +194,7 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Key.ToArray(), NpgsqlDbType.Bytea, token);
-            await writer.WriteNullableAsync(e.Value?.ToArray(), NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Value?.ToArray(), NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         });

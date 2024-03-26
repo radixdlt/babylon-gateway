@@ -4,7 +4,7 @@
   <!-- The below settings get inserted into each child csproj -->
 
   <PropertyGroup Condition="$(MSBuildProjectExtension) == '.csproj'">
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <VersionPrefix>1.4.3</VersionPrefix>
+    <VersionPrefix>1.5.0</VersionPrefix>
     <VersionSuffix>develop</VersionSuffix>
   </PropertyGroup>
 

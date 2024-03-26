@@ -66,12 +66,11 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Npgsql;
-using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -83,22 +82,26 @@ using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
+internal record NonFungibleMap(EntityAddress ResourceAddress, string SimpleRepresentation, long ResourceEntityId, long NonFungibleIdDataId);
+
 internal class ReadHelper : IReadHelper
 {
     private readonly ReadWriteDbContext _dbContext;
     private readonly NpgsqlConnection _connection;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly CancellationToken _token;
+    private readonly IDapperWrapper _dapperWrapper;
 
-    public ReadHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers, CancellationToken token = default)
+    public ReadHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers, IDapperWrapper dapperWrapper, CancellationToken token = default)
     {
         _dbContext = dbContext;
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
         _observers = observers;
+        _dapperWrapper = dapperWrapper;
         _token = token;
     }
 
-    public async Task<Dictionary<TKey, TValue>> MostRecent<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
+    public async Task<Dictionary<TKey, TValue>> LoadDependencies<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
         where TKey : notnull
         where TValue : class
     {
@@ -112,146 +115,6 @@ internal class ReadHelper : IReadHelper
             .ToDictionaryAsync(keySelector, _token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(stageName, Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
-    {
-        if (!metadataChanges.Any())
-        {
-            return new Dictionary<MetadataLookup, EntityMetadataHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = new List<long>();
-        var keys = new List<string>();
-        var lookupSet = new HashSet<MetadataLookup>();
-
-        foreach (var metadataChange in metadataChanges)
-        {
-            lookupSet.Add(new MetadataLookup(metadataChange.ReferencedEntity.DatabaseId, metadataChange.Key));
-        }
-
-        foreach (var lookup in lookupSet)
-        {
-            entityIds.Add(lookup.EntityId);
-            keys.Add(lookup.Key);
-        }
-
-        var result = await _dbContext
-            .EntityMetadataHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, key) AS (
-    SELECT UNNEST({entityIds}), UNNEST({keys})
-)
-SELECT emh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_metadata_history
-    WHERE entity_id = variables.entity_id AND key = variables.key
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new MetadataLookup(e.EntityId, e.Key), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(ICollection<PackageCodeDbLookup> packageCodeChanges, CancellationToken token)
-    {
-        if (!packageCodeChanges.Any())
-        {
-            return new Dictionary<long, PackageCodeAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageCodeChanges.Select(x => x.PackageEntityId).Distinct().ToList();
-
-        var result = await _dbContext
-            .PackageCodeAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (package_entity_id) AS (
-    SELECT UNNEST({packageEntityIds})
-)
-SELECT pbah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM package_code_aggregate_history
-    WHERE package_entity_id = variables.package_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) pbah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.PackageEntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageCodeAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(
-        ICollection<PackageBlueprintDbLookup> packageBlueprintChanges,
-        CancellationToken token)
-    {
-        if (!packageBlueprintChanges.Any())
-        {
-            return new Dictionary<long, PackageBlueprintAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var packageEntityIds = packageBlueprintChanges.Select(x => x.PackageEntityId).Distinct().ToList();
-
-        var result = await _dbContext
-            .PackageBlueprintAggregateHistory
-            .FromSqlInterpolated(@$"
-")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.PackageEntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentPackageBlueprintAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
-    {
-        if (!metadataChanges.Any())
-        {
-            return new Dictionary<long, EntityMetadataAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
-
-        var result = await _dbContext
-            .EntityMetadataAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id) AS (
-    SELECT UNNEST({entityIds})
-)
-SELECT emah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_metadata_aggregate_history
-    WHERE entity_id = variables.entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.EntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityAggregateMetadataHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }
@@ -499,10 +362,7 @@ INNER JOIN LATERAL (
         var sw = Stopwatch.GetTimestamp();
         var entityAddressesToLoad = referencedEntities.Addresses.Select(x => (string)x).ToList();
         var knownAddressesToLoad = referencedEntities.KnownAddresses.Select(x => (string)x).ToList();
-        var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Text)
-        {
-            Value = entityAddressesToLoad.Concat(knownAddressesToLoad).ToArray(),
-        };
+        var addressesToLoad = entityAddressesToLoad.Concat(knownAddressesToLoad).ToList();
 
         var result = await _dbContext
             .Entities
@@ -512,7 +372,7 @@ FROM entities
 WHERE id IN(
     SELECT UNNEST(id || correlated_entities) AS id
     FROM entities
-    WHERE address = ANY({entityAddressesParameter})
+    WHERE address = ANY({addressesToLoad})
 )")
             .AsNoTracking()
             .AnnotateMetricName()
@@ -521,6 +381,53 @@ WHERE id IN(
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingEntitiesFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
+    }
+
+    public async Task<Dictionary<NonFungibleGlobalIdLookup, NonFungibleIdGlobalIdDatabaseId>> ReadNonFungibleData(
+        HashSet<NonFungibleGlobalIdLookup> referencedNonFungibleIds,
+        CancellationToken token)
+    {
+        if (!referencedNonFungibleIds.Any())
+        {
+            return new Dictionary<NonFungibleGlobalIdLookup, NonFungibleIdGlobalIdDatabaseId>();
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+
+        var resourceAddresses = new List<string>();
+        var nonFungibleIds = new List<string>();
+
+        foreach (var nf in referencedNonFungibleIds)
+        {
+            resourceAddresses.Add(nf.ResourceAddress);
+            nonFungibleIds.Add(nf.SimpleRepresentation);
+        }
+
+        var cd = new CommandDefinition(
+            commandText: $@"
+WITH var (non_fungible_resource_address, non_fungible_id) AS (
+    SELECT UNNEST(@resourceAddresses), UNNEST(@nonFungibleIds)
+)
+SELECT
+    var.non_fungible_resource_address AS ResourceAddress,
+    var.non_fungible_id AS SimpleRepresentation,
+    nfid.non_fungible_resource_entity_id AS ResourceEntityId,
+    nfid.id AS NonFungibleIdDataId
+FROM var
+INNER JOIN entities e ON e.address = var.non_fungible_resource_address
+INNER JOIN non_fungible_id_data nfid ON nfid.non_fungible_resource_entity_id = e.id AND nfid.non_fungible_id = var.non_fungible_id",
+            parameters: new
+            {
+                resourceAddresses = resourceAddresses,
+                nonFungibleIds = nonFungibleIds,
+            },
+            cancellationToken: token);
+
+        var result = (await _dapperWrapper.QueryAsync<NonFungibleMap>(_connection, cd)).ToList();
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ReadNonFungibleData), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result.ToDictionary(x => new NonFungibleGlobalIdLookup(x.ResourceAddress, x.SimpleRepresentation), x => new NonFungibleIdGlobalIdDatabaseId(x.ResourceEntityId, x.NonFungibleIdDataId));
     }
 
     public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
@@ -569,57 +476,6 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
         return result;
     }
 
-    public async Task<Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token)
-    {
-        if (!validatorKeyLookups.Any())
-        {
-            return new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var validatorEntityIds = new List<long>();
-        var validatorKeyTypes = new List<PublicKeyType>();
-        var validatorKeys = new List<byte[]>();
-
-        var lookupSet = new HashSet<ValidatorKeyLookup>();
-
-        foreach (var (lookup, _) in validatorKeyLookups.SelectMany(change => change.ValidatorSet))
-        {
-            lookupSet.Add(lookup);
-        }
-
-        foreach (var lookup in lookupSet)
-        {
-            validatorEntityIds.Add(lookup.ValidatorEntityId);
-            validatorKeyTypes.Add(lookup.PublicKeyType);
-            validatorKeys.Add(lookup.PublicKey);
-        }
-
-        var result = await _dbContext
-            .ValidatorKeyHistory
-            .FromSqlInterpolated(@$"
-WITH variables (validator_entity_id, key_type, key) AS (
-    SELECT UNNEST({validatorEntityIds}), UNNEST({validatorKeyTypes}), UNNEST({validatorKeys})
-)
-SELECT vpkh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM validator_public_key_history
-    WHERE validator_entity_id = variables.validator_entity_id AND key_type = variables.key_type AND key = variables.key
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) vpkh ON true;
-")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new ValidatorKeyLookup(e.ValidatorEntityId, e.KeyType, e.Key), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingValidatorKeysFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
     public async Task<SequencesHolder> LoadSequences(CancellationToken token)
     {
         var sw = Stopwatch.GetTimestamp();
@@ -627,7 +483,8 @@ INNER JOIN LATERAL (
             commandText: @"
 SELECT
     nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
-    nextval('account_resource_preference_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
+    nextval('account_resource_preference_rule_entry_history_id_seq') AS AccountResourcePreferenceRuleEntryHistorySequence,
+    nextval('account_resource_preference_rule_aggregate_history_id_seq') AS AccountResourcePreferenceRuleAggregateHistorySequence,
     nextval('state_history_id_seq') AS StateHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
@@ -658,7 +515,9 @@ SELECT
     nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence,
     nextval('package_blueprint_aggregate_history_id_seq') AS PackageBlueprintAggregateHistorySequence,
     nextval('package_code_aggregate_history_id_seq') AS PackageCodeAggregateHistorySequence,
-    nextval('key_value_store_aggregate_history_id_seq') AS KeyValueStoreAggregateHistorySequence
+    nextval('key_value_store_aggregate_history_id_seq') AS KeyValueStoreAggregateHistorySequence,
+    nextval('account_authorized_depositor_entry_history_id_seq') AS AccountAuthorizedDepositorEntryHistorySequence,
+    nextval('account_authorized_depositor_aggregate_history_id_seq') AS AccountAuthorizedDepositorAggregateHistorySequence
 ",
             cancellationToken: token);
 

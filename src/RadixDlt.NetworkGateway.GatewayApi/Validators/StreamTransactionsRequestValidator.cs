@@ -103,6 +103,14 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
             .NotNull()
             .SetValidator(radixAddressValidator);
 
+        RuleForEach(x => x.AffectedGlobalEntitiesFilter)
+            .NotNull()
+            .SetValidator(radixAddressValidator);
+
+        RuleForEach(x => x.ManifestBadgesPresentedFilter)
+            .NotNull()
+            .SetValidator(radixAddressValidator);
+
         RuleForEach(x => x.ManifestResourcesFilter)
             .NotNull()
             .SetValidator(radixAddressValidator);
@@ -121,5 +129,10 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
         RuleForEach(x => x.EventsFilter)
             .NotNull()
             .SetValidator(new StreamTransactionsRequestEventItemValidator(radixAddressValidator));
+
+        RuleFor(x => x.TotalFilterCount)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.TransactionStreamMaxFilterCount)
+            .WithMessage($"The overall number of filters applied ({{PropertyValue}}) must be less than or equal to {endpointOptionsSnapshot.Value.TransactionStreamMaxFilterCount}.")
+            .OverridePropertyName(string.Empty);
     }
 }

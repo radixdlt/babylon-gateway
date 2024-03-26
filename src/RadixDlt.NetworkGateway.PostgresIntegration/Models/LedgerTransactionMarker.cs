@@ -87,6 +87,7 @@ internal enum LedgerTransactionMarkerOperationType
     AccountDepositedInto,
     AccountWithdrawnFrom,
     AccountOwnerMethodCall,
+    BadgePresented,
 }
 
 [Table("ledger_transaction_markers")]
@@ -124,7 +125,7 @@ internal class EventLedgerTransactionMarker : LedgerTransactionMarker
 internal class ManifestClassMarker : LedgerTransactionMarker
 {
     [Column("manifest_class")]
-    public LedgerTransactionManifestClass LedgerTransactionManifestClass { get; set; }
+    public LedgerTransactionManifestClass ManifestClass { get; set; }
 
     [Column("is_most_specific")]
     public bool IsMostSpecific { get; set; }

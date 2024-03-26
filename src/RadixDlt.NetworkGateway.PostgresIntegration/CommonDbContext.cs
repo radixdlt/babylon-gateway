@@ -111,7 +111,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountDefaultDepositRuleHistory> AccountDefaultDepositRuleHistory => Set<AccountDefaultDepositRuleHistory>();
 
-    public DbSet<AccountResourcePreferenceRuleHistory> AccountDepositRuleHistory => Set<AccountResourcePreferenceRuleHistory>();
+    public DbSet<AccountResourcePreferenceRuleEntryHistory> AccountResourcePreferenceRuleEntryHistory => Set<AccountResourcePreferenceRuleEntryHistory>();
+
+    public DbSet<AccountResourcePreferenceRuleAggregateHistory> AccountResourcePreferenceRuleAggregateHistory => Set<AccountResourcePreferenceRuleAggregateHistory>();
 
     public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
@@ -157,6 +159,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<KeyValueStoreSchemaHistory> KeyValueStoreSchemaHistory => Set<KeyValueStoreSchemaHistory>();
 
+    public DbSet<AccountAuthorizedDepositorEntryHistory> AccountAuthorizedDepositorEntryHistory => Set<AccountAuthorizedDepositorEntryHistory>();
+
+    public DbSet<AccountAuthorizedDepositorAggregateHistory> AccountAuthorizedDepositorAggregateHistory => Set<AccountAuthorizedDepositorAggregateHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -185,6 +191,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<ModuleId>();
         modelBuilder.HasPostgresEnum<SborTypeKind>();
         modelBuilder.HasPostgresEnum<StateType>();
+        modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -278,7 +285,12 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<ManifestClassMarker>()
-            .HasIndex(e => new { TransactionType = e.LedgerTransactionManifestClass, e.IsMostSpecific, e.StateVersion })
+            .HasIndex(e => new { a = e.ManifestClass, b = e.StateVersion }, "IX_ledger_transaction_markers_manifest_class_is_most_specific")
+            .HasFilter("discriminator = 'manifest_class' and is_most_specific = true");
+
+        modelBuilder
+            .Entity<ManifestClassMarker>()
+            .HasIndex(e => new { c = e.ManifestClass, d = e.StateVersion }, "IX_ledger_transaction_markers_manifest_class")
             .HasFilter("discriminator = 'manifest_class'");
     }
 
@@ -360,10 +372,6 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<AccountDefaultDepositRuleHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<AccountResourcePreferenceRuleHistory>()
-            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<EntityMetadataHistory>()
@@ -536,6 +544,38 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<NonFungibleSchemaHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountAuthorizedDepositorEntryHistory>()
+            .HasDiscriminator<AuthorizedDepositorBadgeType>(DiscriminatorColumnName)
+            .HasValue<AccountAuthorizedNonFungibleBadgeDepositorEntryHistory>(AuthorizedDepositorBadgeType.NonFungible)
+            .HasValue<AccountAuthorizedResourceBadgeDepositorEntryHistory>(AuthorizedDepositorBadgeType.Resource);
+
+        modelBuilder
+            .Entity<AccountAuthorizedDepositorEntryHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountAuthorizedDepositorAggregateHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountResourcePreferenceRuleEntryHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountResourcePreferenceRuleAggregateHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountAuthorizedNonFungibleBadgeDepositorEntryHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.NonFungibleIdDataId, e.FromStateVersion })
+            .HasFilter("discriminator = 'non_fungible'");
+
+        modelBuilder
+            .Entity<AccountAuthorizedResourceBadgeDepositorEntryHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion })
+            .HasFilter("discriminator = 'resource'");
     }
 
     private static void HookupStatistics(ModelBuilder modelBuilder)

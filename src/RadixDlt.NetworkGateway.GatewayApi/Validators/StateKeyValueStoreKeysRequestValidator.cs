@@ -62,33 +62,36 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[Table("account_resource_preference_rule_history")]
-public class AccountResourcePreferenceRuleHistory
+internal class StateKeyValueStoreKeysRequestValidator : AbstractValidator<StateKeyValueStoreKeysRequest>
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public StateKeyValueStoreKeysRequestValidator(
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator,
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        PaginableRequestValidator paginableRequestValidator)
+    {
+        RuleFor(x => x.KeyValueStoreAddress)
+            .NotEmpty()
+            .SetValidator(radixAddressValidator);
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
-    [Column("account_entity_id")]
-    public long AccountEntityId { get; set; }
+        RuleFor(x => x.Cursor)
+            .Base64();
 
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
+        RuleFor(x => x)
+            .SetValidator(paginableRequestValidator);
 
-    [Column("account_resource_preference_rule")]
-    public AccountResourcePreferenceRule? AccountResourcePreferenceRule { get; set; }
-
-    [MemberNotNullWhen(false, nameof(AccountResourcePreferenceRule))]
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+    }
 }

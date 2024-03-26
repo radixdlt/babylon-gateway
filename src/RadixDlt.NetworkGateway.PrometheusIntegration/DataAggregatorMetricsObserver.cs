@@ -67,7 +67,6 @@ using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
@@ -97,8 +96,11 @@ internal class DataAggregatorMetricsObserver :
     ISqlQueryObserver
 {
     private static readonly Histogram _sqlQueryDuration = Metrics
-        .CreateHistogram("sql_query_duration", "The duration of SQL queries processed by this app.",
-            new HistogramConfiguration { LabelNames = new[] { "query_name" } });
+        .CreateHistogram(
+            "sql_query_duration",
+            "The duration of SQL queries processed by this app.",
+            new HistogramConfiguration { LabelNames = new[] { "query_name" } }
+        );
 
     private static readonly Counter _globalWorkerErrorsCount = Metrics
         .CreateCounter(
@@ -107,11 +109,25 @@ internal class DataAggregatorMetricsObserver :
             new CounterConfiguration { LabelNames = new[] { "worker", "error", "type" } }
         );
 
+    private static readonly Histogram _globalWorkerLoopDurationSeconds = Metrics
+        .CreateHistogram(
+            "ng_workers_global_loop_duration_seconds",
+            "Total time to process a single iteration (loop) of a given worker.",
+            new HistogramConfiguration { LabelNames = new[] { "worker" } }
+        );
+
     private static readonly Counter _nodeWorkerErrorsCount = Metrics
         .CreateCounter(
             "ng_workers_node_error_count",
             "Number of errors in node workers.",
             new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
+        );
+
+    private static readonly Histogram _nodeWorkerLoopDurationSeconds = Metrics
+        .CreateHistogram(
+            "ng_workers_node_loop_duration_seconds",
+            "Total time to process a single iteration (loop) of a given worker.",
+            new HistogramConfiguration { LabelNames = new[] { "worker", "node" } }
         );
 
     /* Global Metrics - Quorum/Sync related - ie ledger_node prefix */
@@ -251,15 +267,6 @@ internal class DataAggregatorMetricsObserver :
             "1 if primary, 0 if secondary."
         );
 
-    // NB - The namespace and choice of tag "worker" is so that it fits into the same metric namespace, and
-    // aligns with the metrics in NodeWorker and GlobalWorker
-    private static readonly Counter _nodeInitializersErrorsCount = Metrics
-        .CreateCounter(
-            "ng_workers_node_initializers_error_count",
-            "Number of errors in node initializers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
-        );
-
     private static readonly Counter _failedFetchLoopsUnlabeled = Metrics
         .CreateCounter(
             "ng_node_fetch_transaction_batch_loop_error_total",
@@ -360,6 +367,11 @@ internal class DataAggregatorMetricsObserver :
         _globalWorkerErrorsCount.WithLabels(worker.Name, exception.GetNameForMetricsOrLogging(), errorType).Inc();
     }
 
+    void IGlobalWorkerObserver.TrackWorkerLoopSucceeded(Type worker, TimeSpan loopDuration)
+    {
+        _globalWorkerLoopDurationSeconds.WithLabels(worker.Name).Observe(loopDuration.TotalSeconds);
+    }
+
     void INodeWorkerObserver.TrackNonFaultingExceptionInWorkLoop(Type worker, string nodeName, Exception exception)
     {
         _nodeWorkerErrorsCount.WithLabels(worker.Name, nodeName, exception.GetNameForMetricsOrLogging(), "non-faulting").Inc();
@@ -369,6 +381,11 @@ internal class DataAggregatorMetricsObserver :
     {
         var errorType = isStopRequested && exception is OperationCanceledException ? "stopped" : "faulting";
         _nodeWorkerErrorsCount.WithLabels(worker.Name, nodeName, exception.GetNameForMetricsOrLogging(), errorType).Inc();
+    }
+
+    void INodeWorkerObserver.TrackWorkerLoopSucceeded(Type worker, string nodeName, TimeSpan loopDuration)
+    {
+        _nodeWorkerLoopDurationSeconds.WithLabels(worker.Name, nodeName).Observe(loopDuration.TotalSeconds);
     }
 
     ValueTask ILedgerConfirmationServiceObserver.PreHandleLedgerExtension(DateTime timestamp)
