@@ -224,6 +224,7 @@ UPDATE pending_transactions
         var outerStopwatch = Stopwatch.StartNew();
         var referencedEntities = new ReferencedEntityDictionary();
         var referencedNonFungibleIdDictionary = new ReferencedNonFungibleIdDictionary();
+        var referencedKeyValueStoreEntries = new ReferencedKeyValueStoreEntryDictionary();
         var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
         var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
         var manifestClasses = new Dictionary<long, List<LedgerTransactionManifestClass>>();
