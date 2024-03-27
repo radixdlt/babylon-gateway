@@ -272,10 +272,6 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
     {
     }
 
-    protected virtual void TrackWorkerLoopSucceeded()
-    {
-    }
-
     protected TimeSpan ElapsedSinceLoopBeginning()
     {
         return _loopIterationStopwatch?.Elapsed ?? TimeSpan.Zero;
@@ -290,9 +286,6 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
             {
                 await ExecuteLoopIteration(cancellationToken);
                 _numConsecutiveErrors = 0;
-
-                TrackWorkerLoopSucceeded();
-
                 var delay = _delayBetweenLoopsStrategy.DelayAfterSuccess(ElapsedSinceLoopBeginning());
                 if (delay > TimeSpan.Zero)
                 {

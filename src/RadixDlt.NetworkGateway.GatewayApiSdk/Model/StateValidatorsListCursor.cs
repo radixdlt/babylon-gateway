@@ -67,10 +67,10 @@ using System.Runtime.Serialization;
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 [DataContract]
-public sealed record StateValidatorsListCursor(long? IdBoundary)
+public sealed record StateValidatorsListCursor(long? StateVersionBoundary)
 {
     [DataMember(Name = "v", EmitDefaultValue = false)]
-    public long? IdBoundary { get; set; } = IdBoundary;
+    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
 
     public static StateValidatorsListCursor FromCursorString(string cursorString)
     {

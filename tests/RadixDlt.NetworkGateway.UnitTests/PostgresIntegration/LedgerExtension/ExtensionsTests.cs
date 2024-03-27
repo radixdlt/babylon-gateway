@@ -64,7 +64,6 @@
 
 using FluentAssertions;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -91,50 +90,6 @@ public class ExtensionsTests
         a.Should().Be(3);
         b.Should().Be(3);
         factoryCalls.Should().Be(1);
-    }
-
-    [Fact]
-    public void AddRange_Specs()
-    {
-        var a = new Dictionary<string, int>
-        {
-            ["a"] = 1,
-            ["b"] = 2,
-        };
-        var b = new Dictionary<string, int>
-        {
-            ["c"] = 3,
-            ["d"] = 4,
-        };
-
-        a.AddRange(b);
-
-        a.Should().Equal(new Dictionary<string, int>
-        {
-            ["a"] = 1,
-            ["b"] = 2,
-            ["c"] = 3,
-            ["d"] = 4,
-        });
-    }
-
-    [Fact]
-    public void AddRange_ShouldThrowOnDuplicateKey()
-    {
-        var a = new Dictionary<string, int>
-        {
-            ["a"] = 1,
-            ["b"] = 2,
-        };
-        var b = new Dictionary<string, int>
-        {
-            ["a"] = 3,
-            ["d"] = 4,
-        };
-
-        Action act = () => a.AddRange(b);
-
-        act.Should().ThrowExactly<ArgumentException>();
     }
 
     private record MyTuple(byte A, int B);

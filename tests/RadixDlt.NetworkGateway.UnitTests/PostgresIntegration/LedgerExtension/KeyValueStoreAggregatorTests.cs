@@ -90,24 +90,24 @@ public class KeyValueStoreAggregatorTests
         var mostRecentEntries = new Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>();
         var mostRecentAggregates = new Dictionary<long, KeyValueStoreAggregateHistory>();
 
-        var changes = new List<KeyValueStoreChange>
+        var changes = new List<Change>
         {
-            new(KeyValueStoreEntityId: 10, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(1)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(2)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(3)),
-            new(KeyValueStoreEntityId: 11, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(1)),
-            new(KeyValueStoreEntityId: 11, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(10)),
-            new(KeyValueStoreEntityId: 12, StateVersion: 110, KeyValueStoreExtensions.GenerateKeyEntry(10)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 100, Extensions.GenerateKeyEntry(1)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 100, Extensions.GenerateKeyEntry(2)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 100, Extensions.GenerateKeyEntry(3)),
+            new(KeyValueStoreEntityId: 11, StateVersion: 100, Extensions.GenerateKeyEntry(1)),
+            new(KeyValueStoreEntityId: 11, StateVersion: 100, Extensions.GenerateKeyEntry(10)),
+            new(KeyValueStoreEntityId: 12, StateVersion: 110, Extensions.GenerateKeyEntry(10)),
         };
 
         var expectedEntries = new List<KeyValueStoreEntryHistory>()
         {
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 200, keyValueStoreEntityId: 10, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(1)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 201, keyValueStoreEntityId: 10, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(2)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 202, keyValueStoreEntityId: 10, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(3)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 203, keyValueStoreEntityId: 11, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(1)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 204, keyValueStoreEntityId: 11, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(10)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 205, keyValueStoreEntityId: 12, fromStateVersion: 110, KeyValueStoreExtensions.GenerateKeyEntry(10)),
+            Extensions.CreateDatabaseHistoryEntry(id: 200, keyValueStoreEntityId: 10, fromStateVersion: 100, Extensions.GenerateKeyEntry(1)),
+            Extensions.CreateDatabaseHistoryEntry(id: 201, keyValueStoreEntityId: 10, fromStateVersion: 100, Extensions.GenerateKeyEntry(2)),
+            Extensions.CreateDatabaseHistoryEntry(id: 202, keyValueStoreEntityId: 10, fromStateVersion: 100, Extensions.GenerateKeyEntry(3)),
+            Extensions.CreateDatabaseHistoryEntry(id: 203, keyValueStoreEntityId: 11, fromStateVersion: 100, Extensions.GenerateKeyEntry(1)),
+            Extensions.CreateDatabaseHistoryEntry(id: 204, keyValueStoreEntityId: 11, fromStateVersion: 100, Extensions.GenerateKeyEntry(10)),
+            Extensions.CreateDatabaseHistoryEntry(id: 205, keyValueStoreEntityId: 12, fromStateVersion: 110, Extensions.GenerateKeyEntry(10)),
         };
 
         var expectedAggregate = new List<KeyValueStoreAggregateHistory>
@@ -117,10 +117,10 @@ public class KeyValueStoreAggregatorTests
             new() { Id = 102, FromStateVersion = 110, KeyValueStoreEntityId = 12, KeyValueStoreEntryIds = new List<long> { 205 } },
         };
 
-        var changeTracker = KeyValueStoreExtensions.PrepareChanges(changes);
+        var (changeOrder, changePointers) = Extensions.PrepareChanges(changes);
 
         // Act.
-        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeTracker, mostRecentEntries, mostRecentAggregates);
+        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeOrder, changePointers, mostRecentEntries, mostRecentAggregates);
 
         // Assert.
         entriesToAdd.Should().BeEquivalentTo(expectedEntries);
@@ -143,12 +143,12 @@ public class KeyValueStoreAggregatorTests
         var mostRecentEntries = new Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>
         {
             {
-                new KeyValueStoreEntryDbLookup(10, KeyValueStoreExtensions.GenerateKeyEntry(1).Key),
-                KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 100, keyValueStoreEntityId: 10, fromStateVersion: 100, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1))
+                new KeyValueStoreEntryDbLookup(10, Extensions.GenerateKeyEntry(1).Key),
+                Extensions.CreateDatabaseHistoryEntry(id: 100, keyValueStoreEntityId: 10, fromStateVersion: 100, Extensions.GenerateDeletedKeyEntry(1))
             },
             {
-                new KeyValueStoreEntryDbLookup(10, KeyValueStoreExtensions.GenerateKeyEntry(2).Key),
-                KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 101, keyValueStoreEntityId: 10, fromStateVersion: 100, KeyValueStoreExtensions.GenerateDeletedKeyEntry(2))
+                new KeyValueStoreEntryDbLookup(10, Extensions.GenerateKeyEntry(2).Key),
+                Extensions.CreateDatabaseHistoryEntry(id: 101, keyValueStoreEntityId: 10, fromStateVersion: 100, Extensions.GenerateDeletedKeyEntry(2))
             },
         };
 
@@ -157,14 +157,14 @@ public class KeyValueStoreAggregatorTests
             { 10, new KeyValueStoreAggregateHistory { Id = 50, FromStateVersion = 100, KeyValueStoreEntityId = 10, KeyValueStoreEntryIds = new List<long> { 100, 101 } } },
         };
 
-        var changes = new List<KeyValueStoreChange>
+        var changes = new List<Change>
         {
-            new(KeyValueStoreEntityId: 10, StateVersion: 200, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 200, Extensions.GenerateDeletedKeyEntry(1)),
         };
 
         var expectedEntriesToAdd = new List<KeyValueStoreEntryHistory>
         {
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 200, keyValueStoreEntityId: 10, fromStateVersion: 200, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1), isDeleted: true),
+            Extensions.CreateDatabaseHistoryEntry(id: 200, keyValueStoreEntityId: 10, fromStateVersion: 200, Extensions.GenerateDeletedKeyEntry(1), isDeleted: true),
         };
 
         var expectedAggregatesToAdd = new List<KeyValueStoreAggregateHistory>
@@ -172,10 +172,10 @@ public class KeyValueStoreAggregatorTests
             new() { Id = 100, FromStateVersion = 200, KeyValueStoreEntityId = 10, KeyValueStoreEntryIds = new List<long> { 101 } },
         };
 
-        var changeTracker = KeyValueStoreExtensions.PrepareChanges(changes);
+        var (changeOrder, changePointers) = Extensions.PrepareChanges(changes);
 
         // Act.
-        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeTracker, mostRecentEntries, mostRecentAggregates);
+        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeOrder, changePointers, mostRecentEntries, mostRecentAggregates);
 
         // Assert.
         entriesToAdd.Should().BeEquivalentTo(expectedEntriesToAdd);
@@ -198,12 +198,12 @@ public class KeyValueStoreAggregatorTests
         var mostRecentEntries = new Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>
         {
             {
-                new KeyValueStoreEntryDbLookup(10, KeyValueStoreExtensions.GenerateKeyEntry(1).Key),
-                KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 100, keyValueStoreEntityId: 10, fromStateVersion: 100, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1))
+                new KeyValueStoreEntryDbLookup(10, Extensions.GenerateKeyEntry(1).Key),
+                Extensions.CreateDatabaseHistoryEntry(id: 100, keyValueStoreEntityId: 10, fromStateVersion: 100, Extensions.GenerateDeletedKeyEntry(1))
             },
             {
-                new KeyValueStoreEntryDbLookup(10, KeyValueStoreExtensions.GenerateKeyEntry(2).Key),
-                KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 101, keyValueStoreEntityId: 10, fromStateVersion: 100, KeyValueStoreExtensions.GenerateDeletedKeyEntry(2))
+                new KeyValueStoreEntryDbLookup(10, Extensions.GenerateKeyEntry(2).Key),
+                Extensions.CreateDatabaseHistoryEntry(id: 101, keyValueStoreEntityId: 10, fromStateVersion: 100, Extensions.GenerateDeletedKeyEntry(2))
             },
         };
 
@@ -212,20 +212,20 @@ public class KeyValueStoreAggregatorTests
             { 10, new KeyValueStoreAggregateHistory { Id = 50, FromStateVersion = 100, KeyValueStoreEntityId = 10, KeyValueStoreEntryIds = new List<long> { 100, 101 } } },
         };
 
-        var changes = new List<KeyValueStoreChange>
+        var changes = new List<Change>
         {
-            new(KeyValueStoreEntityId: 10, StateVersion: 200, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 250, KeyValueStoreExtensions.GenerateKeyEntry(1, 11)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 300, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 350, KeyValueStoreExtensions.GenerateKeyEntry(1, 12)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 200, Extensions.GenerateDeletedKeyEntry(1)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 250, Extensions.GenerateKeyEntry(1, 11)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 300, Extensions.GenerateDeletedKeyEntry(1)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 350, Extensions.GenerateKeyEntry(1, 12)),
         };
 
         var expectedEntriesToAdd = new List<KeyValueStoreEntryHistory>
         {
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 200, keyValueStoreEntityId: 10, fromStateVersion: 200, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1), isDeleted: true),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 201, keyValueStoreEntityId: 10, fromStateVersion: 250, KeyValueStoreExtensions.GenerateKeyEntry(1, 11)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 202, keyValueStoreEntityId: 10, fromStateVersion: 300, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1), isDeleted: true),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 203, keyValueStoreEntityId: 10, fromStateVersion: 350, KeyValueStoreExtensions.GenerateKeyEntry(1, 12)),
+            Extensions.CreateDatabaseHistoryEntry(id: 200, keyValueStoreEntityId: 10, fromStateVersion: 200, Extensions.GenerateDeletedKeyEntry(1), isDeleted: true),
+            Extensions.CreateDatabaseHistoryEntry(id: 201, keyValueStoreEntityId: 10, fromStateVersion: 250, Extensions.GenerateKeyEntry(1, 11)),
+            Extensions.CreateDatabaseHistoryEntry(id: 202, keyValueStoreEntityId: 10, fromStateVersion: 300, Extensions.GenerateDeletedKeyEntry(1), isDeleted: true),
+            Extensions.CreateDatabaseHistoryEntry(id: 203, keyValueStoreEntityId: 10, fromStateVersion: 350, Extensions.GenerateKeyEntry(1, 12)),
         };
 
         var expectedAggregatesToAdd = new List<KeyValueStoreAggregateHistory>
@@ -236,10 +236,10 @@ public class KeyValueStoreAggregatorTests
             new() { Id = 103, FromStateVersion = 350, KeyValueStoreEntityId = 10, KeyValueStoreEntryIds = new List<long> { 101, 203 } },
         };
 
-        var changeTracker = KeyValueStoreExtensions.PrepareChanges(changes);
+        var (changeOrder, changePointers) = Extensions.PrepareChanges(changes);
 
         // Act.
-        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeTracker, mostRecentEntries, mostRecentAggregates);
+        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeOrder, changePointers, mostRecentEntries, mostRecentAggregates);
 
         // Assert.
         entriesToAdd.Should().BeEquivalentTo(expectedEntriesToAdd);
@@ -262,12 +262,12 @@ public class KeyValueStoreAggregatorTests
         var mostRecentEntries = new Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>
         {
             {
-                new KeyValueStoreEntryDbLookup(10, KeyValueStoreExtensions.GenerateKeyEntry(1).Key),
-                KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 100, keyValueStoreEntityId: 10, fromStateVersion: 100, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1))
+                new KeyValueStoreEntryDbLookup(10, Extensions.GenerateKeyEntry(1).Key),
+                Extensions.CreateDatabaseHistoryEntry(id: 100, keyValueStoreEntityId: 10, fromStateVersion: 100, Extensions.GenerateDeletedKeyEntry(1))
             },
             {
-                new KeyValueStoreEntryDbLookup(10, KeyValueStoreExtensions.GenerateKeyEntry(2).Key),
-                KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 101, keyValueStoreEntityId: 10, fromStateVersion: 100, KeyValueStoreExtensions.GenerateDeletedKeyEntry(2))
+                new KeyValueStoreEntryDbLookup(10, Extensions.GenerateKeyEntry(2).Key),
+                Extensions.CreateDatabaseHistoryEntry(id: 101, keyValueStoreEntityId: 10, fromStateVersion: 100, Extensions.GenerateDeletedKeyEntry(2))
             },
         };
 
@@ -276,48 +276,48 @@ public class KeyValueStoreAggregatorTests
             { 10, new KeyValueStoreAggregateHistory { Id = 50, FromStateVersion = 100, KeyValueStoreEntityId = 10, KeyValueStoreEntryIds = new List<long> { 100, 101 } } },
         };
 
-        var changes = new List<KeyValueStoreChange>
+        var changes = new List<Change>
         {
             // new entries.
-            new(KeyValueStoreEntityId: 20, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(1)),
-            new(KeyValueStoreEntityId: 20, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(2)),
-            new(KeyValueStoreEntityId: 20, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(3)),
-            new(KeyValueStoreEntityId: 21, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(1)),
-            new(KeyValueStoreEntityId: 21, StateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(10)),
-            new(KeyValueStoreEntityId: 22, StateVersion: 110, KeyValueStoreExtensions.GenerateKeyEntry(10)),
-            new(KeyValueStoreEntityId: 20, StateVersion: 200, KeyValueStoreExtensions.GenerateKeyEntry(6)),
-            new(KeyValueStoreEntityId: 32, StateVersion: 200, KeyValueStoreExtensions.GenerateKeyEntry(367)),
+            new(KeyValueStoreEntityId: 20, StateVersion: 100, Extensions.GenerateKeyEntry(1)),
+            new(KeyValueStoreEntityId: 20, StateVersion: 100, Extensions.GenerateKeyEntry(2)),
+            new(KeyValueStoreEntityId: 20, StateVersion: 100, Extensions.GenerateKeyEntry(3)),
+            new(KeyValueStoreEntityId: 21, StateVersion: 100, Extensions.GenerateKeyEntry(1)),
+            new(KeyValueStoreEntityId: 21, StateVersion: 100, Extensions.GenerateKeyEntry(10)),
+            new(KeyValueStoreEntityId: 22, StateVersion: 110, Extensions.GenerateKeyEntry(10)),
+            new(KeyValueStoreEntityId: 20, StateVersion: 200, Extensions.GenerateKeyEntry(6)),
+            new(KeyValueStoreEntityId: 32, StateVersion: 200, Extensions.GenerateKeyEntry(367)),
 
             // deletes of existing entries.
-            new(KeyValueStoreEntityId: 10, StateVersion: 200, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 250, KeyValueStoreExtensions.GenerateKeyEntry(1, 11)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 300, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 350, KeyValueStoreExtensions.GenerateKeyEntry(1, 12)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 400, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 400, KeyValueStoreExtensions.GenerateDeletedKeyEntry(2)),
-            new(KeyValueStoreEntityId: 10, StateVersion: 401, KeyValueStoreExtensions.GenerateKeyEntry(1, 13)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 200, Extensions.GenerateDeletedKeyEntry(1)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 250, Extensions.GenerateKeyEntry(1, 11)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 300, Extensions.GenerateDeletedKeyEntry(1)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 350, Extensions.GenerateKeyEntry(1, 12)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 400, Extensions.GenerateDeletedKeyEntry(1)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 400, Extensions.GenerateDeletedKeyEntry(2)),
+            new(KeyValueStoreEntityId: 10, StateVersion: 401, Extensions.GenerateKeyEntry(1, 13)),
         };
 
         var expectedEntriesToAdd = new List<KeyValueStoreEntryHistory>
         {
             // new entries.
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 200, keyValueStoreEntityId: 20, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(1)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 201, keyValueStoreEntityId: 20, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(2)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 202, keyValueStoreEntityId: 20, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(3)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 203, keyValueStoreEntityId: 21, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(1)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 204, keyValueStoreEntityId: 21, fromStateVersion: 100, KeyValueStoreExtensions.GenerateKeyEntry(10)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 205, keyValueStoreEntityId: 22, fromStateVersion: 110, KeyValueStoreExtensions.GenerateKeyEntry(10)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 206, keyValueStoreEntityId: 20, fromStateVersion: 200, KeyValueStoreExtensions.GenerateKeyEntry(6)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 207, keyValueStoreEntityId: 32, fromStateVersion: 200, KeyValueStoreExtensions.GenerateKeyEntry(367)),
+            Extensions.CreateDatabaseHistoryEntry(id: 200, keyValueStoreEntityId: 20, fromStateVersion: 100, Extensions.GenerateKeyEntry(1)),
+            Extensions.CreateDatabaseHistoryEntry(id: 201, keyValueStoreEntityId: 20, fromStateVersion: 100, Extensions.GenerateKeyEntry(2)),
+            Extensions.CreateDatabaseHistoryEntry(id: 202, keyValueStoreEntityId: 20, fromStateVersion: 100, Extensions.GenerateKeyEntry(3)),
+            Extensions.CreateDatabaseHistoryEntry(id: 203, keyValueStoreEntityId: 21, fromStateVersion: 100, Extensions.GenerateKeyEntry(1)),
+            Extensions.CreateDatabaseHistoryEntry(id: 204, keyValueStoreEntityId: 21, fromStateVersion: 100, Extensions.GenerateKeyEntry(10)),
+            Extensions.CreateDatabaseHistoryEntry(id: 205, keyValueStoreEntityId: 22, fromStateVersion: 110, Extensions.GenerateKeyEntry(10)),
+            Extensions.CreateDatabaseHistoryEntry(id: 206, keyValueStoreEntityId: 20, fromStateVersion: 200, Extensions.GenerateKeyEntry(6)),
+            Extensions.CreateDatabaseHistoryEntry(id: 207, keyValueStoreEntityId: 32, fromStateVersion: 200, Extensions.GenerateKeyEntry(367)),
 
             // deletes of existing entries.
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 208, keyValueStoreEntityId: 10, fromStateVersion: 200, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1), isDeleted: true),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 209, keyValueStoreEntityId: 10, fromStateVersion: 250, KeyValueStoreExtensions.GenerateKeyEntry(1, 11)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 210, keyValueStoreEntityId: 10, fromStateVersion: 300, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1), isDeleted: true),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 211, keyValueStoreEntityId: 10, fromStateVersion: 350, KeyValueStoreExtensions.GenerateKeyEntry(1, 12)),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 212, keyValueStoreEntityId: 10, fromStateVersion: 400, KeyValueStoreExtensions.GenerateDeletedKeyEntry(1), isDeleted: true),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 213, keyValueStoreEntityId: 10, fromStateVersion: 400, KeyValueStoreExtensions.GenerateDeletedKeyEntry(2), isDeleted: true),
-            KeyValueStoreExtensions.CreateDatabaseHistoryEntry(id: 214, keyValueStoreEntityId: 10, fromStateVersion: 401, KeyValueStoreExtensions.GenerateKeyEntry(1, 13)),
+            Extensions.CreateDatabaseHistoryEntry(id: 208, keyValueStoreEntityId: 10, fromStateVersion: 200, Extensions.GenerateDeletedKeyEntry(1), isDeleted: true),
+            Extensions.CreateDatabaseHistoryEntry(id: 209, keyValueStoreEntityId: 10, fromStateVersion: 250, Extensions.GenerateKeyEntry(1, 11)),
+            Extensions.CreateDatabaseHistoryEntry(id: 210, keyValueStoreEntityId: 10, fromStateVersion: 300, Extensions.GenerateDeletedKeyEntry(1), isDeleted: true),
+            Extensions.CreateDatabaseHistoryEntry(id: 211, keyValueStoreEntityId: 10, fromStateVersion: 350, Extensions.GenerateKeyEntry(1, 12)),
+            Extensions.CreateDatabaseHistoryEntry(id: 212, keyValueStoreEntityId: 10, fromStateVersion: 400, Extensions.GenerateDeletedKeyEntry(1), isDeleted: true),
+            Extensions.CreateDatabaseHistoryEntry(id: 213, keyValueStoreEntityId: 10, fromStateVersion: 400, Extensions.GenerateDeletedKeyEntry(2), isDeleted: true),
+            Extensions.CreateDatabaseHistoryEntry(id: 214, keyValueStoreEntityId: 10, fromStateVersion: 401, Extensions.GenerateKeyEntry(1, 13)),
         };
 
         var expectedAggregatesToAdd = new List<KeyValueStoreAggregateHistory>
@@ -338,10 +338,10 @@ public class KeyValueStoreAggregatorTests
             new() { Id = 110, FromStateVersion = 401, KeyValueStoreEntityId = 10, KeyValueStoreEntryIds = new List<long> { 214 } },
         };
 
-        var changeTracker = KeyValueStoreExtensions.PrepareChanges(changes);
+        var (changeOrder, changePointers) = Extensions.PrepareChanges(changes);
 
         // Act.
-        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeTracker, mostRecentEntries, mostRecentAggregates);
+        var (entriesToAdd, aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(context, changeOrder, changePointers, mostRecentEntries, mostRecentAggregates);
 
         // Assert.
         entriesToAdd.Should().BeEquivalentTo(expectedEntriesToAdd);

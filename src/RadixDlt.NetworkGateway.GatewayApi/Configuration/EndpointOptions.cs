@@ -97,9 +97,6 @@ public sealed class EndpointOptions
 
     [ConfigurationKeyName("ValidatorsUptimePageSize")]
     public int ValidatorsUptimeMaxPageSize { get; set; } = 200;
-
-    [ConfigurationKeyName("TransactionStreamMaxFilterCount")]
-    public int TransactionStreamMaxFilterCount { get; set; } = 10;
 }
 
 internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptions>
@@ -118,6 +115,5 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
         RuleFor(x => x.StateEntityDetailsMaxPageSize).GreaterThan(0);
         RuleFor(x => x.ExplicitMetadataMaxItems).GreaterThan(0);
         RuleFor(x => x.ValidatorsUptimeMaxPageSize).GreaterThan(0);
-        RuleFor(x => x.TransactionStreamMaxFilterCount).GreaterThan(0);
     }
 }

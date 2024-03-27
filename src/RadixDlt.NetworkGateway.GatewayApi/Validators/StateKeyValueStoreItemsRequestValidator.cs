@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="StateAccountResourcePreferencesPageRequestValidator.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
@@ -73,14 +69,18 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class StateAccountResourcePreferencesPageRequestValidator : AbstractValidator<StateAccountResourcePreferencesPageRequest>
+internal class StateKeyValueStoreItemsRequestValidator : AbstractValidator<StateKeyValueStoreKeysRequest>
 {
-    public StateAccountResourcePreferencesPageRequestValidator(
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
-        PaginableRequestValidator paginableRequestValidator,
+    public StateKeyValueStoreItemsRequestValidator(
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        RadixAddressValidator radixAddressValidator)
+        RadixAddressValidator radixAddressValidator,
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        PaginableRequestValidator paginableRequestValidator)
     {
+        RuleFor(x => x.KeyValueStoreAddress)
+            .NotEmpty()
+            .SetValidator(radixAddressValidator);
+
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
 
@@ -93,8 +93,5 @@ internal class StateAccountResourcePreferencesPageRequestValidator : AbstractVal
         RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)
             .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
-
-        RuleFor(x => x.AccountAddress)
-            .SetValidator(radixAddressValidator);
     }
 }

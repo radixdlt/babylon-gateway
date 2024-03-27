@@ -82,7 +82,7 @@ public class StateNonFungibleController : ControllerBase
     }
 
     [HttpPost("ids")]
-    public async Task<GatewayModel.StateNonFungibleIdsResponse> IdsPage(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token)
+    public async Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token)
     {
         return await _nonFungibleHandler.Ids(request, token);
     }

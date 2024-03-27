@@ -118,7 +118,6 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<ModuleId>();
                 dataSourceBuilder.MapEnum<SborTypeKind>();
                 dataSourceBuilder.MapEnum<StateType>();
-                dataSourceBuilder.MapEnum<AuthorizedDepositorBadgeType>();
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },

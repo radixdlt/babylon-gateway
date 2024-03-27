@@ -85,7 +85,7 @@ public interface IDapperWrapper
         string operationName = "",
         [CallerMemberName] string methodName = "");
 
-    Task<T?> QueryFirstOrDefaultAsync<T>(
+    Task<T> QueryFirstOrDefaultAsync<T>(
         IDbConnection connection,
         CommandDefinition command,
         string operationName = "",
@@ -94,16 +94,16 @@ public interface IDapperWrapper
 
 public class DapperWrapper : IDapperWrapper
 {
-    private readonly IOptionsMonitor<SlowQueryLoggingOptions> _slowQueriesLoggingOptions;
+    private readonly SlowQueryLoggingOptions _slowQueriesLoggingOptions;
     private readonly ILogger<DapperWrapper> _logger;
     private readonly ISqlQueryObserver _sqlQueryObserver;
 
     public DapperWrapper(
-        IOptionsMonitor<SlowQueryLoggingOptions> slowQueriesLoggingOptions,
+        IOptionsSnapshot<SlowQueryLoggingOptions> slowQueriesLoggingOptions,
         ILogger<DapperWrapper> logger,
         ISqlQueryObserver sqlQueryObserver)
     {
-        _slowQueriesLoggingOptions = slowQueriesLoggingOptions;
+        _slowQueriesLoggingOptions = slowQueriesLoggingOptions.Value;
         _logger = logger;
         _sqlQueryObserver = sqlQueryObserver;
     }
@@ -123,19 +123,19 @@ public class DapperWrapper : IDapperWrapper
 
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, elapsed);
 
-        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueryThreshold;
+        var logQueriesLongerThan = _slowQueriesLoggingOptions.SlowQueryThreshold;
         if (elapsed > logQueriesLongerThan)
         {
             var parameters = JsonConvert.SerializeObject(command.Parameters);
             _logger.LogWarning(
-                "Long running query: {Query}, parameters: {QueryParameters} duration: {QueryDuration} seconds",
+                "Long running query: {query}, parameters: {queryParameters} duration: {queryDuration} seconds",
                 command.CommandText, parameters, elapsed);
         }
 
         return result;
     }
 
-    public async Task<T?> QueryFirstOrDefaultAsync<T>(
+    public async Task<T> QueryFirstOrDefaultAsync<T>(
         IDbConnection connection,
         CommandDefinition command,
         string operationName = "",
@@ -149,12 +149,12 @@ public class DapperWrapper : IDapperWrapper
         var queryName = SqlQueryMetricsHelper.GetQueryNameValue(operationName, methodName);
         _sqlQueryObserver.OnSqlQueryExecuted(queryName, elapsed);
 
-        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueryThreshold;
+        var logQueriesLongerThan = _slowQueriesLoggingOptions.SlowQueryThreshold;
         if (elapsed > logQueriesLongerThan)
         {
             var parameters = JsonConvert.SerializeObject(command.Parameters);
             _logger.LogWarning(
-                "Long running query: {Query}, parameters: {QueryParameters} duration: {QueryDuration} milliseconds",
+                "Long running query: {query}, parameters: {queryParameters} duration: {queryDuration} milliseconds",
                 command.CommandText, parameters, elapsed);
         }
 

@@ -62,57 +62,28 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace GatewayApi.Controllers;
 
-public interface IAccountHandler
+[ApiController]
+[Route("state/validators")]
+public class ValidatorController : ControllerBase
 {
-    Task<GatewayModel.StateAccountResourcePreferencesPageResponse> ResourcePreferences(GatewayModel.StateAccountResourcePreferencesPageRequest request, CancellationToken token = default);
+    private readonly IValidatorStateHandler _validatorStateHandler;
 
-    Task<GatewayModel.StateAccountAuthorizedDepositorsPageResponse> AuthorizedDepositors(GatewayModel.StateAccountAuthorizedDepositorsPageRequest request, CancellationToken token = default);
-}
-
-internal class DefaultAccountHandler : IAccountHandler
-{
-    private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
-    private readonly IAccountStateQuerier _accountStateQuerier;
-
-    public DefaultAccountHandler(ILedgerStateQuerier ledgerStateQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration, IAccountStateQuerier accountStateQuerier)
+    public ValidatorController(IValidatorStateHandler validatorStateHandler)
     {
-        _ledgerStateQuerier = ledgerStateQuerier;
-        _endpointConfiguration = endpointConfiguration;
-        _accountStateQuerier = accountStateQuerier;
+        _validatorStateHandler = validatorStateHandler;
     }
 
-    public async Task<GatewayModel.StateAccountResourcePreferencesPageResponse> ResourcePreferences(GatewayModel.StateAccountResourcePreferencesPageRequest request, CancellationToken token = default)
+    [HttpPost("list")]
+    public async Task<GatewayModel.StateValidatorsListResponse> List(GatewayModel.StateValidatorsListRequest request, CancellationToken token)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        return await _accountStateQuerier.AccountResourcePreferences(
-            accountAddress: (EntityAddress)request.AccountAddress,
-            ledgerState: ledgerState,
-            offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
-            token: token);
-    }
-
-    public async Task<GatewayModel.StateAccountAuthorizedDepositorsPageResponse> AuthorizedDepositors(
-        GatewayModel.StateAccountAuthorizedDepositorsPageRequest request,
-        CancellationToken token = default)
-    {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        return await _accountStateQuerier.AccountAuthorizedDepositors(
-            accountAddress: (EntityAddress)request.AccountAddress,
-            ledgerState: ledgerState,
-            offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
-            token: token);
+        return await _validatorStateHandler.List(request, token);
     }
 }

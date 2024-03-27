@@ -74,10 +74,6 @@ internal static class Extensions
     public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
         where TKey : notnull
     {
-        ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
-        ArgumentNullException.ThrowIfNull(key, nameof(key));
-        ArgumentNullException.ThrowIfNull(factory, nameof(factory));
-
         if (dictionary.TryGetValue(key, out var existingValue))
         {
             return existingValue;
@@ -90,17 +86,6 @@ internal static class Extensions
         return value;
     }
 
-    public static void AddRange<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, IDictionary<TKey, TVal> other)
-    {
-        ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
-        ArgumentNullException.ThrowIfNull(other, nameof(other));
-
-        foreach (var (key, value) in other)
-        {
-            dictionary.Add(key, value);
-        }
-    }
-
     public static bool Unzip<TIn, TOut1, TOut2>(
         this HashSet<TIn> input,
         Func<TIn, TOut1> out1Selector,
@@ -108,10 +93,6 @@ internal static class Extensions
         [NotNullWhen(true)] out List<TOut1>? out1,
         [NotNullWhen(true)] out List<TOut2>? out2)
     {
-        ArgumentNullException.ThrowIfNull(input, nameof(input));
-        ArgumentNullException.ThrowIfNull(out1Selector, nameof(out1Selector));
-        ArgumentNullException.ThrowIfNull(out2Selector, nameof(out2Selector));
-
         out1 = default;
         out2 = default;
 
@@ -141,11 +122,6 @@ internal static class Extensions
         [NotNullWhen(true)] out List<TOut2>? out2,
         [NotNullWhen(true)] out List<TOut3>? out3)
     {
-        ArgumentNullException.ThrowIfNull(input, nameof(input));
-        ArgumentNullException.ThrowIfNull(out1Selector, nameof(out1Selector));
-        ArgumentNullException.ThrowIfNull(out2Selector, nameof(out2Selector));
-        ArgumentNullException.ThrowIfNull(out3Selector, nameof(out3Selector));
-
         out1 = default;
         out2 = default;
         out3 = default;

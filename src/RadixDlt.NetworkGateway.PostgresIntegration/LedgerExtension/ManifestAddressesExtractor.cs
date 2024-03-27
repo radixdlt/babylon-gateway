@@ -64,7 +64,6 @@
 
 using RadixDlt.NetworkGateway.Abstractions;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using ToolkitModel = RadixEngineToolkit;
 
@@ -72,8 +71,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal static class ManifestAddressesExtractor
 {
-    internal record PresentedProof(EntityAddress AccountAddress, EntityAddress ResourceAddress);
-
     internal record ManifestAddresses(
         List<EntityAddress> PackageAddresses,
         List<EntityAddress> ComponentAddresses,
@@ -83,8 +80,7 @@ internal static class ManifestAddressesExtractor
         List<EntityAddress> AccountsWithdrawnFrom,
         List<EntityAddress> AccountsDepositedInto,
         List<EntityAddress> IdentityAddresses,
-        List<EntityAddress> IdentitiesRequiringAuth,
-        List<PresentedProof> PresentedProofs)
+        List<EntityAddress> IdentitiesRequiringAuth)
     {
         public List<EntityAddress> All() =>
             PackageAddresses
@@ -96,8 +92,6 @@ internal static class ManifestAddressesExtractor
                 .Concat(AccountsDepositedInto)
                 .Concat(IdentityAddresses)
                 .Concat(IdentitiesRequiringAuth)
-                .Concat(PresentedProofs.Select(x => x.AccountAddress))
-                .Concat(PresentedProofs.Select(x => x.ResourceAddress))
                 .Distinct()
                 .ToList();
     }
@@ -108,7 +102,6 @@ internal static class ManifestAddressesExtractor
 
         var manifestSummary = manifest.Summary(networkId);
 
-        var presentedProofs = ExtractProofs(manifestSummary.presentedProofs);
         var accountsRequiringAuth = manifestSummary.accountsRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
         var accountsWithdrawnFrom = manifestSummary.accountsWithdrawnFrom.Select(x => (EntityAddress)x.AddressString()).ToList();
         var accountsDepositedInto = manifestSummary.accountsDepositedInto.Select(x => (EntityAddress)x.AddressString()).ToList();
@@ -142,42 +135,7 @@ internal static class ManifestAddressesExtractor
             accountsWithdrawnFrom,
             accountsDepositedInto,
             identityAddresses,
-            identitiesRequiringAuth,
-            presentedProofs
+            identitiesRequiringAuth
         );
-    }
-
-    private static List<PresentedProof> ExtractProofs(Dictionary<string, ToolkitModel.ResourceSpecifier[]> presentedProofs)
-    {
-        var mapped = new HashSet<PresentedProof>();
-
-        foreach (var account in presentedProofs)
-        {
-            var accountAddress = (EntityAddress)account.Key;
-            foreach (var proof in account.Value)
-            {
-                switch (proof)
-                {
-                    case ToolkitModel.ResourceSpecifier.Amount fungibleProof:
-                    {
-                        var resourceAddress = (EntityAddress)fungibleProof.resourceAddress.AddressString();
-                        mapped.Add(new PresentedProof(accountAddress, resourceAddress));
-                        break;
-                    }
-
-                    case ToolkitModel.ResourceSpecifier.Ids nonFungibleProof:
-                    {
-                        var resourceAddress = (EntityAddress)nonFungibleProof.resourceAddress.AddressString();
-                        mapped.Add(new PresentedProof(accountAddress, resourceAddress));
-                        break;
-                    }
-
-                    default:
-                        throw new UnreachableException($"Unexpected proof type {proof.GetType()}");
-                }
-            }
-        }
-
-        return mapped.ToList();
     }
 }

@@ -62,9 +62,11 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+
 namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-public record LedgerTransactionEventFilter
+public class LedgerTransactionEventFilter
 {
     public enum EventType
     {

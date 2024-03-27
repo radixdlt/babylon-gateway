@@ -121,9 +121,6 @@ public class GatewayApiStartup
         services
             .AddHealthChecks()
             .ForwardToPrometheus();
-
-        services
-            .UseHttpClientMetrics();
     }
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)

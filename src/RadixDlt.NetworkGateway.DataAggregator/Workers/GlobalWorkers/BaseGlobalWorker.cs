@@ -97,9 +97,4 @@ public abstract class BaseGlobalWorker : LoopedWorkerBase
     {
         _observers.ForEach(x => x.TrackWorkerFaultedException(GetType(), ex, isStopRequested));
     }
-
-    protected override void TrackWorkerLoopSucceeded()
-    {
-        _observers.ForEach(x => x.TrackWorkerLoopSucceeded(GetType(), ElapsedSinceLoopBeginning()));
-    }
 }
