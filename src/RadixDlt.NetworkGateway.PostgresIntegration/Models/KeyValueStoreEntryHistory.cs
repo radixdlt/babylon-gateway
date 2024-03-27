@@ -78,11 +78,8 @@ internal class KeyValueStoreEntryHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("key_value_store_entity_id")]
-    public long KeyValueStoreEntityId { get; set; }
-
-    [Column("key")]
-    public byte[] Key { get; set; }
+    [Column("key_value_store_entry_definition_id")]
+    public long KeyValueStoreEntryDefinitionId { get; set; }
 
     [Column("value")]
     public byte[]? Value { get; set; }

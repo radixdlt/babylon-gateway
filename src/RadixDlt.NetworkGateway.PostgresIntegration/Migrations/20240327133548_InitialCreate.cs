@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -403,18 +403,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "key_value_store_aggregate_history",
+                name: "key_value_store_entry_definition",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     key_value_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    key_value_store_entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                    key = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_key_value_store_aggregate_history", x => x.id);
+                    table.PrimaryKey("PK_key_value_store_entry_definition", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -424,8 +424,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    key_value_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    key = table.Column<byte[]>(type: "bytea", nullable: false),
+                    key_value_store_entry_definition_id = table.Column<long>(type: "bigint", nullable: false),
                     value = table.Column<byte[]>(type: "bytea", nullable: true),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     is_locked = table.Column<bool>(type: "boolean", nullable: false)
@@ -976,14 +975,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'non_fungible'");
 
             migrationBuilder.CreateIndex(
-                name: "IX_key_value_store_aggregate_history_key_value_store_entity_id~",
-                table: "key_value_store_aggregate_history",
+                name: "IX_key_value_store_entry_definition_key_value_store_entity_id_~",
+                table: "key_value_store_entry_definition",
                 columns: new[] { "key_value_store_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_key_value_store_entry_history_key_value_store_entity_id_key~",
+                name: "IX_key_value_store_entry_definition_key_value_store_entity_id~1",
+                table: "key_value_store_entry_definition",
+                columns: new[] { "key_value_store_entity_id", "key" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_key_value_store_entry_history_key_value_store_entry_definit~",
                 table: "key_value_store_entry_history",
-                columns: new[] { "key_value_store_entity_id", "key", "from_state_version" });
+                columns: new[] { "key_value_store_entry_definition_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_key_value_store_schema_history_key_value_store_entity_id_fr~",
@@ -1240,7 +1244,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "entity_vault_history");
 
             migrationBuilder.DropTable(
-                name: "key_value_store_aggregate_history");
+                name: "key_value_store_entry_definition");
 
             migrationBuilder.DropTable(
                 name: "key_value_store_entry_history");

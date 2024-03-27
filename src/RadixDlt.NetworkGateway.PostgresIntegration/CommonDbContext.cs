@@ -149,9 +149,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<SchemaHistory> SchemaHistory => Set<SchemaHistory>();
 
-    public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
+    public DbSet<KeyValueStoreEntryDefinition> KeyValueStoreEntryDefinition => Set<KeyValueStoreEntryDefinition>();
 
-    public DbSet<KeyValueStoreAggregateHistory> KeyValueStoreAggregateHistory => Set<KeyValueStoreAggregateHistory>();
+    public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
 
     public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
 
@@ -530,12 +530,16 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => e.Epoch);
 
         modelBuilder
-            .Entity<KeyValueStoreEntryHistory>()
-            .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key, e.FromStateVersion });
+            .Entity<KeyValueStoreEntryDefinition>()
+            .HasIndex(e => new { e.KeyValueStoreEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<KeyValueStoreAggregateHistory>()
-            .HasIndex(e => new { e.KeyValueStoreEntityId, e.FromStateVersion });
+            .Entity<KeyValueStoreEntryDefinition>()
+            .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key });
+
+        modelBuilder
+            .Entity<KeyValueStoreEntryHistory>()
+            .HasIndex(e => new { e.KeyValueStoreEntryDefinitionId, e.FromStateVersion });
 
         modelBuilder
             .Entity<KeyValueStoreSchemaHistory>()

@@ -62,84 +62,40 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal static class KeyValueStoreAggregator
+internal record KeyValueStoreEntryLookup(EntityAddress KeyValueStoreAddress, ValueBytes Key);
+
+internal record KeyValueStoreEntryDefinitionDatabaseId(long KeyValueStoreEntityId, long KeyValueStoreEntryDefinitionId);
+
+internal class ReferencedKeyValueStoreEntryDictionary
 {
-    internal static (List<KeyValueStoreEntryHistory> EntriesToAdd, List<KeyValueStoreAggregateHistory> AggregatesToAdd) Aggregate(
-        ProcessorContext context,
-        ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> changes,
-        Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory> mostRecentEntries,
-        Dictionary<long, KeyValueStoreAggregateHistory> mostRecentAggregates
-    )
+    private readonly Dictionary<KeyValueStoreEntryLookup, KeyValueStoreEntryDefinitionDatabaseId> _storage = new();
+
+    public HashSet<KeyValueStoreEntryLookup> Observed { get; } = new();
+
+    public void Add(KeyValueStoreEntryLookup lookup, KeyValueStoreEntryDefinitionDatabaseId databaseId)
     {
-        List<KeyValueStoreAggregateHistory> aggregatesToAdd = new();
-        List<KeyValueStoreEntryHistory> entriesToAdd = new();
+        _storage.Add(lookup, databaseId);
+    }
 
-        foreach (var (lookup, change) in changes.AsEnumerable())
+    public KeyValueStoreEntryDefinitionDatabaseId Get(KeyValueStoreEntryLookup lookup)
+    {
+        if (_storage.TryGetValue(lookup, out var databaseId))
         {
-            KeyValueStoreAggregateHistory aggregate;
-
-            if (!mostRecentAggregates.TryGetValue(lookup.KeyValueStoreEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
-            {
-                aggregate = new KeyValueStoreAggregateHistory
-                {
-                    Id = context.Sequences.KeyValueStoreAggregateHistorySequence++,
-                    FromStateVersion = lookup.StateVersion,
-                    KeyValueStoreEntityId = lookup.KeyValueStoreEntityId,
-                    KeyValueStoreEntryIds = new List<long>(),
-                };
-
-                if (previousAggregate != null)
-                {
-                    aggregate.KeyValueStoreEntryIds.AddRange(previousAggregate.KeyValueStoreEntryIds);
-                }
-
-                aggregatesToAdd.Add(aggregate);
-                mostRecentAggregates[lookup.KeyValueStoreEntityId] = aggregate;
-            }
-            else
-            {
-                aggregate = previousAggregate;
-            }
-
-            var entryLookup = new KeyValueStoreEntryDbLookup(lookup.KeyValueStoreEntityId, lookup.Key);
-
-            var isDeleted = change.KeyValueStoreEntry.Value == null;
-            var entry = new KeyValueStoreEntryHistory
-            {
-                Id = context.Sequences.KeyValueStoreEntryHistorySequence++,
-                KeyValueStoreEntityId = lookup.KeyValueStoreEntityId,
-                FromStateVersion = lookup.StateVersion,
-                Key = change.KeyValueStoreEntry.Key.KeyData.GetDataBytes(),
-                IsLocked = change.KeyValueStoreEntry.IsLocked,
-                IsDeleted = isDeleted,
-                Value = isDeleted ? null : change.KeyValueStoreEntry.Value!.Data.StructData.GetDataBytes(),
-            };
-
-            entriesToAdd.Add(entry);
-
-            if (mostRecentEntries.TryGetValue(entryLookup, out var previousEntry))
-            {
-                var currentPosition = aggregate.KeyValueStoreEntryIds.IndexOf(previousEntry.Id);
-
-                if (currentPosition != -1)
-                {
-                    aggregate.KeyValueStoreEntryIds.RemoveAt(currentPosition);
-                }
-            }
-
-            if (entry.Value != null)
-            {
-                aggregate.KeyValueStoreEntryIds.Insert(0, entry.Id);
-            }
-
-            mostRecentEntries[entryLookup] = entry;
+            return databaseId;
         }
 
-        return (entriesToAdd, aggregatesToAdd);
+        throw new InvalidOperationException($"KeyValueEntry with Address: {lookup.KeyValueStoreAddress} and Key: {lookup.Key.ToHex()} not found.");
+    }
+
+    public void MarkSeen(KeyValueStoreEntryLookup lookup)
+    {
+        Observed.Add(lookup);
     }
 }
