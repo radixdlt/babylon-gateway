@@ -1220,7 +1220,6 @@ UPDATE pending_transactions
             await packageBlueprintProcessor.LoadDependencies();
             await validatorProcessor.LoadDependencies();
             await keyValueStoreProcessor.LoadDependencies();
-            await accountAuthorizedDepositorsProcessor.LoadDependencies();
             await accountResourcePreferenceRulesProcessor.LoadDependencies();
 
             dbReadDuration += sw.Elapsed;
@@ -1239,7 +1238,6 @@ UPDATE pending_transactions
             packageCodeProcessor.ProcessChanges();
             packageBlueprintProcessor.ProcessChanges();
             accountDefaultDepositRuleProcessor.ProcessChanges();
-            accountAuthorizedDepositorsProcessor.ProcessChanges();
             accountResourcePreferenceRulesProcessor.ProcessChanges();
             keyValueStoreProcessor.ProcessChanges();
             validatorProcessor.ProcessChanges();
@@ -1262,6 +1260,11 @@ UPDATE pending_transactions
 
                         return ret;
                     });
+
+                referencedNonFungibleIdDictionary.GetOrAdd(
+                    new NonFungibleGlobalIdLookup(e.ReferencedResource.Address, e.NonFungibleId),
+                    _ => new NonFungibleIdGlobalIdDatabaseId(nonFungibleIdData.NonFungibleResourceEntityId, nonFungibleIdData.Id)
+                    );
 
                 var nonFungibleIdStore = nonFungibleIdStoreHistoryToAdd.GetOrAdd(
                     new NonFungibleStoreLookup(e.ReferencedResource.DatabaseId, e.StateVersion),
@@ -1300,6 +1303,16 @@ UPDATE pending_transactions
                     nonFungibleIdStore.NonFungibleIdDataIds.Add(nonFungibleIdData.Id);
                 }
             }
+
+            // We had to move these processing areas temporary after processing non fungible id changes
+            // Account authorized depositors depend on non fungible database identifiers.
+            // It's possible and it has happened on stokenet that nfid was created and referenced as authorized depositor badge in same batch
+            // Start of temporary reordering block.
+            sw = Stopwatch.StartNew();
+            await accountAuthorizedDepositorsProcessor.LoadDependencies();
+            dbReadDuration += sw.Elapsed;
+            accountAuthorizedDepositorsProcessor.ProcessChanges();
+            // End of temporary reordering block.
 
             void AggregateEntityResourceUsingSubstates(
                 ReferencedEntity referencedVault,
