@@ -62,85 +62,25 @@
  * permissions under this License.
  */
 
-using NpgsqlTypes;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+#nullable disable
 
-internal record struct AccountDefaultDepositRuleChangePointerLookup(long AccountEntityId, long StateVersion);
-
-internal record AccountDefaultDepositRuleChangePointer
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    public List<CoreModel.AccountFieldStateSubstate> AccountFieldStateEntries { get; } = new();
-}
-
-internal class AccountDefaultDepositRuleProcessor
-{
-    private readonly ProcessorContext _context;
-    private readonly ChangeTracker<AccountDefaultDepositRuleChangePointerLookup, AccountDefaultDepositRuleChangePointer> _changeTracker = new();
-    private readonly List<AccountDefaultDepositRuleHistory> _rulesToAdd = new();
-
-    public AccountDefaultDepositRuleProcessor(ProcessorContext context)
+    /// <inheritdoc />
+    public partial class FixIsDeletedFlagOnRecreatedKVStoreKeys : Migration
     {
-        _context = context;
-    }
-
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
-    {
-        if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            _changeTracker
-                .GetOrAdd(
-                    new AccountDefaultDepositRuleChangePointerLookup(referencedEntity.DatabaseId, stateVersion),
-                    _ => new AccountDefaultDepositRuleChangePointer())
-                .AccountFieldStateEntries
-                .Add(accountFieldState);
+            migrationBuilder.Sql("update key_value_store_entry_history entry_history SET is_deleted = false where is_deleted = true AND entry_history.id in (select unnest(key_value_store_entry_ids) from key_value_store_aggregate_history aggregate_history where aggregate_history.key_value_store_entity_id = entry_history.key_value_store_entity_id);");
+            migrationBuilder.Sql("update key_value_store_entry_history SET value = null where is_deleted = true;");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
         }
     }
-
-    public void ProcessChanges()
-    {
-        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
-        {
-            foreach (var accountFieldStateChange in change.AccountFieldStateEntries)
-            {
-                _rulesToAdd.Add(
-                    new AccountDefaultDepositRuleHistory
-                    {
-                        Id = _context.Sequences.AccountDefaultDepositRuleHistorySequence++,
-                        FromStateVersion = lookup.StateVersion,
-                        AccountEntityId = lookup.AccountEntityId,
-                        DefaultDepositRule = accountFieldStateChange.Value.DefaultDepositRule.ToModel(),
-                    });
-            }
-        }
-    }
-
-    public async Task<int> SaveEntities()
-    {
-        var rowsInserted = 0;
-
-        rowsInserted += await CopyAccountDefaultDepositRuleHistory();
-
-        return rowsInserted;
-    }
-
-    private Task<int> CopyAccountDefaultDepositRuleHistory() => _context.WriteHelper.Copy(
-        _rulesToAdd,
-        "COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)",
-        async (writer, e, token) =>
-        {
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.DefaultDepositRule, "account_default_deposit_rule", token);
-        });
 }

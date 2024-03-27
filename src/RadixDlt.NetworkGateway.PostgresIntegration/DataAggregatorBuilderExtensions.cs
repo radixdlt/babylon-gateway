@@ -93,7 +93,7 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()
             .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>()
             .AddSingleton<MetricsInterceptor>()
-            .AddSingleton<IDapperWrapper, DapperWrapper>();
+            .AddScoped<IDapperWrapper, DapperWrapper>();
 
         CustomTypes.EnsureConfigured();
 

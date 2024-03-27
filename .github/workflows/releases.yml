@@ -3,7 +3,7 @@ on:
   release:
     types: [published]
 env:
-  DOTNET_VERSION: "8.0.x"
+  DOTNET_VERSION: "7.0.x"
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -104,7 +104,7 @@ jobs:
       packages: write
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: selfhosted-ubuntu-22.04-arm
+      runs_on: babylon-gateway-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "babylon-ng-database-migrations"
@@ -162,7 +162,7 @@ jobs:
       packages: write
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: selfhosted-ubuntu-22.04-arm
+      runs_on: babylon-gateway-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "babylon-ng-data-aggregator"
@@ -220,7 +220,7 @@ jobs:
       packages: write
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: selfhosted-ubuntu-22.04-arm
+      runs_on: babylon-gateway-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "babylon-ng-gateway-api"
@@ -374,7 +374,7 @@ jobs:
       - name: Generate SBOM
         uses: RDXWorks-actions/snyk-actions/node@master
         with:
-          args: --all-projects --org=${{ env.SNYK_NETWORK_ORG_ID }} --format=cyclonedx1.4+json > sbom.json
+          args: --all-projects --org=${{ env.SNYK_NETWORK_ORG_ID }} --format=cyclonedx1.4+json --json-file-output sbom.json
           command: sbom
       - name: Upload SBOM
         uses: RDXWorks-actions/action-gh-release@master

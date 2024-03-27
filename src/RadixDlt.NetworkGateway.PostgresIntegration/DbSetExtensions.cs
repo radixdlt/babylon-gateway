@@ -62,40 +62,97 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Text;
 
-namespace RadixDlt.CoreApiSdk.Model;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public partial class AccountAuthorizedDepositorEntrySubstate : IEntityAddressPointer
+internal static class DbSetExtensions
 {
-    public IEnumerable<string> GetEntityAddresses()
+    /// <summary>
+    /// <para>
+    /// This is designed to replace the use of "IN", improving performance, and allowing for support matching on tuples.
+    /// It does this by using a virtual join, inspired by https://singlebrook.com/2018/05/23/when-to-throw-in-out/.
+    ///
+    /// NOTE - This can be replaced by using UNNEST like we do in BulkAccountValidatorStakeHistoryAtVersion.
+    /// </para>
+    /// <para>
+    /// IMPORTANT NOTES:
+    /// <list type="bullet">
+    /// <item><description>This method assumes the flattened keys (as tuples) are distinct.</description></item>
+    /// <item><description>The initial SQL should be to select all columns of the dbSet and not include a where clause.</description></item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// Example use:
+    /// <code>
+    /// _dbContext.AccountResourceBalanceHistoryEntries
+    ///   .FromMultiDimensionalVirtualJoin(
+    ///     "SELECT * FROM account_resource_balance_history",
+    ///     "(account_id, resource_id)",
+    ///     new object[] { accountIdOne, resourceIdOne, accountIdTwo, resourceIdTwo },
+    ///     2
+    ///   );
+    /// </code>
+    /// </para>
+    /// </summary>
+    /// <typeparam name="TEntity">The entity of the dbSet.</typeparam>
+    public static IQueryable<TEntity> FromMultiDimensionalVirtualJoin<TEntity>(
+        this DbSet<TEntity> dbSet,
+        string initialSql,
+        string keysTuple,
+        object[] flattenedKeys,
+        int keySize
+    )
+        where TEntity : class
     {
-        return Key.Badge.GetEntityAddresses();
+        if (flattenedKeys.Length == 0 || keySize < 1 || flattenedKeys.Length % keySize > 0)
+        {
+            throw new ArgumentException(
+                $"Key size ({keySize}) does not divide key flattened key length ({flattenedKeys.Length}) or they're otherwise invalid"
+            );
+        }
+
+        var placeholders = CreateArrayOfTuplesPlaceholder(flattenedKeys.Length / keySize, keySize);
+
+        // NB: If we can't assume the flattened keys are distinct as tuples,
+        //     see https://dbfiddle.uk/?rdbms=postgres_9.6&amp;fiddle=2796bdabfda3931e98da8c7c23030e80 for ideas
+        return dbSet.FromSqlRaw($"{initialSql} INNER JOIN ( values {placeholders} ) v{keysTuple} using{keysTuple}", flattenedKeys);
     }
-}
 
-public abstract partial class AuthorizedDepositorBadge : IEntityAddressPointer
-{
-    public abstract IEnumerable<string> GetEntityAddresses();
-}
-
-public partial class NonFungibleAuthorizedDepositorBadge : IEntityAddressPointer, INonFungibleGlobalIdPointer
-{
-    public override IEnumerable<string> GetEntityAddresses()
+    /// <summary>
+    /// Outputs a string like ({0},{1},{2}),({3},{4},{5}) for arrayLength=2, tupleLength=3.
+    /// </summary>
+    public static string CreateArrayOfTuplesPlaceholder(int arrayLength, int tupleLength, int startCountingAt = 0)
     {
-        yield return NonFungibleGlobalId.ResourceAddress;
-    }
+        var placeholders = new StringBuilder();
+        var placeholderCount = startCountingAt;
+        for (int i = 0; i < arrayLength; i++)
+        {
+            if (i > 0)
+            {
+                placeholders.Append(',');
+            }
 
-    public NonFungibleGlobalId GetNonFungibleGlobalId()
-    {
-        return NonFungibleGlobalId;
-    }
-}
+            placeholders.Append('(');
 
-public partial class ResourceAuthorizedDepositorBadge : IEntityAddressPointer
-{
-    public override IEnumerable<string> GetEntityAddresses()
-    {
-        yield return ResourceAddress;
+            for (int j = 0; j < tupleLength; j++)
+            {
+                if (j > 0)
+                {
+                    placeholders.Append(',');
+                }
+
+                placeholders.Append('{');
+                placeholders.Append(placeholderCount++);
+                placeholders.Append('}');
+            }
+
+            placeholders.Append(')');
+        }
+
+        return placeholders.ToString();
     }
 }

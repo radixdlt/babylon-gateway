@@ -117,9 +117,4 @@ public abstract class BaseNodeWorker : LoopedWorkerBase, INodeWorker
     {
         _observers.ForEach(x => x.TrackWorkerFaultedException(GetType(), _nodeName, ex, isStopRequested));
     }
-
-    protected override void TrackWorkerLoopSucceeded()
-    {
-        _observers.ForEach(x => x.TrackWorkerLoopSucceeded(GetType(), _nodeName, ElapsedSinceLoopBeginning()));
-    }
 }

@@ -62,36 +62,33 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal class StateKeyValueStoreKeysRequestValidator : AbstractValidator<StateKeyValueStoreKeysRequest>
+[Table("account_resource_preference_rule_history")]
+public class AccountResourcePreferenceRuleHistory
 {
-    public StateKeyValueStoreKeysRequestValidator(
-        LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        RadixAddressValidator radixAddressValidator,
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
-        PaginableRequestValidator paginableRequestValidator)
-    {
-        RuleFor(x => x.KeyValueStoreAddress)
-            .NotEmpty()
-            .SetValidator(radixAddressValidator);
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-        RuleFor(x => x.Cursor)
-            .Base64();
+    [Column("account_entity_id")]
+    public long AccountEntityId { get; set; }
 
-        RuleFor(x => x)
-            .SetValidator(paginableRequestValidator);
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
-    }
+    [Column("account_resource_preference_rule")]
+    public AccountResourcePreferenceRule? AccountResourcePreferenceRule { get; set; }
+
+    [MemberNotNullWhen(false, nameof(AccountResourcePreferenceRule))]
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
 }

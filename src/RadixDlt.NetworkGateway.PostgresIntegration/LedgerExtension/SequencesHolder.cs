@@ -68,13 +68,7 @@ internal class SequencesHolder
 {
     public long AccountDefaultDepositRuleHistorySequence { get; set; }
 
-    public long AccountResourcePreferenceRuleEntryHistorySequence { get; set; }
-
-    public long AccountResourcePreferenceRuleAggregateHistorySequence { get; set; }
-
-    public long AccountAuthorizedDepositorEntryHistorySequence { get; set; }
-
-    public long AccountAuthorizedDepositorAggregateHistorySequence { get; set; }
+    public long AccountResourceDepositRuleHistorySequence { get; set; }
 
     public long StateHistorySequence { get; set; }
 

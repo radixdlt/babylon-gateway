@@ -72,11 +72,11 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("state/entity")]
-public class StateEntityController : ControllerBase
+public class StateController : ControllerBase
 {
     private readonly IEntityHandler _entityHandler;
 
-    public StateEntityController(IEntityHandler entityHandler)
+    public StateController(IEntityHandler entityHandler)
     {
         _entityHandler = entityHandler;
     }

@@ -6,12 +6,6 @@ This system is designed to be the Radix-run publicly exposed gateway into the Ba
 
 For documentation on the Gateway API, see the [Gateway API docs](https://docs-babylon.radixdlt.com/main/apis/api-specification.html).
 
-## Version Support & Network Compatibility
-
-We only support the latest version of Network Gateway and we don't plan to fix bugs in older versions. If you're facing some issues, please upgrade to the latest version of Network Gateway first [Releases](https://github.com/radixdlt/babylon-gateway/releases)
-
-Be aware that protocol updates on the network might result in a mandatory Network Gateway update (e.g. `anemone` protocol update required gateway upgrade to `v1.3.0`) 
-
 ## Community Involvement
 Please see  [CONTRIBUTING.md](./CONTRIBUTING.md)
 
