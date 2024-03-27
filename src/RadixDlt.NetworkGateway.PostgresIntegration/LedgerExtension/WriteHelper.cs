@@ -380,7 +380,7 @@ internal class WriteHelper : IWriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(ttm.LedgerTransactionManifestClass, "ledger_transaction_manifest_class", token);
+                    await writer.WriteAsync(ttm.ManifestClass, "ledger_transaction_manifest_class", token);
                     await writer.WriteAsync(ttm.IsMostSpecific, NpgsqlDbType.Boolean, token);
                     break;
                 default:

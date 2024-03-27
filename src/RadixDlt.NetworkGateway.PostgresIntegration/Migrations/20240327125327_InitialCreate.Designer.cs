@@ -80,8 +80,8 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240227124203_FixIsDeletedFlagOnRecreatedKVStoreKeys")]
-    partial class FixIsDeletedFlagOnRecreatedKVStoreKeys
+    [Migration("20240327125327_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2342,12 +2342,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_most_specific");
 
-                    b.Property<LedgerTransactionManifestClass>("LedgerTransactionManifestClass")
+                    b.Property<LedgerTransactionManifestClass>("ManifestClass")
                         .HasColumnType("ledger_transaction_manifest_class")
                         .HasColumnName("manifest_class");
 
-                    b.HasIndex("LedgerTransactionManifestClass", "IsMostSpecific", "StateVersion")
+                    b.HasIndex(new[] { "ManifestClass", "StateVersion" }, "IX_ledger_transaction_markers_manifest_class")
                         .HasFilter("discriminator = 'manifest_class'");
+
+                    b.HasIndex(new[] { "ManifestClass", "StateVersion" }, "IX_ledger_transaction_markers_manifest_class_is_most_specific")
+                        .HasFilter("discriminator = 'manifest_class' and is_most_specific = true");
 
                     b.ToTable("ledger_transaction_markers");
 

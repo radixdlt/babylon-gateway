@@ -1,3 +1,12 @@
+## 1.4.4
+Release built: 27.03.2024
+
+### API Changes
+- Improved performance `/stream/transactions` endpoint when using `manifest_class_filter` filter.
+
+### Database changes
+- Replaced `IX_ledger_transaction_markers_manifest_class_is_most_specific_~` index with two separate indexes `IX_ledger_transaction_markers_manifest_class_is_most_specific` (indexes `is_most_specific` = true only) and `IX_ledger_transaction_markers_manifest_class` (indexes all manifest classes).
+
 ## 1.4.3
 Release built: 06.03.2024
 
