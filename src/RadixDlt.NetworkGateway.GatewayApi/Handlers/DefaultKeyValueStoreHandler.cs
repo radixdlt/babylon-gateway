@@ -100,12 +100,11 @@ internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
     public async Task<GatewayModel.StateKeyValueStoreKeysResponse> Keys(GatewayModel.StateKeyValueStoreKeysRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var cursor = GatewayModel.StateKeyValueStoreItemsCursor.FromCursorString(request.Cursor);
 
-        return await _keyValueStoreQuerier.KeyValueStoreItems(
+        return await _keyValueStoreQuerier.KeyValueStoreKeys(
             (EntityAddress)request.KeyValueStoreAddress,
             ledgerState,
-            GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            GatewayModel.StateKeyValueStoreKeysCursor.FromCursorString(request.Cursor),
             request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
             token);
     }

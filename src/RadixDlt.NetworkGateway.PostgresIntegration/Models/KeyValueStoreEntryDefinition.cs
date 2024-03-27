@@ -62,23 +62,25 @@
  * permissions under this License.
  */
 
-using System.Runtime.Serialization;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[DataContract]
-public sealed record StateKeyValueStoreItemsCursor(long? StateVersionBoundary)
+[Table("key_value_store_entry_definition")]
+internal class KeyValueStoreEntryDefinition
 {
-    [DataMember(Name = "v", EmitDefaultValue = false)]
-    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public static StateKeyValueStoreItemsCursor FromCursorString(string cursorString)
-    {
-        return Serializations.FromBase64JsonOrDefault<StateKeyValueStoreItemsCursor>(cursorString);
-    }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public string ToCursorString()
-    {
-        return Serializations.AsBase64Json(this);
-    }
+    [Column("key_value_store_entity_id")]
+    public long KeyValueStoreEntityId { get; set; }
+
+    [Column("key")]
+    public byte[] Key { get; set; }
 }
