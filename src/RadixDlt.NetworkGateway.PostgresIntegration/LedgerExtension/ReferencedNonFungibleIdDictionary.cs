@@ -83,6 +83,11 @@ internal class ReferencedNonFungibleIdDictionary
         _storage.Add(nonFungibleGlobalIdLookup, value);
     }
 
+    public NonFungibleIdGlobalIdDatabaseId GetOrAdd(NonFungibleGlobalIdLookup nonFungibleGlobalIdLookup, Func<NonFungibleGlobalIdLookup, NonFungibleIdGlobalIdDatabaseId> factory)
+    {
+        return _storage.GetOrAdd(nonFungibleGlobalIdLookup, factory);
+    }
+
     public NonFungibleIdGlobalIdDatabaseId Get(NonFungibleGlobalIdLookup address)
     {
         if (_storage.TryGetValue(address, out var value))
