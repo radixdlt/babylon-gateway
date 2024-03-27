@@ -308,7 +308,7 @@ UPDATE pending_transactions
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
-                                LedgerTransactionManifestClass = manifestClass,
+                                ManifestClass = manifestClass,
                                 IsMostSpecific = i == 0,
                             });
                         }
