@@ -79,16 +79,11 @@ public abstract partial class AuthorizedDepositorBadge : IEntityAddressPointer
     public abstract IEnumerable<string> GetEntityAddresses();
 }
 
-public partial class NonFungibleAuthorizedDepositorBadge : IEntityAddressPointer, INonFungibleGlobalIdPointer
+public partial class NonFungibleAuthorizedDepositorBadge : IEntityAddressPointer
 {
     public override IEnumerable<string> GetEntityAddresses()
     {
         yield return NonFungibleGlobalId.ResourceAddress;
-    }
-
-    public NonFungibleGlobalId GetNonFungibleGlobalId()
-    {
-        return NonFungibleGlobalId;
     }
 }
 

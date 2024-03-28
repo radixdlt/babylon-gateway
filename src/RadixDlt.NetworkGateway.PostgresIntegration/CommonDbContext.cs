@@ -573,7 +573,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<AccountAuthorizedNonFungibleBadgeDepositorEntryHistory>()
-            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.NonFungibleIdDataId, e.FromStateVersion })
+            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.NonFungibleId, e.FromStateVersion })
             .HasFilter("discriminator = 'non_fungible'");
 
         modelBuilder
