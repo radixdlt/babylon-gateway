@@ -62,92 +62,40 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace RadixDlt.NetworkGateway.UnitTests.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.CoreApiSdk.Model;
 
-internal record Change(long KeyValueStoreEntityId, long StateVersion, KeyValueStoreEntry Entry);
-
-internal record KeyValueStoreEntry(ValueBytes Key, ValueBytes? Value);
-
-internal static class Extensions
+public partial class AccountAuthorizedDepositorEntrySubstate : IEntityAddressPointer
 {
-    internal static KeyValueStoreEntryHistory CreateDatabaseHistoryEntry(
-        long id,
-        long keyValueStoreEntityId,
-        long fromStateVersion,
-        KeyValueStoreEntry keyData,
-        bool isDeleted = false,
-        bool isLocked = false) =>
-        new()
-        {
-            Id = id,
-            KeyValueStoreEntityId = keyValueStoreEntityId,
-            FromStateVersion = fromStateVersion,
-            IsDeleted = isDeleted,
-            IsLocked = isLocked,
-            Key = keyData.Key,
-            Value = keyData.Value,
-        };
-
-    internal static (List<KeyValueStoreChangePointerLookup> ChangeOrder, Dictionary<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> ChangePointers) PrepareChanges(List<Change> changes)
+    public IEnumerable<string> GetEntityAddresses()
     {
-        var changeOrder = changes
-            .Select(x => new KeyValueStoreChangePointerLookup(x.KeyValueStoreEntityId, x.StateVersion, x.Entry.Key))
-            .ToList();
+        return Key.Badge.GetEntityAddresses();
+    }
+}
 
-        var changePointers = changes.ToDictionary(
-            x => new KeyValueStoreChangePointerLookup(x.KeyValueStoreEntityId, x.StateVersion, x.Entry.Key),
-            y => new KeyValueStoreChangePointer(
-                KeyValueStoreReferencedEntity(y.StateVersion),
-                CrateKeyValueStoreSubstate(y.Entry.Key, y.Entry.Value))
-        );
+public abstract partial class AuthorizedDepositorBadge : IEntityAddressPointer
+{
+    public abstract IEnumerable<string> GetEntityAddresses();
+}
 
-        return (changeOrder, changePointers);
+public partial class NonFungibleAuthorizedDepositorBadge : IEntityAddressPointer, INonFungibleGlobalIdPointer
+{
+    public override IEnumerable<string> GetEntityAddresses()
+    {
+        yield return NonFungibleGlobalId.ResourceAddress;
     }
 
-    internal static KeyValueStoreEntry GenerateKeyEntry(long seed)
+    public NonFungibleGlobalId GetNonFungibleGlobalId()
     {
-        return GenerateKeyEntry(seed, seed);
+        return NonFungibleGlobalId;
     }
+}
 
-    internal static KeyValueStoreEntry GenerateKeyEntry(long keySeed, long valueSeed)
+public partial class ResourceAuthorizedDepositorBadge : IEntityAddressPointer
+{
+    public override IEnumerable<string> GetEntityAddresses()
     {
-        return new KeyValueStoreEntry((ValueBytes)Enumerable.Repeat((byte)keySeed, 10).ToArray(), (ValueBytes)Enumerable.Repeat((byte)keySeed, 20).ToArray());
-    }
-
-    internal static KeyValueStoreEntry GenerateDeletedKeyEntry(long seed)
-    {
-        return new KeyValueStoreEntry((ValueBytes)Enumerable.Repeat((byte)seed, 10).ToArray(), null);
-    }
-
-    internal static ReferencedEntity KeyValueStoreReferencedEntity(long stateVersion)
-    {
-        return new ReferencedEntity((EntityAddress)string.Empty, EntityType.InternalKeyValueStore, stateVersion);
-    }
-
-    internal static GenericKeyValueStoreEntrySubstate CrateKeyValueStoreSubstate(byte[] key, byte[]? value)
-    {
-        var genericKey = new GenericKey(new SborData(Convert.ToHexString(key)));
-
-        if (value == null)
-        {
-            return new GenericKeyValueStoreEntrySubstate(genericKey);
-        }
-
-        var entryValue = new GenericKeyValueStoreEntryValue(
-            new DataStruct(
-                new SborData(Convert.ToHexString(value)),
-                new List<EntityReference>(),
-                new List<EntityReference>()
-            )
-        );
-        return new GenericKeyValueStoreEntrySubstate(genericKey, entryValue);
+        yield return ResourceAddress;
     }
 }

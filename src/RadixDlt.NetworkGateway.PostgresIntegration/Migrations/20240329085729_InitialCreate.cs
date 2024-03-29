@@ -83,10 +83,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:account_default_deposit_rule", "accept,reject,allow_existing")
                 .Annotation("Npgsql:Enum:account_resource_preference_rule", "allowed,disallowed")
+                .Annotation("Npgsql:Enum:authorized_depositor_badge_type", "resource,non_fungible")
                 .Annotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker")
                 .Annotation("Npgsql:Enum:ledger_transaction_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call,badge_presented")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,manifest_class")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
@@ -100,6 +101,39 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible")
                 .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
                 .Annotation("Npgsql:Enum:state_type", "json,sbor");
+
+            migrationBuilder.CreateTable(
+                name: "account_authorized_depositor_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_authorized_depositor_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_authorized_depositor_entry_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    discriminator = table.Column<AuthorizedDepositorBadgeType>(type: "authorized_depositor_badge_type", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    non_fungible_id_data_id = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_authorized_depositor_entry_history", x => x.id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "account_default_deposit_rule_history",
@@ -117,7 +151,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "account_resource_preference_rule_history",
+                name: "account_resource_preference_rule_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_resource_preference_rule_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_resource_preference_rule_entry_history",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -130,7 +179,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_account_resource_preference_rule_history", x => x.id);
+                    table.PrimaryKey("PK_account_resource_preference_rule_entry_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -790,13 +839,40 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_account_authorized_depositor_aggregate_history_account_enti~",
+                table: "account_authorized_depositor_aggregate_history",
+                columns: new[] { "account_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_authorized_depositor_entry_history_account_entity_~1",
+                table: "account_authorized_depositor_entry_history",
+                columns: new[] { "account_entity_id", "resource_entity_id", "non_fungible_id_data_id", "from_state_version" },
+                filter: "discriminator = 'non_fungible'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_authorized_depositor_entry_history_account_entity_~2",
+                table: "account_authorized_depositor_entry_history",
+                columns: new[] { "account_entity_id", "resource_entity_id", "from_state_version" },
+                filter: "discriminator = 'resource'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_authorized_depositor_entry_history_account_entity_i~",
+                table: "account_authorized_depositor_entry_history",
+                columns: new[] { "account_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_account_default_deposit_rule_history_account_entity_id_from~",
                 table: "account_default_deposit_rule_history",
                 columns: new[] { "account_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_resource_preference_rule_history_account_entity_id_~",
-                table: "account_resource_preference_rule_history",
+                name: "IX_account_resource_preference_rule_aggregate_history_account_~",
+                table: "account_resource_preference_rule_aggregate_history",
+                columns: new[] { "account_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_resource_preference_rule_entry_history_account_enti~",
+                table: "account_resource_preference_rule_entry_history",
                 columns: new[] { "account_entity_id", "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
@@ -1113,10 +1189,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "account_authorized_depositor_aggregate_history");
+
+            migrationBuilder.DropTable(
+                name: "account_authorized_depositor_entry_history");
+
+            migrationBuilder.DropTable(
                 name: "account_default_deposit_rule_history");
 
             migrationBuilder.DropTable(
-                name: "account_resource_preference_rule_history");
+                name: "account_resource_preference_rule_aggregate_history");
+
+            migrationBuilder.DropTable(
+                name: "account_resource_preference_rule_entry_history");
 
             migrationBuilder.DropTable(
                 name: "component_method_royalty_aggregate_history");

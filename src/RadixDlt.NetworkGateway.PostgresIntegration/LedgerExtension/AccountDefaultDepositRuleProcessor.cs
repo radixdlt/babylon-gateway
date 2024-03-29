@@ -62,97 +62,85 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using System;
+using NpgsqlTypes;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal static class DbSetExtensions
+internal record struct AccountDefaultDepositRuleChangePointerLookup(long AccountEntityId, long StateVersion);
+
+internal record AccountDefaultDepositRuleChangePointer
 {
-    /// <summary>
-    /// <para>
-    /// This is designed to replace the use of "IN", improving performance, and allowing for support matching on tuples.
-    /// It does this by using a virtual join, inspired by https://singlebrook.com/2018/05/23/when-to-throw-in-out/.
-    ///
-    /// NOTE - This can be replaced by using UNNEST like we do in BulkAccountValidatorStakeHistoryAtVersion.
-    /// </para>
-    /// <para>
-    /// IMPORTANT NOTES:
-    /// <list type="bullet">
-    /// <item><description>This method assumes the flattened keys (as tuples) are distinct.</description></item>
-    /// <item><description>The initial SQL should be to select all columns of the dbSet and not include a where clause.</description></item>
-    /// </list>
-    /// </para>
-    /// <para>
-    /// Example use:
-    /// <code>
-    /// _dbContext.AccountResourceBalanceHistoryEntries
-    ///   .FromMultiDimensionalVirtualJoin(
-    ///     "SELECT * FROM account_resource_balance_history",
-    ///     "(account_id, resource_id)",
-    ///     new object[] { accountIdOne, resourceIdOne, accountIdTwo, resourceIdTwo },
-    ///     2
-    ///   );
-    /// </code>
-    /// </para>
-    /// </summary>
-    /// <typeparam name="TEntity">The entity of the dbSet.</typeparam>
-    public static IQueryable<TEntity> FromMultiDimensionalVirtualJoin<TEntity>(
-        this DbSet<TEntity> dbSet,
-        string initialSql,
-        string keysTuple,
-        object[] flattenedKeys,
-        int keySize
-    )
-        where TEntity : class
+    public List<CoreModel.AccountFieldStateSubstate> AccountFieldStateEntries { get; } = new();
+}
+
+internal class AccountDefaultDepositRuleProcessor
+{
+    private readonly ProcessorContext _context;
+    private readonly ChangeTracker<AccountDefaultDepositRuleChangePointerLookup, AccountDefaultDepositRuleChangePointer> _changeTracker = new();
+    private readonly List<AccountDefaultDepositRuleHistory> _rulesToAdd = new();
+
+    public AccountDefaultDepositRuleProcessor(ProcessorContext context)
     {
-        if (flattenedKeys.Length == 0 || keySize < 1 || flattenedKeys.Length % keySize > 0)
-        {
-            throw new ArgumentException(
-                $"Key size ({keySize}) does not divide key flattened key length ({flattenedKeys.Length}) or they're otherwise invalid"
-            );
-        }
-
-        var placeholders = CreateArrayOfTuplesPlaceholder(flattenedKeys.Length / keySize, keySize);
-
-        // NB: If we can't assume the flattened keys are distinct as tuples,
-        //     see https://dbfiddle.uk/?rdbms=postgres_9.6&amp;fiddle=2796bdabfda3931e98da8c7c23030e80 for ideas
-        return dbSet.FromSqlRaw($"{initialSql} INNER JOIN ( values {placeholders} ) v{keysTuple} using{keysTuple}", flattenedKeys);
+        _context = context;
     }
 
-    /// <summary>
-    /// Outputs a string like ({0},{1},{2}),({3},{4},{5}) for arrayLength=2, tupleLength=3.
-    /// </summary>
-    public static string CreateArrayOfTuplesPlaceholder(int arrayLength, int tupleLength, int startCountingAt = 0)
+    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
     {
-        var placeholders = new StringBuilder();
-        var placeholderCount = startCountingAt;
-        for (int i = 0; i < arrayLength; i++)
+        if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
         {
-            if (i > 0)
-            {
-                placeholders.Append(',');
-            }
-
-            placeholders.Append('(');
-
-            for (int j = 0; j < tupleLength; j++)
-            {
-                if (j > 0)
-                {
-                    placeholders.Append(',');
-                }
-
-                placeholders.Append('{');
-                placeholders.Append(placeholderCount++);
-                placeholders.Append('}');
-            }
-
-            placeholders.Append(')');
+            _changeTracker
+                .GetOrAdd(
+                    new AccountDefaultDepositRuleChangePointerLookup(referencedEntity.DatabaseId, stateVersion),
+                    _ => new AccountDefaultDepositRuleChangePointer())
+                .AccountFieldStateEntries
+                .Add(accountFieldState);
         }
-
-        return placeholders.ToString();
     }
+
+    public void ProcessChanges()
+    {
+        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
+        {
+            foreach (var accountFieldStateChange in change.AccountFieldStateEntries)
+            {
+                _rulesToAdd.Add(
+                    new AccountDefaultDepositRuleHistory
+                    {
+                        Id = _context.Sequences.AccountDefaultDepositRuleHistorySequence++,
+                        FromStateVersion = lookup.StateVersion,
+                        AccountEntityId = lookup.AccountEntityId,
+                        DefaultDepositRule = accountFieldStateChange.Value.DefaultDepositRule.ToModel(),
+                    });
+            }
+        }
+    }
+
+    public async Task<int> SaveEntities()
+    {
+        var rowsInserted = 0;
+
+        rowsInserted += await CopyAccountDefaultDepositRuleHistory();
+
+        return rowsInserted;
+    }
+
+    private Task<int> CopyAccountDefaultDepositRuleHistory() => _context.WriteHelper.Copy(
+        _rulesToAdd,
+        "COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.DefaultDepositRule, "account_default_deposit_rule", token);
+        });
 }

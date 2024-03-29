@@ -71,4 +71,6 @@ public interface INodeWorkerObserver
     void TrackNonFaultingExceptionInWorkLoop(Type worker, string nodeName, Exception exception);
 
     void TrackWorkerFaultedException(Type worker, string nodeName, Exception exception, bool isStopRequested);
+
+    void TrackWorkerLoopSucceeded(Type worker, string nodeName, TimeSpan loopDuration);
 }

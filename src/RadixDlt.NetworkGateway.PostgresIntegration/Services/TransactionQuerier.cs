@@ -111,6 +111,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .Concat(request.SearchCriteria.AccountsWithoutManifestOwnerMethodCalls)
             .Concat(request.SearchCriteria.ManifestAccountsWithdrawnFrom)
             .Concat(request.SearchCriteria.ManifestResources)
+            .Concat(request.SearchCriteria.BadgesPresented)
             .Concat(request.SearchCriteria.AffectedGlobalEntities)
             .Concat(request.SearchCriteria.Events.SelectMany(e =>
             {
@@ -159,12 +160,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     return TransactionPageWithoutTotal.Empty;
                 }
 
-                searchQuery = searchQuery
-                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                    .OfType<ManifestAddressLedgerTransactionMarker>()
-                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountDepositedInto && maltm.EntityId == entityId)
-                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
-                    .Select(maltm => maltm.StateVersion);
+                searchQuery = ApplyLedgerTransactionMarkerOperationTypeFilter(entityId, LedgerTransactionMarkerOperationType.AccountDepositedInto, searchQuery);
             }
         }
 
@@ -179,12 +175,22 @@ internal class TransactionQuerier : ITransactionQuerier
                     return TransactionPageWithoutTotal.Empty;
                 }
 
-                searchQuery = searchQuery
-                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                    .OfType<ManifestAddressLedgerTransactionMarker>()
-                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountWithdrawnFrom && maltm.EntityId == entityId)
-                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
-                    .Select(maltm => maltm.StateVersion);
+                searchQuery = ApplyLedgerTransactionMarkerOperationTypeFilter(entityId, LedgerTransactionMarkerOperationType.AccountWithdrawnFrom, searchQuery);
+            }
+        }
+
+        if (request.SearchCriteria.BadgesPresented.Any())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityAddress in request.SearchCriteria.BadgesPresented)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = ApplyLedgerTransactionMarkerOperationTypeFilter(entityId, LedgerTransactionMarkerOperationType.BadgePresented, searchQuery);
             }
         }
 
@@ -199,12 +205,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     return TransactionPageWithoutTotal.Empty;
                 }
 
-                searchQuery = searchQuery
-                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                    .OfType<ManifestAddressLedgerTransactionMarker>()
-                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.ResourceInUse && maltm.EntityId == entityId)
-                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
-                    .Select(maltm => maltm.StateVersion);
+                searchQuery = ApplyLedgerTransactionMarkerOperationTypeFilter(entityId, LedgerTransactionMarkerOperationType.ResourceInUse, searchQuery);
             }
         }
 
@@ -308,16 +309,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     return TransactionPageWithoutTotal.Empty;
                 }
 
-                searchQuery = searchQuery
-                    .Join(
-                        _dbContext.LedgerTransactionMarkers,
-                        stateVersion => stateVersion,
-                        ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
-                        (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
-                    .OfType<ManifestAddressLedgerTransactionMarker>()
-                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
-                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
-                    .Select(maltm => maltm.StateVersion);
+                searchQuery = ApplyLedgerTransactionMarkerOperationTypeFilter(entityId, LedgerTransactionMarkerOperationType.AccountOwnerMethodCall, searchQuery);
             }
         }
 
@@ -388,6 +380,20 @@ internal class TransactionQuerier : ITransactionQuerier
             : null;
 
         return new TransactionPageWithoutTotal(nextCursor, transactions);
+
+        IQueryable<long> ApplyLedgerTransactionMarkerOperationTypeFilter(long entityId, LedgerTransactionMarkerOperationType operationType, IQueryable<long> query)
+        {
+            return query
+                .Join(
+                    _dbContext.LedgerTransactionMarkers,
+                    stateVersion => stateVersion,
+                    ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
+                    (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
+                .OfType<ManifestAddressLedgerTransactionMarker>()
+                .Where(maltm => maltm.OperationType == operationType && maltm.EntityId == entityId)
+                .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
+                .Select(maltm => maltm.StateVersion);
+        }
     }
 
     public async Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(

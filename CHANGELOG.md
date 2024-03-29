@@ -1,3 +1,37 @@
+## 1.5.1
+Release built: _not published yet_
+
+- Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
+- Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.
+- Fixed pagination of the `/state/validators/list` endpoint where incorrect `cursor` was generated previously.
+- Reworked internal data aggregation mechanism to ease up maintenance burden.
+- Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
+- Changed MVC controller and action names. It has no effect on the API itself, but alters prometheus `controler` and `action` labels.
+  - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.KeysPage`,
+  - `StateNonFungibleController.Ids` renamed to `StateNonFungibleController.IdsPage`,
+  - `StatisticsController.Uptime` renamed to `StatisticsController.ValidatorsUptime`,
+  - `StateController` renamed to `StateEntityController`,
+  - `ValidatorStateController` renamed to `StateValidatorsComponent`.
+- Upgraded to .NET 8:
+  - Upgraded runtime and libraries
+  - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
+  - Removed now-obsolete or no-longer-needed code.
+  - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
+
+### API Changes
+- Added `role_assignments` property to the `StateEntityDetailsResponsePackageDetails`. All global component details returned by the `/state/entity/details` endpoint contain role assignments now.
+- Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.
+- Added new filter `manifest_badges_presented_filter` to the `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
+- Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
+- Use strong type definition for the `royalty_config` property of package blueprint and general components details. This is a change to OAS definition only and does not impact returned data format.
+- Introduced upper limit to the overall number of the filters used in the `/stream/transactions` endpoint, defaults to 10.
+- Added new endpoint `/state/account/page/resource-preferences` which allows to read resource preferences for given account.
+- Added new endpoint `/state/account/page/authorized-depositors` which allows to read authorized depositors for given account.
+
+### Database changes
+- Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
+- Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object. 
+
 ## 1.4.4
 Release built: 27.03.2024
 
@@ -17,7 +51,7 @@ Release built: 06.03.2024
 Release built: 27.02.2024
 
 ### Bug fixes
-- Recreated key value store keys are properly returned from `/state/key-value-store/keys` and `/state/key-value-store/keys`. Previously Gateway did not return keys that were deleted and then recreated. This release fixes existing data in the database and makes sure new ingested data is properly stored in the database.
+- Recreated key value store keys are properly returned from `/state/key-value-store/keys` and `/state/key-value-store/data`. Previously Gateway did not return keys that were deleted and then recreated. This release fixes existing data in the database and makes sure new ingested data is properly stored in the database.
 
 ## 1.4.0
 Release built: 08.02.2024

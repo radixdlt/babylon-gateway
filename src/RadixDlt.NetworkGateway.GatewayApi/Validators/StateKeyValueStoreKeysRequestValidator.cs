@@ -69,9 +69,9 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class StateKeyValueStoreItemsRequestValidator : AbstractValidator<StateKeyValueStoreKeysRequest>
+internal class StateKeyValueStoreKeysRequestValidator : AbstractValidator<StateKeyValueStoreKeysRequest>
 {
-    public StateKeyValueStoreItemsRequestValidator(
+    public StateKeyValueStoreKeysRequestValidator(
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
         RadixAddressValidator radixAddressValidator,
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,

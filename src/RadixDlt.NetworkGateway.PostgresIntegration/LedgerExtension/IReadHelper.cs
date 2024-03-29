@@ -75,19 +75,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal interface IReadHelper
 {
-    Task<Dictionary<TKey, TValue>> MostRecent<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
+    Task<Dictionary<TKey, TValue>> LoadDependencies<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
         where TKey : notnull
         where TValue : class;
-
-    Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token);
-
-    Task<Dictionary<long, PackageCodeAggregateHistory>> MostRecentPackageCodeAggregateHistoryFor(ICollection<PackageCodeDbLookup> packageCodeChanges, CancellationToken token);
-
-    Task<Dictionary<long, PackageBlueprintAggregateHistory>> MostRecentPackageBlueprintAggregateHistoryFor(
-        ICollection<PackageBlueprintDbLookup> packageBlueprintChanges,
-        CancellationToken token);
-
-    Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token);
 
     Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<IVaultSnapshot> vaultSnapshots, CancellationToken token);
 
@@ -111,8 +101,6 @@ internal interface IReadHelper
         List<NonFungibleIdChange> nonFungibleIdStoreChanges,
         List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
         CancellationToken token);
-
-    Task<Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token);
 
     Task<SequencesHolder> LoadSequences(CancellationToken token);
 }

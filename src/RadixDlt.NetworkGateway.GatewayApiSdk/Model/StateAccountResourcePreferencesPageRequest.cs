@@ -62,33 +62,12 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+// <copyright file="StateAccountResourcePreferencesPageRequest.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-[Table("account_resource_preference_rule_history")]
-public class AccountResourcePreferenceRuleHistory
+public partial class StateAccountResourcePreferencesPageRequest : IPaginableRequest
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("account_entity_id")]
-    public long AccountEntityId { get; set; }
-
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("account_resource_preference_rule")]
-    public AccountResourcePreferenceRule? AccountResourcePreferenceRule { get; set; }
-
-    [MemberNotNullWhen(false, nameof(AccountResourcePreferenceRule))]
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
 }

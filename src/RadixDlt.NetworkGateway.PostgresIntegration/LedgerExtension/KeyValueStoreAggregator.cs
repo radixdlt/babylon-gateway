@@ -71,8 +71,7 @@ internal static class KeyValueStoreAggregator
 {
     internal static (List<KeyValueStoreEntryHistory> EntriesToAdd, List<KeyValueStoreAggregateHistory> AggregatesToAdd) Aggregate(
         ProcessorContext context,
-        List<KeyValueStoreChangePointerLookup> changeOrder,
-        Dictionary<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> changePointers,
+        ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> changes,
         Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory> mostRecentEntries,
         Dictionary<long, KeyValueStoreAggregateHistory> mostRecentAggregates
     )
@@ -80,10 +79,8 @@ internal static class KeyValueStoreAggregator
         List<KeyValueStoreAggregateHistory> aggregatesToAdd = new();
         List<KeyValueStoreEntryHistory> entriesToAdd = new();
 
-        foreach (var lookup in changeOrder)
+        foreach (var (lookup, change) in changes.AsEnumerable())
         {
-            var change = changePointers[lookup];
-
             KeyValueStoreAggregateHistory aggregate;
 
             if (!mostRecentAggregates.TryGetValue(lookup.KeyValueStoreEntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
