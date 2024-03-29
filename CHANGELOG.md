@@ -1,9 +1,5 @@
-## 1.6.0
+## 1.5.1
 Release built: _not published yet_
-
-
-## 1.5.0
-Release built: 26.03.2024
 
 - Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
 - Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.
@@ -35,6 +31,15 @@ Release built: 26.03.2024
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
 - Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object. 
+
+## 1.4.4
+Release built: 27.03.2024
+
+### API Changes
+- Improved performance `/stream/transactions` endpoint when using `manifest_class_filter` filter.
+
+### Database changes
+- Replaced `IX_ledger_transaction_markers_manifest_class_is_most_specific_~` index with two separate indexes `IX_ledger_transaction_markers_manifest_class_is_most_specific` (indexes `is_most_specific` = true only) and `IX_ledger_transaction_markers_manifest_class` (indexes all manifest classes).
 
 ## 1.4.3
 Release built: 06.03.2024
