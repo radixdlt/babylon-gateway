@@ -1335,6 +1335,29 @@ paths:
                 $ref: "#/components/schemas/TransactionStatusResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
+  "/transaction/transfer-pre-validation":
+    post:
+      operationId: TransactionTransferPreValidation
+      summary: TODO PP
+      description: |
+        TODO PP
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionTransferPreValidationRequest"
+      responses:
+        "200":
+          description: TODO PP
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionTransferPreValidationResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
 
   "/stream/transactions":
     post:
@@ -2560,6 +2583,84 @@ components:
         - ResourceBadge
         - NonFungibleResourceBadge
 
+    AccountDefaultDepositRule:
+      type: string
+      description: TODO PP
+      enum:
+        - Allow
+        - Reject
+        - AllowExisting
+
+    TransferPreValidationDecidingFactors:
+      description: TODO PP
+      type: object
+      required:
+        - default_deposit_rule
+      properties:
+        is_badge_authorized_depositor:
+          description: TODO PP
+          type: boolean
+        default_deposit_rule:
+          $ref: "#/components/schemas/AccountDefaultDepositRule"
+        resource_preference_rules:
+          description: TODO PP
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountResourcePreferencesResponseItem"
+
+    TransferPreValidationResourceSpecificItems:
+      description: TODO PP
+      type: array
+      items:
+        type: object
+        required:
+          - resource_address
+          - allows_try_deposit
+        properties:
+          resource_address:
+            $ref: "#/components/schemas/Address"
+          allows_try_deposit:
+            description: TODO PP
+            type: boolean
+
+    # TODO PP: I'm not sure we want to use discriminator pattern in request.
+    # it's not properly handled in swagger. It doesn't display all possible types and it's properties.
+    # it displays only badge_type enum and it's values.
+    TransferPreValidationBadge:
+      type: object
+      required:
+        - badge_type
+      properties:
+        badge_type:
+          $ref: "#/components/schemas/AccountAuthorizedDepositorBadgeType"
+      discriminator:
+        propertyName: badge_type
+        mapping:
+          # Must match AccountAuthorizedDepositorBadgeType
+          ResourceBadge: "#/components/schemas/TransferPreValidationResourceBadge"
+          NonFungibleResourceBadge: "#/components/schemas/TransferPreValidationNonFungibleResourceBadge"
+    TransferPreValidationResourceBadge:
+      allOf:
+        - $ref: "#/components/schemas/TransferPreValidationBadge"
+        - type: object
+          required:
+            - resource_address
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+    TransferPreValidationNonFungibleResourceBadge:
+      allOf:
+        - $ref: "#/components/schemas/TransferPreValidationBadge"
+        - type: object
+          required:
+            - resource_address
+            - non_fungible_id
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+            non_fungible_id:
+              $ref: "#/components/schemas/NonFungibleId"
+
     AccountAuthorizedDepositorsResponseItem:
       type: object
       required:
@@ -3181,6 +3282,39 @@ components:
         duplicate:
           type: boolean
           description: Is true if the transaction is a duplicate of an existing pending transaction.
+
+    TransactionTransferPreValidationRequest:
+      allOf:
+        - type: object
+          required:
+            - account_address
+          properties:
+            account_address:
+              $ref: "#/components/schemas/Address"
+            resource_addresses:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            badge:
+              $ref: "#/components/schemas/TransferPreValidationBadge"
+    #      example: TODO PP
+    #        intent_hash: "<transaction-intent-hash>"
+
+    TransactionTransferPreValidationResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - allows_try_deposit_batch
+            - resource_specific
+            - deciding_factors
+          properties:
+            allows_try_deposit_batch:
+              type: boolean
+            resource_specific:
+              $ref: "#/components/schemas/TransferPreValidationResourceSpecificItems"
+            deciding_factors:
+              $ref: "#/components/schemas/TransferPreValidationDecidingFactors"
 
     TransactionStatusRequest:
       allOf:

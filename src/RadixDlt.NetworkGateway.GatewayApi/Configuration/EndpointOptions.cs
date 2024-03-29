@@ -95,6 +95,11 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("StateEntityDetailsPageSize")]
     public int StateEntityDetailsMaxPageSize { get; set; } = 20;
 
+    // TODO PP:
+    // Analyze and agree on some limit here.
+    [ConfigurationKeyName("TransactionTransferPreValidationMaxResourceItems")]
+    public int TransactionTransferPreValidationMaxResourceItems { get; set; } = 20;
+
     [ConfigurationKeyName("ExplicitMetadataMaxItems")]
     public int ExplicitMetadataMaxItems { get; set; } = 20;
 
