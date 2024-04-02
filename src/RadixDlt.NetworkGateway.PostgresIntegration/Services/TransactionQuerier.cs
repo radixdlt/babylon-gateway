@@ -141,10 +141,21 @@ internal class TransactionQuerier : ITransactionQuerier
             ? request.Cursor?.StateVersionBoundary ?? request.FromStateVersion
             : request.FromStateVersion;
 
-        var searchQuery = _dbContext
-            .LedgerTransactionMarkers
-            .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion))
-            .Select(lt => lt.StateVersion);
+        IQueryable<long> searchQuery;
+        if (lowerStateVersion.HasValue)
+        {
+            searchQuery = _dbContext
+                .LedgerTransactionMarkers
+                .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= lowerStateVersion)
+                .Select(lt => lt.StateVersion);
+        }
+        else
+        {
+            searchQuery = _dbContext
+                .LedgerTransactionMarkers
+                .Where(lt => lt.StateVersion <= upperStateVersion)
+                .Select(lt => lt.StateVersion);
+        }
 
         var userKindFilterImplicitlyApplied = false;
 
@@ -217,12 +228,24 @@ internal class TransactionQuerier : ITransactionQuerier
                     return TransactionPageWithoutTotal.Empty;
                 }
 
-                searchQuery = searchQuery
-                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                    .OfType<AffectedGlobalEntityTransactionMarker>()
-                    .Where(agetm => agetm.EntityId == entityId)
-                    .Where(agetm => agetm.StateVersion <= upperStateVersion && agetm.StateVersion >= (lowerStateVersion ?? agetm.StateVersion))
-                    .Select(agetm => agetm.StateVersion);
+                if (lowerStateVersion.HasValue)
+                {
+                    searchQuery = searchQuery
+                        .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                        .OfType<AffectedGlobalEntityTransactionMarker>()
+                        .Where(agetm => agetm.EntityId == entityId)
+                        .Where(agetm => agetm.StateVersion <= upperStateVersion && agetm.StateVersion >= lowerStateVersion)
+                        .Select(agetm => agetm.StateVersion);
+                }
+                else
+                {
+                    searchQuery = searchQuery
+                        .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                        .OfType<AffectedGlobalEntityTransactionMarker>()
+                        .Where(agetm => agetm.EntityId == entityId)
+                        .Where(agetm => agetm.StateVersion <= upperStateVersion)
+                        .Select(agetm => agetm.StateVersion);
+                }
             }
         }
 
@@ -262,12 +285,24 @@ internal class TransactionQuerier : ITransactionQuerier
                     eventResourceEntityId = id;
                 }
 
-                searchQuery = searchQuery
-                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                    .OfType<EventLedgerTransactionMarker>()
-                    .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
-                    .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
-                    .Select(eltm => eltm.StateVersion);
+                if (lowerStateVersion.HasValue)
+                {
+                    searchQuery = searchQuery
+                        .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                        .OfType<EventLedgerTransactionMarker>()
+                        .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
+                        .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= lowerStateVersion)
+                        .Select(eltm => eltm.StateVersion);
+                }
+                else
+                {
+                    searchQuery = searchQuery
+                        .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                        .OfType<EventLedgerTransactionMarker>()
+                        .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
+                        .Where(eltm => eltm.StateVersion <= upperStateVersion)
+                        .Select(eltm => eltm.StateVersion);
+                }
             }
         }
 
@@ -288,13 +323,26 @@ internal class TransactionQuerier : ITransactionQuerier
                 _ => throw new UnreachableException($"Didn't expect {request.SearchCriteria.ManifestClassFilter.Class} value"),
             };
 
-            searchQuery = searchQuery
-                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                .OfType<ManifestClassMarker>()
-                .Where(ttm => ttm.ManifestClass == manifestClass)
-                .Where(ttm => (request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType)
-                .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
-                .Select(eltm => eltm.StateVersion);
+            if (lowerStateVersion.HasValue)
+            {
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<ManifestClassMarker>()
+                    .Where(ttm => ttm.ManifestClass == manifestClass)
+                    .Where(ttm => (request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType)
+                    .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= lowerStateVersion)
+                    .Select(eltm => eltm.StateVersion);
+            }
+            else
+            {
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<ManifestClassMarker>()
+                    .Where(ttm => ttm.ManifestClass == manifestClass)
+                    .Where(ttm => (request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType)
+                    .Where(eltm => eltm.StateVersion <= upperStateVersion)
+                    .Select(eltm => eltm.StateVersion);
+            }
         }
 
         if (request.SearchCriteria.AccountsWithManifestOwnerMethodCalls.Any())
@@ -330,12 +378,25 @@ internal class TransactionQuerier : ITransactionQuerier
                     return TransactionPageWithoutTotal.Empty;
                 }
 
-                var withManifestOwnerCall = _dbContext
-                    .LedgerTransactionMarkers
-                    .OfType<ManifestAddressLedgerTransactionMarker>()
-                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
-                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
-                    .Select(y => y.StateVersion);
+                IQueryable<long> withManifestOwnerCall;
+                if (lowerStateVersion.HasValue)
+                {
+                    withManifestOwnerCall = _dbContext
+                        .LedgerTransactionMarkers
+                        .OfType<ManifestAddressLedgerTransactionMarker>()
+                        .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
+                        .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= lowerStateVersion)
+                        .Select(y => y.StateVersion);
+                }
+                else
+                {
+                    withManifestOwnerCall = _dbContext
+                        .LedgerTransactionMarkers
+                        .OfType<ManifestAddressLedgerTransactionMarker>()
+                        .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountOwnerMethodCall && maltm.EntityId == entityId)
+                        .Where(maltm => maltm.StateVersion <= upperStateVersion)
+                        .Select(y => y.StateVersion);
+                }
 
                 searchQuery = searchQuery.Where(x => withManifestOwnerCall.All(y => y != x));
             }
@@ -358,12 +419,24 @@ internal class TransactionQuerier : ITransactionQuerier
                 _ => throw new UnreachableException($"Unexpected value of kindFilter: {request.SearchCriteria.Kind}"),
             };
 
-            searchQuery = searchQuery
-                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                .OfType<OriginLedgerTransactionMarker>()
-                .Where(oltm => oltm.OriginType == originType)
-                .Where(oltm => oltm.StateVersion <= upperStateVersion && oltm.StateVersion >= (lowerStateVersion ?? oltm.StateVersion))
-                .Select(oltm => oltm.StateVersion);
+            if (lowerStateVersion.HasValue)
+            {
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<OriginLedgerTransactionMarker>()
+                    .Where(oltm => oltm.OriginType == originType)
+                    .Where(oltm => oltm.StateVersion <= upperStateVersion && oltm.StateVersion >= lowerStateVersion)
+                    .Select(oltm => oltm.StateVersion);
+            }
+            else
+            {
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<OriginLedgerTransactionMarker>()
+                    .Where(oltm => oltm.OriginType == originType)
+                    .Where(oltm => oltm.StateVersion <= upperStateVersion)
+                    .Select(oltm => oltm.StateVersion);
+            }
         }
 
         if (request.AscendingOrder)
