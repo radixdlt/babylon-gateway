@@ -1029,7 +1029,7 @@ tags:
       }
       ```
 
-      Will respond with a first page of the keys of the current entries of the key value store. This collection is ordered by the state version of the entry's last update, descending. In other words, the first entry on the list will be one that was most recently updated/created. Each item includes the entry's key (in both `hex` and `programmatic_json` form) and the state version when it was last updated.
+      Will respond with a first page of the keys of the current entries of the key value store. This collection is ordered by the entry first appearance on the network, descending. Each item includes the entry's key (in both `hex` and `programmatic_json` form) and the state version when it was last updated.
 
       ```
       {

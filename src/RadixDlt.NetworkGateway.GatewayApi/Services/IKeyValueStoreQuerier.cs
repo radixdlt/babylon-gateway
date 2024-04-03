@@ -66,21 +66,22 @@ using RadixDlt.NetworkGateway.Abstractions;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IKeyValueStoreQuerier
 {
-    Task<GatewayApiSdk.Model.StateKeyValueStoreDataResponse> KeyValueStoreData(
+    Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
         EntityAddress keyValueStoreAddress,
         IList<ValueBytes> keys,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
 
-    Task<GatewayApiSdk.Model.StateKeyValueStoreKeysResponse> KeyValueStoreItems(
+    Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
         EntityAddress keyValueStoreAddress,
-        GatewayApiSdk.Model.LedgerState ledgerState,
-        int offset,
-        int limit,
+        GatewayModel.LedgerState ledgerState,
+        GatewayModel.StateKeyValueStoreKeysCursor? cursor,
+        int pageSize,
         CancellationToken token = default);
 }

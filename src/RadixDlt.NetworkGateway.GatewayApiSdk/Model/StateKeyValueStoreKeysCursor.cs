@@ -62,91 +62,26 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.UnitTests.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal record KeyValueStoreChange(long KeyValueStoreEntityId, long StateVersion, KeyValueStoreEntry Entry);
-
-internal record KeyValueStoreEntry(ValueBytes Key, ValueBytes? Value);
-
-internal static class KeyValueStoreExtensions
+[DataContract]
+public sealed record StateKeyValueStoreKeysCursor(long? StateVersionBoundary, long? IdBoundary)
 {
-    internal static KeyValueStoreEntryHistory CreateDatabaseHistoryEntry(
-        long id,
-        long keyValueStoreEntityId,
-        long fromStateVersion,
-        KeyValueStoreEntry keyData,
-        bool isDeleted = false,
-        bool isLocked = false) =>
-        new()
-        {
-            Id = id,
-            KeyValueStoreEntityId = keyValueStoreEntityId,
-            FromStateVersion = fromStateVersion,
-            IsDeleted = isDeleted,
-            IsLocked = isLocked,
-            Key = keyData.Key,
-            Value = keyData.Value,
-        };
+    [DataMember(Name = "sv", EmitDefaultValue = false)]
+    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
 
-    internal static ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> PrepareChanges(List<KeyValueStoreChange> changes)
+    [DataMember(Name = "id", EmitDefaultValue = false)]
+    public long? IdBoundary { get; set; } = IdBoundary;
+
+    public static StateKeyValueStoreKeysCursor FromCursorString(string cursorString)
     {
-        var changeTracker = new ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer>();
-
-        foreach (var change in changes)
-        {
-            changeTracker.Add(
-                new KeyValueStoreChangePointerLookup(change.KeyValueStoreEntityId, change.StateVersion, change.Entry.Key),
-                new KeyValueStoreChangePointer(CrateKeyValueStoreSubstate(change.Entry.Key, change.Entry.Value))
-            );
-        }
-
-        return changeTracker;
+        return Serializations.FromBase64JsonOrDefault<StateKeyValueStoreKeysCursor>(cursorString);
     }
 
-    internal static KeyValueStoreEntry GenerateKeyEntry(long seed)
+    public string ToCursorString()
     {
-        return GenerateKeyEntry(seed, seed);
-    }
-
-    internal static KeyValueStoreEntry GenerateKeyEntry(long keySeed, long valueSeed)
-    {
-        return new KeyValueStoreEntry((ValueBytes)Enumerable.Repeat((byte)keySeed, 10).ToArray(), (ValueBytes)Enumerable.Repeat((byte)keySeed, 20).ToArray());
-    }
-
-    internal static KeyValueStoreEntry GenerateDeletedKeyEntry(long seed)
-    {
-        return new KeyValueStoreEntry((ValueBytes)Enumerable.Repeat((byte)seed, 10).ToArray(), null);
-    }
-
-    internal static ReferencedEntity KeyValueStoreReferencedEntity(long stateVersion)
-    {
-        return new ReferencedEntity((EntityAddress)string.Empty, EntityType.InternalKeyValueStore, stateVersion);
-    }
-
-    internal static GenericKeyValueStoreEntrySubstate CrateKeyValueStoreSubstate(byte[] key, byte[]? value)
-    {
-        var genericKey = new GenericKey(new SborData(Convert.ToHexString(key)));
-
-        if (value == null)
-        {
-            return new GenericKeyValueStoreEntrySubstate(genericKey);
-        }
-
-        var entryValue = new GenericKeyValueStoreEntryValue(
-            new DataStruct(
-                new SborData(Convert.ToHexString(value)),
-                new List<EntityReference>(),
-                new List<EntityReference>()
-            )
-        );
-        return new GenericKeyValueStoreEntrySubstate(genericKey, entryValue);
+        return Serializations.AsBase64Json(this);
     }
 }

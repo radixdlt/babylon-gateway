@@ -4,7 +4,6 @@ Release built: _not published yet_
 - Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
 - Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.
 - Fixed pagination of the `/state/validators/list` endpoint where incorrect `cursor` was generated previously.
-- Reworked internal data aggregation mechanism to ease up maintenance burden.
 - Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
 - Changed MVC controller and action names. It has no effect on the API itself, but alters prometheus `controler` and `action` labels.
   - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.KeysPage`,
@@ -16,7 +15,9 @@ Release built: _not published yet_
   - Upgraded runtime and libraries
   - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
   - Removed now-obsolete or no-longer-needed code.
-  - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
+  - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client.
+- Reworked internal data aggregation mechanism to ease up maintenance burden.
+- Reworked KVStores storage and changed API surface of this area to improve overall performance. 
 
 ### API Changes
 - Added `role_assignments` property to the `StateEntityDetailsResponsePackageDetails`. All global component details returned by the `/state/entity/details` endpoint contain role assignments now.
@@ -28,9 +29,17 @@ Release built: _not published yet_
 - Added new endpoint `/state/account/page/resource-preferences` which allows to read resource preferences for given account.
 - Added new endpoint `/state/account/page/authorized-depositors` which allows to read authorized depositors for given account.
 
+> [!CAUTION]
+> **Breaking Changes:**
+> - Changed ordering of the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending.
+
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
-- Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object. 
+- Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object.
+- Changed KVStore area:
+  - dropped `key_value_store_aggregate_history` table altogether as we no longer keep track of aggregated KVStores,
+  - introduced `key_value_store_entry_definition` table that defines each and every KVStore entry,
+  - table `key_value_store_entry_history` references rows from `key_value_store_entry_definition` rather `key`s themselves.
 
 ## 1.4.4
 Release built: 27.03.2024

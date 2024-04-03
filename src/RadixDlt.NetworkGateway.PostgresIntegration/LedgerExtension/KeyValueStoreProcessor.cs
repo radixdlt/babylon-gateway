@@ -65,8 +65,8 @@
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -82,12 +82,14 @@ internal record KeyValueStoreChangePointer(CoreModel.GenericKeyValueStoreEntrySu
 internal class KeyValueStoreProcessor
 {
     private readonly ProcessorContext _context;
-    private ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changes = new();
-    private Dictionary<long, KeyValueStoreAggregateHistory> _mostRecentAggregates = new();
-    private Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory> _mostRecentEntries = new();
 
-    private List<KeyValueStoreAggregateHistory> _aggregatesToAdd = new();
-    private List<KeyValueStoreEntryHistory> _entriesToAdd = new();
+    private readonly Dictionary<KeyValueStoreEntryDbLookup, long> _observedEntryDefinitions = new();
+    private readonly Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryDefinition> _existingEntryDefinitions = new();
+
+    private readonly List<KeyValueStoreEntryDefinition> _entryDefinitionsToAdd = new();
+    private readonly List<KeyValueStoreEntryHistory> _entryHistoryToAdd = new();
+
+    private ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changes = new();
 
     public KeyValueStoreProcessor(ProcessorContext context)
     {
@@ -98,115 +100,100 @@ internal class KeyValueStoreProcessor
     {
         if (substateData is CoreModel.GenericKeyValueStoreEntrySubstate genericKeyValueStoreEntry)
         {
-            var kvStoreEntryLookup = new KeyValueStoreChangePointerLookup(
-                referencedEntity.DatabaseId,
-                stateVersion,
-                (ValueBytes)genericKeyValueStoreEntry.Key.KeyData.GetDataBytes()
-            );
+            var key = (ValueBytes)genericKeyValueStoreEntry.Key.KeyData.GetDataBytes();
+            var kvStoreEntryLookup = new KeyValueStoreChangePointerLookup(referencedEntity.DatabaseId, stateVersion, key);
 
             _changes.Add(kvStoreEntryLookup, new KeyValueStoreChangePointer(genericKeyValueStoreEntry));
+            _observedEntryDefinitions.TryAdd(new KeyValueStoreEntryDbLookup(referencedEntity.DatabaseId, key), stateVersion);
         }
-    }
-
-    public void ProcessChanges()
-    {
-        (_entriesToAdd, _aggregatesToAdd) = KeyValueStoreAggregator.Aggregate(_context, _changes, _mostRecentEntries, _mostRecentAggregates);
     }
 
     public async Task LoadDependencies()
     {
-        _mostRecentEntries = await MostRecentKeyValueStoreEntryHistoryFor();
-        _mostRecentAggregates = await MostRecentKeyValueStoreAggregateHistoryFor();
+        _existingEntryDefinitions.AddRange(await ExistingKeyValueStoreEntryDefinitions());
+    }
+
+    public void ProcessChanges()
+    {
+        foreach (var lookup in _observedEntryDefinitions.Keys.Except(_existingEntryDefinitions.Keys))
+        {
+            var entryDefinition = new KeyValueStoreEntryDefinition
+            {
+                Id = _context.Sequences.KeyValueStoreEntryDefinitionSequence++,
+                FromStateVersion = _observedEntryDefinitions[lookup],
+                KeyValueStoreEntityId = lookup.KeyValueStoreEntityId,
+                Key = lookup.Key,
+            };
+
+            _entryDefinitionsToAdd.Add(entryDefinition);
+            _existingEntryDefinitions[lookup] = entryDefinition;
+        }
+
+        foreach (var change in _changes.AsEnumerable())
+        {
+            var isDeleted = change.Value.KeyValueStoreEntry.Value == null;
+
+            _entryHistoryToAdd.Add(new KeyValueStoreEntryHistory
+            {
+                Id = _context.Sequences.KeyValueStoreEntryHistorySequence++,
+                FromStateVersion = change.Key.StateVersion,
+                KeyValueStoreEntryDefinitionId = _existingEntryDefinitions[new KeyValueStoreEntryDbLookup(change.Key.KeyValueStoreEntityId, change.Key.Key)].Id,
+                Value = isDeleted ? null : change.Value.KeyValueStoreEntry.Value!.Data.StructData.GetDataBytes(),
+                IsDeleted = isDeleted,
+                IsLocked = change.Value.KeyValueStoreEntry.IsLocked,
+            });
+        }
     }
 
     public async Task<int> SaveEntities()
     {
         var rowsInserted = 0;
 
+        rowsInserted += await CopyKeyValueStoreEntryDefinition();
         rowsInserted += await CopyKeyValueStoreEntryHistory();
-        rowsInserted += await CopyKeyValueStoreAggregateHistory();
 
         return rowsInserted;
     }
 
-    private Task<Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>> MostRecentKeyValueStoreEntryHistoryFor()
+    private async Task<IDictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryDefinition>> ExistingKeyValueStoreEntryDefinitions()
     {
-        var lookupSet = _changes.Keys.Select(x => new KeyValueStoreEntryDbLookup(x.KeyValueStoreEntityId, x.Key)).ToHashSet();
-
-        if (!lookupSet.Unzip(
-                x => x.KeyValueStoreEntityId,
-                x => (byte[])x.Key,
-                out var keyValueStoreEntityIds,
-                out var keys))
+        if (!_observedEntryDefinitions.Keys.ToHashSet().Unzip(x => x.KeyValueStoreEntityId, x => (byte[])x.Key, out var keyValueStoreEntityIds, out var keys))
         {
-            return Task.FromResult(new Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>());
+            return ImmutableDictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryDefinition>.Empty;
         }
 
-        return _context.ReadHelper.LoadDependencies<KeyValueStoreEntryDbLookup, KeyValueStoreEntryHistory>(
+        return await _context.ReadHelper.LoadDependencies<KeyValueStoreEntryDbLookup, KeyValueStoreEntryDefinition>(
             @$"
 WITH variables (key_value_store_entity_id, key) AS (
     SELECT UNNEST({keyValueStoreEntityIds}), UNNEST({keys})
 )
-SELECT kvseh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM key_value_store_entry_history
-    WHERE key_value_store_entity_id = variables.key_value_store_entity_id AND key = variables.key
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) kvseh ON true;",
+SELECT *
+FROM key_value_store_entry_definition
+WHERE (key_value_store_entity_id, key) IN (SELECT * FROM variables)",
             e => new KeyValueStoreEntryDbLookup(e.KeyValueStoreEntityId, (ValueBytes)e.Key));
     }
 
-    private Task<Dictionary<long, KeyValueStoreAggregateHistory>> MostRecentKeyValueStoreAggregateHistoryFor()
-    {
-        var entityIds = _changes.Keys.Select(x => x.KeyValueStoreEntityId).ToHashSet().ToList();
-
-        if (!entityIds.Any())
-        {
-            return Task.FromResult(new Dictionary<long, KeyValueStoreAggregateHistory>());
-        }
-
-        return _context.ReadHelper.LoadDependencies<long, KeyValueStoreAggregateHistory>(
-            @$"
-WITH variables (key_value_store_entity_id) AS (
-    SELECT UNNEST({entityIds})
-)
-SELECT kvsah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM key_value_store_aggregate_history
-    WHERE key_value_store_entity_id = variables.key_value_store_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) kvsah ON true;",
-            e => e.KeyValueStoreEntityId);
-    }
-
-    private Task<int> CopyKeyValueStoreEntryHistory() => _context.WriteHelper.Copy(
-        _entriesToAdd,
-        "COPY key_value_store_entry_history (id, from_state_version, key_value_store_entity_id, key, value, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)",
+    private Task<int> CopyKeyValueStoreEntryDefinition() => _context.WriteHelper.Copy(
+        _entryDefinitionsToAdd,
+        "COPY key_value_store_entry_definition (id, from_state_version, key_value_store_entity_id, key) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Key.ToArray(), NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Key, NpgsqlDbType.Bytea, token);
+        });
+
+    private Task<int> CopyKeyValueStoreEntryHistory() => _context.WriteHelper.Copy(
+        _entryHistoryToAdd,
+        "COPY key_value_store_entry_history (id, from_state_version, key_value_store_entry_definition_id, value, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.KeyValueStoreEntryDefinitionId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Value?.ToArray(), NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
-        });
-
-    private Task<int> CopyKeyValueStoreAggregateHistory() => _context.WriteHelper.Copy(
-        _aggregatesToAdd,
-        "COPY key_value_store_aggregate_history (id, from_state_version, key_value_store_entity_id, key_value_store_entry_ids) FROM STDIN (FORMAT BINARY)",
-        async (writer, e, token) =>
-        {
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.KeyValueStoreEntryIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         });
 }
