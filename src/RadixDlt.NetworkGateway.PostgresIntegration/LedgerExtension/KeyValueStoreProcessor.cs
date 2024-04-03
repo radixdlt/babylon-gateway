@@ -82,13 +82,14 @@ internal record KeyValueStoreChangePointer(CoreModel.GenericKeyValueStoreEntrySu
 internal class KeyValueStoreProcessor
 {
     private readonly ProcessorContext _context;
+
+    private readonly Dictionary<KeyValueStoreEntryDbLookup, long> _observedEntryDefinitions = new();
+    private readonly Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryDefinition> _existingEntryDefinitions = new();
+
+    private readonly List<KeyValueStoreEntryDefinition> _entryDefinitionsToAdd = new();
+    private readonly List<KeyValueStoreEntryHistory> _entryHistoryToAdd = new();
+
     private ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changes = new();
-
-    private Dictionary<KeyValueStoreEntryDbLookup, long> _observedEntryDefinitions = new();
-    private Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryDefinition> _existingEntryDefinitions = new();
-
-    private List<KeyValueStoreEntryDefinition> _entryDefinitionsToAdd = new();
-    private List<KeyValueStoreEntryHistory> _entryHistoryToAdd = new();
 
     public KeyValueStoreProcessor(ProcessorContext context)
     {
