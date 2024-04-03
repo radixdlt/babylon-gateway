@@ -200,15 +200,9 @@ internal class ValidatorProcessor
 WITH variables (validator_entity_id, key_type, key) AS (
     SELECT UNNEST({entityIds}), UNNEST({keyTypes}), UNNEST({keys})
 )
-SELECT vpkh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM validator_public_key_history
-    WHERE validator_entity_id = variables.validator_entity_id AND key_type = variables.key_type AND key = variables.key
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) vpkh ON true;",
+SELECT *
+FROM validator_public_key_history
+WHERE (validator_entity_id, key_type, key) IN (SELECT * FROM variables);",
             e => new ValidatorPublicKeyLookup(e.ValidatorEntityId, e.KeyType, e.Key));
     }
 
