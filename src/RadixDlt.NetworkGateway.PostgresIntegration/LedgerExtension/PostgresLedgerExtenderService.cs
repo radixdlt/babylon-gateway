@@ -216,14 +216,13 @@ UPDATE pending_transactions
 
     private async Task<ExtendLedgerReport> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
-        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration();
+        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
         var rowsInserted = 0;
         var rowsUpdated = 0;
         var dbReadDuration = TimeSpan.Zero;
         var dbWriteDuration = TimeSpan.Zero;
         var outerStopwatch = Stopwatch.StartNew();
         var referencedEntities = new ReferencedEntityDictionary();
-        var referencedNonFungibleIdDictionary = new ReferencedNonFungibleIdDictionary();
         var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
         var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
         var manifestClasses = new Dictionary<long, List<LedgerTransactionManifestClass>>();
@@ -483,21 +482,6 @@ UPDATE pending_transactions
                                 e.PendingOwnerStakeUnitUnlockVault = referencedEntities.Get((EntityAddress)validator.Value.PendingOwnerStakeUnitUnlockVault.EntityAddress).DatabaseId;
                             });
                         }
-
-                        if (substateData is CoreModel.AccountAuthorizedDepositorEntrySubstate accountAuthorizedDepositorEntrySubstate)
-                        {
-                            if (accountAuthorizedDepositorEntrySubstate.Key.Badge is CoreModel.NonFungibleAuthorizedDepositorBadge nonFungibleGlobalAuthorizedDepositorBadge)
-                            {
-                                var nonFungibleId = nonFungibleGlobalAuthorizedDepositorBadge.GetNonFungibleGlobalId();
-
-                                referencedNonFungibleIdDictionary.MarkSeen(
-                                    new NonFungibleGlobalIdLookup(
-                                        (EntityAddress)nonFungibleId.ResourceAddress,
-                                        nonFungibleId.LocalId.SimpleRep
-                                    )
-                                );
-                    }
-                        }
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -626,20 +610,8 @@ UPDATE pending_transactions
             var sw = Stopwatch.StartNew();
 
             var knownDbEntities = await readHelper.ExistingEntitiesFor(referencedEntities, token);
-            var nonFungibleIds = await readHelper.ReadNonFungibleData(referencedNonFungibleIdDictionary.Observed, token);
 
             dbReadDuration += sw.Elapsed;
-
-            foreach (var referencedNonFungibleId in referencedNonFungibleIdDictionary.Observed)
-            {
-                if (nonFungibleIds.TryGetValue(referencedNonFungibleId, out var nonFungibleIdGlobalIdDatabaseId))
-                {
-                    referencedNonFungibleIdDictionary.Add(
-                        referencedNonFungibleId,
-                        new NonFungibleIdGlobalIdDatabaseId(nonFungibleIdGlobalIdDatabaseId.ResourceEntityId, nonFungibleIdGlobalIdDatabaseId.NonFungibleIdDataId)
-                    );
-                }
-            }
 
             foreach (var knownDbEntity in knownDbEntities.Values)
             {
@@ -794,7 +766,7 @@ UPDATE pending_transactions
         var entityRoleAssignmentProcessor = new EntityRoleAssignmentProcessor(processorContext);
         var packageCodeProcessor = new PackageCodeProcessor(processorContext, networkConfiguration.Id);
         var packageBlueprintProcessor = new PackageBlueprintProcessor(processorContext, referencedEntities);
-        var accountAuthorizedDepositorsProcessor = new AccountAuthorizedDepositorsProcessor(processorContext, referencedNonFungibleIdDictionary, referencedEntities);
+        var accountAuthorizedDepositorsProcessor = new AccountAuthorizedDepositorsProcessor(processorContext, referencedEntities);
         var accountResourcePreferenceRulesProcessor = new AccountResourcePreferenceRulesProcessor(processorContext, referencedEntities);
         var accountDefaultDepositRuleProcessor = new AccountDefaultDepositRuleProcessor(processorContext);
         var keyValueStoreProcessor = new KeyValueStoreProcessor(processorContext);

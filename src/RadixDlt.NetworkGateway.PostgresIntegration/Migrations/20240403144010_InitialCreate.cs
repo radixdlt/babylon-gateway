@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -128,7 +128,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     discriminator = table.Column<AuthorizedDepositorBadgeType>(type: "authorized_depositor_badge_type", nullable: false),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
-                    non_fungible_id_data_id = table.Column<long>(type: "bigint", nullable: true)
+                    non_fungible_id = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -845,7 +845,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_account_authorized_depositor_entry_history_account_entity_~1",
                 table: "account_authorized_depositor_entry_history",
-                columns: new[] { "account_entity_id", "resource_entity_id", "non_fungible_id_data_id", "from_state_version" },
+                columns: new[] { "account_entity_id", "resource_entity_id", "non_fungible_id", "from_state_version" },
                 filter: "discriminator = 'non_fungible'");
 
             migrationBuilder.CreateIndex(

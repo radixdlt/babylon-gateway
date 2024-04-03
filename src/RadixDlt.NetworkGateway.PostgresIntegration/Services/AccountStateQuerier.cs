@@ -128,9 +128,9 @@ WHERE account_entity_id = @accountEntityId AND from_state_version <= @stateVersi
 ORDER BY from_state_version DESC
 LIMIT 1)
 SELECT
-       arpreh.from_state_version                         AS FromStateVersion,
+       arpreh.from_state_version                        AS FromStateVersion,
        resource_entity.address                          AS ResourceEntityAddress,
-       arpreh.account_resource_preference_rule           AS AccountResourcePreferenceRule,
+       arpreh.account_resource_preference_rule          AS AccountResourcePreferenceRule,
        slices.resource_preference_rules_total_count     AS TotalCount
 FROM slices
 INNER JOIN LATERAL UNNEST(resource_preference_rules_slice) WITH ORDINALITY AS resource_preference_join(id, ordinality) ON TRUE
@@ -191,12 +191,11 @@ SELECT
     aadeh.discriminator                          AS BadgeType,
     resource_entity.address                     AS ResourceBadgeEntityAddress,
     non_fungible_resource_entity.address        AS NonFungibleBadgeResourceEntityAddress,
-    nfid.non_fungible_id                        AS NonFungibleBadgeNonFungibleId,
+    aadeh.non_fungible_id                       AS NonFungibleBadgeNonFungibleId,
     slices.authorized_depositors_total_count    AS TotalCount
 FROM slices
          INNER JOIN LATERAL UNNEST(resource_authorized_depositors_slice) WITH ORDINALITY AS resource_authorized_depositors_join(id, ordinality) ON TRUE
          INNER JOIN account_authorized_depositor_entry_history aadeh ON aadeh.id = resource_authorized_depositors_join.id
-         LEFT JOIN non_fungible_id_data nfid on nfid.id = aadeh.non_fungible_id_data_id
          LEFT JOIN entities resource_entity on aadeh.resource_entity_id = resource_entity.id
          LEFT JOIN entities non_fungible_resource_entity on aadeh.resource_entity_id = non_fungible_resource_entity.id
 ORDER BY resource_authorized_depositors_join.ordinality ASC;",

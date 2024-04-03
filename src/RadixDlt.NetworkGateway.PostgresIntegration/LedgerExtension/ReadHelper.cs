@@ -383,53 +383,6 @@ WHERE id IN(
         return result;
     }
 
-    public async Task<Dictionary<NonFungibleGlobalIdLookup, NonFungibleIdGlobalIdDatabaseId>> ReadNonFungibleData(
-        HashSet<NonFungibleGlobalIdLookup> referencedNonFungibleIds,
-        CancellationToken token)
-    {
-        if (!referencedNonFungibleIds.Any())
-        {
-            return new Dictionary<NonFungibleGlobalIdLookup, NonFungibleIdGlobalIdDatabaseId>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        var resourceAddresses = new List<string>();
-        var nonFungibleIds = new List<string>();
-
-        foreach (var nf in referencedNonFungibleIds)
-        {
-            resourceAddresses.Add(nf.ResourceAddress);
-            nonFungibleIds.Add(nf.SimpleRepresentation);
-        }
-
-        var cd = new CommandDefinition(
-            commandText: $@"
-WITH var (non_fungible_resource_address, non_fungible_id) AS (
-    SELECT UNNEST(@resourceAddresses), UNNEST(@nonFungibleIds)
-)
-SELECT
-    var.non_fungible_resource_address AS ResourceAddress,
-    var.non_fungible_id AS SimpleRepresentation,
-    nfid.non_fungible_resource_entity_id AS ResourceEntityId,
-    nfid.id AS NonFungibleIdDataId
-FROM var
-INNER JOIN entities e ON e.address = var.non_fungible_resource_address
-INNER JOIN non_fungible_id_data nfid ON nfid.non_fungible_resource_entity_id = e.id AND nfid.non_fungible_id = var.non_fungible_id",
-            parameters: new
-            {
-                resourceAddresses = resourceAddresses,
-                nonFungibleIds = nonFungibleIds,
-            },
-            cancellationToken: token);
-
-        var result = (await _dapperWrapper.QueryAsync<NonFungibleMap>(_connection, cd)).ToList();
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ReadNonFungibleData), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result.ToDictionary(x => new NonFungibleGlobalIdLookup(x.ResourceAddress, x.SimpleRepresentation), x => new NonFungibleIdGlobalIdDatabaseId(x.ResourceEntityId, x.NonFungibleIdDataId));
-    }
-
     public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
         List<NonFungibleIdChange> nonFungibleIdStoreChanges,
         List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
