@@ -80,7 +80,7 @@ public interface IFetchedTransactionStore
 
     GatewayModel.CommittedStateIdentifiers? GetStateIdentifiersForStateVersion(long stateVersion);
 
-    List<CoreModel.CommittedTransaction> GetTransactionBatch(long fromStateVersion, int maxBatchSize);
+    List<CoreModel.CommittedTransaction> GetTransactionBatch(long fromStateVersion, int maxBatchSize, int minBatchSize);
 
     void StoreNodeTransactions(string nodeName, List<CoreModel.CommittedTransaction> transactions, int responseSize);
 
@@ -151,7 +151,7 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
         }
     }
 
-    public List<CoreApiSdk.Model.CommittedTransaction> GetTransactionBatch(long fromStateVersion, int maxBatchSize)
+    public List<CoreApiSdk.Model.CommittedTransaction> GetTransactionBatch(long fromStateVersion, int maxBatchSize, int minBatchSize)
     {
         var nodeWithMostTransactions = _transactionsByNode
             .Where(x => x.Value.ContainsKey(fromStateVersion))
@@ -161,15 +161,22 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
 
         if (nodeWithMostTransactions == null)
         {
-            return new List<CoreModel.CommittedTransaction>();
+            return [];
         }
 
-        return nodeWithMostTransactions
+        var transactions = nodeWithMostTransactions
             .Where(x => x.Key >= fromStateVersion)
             .OrderBy(x => x.Key)
             .Take(maxBatchSize)
             .Select(x => x.Value.CommittedTransaction)
             .ToList();
+
+        if (transactions.Count < minBatchSize)
+        {
+            return [];
+        }
+
+        return transactions;
     }
 
     public bool ShouldFetchNewTransactions(string nodeName, long committedStateVersion)
@@ -185,7 +192,8 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
         {
             _logger.LogDebug(
                 "Fetched transaction store is full. Not fetching new transactions. Store holds: {StoredTransactionsSize} max limit per node: {MaxEstimatedTransactionPipelineByteSizePerNode}",
-                storedTransactionsSize, Config.MaxEstimatedTransactionPipelineByteSizePerNode);
+                storedTransactionsSize,
+                Config.MaxEstimatedTransactionPipelineByteSizePerNode);
         }
 
         return shouldFetchTransactions;

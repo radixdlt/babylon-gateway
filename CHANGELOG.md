@@ -15,7 +15,8 @@ Release built: _not published yet_
   - Upgraded runtime and libraries
   - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
   - Removed now-obsolete or no-longer-needed code.
-  - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client.
+  - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
+- Introduced new configuration parameter `LedgerConfirmation.MinCommitBatchSize`. It controls the minimum batch size of transactions that will be processed, set by default to 1. 
 - Reworked internal data aggregation mechanism to ease up maintenance burden.
 - Reworked KVStores storage and changed API surface of this area to improve overall performance. 
 
@@ -35,7 +36,7 @@ Release built: _not published yet_
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
-- Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object.
+- Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object. 
 - Changed KVStore area:
   - dropped `key_value_store_aggregate_history` table altogether as we no longer keep track of aggregated KVStores,
   - introduced `key_value_store_entry_definition` table that defines each and every KVStore entry,
