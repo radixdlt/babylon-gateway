@@ -73,7 +73,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class TransactionTransferPreValidationRequestValidator : AbstractValidator<TransactionTransferPreValidationRequest>
+internal class TransactionTransferPreValidationRequestValidator : AbstractValidator<AccountDepositPreValidationRequest>
 {
     public TransactionTransferPreValidationRequestValidator(RadixAddressValidator radixAddressValidator, IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
     {
@@ -103,7 +103,7 @@ internal class TransactionTransferPreValidationRequestValidator : AbstractValida
     }
 }
 
-internal class TransferPreValidationResourceBadgeValidator : AbstractValidator<TransferPreValidationResourceBadge>
+internal class TransferPreValidationResourceBadgeValidator : AbstractValidator<AccountDepositPreValidationResourceBadge>
 {
     public TransferPreValidationResourceBadgeValidator(RadixAddressValidator radixAddressValidator)
     {
@@ -113,7 +113,7 @@ internal class TransferPreValidationResourceBadgeValidator : AbstractValidator<T
     }
 }
 
-internal class TransferPreValidationNonFungibleResourceBadgeValidator : AbstractValidator<TransferPreValidationNonFungibleResourceBadge>
+internal class TransferPreValidationNonFungibleResourceBadgeValidator : AbstractValidator<AccountDepositPreValidationNonFungibleResourceBadge>
 {
     public TransferPreValidationNonFungibleResourceBadgeValidator(RadixAddressValidator radixAddressValidator)
     {

@@ -90,50 +90,70 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransferPreValidationNonFungibleResourceBadgeAllOf
+    /// AccountDepositPreValidationResponse
     /// </summary>
-    [DataContract(Name = "TransferPreValidationNonFungibleResourceBadge_allOf")]
-    public partial class TransferPreValidationNonFungibleResourceBadgeAllOf : IEquatable<TransferPreValidationNonFungibleResourceBadgeAllOf>
+    [DataContract(Name = "AccountDepositPreValidationResponse")]
+    public partial class AccountDepositPreValidationResponse : IEquatable<AccountDepositPreValidationResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransferPreValidationNonFungibleResourceBadgeAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransferPreValidationNonFungibleResourceBadgeAllOf() { }
+        protected AccountDepositPreValidationResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransferPreValidationNonFungibleResourceBadgeAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResponse" /> class.
         /// </summary>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        public TransferPreValidationNonFungibleResourceBadgeAllOf(string resourceAddress = default(string), string nonFungibleId = default(string))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="allowsTryDepositBatch">allowsTryDepositBatch (required).</param>
+        /// <param name="resourceSpecific">TODO PP (required).</param>
+        /// <param name="decidingFactors">decidingFactors (required).</param>
+        public AccountDepositPreValidationResponse(LedgerState ledgerState = default(LedgerState), bool allowsTryDepositBatch = default(bool), List<AccountDepositPreValidationResourceSpecificItemsInner> resourceSpecific = default(List<AccountDepositPreValidationResourceSpecificItemsInner>), AccountDepositPreValidationDecidingFactors decidingFactors = default(AccountDepositPreValidationDecidingFactors))
         {
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for TransferPreValidationNonFungibleResourceBadgeAllOf and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for AccountDepositPreValidationResponse and cannot be null");
             }
-            this.ResourceAddress = resourceAddress;
-            // to ensure "nonFungibleId" is required (not null)
-            if (nonFungibleId == null)
+            this.LedgerState = ledgerState;
+            this.AllowsTryDepositBatch = allowsTryDepositBatch;
+            // to ensure "resourceSpecific" is required (not null)
+            if (resourceSpecific == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for TransferPreValidationNonFungibleResourceBadgeAllOf and cannot be null");
+                throw new ArgumentNullException("resourceSpecific is a required property for AccountDepositPreValidationResponse and cannot be null");
             }
-            this.NonFungibleId = nonFungibleId;
+            this.ResourceSpecific = resourceSpecific;
+            // to ensure "decidingFactors" is required (not null)
+            if (decidingFactors == null)
+            {
+                throw new ArgumentNullException("decidingFactors is a required property for AccountDepositPreValidationResponse and cannot be null");
+            }
+            this.DecidingFactors = decidingFactors;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets LedgerState
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// String-encoded non-fungible ID.
+        /// Gets or Sets AllowsTryDepositBatch
         /// </summary>
-        /// <value>String-encoded non-fungible ID.</value>
-        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleId { get; set; }
+        [DataMember(Name = "allows_try_deposit_batch", IsRequired = true, EmitDefaultValue = true)]
+        public bool AllowsTryDepositBatch { get; set; }
+
+        /// <summary>
+        /// TODO PP
+        /// </summary>
+        /// <value>TODO PP</value>
+        [DataMember(Name = "resource_specific", IsRequired = true, EmitDefaultValue = true)]
+        public List<AccountDepositPreValidationResourceSpecificItemsInner> ResourceSpecific { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DecidingFactors
+        /// </summary>
+        [DataMember(Name = "deciding_factors", IsRequired = true, EmitDefaultValue = true)]
+        public AccountDepositPreValidationDecidingFactors DecidingFactors { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +162,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransferPreValidationNonFungibleResourceBadgeAllOf {\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
+            sb.Append("class AccountDepositPreValidationResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  AllowsTryDepositBatch: ").Append(AllowsTryDepositBatch).Append("\n");
+            sb.Append("  ResourceSpecific: ").Append(ResourceSpecific).Append("\n");
+            sb.Append("  DecidingFactors: ").Append(DecidingFactors).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +187,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransferPreValidationNonFungibleResourceBadgeAllOf);
+            return this.Equals(input as AccountDepositPreValidationResponse);
         }
 
         /// <summary>
-        /// Returns true if TransferPreValidationNonFungibleResourceBadgeAllOf instances are equal
+        /// Returns true if AccountDepositPreValidationResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransferPreValidationNonFungibleResourceBadgeAllOf to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransferPreValidationNonFungibleResourceBadgeAllOf input)
+        public bool Equals(AccountDepositPreValidationResponse input)
         {
             if (input == null)
             {
@@ -181,14 +203,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.NonFungibleId == input.NonFungibleId ||
-                    (this.NonFungibleId != null &&
-                    this.NonFungibleId.Equals(input.NonFungibleId))
+                    this.AllowsTryDepositBatch == input.AllowsTryDepositBatch ||
+                    this.AllowsTryDepositBatch.Equals(input.AllowsTryDepositBatch)
+                ) && 
+                (
+                    this.ResourceSpecific == input.ResourceSpecific ||
+                    this.ResourceSpecific != null &&
+                    input.ResourceSpecific != null &&
+                    this.ResourceSpecific.SequenceEqual(input.ResourceSpecific)
+                ) && 
+                (
+                    this.DecidingFactors == input.DecidingFactors ||
+                    (this.DecidingFactors != null &&
+                    this.DecidingFactors.Equals(input.DecidingFactors))
                 );
         }
 
@@ -201,13 +233,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ResourceAddress != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.NonFungibleId != null)
+                hashCode = (hashCode * 59) + this.AllowsTryDepositBatch.GetHashCode();
+                if (this.ResourceSpecific != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceSpecific.GetHashCode();
+                }
+                if (this.DecidingFactors != null)
+                {
+                    hashCode = (hashCode * 59) + this.DecidingFactors.GetHashCode();
                 }
                 return hashCode;
             }

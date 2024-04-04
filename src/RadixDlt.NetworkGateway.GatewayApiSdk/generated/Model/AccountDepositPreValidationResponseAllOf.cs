@@ -90,52 +90,57 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionTransferPreValidationRequest
+    /// AccountDepositPreValidationResponseAllOf
     /// </summary>
-    [DataContract(Name = "TransactionTransferPreValidationRequest")]
-    public partial class TransactionTransferPreValidationRequest : IEquatable<TransactionTransferPreValidationRequest>
+    [DataContract(Name = "AccountDepositPreValidationResponse_allOf")]
+    public partial class AccountDepositPreValidationResponseAllOf : IEquatable<AccountDepositPreValidationResponseAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionTransferPreValidationRequest" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionTransferPreValidationRequest() { }
+        protected AccountDepositPreValidationResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionTransferPreValidationRequest" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResponseAllOf" /> class.
         /// </summary>
-        /// <param name="accountAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="resourceAddresses">resourceAddresses.</param>
-        /// <param name="badge">badge.</param>
-        public TransactionTransferPreValidationRequest(string accountAddress = default(string), List<string> resourceAddresses = default(List<string>), TransferPreValidationBadge badge = default(TransferPreValidationBadge))
+        /// <param name="allowsTryDepositBatch">allowsTryDepositBatch (required).</param>
+        /// <param name="resourceSpecific">TODO PP (required).</param>
+        /// <param name="decidingFactors">decidingFactors (required).</param>
+        public AccountDepositPreValidationResponseAllOf(bool allowsTryDepositBatch = default(bool), List<AccountDepositPreValidationResourceSpecificItemsInner> resourceSpecific = default(List<AccountDepositPreValidationResourceSpecificItemsInner>), AccountDepositPreValidationDecidingFactors decidingFactors = default(AccountDepositPreValidationDecidingFactors))
         {
-            // to ensure "accountAddress" is required (not null)
-            if (accountAddress == null)
+            this.AllowsTryDepositBatch = allowsTryDepositBatch;
+            // to ensure "resourceSpecific" is required (not null)
+            if (resourceSpecific == null)
             {
-                throw new ArgumentNullException("accountAddress is a required property for TransactionTransferPreValidationRequest and cannot be null");
+                throw new ArgumentNullException("resourceSpecific is a required property for AccountDepositPreValidationResponseAllOf and cannot be null");
             }
-            this.AccountAddress = accountAddress;
-            this.ResourceAddresses = resourceAddresses;
-            this.Badge = badge;
+            this.ResourceSpecific = resourceSpecific;
+            // to ensure "decidingFactors" is required (not null)
+            if (decidingFactors == null)
+            {
+                throw new ArgumentNullException("decidingFactors is a required property for AccountDepositPreValidationResponseAllOf and cannot be null");
+            }
+            this.DecidingFactors = decidingFactors;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets AllowsTryDepositBatch
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountAddress { get; set; }
+        [DataMember(Name = "allows_try_deposit_batch", IsRequired = true, EmitDefaultValue = true)]
+        public bool AllowsTryDepositBatch { get; set; }
 
         /// <summary>
-        /// Gets or Sets ResourceAddresses
+        /// TODO PP
         /// </summary>
-        [DataMember(Name = "resource_addresses", EmitDefaultValue = true)]
-        public List<string> ResourceAddresses { get; set; }
+        /// <value>TODO PP</value>
+        [DataMember(Name = "resource_specific", IsRequired = true, EmitDefaultValue = true)]
+        public List<AccountDepositPreValidationResourceSpecificItemsInner> ResourceSpecific { get; set; }
 
         /// <summary>
-        /// Gets or Sets Badge
+        /// Gets or Sets DecidingFactors
         /// </summary>
-        [DataMember(Name = "badge", EmitDefaultValue = true)]
-        public TransferPreValidationBadge Badge { get; set; }
+        [DataMember(Name = "deciding_factors", IsRequired = true, EmitDefaultValue = true)]
+        public AccountDepositPreValidationDecidingFactors DecidingFactors { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,10 +149,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionTransferPreValidationRequest {\n");
-            sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
-            sb.Append("  ResourceAddresses: ").Append(ResourceAddresses).Append("\n");
-            sb.Append("  Badge: ").Append(Badge).Append("\n");
+            sb.Append("class AccountDepositPreValidationResponseAllOf {\n");
+            sb.Append("  AllowsTryDepositBatch: ").Append(AllowsTryDepositBatch).Append("\n");
+            sb.Append("  ResourceSpecific: ").Append(ResourceSpecific).Append("\n");
+            sb.Append("  DecidingFactors: ").Append(DecidingFactors).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,15 +173,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionTransferPreValidationRequest);
+            return this.Equals(input as AccountDepositPreValidationResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionTransferPreValidationRequest instances are equal
+        /// Returns true if AccountDepositPreValidationResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionTransferPreValidationRequest to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionTransferPreValidationRequest input)
+        public bool Equals(AccountDepositPreValidationResponseAllOf input)
         {
             if (input == null)
             {
@@ -184,20 +189,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AccountAddress == input.AccountAddress ||
-                    (this.AccountAddress != null &&
-                    this.AccountAddress.Equals(input.AccountAddress))
+                    this.AllowsTryDepositBatch == input.AllowsTryDepositBatch ||
+                    this.AllowsTryDepositBatch.Equals(input.AllowsTryDepositBatch)
                 ) && 
                 (
-                    this.ResourceAddresses == input.ResourceAddresses ||
-                    this.ResourceAddresses != null &&
-                    input.ResourceAddresses != null &&
-                    this.ResourceAddresses.SequenceEqual(input.ResourceAddresses)
+                    this.ResourceSpecific == input.ResourceSpecific ||
+                    this.ResourceSpecific != null &&
+                    input.ResourceSpecific != null &&
+                    this.ResourceSpecific.SequenceEqual(input.ResourceSpecific)
                 ) && 
                 (
-                    this.Badge == input.Badge ||
-                    (this.Badge != null &&
-                    this.Badge.Equals(input.Badge))
+                    this.DecidingFactors == input.DecidingFactors ||
+                    (this.DecidingFactors != null &&
+                    this.DecidingFactors.Equals(input.DecidingFactors))
                 );
         }
 
@@ -210,17 +214,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AccountAddress != null)
+                hashCode = (hashCode * 59) + this.AllowsTryDepositBatch.GetHashCode();
+                if (this.ResourceSpecific != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceSpecific.GetHashCode();
                 }
-                if (this.ResourceAddresses != null)
+                if (this.DecidingFactors != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddresses.GetHashCode();
-                }
-                if (this.Badge != null)
-                {
-                    hashCode = (hashCode * 59) + this.Badge.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DecidingFactors.GetHashCode();
                 }
                 return hashCode;
             }

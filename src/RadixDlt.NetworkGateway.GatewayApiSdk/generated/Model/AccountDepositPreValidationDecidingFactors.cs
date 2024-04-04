@@ -84,42 +84,54 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransferPreValidationBadge
+    /// TODO PP
     /// </summary>
-    [DataContract(Name = "TransferPreValidationBadge")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(TransferPreValidationNonFungibleResourceBadge), "NonFungibleResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(TransferPreValidationResourceBadge), "ResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(TransferPreValidationNonFungibleResourceBadge), "TransferPreValidationNonFungibleResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(TransferPreValidationResourceBadge), "TransferPreValidationResourceBadge")]
-    public partial class TransferPreValidationBadge : IEquatable<TransferPreValidationBadge>
+    [DataContract(Name = "AccountDepositPreValidationDecidingFactors")]
+    public partial class AccountDepositPreValidationDecidingFactors : IEquatable<AccountDepositPreValidationDecidingFactors>
     {
 
         /// <summary>
-        /// Gets or Sets BadgeType
+        /// Gets or Sets DefaultDepositRule
         /// </summary>
-        [DataMember(Name = "badge_type", IsRequired = true, EmitDefaultValue = true)]
-        public AccountAuthorizedDepositorBadgeType BadgeType { get; set; }
+        [DataMember(Name = "default_deposit_rule", IsRequired = true, EmitDefaultValue = true)]
+        public AccountDefaultDepositRule DefaultDepositRule { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransferPreValidationBadge" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactors" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransferPreValidationBadge() { }
+        protected AccountDepositPreValidationDecidingFactors() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransferPreValidationBadge" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactors" /> class.
         /// </summary>
-        /// <param name="badgeType">badgeType (required).</param>
-        public TransferPreValidationBadge(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType))
+        /// <param name="isBadgeAuthorizedDepositor">TODO PP.</param>
+        /// <param name="defaultDepositRule">defaultDepositRule (required).</param>
+        /// <param name="resourcePreferenceRules">TODO PP.</param>
+        public AccountDepositPreValidationDecidingFactors(bool isBadgeAuthorizedDepositor = default(bool), AccountDefaultDepositRule defaultDepositRule = default(AccountDefaultDepositRule), List<AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem> resourcePreferenceRules = default(List<AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem>))
         {
-            this.BadgeType = badgeType;
+            this.DefaultDepositRule = defaultDepositRule;
+            this.IsBadgeAuthorizedDepositor = isBadgeAuthorizedDepositor;
+            this.ResourcePreferenceRules = resourcePreferenceRules;
         }
+
+        /// <summary>
+        /// TODO PP
+        /// </summary>
+        /// <value>TODO PP</value>
+        [DataMember(Name = "is_badge_authorized_depositor", EmitDefaultValue = true)]
+        public bool IsBadgeAuthorizedDepositor { get; set; }
+
+        /// <summary>
+        /// TODO PP
+        /// </summary>
+        /// <value>TODO PP</value>
+        [DataMember(Name = "resource_preference_rules", EmitDefaultValue = true)]
+        public List<AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem> ResourcePreferenceRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +140,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransferPreValidationBadge {\n");
-            sb.Append("  BadgeType: ").Append(BadgeType).Append("\n");
+            sb.Append("class AccountDepositPreValidationDecidingFactors {\n");
+            sb.Append("  IsBadgeAuthorizedDepositor: ").Append(IsBadgeAuthorizedDepositor).Append("\n");
+            sb.Append("  DefaultDepositRule: ").Append(DefaultDepositRule).Append("\n");
+            sb.Append("  ResourcePreferenceRules: ").Append(ResourcePreferenceRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransferPreValidationBadge);
+            return this.Equals(input as AccountDepositPreValidationDecidingFactors);
         }
 
         /// <summary>
-        /// Returns true if TransferPreValidationBadge instances are equal
+        /// Returns true if AccountDepositPreValidationDecidingFactors instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransferPreValidationBadge to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationDecidingFactors to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransferPreValidationBadge input)
+        public bool Equals(AccountDepositPreValidationDecidingFactors input)
         {
             if (input == null)
             {
@@ -166,8 +180,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.BadgeType == input.BadgeType ||
-                    this.BadgeType.Equals(input.BadgeType)
+                    this.IsBadgeAuthorizedDepositor == input.IsBadgeAuthorizedDepositor ||
+                    this.IsBadgeAuthorizedDepositor.Equals(input.IsBadgeAuthorizedDepositor)
+                ) && 
+                (
+                    this.DefaultDepositRule == input.DefaultDepositRule ||
+                    this.DefaultDepositRule.Equals(input.DefaultDepositRule)
+                ) && 
+                (
+                    this.ResourcePreferenceRules == input.ResourcePreferenceRules ||
+                    this.ResourcePreferenceRules != null &&
+                    input.ResourcePreferenceRules != null &&
+                    this.ResourcePreferenceRules.SequenceEqual(input.ResourcePreferenceRules)
                 );
         }
 
@@ -180,7 +204,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.BadgeType.GetHashCode();
+                hashCode = (hashCode * 59) + this.IsBadgeAuthorizedDepositor.GetHashCode();
+                hashCode = (hashCode * 59) + this.DefaultDepositRule.GetHashCode();
+                if (this.ResourcePreferenceRules != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourcePreferenceRules.GetHashCode();
+                }
                 return hashCode;
             }
         }

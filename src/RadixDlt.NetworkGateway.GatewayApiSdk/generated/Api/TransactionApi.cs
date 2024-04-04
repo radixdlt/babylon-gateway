@@ -92,6 +92,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// TODO PP
+        /// </summary>
+        /// <remarks>
+        /// TODO PP 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="accountDepositPreValidationRequest"></param>
+        /// <returns>AccountDepositPreValidationResponse</returns>
+        AccountDepositPreValidationResponse AccountDepositPreValidation(AccountDepositPreValidationRequest accountDepositPreValidationRequest);
+
+        /// <summary>
+        /// TODO PP
+        /// </summary>
+        /// <remarks>
+        /// TODO PP 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="accountDepositPreValidationRequest"></param>
+        /// <returns>ApiResponse of AccountDepositPreValidationResponse</returns>
+        ApiResponse<AccountDepositPreValidationResponse> AccountDepositPreValidationWithHttpInfo(AccountDepositPreValidationRequest accountDepositPreValidationRequest);
+        /// <summary>
         /// Get Committed Transaction Details
         /// </summary>
         /// <remarks>
@@ -194,27 +215,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="transactionSubmitRequest"></param>
         /// <returns>ApiResponse of TransactionSubmitResponse</returns>
         ApiResponse<TransactionSubmitResponse> TransactionSubmitWithHttpInfo(TransactionSubmitRequest transactionSubmitRequest);
-        /// <summary>
-        /// TODO PP
-        /// </summary>
-        /// <remarks>
-        /// TODO PP 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionTransferPreValidationRequest"></param>
-        /// <returns>TransactionTransferPreValidationResponse</returns>
-        TransactionTransferPreValidationResponse TransactionTransferPreValidation(TransactionTransferPreValidationRequest transactionTransferPreValidationRequest);
-
-        /// <summary>
-        /// TODO PP
-        /// </summary>
-        /// <remarks>
-        /// TODO PP 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionTransferPreValidationRequest"></param>
-        /// <returns>ApiResponse of TransactionTransferPreValidationResponse</returns>
-        ApiResponse<TransactionTransferPreValidationResponse> TransactionTransferPreValidationWithHttpInfo(TransactionTransferPreValidationRequest transactionTransferPreValidationRequest);
         #endregion Synchronous Operations
     }
 
@@ -224,6 +224,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     public interface ITransactionApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
+        /// <summary>
+        /// TODO PP
+        /// </summary>
+        /// <remarks>
+        /// TODO PP 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="accountDepositPreValidationRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of AccountDepositPreValidationResponse</returns>
+        System.Threading.Tasks.Task<AccountDepositPreValidationResponse> AccountDepositPreValidationAsync(AccountDepositPreValidationRequest accountDepositPreValidationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// TODO PP
+        /// </summary>
+        /// <remarks>
+        /// TODO PP 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="accountDepositPreValidationRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (AccountDepositPreValidationResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<AccountDepositPreValidationResponse>> AccountDepositPreValidationWithHttpInfoAsync(AccountDepositPreValidationRequest accountDepositPreValidationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Committed Transaction Details
         /// </summary>
@@ -337,29 +360,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (TransactionSubmitResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<TransactionSubmitResponse>> TransactionSubmitWithHttpInfoAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
-        /// TODO PP
-        /// </summary>
-        /// <remarks>
-        /// TODO PP 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionTransferPreValidationRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionTransferPreValidationResponse</returns>
-        System.Threading.Tasks.Task<TransactionTransferPreValidationResponse> TransactionTransferPreValidationAsync(TransactionTransferPreValidationRequest transactionTransferPreValidationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// TODO PP
-        /// </summary>
-        /// <remarks>
-        /// TODO PP 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionTransferPreValidationRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionTransferPreValidationResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<TransactionTransferPreValidationResponse>> TransactionTransferPreValidationWithHttpInfoAsync(TransactionTransferPreValidationRequest transactionTransferPreValidationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -571,6 +571,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
                 return _exceptionFactory;
             }
             set { _exceptionFactory = value; }
+        }
+
+        /// <summary>
+        /// TODO PP TODO PP 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="accountDepositPreValidationRequest"></param>
+        /// <returns>AccountDepositPreValidationResponse</returns>
+        public AccountDepositPreValidationResponse AccountDepositPreValidation(AccountDepositPreValidationRequest accountDepositPreValidationRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<AccountDepositPreValidationResponse> localVarResponse = AccountDepositPreValidationWithHttpInfo(accountDepositPreValidationRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// TODO PP TODO PP 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="accountDepositPreValidationRequest"></param>
+        /// <returns>ApiResponse of AccountDepositPreValidationResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<AccountDepositPreValidationResponse> AccountDepositPreValidationWithHttpInfo(AccountDepositPreValidationRequest accountDepositPreValidationRequest)
+        {
+            // verify the required parameter 'accountDepositPreValidationRequest' is set
+            if (accountDepositPreValidationRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'accountDepositPreValidationRequest' when calling TransactionApi->AccountDepositPreValidation");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = accountDepositPreValidationRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<AccountDepositPreValidationResponse>("/transaction/account-deposit-pre-validation", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountDepositPreValidation", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// TODO PP TODO PP 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="accountDepositPreValidationRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of AccountDepositPreValidationResponse</returns>
+        public async System.Threading.Tasks.Task<AccountDepositPreValidationResponse> AccountDepositPreValidationAsync(AccountDepositPreValidationRequest accountDepositPreValidationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<AccountDepositPreValidationResponse> localVarResponse = await AccountDepositPreValidationWithHttpInfoAsync(accountDepositPreValidationRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// TODO PP TODO PP 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="accountDepositPreValidationRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (AccountDepositPreValidationResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<AccountDepositPreValidationResponse>> AccountDepositPreValidationWithHttpInfoAsync(AccountDepositPreValidationRequest accountDepositPreValidationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'accountDepositPreValidationRequest' is set
+            if (accountDepositPreValidationRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'accountDepositPreValidationRequest' when calling TransactionApi->AccountDepositPreValidation");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = accountDepositPreValidationRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<AccountDepositPreValidationResponse>("/transaction/account-deposit-pre-validation", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountDepositPreValidation", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
         }
 
         /// <summary>
@@ -1136,123 +1253,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("TransactionSubmit", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// TODO PP TODO PP 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionTransferPreValidationRequest"></param>
-        /// <returns>TransactionTransferPreValidationResponse</returns>
-        public TransactionTransferPreValidationResponse TransactionTransferPreValidation(TransactionTransferPreValidationRequest transactionTransferPreValidationRequest)
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionTransferPreValidationResponse> localVarResponse = TransactionTransferPreValidationWithHttpInfo(transactionTransferPreValidationRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// TODO PP TODO PP 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionTransferPreValidationRequest"></param>
-        /// <returns>ApiResponse of TransactionTransferPreValidationResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionTransferPreValidationResponse> TransactionTransferPreValidationWithHttpInfo(TransactionTransferPreValidationRequest transactionTransferPreValidationRequest)
-        {
-            // verify the required parameter 'transactionTransferPreValidationRequest' is set
-            if (transactionTransferPreValidationRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionTransferPreValidationRequest' when calling TransactionApi->TransactionTransferPreValidation");
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionTransferPreValidationRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<TransactionTransferPreValidationResponse>("/transaction/transfer-pre-validation", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionTransferPreValidation", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// TODO PP TODO PP 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionTransferPreValidationRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionTransferPreValidationResponse</returns>
-        public async System.Threading.Tasks.Task<TransactionTransferPreValidationResponse> TransactionTransferPreValidationAsync(TransactionTransferPreValidationRequest transactionTransferPreValidationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionTransferPreValidationResponse> localVarResponse = await TransactionTransferPreValidationWithHttpInfoAsync(transactionTransferPreValidationRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// TODO PP TODO PP 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionTransferPreValidationRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionTransferPreValidationResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionTransferPreValidationResponse>> TransactionTransferPreValidationWithHttpInfoAsync(TransactionTransferPreValidationRequest transactionTransferPreValidationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'transactionTransferPreValidationRequest' is set
-            if (transactionTransferPreValidationRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionTransferPreValidationRequest' when calling TransactionApi->TransactionTransferPreValidation");
-
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionTransferPreValidationRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionTransferPreValidationResponse>("/transaction/transfer-pre-validation", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionTransferPreValidation", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

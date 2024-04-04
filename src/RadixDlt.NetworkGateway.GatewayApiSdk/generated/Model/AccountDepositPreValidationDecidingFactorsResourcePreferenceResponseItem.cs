@@ -90,48 +90,61 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TODO PP
+    /// AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem
     /// </summary>
-    [DataContract(Name = "TransferPreValidationDecidingFactors")]
-    public partial class TransferPreValidationDecidingFactors : IEquatable<TransferPreValidationDecidingFactors>
+    [DataContract(Name = "AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem")]
+    public partial class AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem : IEquatable<AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem>
     {
 
         /// <summary>
-        /// Gets or Sets DefaultDepositRule
+        /// Gets or Sets ResourcePreferenceRule
         /// </summary>
-        [DataMember(Name = "default_deposit_rule", IsRequired = true, EmitDefaultValue = true)]
-        public AccountDefaultDepositRule DefaultDepositRule { get; set; }
+        [DataMember(Name = "resource_preference_rule", IsRequired = true, EmitDefaultValue = true)]
+        public AccountResourcePreferenceRule ResourcePreferenceRule { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransferPreValidationDecidingFactors" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransferPreValidationDecidingFactors() { }
+        protected AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransferPreValidationDecidingFactors" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem" /> class.
         /// </summary>
-        /// <param name="isBadgeAuthorizedDepositor">TODO PP.</param>
-        /// <param name="defaultDepositRule">defaultDepositRule (required).</param>
-        /// <param name="resourcePreferenceRules">TODO PP.</param>
-        public TransferPreValidationDecidingFactors(bool isBadgeAuthorizedDepositor = default(bool), AccountDefaultDepositRule defaultDepositRule = default(AccountDefaultDepositRule), List<AccountResourcePreferencesResponseItem> resourcePreferenceRules = default(List<AccountResourcePreferencesResponseItem>))
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="isXrd">isXrd (required).</param>
+        /// <param name="resourcePreferenceRule">resourcePreferenceRule (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
+        public AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem(string resourceAddress = default(string), bool isXrd = default(bool), AccountResourcePreferenceRule resourcePreferenceRule = default(AccountResourcePreferenceRule), long lastUpdatedAtStateVersion = default(long))
         {
-            this.DefaultDepositRule = defaultDepositRule;
-            this.IsBadgeAuthorizedDepositor = isBadgeAuthorizedDepositor;
-            this.ResourcePreferenceRules = resourcePreferenceRules;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
+            this.IsXrd = isXrd;
+            this.ResourcePreferenceRule = resourcePreferenceRule;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
-        /// TODO PP
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>TODO PP</value>
-        [DataMember(Name = "is_badge_authorized_depositor", EmitDefaultValue = true)]
-        public bool IsBadgeAuthorizedDepositor { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// TODO PP
+        /// Gets or Sets IsXrd
         /// </summary>
-        /// <value>TODO PP</value>
-        [DataMember(Name = "resource_preference_rules", EmitDefaultValue = true)]
-        public List<AccountResourcePreferencesResponseItem> ResourcePreferenceRules { get; set; }
+        [DataMember(Name = "is_xrd", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsXrd { get; set; }
+
+        /// <summary>
+        /// The most recent state version underlying object was modified at.
+        /// </summary>
+        /// <value>The most recent state version underlying object was modified at.</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,10 +153,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransferPreValidationDecidingFactors {\n");
-            sb.Append("  IsBadgeAuthorizedDepositor: ").Append(IsBadgeAuthorizedDepositor).Append("\n");
-            sb.Append("  DefaultDepositRule: ").Append(DefaultDepositRule).Append("\n");
-            sb.Append("  ResourcePreferenceRules: ").Append(ResourcePreferenceRules).Append("\n");
+            sb.Append("class AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  IsXrd: ").Append(IsXrd).Append("\n");
+            sb.Append("  ResourcePreferenceRule: ").Append(ResourcePreferenceRule).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +178,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransferPreValidationDecidingFactors);
+            return this.Equals(input as AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem);
         }
 
         /// <summary>
-        /// Returns true if TransferPreValidationDecidingFactors instances are equal
+        /// Returns true if AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransferPreValidationDecidingFactors to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransferPreValidationDecidingFactors input)
+        public bool Equals(AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem input)
         {
             if (input == null)
             {
@@ -180,18 +194,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.IsBadgeAuthorizedDepositor == input.IsBadgeAuthorizedDepositor ||
-                    this.IsBadgeAuthorizedDepositor.Equals(input.IsBadgeAuthorizedDepositor)
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.DefaultDepositRule == input.DefaultDepositRule ||
-                    this.DefaultDepositRule.Equals(input.DefaultDepositRule)
+                    this.IsXrd == input.IsXrd ||
+                    this.IsXrd.Equals(input.IsXrd)
                 ) && 
                 (
-                    this.ResourcePreferenceRules == input.ResourcePreferenceRules ||
-                    this.ResourcePreferenceRules != null &&
-                    input.ResourcePreferenceRules != null &&
-                    this.ResourcePreferenceRules.SequenceEqual(input.ResourcePreferenceRules)
+                    this.ResourcePreferenceRule == input.ResourcePreferenceRule ||
+                    this.ResourcePreferenceRule.Equals(input.ResourcePreferenceRule)
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -204,12 +221,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.IsBadgeAuthorizedDepositor.GetHashCode();
-                hashCode = (hashCode * 59) + this.DefaultDepositRule.GetHashCode();
-                if (this.ResourcePreferenceRules != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourcePreferenceRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsXrd.GetHashCode();
+                hashCode = (hashCode * 59) + this.ResourcePreferenceRule.GetHashCode();
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }
