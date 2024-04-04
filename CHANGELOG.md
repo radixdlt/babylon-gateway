@@ -1,6 +1,7 @@
 ## 1.5.1
 Release built: _not published yet_
 
+- Fixed broken (missing) package blueprint & code, and schema pagination in the `/state/entity/details` endpoint.
 - Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
 - Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.
 - Fixed pagination of the `/state/validators/list` endpoint where incorrect `cursor` was generated previously.
@@ -28,6 +29,9 @@ Release built: _not published yet_
 - Introduced upper limit to the overall number of the filters used in the `/stream/transactions` endpoint, defaults to 10.
 - Added new endpoint `/state/account/page/resource-preferences` which allows to read resource preferences for given account.
 - Added new endpoint `/state/account/page/authorized-depositors` which allows to read authorized depositors for given account.
+- Added new endpoint `/state/package/page/blueprints` returning paginable iterator over package blueprints.
+- Added new endpoint `/state/package/page/codes` returning paginable iterator over package codes.
+- Added new endpoint `/state/entity/page/schemas` returning paginable iterator over entity schemas.
 
 > [!CAUTION]
 > **Breaking Changes:**

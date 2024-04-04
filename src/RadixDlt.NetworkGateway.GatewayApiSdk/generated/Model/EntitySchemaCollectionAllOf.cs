@@ -90,50 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsSchemaItem
+    /// EntitySchemaCollectionAllOf
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsSchemaItem")]
-    public partial class StateEntityDetailsResponsePackageDetailsSchemaItem : IEquatable<StateEntityDetailsResponsePackageDetailsSchemaItem>
+    [DataContract(Name = "EntitySchemaCollection_allOf")]
+    public partial class EntitySchemaCollectionAllOf : IEquatable<EntitySchemaCollectionAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaItem" /> class.
+        /// Initializes a new instance of the <see cref="EntitySchemaCollectionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsSchemaItem() { }
+        protected EntitySchemaCollectionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaItem" /> class.
+        /// Initializes a new instance of the <see cref="EntitySchemaCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="schemaHashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="schemaHex">Hex-encoded binary blob. (required).</param>
-        public StateEntityDetailsResponsePackageDetailsSchemaItem(string schemaHashHex = default(string), string schemaHex = default(string))
+        /// <param name="items">items (required).</param>
+        public EntitySchemaCollectionAllOf(List<EntitySchemaCollectionItem> items = default(List<EntitySchemaCollectionItem>))
         {
-            // to ensure "schemaHashHex" is required (not null)
-            if (schemaHashHex == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("schemaHashHex is a required property for StateEntityDetailsResponsePackageDetailsSchemaItem and cannot be null");
+                throw new ArgumentNullException("items is a required property for EntitySchemaCollectionAllOf and cannot be null");
             }
-            this.SchemaHashHex = schemaHashHex;
-            // to ensure "schemaHex" is required (not null)
-            if (schemaHex == null)
-            {
-                throw new ArgumentNullException("schemaHex is a required property for StateEntityDetailsResponsePackageDetailsSchemaItem and cannot be null");
-            }
-            this.SchemaHex = schemaHex;
+            this.Items = items;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "schema_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string SchemaHashHex { get; set; }
-
-        /// <summary>
-        /// Hex-encoded binary blob.
-        /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "schema_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string SchemaHex { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntitySchemaCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsSchemaItem {\n");
-            sb.Append("  SchemaHashHex: ").Append(SchemaHashHex).Append("\n");
-            sb.Append("  SchemaHex: ").Append(SchemaHex).Append("\n");
+            sb.Append("class EntitySchemaCollectionAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsSchemaItem);
+            return this.Equals(input as EntitySchemaCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsSchemaItem instances are equal
+        /// Returns true if EntitySchemaCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsSchemaItem to be compared</param>
+        /// <param name="input">Instance of EntitySchemaCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsSchemaItem input)
+        public bool Equals(EntitySchemaCollectionAllOf input)
         {
             if (input == null)
             {
@@ -181,14 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.SchemaHashHex == input.SchemaHashHex ||
-                    (this.SchemaHashHex != null &&
-                    this.SchemaHashHex.Equals(input.SchemaHashHex))
-                ) && 
-                (
-                    this.SchemaHex == input.SchemaHex ||
-                    (this.SchemaHex != null &&
-                    this.SchemaHex.Equals(input.SchemaHex))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -201,13 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.SchemaHashHex != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.SchemaHashHex.GetHashCode();
-                }
-                if (this.SchemaHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.SchemaHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

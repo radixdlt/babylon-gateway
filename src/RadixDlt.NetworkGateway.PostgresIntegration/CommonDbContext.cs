@@ -147,7 +147,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<PackageCodeHistory> PackageCodeHistory => Set<PackageCodeHistory>();
 
-    public DbSet<SchemaHistory> SchemaHistory => Set<SchemaHistory>();
+    public DbSet<SchemaEntryDefinition> SchemaEntryDefinition => Set<SchemaEntryDefinition>();
+
+    public DbSet<SchemaEntryAggregateHistory> SchemaEntryAggregateHistory => Set<SchemaEntryAggregateHistory>();
 
     public DbSet<KeyValueStoreEntryDefinition> KeyValueStoreEntryDefinition => Set<KeyValueStoreEntryDefinition>();
 
@@ -506,12 +508,12 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<SchemaHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+            .Entity<SchemaEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.SchemaHash });
 
         modelBuilder
-            .Entity<SchemaHistory>()
-            .HasIndex(e => new { e.SchemaHash, e.FromStateVersion });
+            .Entity<SchemaEntryAggregateHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<ValidatorPublicKeyHistory>()

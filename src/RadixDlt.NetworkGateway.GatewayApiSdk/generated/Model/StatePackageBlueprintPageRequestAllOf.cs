@@ -90,35 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf
+    /// StatePackageBlueprintPageRequestAllOf
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsSchemaCollection_allOf")]
-    public partial class StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf : IEquatable<StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf>
+    [DataContract(Name = "StatePackageBlueprintPageRequest_allOf")]
+    public partial class StatePackageBlueprintPageRequestAllOf : IEquatable<StatePackageBlueprintPageRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StatePackageBlueprintPageRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf() { }
+        protected StatePackageBlueprintPageRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StatePackageBlueprintPageRequestAllOf" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf(List<StateEntityDetailsResponsePackageDetailsSchemaItem> items = default(List<StateEntityDetailsResponsePackageDetailsSchemaItem>))
+        /// <param name="packageAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        public StatePackageBlueprintPageRequestAllOf(string packageAddress = default(string))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
             {
-                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("packageAddress is a required property for StatePackageBlueprintPageRequestAllOf and cannot be null");
             }
-            this.Items = items;
+            this.PackageAddress = packageAddress;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateEntityDetailsResponsePackageDetailsSchemaItem> Items { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class StatePackageBlueprintPageRequestAllOf {\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf);
+            return this.Equals(input as StatePackageBlueprintPageRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf instances are equal
+        /// Returns true if StatePackageBlueprintPageRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of StatePackageBlueprintPageRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf input)
+        public bool Equals(StatePackageBlueprintPageRequestAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.PackageAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
                 return hashCode;
             }

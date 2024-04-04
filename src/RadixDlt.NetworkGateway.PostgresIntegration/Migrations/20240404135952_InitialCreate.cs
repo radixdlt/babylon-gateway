@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -726,7 +726,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "schema_history",
+                name: "schema_entry_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_schema_entry_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "schema_entry_definition",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -738,7 +753,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_schema_history", x => x.id);
+                    table.PrimaryKey("PK_schema_entry_definition", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1143,14 +1158,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_schema_history_entity_id_from_state_version",
-                table: "schema_history",
+                name: "IX_schema_entry_aggregate_history_entity_id_from_state_version",
+                table: "schema_entry_aggregate_history",
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_schema_history_schema_hash_from_state_version",
-                table: "schema_history",
-                columns: new[] { "schema_hash", "from_state_version" });
+                name: "IX_schema_entry_definition_entity_id_schema_hash",
+                table: "schema_entry_definition",
+                columns: new[] { "entity_id", "schema_hash" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_state_history_entity_id_from_state_version",
@@ -1292,7 +1307,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "resource_entity_supply_history");
 
             migrationBuilder.DropTable(
-                name: "schema_history");
+                name: "schema_entry_aggregate_history");
+
+            migrationBuilder.DropTable(
+                name: "schema_entry_definition");
 
             migrationBuilder.DropTable(
                 name: "state_history");

@@ -90,53 +90,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsBlueprintCollection
+    /// StatePackageCodePageRequest
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsBlueprintCollection")]
-    public partial class StateEntityDetailsResponsePackageDetailsBlueprintCollection : IEquatable<StateEntityDetailsResponsePackageDetailsBlueprintCollection>
+    [DataContract(Name = "StatePackageCodePageRequest")]
+    public partial class StatePackageCodePageRequest : IEquatable<StatePackageCodePageRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
+        /// Initializes a new instance of the <see cref="StatePackageCodePageRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsBlueprintCollection() { }
+        protected StatePackageCodePageRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
+        /// Initializes a new instance of the <see cref="StatePackageCodePageRequest" /> class.
         /// </summary>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
-        /// <param name="items">items (required).</param>
-        public StateEntityDetailsResponsePackageDetailsBlueprintCollection(long? totalCount = default(long?), string nextCursor = default(string), List<StateEntityDetailsResponsePackageDetailsBlueprintItem> items = default(List<StateEntityDetailsResponsePackageDetailsBlueprintItem>))
+        /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limitPerPage">The page size requested..</param>
+        /// <param name="packageAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        public StatePackageCodePageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string packageAddress = default(string))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
             {
-                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsBlueprintCollection and cannot be null");
+                throw new ArgumentNullException("packageAddress is a required property for StatePackageCodePageRequest and cannot be null");
             }
-            this.Items = items;
-            this.TotalCount = totalCount;
-            this.NextCursor = nextCursor;
+            this.PackageAddress = packageAddress;
+            this.AtLedgerState = atLedgerState;
+            this.Cursor = cursor;
+            this.LimitPerPage = limitPerPage;
         }
 
         /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
         /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// The page size requested.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateEntityDetailsResponsePackageDetailsBlueprintItem> Items { get; set; }
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +154,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsBlueprintCollection {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class StatePackageCodePageRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +179,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsBlueprintCollection);
+            return this.Equals(input as StatePackageCodePageRequest);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsBlueprintCollection instances are equal
+        /// Returns true if StatePackageCodePageRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsBlueprintCollection to be compared</param>
+        /// <param name="input">Instance of StatePackageCodePageRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsBlueprintCollection input)
+        public bool Equals(StatePackageCodePageRequest input)
         {
             if (input == null)
             {
@@ -185,20 +195,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
                 ) && 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
+                ) && 
+                (
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
                 );
         }
 
@@ -211,17 +225,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.NextCursor != null)
+                if (this.Cursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
                 }
-                if (this.Items != null)
+                if (this.LimitPerPage != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
+                }
+                if (this.PackageAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
                 return hashCode;
             }

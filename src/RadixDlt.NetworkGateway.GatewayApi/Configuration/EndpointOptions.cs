@@ -89,6 +89,9 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("ValidatorsPageSize")]
     public int ValidatorsPageSize { get; set; } = 1000;
 
+    [ConfigurationKeyName("PackagePageSize")]
+    public int PackagePageSize { get; set; } = 10;
+
     [ConfigurationKeyName("StateEntityDetailsPageSize")]
     public int StateEntityDetailsMaxPageSize { get; set; } = 20;
 
@@ -114,6 +117,7 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
         RuleFor(x => x.DefaultTransactionsStreamPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
         RuleFor(x => x.DefaultPageSize).GreaterThan(0);
+        RuleFor(x => x.PackagePageSize).GreaterThan(0);
         RuleFor(x => x.ValidatorsPageSize).GreaterThan(0);
         RuleFor(x => x.StateEntityDetailsMaxPageSize).GreaterThan(0);
         RuleFor(x => x.ExplicitMetadataMaxItems).GreaterThan(0);

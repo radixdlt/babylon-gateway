@@ -102,8 +102,6 @@ internal interface IWriteHelper
 
     Task<int> CopyNonFungibleIdLocationHistory(List<NonFungibleIdLocationHistory> entities, CancellationToken token);
 
-    Task<int> CopySchemaHistory(ICollection<SchemaHistory> entities, CancellationToken token);
-
     Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token);
 
     Task<int> CopyKeyValueStoreSchemaHistory(ICollection<KeyValueStoreSchemaHistory> entities, CancellationToken token);

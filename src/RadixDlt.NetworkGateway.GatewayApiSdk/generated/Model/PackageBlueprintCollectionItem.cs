@@ -90,104 +90,103 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsAllOf
+    /// PackageBlueprintCollectionItem
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetails_allOf")]
-    public partial class StateEntityDetailsResponsePackageDetailsAllOf : IEquatable<StateEntityDetailsResponsePackageDetailsAllOf>
+    [DataContract(Name = "PackageBlueprintCollectionItem")]
+    public partial class PackageBlueprintCollectionItem : IEquatable<PackageBlueprintCollectionItem>
     {
-
         /// <summary>
-        /// Gets or Sets VmType
-        /// </summary>
-        [DataMember(Name = "vm_type", IsRequired = true, EmitDefaultValue = true)]
-        public PackageVmType VmType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageBlueprintCollectionItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsAllOf() { }
+        protected PackageBlueprintCollectionItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageBlueprintCollectionItem" /> class.
         /// </summary>
-        /// <param name="codes">codes (required).</param>
-        /// <param name="vmType">vmType (required).</param>
-        /// <param name="codeHashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        /// <param name="blueprints">blueprints.</param>
-        /// <param name="schemas">schemas.</param>
-        /// <param name="roleAssignments">roleAssignments.</param>
-        public StateEntityDetailsResponsePackageDetailsAllOf(PackageCodeCollection codes = default(PackageCodeCollection), PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), PackageBlueprintCollection blueprints = default(PackageBlueprintCollection), EntitySchemaCollection schemas = default(EntitySchemaCollection), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments))
+        /// <param name="name">name (required).</param>
+        /// <param name="version">version (required).</param>
+        /// <param name="definition">This type is defined in the Core API as &#x60;BlueprintDefinition&#x60;. See the Core API documentation for more details.  (required).</param>
+        /// <param name="dependantEntities">dependantEntities.</param>
+        /// <param name="authTemplate">This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. .</param>
+        /// <param name="authTemplateIsLocked">authTemplateIsLocked.</param>
+        /// <param name="royaltyConfig">royaltyConfig.</param>
+        /// <param name="royaltyConfigIsLocked">royaltyConfigIsLocked.</param>
+        public PackageBlueprintCollectionItem(string name = default(string), string version = default(string), Object definition = default(Object), List<string> dependantEntities = default(List<string>), Object authTemplate = default(Object), bool? authTemplateIsLocked = default(bool?), BlueprintRoyaltyConfig royaltyConfig = default(BlueprintRoyaltyConfig), bool? royaltyConfigIsLocked = default(bool?))
         {
-            // to ensure "codes" is required (not null)
-            if (codes == null)
+            // to ensure "name" is required (not null)
+            if (name == null)
             {
-                throw new ArgumentNullException("codes is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("name is a required property for PackageBlueprintCollectionItem and cannot be null");
             }
-            this.Codes = codes;
-            this.VmType = vmType;
-            // to ensure "codeHashHex" is required (not null)
-            if (codeHashHex == null)
+            this.Name = name;
+            // to ensure "version" is required (not null)
+            if (version == null)
             {
-                throw new ArgumentNullException("codeHashHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("version is a required property for PackageBlueprintCollectionItem and cannot be null");
             }
-            this.CodeHashHex = codeHashHex;
-            // to ensure "codeHex" is required (not null)
-            if (codeHex == null)
+            this._Version = version;
+            // to ensure "definition" is required (not null)
+            if (definition == null)
             {
-                throw new ArgumentNullException("codeHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("definition is a required property for PackageBlueprintCollectionItem and cannot be null");
             }
-            this.CodeHex = codeHex;
-            this.RoyaltyVaultBalance = royaltyVaultBalance;
-            this.Blueprints = blueprints;
-            this.Schemas = schemas;
-            this.RoleAssignments = roleAssignments;
+            this.Definition = definition;
+            this.DependantEntities = dependantEntities;
+            this.AuthTemplate = authTemplate;
+            this.AuthTemplateIsLocked = authTemplateIsLocked;
+            this.RoyaltyConfig = royaltyConfig;
+            this.RoyaltyConfigIsLocked = royaltyConfigIsLocked;
         }
 
         /// <summary>
-        /// Gets or Sets Codes
+        /// Gets or Sets Name
         /// </summary>
-        [DataMember(Name = "codes", IsRequired = true, EmitDefaultValue = true)]
-        public PackageCodeCollection Codes { get; set; }
+        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
+        public string Name { get; set; }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Gets or Sets _Version
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHashHex { get; set; }
+        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
+        public string _Version { get; set; }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// This type is defined in the Core API as &#x60;BlueprintDefinition&#x60;. See the Core API documentation for more details. 
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHex { get; set; }
+        /// <value>This type is defined in the Core API as &#x60;BlueprintDefinition&#x60;. See the Core API documentation for more details. </value>
+        [DataMember(Name = "definition", IsRequired = true, EmitDefaultValue = true)]
+        public Object Definition { get; set; }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// Gets or Sets DependantEntities
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
-        public string RoyaltyVaultBalance { get; set; }
+        [DataMember(Name = "dependant_entities", EmitDefaultValue = true)]
+        public List<string> DependantEntities { get; set; }
 
         /// <summary>
-        /// Gets or Sets Blueprints
+        /// This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. 
         /// </summary>
-        [DataMember(Name = "blueprints", EmitDefaultValue = true)]
-        public PackageBlueprintCollection Blueprints { get; set; }
+        /// <value>This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. </value>
+        [DataMember(Name = "auth_template", EmitDefaultValue = true)]
+        public Object AuthTemplate { get; set; }
 
         /// <summary>
-        /// Gets or Sets Schemas
+        /// Gets or Sets AuthTemplateIsLocked
         /// </summary>
-        [DataMember(Name = "schemas", EmitDefaultValue = true)]
-        public EntitySchemaCollection Schemas { get; set; }
+        [DataMember(Name = "auth_template_is_locked", EmitDefaultValue = true)]
+        public bool? AuthTemplateIsLocked { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoleAssignments
+        /// Gets or Sets RoyaltyConfig
         /// </summary>
-        [DataMember(Name = "role_assignments", EmitDefaultValue = true)]
-        public ComponentEntityRoleAssignments RoleAssignments { get; set; }
+        [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
+        public BlueprintRoyaltyConfig RoyaltyConfig { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RoyaltyConfigIsLocked
+        /// </summary>
+        [DataMember(Name = "royalty_config_is_locked", EmitDefaultValue = true)]
+        public bool? RoyaltyConfigIsLocked { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -196,15 +195,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsAllOf {\n");
-            sb.Append("  Codes: ").Append(Codes).Append("\n");
-            sb.Append("  VmType: ").Append(VmType).Append("\n");
-            sb.Append("  CodeHashHex: ").Append(CodeHashHex).Append("\n");
-            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
-            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
-            sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
-            sb.Append("  Schemas: ").Append(Schemas).Append("\n");
-            sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
+            sb.Append("class PackageBlueprintCollectionItem {\n");
+            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("  Definition: ").Append(Definition).Append("\n");
+            sb.Append("  DependantEntities: ").Append(DependantEntities).Append("\n");
+            sb.Append("  AuthTemplate: ").Append(AuthTemplate).Append("\n");
+            sb.Append("  AuthTemplateIsLocked: ").Append(AuthTemplateIsLocked).Append("\n");
+            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
+            sb.Append("  RoyaltyConfigIsLocked: ").Append(RoyaltyConfigIsLocked).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -225,15 +224,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsAllOf);
+            return this.Equals(input as PackageBlueprintCollectionItem);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsAllOf instances are equal
+        /// Returns true if PackageBlueprintCollectionItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of PackageBlueprintCollectionItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsAllOf input)
+        public bool Equals(PackageBlueprintCollectionItem input)
         {
             if (input == null)
             {
@@ -241,43 +240,45 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Codes == input.Codes ||
-                    (this.Codes != null &&
-                    this.Codes.Equals(input.Codes))
+                    this.Name == input.Name ||
+                    (this.Name != null &&
+                    this.Name.Equals(input.Name))
                 ) && 
                 (
-                    this.VmType == input.VmType ||
-                    this.VmType.Equals(input.VmType)
+                    this._Version == input._Version ||
+                    (this._Version != null &&
+                    this._Version.Equals(input._Version))
                 ) && 
                 (
-                    this.CodeHashHex == input.CodeHashHex ||
-                    (this.CodeHashHex != null &&
-                    this.CodeHashHex.Equals(input.CodeHashHex))
+                    this.Definition == input.Definition ||
+                    (this.Definition != null &&
+                    this.Definition.Equals(input.Definition))
                 ) && 
                 (
-                    this.CodeHex == input.CodeHex ||
-                    (this.CodeHex != null &&
-                    this.CodeHex.Equals(input.CodeHex))
+                    this.DependantEntities == input.DependantEntities ||
+                    this.DependantEntities != null &&
+                    input.DependantEntities != null &&
+                    this.DependantEntities.SequenceEqual(input.DependantEntities)
                 ) && 
                 (
-                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
-                    (this.RoyaltyVaultBalance != null &&
-                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
+                    this.AuthTemplate == input.AuthTemplate ||
+                    (this.AuthTemplate != null &&
+                    this.AuthTemplate.Equals(input.AuthTemplate))
                 ) && 
                 (
-                    this.Blueprints == input.Blueprints ||
-                    (this.Blueprints != null &&
-                    this.Blueprints.Equals(input.Blueprints))
+                    this.AuthTemplateIsLocked == input.AuthTemplateIsLocked ||
+                    (this.AuthTemplateIsLocked != null &&
+                    this.AuthTemplateIsLocked.Equals(input.AuthTemplateIsLocked))
                 ) && 
                 (
-                    this.Schemas == input.Schemas ||
-                    (this.Schemas != null &&
-                    this.Schemas.Equals(input.Schemas))
+                    this.RoyaltyConfig == input.RoyaltyConfig ||
+                    (this.RoyaltyConfig != null &&
+                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
                 ) && 
                 (
-                    this.RoleAssignments == input.RoleAssignments ||
-                    (this.RoleAssignments != null &&
-                    this.RoleAssignments.Equals(input.RoleAssignments))
+                    this.RoyaltyConfigIsLocked == input.RoyaltyConfigIsLocked ||
+                    (this.RoyaltyConfigIsLocked != null &&
+                    this.RoyaltyConfigIsLocked.Equals(input.RoyaltyConfigIsLocked))
                 );
         }
 
@@ -290,34 +291,37 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Codes != null)
+                if (this.Name != null)
                 {
-                    hashCode = (hashCode * 59) + this.Codes.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.VmType.GetHashCode();
-                if (this.CodeHashHex != null)
+                if (this._Version != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 }
-                if (this.CodeHex != null)
+                if (this.Definition != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Definition.GetHashCode();
                 }
-                if (this.RoyaltyVaultBalance != null)
+                if (this.DependantEntities != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DependantEntities.GetHashCode();
                 }
-                if (this.Blueprints != null)
+                if (this.AuthTemplate != null)
                 {
-                    hashCode = (hashCode * 59) + this.Blueprints.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AuthTemplate.GetHashCode();
                 }
-                if (this.Schemas != null)
+                if (this.AuthTemplateIsLocked != null)
                 {
-                    hashCode = (hashCode * 59) + this.Schemas.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AuthTemplateIsLocked.GetHashCode();
                 }
-                if (this.RoleAssignments != null)
+                if (this.RoyaltyConfig != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoleAssignments.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
+                }
+                if (this.RoyaltyConfigIsLocked != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyConfigIsLocked.GetHashCode();
                 }
                 return hashCode;
             }

@@ -62,14 +62,23 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using System.Collections.Generic;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 public static class CursorGenerator
 {
     public static string? GenerateOffsetCursor(int offset, int limit, long totalCount)
     {
         return offset + limit < totalCount
+            ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
+            : null;
+    }
+
+    public static string? GenerateOffsetCursor<T>(int offset, int limit, ICollection<T> collection)
+    {
+        return collection.Count > limit
             ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
     }

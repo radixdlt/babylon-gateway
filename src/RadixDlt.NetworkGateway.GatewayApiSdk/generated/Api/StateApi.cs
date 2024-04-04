@@ -260,6 +260,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of StateEntityNonFungiblesPageResponse</returns>
         ApiResponse<StateEntityNonFungiblesPageResponse> EntityNonFungiblesPageWithHttpInfo(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest);
         /// <summary>
+        /// Get Entity Schema Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the schemas associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntitySchemaPageRequest"></param>
+        /// <returns>StateEntitySchemaPageResponse</returns>
+        StateEntitySchemaPageResponse EntitySchemaPage(StateEntitySchemaPageRequest stateEntitySchemaPageRequest);
+
+        /// <summary>
+        /// Get Entity Schema Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the schemas associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntitySchemaPageRequest"></param>
+        /// <returns>ApiResponse of StateEntitySchemaPageResponse</returns>
+        ApiResponse<StateEntitySchemaPageResponse> EntitySchemaPageWithHttpInfo(StateEntitySchemaPageRequest stateEntitySchemaPageRequest);
+        /// <summary>
         /// Get KeyValueStore Data
         /// </summary>
         /// <remarks>
@@ -364,6 +385,48 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="stateNonFungibleLocationRequest"></param>
         /// <returns>ApiResponse of StateNonFungibleLocationResponse</returns>
         ApiResponse<StateNonFungibleLocationResponse> NonFungibleLocationWithHttpInfo(StateNonFungibleLocationRequest stateNonFungibleLocationRequest);
+        /// <summary>
+        /// Get Package Blueprints Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the blueprints associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageBlueprintPageRequest"></param>
+        /// <returns>StatePackageBlueprintPageResponse</returns>
+        StatePackageBlueprintPageResponse PackageBlueprintPage(StatePackageBlueprintPageRequest statePackageBlueprintPageRequest);
+
+        /// <summary>
+        /// Get Package Blueprints Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the blueprints associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageBlueprintPageRequest"></param>
+        /// <returns>ApiResponse of StatePackageBlueprintPageResponse</returns>
+        ApiResponse<StatePackageBlueprintPageResponse> PackageBlueprintPageWithHttpInfo(StatePackageBlueprintPageRequest statePackageBlueprintPageRequest);
+        /// <summary>
+        /// Get Package Codes Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the codes associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageCodePageRequest"></param>
+        /// <returns>StatePackageCodePageResponse</returns>
+        StatePackageCodePageResponse PackageCodePage(StatePackageCodePageRequest statePackageCodePageRequest);
+
+        /// <summary>
+        /// Get Package Codes Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the codes associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageCodePageRequest"></param>
+        /// <returns>ApiResponse of StatePackageCodePageResponse</returns>
+        ApiResponse<StatePackageCodePageResponse> PackageCodePageWithHttpInfo(StatePackageCodePageRequest statePackageCodePageRequest);
         /// <summary>
         /// Get Entity Details
         /// </summary>
@@ -597,6 +660,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (StateEntityNonFungiblesPageResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateEntityNonFungiblesPageResponse>> EntityNonFungiblesPageWithHttpInfoAsync(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
+        /// Get Entity Schema Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the schemas associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntitySchemaPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateEntitySchemaPageResponse</returns>
+        System.Threading.Tasks.Task<StateEntitySchemaPageResponse> EntitySchemaPageAsync(StateEntitySchemaPageRequest stateEntitySchemaPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Entity Schema Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the schemas associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntitySchemaPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateEntitySchemaPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateEntitySchemaPageResponse>> EntitySchemaPageWithHttpInfoAsync(StateEntitySchemaPageRequest stateEntitySchemaPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
         /// Get KeyValueStore Data
         /// </summary>
         /// <remarks>
@@ -711,6 +797,52 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateNonFungibleLocationResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateNonFungibleLocationResponse>> NonFungibleLocationWithHttpInfoAsync(StateNonFungibleLocationRequest stateNonFungibleLocationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Package Blueprints Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the blueprints associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageBlueprintPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StatePackageBlueprintPageResponse</returns>
+        System.Threading.Tasks.Task<StatePackageBlueprintPageResponse> PackageBlueprintPageAsync(StatePackageBlueprintPageRequest statePackageBlueprintPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Package Blueprints Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the blueprints associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageBlueprintPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StatePackageBlueprintPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StatePackageBlueprintPageResponse>> PackageBlueprintPageWithHttpInfoAsync(StatePackageBlueprintPageRequest statePackageBlueprintPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Package Codes Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the codes associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageCodePageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StatePackageCodePageResponse</returns>
+        System.Threading.Tasks.Task<StatePackageCodePageResponse> PackageCodePageAsync(StatePackageCodePageRequest statePackageCodePageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Package Codes Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the codes associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageCodePageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StatePackageCodePageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StatePackageCodePageResponse>> PackageCodePageWithHttpInfoAsync(StatePackageCodePageRequest statePackageCodePageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Entity Details
         /// </summary>
@@ -1907,6 +2039,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
+        /// Get Entity Schema Page Returns all the schemas associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntitySchemaPageRequest"></param>
+        /// <returns>StateEntitySchemaPageResponse</returns>
+        public StateEntitySchemaPageResponse EntitySchemaPage(StateEntitySchemaPageRequest stateEntitySchemaPageRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntitySchemaPageResponse> localVarResponse = EntitySchemaPageWithHttpInfo(stateEntitySchemaPageRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Entity Schema Page Returns all the schemas associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntitySchemaPageRequest"></param>
+        /// <returns>ApiResponse of StateEntitySchemaPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntitySchemaPageResponse> EntitySchemaPageWithHttpInfo(StateEntitySchemaPageRequest stateEntitySchemaPageRequest)
+        {
+            // verify the required parameter 'stateEntitySchemaPageRequest' is set
+            if (stateEntitySchemaPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntitySchemaPageRequest' when calling StateApi->EntitySchemaPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateEntitySchemaPageRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateEntitySchemaPageResponse>("/state/entity/page/schemas", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntitySchemaPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Entity Schema Page Returns all the schemas associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntitySchemaPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateEntitySchemaPageResponse</returns>
+        public async System.Threading.Tasks.Task<StateEntitySchemaPageResponse> EntitySchemaPageAsync(StateEntitySchemaPageRequest stateEntitySchemaPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntitySchemaPageResponse> localVarResponse = await EntitySchemaPageWithHttpInfoAsync(stateEntitySchemaPageRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Entity Schema Page Returns all the schemas associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntitySchemaPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateEntitySchemaPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntitySchemaPageResponse>> EntitySchemaPageWithHttpInfoAsync(StateEntitySchemaPageRequest stateEntitySchemaPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateEntitySchemaPageRequest' is set
+            if (stateEntitySchemaPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntitySchemaPageRequest' when calling StateApi->EntitySchemaPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateEntitySchemaPageRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateEntitySchemaPageResponse>("/state/entity/page/schemas", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntitySchemaPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
         /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
@@ -2485,6 +2734,240 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("NonFungibleLocation", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Package Blueprints Page Returns all the blueprints associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageBlueprintPageRequest"></param>
+        /// <returns>StatePackageBlueprintPageResponse</returns>
+        public StatePackageBlueprintPageResponse PackageBlueprintPage(StatePackageBlueprintPageRequest statePackageBlueprintPageRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StatePackageBlueprintPageResponse> localVarResponse = PackageBlueprintPageWithHttpInfo(statePackageBlueprintPageRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Package Blueprints Page Returns all the blueprints associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageBlueprintPageRequest"></param>
+        /// <returns>ApiResponse of StatePackageBlueprintPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StatePackageBlueprintPageResponse> PackageBlueprintPageWithHttpInfo(StatePackageBlueprintPageRequest statePackageBlueprintPageRequest)
+        {
+            // verify the required parameter 'statePackageBlueprintPageRequest' is set
+            if (statePackageBlueprintPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'statePackageBlueprintPageRequest' when calling StateApi->PackageBlueprintPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = statePackageBlueprintPageRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StatePackageBlueprintPageResponse>("/state/package/page/blueprints", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("PackageBlueprintPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Package Blueprints Page Returns all the blueprints associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageBlueprintPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StatePackageBlueprintPageResponse</returns>
+        public async System.Threading.Tasks.Task<StatePackageBlueprintPageResponse> PackageBlueprintPageAsync(StatePackageBlueprintPageRequest statePackageBlueprintPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StatePackageBlueprintPageResponse> localVarResponse = await PackageBlueprintPageWithHttpInfoAsync(statePackageBlueprintPageRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Package Blueprints Page Returns all the blueprints associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageBlueprintPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StatePackageBlueprintPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StatePackageBlueprintPageResponse>> PackageBlueprintPageWithHttpInfoAsync(StatePackageBlueprintPageRequest statePackageBlueprintPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'statePackageBlueprintPageRequest' is set
+            if (statePackageBlueprintPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'statePackageBlueprintPageRequest' when calling StateApi->PackageBlueprintPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = statePackageBlueprintPageRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StatePackageBlueprintPageResponse>("/state/package/page/blueprints", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("PackageBlueprintPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Package Codes Page Returns all the codes associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageCodePageRequest"></param>
+        /// <returns>StatePackageCodePageResponse</returns>
+        public StatePackageCodePageResponse PackageCodePage(StatePackageCodePageRequest statePackageCodePageRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StatePackageCodePageResponse> localVarResponse = PackageCodePageWithHttpInfo(statePackageCodePageRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Package Codes Page Returns all the codes associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageCodePageRequest"></param>
+        /// <returns>ApiResponse of StatePackageCodePageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StatePackageCodePageResponse> PackageCodePageWithHttpInfo(StatePackageCodePageRequest statePackageCodePageRequest)
+        {
+            // verify the required parameter 'statePackageCodePageRequest' is set
+            if (statePackageCodePageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'statePackageCodePageRequest' when calling StateApi->PackageCodePage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = statePackageCodePageRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StatePackageCodePageResponse>("/state/package/page/codes", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("PackageCodePage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Package Codes Page Returns all the codes associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageCodePageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StatePackageCodePageResponse</returns>
+        public async System.Threading.Tasks.Task<StatePackageCodePageResponse> PackageCodePageAsync(StatePackageCodePageRequest statePackageCodePageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StatePackageCodePageResponse> localVarResponse = await PackageCodePageWithHttpInfoAsync(statePackageCodePageRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Package Codes Page Returns all the codes associated with a given package entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="statePackageCodePageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StatePackageCodePageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StatePackageCodePageResponse>> PackageCodePageWithHttpInfoAsync(StatePackageCodePageRequest statePackageCodePageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'statePackageCodePageRequest' is set
+            if (statePackageCodePageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'statePackageCodePageRequest' when calling StateApi->PackageCodePage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = statePackageCodePageRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StatePackageCodePageResponse>("/state/package/page/codes", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("PackageCodePage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

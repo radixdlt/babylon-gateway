@@ -450,6 +450,8 @@ tags:
 
       * `/state/entity/page/metadata` &rarr; returns entity metadata, and can be used as entry point for further pagination with the cursor returned from `/state/entity/details`
 
+      * `/state/entity/page/schemas` &rarr; returns entity schemas, and can be used as an entry point for further pagination from a cursor returned from `/state/entity/details`
+
       * `/state/entity/page/fungibles/` &rarr; can be used as an entry point to fetch fungible resources under a given global entity or for further pagination with the cursor returned from `/state/entity/details`
 
       * `/state/entity/page/fungible-vaults/` &rarr; can be used as an entry point to fetch fungible vaults of a given resource under a given global entity or for further pagination with a cursor returned from `/state/entity/details`
@@ -458,7 +460,11 @@ tags:
 
       * `/state/entity/page/non-fungible-vaults/` &rarr; can be used as an entry point to fetch non-fungible vaults of a given resource under a given global entity or for further pagination with a cursor returned from `/state/entity/details`
 
-      * `/state/entity/page/non-fungible-vault/ids` &rarr; can be used as  an entry point to fetch non fungible-ids in a given vault or for further pagination from a cursor returned from `/state/entity/details`
+      * `/state/entity/page/non-fungible-vault/ids` &rarr; can be used as an entry point to fetch non fungible-ids in a given vault or for further pagination from a cursor returned from `/state/entity/details`
+
+      * `/state/package/page/blueprints` &rarr; can be used as an entry point to fetch blueprints of a given package entity or for further pagination with a cursor returned from `/state/entity/details`
+
+      * `/state/package/page/codes` &rarr; can be used as an entry point to fetch codes of a given package entity or for further pagination with a cursor returned from `/state/entity/details`
 
       ### Metadata
 
@@ -1404,6 +1410,31 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /state/entity/page/schemas:
+    post:
+      operationId: EntitySchemaPage
+      summary: Get Entity Schema Page
+      description: |
+        Returns all the schemas associated with a given global entity.
+        The returned response is in a paginated format, ordered by first appearance on the ledger.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateEntitySchemaPageRequest"
+      responses:
+        "200":
+          description: Entity Schemas (paginated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateEntitySchemaPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
   /state/entity/page/fungibles/:
     post:
       operationId: EntityFungiblesPage
@@ -1716,6 +1747,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StateAccountAuthorizedDepositorsPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /state/package/page/blueprints:
+    post:
+      operationId: PackageBlueprintPage
+      summary: Get Package Blueprints Page
+      description: |
+        Returns all the blueprints associated with a given package entity.
+        The returned response is in a paginated format, ordered by first appearance on the ledger.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatePackageBlueprintPageRequest"
+      responses:
+        "200":
+          description: Package Blueprints (paginated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatePackageBlueprintPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+  /state/package/page/codes:
+    post:
+      operationId: PackageCodePage
+      summary: Get Package Codes Page
+      description: |
+        Returns all the codes associated with a given package entity.
+        The returned response is in a paginated format, ordered by first appearance on the ledger.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatePackageCodePageRequest"
+      responses:
+        "200":
+          description: Package Blueprints (paginated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatePackageCodePageResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -2112,6 +2192,97 @@ components:
           properties:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
+
+    EntitySchemaCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntitySchemaCollectionItem"
+    EntitySchemaCollectionItem:
+      type: object
+      required:
+        - schema_hash_hex
+        - schema_hex
+      properties:
+        schema_hash_hex:
+          $ref: "#/components/schemas/HexString"
+        schema_hex:
+          $ref: "#/components/schemas/HexString"
+
+    PackageBlueprintCollection:
+      description: Package blueprint collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/PackageBlueprintCollectionItem"
+    PackageBlueprintCollectionItem:
+      type: object
+      required:
+        - name
+        - version
+        - definition
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        definition:
+          type: object
+          description: |
+            This type is defined in the Core API as `BlueprintDefinition`. See the Core API documentation for more details.
+        dependant_entities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Address"
+        auth_template:
+          type: object
+          description: |
+            This type is defined in the Core API as `AuthConfig`. See the Core API documentation for more details.
+        auth_template_is_locked:
+          type: boolean
+          nullable: true
+        royalty_config:
+          $ref: "#/components/schemas/BlueprintRoyaltyConfig"
+        royalty_config_is_locked:
+          type: boolean
+          nullable: true
+    PackageCodeCollection:
+      description: Package code collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/PackageCodeCollectionItem"
+    PackageCodeCollectionItem:
+      type: object
+      required:
+        - vm_type
+        - code_hash_hex
+        - code_hex
+      properties:
+        vm_type:
+          $ref: "#/components/schemas/PackageVmType"
+        code_hash_hex:
+          $ref: "#/components/schemas/HexString"
+        code_hex:
+          $ref: "#/components/schemas/HexString"
 
     ComponentEntityRoleAssignments:
       type: object
@@ -3592,7 +3763,7 @@ components:
             - code_hex
           properties:
             codes:
-              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsCodeCollection"
+              $ref: "#/components/schemas/PackageCodeCollection"
             vm_type:
               description: "**Obsolete!** Use `codes` collection instead."
               deprecated: true
@@ -3608,98 +3779,11 @@ components:
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
             blueprints:
-              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
+              $ref: "#/components/schemas/PackageBlueprintCollection"
             schemas:
-              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaCollection"
+              $ref: "#/components/schemas/EntitySchemaCollection"
             role_assignments:
               $ref: "#/components/schemas/ComponentEntityRoleAssignments"
-    StateEntityDetailsResponsePackageDetailsCodeCollection:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/PackageCodeCollectionItem"
-    PackageCodeCollectionItem:
-      type: object
-      required:
-        - vm_type
-        - code_hash_hex
-        - code_hex
-      properties:
-        vm_type:
-          $ref: "#/components/schemas/PackageVmType"
-        code_hash_hex:
-          $ref: "#/components/schemas/HexString"
-        code_hex:
-          $ref: "#/components/schemas/HexString"
-    StateEntityDetailsResponsePackageDetailsBlueprintCollection:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintItem"
-    StateEntityDetailsResponsePackageDetailsBlueprintItem:
-      type: object
-      required:
-        - name
-        - version
-        - definition
-      properties:
-        name:
-          type: string
-        version:
-          type: string
-        definition:
-          type: object
-          description: |
-            This type is defined in the Core API as `BlueprintDefinition`. See the Core API documentation for more details.
-        dependant_entities:
-          type: array
-          items:
-            $ref: "#/components/schemas/Address"
-        auth_template:
-          type: object
-          description: |
-            This type is defined in the Core API as `AuthConfig`. See the Core API documentation for more details.
-        auth_template_is_locked:
-          type: boolean
-          nullable: true
-        royalty_config:
-          $ref: "#/components/schemas/BlueprintRoyaltyConfig"
-        royalty_config_is_locked:
-          type: boolean
-          nullable: true
-    StateEntityDetailsResponsePackageDetailsSchemaCollection:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaItem"
-    StateEntityDetailsResponsePackageDetailsSchemaItem:
-      type: object
-      required:
-        - schema_hash_hex
-        - schema_hex
-      properties:
-        schema_hash_hex:
-          $ref: "#/components/schemas/HexString"
-        schema_hex:
-          $ref: "#/components/schemas/HexString"
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -3776,6 +3860,52 @@ components:
             account_address:
               $ref: "#/components/schemas/Address"
 
+    StatePackageBlueprintPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - package_address
+          properties:
+            package_address:
+              $ref: "#/components/schemas/Address"
+      example:
+        package_address: "<package-address>"
+    StatePackageBlueprintPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/PackageBlueprintCollection"
+        - type: object
+          required:
+            - package_address
+          properties:
+            package_address:
+              $ref: "#/components/schemas/Address"
+
+    StatePackageCodePageRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - package_address
+          properties:
+            package_address:
+              $ref: "#/components/schemas/Address"
+      example:
+        package_address: "<package-address>"
+    StatePackageCodePageResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/PackageCodeCollection"
+        - type: object
+          required:
+            - package_address
+          properties:
+            package_address:
+              $ref: "#/components/schemas/Address"
+
     StateEntityMetadataPageRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
@@ -3792,6 +3922,29 @@ components:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - $ref: "#/components/schemas/EntityMetadataCollection"
+        - type: object
+          required:
+            - address
+          properties:
+            address:
+              $ref: "#/components/schemas/Address"
+
+    StateEntitySchemaPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - address
+          properties:
+            address:
+              $ref: "#/components/schemas/Address"
+      example:
+        address: "<package-address>"
+    StateEntitySchemaPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/EntitySchemaCollection"
         - type: object
           required:
             - address
@@ -3849,7 +4002,7 @@ components:
               $ref: "#/components/schemas/Address"
       example:
         address: "<component-entity-address>"
-        resource_address: "<resource_address>"
+        resource_address: "<resource-address>"
     StateEntityFungibleResourceVaultsPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -3921,7 +4074,7 @@ components:
               $ref: "#/components/schemas/StateEntityNonFungibleResourceVaultsPageOptIns"
       example:
         address: "<component-entity-address>"
-        resource_address: "<resource_address>"
+        resource_address: "<resource-address>"
     StateEntityNonFungibleResourceVaultsPageOptIns:
       type: object
       description: Check detailed [OptIns](#section/Using-endpoints-with-opt-in-features) documentation for more details

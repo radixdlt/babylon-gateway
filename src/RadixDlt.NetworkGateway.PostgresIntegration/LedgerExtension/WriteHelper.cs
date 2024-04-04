@@ -731,35 +731,6 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopySchemaHistory(ICollection<SchemaHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY schema_history (id, from_state_version, entity_id, schema_hash, schema) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopySchemaHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -863,7 +834,8 @@ SELECT
     setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
     setval('package_blueprint_history_id_seq', @packageBlueprintHistorySequence),
     setval('package_code_history_id_seq', @packageCodeHistorySequence),
-    setval('schema_history_id_seq', @schemaHistorySequence),
+    setval('schema_entry_definition_id_seq', @schemaEntryDefinitionSequence),
+    setval('schema_entry_aggregate_history_id_seq', @schemaEntryAggregateHistorySequence),
     setval('key_value_store_entry_definition_id_seq', @keyValueStoreEntryDefinitionSequence),
     setval('key_value_store_entry_history_id_seq', @keyValueStoreEntryHistorySequence),
     setval('validator_emission_statistics_id_seq', @validatorEmissionStatisticsSequence),
@@ -902,7 +874,8 @@ SELECT
                 ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
                 packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
                 packageCodeHistorySequence = sequences.PackageCodeHistorySequence,
-                schemaHistorySequence = sequences.SchemaHistorySequence,
+                schemaEntryDefinitionSequence = sequences.SchemaEntryDefinitionSequence,
+                schemaEntryAggregateHistorySequence = sequences.SchemaEntryAggregateHistorySequence,
                 keyValueStoreEntryDefinitionSequence = sequences.KeyValueStoreEntryDefinitionSequence,
                 keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
                 validatorEmissionStatisticsSequence = sequences.ValidatorEmissionStatisticsSequence,

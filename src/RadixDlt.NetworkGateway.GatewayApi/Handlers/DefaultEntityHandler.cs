@@ -112,6 +112,19 @@ internal class DefaultEntityHandler : IEntityHandler
         return await _entityStateQuerier.EntityMetadata(pageRequest, ledgerState, token);
     }
 
+    public async Task<GatewayModel.StateEntitySchemaPageResponse?> Schemas(GatewayModel.StateEntitySchemaPageRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+
+        var pageRequest = new IEntityStateQuerier.PageRequest(
+            Address: (EntityAddress)request.Address,
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.PackagePageSize
+        );
+
+        return await _entityStateQuerier.EntitySchema(pageRequest, ledgerState, token);
+    }
+
     public async Task<GatewayModel.StateEntityFungiblesPageResponse?> Fungibles(GatewayModel.StateEntityFungiblesPageRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);

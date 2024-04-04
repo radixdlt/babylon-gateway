@@ -62,27 +62,9 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
-
-[Table("schema_history")]
-internal class SchemaHistory
+public partial class StateEntitySchemaPageRequest : IPaginableRequest
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("schema_hash")]
-    public byte[] SchemaHash { get; set; }
-
-    [Column("schema")]
-    public byte[] Schema { get; set; }
 }

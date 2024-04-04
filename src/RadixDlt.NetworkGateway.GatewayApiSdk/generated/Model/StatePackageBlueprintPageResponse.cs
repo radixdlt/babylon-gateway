@@ -90,103 +90,80 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsBlueprintItem
+    /// StatePackageBlueprintPageResponse
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsBlueprintItem")]
-    public partial class StateEntityDetailsResponsePackageDetailsBlueprintItem : IEquatable<StateEntityDetailsResponsePackageDetailsBlueprintItem>
+    [DataContract(Name = "StatePackageBlueprintPageResponse")]
+    public partial class StatePackageBlueprintPageResponse : IEquatable<StatePackageBlueprintPageResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintItem" /> class.
+        /// Initializes a new instance of the <see cref="StatePackageBlueprintPageResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsBlueprintItem() { }
+        protected StatePackageBlueprintPageResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintItem" /> class.
+        /// Initializes a new instance of the <see cref="StatePackageBlueprintPageResponse" /> class.
         /// </summary>
-        /// <param name="name">name (required).</param>
-        /// <param name="version">version (required).</param>
-        /// <param name="definition">This type is defined in the Core API as &#x60;BlueprintDefinition&#x60;. See the Core API documentation for more details.  (required).</param>
-        /// <param name="dependantEntities">dependantEntities.</param>
-        /// <param name="authTemplate">This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. .</param>
-        /// <param name="authTemplateIsLocked">authTemplateIsLocked.</param>
-        /// <param name="royaltyConfig">royaltyConfig.</param>
-        /// <param name="royaltyConfigIsLocked">royaltyConfigIsLocked.</param>
-        public StateEntityDetailsResponsePackageDetailsBlueprintItem(string name = default(string), string version = default(string), Object definition = default(Object), List<string> dependantEntities = default(List<string>), Object authTemplate = default(Object), bool? authTemplateIsLocked = default(bool?), BlueprintRoyaltyConfig royaltyConfig = default(BlueprintRoyaltyConfig), bool? royaltyConfigIsLocked = default(bool?))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
+        /// <param name="items">items (required).</param>
+        /// <param name="packageAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        public StatePackageBlueprintPageResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string nextCursor = default(string), List<PackageBlueprintCollectionItem> items = default(List<PackageBlueprintCollectionItem>), string packageAddress = default(string))
         {
-            // to ensure "name" is required (not null)
-            if (name == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("name is a required property for StateEntityDetailsResponsePackageDetailsBlueprintItem and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for StatePackageBlueprintPageResponse and cannot be null");
             }
-            this.Name = name;
-            // to ensure "version" is required (not null)
-            if (version == null)
+            this.LedgerState = ledgerState;
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("version is a required property for StateEntityDetailsResponsePackageDetailsBlueprintItem and cannot be null");
+                throw new ArgumentNullException("items is a required property for StatePackageBlueprintPageResponse and cannot be null");
             }
-            this._Version = version;
-            // to ensure "definition" is required (not null)
-            if (definition == null)
+            this.Items = items;
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
             {
-                throw new ArgumentNullException("definition is a required property for StateEntityDetailsResponsePackageDetailsBlueprintItem and cannot be null");
+                throw new ArgumentNullException("packageAddress is a required property for StatePackageBlueprintPageResponse and cannot be null");
             }
-            this.Definition = definition;
-            this.DependantEntities = dependantEntities;
-            this.AuthTemplate = authTemplate;
-            this.AuthTemplateIsLocked = authTemplateIsLocked;
-            this.RoyaltyConfig = royaltyConfig;
-            this.RoyaltyConfigIsLocked = royaltyConfigIsLocked;
+            this.PackageAddress = packageAddress;
+            this.TotalCount = totalCount;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Gets or Sets Name
+        /// Gets or Sets LedgerState
         /// </summary>
-        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
-        public string Name { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets _Version
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
         /// </summary>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public string _Version { get; set; }
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;BlueprintDefinition&#x60;. See the Core API documentation for more details. 
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;BlueprintDefinition&#x60;. See the Core API documentation for more details. </value>
-        [DataMember(Name = "definition", IsRequired = true, EmitDefaultValue = true)]
-        public Object Definition { get; set; }
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets DependantEntities
+        /// Gets or Sets Items
         /// </summary>
-        [DataMember(Name = "dependant_entities", EmitDefaultValue = true)]
-        public List<string> DependantEntities { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<PackageBlueprintCollectionItem> Items { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. 
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. </value>
-        [DataMember(Name = "auth_template", EmitDefaultValue = true)]
-        public Object AuthTemplate { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AuthTemplateIsLocked
-        /// </summary>
-        [DataMember(Name = "auth_template_is_locked", EmitDefaultValue = true)]
-        public bool? AuthTemplateIsLocked { get; set; }
-
-        /// <summary>
-        /// Gets or Sets RoyaltyConfig
-        /// </summary>
-        [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
-        public BlueprintRoyaltyConfig RoyaltyConfig { get; set; }
-
-        /// <summary>
-        /// Gets or Sets RoyaltyConfigIsLocked
-        /// </summary>
-        [DataMember(Name = "royalty_config_is_locked", EmitDefaultValue = true)]
-        public bool? RoyaltyConfigIsLocked { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -195,15 +172,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsBlueprintItem {\n");
-            sb.Append("  Name: ").Append(Name).Append("\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
-            sb.Append("  Definition: ").Append(Definition).Append("\n");
-            sb.Append("  DependantEntities: ").Append(DependantEntities).Append("\n");
-            sb.Append("  AuthTemplate: ").Append(AuthTemplate).Append("\n");
-            sb.Append("  AuthTemplateIsLocked: ").Append(AuthTemplateIsLocked).Append("\n");
-            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
-            sb.Append("  RoyaltyConfigIsLocked: ").Append(RoyaltyConfigIsLocked).Append("\n");
+            sb.Append("class StatePackageBlueprintPageResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -224,15 +198,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsBlueprintItem);
+            return this.Equals(input as StatePackageBlueprintPageResponse);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsBlueprintItem instances are equal
+        /// Returns true if StatePackageBlueprintPageResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsBlueprintItem to be compared</param>
+        /// <param name="input">Instance of StatePackageBlueprintPageResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsBlueprintItem input)
+        public bool Equals(StatePackageBlueprintPageResponse input)
         {
             if (input == null)
             {
@@ -240,45 +214,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Name == input.Name ||
-                    (this.Name != null &&
-                    this.Name.Equals(input.Name))
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this._Version == input._Version ||
-                    (this._Version != null &&
-                    this._Version.Equals(input._Version))
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
-                    this.Definition == input.Definition ||
-                    (this.Definition != null &&
-                    this.Definition.Equals(input.Definition))
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
-                    this.DependantEntities == input.DependantEntities ||
-                    this.DependantEntities != null &&
-                    input.DependantEntities != null &&
-                    this.DependantEntities.SequenceEqual(input.DependantEntities)
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 ) && 
                 (
-                    this.AuthTemplate == input.AuthTemplate ||
-                    (this.AuthTemplate != null &&
-                    this.AuthTemplate.Equals(input.AuthTemplate))
-                ) && 
-                (
-                    this.AuthTemplateIsLocked == input.AuthTemplateIsLocked ||
-                    (this.AuthTemplateIsLocked != null &&
-                    this.AuthTemplateIsLocked.Equals(input.AuthTemplateIsLocked))
-                ) && 
-                (
-                    this.RoyaltyConfig == input.RoyaltyConfig ||
-                    (this.RoyaltyConfig != null &&
-                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
-                ) && 
-                (
-                    this.RoyaltyConfigIsLocked == input.RoyaltyConfigIsLocked ||
-                    (this.RoyaltyConfigIsLocked != null &&
-                    this.RoyaltyConfigIsLocked.Equals(input.RoyaltyConfigIsLocked))
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
                 );
         }
 
@@ -291,37 +250,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Name != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this._Version != null)
+                if (this.TotalCount != null)
                 {
-                    hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 }
-                if (this.Definition != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.Definition.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
-                if (this.DependantEntities != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.DependantEntities.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
-                if (this.AuthTemplate != null)
+                if (this.PackageAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.AuthTemplate.GetHashCode();
-                }
-                if (this.AuthTemplateIsLocked != null)
-                {
-                    hashCode = (hashCode * 59) + this.AuthTemplateIsLocked.GetHashCode();
-                }
-                if (this.RoyaltyConfig != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
-                }
-                if (this.RoyaltyConfigIsLocked != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyConfigIsLocked.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
                 return hashCode;
             }

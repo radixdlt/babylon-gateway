@@ -62,46 +62,15 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-[Table("package_blueprint_history")]
-internal class PackageBlueprintHistory
+public interface IPackageHandler
 {
-    [Column("id")]
-    [Key]
-    public long Id { get; set; }
+    Task<GatewayModel.StatePackageBlueprintPageResponse?> Blueprints(GatewayModel.StatePackageBlueprintPageRequest request, CancellationToken token = default);
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("package_entity_id")]
-    public long PackageEntityId { get; set; }
-
-    [Column("name")]
-    public string Name { get; set; }
-
-    [Column("version")]
-    public string Version { get; set; }
-
-    [Column("definition", TypeName = "jsonb")]
-    public string Definition { get; set; }
-
-    [Column("dependant_entity_ids")]
-    public List<long>? DependantEntityIds { get; set; }
-
-    [Column("auth_template", TypeName = "jsonb")]
-    public string? AuthTemplate { get; set; }
-
-    [Column("auth_template_is_locked")]
-    public bool? AuthTemplateIsLocked { get; set; }
-
-    [Column("royalty_config", TypeName = "jsonb")]
-    public string? RoyaltyConfig { get; set; }
-
-    [Column("royalty_config_is_locked")]
-    public bool? RoyaltyConfigIsLocked { get; set; }
+    Task<GatewayModel.StatePackageCodePageResponse?> Codes(GatewayModel.StatePackageCodePageRequest request, CancellationToken token = default);
 }
