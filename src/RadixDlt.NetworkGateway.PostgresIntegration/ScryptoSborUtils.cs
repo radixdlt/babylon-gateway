@@ -147,9 +147,9 @@ internal static class ScryptoSborUtils
             case ToolkitModel.MetadataValue.I64Value i64Value:
                 return new GatewayModel.MetadataI64Value(i64Value.value.ToString());
             case ToolkitModel.MetadataValue.InstantArrayValue instantArrayValue:
-                return new GatewayModel.MetadataInstantArrayValue(instantArrayValue.value.Select(x => DateTimeOffset.FromUnixTimeSeconds(x).AsUtcIsoDateAtSecondsPrecisionString()).ToList());
+                return new GatewayModel.MetadataInstantArrayValue(instantArrayValue.value.Select(x => DateTimeOffset.FromUnixTimeMilliseconds(x).AsUtcIsoDateAtSecondsPrecisionString()).ToList());
             case ToolkitModel.MetadataValue.InstantValue instantValue:
-                return new GatewayModel.MetadataInstantValue(DateTimeOffset.FromUnixTimeSeconds(instantValue.value).AsUtcIsoDateAtSecondsPrecisionString());
+                return new GatewayModel.MetadataInstantValue(DateTimeOffset.FromUnixTimeMilliseconds(instantValue.value).AsUtcIsoDateAtSecondsPrecisionString());
             case ToolkitModel.MetadataValue.NonFungibleGlobalIdArrayValue nonFungibleGlobalIdArrayValue:
                 return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue
                     .value
