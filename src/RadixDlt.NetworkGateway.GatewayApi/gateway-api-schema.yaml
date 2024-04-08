@@ -4884,11 +4884,17 @@ components:
         kind:
           $ref: "#/components/schemas/ProgrammaticScryptoSborValueKind"
         type_name:
-          description: Object type name; available only when a schema is present and the type has a name.
+          description: |
+            The name of the type of this value.
+            This is only output when a schema is present and the type has a name.
+            This property is ignored when the value is used as an input to the API.
           type: string
           nullable: true
         field_name:
-          description: Field name; available only when the value is a child of a `Tuple` or `Enum`, which has a type with named fields.
+          description: |
+            The name of the field which hosts this value.
+            This property is only included if this value is a child of a `Tuple` or `Enum` with named fields.
+            This property is ignored when the value is used as an input to the API.
           type: string
           nullable: true
       discriminator:
