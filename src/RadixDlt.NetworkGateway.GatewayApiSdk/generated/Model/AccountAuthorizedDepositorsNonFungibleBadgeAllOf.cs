@@ -90,29 +90,45 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountDepositPreValidationNonFungibleResourceBadgeAllOf
+    /// AccountAuthorizedDepositorsNonFungibleBadgeAllOf
     /// </summary>
-    [DataContract(Name = "AccountDepositPreValidationNonFungibleResourceBadge_allOf")]
-    public partial class AccountDepositPreValidationNonFungibleResourceBadgeAllOf : IEquatable<AccountDepositPreValidationNonFungibleResourceBadgeAllOf>
+    [DataContract(Name = "AccountAuthorizedDepositorsNonFungibleBadge_allOf")]
+    public partial class AccountAuthorizedDepositorsNonFungibleBadgeAllOf : IEquatable<AccountAuthorizedDepositorsNonFungibleBadgeAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountDepositPreValidationNonFungibleResourceBadgeAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleBadgeAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountDepositPreValidationNonFungibleResourceBadgeAllOf() { }
+        protected AccountAuthorizedDepositorsNonFungibleBadgeAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountDepositPreValidationNonFungibleResourceBadgeAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleBadgeAllOf" /> class.
         /// </summary>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        public AccountDepositPreValidationNonFungibleResourceBadgeAllOf(string nonFungibleId = default(string))
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
+        public AccountAuthorizedDepositorsNonFungibleBadgeAllOf(string resourceAddress = default(string), string nonFungibleId = default(string), long lastUpdatedAtStateVersion = default(long))
         {
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for AccountAuthorizedDepositorsNonFungibleBadgeAllOf and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
             // to ensure "nonFungibleId" is required (not null)
             if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for AccountDepositPreValidationNonFungibleResourceBadgeAllOf and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for AccountAuthorizedDepositorsNonFungibleBadgeAllOf and cannot be null");
             }
             this.NonFungibleId = nonFungibleId;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// String-encoded non-fungible ID.
@@ -122,14 +138,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string NonFungibleId { get; set; }
 
         /// <summary>
+        /// The most recent state version underlying object was modified at.
+        /// </summary>
+        /// <value>The most recent state version underlying object was modified at.</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountDepositPreValidationNonFungibleResourceBadgeAllOf {\n");
+            sb.Append("class AccountAuthorizedDepositorsNonFungibleBadgeAllOf {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +175,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountDepositPreValidationNonFungibleResourceBadgeAllOf);
+            return this.Equals(input as AccountAuthorizedDepositorsNonFungibleBadgeAllOf);
         }
 
         /// <summary>
-        /// Returns true if AccountDepositPreValidationNonFungibleResourceBadgeAllOf instances are equal
+        /// Returns true if AccountAuthorizedDepositorsNonFungibleBadgeAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountDepositPreValidationNonFungibleResourceBadgeAllOf to be compared</param>
+        /// <param name="input">Instance of AccountAuthorizedDepositorsNonFungibleBadgeAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountDepositPreValidationNonFungibleResourceBadgeAllOf input)
+        public bool Equals(AccountAuthorizedDepositorsNonFungibleBadgeAllOf input)
         {
             if (input == null)
             {
@@ -166,9 +191,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
                     this.NonFungibleId == input.NonFungibleId ||
                     (this.NonFungibleId != null &&
                     this.NonFungibleId.Equals(input.NonFungibleId))
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -181,10 +215,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
                 if (this.NonFungibleId != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

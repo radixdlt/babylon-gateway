@@ -102,10 +102,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         ResourceBadge = 1,
 
         /// <summary>
-        /// Enum NonFungibleResourceBadge for value: NonFungibleResourceBadge
+        /// Enum NonFungibleBadge for value: NonFungibleBadge
         /// </summary>
-        [EnumMember(Value = "NonFungibleResourceBadge")]
-        NonFungibleResourceBadge = 2
+        [EnumMember(Value = "NonFungibleBadge")]
+        NonFungibleBadge = 2
 
     }
 

@@ -115,8 +115,6 @@ public sealed class TransactionController : ControllerBase
     [HttpPost("account-deposit-pre-validation")]
     public async Task<GatewayModel.AccountDepositPreValidationResponse> AccountDepositPreValidation(GatewayModel.AccountDepositPreValidationRequest request, CancellationToken token)
     {
-        // TODO PP:
-        await Task.Yield();
-        throw new NotImplementedException();
+        return await _transactionHandler.AccountDepositPreValidation(request, token);
     }
 }

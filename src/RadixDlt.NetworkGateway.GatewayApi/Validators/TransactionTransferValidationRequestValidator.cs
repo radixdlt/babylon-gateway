@@ -86,7 +86,7 @@ internal class TransactionTransferPreValidationRequestValidator : AbstractValida
                 {
                     RuleFor(x => x.ResourceAddresses.Count)
                         .GreaterThan(0)
-                        .LessThanOrEqualTo(endpointOptionsSnapshot.Value.TransactionTransferPreValidationMaxResourceItems);
+                        .LessThanOrEqualTo(endpointOptionsSnapshot.Value.TransactionAccountDepositPreValidationMaxResourceItems);
 
                     RuleForEach(x => x.ResourceAddresses)
                         .NotNull()
@@ -107,18 +107,16 @@ internal class TransferPreValidationResourceBadgeValidator : AbstractValidator<A
 {
     public TransferPreValidationResourceBadgeValidator(RadixAddressValidator radixAddressValidator)
     {
-        // TODO PP:
-        // fix validation message. It's not displaying entire path of properties.
+        RuleFor(x => x.BadgeType).IsInEnum();
         RuleFor(x => x.ResourceAddress).SetValidator(radixAddressValidator);
     }
 }
 
-internal class TransferPreValidationNonFungibleResourceBadgeValidator : AbstractValidator<AccountDepositPreValidationNonFungibleResourceBadge>
+internal class TransferPreValidationNonFungibleResourceBadgeValidator : AbstractValidator<AccountDepositPreValidationNonFungibleBadge>
 {
     public TransferPreValidationNonFungibleResourceBadgeValidator(RadixAddressValidator radixAddressValidator)
     {
-        // TODO PP:
-        // fix validation message. It's not displaying entire path of properties.
+        RuleFor(x => x.BadgeType).IsInEnum();
         RuleFor(x => x.ResourceAddress).SetValidator(radixAddressValidator);
         RuleFor(x => x.NonFungibleId).NotEmpty();
     }

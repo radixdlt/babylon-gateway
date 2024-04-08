@@ -105,9 +105,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="allowsTryDepositBatch">allowsTryDepositBatch (required).</param>
-        /// <param name="resourceSpecific">TODO PP (required).</param>
+        /// <param name="resourceSpecificBehaviour">The fully resolved try_deposit_* ability of each resource (which takes all the inputs into account, including the authorized depositor badge, the default deposit rule and the resource-specific details)..</param>
         /// <param name="decidingFactors">decidingFactors (required).</param>
-        public AccountDepositPreValidationResponse(LedgerState ledgerState = default(LedgerState), bool allowsTryDepositBatch = default(bool), List<AccountDepositPreValidationResourceSpecificItemsInner> resourceSpecific = default(List<AccountDepositPreValidationResourceSpecificItemsInner>), AccountDepositPreValidationDecidingFactors decidingFactors = default(AccountDepositPreValidationDecidingFactors))
+        public AccountDepositPreValidationResponse(LedgerState ledgerState = default(LedgerState), bool allowsTryDepositBatch = default(bool), List<AccountDepositPreValidationResourceSpecificBehaviourItem> resourceSpecificBehaviour = default(List<AccountDepositPreValidationResourceSpecificBehaviourItem>), AccountDepositPreValidationDecidingFactors decidingFactors = default(AccountDepositPreValidationDecidingFactors))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -116,18 +116,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.LedgerState = ledgerState;
             this.AllowsTryDepositBatch = allowsTryDepositBatch;
-            // to ensure "resourceSpecific" is required (not null)
-            if (resourceSpecific == null)
-            {
-                throw new ArgumentNullException("resourceSpecific is a required property for AccountDepositPreValidationResponse and cannot be null");
-            }
-            this.ResourceSpecific = resourceSpecific;
             // to ensure "decidingFactors" is required (not null)
             if (decidingFactors == null)
             {
                 throw new ArgumentNullException("decidingFactors is a required property for AccountDepositPreValidationResponse and cannot be null");
             }
             this.DecidingFactors = decidingFactors;
+            this.ResourceSpecificBehaviour = resourceSpecificBehaviour;
         }
 
         /// <summary>
@@ -143,11 +138,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool AllowsTryDepositBatch { get; set; }
 
         /// <summary>
-        /// TODO PP
+        /// The fully resolved try_deposit_* ability of each resource (which takes all the inputs into account, including the authorized depositor badge, the default deposit rule and the resource-specific details).
         /// </summary>
-        /// <value>TODO PP</value>
-        [DataMember(Name = "resource_specific", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccountDepositPreValidationResourceSpecificItemsInner> ResourceSpecific { get; set; }
+        /// <value>The fully resolved try_deposit_* ability of each resource (which takes all the inputs into account, including the authorized depositor badge, the default deposit rule and the resource-specific details).</value>
+        [DataMember(Name = "resource_specific_behaviour", EmitDefaultValue = true)]
+        public List<AccountDepositPreValidationResourceSpecificBehaviourItem> ResourceSpecificBehaviour { get; set; }
 
         /// <summary>
         /// Gets or Sets DecidingFactors
@@ -165,7 +160,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class AccountDepositPreValidationResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  AllowsTryDepositBatch: ").Append(AllowsTryDepositBatch).Append("\n");
-            sb.Append("  ResourceSpecific: ").Append(ResourceSpecific).Append("\n");
+            sb.Append("  ResourceSpecificBehaviour: ").Append(ResourceSpecificBehaviour).Append("\n");
             sb.Append("  DecidingFactors: ").Append(DecidingFactors).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -212,10 +207,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AllowsTryDepositBatch.Equals(input.AllowsTryDepositBatch)
                 ) && 
                 (
-                    this.ResourceSpecific == input.ResourceSpecific ||
-                    this.ResourceSpecific != null &&
-                    input.ResourceSpecific != null &&
-                    this.ResourceSpecific.SequenceEqual(input.ResourceSpecific)
+                    this.ResourceSpecificBehaviour == input.ResourceSpecificBehaviour ||
+                    this.ResourceSpecificBehaviour != null &&
+                    input.ResourceSpecificBehaviour != null &&
+                    this.ResourceSpecificBehaviour.SequenceEqual(input.ResourceSpecificBehaviour)
                 ) && 
                 (
                     this.DecidingFactors == input.DecidingFactors ||
@@ -238,9 +233,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.AllowsTryDepositBatch.GetHashCode();
-                if (this.ResourceSpecific != null)
+                if (this.ResourceSpecificBehaviour != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceSpecific.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceSpecificBehaviour.GetHashCode();
                 }
                 if (this.DecidingFactors != null)
                 {

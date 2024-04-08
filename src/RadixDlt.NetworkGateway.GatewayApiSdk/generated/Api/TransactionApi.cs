@@ -92,10 +92,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
-        /// TODO PP
+        /// PreValidate deposit of resources to an account
         /// </summary>
         /// <remarks>
-        /// TODO PP 
+        /// Helper endpoint that allows pre-validation if a deposit of certain resources to a given account can succeed or not. It is only meant for pre-validation usage, it does not guarantee that execution will succeed. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="accountDepositPreValidationRequest"></param>
@@ -103,10 +103,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         AccountDepositPreValidationResponse AccountDepositPreValidation(AccountDepositPreValidationRequest accountDepositPreValidationRequest);
 
         /// <summary>
-        /// TODO PP
+        /// PreValidate deposit of resources to an account
         /// </summary>
         /// <remarks>
-        /// TODO PP 
+        /// Helper endpoint that allows pre-validation if a deposit of certain resources to a given account can succeed or not. It is only meant for pre-validation usage, it does not guarantee that execution will succeed. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="accountDepositPreValidationRequest"></param>
@@ -225,10 +225,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Asynchronous Operations
         /// <summary>
-        /// TODO PP
+        /// PreValidate deposit of resources to an account
         /// </summary>
         /// <remarks>
-        /// TODO PP 
+        /// Helper endpoint that allows pre-validation if a deposit of certain resources to a given account can succeed or not. It is only meant for pre-validation usage, it does not guarantee that execution will succeed. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="accountDepositPreValidationRequest"></param>
@@ -237,10 +237,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         System.Threading.Tasks.Task<AccountDepositPreValidationResponse> AccountDepositPreValidationAsync(AccountDepositPreValidationRequest accountDepositPreValidationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// TODO PP
+        /// PreValidate deposit of resources to an account
         /// </summary>
         /// <remarks>
-        /// TODO PP 
+        /// Helper endpoint that allows pre-validation if a deposit of certain resources to a given account can succeed or not. It is only meant for pre-validation usage, it does not guarantee that execution will succeed. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="accountDepositPreValidationRequest"></param>
@@ -574,7 +574,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// TODO PP TODO PP 
+        /// PreValidate deposit of resources to an account Helper endpoint that allows pre-validation if a deposit of certain resources to a given account can succeed or not. It is only meant for pre-validation usage, it does not guarantee that execution will succeed. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="accountDepositPreValidationRequest"></param>
@@ -586,7 +586,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// TODO PP TODO PP 
+        /// PreValidate deposit of resources to an account Helper endpoint that allows pre-validation if a deposit of certain resources to a given account can succeed or not. It is only meant for pre-validation usage, it does not guarantee that execution will succeed. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="accountDepositPreValidationRequest"></param>
@@ -630,7 +630,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// TODO PP TODO PP 
+        /// PreValidate deposit of resources to an account Helper endpoint that allows pre-validation if a deposit of certain resources to a given account can succeed or not. It is only meant for pre-validation usage, it does not guarantee that execution will succeed. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="accountDepositPreValidationRequest"></param>
@@ -643,7 +643,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// TODO PP TODO PP 
+        /// PreValidate deposit of resources to an account Helper endpoint that allows pre-validation if a deposit of certain resources to a given account can succeed or not. It is only meant for pre-validation usage, it does not guarantee that execution will succeed. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="accountDepositPreValidationRequest"></param>

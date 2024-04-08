@@ -95,7 +95,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// </summary>
     [DataContract(Name = "AccountDepositPreValidationResourceBadge")]
     [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationNonFungibleResourceBadge), "NonFungibleResourceBadge")]
+    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationNonFungibleBadge), "NonFungibleBadge")]
     [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationResourceBadge), "ResourceBadge")]
     public partial class AccountDepositPreValidationResourceBadge : TransactionAccountDepositPreValidationAuthorizedDepositorBadge, IEquatable<AccountDepositPreValidationResourceBadge>
     {

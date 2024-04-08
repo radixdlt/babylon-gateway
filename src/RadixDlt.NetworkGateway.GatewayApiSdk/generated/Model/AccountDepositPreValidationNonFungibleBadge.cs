@@ -84,51 +84,48 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountDepositPreValidationResourceSpecificItemsInner
+    /// AccountDepositPreValidationNonFungibleBadge
     /// </summary>
-    [DataContract(Name = "AccountDepositPreValidationResourceSpecificItems_inner")]
-    public partial class AccountDepositPreValidationResourceSpecificItemsInner : IEquatable<AccountDepositPreValidationResourceSpecificItemsInner>
+    [DataContract(Name = "AccountDepositPreValidationNonFungibleBadge")]
+    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationNonFungibleBadge), "NonFungibleBadge")]
+    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationResourceBadge), "ResourceBadge")]
+    public partial class AccountDepositPreValidationNonFungibleBadge : TransactionAccountDepositPreValidationAuthorizedDepositorBadge, IEquatable<AccountDepositPreValidationNonFungibleBadge>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResourceSpecificItemsInner" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationNonFungibleBadge" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountDepositPreValidationResourceSpecificItemsInner() { }
+        protected AccountDepositPreValidationNonFungibleBadge() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResourceSpecificItemsInner" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationNonFungibleBadge" /> class.
         /// </summary>
+        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
+        /// <param name="badgeType">badgeType (required) (default to AccountAuthorizedDepositorBadgeType.NonFungibleBadge).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="allowsTryDeposit">TODO PP (required).</param>
-        public AccountDepositPreValidationResourceSpecificItemsInner(string resourceAddress = default(string), bool allowsTryDeposit = default(bool))
+        public AccountDepositPreValidationNonFungibleBadge(string nonFungibleId = default(string), AccountAuthorizedDepositorBadgeType badgeType = AccountAuthorizedDepositorBadgeType.NonFungibleBadge, string resourceAddress = default(string)) : base(badgeType, resourceAddress)
         {
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for AccountDepositPreValidationResourceSpecificItemsInner and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for AccountDepositPreValidationNonFungibleBadge and cannot be null");
             }
-            this.ResourceAddress = resourceAddress;
-            this.AllowsTryDeposit = allowsTryDeposit;
+            this.NonFungibleId = nonFungibleId;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// String-encoded non-fungible ID.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
-
-        /// <summary>
-        /// TODO PP
-        /// </summary>
-        /// <value>TODO PP</value>
-        [DataMember(Name = "allows_try_deposit", IsRequired = true, EmitDefaultValue = true)]
-        public bool AllowsTryDeposit { get; set; }
+        /// <value>String-encoded non-fungible ID.</value>
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,9 +134,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountDepositPreValidationResourceSpecificItemsInner {\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  AllowsTryDeposit: ").Append(AllowsTryDeposit).Append("\n");
+            sb.Append("class AccountDepositPreValidationNonFungibleBadge {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -148,7 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -160,29 +157,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountDepositPreValidationResourceSpecificItemsInner);
+            return this.Equals(input as AccountDepositPreValidationNonFungibleBadge);
         }
 
         /// <summary>
-        /// Returns true if AccountDepositPreValidationResourceSpecificItemsInner instances are equal
+        /// Returns true if AccountDepositPreValidationNonFungibleBadge instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountDepositPreValidationResourceSpecificItemsInner to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationNonFungibleBadge to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountDepositPreValidationResourceSpecificItemsInner input)
+        public bool Equals(AccountDepositPreValidationNonFungibleBadge input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && 
-                (
-                    this.AllowsTryDeposit == input.AllowsTryDeposit ||
-                    this.AllowsTryDeposit.Equals(input.AllowsTryDeposit)
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 );
         }
 
@@ -194,12 +187,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.ResourceAddress != null)
+                int hashCode = base.GetHashCode();
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.AllowsTryDeposit.GetHashCode();
                 return hashCode;
             }
         }

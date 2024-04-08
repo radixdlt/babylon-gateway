@@ -84,45 +84,47 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem
+    /// AccountAuthorizedDepositorsNonFungibleBadge
     /// </summary>
-    [DataContract(Name = "AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem")]
-    public partial class AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem : IEquatable<AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem>
+    [DataContract(Name = "AccountAuthorizedDepositorsNonFungibleBadge")]
+    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "NonFungibleBadge")]
+    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "ResourceBadge")]
+    public partial class AccountAuthorizedDepositorsNonFungibleBadge : AccountAuthorizedDepositorsResponseItem, IEquatable<AccountAuthorizedDepositorsNonFungibleBadge>
     {
-
         /// <summary>
-        /// Gets or Sets ResourcePreferenceRule
-        /// </summary>
-        [DataMember(Name = "resource_preference_rule", IsRequired = true, EmitDefaultValue = true)]
-        public AccountResourcePreferenceRule ResourcePreferenceRule { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleBadge" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem() { }
+        protected AccountAuthorizedDepositorsNonFungibleBadge() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleBadge" /> class.
         /// </summary>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="isXrd">isXrd (required).</param>
-        /// <param name="resourcePreferenceRule">resourcePreferenceRule (required).</param>
+        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
         /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        public AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem(string resourceAddress = default(string), bool isXrd = default(bool), AccountResourcePreferenceRule resourcePreferenceRule = default(AccountResourcePreferenceRule), long lastUpdatedAtStateVersion = default(long))
+        /// <param name="badgeType">badgeType (required) (default to AccountAuthorizedDepositorBadgeType.NonFungibleBadge).</param>
+        public AccountAuthorizedDepositorsNonFungibleBadge(string resourceAddress = default(string), string nonFungibleId = default(string), long lastUpdatedAtStateVersion = default(long), AccountAuthorizedDepositorBadgeType badgeType = AccountAuthorizedDepositorBadgeType.NonFungibleBadge) : base(badgeType)
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for AccountAuthorizedDepositorsNonFungibleBadge and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
-            this.IsXrd = isXrd;
-            this.ResourcePreferenceRule = resourcePreferenceRule;
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
+            {
+                throw new ArgumentNullException("nonFungibleId is a required property for AccountAuthorizedDepositorsNonFungibleBadge and cannot be null");
+            }
+            this.NonFungibleId = nonFungibleId;
             this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
@@ -134,10 +136,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsXrd
+        /// String-encoded non-fungible ID.
         /// </summary>
-        [DataMember(Name = "is_xrd", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsXrd { get; set; }
+        /// <value>String-encoded non-fungible ID.</value>
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// The most recent state version underlying object was modified at.
@@ -153,10 +156,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem {\n");
+            sb.Append("class AccountAuthorizedDepositorsNonFungibleBadge {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  IsXrd: ").Append(IsXrd).Append("\n");
-            sb.Append("  ResourcePreferenceRule: ").Append(ResourcePreferenceRule).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -166,7 +169,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -178,34 +181,31 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem);
+            return this.Equals(input as AccountAuthorizedDepositorsNonFungibleBadge);
         }
 
         /// <summary>
-        /// Returns true if AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem instances are equal
+        /// Returns true if AccountAuthorizedDepositorsNonFungibleBadge instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem to be compared</param>
+        /// <param name="input">Instance of AccountAuthorizedDepositorsNonFungibleBadge to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem input)
+        public bool Equals(AccountAuthorizedDepositorsNonFungibleBadge input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
                     this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && 
+                ) && base.Equals(input) && 
                 (
-                    this.IsXrd == input.IsXrd ||
-                    this.IsXrd.Equals(input.IsXrd)
-                ) && 
-                (
-                    this.ResourcePreferenceRule == input.ResourcePreferenceRule ||
-                    this.ResourcePreferenceRule.Equals(input.ResourcePreferenceRule)
-                ) && 
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
+                ) && base.Equals(input) && 
                 (
                     this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
                     this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
@@ -220,13 +220,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
+                int hashCode = base.GetHashCode();
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsXrd.GetHashCode();
-                hashCode = (hashCode * 59) + this.ResourcePreferenceRule.GetHashCode();
+                if (this.NonFungibleId != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }

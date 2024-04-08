@@ -40,10 +40,11 @@ Release built: _not published yet_
 - Added new endpoint `/state/package/page/blueprints` returning paginable iterator over package blueprints.
 - Added new endpoint `/state/package/page/codes` returning paginable iterator over package codes.
 - Added new endpoint `/state/entity/page/schemas` returning paginable iterator over entity schemas.
+- Added new endpoint `/transaction/account-deposit-pre-validation` which allows to pre-validate if deposits can succeed based on account deposit settings and badges presented, before submitting the transaction. 
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
-- Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object. 
+- Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object.
 - Changed schema area:
     - renamed `schema_history` table to `schema_entry_definition`,
     - introduced `schema_entry_aggregate_history` table that contains aggregate history of schema entries under given entity.

@@ -120,6 +120,7 @@ public static class OpenApiDocumentHandler
 
         response = OptionalReplace(response, "<resource-address>", placeholderReplacements.ResourceAddress);
         response = OptionalReplace(response, "<entity-address>", placeholderReplacements.ResourceAddress);
+        response = OptionalReplace(response, "<resource-address>", placeholderReplacements.ResourceAddress);
         response = OptionalReplace(response, "<component-entity-address>", placeholderReplacements.ComponentAddress);
         response = OptionalReplace(response, "<package-address>", placeholderReplacements.PackageAddress);
         response = OptionalReplace(response, "<transaction-intent-hash>", placeholderReplacements.CommittedTransactionIntentHash);

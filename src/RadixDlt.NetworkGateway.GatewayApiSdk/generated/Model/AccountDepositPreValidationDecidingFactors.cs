@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TODO PP
+    /// Deciding factors used to calculate response.
     /// </summary>
     [DataContract(Name = "AccountDepositPreValidationDecidingFactors")]
     public partial class AccountDepositPreValidationDecidingFactors : IEquatable<AccountDepositPreValidationDecidingFactors>
@@ -109,29 +109,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactors" /> class.
         /// </summary>
-        /// <param name="isBadgeAuthorizedDepositor">TODO PP.</param>
+        /// <param name="isBadgeAuthorizedDepositor">Whether the input badge belongs to the account&#39;s set of authorized depositors. This field will only be present if any badge was passed in the request..</param>
         /// <param name="defaultDepositRule">defaultDepositRule (required).</param>
-        /// <param name="resourcePreferenceRules">TODO PP.</param>
-        public AccountDepositPreValidationDecidingFactors(bool isBadgeAuthorizedDepositor = default(bool), AccountDefaultDepositRule defaultDepositRule = default(AccountDefaultDepositRule), List<AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem> resourcePreferenceRules = default(List<AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem>))
+        /// <param name="resourceSpecificDetails">Returns deciding factors for each resource. Contains only information about resources presented in the request, not all resource preference rules for queried account..</param>
+        public AccountDepositPreValidationDecidingFactors(bool? isBadgeAuthorizedDepositor = default(bool?), AccountDefaultDepositRule defaultDepositRule = default(AccountDefaultDepositRule), List<AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem> resourceSpecificDetails = default(List<AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem>))
         {
             this.DefaultDepositRule = defaultDepositRule;
             this.IsBadgeAuthorizedDepositor = isBadgeAuthorizedDepositor;
-            this.ResourcePreferenceRules = resourcePreferenceRules;
+            this.ResourceSpecificDetails = resourceSpecificDetails;
         }
 
         /// <summary>
-        /// TODO PP
+        /// Whether the input badge belongs to the account&#39;s set of authorized depositors. This field will only be present if any badge was passed in the request.
         /// </summary>
-        /// <value>TODO PP</value>
+        /// <value>Whether the input badge belongs to the account&#39;s set of authorized depositors. This field will only be present if any badge was passed in the request.</value>
         [DataMember(Name = "is_badge_authorized_depositor", EmitDefaultValue = true)]
-        public bool IsBadgeAuthorizedDepositor { get; set; }
+        public bool? IsBadgeAuthorizedDepositor { get; set; }
 
         /// <summary>
-        /// TODO PP
+        /// Returns deciding factors for each resource. Contains only information about resources presented in the request, not all resource preference rules for queried account.
         /// </summary>
-        /// <value>TODO PP</value>
-        [DataMember(Name = "resource_preference_rules", EmitDefaultValue = true)]
-        public List<AccountDepositPreValidationDecidingFactorsResourcePreferenceResponseItem> ResourcePreferenceRules { get; set; }
+        /// <value>Returns deciding factors for each resource. Contains only information about resources presented in the request, not all resource preference rules for queried account.</value>
+        [DataMember(Name = "resource_specific_details", EmitDefaultValue = true)]
+        public List<AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem> ResourceSpecificDetails { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,7 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class AccountDepositPreValidationDecidingFactors {\n");
             sb.Append("  IsBadgeAuthorizedDepositor: ").Append(IsBadgeAuthorizedDepositor).Append("\n");
             sb.Append("  DefaultDepositRule: ").Append(DefaultDepositRule).Append("\n");
-            sb.Append("  ResourcePreferenceRules: ").Append(ResourcePreferenceRules).Append("\n");
+            sb.Append("  ResourceSpecificDetails: ").Append(ResourceSpecificDetails).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,17 +181,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             return 
                 (
                     this.IsBadgeAuthorizedDepositor == input.IsBadgeAuthorizedDepositor ||
-                    this.IsBadgeAuthorizedDepositor.Equals(input.IsBadgeAuthorizedDepositor)
+                    (this.IsBadgeAuthorizedDepositor != null &&
+                    this.IsBadgeAuthorizedDepositor.Equals(input.IsBadgeAuthorizedDepositor))
                 ) && 
                 (
                     this.DefaultDepositRule == input.DefaultDepositRule ||
                     this.DefaultDepositRule.Equals(input.DefaultDepositRule)
                 ) && 
                 (
-                    this.ResourcePreferenceRules == input.ResourcePreferenceRules ||
-                    this.ResourcePreferenceRules != null &&
-                    input.ResourcePreferenceRules != null &&
-                    this.ResourcePreferenceRules.SequenceEqual(input.ResourcePreferenceRules)
+                    this.ResourceSpecificDetails == input.ResourceSpecificDetails ||
+                    this.ResourceSpecificDetails != null &&
+                    input.ResourceSpecificDetails != null &&
+                    this.ResourceSpecificDetails.SequenceEqual(input.ResourceSpecificDetails)
                 );
         }
 
@@ -204,11 +205,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.IsBadgeAuthorizedDepositor.GetHashCode();
-                hashCode = (hashCode * 59) + this.DefaultDepositRule.GetHashCode();
-                if (this.ResourcePreferenceRules != null)
+                if (this.IsBadgeAuthorizedDepositor != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourcePreferenceRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IsBadgeAuthorizedDepositor.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.DefaultDepositRule.GetHashCode();
+                if (this.ResourceSpecificDetails != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceSpecificDetails.GetHashCode();
                 }
                 return hashCode;
             }
