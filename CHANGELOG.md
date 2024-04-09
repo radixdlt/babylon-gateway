@@ -31,7 +31,8 @@ Release built: _not published yet_
 
 > [!CAUTION]
 > **Breaking Changes:**
-> - Changed ordering of the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending.
+> - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending. 
+> - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
