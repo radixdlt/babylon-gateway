@@ -104,6 +104,8 @@ public sealed record LedgerConfirmationOptions
     /// <summary>
     /// Gets or sets MinCommitBatchSize.
     /// The minimum batch to send to the ledger extension service for committing.
+    /// It was added to have more control over batch size in tests.
+    /// We expect that best value to be used on production network is 1.
     /// </summary>
     [ConfigurationKeyName("MinCommitBatchSize")]
     public long MinCommitBatchSize { get; set; } = 1;

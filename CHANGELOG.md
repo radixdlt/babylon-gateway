@@ -15,8 +15,7 @@ Release built: _not published yet_
   - Upgraded runtime and libraries
   - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
   - Removed now-obsolete or no-longer-needed code.
-  - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client. 
-- Introduced new configuration parameter `LedgerConfirmation.MinCommitBatchSize`. It controls the minimum batch size of transactions that will be processed, set by default to 1. 
+  - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP client.
 - Reworked internal data aggregation mechanism to ease up maintenance burden.
 - Reworked KVStores storage and changed API surface of this area to improve overall performance. 
 

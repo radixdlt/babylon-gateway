@@ -64,6 +64,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using System;
 using System.Collections.Concurrent;
@@ -156,15 +157,16 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
         var nodeWithMostTransactions = _transactionsByNode
             .Where(x => x.Value.ContainsKey(fromStateVersion))
             .OrderByDescending(x => x.Value.Count(y => y.Key >= fromStateVersion))
-            .Select(x => x.Value)
             .FirstOrDefault();
 
-        if (nodeWithMostTransactions == null)
+        var nodeTransactions = nodeWithMostTransactions.Value;
+
+        if (nodeTransactions == null)
         {
             return [];
         }
 
-        var transactions = nodeWithMostTransactions
+        var transactions = nodeTransactions
             .Where(x => x.Key >= fromStateVersion)
             .OrderBy(x => x.Key)
             .Take(maxBatchSize)
@@ -173,6 +175,17 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
 
         if (transactions.Count < minBatchSize)
         {
+            _logger.LogInformation(
+                "Number of fetched transaction {transactionCount} is smaller than configured minimum batch size {minBatchSize}. Waiting for more transactions.",
+                transactions.Count,
+                minBatchSize);
+
+            if (!ShouldFetchNewTransactions(nodeWithMostTransactions.Key, fromStateVersion))
+            {
+                throw new ConfigurationException(
+                    "Current configuration doesn't allow to process transaction stream. Transaction store is full and minimum batch size requires to fetch more transaction before processing");
+            }
+
             return [];
         }
 
