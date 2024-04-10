@@ -1824,6 +1824,52 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /state/account-locker/page/account-resources:
+    post:
+      operationId: TBD-state-account-locker-page-account-resources
+      summary: TBD
+      description: TBD
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateAccountLockerPageAccountResourcesRequest"
+      responses:
+        "200":
+          description: TBD
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateAccountLockerPageAccountResourcesResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /wallet/tbd: # TODO ok, we need to figure out suitable naming scheme, and then rename some types
+    post:
+      operationId: TBD-wallet-tbd-tbd
+      summary: TBD
+      description: TBD
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletTbdRequest"
+      responses:
+        "200":
+          description: Validators Uptime
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletTbdResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
   /statistics/validators/uptime:
     post:
       operationId: ValidatorsUptime
@@ -2217,6 +2263,36 @@ components:
           properties:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
+
+    AccountLockerResourceVaultCollection:
+      description: TBD
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/AccountLockerResourceVault"
+    AccountLockerResourceVault:
+      type: object
+      required:
+        - resource_address
+        - vault_address
+        - amount
+        - last_updated_at_state_version
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        vault_address:
+          $ref: "#/components/schemas/Address"
+        amount:
+          $ref: "#/components/schemas/BigDecimal"
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
 
     EntitySchemaCollection:
       allOf:
@@ -4528,6 +4604,41 @@ components:
         is_locked:
           type: boolean
 
+    StateAccountLockerPageAccountResourcesRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - account_locker_address
+            - account_address
+          properties:
+            account_locker_address:
+              $ref: "#/components/schemas/Address"
+            account_address:
+              $ref: "#/components/schemas/Address"
+            explicit_resource_addresses:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+      example:
+        account_locker_address: TBD
+        account_address: TBD
+        explicit_resource_addresses: TBD
+
+    StateAccountLockerPageAccountResourcesResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/AccountLockerResourceVaultCollection"
+        - type: object
+          required:
+            - account_locker_address
+            - account_address
+          properties:
+            account_locker_address:
+              $ref: "#/components/schemas/Address"
+            account_address:
+              $ref: "#/components/schemas/Address"
 
     #
     # /state/validators/* Request & Response Types
@@ -4576,6 +4687,62 @@ components:
           properties:
             validators:
               $ref: "#/components/schemas/ValidatorUptimeCollection"
+
+    #
+    # /wallet/* Request & Response Types
+    #
+
+    WalletTbdRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin" # TODO do we even want to support that? if yes, it could technically fall under regular /state/* endpoints
+        - type: object
+          required:
+            - lookup
+          properties:
+            lookup:
+              type: array
+              items:
+                $ref: "#/components/schemas/WalletTbdRequestLookupTuple"
+      example:
+        TBD
+    WalletTbdRequestLookupTuple:
+      allOf:
+        - $ref: "#/components/schemas/FromLedgerStateMixin"
+        - type: object
+          required:
+            - account_locker_address
+            - account_address
+          properties:
+            account_locker_address:
+              $ref: "#/components/schemas/Address"
+            account_address:
+              $ref: "#/components/schemas/Address"
+
+    WalletTbdResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/WalletTbdResponseItem"
+    WalletTbdResponseItem:
+      type: object
+      required:
+        - account_locker_address
+        - account_address
+        - resource_last_stored_at_state_version
+      properties:
+        account_locker_address:
+          $ref: "#/components/schemas/Address"
+        account_address:
+          $ref: "#/components/schemas/Address"
+        resource_last_stored_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
 
     #
     # Errors
