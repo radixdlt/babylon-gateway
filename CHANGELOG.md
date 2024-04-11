@@ -1,6 +1,12 @@
 ## 1.5.1
 Release built: _not published yet_
 
+> [!CAUTION]
+> **Breaking Changes:**
+> - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending.
+> - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
+> - Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
+
 - Fixed broken (missing) package blueprint & code, and schema pagination in the `/state/entity/details` endpoint.
 - Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
 - Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.
@@ -21,6 +27,7 @@ Release built: _not published yet_
 - Reworked KVStores storage and changed API surface of this area to improve overall performance. 
 
 ### API Changes
+- Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
 - Added `role_assignments` property to the `StateEntityDetailsResponsePackageDetails`. All global component details returned by the `/state/entity/details` endpoint contain role assignments now.
 - Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.
 - Added new filter `manifest_badges_presented_filter` to the `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
@@ -32,11 +39,6 @@ Release built: _not published yet_
 - Added new endpoint `/state/package/page/blueprints` returning paginable iterator over package blueprints.
 - Added new endpoint `/state/package/page/codes` returning paginable iterator over package codes.
 - Added new endpoint `/state/entity/page/schemas` returning paginable iterator over entity schemas.
-
-> [!CAUTION]
-> **Breaking Changes:**
-> - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending. 
-> - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.

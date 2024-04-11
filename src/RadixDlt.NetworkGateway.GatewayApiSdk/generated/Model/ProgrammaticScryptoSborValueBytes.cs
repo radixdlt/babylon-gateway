@@ -137,8 +137,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="elementTypeName">elementTypeName.</param>
         /// <param name="hex">Hex-encoded binary blob. (required).</param>
         /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Bytes).</param>
-        /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
-        /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
+        /// <param name="typeName">The name of the type of this value. This is only output when a schema is present and the type has a name. This property is ignored when the value is used as an input to the API. .</param>
+        /// <param name="fieldName">The name of the field which hosts this value. This property is only included if this value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60; with named fields. This property is ignored when the value is used as an input to the API. .</param>
         public ProgrammaticScryptoSborValueBytes(ProgrammaticScryptoSborValueKind elementKind = default(ProgrammaticScryptoSborValueKind), string elementTypeName = default(string), string hex = default(string), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Bytes, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
             this.ElementKind = elementKind;
