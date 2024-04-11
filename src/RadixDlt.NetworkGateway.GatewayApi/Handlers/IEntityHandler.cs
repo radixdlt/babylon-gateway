@@ -74,6 +74,8 @@ public interface IEntityHandler
 
     Task<GatewayModel.StateEntityMetadataPageResponse?> Metadata(GatewayModel.StateEntityMetadataPageRequest request, CancellationToken token = default);
 
+    Task<GatewayModel.StateEntitySchemaPageResponse?> Schemas(GatewayModel.StateEntitySchemaPageRequest request, CancellationToken token = default);
+
     Task<GatewayModel.StateEntityFungiblesPageResponse?> Fungibles(GatewayModel.StateEntityFungiblesPageRequest request, CancellationToken token = default);
 
     Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse?> FungibleVaults(GatewayModel.StateEntityFungibleResourceVaultsPageRequest request, CancellationToken token = default);

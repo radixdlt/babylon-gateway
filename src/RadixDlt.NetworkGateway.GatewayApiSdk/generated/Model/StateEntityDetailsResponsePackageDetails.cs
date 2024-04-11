@@ -126,7 +126,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="schemas">schemas.</param>
         /// <param name="roleAssignments">roleAssignments.</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Package).</param>
-        public StateEntityDetailsResponsePackageDetails(StateEntityDetailsResponsePackageDetailsCodeCollection codes = default(StateEntityDetailsResponsePackageDetailsCodeCollection), PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
+        public StateEntityDetailsResponsePackageDetails(PackageCodeCollection codes = default(PackageCodeCollection), PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), PackageBlueprintCollection blueprints = default(PackageBlueprintCollection), EntitySchemaCollection schemas = default(EntitySchemaCollection), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
         {
             // to ensure "codes" is required (not null)
             if (codes == null)
@@ -157,7 +157,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Codes
         /// </summary>
         [DataMember(Name = "codes", IsRequired = true, EmitDefaultValue = true)]
-        public StateEntityDetailsResponsePackageDetailsCodeCollection Codes { get; set; }
+        public PackageCodeCollection Codes { get; set; }
 
         /// <summary>
         /// Hex-encoded binary blob.
@@ -184,13 +184,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Blueprints
         /// </summary>
         [DataMember(Name = "blueprints", EmitDefaultValue = true)]
-        public StateEntityDetailsResponsePackageDetailsBlueprintCollection Blueprints { get; set; }
+        public PackageBlueprintCollection Blueprints { get; set; }
 
         /// <summary>
         /// Gets or Sets Schemas
         /// </summary>
         [DataMember(Name = "schemas", EmitDefaultValue = true)]
-        public StateEntityDetailsResponsePackageDetailsSchemaCollection Schemas { get; set; }
+        public EntitySchemaCollection Schemas { get; set; }
 
         /// <summary>
         /// Gets or Sets RoleAssignments

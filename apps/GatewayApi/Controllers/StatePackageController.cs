@@ -62,46 +62,42 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace GatewayApi.Controllers;
 
-[Table("package_blueprint_history")]
-internal class PackageBlueprintHistory
+[ApiController]
+[Route("state/package")]
+public class StatePackageController : ControllerBase
 {
-    [Column("id")]
-    [Key]
-    public long Id { get; set; }
+    private readonly IPackageHandler _packageHandler;
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+    public StatePackageController(IPackageHandler packageHandler)
+    {
+        _packageHandler = packageHandler;
+    }
 
-    [Column("package_entity_id")]
-    public long PackageEntityId { get; set; }
+    [HttpPost("page/blueprints")]
+    public async Task<IActionResult> BlueprintPage(GatewayModel.StatePackageBlueprintPageRequest request, CancellationToken token = default)
+    {
+        var response = await _packageHandler.Blueprints(request, token);
 
-    [Column("name")]
-    public string Name { get; set; }
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
 
-    [Column("version")]
-    public string Version { get; set; }
+    [HttpPost("page/codes")]
+    public async Task<IActionResult> CodePage(GatewayModel.StatePackageCodePageRequest request, CancellationToken token = default)
+    {
+        var response = await _packageHandler.Codes(request, token);
 
-    [Column("definition", TypeName = "jsonb")]
-    public string Definition { get; set; }
-
-    [Column("dependant_entity_ids")]
-    public List<long>? DependantEntityIds { get; set; }
-
-    [Column("auth_template", TypeName = "jsonb")]
-    public string? AuthTemplate { get; set; }
-
-    [Column("auth_template_is_locked")]
-    public bool? AuthTemplateIsLocked { get; set; }
-
-    [Column("royalty_config", TypeName = "jsonb")]
-    public string? RoyaltyConfig { get; set; }
-
-    [Column("royalty_config_is_locked")]
-    public bool? RoyaltyConfigIsLocked { get; set; }
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
 }

@@ -83,7 +83,15 @@ public interface IEntityStateQuerier
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
 
-    Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(
+        PageRequest request,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
+
+    Task<GatewayModel.StateEntitySchemaPageResponse?> EntitySchema(
+        PageRequest pageRequest,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 
     Task<GatewayModel.StateEntityFungiblesPageResponse> EntityFungibleResourcesPage(
         PageRequest pageRequest,
@@ -132,4 +140,8 @@ public interface IEntityStateQuerier
         CancellationToken token = default);
 
     Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+
+    Task<GatewayModel.StatePackageBlueprintPageResponse?> PackageBlueprints(PageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+
+    Task<GatewayModel.StatePackageCodePageResponse?> PackageCodes(PageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 }

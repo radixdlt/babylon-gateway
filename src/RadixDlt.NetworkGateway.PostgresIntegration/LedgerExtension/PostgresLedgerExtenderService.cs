@@ -753,15 +753,14 @@ UPDATE pending_transactions
         var nonFungibleIdChanges = new List<NonFungibleIdChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
-        var schemaHistoryToAdd = new List<SchemaHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
-        var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
         var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, token);
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
         var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
+        var entitySchemaProcessor = new EntitySchemaProcessor(processorContext);
         var componentMethodRoyaltyProcessor = new ComponentMethodRoyaltyProcessor(processorContext);
         var entityRoleAssignmentProcessor = new EntityRoleAssignmentProcessor(processorContext);
         var packageCodeProcessor = new PackageCodeProcessor(processorContext, networkConfiguration.Id);
@@ -870,19 +869,6 @@ UPDATE pending_transactions
                             }
                         }
 
-                        if (substateData is CoreModel.SchemaEntrySubstate schema)
-                        {
-                            schemaHistoryToAdd.Add(
-                                new SchemaHistory
-                            {
-                                Id = sequences.SchemaHistorySequence++,
-                                FromStateVersion = stateVersion,
-                                EntityId = referencedEntity.DatabaseId,
-                                SchemaHash = schema.Key.SchemaHash.ConvertFromHex(),
-                                Schema = schema.Value.Schema.SborData.Hex.ConvertFromHex(),
-                            });
-                        }
-
                         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
                         {
                             if (typeInfoSubstate.TryGetNonFungibleDataSchemaDetails(out var nonFungibleDataSchemaDetails))
@@ -936,6 +922,7 @@ UPDATE pending_transactions
 
                         entityStateProcessor.VisitUpsert(substate, referencedEntity, stateVersion);
                         entityMetadataProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        entitySchemaProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         componentMethodRoyaltyProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         entityRoleAssignmentProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         packageCodeProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
@@ -1186,6 +1173,7 @@ UPDATE pending_transactions
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
 
             await entityMetadataProcessor.LoadDependencies();
+            await entitySchemaProcessor.LoadDependencies();
             await componentMethodRoyaltyProcessor.LoadDependencies();
             await entityRoleAssignmentProcessor.LoadDependencies();
             await packageCodeProcessor.LoadDependencies();
@@ -1206,6 +1194,7 @@ UPDATE pending_transactions
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
 
             entityMetadataProcessor.ProcessChanges();
+            entitySchemaProcessor.ProcessChanges();
             componentMethodRoyaltyProcessor.ProcessChanges();
             entityRoleAssignmentProcessor.ProcessChanges();
             packageCodeProcessor.ProcessChanges();
@@ -1557,18 +1546,17 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopySchemaHistory(schemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
 
             rowsInserted += await entityStateProcessor.SaveEntities();
             rowsInserted += await entityMetadataProcessor.SaveEntities();
+            rowsInserted += await entitySchemaProcessor.SaveEntities();
             rowsInserted += await componentMethodRoyaltyProcessor.SaveEntities();
             rowsInserted += await entityRoleAssignmentProcessor.SaveEntities();
             rowsInserted += await packageCodeProcessor.SaveEntities();
             rowsInserted += await packageBlueprintProcessor.SaveEntities();
-
             rowsInserted += await accountDefaultDepositRuleProcessor.SaveEntities();
             rowsInserted += await accountAuthorizedDepositorsProcessor.SaveEntities();
             rowsInserted += await accountResourcePreferenceRulesProcessor.SaveEntities();

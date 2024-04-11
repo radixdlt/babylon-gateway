@@ -90,28 +90,28 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsSchemaCollection
+    /// Package blueprint collection.
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsSchemaCollection")]
-    public partial class StateEntityDetailsResponsePackageDetailsSchemaCollection : IEquatable<StateEntityDetailsResponsePackageDetailsSchemaCollection>
+    [DataContract(Name = "PackageBlueprintCollection")]
+    public partial class PackageBlueprintCollection : IEquatable<PackageBlueprintCollection>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollection" /> class.
+        /// Initializes a new instance of the <see cref="PackageBlueprintCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsSchemaCollection() { }
+        protected PackageBlueprintCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollection" /> class.
+        /// Initializes a new instance of the <see cref="PackageBlueprintCollection" /> class.
         /// </summary>
         /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
-        public StateEntityDetailsResponsePackageDetailsSchemaCollection(long? totalCount = default(long?), string nextCursor = default(string), List<StateEntityDetailsResponsePackageDetailsSchemaItem> items = default(List<StateEntityDetailsResponsePackageDetailsSchemaItem>))
+        public PackageBlueprintCollection(long? totalCount = default(long?), string nextCursor = default(string), List<PackageBlueprintCollectionItem> items = default(List<PackageBlueprintCollectionItem>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsSchemaCollection and cannot be null");
+                throw new ArgumentNullException("items is a required property for PackageBlueprintCollection and cannot be null");
             }
             this.Items = items;
             this.TotalCount = totalCount;
@@ -136,7 +136,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateEntityDetailsResponsePackageDetailsSchemaItem> Items { get; set; }
+        public List<PackageBlueprintCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,7 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsSchemaCollection {\n");
+            sb.Append("class PackageBlueprintCollection {\n");
             sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
@@ -169,15 +169,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsSchemaCollection);
+            return this.Equals(input as PackageBlueprintCollection);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsSchemaCollection instances are equal
+        /// Returns true if PackageBlueprintCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsSchemaCollection to be compared</param>
+        /// <param name="input">Instance of PackageBlueprintCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsSchemaCollection input)
+        public bool Equals(PackageBlueprintCollection input)
         {
             if (input == null)
             {

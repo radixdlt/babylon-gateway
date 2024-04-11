@@ -233,9 +233,9 @@ internal static class GatewayModelExtensions
             methodRules: input?.Select(e => new GatewayModel.ComponentMethodRoyalty(e.MethodName, TranscodeRoyaltyAmount(e.RoyaltyAmount))).ToList());
     }
 
-    public static GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem ToGatewayModel(this PackageBlueprintHistory input, Dictionary<long, EntityAddress> correlatedAddresses)
+    public static GatewayModel.PackageBlueprintCollectionItem ToGatewayModel(this PackageBlueprintHistory input, Dictionary<long, EntityAddress> correlatedAddresses)
     {
-        return new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem(
+        return new GatewayModel.PackageBlueprintCollectionItem(
             name: input.Name,
             version: input.Version,
             definition: new JRaw(input.Definition),
@@ -244,6 +244,23 @@ internal static class GatewayModelExtensions
             authTemplateIsLocked: input.AuthTemplateIsLocked,
             royaltyConfig: input.RoyaltyConfig != null ? TranscodeBlueprintRoyaltyConfig(input.RoyaltyConfig) : null,
             royaltyConfigIsLocked: input.RoyaltyConfigIsLocked
+        );
+    }
+
+    public static GatewayModel.PackageCodeCollectionItem ToGatewayModel(this PackageCodeHistory input)
+    {
+        return new GatewayModel.PackageCodeCollectionItem(
+            vmType: input.VmType.ToGatewayModel(),
+            codeHashHex: input.CodeHash.ToHex(),
+            codeHex: input.Code.ToHex()
+        );
+    }
+
+    public static GatewayModel.EntitySchemaCollectionItem ToGatewayModel(this SchemaEntryDefinition input)
+    {
+        return new GatewayModel.EntitySchemaCollectionItem(
+            schemaHashHex: input.SchemaHash.ToHex(),
+            schemaHex: input.Schema.ToHex()
         );
     }
 

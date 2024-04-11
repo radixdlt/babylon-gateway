@@ -97,6 +97,16 @@ public class StateEntityController : ControllerBase
             : NotFound();
     }
 
+    [HttpPost("page/schemas")]
+    public async Task<IActionResult> SchemasPage(GatewayModel.StateEntitySchemaPageRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.Schemas(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
     [HttpPost("page/fungibles")]
     public async Task<IActionResult> FungiblesPage(GatewayModel.StateEntityFungiblesPageRequest request, CancellationToken token = default)
     {

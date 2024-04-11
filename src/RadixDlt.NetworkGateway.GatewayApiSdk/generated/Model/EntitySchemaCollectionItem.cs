@@ -90,53 +90,50 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsCodeCollection
+    /// EntitySchemaCollectionItem
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsCodeCollection")]
-    public partial class StateEntityDetailsResponsePackageDetailsCodeCollection : IEquatable<StateEntityDetailsResponsePackageDetailsCodeCollection>
+    [DataContract(Name = "EntitySchemaCollectionItem")]
+    public partial class EntitySchemaCollectionItem : IEquatable<EntitySchemaCollectionItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsCodeCollection" /> class.
+        /// Initializes a new instance of the <see cref="EntitySchemaCollectionItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsCodeCollection() { }
+        protected EntitySchemaCollectionItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsCodeCollection" /> class.
+        /// Initializes a new instance of the <see cref="EntitySchemaCollectionItem" /> class.
         /// </summary>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
-        /// <param name="items">items (required).</param>
-        public StateEntityDetailsResponsePackageDetailsCodeCollection(long? totalCount = default(long?), string nextCursor = default(string), List<PackageCodeCollectionItem> items = default(List<PackageCodeCollectionItem>))
+        /// <param name="schemaHashHex">Hex-encoded binary blob. (required).</param>
+        /// <param name="schemaHex">Hex-encoded binary blob. (required).</param>
+        public EntitySchemaCollectionItem(string schemaHashHex = default(string), string schemaHex = default(string))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "schemaHashHex" is required (not null)
+            if (schemaHashHex == null)
             {
-                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsCodeCollection and cannot be null");
+                throw new ArgumentNullException("schemaHashHex is a required property for EntitySchemaCollectionItem and cannot be null");
             }
-            this.Items = items;
-            this.TotalCount = totalCount;
-            this.NextCursor = nextCursor;
+            this.SchemaHashHex = schemaHashHex;
+            // to ensure "schemaHex" is required (not null)
+            if (schemaHex == null)
+            {
+                throw new ArgumentNullException("schemaHex is a required property for EntitySchemaCollectionItem and cannot be null");
+            }
+            this.SchemaHex = schemaHex;
         }
 
         /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// Hex-encoded binary blob.
         /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "schema_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SchemaHashHex { get; set; }
 
         /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// Hex-encoded binary blob.
         /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Items
-        /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<PackageCodeCollectionItem> Items { get; set; }
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "schema_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SchemaHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +142,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsCodeCollection {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class EntitySchemaCollectionItem {\n");
+            sb.Append("  SchemaHashHex: ").Append(SchemaHashHex).Append("\n");
+            sb.Append("  SchemaHex: ").Append(SchemaHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +165,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsCodeCollection);
+            return this.Equals(input as EntitySchemaCollectionItem);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsCodeCollection instances are equal
+        /// Returns true if EntitySchemaCollectionItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsCodeCollection to be compared</param>
+        /// <param name="input">Instance of EntitySchemaCollectionItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsCodeCollection input)
+        public bool Equals(EntitySchemaCollectionItem input)
         {
             if (input == null)
             {
@@ -185,20 +181,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
+                    this.SchemaHashHex == input.SchemaHashHex ||
+                    (this.SchemaHashHex != null &&
+                    this.SchemaHashHex.Equals(input.SchemaHashHex))
                 ) && 
                 (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
-                (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.SchemaHex == input.SchemaHex ||
+                    (this.SchemaHex != null &&
+                    this.SchemaHex.Equals(input.SchemaHex))
                 );
         }
 
@@ -211,17 +201,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
+                if (this.SchemaHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SchemaHashHex.GetHashCode();
                 }
-                if (this.NextCursor != null)
+                if (this.SchemaHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
-                if (this.Items != null)
-                {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SchemaHex.GetHashCode();
                 }
                 return hashCode;
             }

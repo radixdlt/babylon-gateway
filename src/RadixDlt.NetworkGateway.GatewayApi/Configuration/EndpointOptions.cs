@@ -86,6 +86,9 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("DefaultPageSize")]
     public int DefaultPageSize { get; set; } = 100;
 
+    [ConfigurationKeyName("HeavyPageSize")]
+    public int HeavyPageSize { get; set; } = 10;
+
     [ConfigurationKeyName("ValidatorsPageSize")]
     public int ValidatorsPageSize { get; set; } = 1000;
 
@@ -114,6 +117,7 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
         RuleFor(x => x.DefaultTransactionsStreamPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
         RuleFor(x => x.DefaultPageSize).GreaterThan(0);
+        RuleFor(x => x.HeavyPageSize).GreaterThan(0);
         RuleFor(x => x.ValidatorsPageSize).GreaterThan(0);
         RuleFor(x => x.StateEntityDetailsMaxPageSize).GreaterThan(0);
         RuleFor(x => x.ExplicitMetadataMaxItems).GreaterThan(0);

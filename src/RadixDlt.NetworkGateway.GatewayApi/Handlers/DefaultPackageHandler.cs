@@ -62,46 +62,53 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-[Table("package_blueprint_history")]
-internal class PackageBlueprintHistory
+internal class DefaultPackageHandler : IPackageHandler
 {
-    [Column("id")]
-    [Key]
-    public long Id { get; set; }
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IEntityStateQuerier _entityStateQuerier;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+    public DefaultPackageHandler(
+        ILedgerStateQuerier ledgerStateQuerier,
+        IEntityStateQuerier entityStateQuerier,
+        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    {
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _entityStateQuerier = entityStateQuerier;
+        _endpointConfiguration = endpointConfiguration;
+    }
 
-    [Column("package_entity_id")]
-    public long PackageEntityId { get; set; }
+    public async Task<GatewayModel.StatePackageBlueprintPageResponse?> Blueprints(GatewayModel.StatePackageBlueprintPageRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var pageRequest = new IEntityStateQuerier.PageRequest(
+            Address: (EntityAddress)request.PackageAddress,
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.HeavyPageSize
+        );
 
-    [Column("name")]
-    public string Name { get; set; }
+        return await _entityStateQuerier.PackageBlueprints(pageRequest, ledgerState, token);
+    }
 
-    [Column("version")]
-    public string Version { get; set; }
+    public async Task<GatewayModel.StatePackageCodePageResponse?> Codes(GatewayModel.StatePackageCodePageRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var pageRequest = new IEntityStateQuerier.PageRequest(
+            Address: (EntityAddress)request.PackageAddress,
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.HeavyPageSize
+        );
 
-    [Column("definition", TypeName = "jsonb")]
-    public string Definition { get; set; }
-
-    [Column("dependant_entity_ids")]
-    public List<long>? DependantEntityIds { get; set; }
-
-    [Column("auth_template", TypeName = "jsonb")]
-    public string? AuthTemplate { get; set; }
-
-    [Column("auth_template_is_locked")]
-    public bool? AuthTemplateIsLocked { get; set; }
-
-    [Column("royalty_config", TypeName = "jsonb")]
-    public string? RoyaltyConfig { get; set; }
-
-    [Column("royalty_config_is_locked")]
-    public bool? RoyaltyConfigIsLocked { get; set; }
+        return await _entityStateQuerier.PackageCodes(pageRequest, ledgerState, token);
+    }
 }

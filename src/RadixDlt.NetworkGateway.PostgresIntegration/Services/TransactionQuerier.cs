@@ -537,14 +537,11 @@ WHERE state_version = ANY({transactionStateVersions})")
             var schemaHashes = schemaLookups.Select(x => (byte[])x.SchemaHash).ToList();
 
             schemas = await _dbContext
-                .SchemaHistory
+                .SchemaEntryDefinition
                 .FromSqlInterpolated($@"
-WITH variables (entity_id, schema_hash) AS (
-    SELECT UNNEST({entityIds}), UNNEST({schemaHashes})
-)
-SELECT sh.*
-FROM variables var
-INNER JOIN schema_history sh ON sh.entity_id = var.entity_id AND sh.schema_hash = var.schema_hash")
+SELECT *
+FROM schema_entry_definition
+WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHashes}))")
                 .AnnotateMetricName("GetEventSchemas")
                 .ToDictionaryAsync(x => new SchemaLookup(x.EntityId, x.SchemaHash), x => x.Schema, token);
         }

@@ -62,46 +62,27 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("package_blueprint_history")]
-internal class PackageBlueprintHistory
+[Table("schema_entry_definition")]
+internal class SchemaEntryDefinition
 {
-    [Column("id")]
     [Key]
+    [Column("id")]
     public long Id { get; set; }
 
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("package_entity_id")]
-    public long PackageEntityId { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    [Column("name")]
-    public string Name { get; set; }
+    [Column("schema_hash")]
+    public byte[] SchemaHash { get; set; }
 
-    [Column("version")]
-    public string Version { get; set; }
-
-    [Column("definition", TypeName = "jsonb")]
-    public string Definition { get; set; }
-
-    [Column("dependant_entity_ids")]
-    public List<long>? DependantEntityIds { get; set; }
-
-    [Column("auth_template", TypeName = "jsonb")]
-    public string? AuthTemplate { get; set; }
-
-    [Column("auth_template_is_locked")]
-    public bool? AuthTemplateIsLocked { get; set; }
-
-    [Column("royalty_config", TypeName = "jsonb")]
-    public string? RoyaltyConfig { get; set; }
-
-    [Column("royalty_config_is_locked")]
-    public bool? RoyaltyConfigIsLocked { get; set; }
+    [Column("schema")]
+    public byte[] Schema { get; set; }
 }

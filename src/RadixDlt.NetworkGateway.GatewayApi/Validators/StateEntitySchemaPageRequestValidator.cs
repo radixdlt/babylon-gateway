@@ -62,46 +62,36 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[Table("package_blueprint_history")]
-internal class PackageBlueprintHistory
+internal class StateEntitySchemaPageRequestValidator : AbstractValidator<GatewayModel.StateEntitySchemaPageRequest>
 {
-    [Column("id")]
-    [Key]
-    public long Id { get; set; }
+    public StateEntitySchemaPageRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        RadixAddressValidator radixAddressValidator,
+        PaginableRequestValidator paginableRequestValidator,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    {
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .SetValidator(radixAddressValidator);
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
-    [Column("package_entity_id")]
-    public long PackageEntityId { get; set; }
+        RuleFor(x => x.Cursor)
+            .Base64();
 
-    [Column("name")]
-    public string Name { get; set; }
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
 
-    [Column("version")]
-    public string Version { get; set; }
-
-    [Column("definition", TypeName = "jsonb")]
-    public string Definition { get; set; }
-
-    [Column("dependant_entity_ids")]
-    public List<long>? DependantEntityIds { get; set; }
-
-    [Column("auth_template", TypeName = "jsonb")]
-    public string? AuthTemplate { get; set; }
-
-    [Column("auth_template_is_locked")]
-    public bool? AuthTemplateIsLocked { get; set; }
-
-    [Column("royalty_config", TypeName = "jsonb")]
-    public string? RoyaltyConfig { get; set; }
-
-    [Column("royalty_config_is_locked")]
-    public bool? RoyaltyConfigIsLocked { get; set; }
+        RuleFor(x => x)
+            .SetValidator(paginableRequestValidator);
+    }
 }

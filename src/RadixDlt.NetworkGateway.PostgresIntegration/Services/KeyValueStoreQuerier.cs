@@ -233,8 +233,8 @@ SELECT
     kvssh.value_type_index AS ValueTypeIndex,
     kvssh.value_sbor_type_kind AS ValueSborTypeKind
 FROM key_value_store_schema_history kvssh
-INNER JOIN schema_history ksh ON ksh.schema_hash = kvssh.key_schema_hash AND ksh.entity_id = kvssh.key_schema_defining_entity_id
-INNER JOIN schema_history vsh ON vsh.schema_hash = kvssh.value_schema_hash AND vsh.entity_id = kvssh.value_schema_defining_entity_id
+INNER JOIN schema_entry_definition ksh ON ksh.schema_hash = kvssh.key_schema_hash AND ksh.entity_id = kvssh.key_schema_defining_entity_id
+INNER JOIN schema_entry_definition vsh ON vsh.schema_hash = kvssh.value_schema_hash AND vsh.entity_id = kvssh.value_schema_defining_entity_id
 WHERE kvssh.key_value_store_entity_id = @entityId AND kvssh.from_state_version <= @stateVersion
 ORDER BY kvssh.from_state_version DESC
 ",

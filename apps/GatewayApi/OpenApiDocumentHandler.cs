@@ -118,8 +118,10 @@ public static class OpenApiDocumentHandler
 
         var response = textWriter.ToString();
 
+        response = OptionalReplace(response, "<resource-address>", placeholderReplacements.ResourceAddress);
         response = OptionalReplace(response, "<entity-address>", placeholderReplacements.ResourceAddress);
         response = OptionalReplace(response, "<component-entity-address>", placeholderReplacements.ComponentAddress);
+        response = OptionalReplace(response, "<package-address>", placeholderReplacements.PackageAddress);
         response = OptionalReplace(response, "<transaction-intent-hash>", placeholderReplacements.CommittedTransactionIntentHash);
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
@@ -156,6 +158,8 @@ public static class OpenApiDocumentHandler
 
         public string? ComponentAddress { get; set; }
 
+        public string? PackageAddress { get; set; }
+
         public string? CommittedTransactionIntentHash { get; set; }
 
         public byte? NetworkId { get; set; }
@@ -178,6 +182,7 @@ public static class OpenApiDocumentHandler
         {
             placeholderReplacements.ResourceAddress = networkConfiguration.WellKnownAddresses.Xrd;
             placeholderReplacements.ComponentAddress = networkConfiguration.WellKnownAddresses.ConsensusManager;
+            placeholderReplacements.PackageAddress = networkConfiguration.WellKnownAddresses.AccountPackage;
             placeholderReplacements.NetworkId = networkConfiguration.Id;
             placeholderReplacements.NetworkName = networkConfiguration.Name;
         }
