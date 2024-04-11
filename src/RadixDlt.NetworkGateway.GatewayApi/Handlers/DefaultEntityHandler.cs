@@ -119,7 +119,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (EntityAddress)request.Address,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.PackagePageSize
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.HeavyPageSize
         );
 
         return await _entityStateQuerier.EntitySchema(pageRequest, ledgerState, token);

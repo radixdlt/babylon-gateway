@@ -141,7 +141,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         CancellationToken token = default)
     {
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
-        var packagePageSize = _endpointConfiguration.Value.PackagePageSize;
+        var packagePageSize = _endpointConfiguration.Value.HeavyPageSize;
 
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();

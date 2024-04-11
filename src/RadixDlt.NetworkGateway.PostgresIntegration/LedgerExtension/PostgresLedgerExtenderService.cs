@@ -753,11 +753,8 @@ UPDATE pending_transactions
         var nonFungibleIdChanges = new List<NonFungibleIdChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
-        var schemaEntryDefinitionsToAdd = new List<SchemaEntryDefinition>();
-        var schemaEntryAggregateHistoryToAdd = new List<SchemaEntryAggregateHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
-        var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
         var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, token);
