@@ -168,6 +168,13 @@ internal class LedgerConfirmationOptionsValidator : AbstractOptionsValidator<Led
         RuleFor(x => x.SufficientlySyncedStateVersionThreshold).GreaterThan(0);
         RuleFor(x => x.MaxCommitBatchSize).GreaterThan(0);
         RuleFor(x => x.MinCommitBatchSize).GreaterThan(0);
+
+        RuleFor(x => x.MinCommitBatchSize).LessThanOrEqualTo(x => x.MaxCommitBatchSize)
+            .WithMessage(x => $"MinCommitBatchSize is set to: {x.MinCommitBatchSize} but must be lower or equal to MaxCommitBatchSize: {x.MaxCommitBatchSize}");
+
+        RuleFor(x => x.MinCommitBatchSize).LessThanOrEqualTo(x => x.MaxTransactionPipelineSizePerNode)
+            .WithMessage(x => $"MinCommitBatchSize is set to: {x.MinCommitBatchSize} but must be lower or equal to MaxTransactionPipelineSizePerNode: {x.MaxTransactionPipelineSizePerNode}");
+
         RuleFor(x => x.LargeBatchSizeToAddDelay).GreaterThan(0);
         RuleFor(x => x.MaxTransactionPipelineSizePerNode).GreaterThan(0);
         RuleFor(x => x.MaxCoreApiTransactionBatchSize).GreaterThan(0);

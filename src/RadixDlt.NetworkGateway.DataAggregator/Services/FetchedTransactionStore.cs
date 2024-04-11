@@ -175,7 +175,7 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
 
         if (transactions.Count < minBatchSize)
         {
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "Number of fetched transaction {transactionCount} is smaller than configured minimum batch size {minBatchSize}. Waiting for more transactions.",
                 transactions.Count,
                 minBatchSize);
@@ -183,7 +183,7 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
             if (!ShouldFetchNewTransactions(nodeWithMostTransactions.Key, fromStateVersion))
             {
                 throw new ConfigurationException(
-                    "Current configuration doesn't allow to process transaction stream. Transaction store is full and minimum batch size requires to fetch more transaction before processing");
+                    "Current configuration doesn't allow to process transaction stream. Transaction store is full and minimum batch size requires to fetch more transaction before processing. Please increase MaxEstimatedTransactionPipelineByteSizePerNode value or set MinCommitBatchSize to smaller value.");
             }
 
             return [];
