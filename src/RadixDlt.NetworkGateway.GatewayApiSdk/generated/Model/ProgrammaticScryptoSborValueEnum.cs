@@ -131,10 +131,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="variantName">variantName.</param>
         /// <param name="fields">fields (required).</param>
         /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Enum).</param>
-        /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
-        /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
-        public ProgrammaticScryptoSborValueEnum(int variantId = default(int), string variantName = default(string), List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Enum, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
+        /// <param name="typeName">The name of the type of this value. This is only output when a schema is present and the type has a name. This property is ignored when the value is used as an input to the API. .</param>
+        /// <param name="fieldName">The name of the field which hosts this value. This property is only included if this value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60; with named fields. This property is ignored when the value is used as an input to the API. .</param>
+        public ProgrammaticScryptoSborValueEnum(string variantId = default(string), string variantName = default(string), List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Enum, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
+            // to ensure "variantId" is required (not null)
+            if (variantId == null)
+            {
+                throw new ArgumentNullException("variantId is a required property for ProgrammaticScryptoSborValueEnum and cannot be null");
+            }
             this.VariantId = variantId;
             // to ensure "fields" is required (not null)
             if (fields == null)
@@ -149,7 +154,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets VariantId
         /// </summary>
         [DataMember(Name = "variant_id", IsRequired = true, EmitDefaultValue = true)]
-        public int VariantId { get; set; }
+        public string VariantId { get; set; }
 
         /// <summary>
         /// Gets or Sets VariantName
@@ -212,7 +217,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             return base.Equals(input) && 
                 (
                     this.VariantId == input.VariantId ||
-                    this.VariantId.Equals(input.VariantId)
+                    (this.VariantId != null &&
+                    this.VariantId.Equals(input.VariantId))
                 ) && base.Equals(input) && 
                 (
                     this.VariantName == input.VariantName ||
@@ -236,7 +242,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.VariantId.GetHashCode();
+                if (this.VariantId != null)
+                {
+                    hashCode = (hashCode * 59) + this.VariantId.GetHashCode();
+                }
                 if (this.VariantName != null)
                 {
                     hashCode = (hashCode * 59) + this.VariantName.GetHashCode();

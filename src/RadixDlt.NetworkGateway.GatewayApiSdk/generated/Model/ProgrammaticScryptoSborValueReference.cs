@@ -127,10 +127,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueReference" /> class.
         /// </summary>
-        /// <param name="value">value (required).</param>
+        /// <param name="value">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Reference).</param>
-        /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
-        /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
+        /// <param name="typeName">The name of the type of this value. This is only output when a schema is present and the type has a name. This property is ignored when the value is used as an input to the API. .</param>
+        /// <param name="fieldName">The name of the field which hosts this value. This property is only included if this value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60; with named fields. This property is ignored when the value is used as an input to the API. .</param>
         public ProgrammaticScryptoSborValueReference(string value = default(string), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Reference, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
         {
             // to ensure "value" is required (not null)
@@ -142,8 +142,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
         public string Value { get; set; }
 

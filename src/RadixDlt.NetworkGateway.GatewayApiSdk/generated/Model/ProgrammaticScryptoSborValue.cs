@@ -156,8 +156,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValue" /> class.
         /// </summary>
         /// <param name="kind">kind (required).</param>
-        /// <param name="typeName">Object type name; available only when a schema is present and the type has a name..</param>
-        /// <param name="fieldName">Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields..</param>
+        /// <param name="typeName">The name of the type of this value. This is only output when a schema is present and the type has a name. This property is ignored when the value is used as an input to the API. .</param>
+        /// <param name="fieldName">The name of the field which hosts this value. This property is only included if this value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60; with named fields. This property is ignored when the value is used as an input to the API. .</param>
         public ProgrammaticScryptoSborValue(ProgrammaticScryptoSborValueKind kind = default(ProgrammaticScryptoSborValueKind), string typeName = default(string), string fieldName = default(string))
         {
             this.Kind = kind;
@@ -166,16 +166,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Object type name; available only when a schema is present and the type has a name.
+        /// The name of the type of this value. This is only output when a schema is present and the type has a name. This property is ignored when the value is used as an input to the API. 
         /// </summary>
-        /// <value>Object type name; available only when a schema is present and the type has a name.</value>
+        /// <value>The name of the type of this value. This is only output when a schema is present and the type has a name. This property is ignored when the value is used as an input to the API. </value>
         [DataMember(Name = "type_name", EmitDefaultValue = true)]
         public string TypeName { get; set; }
 
         /// <summary>
-        /// Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields.
+        /// The name of the field which hosts this value. This property is only included if this value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60; with named fields. This property is ignored when the value is used as an input to the API. 
         /// </summary>
-        /// <value>Field name; available only when the value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60;, which has a type with named fields.</value>
+        /// <value>The name of the field which hosts this value. This property is only included if this value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60; with named fields. This property is ignored when the value is used as an input to the API. </value>
         [DataMember(Name = "field_name", EmitDefaultValue = true)]
         public string FieldName { get; set; }
 
