@@ -149,7 +149,7 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
     private List<CoreModel.CommittedTransaction> ConstructLedgerExtension(TransactionSummary topOfLedger)
     {
         var startStateVersion = topOfLedger.StateVersion + 1;
-        var transactions = _fetchedTransactionStore.GetTransactionBatch(startStateVersion, (int)Config.MaxCommitBatchSize);
+        var transactions = _fetchedTransactionStore.GetTransactionBatch(startStateVersion, (int)Config.MaxCommitBatchSize, (int)Config.MinCommitBatchSize);
         return transactions;
     }
 
