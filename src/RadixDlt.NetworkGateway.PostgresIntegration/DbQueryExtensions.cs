@@ -122,6 +122,24 @@ internal static class DbQueryExtensions
     }
 
     /// <summary>
+    /// Returns the very first ledger transaction committed at given epoch.
+    /// </summary>
+    /// <remarks>
+    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
+    /// ledger transaction row, to avoid possible performance issues.
+    /// </remarks>
+    public static IQueryable<LedgerTransaction> GetLedgerTransactionAtEpochStart<TDbContext>(this TDbContext dbContext, long epoch)
+        where TDbContext : CommonDbContext
+    {
+        return dbContext
+            .LedgerTransactions
+            .Where(lt => lt.Epoch == epoch && lt.IndexInRound == 0)
+            .OrderBy(lt => lt.RoundInEpoch)
+            .Take(1)
+            .AnnotateMetricName();
+    }
+
+    /// <summary>
     /// Returns most recently committed ledger transaction at or before given timestamp.
     /// </summary>
     /// <remarks>
