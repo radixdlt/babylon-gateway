@@ -7,6 +7,7 @@ Release built: _not published yet_
 > - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
 > - Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
 
+- Fixed broken ledger state lookup (`at_ledger_state`) when using epoch-only constraint and given epoch did not result in any transactions at round `1`.
 - Fixed broken (missing) package blueprint & code, and schema pagination in the `/state/entity/details` endpoint.
 - Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
 - Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.

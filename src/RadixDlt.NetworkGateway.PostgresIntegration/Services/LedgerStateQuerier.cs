@@ -183,9 +183,13 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         {
             ledgerStateReport = await GetLedgerStateAtStateVersion(fromLedgerStateIdentifier.StateVersion.Value, token);
         }
+        else if (fromLedgerStateIdentifier?.HasEpochAndRound() == true)
+        {
+            ledgerStateReport = await GetLedgerStateAtEpochAndRound(fromLedgerStateIdentifier.Epoch.Value, fromLedgerStateIdentifier.Round.Value, token);
+        }
         else if (fromLedgerStateIdentifier?.HasEpoch() == true)
         {
-            ledgerStateReport = await GetLedgerStateAtEpochAndRound(fromLedgerStateIdentifier.Epoch.Value, fromLedgerStateIdentifier.Round ?? 1, token);
+            ledgerStateReport = await GetLedgerStateAtEpochStart(fromLedgerStateIdentifier.Epoch.Value, token);
         }
         else if (fromLedgerStateIdentifier?.HasTimestamp() == true)
         {
@@ -295,9 +299,13 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         {
             result = await GetLedgerStateAtStateVersion(at.StateVersion.Value, token);
         }
+        else if (at?.HasEpochAndRound() == true)
+        {
+            result = await GetLedgerStateAtEpochAndRound(at.Epoch.Value, at.Round.Value, token);
+        }
         else if (at?.HasEpoch() == true)
         {
-            result = await GetLedgerStateAtEpochAndRound(at.Epoch.Value, at.Round ?? 1, token);
+            result = await GetLedgerStateAtEpochStart(at.Epoch.Value, token);
         }
         else if (at?.HasTimestamp() == true)
         {
@@ -370,6 +378,18 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         if (ledgerState == null)
         {
             throw InvalidRequestException.FromOtherError($"Epoch {epoch} round {round} is beyond the end of the known ledger or invalid");
+        }
+
+        return ledgerState;
+    }
+
+    private async Task<LedgerStateReport> GetLedgerStateAtEpochStart(long epoch, CancellationToken token)
+    {
+        var ledgerState = await SelectLedgerStateFromQuery(_dbContext.GetLedgerTransactionAtEpochStart(epoch), false, token);
+
+        if (ledgerState == null)
+        {
+            throw InvalidRequestException.FromOtherError($"Epoch {epoch} is beyond the end of the known ledger or invalid");
         }
 
         return ledgerState;
