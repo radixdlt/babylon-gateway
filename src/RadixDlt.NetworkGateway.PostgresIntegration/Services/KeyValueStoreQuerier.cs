@@ -104,7 +104,7 @@ internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
         int pageSize,
         CancellationToken token = default)
     {
-        var keyValueStore = await GetEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        var keyValueStore = await QueryHelper.GetEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
         var keyValueStoreSchema = await GetKeyValueStoreSchema(keyValueStore.Id, ledgerState, token);
 
         var cd = new CommandDefinition(
@@ -170,7 +170,7 @@ LIMIT @limit
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var keyValueStore = await GetEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        var keyValueStore = await QueryHelper.GetEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
         var keyValueStoreSchema = await GetKeyValueStoreSchema(keyValueStore.Id, ledgerState, token);
 
         var cd = new CommandDefinition(
@@ -255,27 +255,5 @@ ORDER BY kvssh.from_state_version DESC
         }
 
         return keyValueStoreSchema;
-    }
-
-    private async Task<TEntity> GetEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
-        where TEntity : Entity
-    {
-        var entity = await _dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .AnnotateMetricName()
-            .FirstOrDefaultAsync(e => e.Address == address, token);
-
-        if (entity == null)
-        {
-            throw new EntityNotFoundException(address.ToString());
-        }
-
-        if (entity is not TEntity typedEntity)
-        {
-            throw new InvalidEntityException(address.ToString());
-        }
-
-        return typedEntity;
     }
 }

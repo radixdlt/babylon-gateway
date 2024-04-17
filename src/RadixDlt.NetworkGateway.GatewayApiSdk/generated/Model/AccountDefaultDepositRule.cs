@@ -84,106 +84,35 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountAuthorizedDepositorsResponseItem
+    /// Default deposit rule set to an account.
     /// </summary>
-    [DataContract(Name = "AccountAuthorizedDepositorsResponseItem")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "AccountAuthorizedDepositorsNonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "AccountAuthorizedDepositorsResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "NonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "ResourceBadge")]
-    public partial class AccountAuthorizedDepositorsResponseItem : IEquatable<AccountAuthorizedDepositorsResponseItem>
+    /// <value>Default deposit rule set to an account.</value>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum AccountDefaultDepositRule
     {
+        /// <summary>
+        /// Enum Accept for value: Accept
+        /// </summary>
+        [EnumMember(Value = "Accept")]
+        Accept = 1,
 
         /// <summary>
-        /// Gets or Sets BadgeType
+        /// Enum Reject for value: Reject
         /// </summary>
-        [DataMember(Name = "badge_type", IsRequired = true, EmitDefaultValue = true)]
-        public AccountAuthorizedDepositorBadgeType BadgeType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected AccountAuthorizedDepositorsResponseItem() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
-        /// </summary>
-        /// <param name="badgeType">badgeType (required).</param>
-        public AccountAuthorizedDepositorsResponseItem(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType))
-        {
-            this.BadgeType = badgeType;
-        }
+        [EnumMember(Value = "Reject")]
+        Reject = 2,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum AllowExisting for value: AllowExisting
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountAuthorizedDepositorsResponseItem {\n");
-            sb.Append("  BadgeType: ").Append(BadgeType).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as AccountAuthorizedDepositorsResponseItem);
-        }
-
-        /// <summary>
-        /// Returns true if AccountAuthorizedDepositorsResponseItem instances are equal
-        /// </summary>
-        /// <param name="input">Instance of AccountAuthorizedDepositorsResponseItem to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(AccountAuthorizedDepositorsResponseItem input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.BadgeType == input.BadgeType ||
-                    this.BadgeType.Equals(input.BadgeType)
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.BadgeType.GetHashCode();
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "AllowExisting")]
+        AllowExisting = 3
 
     }
 

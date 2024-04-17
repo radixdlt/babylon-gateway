@@ -84,42 +84,66 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountAuthorizedDepositorsResponseItem
+    /// AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem
     /// </summary>
-    [DataContract(Name = "AccountAuthorizedDepositorsResponseItem")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "AccountAuthorizedDepositorsNonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "AccountAuthorizedDepositorsResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "NonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "ResourceBadge")]
-    public partial class AccountAuthorizedDepositorsResponseItem : IEquatable<AccountAuthorizedDepositorsResponseItem>
+    [DataContract(Name = "AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem")]
+    public partial class AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem : IEquatable<AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem>
     {
 
         /// <summary>
-        /// Gets or Sets BadgeType
+        /// Gets or Sets ResourcePreferenceRule
         /// </summary>
-        [DataMember(Name = "badge_type", IsRequired = true, EmitDefaultValue = true)]
-        public AccountAuthorizedDepositorBadgeType BadgeType { get; set; }
+        [DataMember(Name = "resource_preference_rule", EmitDefaultValue = true)]
+        public AccountResourcePreferenceRule? ResourcePreferenceRule { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountAuthorizedDepositorsResponseItem() { }
+        protected AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem" /> class.
         /// </summary>
-        /// <param name="badgeType">badgeType (required).</param>
-        public AccountAuthorizedDepositorsResponseItem(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType))
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="vaultExists">vaultExists (required).</param>
+        /// <param name="isXrd">isXrd (required).</param>
+        /// <param name="resourcePreferenceRule">resourcePreferenceRule.</param>
+        public AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem(string resourceAddress = default(string), bool vaultExists = default(bool), bool isXrd = default(bool), AccountResourcePreferenceRule? resourcePreferenceRule = default(AccountResourcePreferenceRule?))
         {
-            this.BadgeType = badgeType;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
+            this.VaultExists = vaultExists;
+            this.IsXrd = isXrd;
+            this.ResourcePreferenceRule = resourcePreferenceRule;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets VaultExists
+        /// </summary>
+        [DataMember(Name = "vault_exists", IsRequired = true, EmitDefaultValue = true)]
+        public bool VaultExists { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsXrd
+        /// </summary>
+        [DataMember(Name = "is_xrd", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsXrd { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +152,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountAuthorizedDepositorsResponseItem {\n");
-            sb.Append("  BadgeType: ").Append(BadgeType).Append("\n");
+            sb.Append("class AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  VaultExists: ").Append(VaultExists).Append("\n");
+            sb.Append("  IsXrd: ").Append(IsXrd).Append("\n");
+            sb.Append("  ResourcePreferenceRule: ").Append(ResourcePreferenceRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +177,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountAuthorizedDepositorsResponseItem);
+            return this.Equals(input as AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem);
         }
 
         /// <summary>
-        /// Returns true if AccountAuthorizedDepositorsResponseItem instances are equal
+        /// Returns true if AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountAuthorizedDepositorsResponseItem to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountAuthorizedDepositorsResponseItem input)
+        public bool Equals(AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem input)
         {
             if (input == null)
             {
@@ -166,8 +193,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.BadgeType == input.BadgeType ||
-                    this.BadgeType.Equals(input.BadgeType)
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
+                    this.VaultExists == input.VaultExists ||
+                    this.VaultExists.Equals(input.VaultExists)
+                ) && 
+                (
+                    this.IsXrd == input.IsXrd ||
+                    this.IsXrd.Equals(input.IsXrd)
+                ) && 
+                (
+                    this.ResourcePreferenceRule == input.ResourcePreferenceRule ||
+                    this.ResourcePreferenceRule.Equals(input.ResourcePreferenceRule)
                 );
         }
 
@@ -180,7 +220,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.BadgeType.GetHashCode();
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.VaultExists.GetHashCode();
+                hashCode = (hashCode * 59) + this.IsXrd.GetHashCode();
+                hashCode = (hashCode * 59) + this.ResourcePreferenceRule.GetHashCode();
                 return hashCode;
             }
         }

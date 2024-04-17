@@ -84,42 +84,63 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountAuthorizedDepositorsResponseItem
+    /// AccountDepositPreValidationRequest
     /// </summary>
-    [DataContract(Name = "AccountAuthorizedDepositorsResponseItem")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "AccountAuthorizedDepositorsNonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "AccountAuthorizedDepositorsResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "NonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "ResourceBadge")]
-    public partial class AccountAuthorizedDepositorsResponseItem : IEquatable<AccountAuthorizedDepositorsResponseItem>
+    [DataContract(Name = "AccountDepositPreValidationRequest")]
+    public partial class AccountDepositPreValidationRequest : IEquatable<AccountDepositPreValidationRequest>
     {
-
         /// <summary>
-        /// Gets or Sets BadgeType
-        /// </summary>
-        [DataMember(Name = "badge_type", IsRequired = true, EmitDefaultValue = true)]
-        public AccountAuthorizedDepositorBadgeType BadgeType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountAuthorizedDepositorsResponseItem() { }
+        protected AccountDepositPreValidationRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationRequest" /> class.
         /// </summary>
-        /// <param name="badgeType">badgeType (required).</param>
-        public AccountAuthorizedDepositorsResponseItem(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType))
+        /// <param name="accountAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="resourceAddresses">resourceAddresses (required).</param>
+        /// <param name="badge">badge.</param>
+        public AccountDepositPreValidationRequest(string accountAddress = default(string), List<string> resourceAddresses = default(List<string>), TransactionAccountDepositPreValidationAuthorizedDepositorBadge badge = default(TransactionAccountDepositPreValidationAuthorizedDepositorBadge))
         {
-            this.BadgeType = badgeType;
+            // to ensure "accountAddress" is required (not null)
+            if (accountAddress == null)
+            {
+                throw new ArgumentNullException("accountAddress is a required property for AccountDepositPreValidationRequest and cannot be null");
+            }
+            this.AccountAddress = accountAddress;
+            // to ensure "resourceAddresses" is required (not null)
+            if (resourceAddresses == null)
+            {
+                throw new ArgumentNullException("resourceAddresses is a required property for AccountDepositPreValidationRequest and cannot be null");
+            }
+            this.ResourceAddresses = resourceAddresses;
+            this.Badge = badge;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "account_address", IsRequired = true, EmitDefaultValue = true)]
+        public string AccountAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ResourceAddresses
+        /// </summary>
+        [DataMember(Name = "resource_addresses", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> ResourceAddresses { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Badge
+        /// </summary>
+        [DataMember(Name = "badge", EmitDefaultValue = true)]
+        public TransactionAccountDepositPreValidationAuthorizedDepositorBadge Badge { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +149,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountAuthorizedDepositorsResponseItem {\n");
-            sb.Append("  BadgeType: ").Append(BadgeType).Append("\n");
+            sb.Append("class AccountDepositPreValidationRequest {\n");
+            sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
+            sb.Append("  ResourceAddresses: ").Append(ResourceAddresses).Append("\n");
+            sb.Append("  Badge: ").Append(Badge).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +173,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountAuthorizedDepositorsResponseItem);
+            return this.Equals(input as AccountDepositPreValidationRequest);
         }
 
         /// <summary>
-        /// Returns true if AccountAuthorizedDepositorsResponseItem instances are equal
+        /// Returns true if AccountDepositPreValidationRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountAuthorizedDepositorsResponseItem to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountAuthorizedDepositorsResponseItem input)
+        public bool Equals(AccountDepositPreValidationRequest input)
         {
             if (input == null)
             {
@@ -166,8 +189,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.BadgeType == input.BadgeType ||
-                    this.BadgeType.Equals(input.BadgeType)
+                    this.AccountAddress == input.AccountAddress ||
+                    (this.AccountAddress != null &&
+                    this.AccountAddress.Equals(input.AccountAddress))
+                ) && 
+                (
+                    this.ResourceAddresses == input.ResourceAddresses ||
+                    this.ResourceAddresses != null &&
+                    input.ResourceAddresses != null &&
+                    this.ResourceAddresses.SequenceEqual(input.ResourceAddresses)
+                ) && 
+                (
+                    this.Badge == input.Badge ||
+                    (this.Badge != null &&
+                    this.Badge.Equals(input.Badge))
                 );
         }
 
@@ -180,7 +215,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.BadgeType.GetHashCode();
+                if (this.AccountAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();
+                }
+                if (this.ResourceAddresses != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddresses.GetHashCode();
+                }
+                if (this.Badge != null)
+                {
+                    hashCode = (hashCode * 59) + this.Badge.GetHashCode();
+                }
                 return hashCode;
             }
         }

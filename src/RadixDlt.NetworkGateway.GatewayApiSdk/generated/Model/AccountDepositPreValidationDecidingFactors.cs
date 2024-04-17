@@ -90,59 +90,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf
+    /// Deciding factors used to calculate response.
     /// </summary>
-    [DataContract(Name = "AccountAuthorizedDepositorsNonFungibleResourceBadge_allOf")]
-    public partial class AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf : IEquatable<AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf>
+    [DataContract(Name = "AccountDepositPreValidationDecidingFactors")]
+    public partial class AccountDepositPreValidationDecidingFactors : IEquatable<AccountDepositPreValidationDecidingFactors>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf" /> class.
+        /// Gets or Sets DefaultDepositRule
+        /// </summary>
+        [DataMember(Name = "default_deposit_rule", IsRequired = true, EmitDefaultValue = true)]
+        public AccountDefaultDepositRule DefaultDepositRule { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactors" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf() { }
+        protected AccountDepositPreValidationDecidingFactors() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationDecidingFactors" /> class.
         /// </summary>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        public AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf(string resourceAddress = default(string), string nonFungibleId = default(string), long lastUpdatedAtStateVersion = default(long))
+        /// <param name="isBadgeAuthorizedDepositor">Whether the input badge belongs to the account&#39;s set of authorized depositors. This field will only be present if any badge was passed in the request..</param>
+        /// <param name="defaultDepositRule">defaultDepositRule (required).</param>
+        /// <param name="resourceSpecificDetails">Returns deciding factors for each resource. Contains only information about resources presented in the request, not all resource preference rules for queried account..</param>
+        public AccountDepositPreValidationDecidingFactors(bool? isBadgeAuthorizedDepositor = default(bool?), AccountDefaultDepositRule defaultDepositRule = default(AccountDefaultDepositRule), List<AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem> resourceSpecificDetails = default(List<AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem>))
         {
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
-            {
-                throw new ArgumentNullException("resourceAddress is a required property for AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf and cannot be null");
-            }
-            this.ResourceAddress = resourceAddress;
-            // to ensure "nonFungibleId" is required (not null)
-            if (nonFungibleId == null)
-            {
-                throw new ArgumentNullException("nonFungibleId is a required property for AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf and cannot be null");
-            }
-            this.NonFungibleId = nonFungibleId;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.DefaultDepositRule = defaultDepositRule;
+            this.IsBadgeAuthorizedDepositor = isBadgeAuthorizedDepositor;
+            this.ResourceSpecificDetails = resourceSpecificDetails;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Whether the input badge belongs to the account&#39;s set of authorized depositors. This field will only be present if any badge was passed in the request.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
+        /// <value>Whether the input badge belongs to the account&#39;s set of authorized depositors. This field will only be present if any badge was passed in the request.</value>
+        [DataMember(Name = "is_badge_authorized_depositor", EmitDefaultValue = true)]
+        public bool? IsBadgeAuthorizedDepositor { get; set; }
 
         /// <summary>
-        /// String-encoded non-fungible ID.
+        /// Returns deciding factors for each resource. Contains only information about resources presented in the request, not all resource preference rules for queried account.
         /// </summary>
-        /// <value>String-encoded non-fungible ID.</value>
-        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleId { get; set; }
-
-        /// <summary>
-        /// The most recent state version underlying object was modified at.
-        /// </summary>
-        /// <value>The most recent state version underlying object was modified at.</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        /// <value>Returns deciding factors for each resource. Contains only information about resources presented in the request, not all resource preference rules for queried account.</value>
+        [DataMember(Name = "resource_specific_details", EmitDefaultValue = true)]
+        public List<AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem> ResourceSpecificDetails { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -151,10 +140,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf {\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("class AccountDepositPreValidationDecidingFactors {\n");
+            sb.Append("  IsBadgeAuthorizedDepositor: ").Append(IsBadgeAuthorizedDepositor).Append("\n");
+            sb.Append("  DefaultDepositRule: ").Append(DefaultDepositRule).Append("\n");
+            sb.Append("  ResourceSpecificDetails: ").Append(ResourceSpecificDetails).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,15 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf);
+            return this.Equals(input as AccountDepositPreValidationDecidingFactors);
         }
 
         /// <summary>
-        /// Returns true if AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf instances are equal
+        /// Returns true if AccountDepositPreValidationDecidingFactors instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationDecidingFactors to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountAuthorizedDepositorsNonFungibleResourceBadgeAllOf input)
+        public bool Equals(AccountDepositPreValidationDecidingFactors input)
         {
             if (input == null)
             {
@@ -191,18 +180,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
+                    this.IsBadgeAuthorizedDepositor == input.IsBadgeAuthorizedDepositor ||
+                    (this.IsBadgeAuthorizedDepositor != null &&
+                    this.IsBadgeAuthorizedDepositor.Equals(input.IsBadgeAuthorizedDepositor))
                 ) && 
                 (
-                    this.NonFungibleId == input.NonFungibleId ||
-                    (this.NonFungibleId != null &&
-                    this.NonFungibleId.Equals(input.NonFungibleId))
+                    this.DefaultDepositRule == input.DefaultDepositRule ||
+                    this.DefaultDepositRule.Equals(input.DefaultDepositRule)
                 ) && 
                 (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.ResourceSpecificDetails == input.ResourceSpecificDetails ||
+                    this.ResourceSpecificDetails != null &&
+                    input.ResourceSpecificDetails != null &&
+                    this.ResourceSpecificDetails.SequenceEqual(input.ResourceSpecificDetails)
                 );
         }
 
@@ -215,15 +205,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ResourceAddress != null)
+                if (this.IsBadgeAuthorizedDepositor != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IsBadgeAuthorizedDepositor.GetHashCode();
                 }
-                if (this.NonFungibleId != null)
+                hashCode = (hashCode * 59) + this.DefaultDepositRule.GetHashCode();
+                if (this.ResourceSpecificDetails != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceSpecificDetails.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

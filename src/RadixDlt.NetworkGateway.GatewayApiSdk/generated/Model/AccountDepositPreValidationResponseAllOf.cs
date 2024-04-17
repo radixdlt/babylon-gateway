@@ -84,42 +84,58 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountAuthorizedDepositorsResponseItem
+    /// AccountDepositPreValidationResponseAllOf
     /// </summary>
-    [DataContract(Name = "AccountAuthorizedDepositorsResponseItem")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "AccountAuthorizedDepositorsNonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "AccountAuthorizedDepositorsResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "NonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "ResourceBadge")]
-    public partial class AccountAuthorizedDepositorsResponseItem : IEquatable<AccountAuthorizedDepositorsResponseItem>
+    [DataContract(Name = "AccountDepositPreValidationResponse_allOf")]
+    public partial class AccountDepositPreValidationResponseAllOf : IEquatable<AccountDepositPreValidationResponseAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets BadgeType
-        /// </summary>
-        [DataMember(Name = "badge_type", IsRequired = true, EmitDefaultValue = true)]
-        public AccountAuthorizedDepositorBadgeType BadgeType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountAuthorizedDepositorsResponseItem() { }
+        protected AccountDepositPreValidationResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResponseAllOf" /> class.
         /// </summary>
-        /// <param name="badgeType">badgeType (required).</param>
-        public AccountAuthorizedDepositorsResponseItem(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType))
+        /// <param name="allowsTryDepositBatch">allowsTryDepositBatch (required).</param>
+        /// <param name="resourceSpecificBehaviour">The fully resolved try_deposit_* ability of each resource (which takes all the inputs into account, including the authorized depositor badge, the default deposit rule and the resource-specific details)..</param>
+        /// <param name="decidingFactors">decidingFactors (required).</param>
+        public AccountDepositPreValidationResponseAllOf(bool allowsTryDepositBatch = default(bool), List<AccountDepositPreValidationResourceSpecificBehaviourItem> resourceSpecificBehaviour = default(List<AccountDepositPreValidationResourceSpecificBehaviourItem>), AccountDepositPreValidationDecidingFactors decidingFactors = default(AccountDepositPreValidationDecidingFactors))
         {
-            this.BadgeType = badgeType;
+            this.AllowsTryDepositBatch = allowsTryDepositBatch;
+            // to ensure "decidingFactors" is required (not null)
+            if (decidingFactors == null)
+            {
+                throw new ArgumentNullException("decidingFactors is a required property for AccountDepositPreValidationResponseAllOf and cannot be null");
+            }
+            this.DecidingFactors = decidingFactors;
+            this.ResourceSpecificBehaviour = resourceSpecificBehaviour;
         }
+
+        /// <summary>
+        /// Gets or Sets AllowsTryDepositBatch
+        /// </summary>
+        [DataMember(Name = "allows_try_deposit_batch", IsRequired = true, EmitDefaultValue = true)]
+        public bool AllowsTryDepositBatch { get; set; }
+
+        /// <summary>
+        /// The fully resolved try_deposit_* ability of each resource (which takes all the inputs into account, including the authorized depositor badge, the default deposit rule and the resource-specific details).
+        /// </summary>
+        /// <value>The fully resolved try_deposit_* ability of each resource (which takes all the inputs into account, including the authorized depositor badge, the default deposit rule and the resource-specific details).</value>
+        [DataMember(Name = "resource_specific_behaviour", EmitDefaultValue = true)]
+        public List<AccountDepositPreValidationResourceSpecificBehaviourItem> ResourceSpecificBehaviour { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DecidingFactors
+        /// </summary>
+        [DataMember(Name = "deciding_factors", IsRequired = true, EmitDefaultValue = true)]
+        public AccountDepositPreValidationDecidingFactors DecidingFactors { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +144,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountAuthorizedDepositorsResponseItem {\n");
-            sb.Append("  BadgeType: ").Append(BadgeType).Append("\n");
+            sb.Append("class AccountDepositPreValidationResponseAllOf {\n");
+            sb.Append("  AllowsTryDepositBatch: ").Append(AllowsTryDepositBatch).Append("\n");
+            sb.Append("  ResourceSpecificBehaviour: ").Append(ResourceSpecificBehaviour).Append("\n");
+            sb.Append("  DecidingFactors: ").Append(DecidingFactors).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +168,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountAuthorizedDepositorsResponseItem);
+            return this.Equals(input as AccountDepositPreValidationResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if AccountAuthorizedDepositorsResponseItem instances are equal
+        /// Returns true if AccountDepositPreValidationResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountAuthorizedDepositorsResponseItem to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountAuthorizedDepositorsResponseItem input)
+        public bool Equals(AccountDepositPreValidationResponseAllOf input)
         {
             if (input == null)
             {
@@ -166,8 +184,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.BadgeType == input.BadgeType ||
-                    this.BadgeType.Equals(input.BadgeType)
+                    this.AllowsTryDepositBatch == input.AllowsTryDepositBatch ||
+                    this.AllowsTryDepositBatch.Equals(input.AllowsTryDepositBatch)
+                ) && 
+                (
+                    this.ResourceSpecificBehaviour == input.ResourceSpecificBehaviour ||
+                    this.ResourceSpecificBehaviour != null &&
+                    input.ResourceSpecificBehaviour != null &&
+                    this.ResourceSpecificBehaviour.SequenceEqual(input.ResourceSpecificBehaviour)
+                ) && 
+                (
+                    this.DecidingFactors == input.DecidingFactors ||
+                    (this.DecidingFactors != null &&
+                    this.DecidingFactors.Equals(input.DecidingFactors))
                 );
         }
 
@@ -180,7 +209,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.BadgeType.GetHashCode();
+                hashCode = (hashCode * 59) + this.AllowsTryDepositBatch.GetHashCode();
+                if (this.ResourceSpecificBehaviour != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceSpecificBehaviour.GetHashCode();
+                }
+                if (this.DecidingFactors != null)
+                {
+                    hashCode = (hashCode * 59) + this.DecidingFactors.GetHashCode();
+                }
                 return hashCode;
             }
         }

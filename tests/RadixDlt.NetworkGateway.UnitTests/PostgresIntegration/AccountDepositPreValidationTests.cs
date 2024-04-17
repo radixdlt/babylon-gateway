@@ -62,59 +62,90 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
+using FluentAssertions;
+using Microsoft.Extensions.Options;
+using Moq;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Xunit;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.UnitTests.PostgresIntegration;
 
-[ApiController]
-[Route("transaction")]
-public sealed class TransactionController : ControllerBase
+public class AccountDepositPreValidationTests
 {
-    private readonly ITransactionHandler _transactionHandler;
-
-    public TransactionController(ITransactionHandler transactionHandler)
+    [Fact]
+    public async Task AccountIsConfiguredToAllowExistings_AllResourceVaultsExists_DepositAllowed()
     {
-        _transactionHandler = transactionHandler;
-    }
+        // Arrange.
+        var mockLedgerStateQuerier = new Mock<ILedgerStateQuerier>();
+        mockLedgerStateQuerier
+            .Setup(x => x.GetValidLedgerStateForReadRequest(null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new LedgerState("testnetwork", 100_000_000, string.Empty, 1, 1000));
 
-    [HttpPost("construction")]
-    public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token)
-    {
-        return await _transactionHandler.Construction(token);
-    }
+        var mockTransactionQuerier = new Mock<ITransactionQuerier>();
+        var mockTransactionPreviewService = new Mock<ITransactionPreviewService>();
+        var mockSubmissionService = new Mock<ISubmissionService>();
+        var mockEndpointConfiguration = new Mock<IOptionsSnapshot<EndpointOptions>>();
+        var mockDepositPreValidationQuerier = new Mock<IDepositPreValidationQuerier>();
 
-    [HttpPost("status")]
-    public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Status(request, token);
-    }
+        var sut = new DefaultTransactionHandler(
+            mockLedgerStateQuerier.Object,
+            mockTransactionQuerier.Object,
+            mockTransactionPreviewService.Object,
+            mockSubmissionService.Object,
+            mockEndpointConfiguration.Object,
+            mockDepositPreValidationQuerier.Object);
 
-    [HttpPost("committed-details")]
-    public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.CommittedDetails(request, token);
-    }
+        var accountAddress = "account1";
+        var resourceAddresses = new List<string> { "resource1", "resource2", "xrd_resource" };
+        var badge = new AccountDepositPreValidationResourceBadge(AccountAuthorizedDepositorBadgeType.ResourceBadge, "badge_resource");
+        var request = new AccountDepositPreValidationRequest(accountAddress, resourceAddresses, badge);
 
-    [HttpPost("preview")]
-    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Preview(request, token);
-    }
+        mockDepositPreValidationQuerier
+            .Setup(
+                x => x.AccountTryDepositPreValidation(
+                    It.IsAny<EntityAddress>(),
+                    It.IsAny<EntityAddress[]>(),
+                    It.IsAny<EntityAddress>(),
+                    It.IsAny<string>(),
+                    It.IsAny<LedgerState>(),
+                    It.IsAny<CancellationToken>()
+                ))
+            .ReturnsAsync(
+                new AccountDepositPreValidationDecidingFactors(
+                    true,
+                    AccountDefaultDepositRule.AllowExisting,
+                    new List<AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem>()
+                    {
+                        new("resource1", true, false, null),
+                        new("resource2", true, false, null),
+                        new("xrd_resource", true, true, null),
+                    }));
 
-    [HttpPost("submit")]
-    public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Submit(request, token);
-    }
+        var expectedResourceSpecificBehaviour = new List<AccountDepositPreValidationResourceSpecificBehaviourItem>()
+        {
+            new("resource1", true),
+            new("resource2", true),
+            new("xrd_resource", true),
+        };
 
-    [HttpPost("account-deposit-pre-validation")]
-    public async Task<GatewayModel.AccountDepositPreValidationResponse> AccountDepositPreValidation(GatewayModel.AccountDepositPreValidationRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.AccountDepositPreValidation(request, token);
-    }
+        // Act.
+        var result = await sut.AccountDepositPreValidation(request, CancellationToken.None);
+
+        // Assert.
+        result.AllowsTryDepositBatch.Should().BeTrue();
+        result.ResourceSpecificBehaviour.Should().BeEquivalentTo(expectedResourceSpecificBehaviour);
+  }
 }

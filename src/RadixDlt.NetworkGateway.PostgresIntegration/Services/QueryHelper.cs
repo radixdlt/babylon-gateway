@@ -62,59 +62,49 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System;
+using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-[ApiController]
-[Route("transaction")]
-public sealed class TransactionController : ControllerBase
+internal static class QueryHelper
 {
-    private readonly ITransactionHandler _transactionHandler;
-
-    public TransactionController(ITransactionHandler transactionHandler)
+    internal static async Task<Dictionary<EntityAddress, long>> ResolveEntityIds(ReadOnlyDbContext dbContext, List<EntityAddress> addresses, GatewayApiSdk.Model.LedgerState ledgerState, CancellationToken token)
     {
-        _transactionHandler = transactionHandler;
+        var entities = await dbContext
+            .Entities
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => e.Address, e => e.Id, token);
+
+        return entities;
     }
 
-    [HttpPost("construction")]
-    public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token)
+    internal static async Task<TEntity> GetEntity<TEntity>(ReadOnlyDbContext dbContext, EntityAddress address, GatewayApiSdk.Model.LedgerState ledgerState, CancellationToken token)
+        where TEntity : Entity
     {
-        return await _transactionHandler.Construction(token);
-    }
+        var entity = await dbContext
+            .Entities
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
+            .AnnotateMetricName()
+            .FirstOrDefaultAsync(e => e.Address == address, token);
 
-    [HttpPost("status")]
-    public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Status(request, token);
-    }
+        if (entity == null)
+        {
+            throw new EntityNotFoundException(address.ToString());
+        }
 
-    [HttpPost("committed-details")]
-    public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.CommittedDetails(request, token);
-    }
+        if (entity is not TEntity typedEntity)
+        {
+            throw new InvalidEntityException(address.ToString());
+        }
 
-    [HttpPost("preview")]
-    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Preview(request, token);
-    }
-
-    [HttpPost("submit")]
-    public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Submit(request, token);
-    }
-
-    [HttpPost("account-deposit-pre-validation")]
-    public async Task<GatewayModel.AccountDepositPreValidationResponse> AccountDepositPreValidation(GatewayModel.AccountDepositPreValidationRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.AccountDepositPreValidation(request, token);
+        return typedEntity;
     }
 }

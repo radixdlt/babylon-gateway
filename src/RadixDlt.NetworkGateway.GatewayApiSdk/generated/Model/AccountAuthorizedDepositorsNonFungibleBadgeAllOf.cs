@@ -84,45 +84,40 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountAuthorizedDepositorsNonFungibleResourceBadge
+    /// AccountAuthorizedDepositorsNonFungibleBadgeAllOf
     /// </summary>
-    [DataContract(Name = "AccountAuthorizedDepositorsNonFungibleResourceBadge")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleResourceBadge), "NonFungibleResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "ResourceBadge")]
-    public partial class AccountAuthorizedDepositorsNonFungibleResourceBadge : AccountAuthorizedDepositorsResponseItem, IEquatable<AccountAuthorizedDepositorsNonFungibleResourceBadge>
+    [DataContract(Name = "AccountAuthorizedDepositorsNonFungibleBadge_allOf")]
+    public partial class AccountAuthorizedDepositorsNonFungibleBadgeAllOf : IEquatable<AccountAuthorizedDepositorsNonFungibleBadgeAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleResourceBadge" /> class.
+        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleBadgeAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountAuthorizedDepositorsNonFungibleResourceBadge() { }
+        protected AccountAuthorizedDepositorsNonFungibleBadgeAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleResourceBadge" /> class.
+        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsNonFungibleBadgeAllOf" /> class.
         /// </summary>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
         /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        /// <param name="badgeType">badgeType (required) (default to AccountAuthorizedDepositorBadgeType.NonFungibleResourceBadge).</param>
-        public AccountAuthorizedDepositorsNonFungibleResourceBadge(string resourceAddress = default(string), string nonFungibleId = default(string), long lastUpdatedAtStateVersion = default(long), AccountAuthorizedDepositorBadgeType badgeType = AccountAuthorizedDepositorBadgeType.NonFungibleResourceBadge) : base(badgeType)
+        public AccountAuthorizedDepositorsNonFungibleBadgeAllOf(string resourceAddress = default(string), string nonFungibleId = default(string), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for AccountAuthorizedDepositorsNonFungibleResourceBadge and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for AccountAuthorizedDepositorsNonFungibleBadgeAllOf and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
             // to ensure "nonFungibleId" is required (not null)
             if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for AccountAuthorizedDepositorsNonFungibleResourceBadge and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for AccountAuthorizedDepositorsNonFungibleBadgeAllOf and cannot be null");
             }
             this.NonFungibleId = nonFungibleId;
             this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
@@ -156,8 +151,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountAuthorizedDepositorsNonFungibleResourceBadge {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("class AccountAuthorizedDepositorsNonFungibleBadgeAllOf {\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
@@ -169,7 +163,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -181,31 +175,31 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountAuthorizedDepositorsNonFungibleResourceBadge);
+            return this.Equals(input as AccountAuthorizedDepositorsNonFungibleBadgeAllOf);
         }
 
         /// <summary>
-        /// Returns true if AccountAuthorizedDepositorsNonFungibleResourceBadge instances are equal
+        /// Returns true if AccountAuthorizedDepositorsNonFungibleBadgeAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountAuthorizedDepositorsNonFungibleResourceBadge to be compared</param>
+        /// <param name="input">Instance of AccountAuthorizedDepositorsNonFungibleBadgeAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountAuthorizedDepositorsNonFungibleResourceBadge input)
+        public bool Equals(AccountAuthorizedDepositorsNonFungibleBadgeAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
                     this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && base.Equals(input) && 
+                ) && 
                 (
                     this.NonFungibleId == input.NonFungibleId ||
                     (this.NonFungibleId != null &&
                     this.NonFungibleId.Equals(input.NonFungibleId))
-                ) && base.Equals(input) && 
+                ) && 
                 (
                     this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
                     this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
@@ -220,7 +214,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
+                int hashCode = 41;
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();

@@ -91,35 +91,41 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountAuthorizedDepositorsResponseItem
+    /// AccountDepositPreValidationNonFungibleBadge
     /// </summary>
-    [DataContract(Name = "AccountAuthorizedDepositorsResponseItem")]
+    [DataContract(Name = "AccountDepositPreValidationNonFungibleBadge")]
     [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "AccountAuthorizedDepositorsNonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "AccountAuthorizedDepositorsResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "NonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "ResourceBadge")]
-    public partial class AccountAuthorizedDepositorsResponseItem : IEquatable<AccountAuthorizedDepositorsResponseItem>
+    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationNonFungibleBadge), "NonFungibleBadge")]
+    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationResourceBadge), "ResourceBadge")]
+    public partial class AccountDepositPreValidationNonFungibleBadge : TransactionAccountDepositPreValidationAuthorizedDepositorBadge, IEquatable<AccountDepositPreValidationNonFungibleBadge>
     {
-
         /// <summary>
-        /// Gets or Sets BadgeType
-        /// </summary>
-        [DataMember(Name = "badge_type", IsRequired = true, EmitDefaultValue = true)]
-        public AccountAuthorizedDepositorBadgeType BadgeType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationNonFungibleBadge" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountAuthorizedDepositorsResponseItem() { }
+        protected AccountDepositPreValidationNonFungibleBadge() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationNonFungibleBadge" /> class.
         /// </summary>
-        /// <param name="badgeType">badgeType (required).</param>
-        public AccountAuthorizedDepositorsResponseItem(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType))
+        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
+        /// <param name="badgeType">badgeType (required) (default to AccountAuthorizedDepositorBadgeType.NonFungibleBadge).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        public AccountDepositPreValidationNonFungibleBadge(string nonFungibleId = default(string), AccountAuthorizedDepositorBadgeType badgeType = AccountAuthorizedDepositorBadgeType.NonFungibleBadge, string resourceAddress = default(string)) : base(badgeType, resourceAddress)
         {
-            this.BadgeType = badgeType;
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
+            {
+                throw new ArgumentNullException("nonFungibleId is a required property for AccountDepositPreValidationNonFungibleBadge and cannot be null");
+            }
+            this.NonFungibleId = nonFungibleId;
         }
+
+        /// <summary>
+        /// String-encoded non-fungible ID.
+        /// </summary>
+        /// <value>String-encoded non-fungible ID.</value>
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +134,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountAuthorizedDepositorsResponseItem {\n");
-            sb.Append("  BadgeType: ").Append(BadgeType).Append("\n");
+            sb.Append("class AccountDepositPreValidationNonFungibleBadge {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -138,7 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -150,24 +157,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountAuthorizedDepositorsResponseItem);
+            return this.Equals(input as AccountDepositPreValidationNonFungibleBadge);
         }
 
         /// <summary>
-        /// Returns true if AccountAuthorizedDepositorsResponseItem instances are equal
+        /// Returns true if AccountDepositPreValidationNonFungibleBadge instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountAuthorizedDepositorsResponseItem to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationNonFungibleBadge to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountAuthorizedDepositorsResponseItem input)
+        public bool Equals(AccountDepositPreValidationNonFungibleBadge input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.BadgeType == input.BadgeType ||
-                    this.BadgeType.Equals(input.BadgeType)
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 );
         }
 
@@ -179,8 +187,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.BadgeType.GetHashCode();
+                int hashCode = base.GetHashCode();
+                if (this.NonFungibleId != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                }
                 return hashCode;
             }
         }

@@ -95,7 +95,7 @@ internal record AccountAuthorizedDepositorsViewModel(
     EntityAddress? NonFungibleBadgeResourceEntityAddress,
     string? NonFungibleBadgeNonFungibleId,
     int TotalCount
-    );
+);
 
 internal class AccountStateQuerier : IAccountStateQuerier
 {
@@ -115,7 +115,7 @@ internal class AccountStateQuerier : IAccountStateQuerier
         int limit,
         CancellationToken token = default)
     {
-        var accountEntity = await GetEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
+        var accountEntity = await QueryHelper.GetEntity<GlobalAccountEntity>(_dbContext, accountAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
@@ -174,7 +174,7 @@ ORDER BY resource_preference_join.ordinality ASC;",
         int limit,
         CancellationToken token = default)
     {
-        var accountEntity = await GetEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
+        var accountEntity = await QueryHelper.GetEntity<GlobalAccountEntity>(_dbContext, accountAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
@@ -219,7 +219,7 @@ ORDER BY resource_authorized_depositors_join.ordinality ASC;",
                     AuthorizedDepositorBadgeType.Resource => new GatewayModel.AccountAuthorizedDepositorsResourceBadge(
                         resourceAddress: item.ResourceBadgeEntityAddress,
                         lastUpdatedAtStateVersion: item.FromStateVersion),
-                    AuthorizedDepositorBadgeType.NonFungible => new GatewayModel.AccountAuthorizedDepositorsNonFungibleResourceBadge(
+                    AuthorizedDepositorBadgeType.NonFungible => new GatewayModel.AccountAuthorizedDepositorsNonFungibleBadge(
                         resourceAddress: item.NonFungibleBadgeResourceEntityAddress,
                         nonFungibleId: item.NonFungibleBadgeNonFungibleId,
                         lastUpdatedAtStateVersion: item.FromStateVersion),
@@ -234,22 +234,5 @@ ORDER BY resource_authorized_depositors_join.ordinality ASC;",
             nextCursor: CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount),
             items: mappedItems
         );
-    }
-
-    private async Task<TEntity> GetEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
-        where TEntity : Entity
-    {
-        var entity = await _dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .AnnotateMetricName()
-            .FirstOrDefaultAsync(e => e.Address == address, token);
-
-        if (entity is not TEntity typedEntity)
-        {
-            throw new InvalidEntityException(address.ToString());
-        }
-
-        return typedEntity;
     }
 }

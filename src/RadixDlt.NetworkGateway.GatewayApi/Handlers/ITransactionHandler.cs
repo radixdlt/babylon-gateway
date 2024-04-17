@@ -81,4 +81,6 @@ public interface ITransactionHandler
     Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
 
     Task<GatewayModel.StreamTransactionsResponse> StreamTransactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token = default);
+
+    Task<GatewayModel.AccountDepositPreValidationResponse> AccountDepositPreValidation(GatewayModel.AccountDepositPreValidationRequest request, CancellationToken token = default);
 }

@@ -95,6 +95,9 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("StateEntityDetailsPageSize")]
     public int StateEntityDetailsMaxPageSize { get; set; } = 20;
 
+    [ConfigurationKeyName("TransactionAccountDepositPreValidationMaxResourceItems")]
+    public int TransactionAccountDepositPreValidationMaxResourceItems { get; set; } = 20;
+
     [ConfigurationKeyName("ExplicitMetadataMaxItems")]
     public int ExplicitMetadataMaxItems { get; set; } = 20;
 

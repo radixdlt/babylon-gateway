@@ -68,7 +68,10 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -80,6 +83,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly ITransactionPreviewService _transactionPreviewService;
+    private readonly IDepositPreValidationQuerier _depositPreValidationQuerier;
     private readonly ISubmissionService _submissionService;
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
@@ -88,13 +92,15 @@ internal class DefaultTransactionHandler : ITransactionHandler
         ITransactionQuerier transactionQuerier,
         ITransactionPreviewService transactionPreviewService,
         ISubmissionService submissionService,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+        IOptionsSnapshot<EndpointOptions> endpointConfiguration,
+        IDepositPreValidationQuerier depositPreValidationQuerier)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _transactionQuerier = transactionQuerier;
         _transactionPreviewService = transactionPreviewService;
         _submissionService = submissionService;
         _endpointConfiguration = endpointConfiguration;
+        _depositPreValidationQuerier = depositPreValidationQuerier;
     }
 
     public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token = default)
@@ -209,5 +215,89 @@ internal class DefaultTransactionHandler : ITransactionHandler
             nextCursor: results.NextPageCursor?.ToCursorString(),
             items: results.Transactions
         );
+    }
+
+    public async Task<GatewayModel.AccountDepositPreValidationResponse> AccountDepositPreValidation(GatewayModel.AccountDepositPreValidationRequest request, CancellationToken token = default)
+    {
+        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
+
+        var nonFungibleBadgeNfid = request.Badge is GatewayModel.AccountDepositPreValidationNonFungibleBadge nonFungibleBadge ? nonFungibleBadge.NonFungibleId : null;
+        var decidingFactors = await _depositPreValidationQuerier.AccountTryDepositPreValidation(
+            (EntityAddress)request.AccountAddress,
+            request.ResourceAddresses.Select(x => (EntityAddress)x).ToArray(),
+            request.Badge != null ? (EntityAddress)request.Badge.ResourceAddress : null,
+            nonFungibleBadgeNfid,
+            atLedgerState,
+            token
+        );
+
+        if (decidingFactors.IsBadgeAuthorizedDepositor == true)
+        {
+            return new GatewayModel.AccountDepositPreValidationResponse(
+                atLedgerState,
+                true,
+                decidingFactors.ResourceSpecificDetails
+                    .Select(x => new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(x.ResourceAddress, true))
+                    .ToList(),
+                decidingFactors);
+        }
+
+        var resourceSpecificResponseCollection = new List<GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem>();
+
+        foreach (var decidingFactorItem in decidingFactors.ResourceSpecificDetails)
+        {
+            switch (decidingFactorItem.ResourcePreferenceRule)
+            {
+                case GatewayModel.AccountResourcePreferenceRule.Allowed:
+                {
+                    var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
+                    resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                    break;
+                }
+
+                case GatewayModel.AccountResourcePreferenceRule.Disallowed:
+                {
+                    var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
+                    resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                    break;
+                }
+
+                case null:
+                    switch (decidingFactors.DefaultDepositRule)
+                    {
+                        case GatewayModel.AccountDefaultDepositRule.Reject:
+                        {
+                            var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
+                            resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                            break;
+                        }
+
+                        case GatewayModel.AccountDefaultDepositRule.Accept:
+                        {
+                            var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
+                            resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                            break;
+                        }
+
+                        case GatewayModel.AccountDefaultDepositRule.AllowExisting:
+                        {
+                            var allowsTryDeposit = decidingFactorItem.IsXrd || decidingFactorItem.VaultExists;
+                            var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, allowsTryDeposit);
+                            resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                            break;
+                        }
+
+                        default:
+                            throw new ArgumentOutOfRangeException($"Unexpected value of {decidingFactors.DefaultDepositRule}");
+                    }
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException($"Unexpected value of {decidingFactorItem.ResourcePreferenceRule}");
+            }
+        }
+
+        var allowsBatchTryDeposit = resourceSpecificResponseCollection.All(x => x.AllowsTryDeposit);
+        return new GatewayModel.AccountDepositPreValidationResponse(atLedgerState, allowsBatchTryDeposit, resourceSpecificResponseCollection, decidingFactors);
     }
 }

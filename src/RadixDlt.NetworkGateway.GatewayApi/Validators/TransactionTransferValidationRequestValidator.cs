@@ -62,59 +62,62 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+// <copyright file="TransactionTransferValidationRequestValidator.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
-namespace GatewayApi.Controllers;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-[ApiController]
-[Route("transaction")]
-public sealed class TransactionController : ControllerBase
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+
+internal class TransactionTransferPreValidationRequestValidator : AbstractValidator<AccountDepositPreValidationRequest>
 {
-    private readonly ITransactionHandler _transactionHandler;
-
-    public TransactionController(ITransactionHandler transactionHandler)
+    public TransactionTransferPreValidationRequestValidator(RadixAddressValidator radixAddressValidator, IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
     {
-        _transactionHandler = transactionHandler;
+        RuleFor(x => x.AccountAddress).SetValidator(radixAddressValidator);
+
+        RuleFor(x => x.ResourceAddresses)
+            .NotEmpty()
+            .DependentRules(
+                () =>
+                {
+                    RuleFor(x => x.ResourceAddresses.Count)
+                        .GreaterThan(0)
+                        .LessThanOrEqualTo(endpointOptionsSnapshot.Value.TransactionAccountDepositPreValidationMaxResourceItems);
+
+                    RuleForEach(x => x.ResourceAddresses)
+                        .NotNull()
+                        .SetValidator(radixAddressValidator);
+                });
+
+        RuleFor(x => x.Badge)
+            .SetInheritanceValidator(
+                v =>
+                {
+                    v.Add(new TransferPreValidationResourceBadgeValidator(radixAddressValidator));
+                    v.Add(new TransferPreValidationNonFungibleResourceBadgeValidator(radixAddressValidator));
+                });
     }
+}
 
-    [HttpPost("construction")]
-    public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token)
+internal class TransferPreValidationResourceBadgeValidator : AbstractValidator<AccountDepositPreValidationResourceBadge>
+{
+    public TransferPreValidationResourceBadgeValidator(RadixAddressValidator radixAddressValidator)
     {
-        return await _transactionHandler.Construction(token);
+        RuleFor(x => x.BadgeType).IsInEnum();
+        RuleFor(x => x.ResourceAddress).SetValidator(radixAddressValidator);
     }
+}
 
-    [HttpPost("status")]
-    public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
+internal class TransferPreValidationNonFungibleResourceBadgeValidator : AbstractValidator<AccountDepositPreValidationNonFungibleBadge>
+{
+    public TransferPreValidationNonFungibleResourceBadgeValidator(RadixAddressValidator radixAddressValidator)
     {
-        return await _transactionHandler.Status(request, token);
-    }
-
-    [HttpPost("committed-details")]
-    public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.CommittedDetails(request, token);
-    }
-
-    [HttpPost("preview")]
-    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Preview(request, token);
-    }
-
-    [HttpPost("submit")]
-    public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Submit(request, token);
-    }
-
-    [HttpPost("account-deposit-pre-validation")]
-    public async Task<GatewayModel.AccountDepositPreValidationResponse> AccountDepositPreValidation(GatewayModel.AccountDepositPreValidationRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.AccountDepositPreValidation(request, token);
+        RuleFor(x => x.BadgeType).IsInEnum();
+        RuleFor(x => x.ResourceAddress).SetValidator(radixAddressValidator);
+        RuleFor(x => x.NonFungibleId).NotEmpty();
     }
 }

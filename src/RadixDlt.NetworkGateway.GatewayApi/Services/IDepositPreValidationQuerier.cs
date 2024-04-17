@@ -62,59 +62,20 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System;
+using RadixDlt.NetworkGateway.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-[ApiController]
-[Route("transaction")]
-public sealed class TransactionController : ControllerBase
+public interface IDepositPreValidationQuerier
 {
-    private readonly ITransactionHandler _transactionHandler;
-
-    public TransactionController(ITransactionHandler transactionHandler)
-    {
-        _transactionHandler = transactionHandler;
-    }
-
-    [HttpPost("construction")]
-    public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token)
-    {
-        return await _transactionHandler.Construction(token);
-    }
-
-    [HttpPost("status")]
-    public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Status(request, token);
-    }
-
-    [HttpPost("committed-details")]
-    public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.CommittedDetails(request, token);
-    }
-
-    [HttpPost("preview")]
-    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Preview(request, token);
-    }
-
-    [HttpPost("submit")]
-    public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Submit(request, token);
-    }
-
-    [HttpPost("account-deposit-pre-validation")]
-    public async Task<GatewayModel.AccountDepositPreValidationResponse> AccountDepositPreValidation(GatewayModel.AccountDepositPreValidationRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.AccountDepositPreValidation(request, token);
-    }
+    Task<GatewayApiSdk.Model.AccountDepositPreValidationDecidingFactors> AccountTryDepositPreValidation(
+        EntityAddress accountAddress,
+        EntityAddress[] resourceAddresses,
+        EntityAddress? badgeResourceAddress,
+        string? nonFungibleBadgeNfid,
+        GatewayApiSdk.Model.LedgerState ledgerState,
+        CancellationToken token = default
+    );
 }

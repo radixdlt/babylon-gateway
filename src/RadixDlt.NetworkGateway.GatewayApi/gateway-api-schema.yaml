@@ -1336,6 +1336,30 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  "/transaction/account-deposit-pre-validation":
+    post:
+      operationId: AccountDepositPreValidation
+      summary: PreValidate deposit of resources to an account
+      description: |
+        Helper endpoint that allows pre-validation if a deposit of certain resources to a given account can succeed or not. It is only meant for pre-validation usage, it does not guarantee that execution will succeed.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountDepositPreValidationRequest"
+      responses:
+        "200":
+          description: Pre-validation response, including all deciding factors that were used to generate that response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDepositPreValidationResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
   "/stream/transactions":
     post:
       operationId: StreamTransactions
@@ -2558,7 +2582,92 @@ components:
       type: string
       enum:
         - ResourceBadge
-        - NonFungibleResourceBadge
+        - NonFungibleBadge
+
+    AccountDefaultDepositRule:
+      type: string
+      description: Default deposit rule set to an account.
+      enum:
+        - Accept
+        - Reject
+        - AllowExisting
+
+    AccountDepositPreValidationDecidingFactors:
+      description: Deciding factors used to calculate response.
+      type: object
+      required:
+        - default_deposit_rule
+      properties:
+        is_badge_authorized_depositor:
+          description: Whether the input badge belongs to the account's set of authorized depositors. This field will only be present if any badge was passed in the request.
+          type: boolean
+          nullable: true
+        default_deposit_rule:
+          $ref: "#/components/schemas/AccountDefaultDepositRule"
+        resource_specific_details:
+          description: Returns deciding factors for each resource. Contains only information about resources presented in the request, not all resource preference rules for queried account.
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem"
+
+    AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem:
+      type: object
+      required:
+        - resource_address
+        - vault_exists
+        - is_xrd
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        vault_exists:
+          type: boolean
+        is_xrd:
+          type: boolean
+        resource_preference_rule:
+          $ref: "#/components/schemas/AccountResourcePreferenceRule"
+
+    AccountDepositPreValidationResourceSpecificBehaviourItem:
+      type: object
+      required:
+        - resource_address
+        - allows_try_deposit
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        allows_try_deposit:
+          type: boolean
+
+    TransactionAccountDepositPreValidationAuthorizedDepositorBadge:
+      type: object
+      required:
+        - badge_type
+        - resource_address
+      properties:
+        badge_type:
+          $ref: "#/components/schemas/AccountAuthorizedDepositorBadgeType"
+        resource_address:
+          # That is part of parent type because moving it to child broke OpenAPI generator and removed some other types:
+          # MetadataNonFungibleGlobalIdValueAllOf StateNonFungibleIdsRequestAllOf  MetadataNonFungibleGlobalIdArrayValueAllOf and MetadataNonFungibleGlobalIdArrayValue were affected
+          $ref: "#/components/schemas/Address"
+      discriminator:
+        propertyName: badge_type
+        mapping:
+          # Must match AccountDepositPreValidationBadgeType
+          ResourceBadge: "#/components/schemas/AccountDepositPreValidationResourceBadge"
+          NonFungibleBadge: "#/components/schemas/AccountDepositPreValidationNonFungibleBadge"
+    AccountDepositPreValidationResourceBadge:
+      allOf:
+        - $ref: "#/components/schemas/TransactionAccountDepositPreValidationAuthorizedDepositorBadge"
+        - type: object
+    AccountDepositPreValidationNonFungibleBadge:
+      allOf:
+        - $ref: "#/components/schemas/TransactionAccountDepositPreValidationAuthorizedDepositorBadge"
+        - type: object
+          required:
+            - non_fungible_id
+          properties:
+            non_fungible_id:
+              $ref: "#/components/schemas/NonFungibleId"
 
     AccountAuthorizedDepositorsResponseItem:
       type: object
@@ -2572,7 +2681,7 @@ components:
         mapping:
           # Must match AccountAuthorizedDepositorBadgeType
           ResourceBadge: "#/components/schemas/AccountAuthorizedDepositorsResourceBadge"
-          NonFungibleResourceBadge: "#/components/schemas/AccountAuthorizedDepositorsNonFungibleResourceBadge"
+          NonFungibleBadge: "#/components/schemas/AccountAuthorizedDepositorsNonFungibleBadge"
     AccountAuthorizedDepositorsResourceBadge:
       allOf:
         - $ref: "#/components/schemas/AccountAuthorizedDepositorsResponseItem"
@@ -2585,7 +2694,7 @@ components:
               $ref: "#/components/schemas/Address"
             last_updated_at_state_version:
               $ref: "#/components/schemas/LastUpdatedAtStateVersion"
-    AccountAuthorizedDepositorsNonFungibleResourceBadge:
+    AccountAuthorizedDepositorsNonFungibleBadge:
       allOf:
         - $ref: "#/components/schemas/AccountAuthorizedDepositorsResponseItem"
         - type: object
@@ -3181,6 +3290,44 @@ components:
         duplicate:
           type: boolean
           description: Is true if the transaction is a duplicate of an existing pending transaction.
+
+    AccountDepositPreValidationRequest:
+      allOf:
+        - type: object
+          required:
+            - account_address
+            - resource_addresses
+          properties:
+            account_address:
+              $ref: "#/components/schemas/Address"
+            resource_addresses:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            badge:
+              $ref: "#/components/schemas/TransactionAccountDepositPreValidationAuthorizedDepositorBadge"
+          example:
+            account_address: "<account-address>"
+            resource_addresses: ["<resource-address>"]
+
+    AccountDepositPreValidationResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - allows_try_deposit_batch
+            - resource_specific
+            - deciding_factors
+          properties:
+            allows_try_deposit_batch:
+              type: boolean
+            resource_specific_behaviour:
+              description: The fully resolved try_deposit_* ability of each resource (which takes all the inputs into account, including the authorized depositor badge, the default deposit rule and the resource-specific details).
+              type: array
+              items:
+                $ref: "#/components/schemas/AccountDepositPreValidationResourceSpecificBehaviourItem"
+            deciding_factors:
+              $ref: "#/components/schemas/AccountDepositPreValidationDecidingFactors"
 
     TransactionStatusRequest:
       allOf:
