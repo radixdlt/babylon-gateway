@@ -35,7 +35,7 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
   Stokenet: {
     networkName: 'Stokenet',
     networkId: RadixNetwork.Stokenet,
-    gatewayUrl: 'https://babylon-stokenet-gateway.radixdlt.com',
+    gatewayUrl: 'https://stokenet.radixdlt.com',
     dashboardUrl: 'https://stokenet-dashboard.radixdlt.com',
   },
   Kisharnet: {

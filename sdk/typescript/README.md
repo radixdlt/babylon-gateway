@@ -29,11 +29,13 @@ Calling static `intialize` method from `GatewayApiClient` class will instantiate
 `applicationName` is required purely for statictis purposes and will be added as a request header. Additional fields you can set up are `applicationVersion` and `applicationDappDefinitionAddress`
 
 ```typescript
-import { GatewayApiClient } from '@radixdlt/babylon-gateway-api-sdk'
+import { GatewayApiClient, RadixNetwork } from '@radixdlt/babylon-gateway-api-sdk'
 
 const gatewayApi = GatewayApiClient.initialize({
-  basePath: 'https://mainnet.radixdlt.com',
+  networkId: RadixNetwork.Mainnet,
   applicationName: 'Your dApp Name',
+  applicationVersion: '1.0.0',
+  applicationDappDefinitionAddress: 'account_rdx12y4l35lh2543nfa9pyyzvsh64ssu0dv6fq20gg8suslwmjvkylejgj'
 })
 const { status, transaction, stream, state } = gatewayApi
 ```
@@ -75,9 +77,11 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 
 ## Low Level APIs
 
-Low level APIs are generated automatically based on OpenAPI spec. You can get a good sense of available methods by looking at [Swagger](https://rcnet.radixdlt.com/swagger/index.html). In order to access automatically generated methods you have two options:
+Low level APIs are generated automatically based on OpenAPI spec. You can get a good sense of available methods by looking at [Swagger](https://mainnet.radixdlt.com/swagger/index.html). In order to access automatically generated methods you have two options:
 
 ### Using generated APIs through `innerClient`
+
+When using automatically generated APIs please check method parameter. They're always wrapped object with property matching method name (like in the example below) 
 
 ```typescript
 async function getTransactionStatus(transactionIntentHash: string) {
@@ -119,10 +123,10 @@ Behind the scenes, this library uses the fetch API. If in an environment where `
 Starting from NodeJS 16 `fetch` is available as experimental API. You can e.g. check Gateway API status by using following snippet.
 
 ```typescript
-const { GatewayApiClient } = require('@radixdlt/babylon-gateway-api-sdk')
+const { GatewayApiClient, RadixNetwork } = require('@radixdlt/babylon-gateway-api-sdk')
 
 const gateway = GatewayApiClient.initialize({
-  basePath: 'https://mainnet.radixdlt.com',
+  networkId: RadixNetwork.Mainnet
 })
 gateway.status.getCurrent().then(console.log)
 ```

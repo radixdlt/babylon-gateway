@@ -1,3 +1,4 @@
+import { RadixNetworkConfigById } from './helpers/networks'
 import {
   ConfigurationParameters,
   StateApi,
@@ -45,6 +46,12 @@ export type GatewayApiClientSettings = ConfigurationParameters & {
    * Application dApp definition address which can be used for statistics purposes.
    */
   applicationDappDefinitionAddress?: string
+
+  /**
+   * Network ID of the network the client is connecting to. It's used to determine the gateway URL.
+   * It's discarded if `basePath` is provided.
+   */
+  networkId?: number
 }
 
 export class GatewayApiClient {
@@ -54,7 +61,10 @@ export class GatewayApiClient {
   }
 
   private static constructConfiguration(settings: GatewayApiClientSettings) {
-    const basePath = normalizeBasePath(settings?.basePath)
+    const basePath =
+      settings.networkId && !settings.basePath
+        ? RadixNetworkConfigById[settings.networkId].gatewayUrl
+        : normalizeBasePath(settings?.basePath)
     const applicationName = settings?.applicationName ?? 'Unknown'
 
     return new RuntimeConfiguration({
