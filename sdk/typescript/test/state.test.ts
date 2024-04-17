@@ -24,7 +24,7 @@ describe('State Subapi', () => {
       )
       const gatewayApi = GatewayApiClient.initialize({
         fetchApi: spy,
-        basePath: 'https://just-for-test.com',
+        networkId: 2,
         maxAddressesCount: 1,
       })
 
@@ -34,7 +34,7 @@ describe('State Subapi', () => {
       // Assert
       expect(spy).toHaveBeenCalledTimes(2)
       expect(spy).toHaveBeenCalledWith(
-        'https://just-for-test.com/state/entity/details',
+        'https://stokenet.radixdlt.com/state/entity/details',
         fetchRequestFactory({
           opt_ins: {
             ancestor_identities: false,
@@ -48,7 +48,7 @@ describe('State Subapi', () => {
         })
       )
       expect(spy).toHaveBeenCalledWith(
-        'https://just-for-test.com/state/entity/details',
+        'https://stokenet.radixdlt.com/state/entity/details',
         fetchRequestFactory({
           opt_ins: {
             ancestor_identities: false,
@@ -188,6 +188,7 @@ describe('State Subapi', () => {
       const gatewayApi = GatewayApiClient.initialize({
         fetchApi: spy,
         basePath: 'https://just-for-test.com',
+        networkId: 1,
         maxAddressesCount: 1,
       })
 
