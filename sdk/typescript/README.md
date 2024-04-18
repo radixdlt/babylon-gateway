@@ -46,35 +46,35 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 
 ### State
 
-- `getEntityDetailsVaultAggregated(entities: string | string[])` - detailed information about entities
-- `getAllEntityMetadata(entity: string)` - get all metadata about given entity
-- `getEntityMetadata(entity: string, cursor?: string)` - get paged metadata about given entity
-- `getValidators(cursor?: string)` - get paged validators
-- `getAllValidators()` - get all validators
-- `getNonFungibleLocation(resource: string, ids: string[])` - get list of NFT location for given resource and ids
-- `getNonFungibleIds(address:string, ledgerState, cursor?: string)` - get paged non fungible ids for given address
-- `getAllNonFungibleIds(address: string)` - get all non fungible ids for given address
-- `getNonFungibleData(address: string, ids: string | string[])` - get non fungible data
+- `getEntityDetailsVaultAggregated(entities: string | string[])` - detailed information about entities. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/StateEntityDetails)
+- `getAllEntityMetadata(entity: string)` - get all metadata about given entity. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/EntityMetadataPage)
+- `getEntityMetadata(entity: string, cursor?: string)` - get paged metadata about given entity. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/EntityMetadataPage)
+- `getValidators(cursor?: string)` - get paged validators. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/StateValidatorsList)
+- `getAllValidators()` - get all validators. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/StateValidatorsList)
+- `getNonFungibleLocation(resource: string, ids: string[])` - get list of NFT location for given resource and ids. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleLocation)
+- `getNonFungibleIds(address:string, ledgerState, cursor?: string)` - get paged non fungible ids for given address. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleIds)
+- `getAllNonFungibleIds(address: string)` - get all non fungible ids for given address. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleIds)
+- `getNonFungibleData(address: string, ids: string | string[])` - get non fungible data. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleData)
 
 ### Status
 
-- `getCurrent()` - Gateway API version and current ledger state
-- `getNetworkConfiguration()` - network identifier, network name and well-known network addresses
+- `getCurrent()` - Gateway API version and current ledger state. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/GatewayStatus)
+- `getNetworkConfiguration()` - network identifier, network name and well-known network addresses. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NetworkConfiguration)
 
 ### Transaction
 
-- `getStatus(txID: string)` - transaction status for given transaction id (the intent hash)
-- `getCommittedDetails(txID: string, options)` - transaction details for given transaction id (the intent hash)
+- `getStatus(txID: string)` - transaction status for given transaction id (the intent hash). [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionStatus)
+- `getCommittedDetails(txID: string, options)` - transaction details for given transaction id (the intent hash). [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionCommittedDetails)
 
 ### Stream
 
-- `getTransactionsList(affectedEntities?: string[], cursor?: string)` - get transaction list for given list of entities
+- `getTransactionsList(affectedEntities?: string[], cursor?: string)` - get transaction list for given list of entities. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/StreamTransactions)
 
 ### Statistics
 
-- `getValidatorsUptimeFromTo(addresses: string[], from, to)` - get uptime statistics for validators for given period 
-- `getValidatorsUptime(addresses: string[])` - get uptime statistics for validators
-
+- `getValidatorsUptimeFromTo(addresses: string[], from, to)` - get uptime statistics for validators for given period. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/ValidatorsUptime) 
+- `getValidatorsUptime(addresses: string[])` - get uptime statistics for validators. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/ValidatorsUptime)
+  
 ## Low Level APIs
 
 Low level APIs are generated automatically based on OpenAPI spec. You can get a good sense of available methods by looking at [Swagger](https://mainnet.radixdlt.com/swagger/index.html). In order to access automatically generated methods you have two options:
