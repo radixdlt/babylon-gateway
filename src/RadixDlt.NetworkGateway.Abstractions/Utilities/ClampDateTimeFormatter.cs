@@ -74,19 +74,19 @@ public static class ClampDateTimeFormatter
     // - The end is simply the maximum fitting within 4 characters.
     // - Used for compatibility with other APIs
     private static readonly DateTimeOffset _clampMinDateTime = new(1583, 1, 1, 0, 0, 0, TimeSpan.Zero);
-    private static readonly DateTimeOffset _clampMaxDateTime = DateTimeOffset.MaxValue;
-    private static readonly long _clampMinDateTimeTimestamp = _clampMinDateTime.ToUnixTimeSeconds();
-    private static readonly long _clampMaxDateTimeTimestamp = _clampMaxDateTime.ToUnixTimeSeconds();
+    private static readonly DateTimeOffset _clampMaxDateTime = new(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
+    private static readonly long _clampMinDateTimeTimestampSeconds = _clampMinDateTime.ToUnixTimeSeconds();
+    private static readonly long _clampMaxDateTimeTimestampSeconds = _clampMaxDateTime.ToUnixTimeSeconds();
 
-    public static string Format(long timestamp)
+    public static string FormatUnixTimestampSeconds(long timestamp)
     {
         DateTimeOffset dt;
 
-        if (timestamp < _clampMinDateTimeTimestamp)
+        if (timestamp < _clampMinDateTimeTimestampSeconds)
         {
             dt = _clampMinDateTime;
         }
-        else if (timestamp > _clampMaxDateTimeTimestamp)
+        else if (timestamp > _clampMaxDateTimeTimestampSeconds)
         {
             dt = _clampMaxDateTime;
         }

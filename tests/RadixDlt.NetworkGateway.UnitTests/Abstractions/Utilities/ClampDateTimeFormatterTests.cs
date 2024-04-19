@@ -82,9 +82,9 @@ public class ClampDateTimeFormatterTests
     [InlineData(253402300799L, "9999-12-31T23:59:59Z")]
     [InlineData(253402300800L, "9999-12-31T23:59:59Z")]
     [InlineData(9223372036854775807L, "9999-12-31T23:59:59Z")]
-    public void Tests(long timestamp, string expected)
+    public void ScryptoInstantClampingTests(long unixTimestampSeconds, string expected)
     {
-        var result = ClampDateTimeFormatter.Format(timestamp);
+        var result = ClampDateTimeFormatter.FormatUnixTimestampSeconds(unixTimestampSeconds);
 
         result.Should().Be(expected);
     }
