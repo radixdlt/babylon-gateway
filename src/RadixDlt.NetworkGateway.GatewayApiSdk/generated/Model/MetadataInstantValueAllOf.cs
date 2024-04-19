@@ -84,74 +84,39 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataInstantValue
+    /// MetadataInstantValueAllOf
     /// </summary>
-    [DataContract(Name = "MetadataInstantValue")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataBoolValue), "Bool")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataBoolArrayValue), "BoolArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataDecimalValue), "Decimal")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataDecimalArrayValue), "DecimalArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataGlobalAddressValue), "GlobalAddress")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataGlobalAddressArrayValue), "GlobalAddressArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataI32Value), "I32")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataI32ArrayValue), "I32Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataI64Value), "I64")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataI64ArrayValue), "I64Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataInstantValue), "Instant")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataInstantArrayValue), "InstantArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdValue), "NonFungibleGlobalId")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdArrayValue), "NonFungibleGlobalIdArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleLocalIdValue), "NonFungibleLocalId")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleLocalIdArrayValue), "NonFungibleLocalIdArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataOriginValue), "Origin")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataOriginArrayValue), "OriginArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyValue), "PublicKey")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyArrayValue), "PublicKeyArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyHashValue), "PublicKeyHash")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyHashArrayValue), "PublicKeyHashArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataStringValue), "String")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataStringArrayValue), "StringArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataU32Value), "U32")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataU32ArrayValue), "U32Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataU64Value), "U64")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataU64ArrayValue), "U64Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataU8Value), "U8")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataU8ArrayValue), "U8Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataUrlValue), "Url")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataUrlArrayValue), "UrlArray")]
-    public partial class MetadataInstantValue : MetadataTypedValue, IEquatable<MetadataInstantValue>
+    [DataContract(Name = "MetadataInstantValue_allOf")]
+    public partial class MetadataInstantValueAllOf : IEquatable<MetadataInstantValueAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataInstantValue" /> class.
+        /// Initializes a new instance of the <see cref="MetadataInstantValueAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataInstantValue() { }
+        protected MetadataInstantValueAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataInstantValue" /> class.
+        /// Initializes a new instance of the <see cref="MetadataInstantValueAllOf" /> class.
         /// </summary>
         /// <param name="value">The RFC 3339 / ISO 8601 string representation of the timestamp. Will always use \&quot;Z\&quot; (denoting UTC) and include milliseconds (which are always &#x60;000&#x60;). E.g.: &#x60;2023-01-26T18:30:09.000Z&#x60;.  Note: This field will return clamped value if the actual on-ledger &#x60;unix_timestamp_seconds&#x60; value is outside the basic range supported by the RFC 3339 / ISO 8601 standard, which starts at year 1583 (i.e. the beginning of the Gregorian calendar) and ends at year 9999 (inclusive).  (required).</param>
         /// <param name="unixTimestampSeconds">A decimal string-encoded 64-bit signed integer, marking the unix timestamp in seconds.  Note: this field accurately represents the full range of possible on-ledger values (i.e. &#x60;-2^63 &lt;&#x3D; seconds &lt; 2^63&#x60;).  (required).</param>
-        /// <param name="type">type (required) (default to MetadataValueType.Instant).</param>
-        public MetadataInstantValue(string value = default(string), string unixTimestampSeconds = default(string), MetadataValueType type = MetadataValueType.Instant) : base(type)
+        public MetadataInstantValueAllOf(string value = default(string), string unixTimestampSeconds = default(string))
         {
             // to ensure "value" is required (not null)
             if (value == null)
             {
-                throw new ArgumentNullException("value is a required property for MetadataInstantValue and cannot be null");
+                throw new ArgumentNullException("value is a required property for MetadataInstantValueAllOf and cannot be null");
             }
             this.Value = value;
             // to ensure "unixTimestampSeconds" is required (not null)
             if (unixTimestampSeconds == null)
             {
-                throw new ArgumentNullException("unixTimestampSeconds is a required property for MetadataInstantValue and cannot be null");
+                throw new ArgumentNullException("unixTimestampSeconds is a required property for MetadataInstantValueAllOf and cannot be null");
             }
             this.UnixTimestampSeconds = unixTimestampSeconds;
         }
@@ -177,8 +142,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataInstantValue {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("class MetadataInstantValueAllOf {\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("  UnixTimestampSeconds: ").Append(UnixTimestampSeconds).Append("\n");
             sb.Append("}\n");
@@ -189,7 +153,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -201,26 +165,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataInstantValue);
+            return this.Equals(input as MetadataInstantValueAllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataInstantValue instances are equal
+        /// Returns true if MetadataInstantValueAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataInstantValue to be compared</param>
+        /// <param name="input">Instance of MetadataInstantValueAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataInstantValue input)
+        public bool Equals(MetadataInstantValueAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
                     this.Value == input.Value ||
                     (this.Value != null &&
                     this.Value.Equals(input.Value))
-                ) && base.Equals(input) && 
+                ) && 
                 (
                     this.UnixTimestampSeconds == input.UnixTimestampSeconds ||
                     (this.UnixTimestampSeconds != null &&
@@ -236,7 +200,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
+                int hashCode = 41;
                 if (this.Value != null)
                 {
                     hashCode = (hashCode * 59) + this.Value.GetHashCode();

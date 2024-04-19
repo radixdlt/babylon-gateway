@@ -29,6 +29,7 @@ Release built: _not published yet_
 
 ### API Changes
 - Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
+- Added `unix_timestamp_seconds` property to `MetadataInstantValue` and its array counterpart with exact numerical timestamp value while `value` retains RFC-3339 compatible date-time clamped to 1583..9999 year range.
 - Added `role_assignments` property to the `StateEntityDetailsResponsePackageDetails`. All global component details returned by the `/state/entity/details` endpoint contain role assignments now.
 - Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.
 - Added new filter `manifest_badges_presented_filter` to the `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
