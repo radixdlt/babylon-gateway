@@ -1,6 +1,6 @@
 # Gateway API SDK
 
-This SDK is a thin wrapper around the [Babylon Gateway API](https://docs-babylon.radixdlt.com/main/apis/api-specification.html). It enables clients to efficiently query current and historic state on the RadixDLT ledger, and intelligently handle transaction submission. It is designed for use by wallets and explorers. For simple use cases, you can typically use the [Core API](https://github.com/radixdlt/babylon-node/tree/main/sdk/typescript) on a Node. A Gateway is only needed for reading historic snapshots of ledger states or a more robust set-up.
+This SDK is a thin wrapper around the [Babylon Gateway API](https://docs.radixdlt.com/docs/network-gateway). It enables clients to efficiently query current and historic state on the RadixDLT ledger, and intelligently handle transaction submission. It is designed for use by wallets and explorers. For simple use cases, you can typically use the [Core API](https://github.com/radixdlt/babylon-node/tree/main/sdk/typescript) on a Node. A Gateway is only needed for reading historic snapshots of ledger states or a more robust set-up.
 
 ## License
 
@@ -29,11 +29,13 @@ Calling static `intialize` method from `GatewayApiClient` class will instantiate
 `applicationName` is required purely for statictis purposes and will be added as a request header. Additional fields you can set up are `applicationVersion` and `applicationDappDefinitionAddress`
 
 ```typescript
-import { GatewayApiClient } from '@radixdlt/babylon-gateway-api-sdk'
+import { GatewayApiClient, RadixNetwork } from '@radixdlt/babylon-gateway-api-sdk'
 
 const gatewayApi = GatewayApiClient.initialize({
-  basePath: 'https://mainnet.radixdlt.com',
+  networkId: RadixNetwork.Mainnet,
   applicationName: 'Your dApp Name',
+  applicationVersion: '1.0.0',
+  applicationDappDefinitionAddress: 'account_rdx12y4l35lh2543nfa9pyyzvsh64ssu0dv6fq20gg8suslwmjvkylejgj'
 })
 const { status, transaction, stream, state } = gatewayApi
 ```
@@ -44,40 +46,42 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 
 ### State
 
-- `getEntityDetailsVaultAggregated(entities: string | string[])` - detailed information about entities
-- `getAllEntityMetadata(entity: string)` - get all metadata about given entity
-- `getEntityMetadata(entity: string, cursor?: string)` - get paged metadata about given entity
-- `getValidators(cursor?: string)` - get paged validators
-- `getAllValidators()` - get all validators
-- `getNonFungibleLocation(resource: string, ids: string[])` - get list of NFT location for given resource and ids
-- `getNonFungibleIds(address:string, ledgerState, cursor?: string)` - get paged non fungible ids for given address
-- `getAllNonFungibleIds(address: string)` - get all non fungible ids for given address
-- `getNonFungibleData(address: string, ids: string | string[])` - get non fungible data
+- `getEntityDetailsVaultAggregated(entities: string | string[])` - detailed information about entities. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/StateEntityDetails)
+- `getAllEntityMetadata(entity: string)` - get all metadata about given entity. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/EntityMetadataPage)
+- `getEntityMetadata(entity: string, cursor?: string)` - get paged metadata about given entity. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/EntityMetadataPage)
+- `getValidators(cursor?: string)` - get paged validators. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/StateValidatorsList)
+- `getAllValidators()` - get all validators. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/StateValidatorsList)
+- `getNonFungibleLocation(resource: string, ids: string[])` - get list of NFT location for given resource and ids. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleLocation)
+- `getNonFungibleIds(address:string, ledgerState, cursor?: string)` - get paged non fungible ids for given address. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleIds)
+- `getAllNonFungibleIds(address: string)` - get all non fungible ids for given address. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleIds)
+- `getNonFungibleData(address: string, ids: string | string[])` - get non fungible data. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleData)
 
 ### Status
 
-- `getCurrent()` - Gateway API version and current ledger state
-- `getNetworkConfiguration()` - network identifier, network name and well-known network addresses
+- `getCurrent()` - Gateway API version and current ledger state. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/GatewayStatus)
+- `getNetworkConfiguration()` - network identifier, network name and well-known network addresses. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/NetworkConfiguration)
 
 ### Transaction
 
-- `getStatus(txID: string)` - transaction status for given transaction id (the intent hash)
-- `getCommittedDetails(txID: string, options)` - transaction details for given transaction id (the intent hash)
+- `getStatus(txID: string)` - transaction status for given transaction id (the intent hash). [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionStatus)
+- `getCommittedDetails(txID: string, options)` - transaction details for given transaction id (the intent hash). [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionCommittedDetails)
 
 ### Stream
 
-- `getTransactionsList(affectedEntities?: string[], cursor?: string)` - get transaction list for given list of entities
+- `getTransactionsList(affectedEntities?: string[], cursor?: string)` - get transaction list for given list of entities. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/StreamTransactions)
 
 ### Statistics
 
-- `getValidatorsUptimeFromTo(addresses: string[], from, to)` - get uptime statistics for validators for given period 
-- `getValidatorsUptime(addresses: string[])` - get uptime statistics for validators
-
+- `getValidatorsUptimeFromTo(addresses: string[], from, to)` - get uptime statistics for validators for given period. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/ValidatorsUptime) 
+- `getValidatorsUptime(addresses: string[])` - get uptime statistics for validators. [ReDocly Docs](https://radix-babylon-gateway-api.redoc.ly/#operation/ValidatorsUptime)
+  
 ## Low Level APIs
 
-Low level APIs are generated automatically based on OpenAPI spec. You can get a good sense of available methods by looking at [Swagger](https://rcnet.radixdlt.com/swagger/index.html). In order to access automatically generated methods you have two options:
+Low level APIs are generated automatically based on OpenAPI spec. You can get a good sense of available methods by looking at [Swagger](https://mainnet.radixdlt.com/swagger/index.html). In order to access automatically generated methods you have two options:
 
 ### Using generated APIs through `innerClient`
+
+When using automatically generated APIs please check method parameter. They're always wrapped object with property matching method name (like in the example below) 
 
 ```typescript
 async function getTransactionStatus(transactionIntentHash: string) {
@@ -119,10 +123,10 @@ Behind the scenes, this library uses the fetch API. If in an environment where `
 Starting from NodeJS 16 `fetch` is available as experimental API. You can e.g. check Gateway API status by using following snippet.
 
 ```typescript
-const { GatewayApiClient } = require('@radixdlt/babylon-gateway-api-sdk')
+const { GatewayApiClient, RadixNetwork } = require('@radixdlt/babylon-gateway-api-sdk')
 
 const gateway = GatewayApiClient.initialize({
-  basePath: 'https://mainnet.radixdlt.com',
+  networkId: RadixNetwork.Mainnet
 })
 gateway.status.getCurrent().then(console.log)
 ```
