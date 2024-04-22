@@ -63,64 +63,18 @@
  */
 
 using Dapper;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
-using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-internal static class CustomTypes
+public sealed class GenericListHandler<T> : SqlMapper.TypeHandler<List<T>>
 {
-    private static bool _configured;
-
-    public static void EnsureConfigured()
+    public override void SetValue(IDbDataParameter parameter, List<T>? value)
     {
-        if (_configured)
-        {
-            return;
-        }
-
-        DefaultTypeMap.MatchNamesWithUnderscores = true;
-
-        // needed to read int[], bigint[] and text[] columns using Dapper
-        SqlMapper.AddTypeHandler(new EntityAddressHandler());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<byte[]>());
-
-        SqlMapper.AddTypeHandler(new GenericListHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericListHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericListHandler<string>());
-        SqlMapper.AddTypeHandler(new GenericListHandler<byte[]>());
-
-#pragma warning disable CS0618
-        // needed to support custom enums in postgres
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountDefaultDepositRule>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountResourcePreferenceRule>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionManifestClass>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerEventType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOperationType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOriginType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PackageVmType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionPayloadLedgerStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionIntentLedgerStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ModuleId>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<SborTypeKind>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AuthorizedDepositorBadgeType>();
-#pragma warning restore CS0618
-
-        _configured = true;
+        parameter.Value = value?.ToArray();
     }
+
+    public override List<T> Parse(object value) => ((T[])value).ToList();
 }
