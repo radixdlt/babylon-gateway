@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -76,72 +77,78 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal partial class EntityStateQuerier
 {
+    private class PackageBlueprintViewModel : PackageBlueprintHistory
+    {
+        public int TotalCount { get; set; }
+    }
+
+    private class PackageCodeViewModel : PackageCodeHistory
+    {
+        public int TotalCount { get; set; }
+    }
+
     public async Task<GatewayModel.StatePackageBlueprintPageResponse?> PackageBlueprints(
         IEntityStateQuerier.PageRequest pageRequest,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
         var package = await GetEntity<GlobalPackageEntity>(pageRequest.Address, ledgerState, token);
-        var packageBlueprintHistoryAndOneMore = await GetPackageBlueprintHistory(new[] { package.Id }, pageRequest.Offset, pageRequest.Limit + 1, ledgerState, token);
+        var packageBlueprintHistory = await GetPackageBlueprintHistory(new[] { package.Id }, pageRequest.Offset, pageRequest.Limit, ledgerState, token);
 
-        if (!packageBlueprintHistoryAndOneMore.TryGetValue(package.Id, out var packageBlueprintsAndOneMore))
+        if (!packageBlueprintHistory.TryGetValue(package.Id, out var packageBlueprints))
         {
             return null;
         }
 
-        var correlatedAddresses = await GetCorrelatedEntityAddresses(new[] { package }, packageBlueprintHistoryAndOneMore, ledgerState, token);
-        var items = packageBlueprintsAndOneMore.Take(pageRequest.Limit).Select(pb => pb.ToGatewayModel(correlatedAddresses)).ToList();
-        var cursor = CursorGenerator.GenerateOffsetCursor(pageRequest.Offset, pageRequest.Limit, packageBlueprintsAndOneMore);
+        var correlatedAddresses = await GetCorrelatedEntityAddresses(new[] { package }, packageBlueprintHistory, ledgerState, token);
+        var totalCount = packageBlueprints.FirstOrDefault()?.TotalCount ?? 0;
 
         return new GatewayModel.StatePackageBlueprintPageResponse(
             ledgerState: ledgerState,
             packageAddress: package.Address,
-            items: items,
-            nextCursor: cursor);
+            totalCount: totalCount,
+            nextCursor: CursorGenerator.GenerateOffsetCursor(pageRequest.Offset, pageRequest.Limit, totalCount),
+            items: packageBlueprints.Select(pb => pb.ToGatewayModel(correlatedAddresses)).ToList());
     }
 
     public async Task<GatewayModel.StatePackageCodePageResponse?> PackageCodes(IEntityStateQuerier.PageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var package = await GetEntity<GlobalPackageEntity>(pageRequest.Address, ledgerState, token);
-        var packageCodeHistoryAndOneMore = await GetPackageCodeHistory(new[] { package.Id }, pageRequest.Offset, pageRequest.Limit + 1, ledgerState, token);
+        var packageCodeHistory = await GetPackageCodeHistory(new[] { package.Id }, pageRequest.Offset, pageRequest.Limit, ledgerState, token);
 
-        if (!packageCodeHistoryAndOneMore.TryGetValue(package.Id, out var packageCodesAndOneMore))
+        if (!packageCodeHistory.TryGetValue(package.Id, out var packageCodes))
         {
             return null;
         }
 
-        var items = packageCodesAndOneMore.Take(pageRequest.Limit).Select(pb => pb.ToGatewayModel()).ToList();
-        var cursor = CursorGenerator.GenerateOffsetCursor(pageRequest.Offset, pageRequest.Limit, packageCodesAndOneMore);
+        var totalCount = packageCodes.FirstOrDefault()?.TotalCount ?? 0;
 
         return new GatewayModel.StatePackageCodePageResponse(
             ledgerState: ledgerState,
             packageAddress: package.Address,
-            items: items,
-            nextCursor: cursor);
+            totalCount: totalCount,
+            nextCursor: CursorGenerator.GenerateOffsetCursor(pageRequest.Offset, pageRequest.Limit, totalCount),
+            items: packageCodes.Select(pb => pb.ToGatewayModel()).ToList());
     }
 
-    private async Task<IDictionary<long, PackageBlueprintHistory[]>> GetPackageBlueprintHistory(long[] packageEntityIds, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<IDictionary<long, PackageBlueprintViewModel[]>> GetPackageBlueprintHistory(long[] packageEntityIds, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         if (!packageEntityIds.Any())
         {
-            return ImmutableDictionary<long, PackageBlueprintHistory[]>.Empty;
+            return ImmutableDictionary<long, PackageBlueprintViewModel[]>.Empty;
         }
 
-        var startIndex = offset + 1;
-        var endIndex = offset + limit;
-
-        return (await _dbContext
-                .PackageBlueprintHistory
-                .FromSqlInterpolated($@"
-WITH variables (package_entity_id) AS (SELECT UNNEST({packageEntityIds})),
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH variables (package_entity_id) AS (SELECT UNNEST(@packageEntityIds)),
 blueprint_slices AS
 (
     SELECT *
     FROM variables var
     INNER JOIN LATERAL (
-        SELECT package_entity_id, package_blueprint_ids[{startIndex}:{endIndex}] AS blueprint_slice, cardinality(package_blueprint_ids) AS total_count
+        SELECT package_entity_id, package_blueprint_ids[@startIndex:@endIndex] AS blueprint_slice, cardinality(package_blueprint_ids) AS total_count
         FROM package_blueprint_aggregate_history
-        WHERE package_entity_id = var.package_entity_id AND from_state_version <= {ledgerState.StateVersion}
+        WHERE package_entity_id = var.package_entity_id AND from_state_version <= @stateVersion
         ORDER BY from_state_version DESC
         LIMIT 1
     ) pbah ON TRUE
@@ -150,47 +157,60 @@ SELECT pbh.*, bs.total_count
 FROM blueprint_slices AS bs
 INNER JOIN LATERAL UNNEST(blueprint_slice) WITH ORDINALITY AS blueprint_join(id, ordinality) ON TRUE
 INNER JOIN package_blueprint_history pbh ON pbh.id = blueprint_join.id
-ORDER BY blueprint_join.ordinality ASC;
-")
-                .AnnotateMetricName()
-                .ToListAsync(token))
+ORDER BY blueprint_join.ordinality ASC;",
+            parameters: new
+            {
+                packageEntityIds = packageEntityIds.ToList(),
+                startIndex = offset + 1,
+                endIndex = offset + limit,
+                stateVersion = ledgerState.StateVersion,
+            },
+            cancellationToken: token);
+
+        return (await _dbContext.Database.GetDbConnection().QueryAsync<PackageBlueprintViewModel>(cd))
+            .ToList()
             .GroupBy(b => b.PackageEntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
     }
 
-    private async Task<IDictionary<long, PackageCodeHistory[]>> GetPackageCodeHistory(long[] packageEntityIds, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<IDictionary<long, PackageCodeViewModel[]>> GetPackageCodeHistory(long[] packageEntityIds, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         if (!packageEntityIds.Any())
         {
-            return ImmutableDictionary<long, PackageCodeHistory[]>.Empty;
+            return ImmutableDictionary<long, PackageCodeViewModel[]>.Empty;
         }
 
-        var startIndex = offset + 1;
-        var endIndex = offset + limit;
-
-        return (await _dbContext
-                .PackageCodeHistory
-                .FromSqlInterpolated($@"
-WITH variables (package_entity_id) AS (SELECT UNNEST({packageEntityIds})),
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH variables (package_entity_id) AS (SELECT UNNEST(@packageEntityIds)),
 code_slices AS
 (
     SELECT *
     FROM variables var
     INNER JOIN LATERAL (
-        SELECT package_entity_id, package_code_ids[{startIndex}:{endIndex}] AS code_slice
+        SELECT package_entity_id, package_code_ids[@startIndex:@endIndex] AS code_slice, cardinality(package_code_ids) AS total_count
         FROM package_code_aggregate_history
-        WHERE package_entity_id = var.package_entity_id AND from_state_version <= {ledgerState.StateVersion}
+        WHERE package_entity_id = var.package_entity_id AND from_state_version <= @stateVersion
         ORDER BY from_state_version DESC
         LIMIT 1
-    ) pcah ON TRUE
+    ) pbah ON TRUE
 )
-SELECT pch.*
+SELECT pch.*, cs.total_count
 FROM code_slices AS cs
 INNER JOIN LATERAL UNNEST(code_slice) WITH ORDINALITY AS code_join(id, ordinality) ON TRUE
 INNER JOIN package_code_history pch ON pch.id = code_join.id
-ORDER BY code_join.ordinality ASC;")
-                .AnnotateMetricName()
-                .ToListAsync(token))
+ORDER BY code_join.ordinality ASC;",
+            parameters: new
+            {
+                packageEntityIds = packageEntityIds.ToList(),
+                startIndex = offset + 1,
+                endIndex = offset + limit,
+                stateVersion = ledgerState.StateVersion,
+            },
+            cancellationToken: token);
+
+        return (await _dbContext.Database.GetDbConnection().QueryAsync<PackageCodeViewModel>(cd))
+            .ToList()
             .GroupBy(b => b.PackageEntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
     }

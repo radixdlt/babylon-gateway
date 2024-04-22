@@ -92,6 +92,11 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
     private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, bool IsLocked, int TotalCount);
 
+    private class SchemaEntryViewModel : SchemaEntryDefinition
+    {
+        public int TotalCount { get; set; }
+    }
+
     private record ValidatorCurrentStakeViewModel(
         long ValidatorId,
         string State,
@@ -156,12 +161,12 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, defaultPageSize, ledgerState, token);
         var roleAssignmentsHistory = await _roleAssignmentQuerier.GetRoleAssignmentsHistory(globalPersistedComponentEntities, ledgerState, token);
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
-        var packageBlueprintHistoryAndOneMore = await GetPackageBlueprintHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize + 1, ledgerState, token);
-        var packageCodeHistoryAndOneMore = await GetPackageCodeHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize + 1, ledgerState, token);
-        var packageSchemaHistoryAndOneMore = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize + 1, ledgerState, token);
+        var packageBlueprintHistory = await GetPackageBlueprintHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
+        var packageCodeHistory = await GetPackageCodeHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
+        var packageSchemaHistory = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
-        var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistoryAndOneMore, ledgerState, token);
+        var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)
@@ -226,33 +231,39 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     string? blueprintCursor = null;
                     string? codeCursor = null;
                     string? schemaCursor = null;
+                    long? blueprintTotalCount = default;
+                    long? codeTotalCount = default;
+                    long? schemaTotalCount = default;
 
-                    if (packageBlueprintHistoryAndOneMore.TryGetValue(pe.Id, out var packageBlueprintsAndOneMore))
+                    if (packageBlueprintHistory.TryGetValue(pe.Id, out var packageBlueprints))
                     {
-                        blueprintItems.AddRange(packageBlueprintsAndOneMore.Take(packagePageSize).Select(pb => pb.ToGatewayModel(correlatedAddresses)));
-                        blueprintCursor = CursorGenerator.GenerateOffsetCursor(0, packagePageSize, packageBlueprintsAndOneMore);
+                        blueprintTotalCount = packageBlueprints.FirstOrDefault()?.TotalCount ?? 0;
+                        blueprintItems.AddRange(packageBlueprints.Select(pb => pb.ToGatewayModel(correlatedAddresses)));
+                        blueprintCursor = CursorGenerator.GenerateOffsetCursor(0, packagePageSize, blueprintTotalCount.Value);
                     }
 
-                    if (packageCodeHistoryAndOneMore.TryGetValue(pe.Id, out var packageCodesAndOneMore))
+                    if (packageCodeHistory.TryGetValue(pe.Id, out var packageCodes))
                     {
-                        codeItems.AddRange(packageCodesAndOneMore.Take(packagePageSize).Select(pc => pc.ToGatewayModel()));
-                        codeCursor = CursorGenerator.GenerateOffsetCursor(0, packagePageSize, packageCodesAndOneMore);
+                        codeTotalCount = packageCodes.FirstOrDefault()?.TotalCount ?? 0;
+                        codeItems.AddRange(packageCodes.Select(pc => pc.ToGatewayModel()));
+                        codeCursor = CursorGenerator.GenerateOffsetCursor(0, packagePageSize, codeTotalCount.Value);
                     }
 
-                    if (packageSchemaHistoryAndOneMore.TryGetValue(pe.Id, out var packageSchemasAndOneMore))
+                    if (packageSchemaHistory.TryGetValue(pe.Id, out var packageSchemas))
                     {
-                        schemaItems.AddRange(packageSchemasAndOneMore.Take(packagePageSize).Select(sh => sh.ToGatewayModel()));
-                        schemaCursor = CursorGenerator.GenerateOffsetCursor(0, packagePageSize, packageSchemasAndOneMore);
+                        schemaTotalCount = packageSchemas.FirstOrDefault()?.TotalCount ?? 0;
+                        schemaItems.AddRange(packageSchemas.Take(packagePageSize).Select(sh => sh.ToGatewayModel()));
+                        schemaCursor = CursorGenerator.GenerateOffsetCursor(0, packagePageSize, schemaTotalCount.Value);
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
                         vmType: codeItems[0].VmType,
                         codeHashHex: codeItems[0].CodeHashHex,
                         codeHex: codeItems[0].CodeHex,
-                        codes: new GatewayModel.PackageCodeCollection(items: codeItems, nextCursor: codeCursor),
+                        codes: new GatewayModel.PackageCodeCollection(codeTotalCount, codeCursor, codeItems),
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null,
-                        blueprints: new GatewayModel.PackageBlueprintCollection(items: blueprintItems, nextCursor: blueprintCursor),
-                        schemas: new GatewayModel.EntitySchemaCollection(items: schemaItems, nextCursor: schemaCursor),
+                        blueprints: new GatewayModel.PackageBlueprintCollection(blueprintTotalCount, blueprintCursor, blueprintItems),
+                        schemas: new GatewayModel.EntitySchemaCollection(schemaTotalCount, schemaCursor, schemaItems),
                         roleAssignments: roleAssignmentsHistory[pe.Id]);
                     break;
 
@@ -526,21 +537,21 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     public async Task<GatewayModel.StateEntitySchemaPageResponse?> EntitySchema(IEntityStateQuerier.PageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<Entity>(pageRequest.Address, ledgerState, token);
-        var packageSchemaHistoryAndOneMore = await GetEntitySchemaHistory(new[] { entity.Id }, pageRequest.Offset, pageRequest.Limit + 1, ledgerState, token);
+        var packageSchemaHistory = await GetEntitySchemaHistory(new[] { entity.Id }, pageRequest.Offset, pageRequest.Limit, ledgerState, token);
 
-        if (!packageSchemaHistoryAndOneMore.TryGetValue(entity.Id, out var packageSchemasAndOneMore))
+        if (!packageSchemaHistory.TryGetValue(entity.Id, out var packageSchemas))
         {
             return null;
         }
 
-        var items = packageSchemasAndOneMore.Take(pageRequest.Limit).Select(pb => pb.ToGatewayModel()).ToList();
-        var cursor = CursorGenerator.GenerateOffsetCursor(pageRequest.Offset, pageRequest.Limit, packageSchemasAndOneMore);
+        var totalCount = packageSchemas.FirstOrDefault()?.TotalCount ?? 0;
 
         return new GatewayModel.StateEntitySchemaPageResponse(
             ledgerState: ledgerState,
             address: entity.Address,
-            items: items,
-            nextCursor: cursor);
+            totalCount: totalCount,
+            nextCursor: CursorGenerator.GenerateOffsetCursor(pageRequest.Offset, pageRequest.Limit, totalCount),
+            items: packageSchemas.Select(pb => pb.ToGatewayModel()).ToList());
     }
 
     public async Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaults(
@@ -1141,39 +1152,44 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    private async Task<IDictionary<long, SchemaEntryDefinition[]>> GetEntitySchemaHistory(long[] entityIds, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<IDictionary<long, SchemaEntryViewModel[]>> GetEntitySchemaHistory(long[] entityIds, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         if (!entityIds.Any())
         {
-            return ImmutableDictionary<long, SchemaEntryDefinition[]>.Empty;
+            return ImmutableDictionary<long, SchemaEntryViewModel[]>.Empty;
         }
 
-        var startIndex = offset + 1;
-        var endIndex = offset + limit;
-
-        return (await _dbContext
-                .SchemaEntryDefinition
-                .FromSqlInterpolated($@"
-WITH variables (entity_id) AS (SELECT UNNEST({entityIds})),
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH variables (entity_id) AS (SELECT UNNEST(@entityIds)),
 schema_slices AS
 (
     SELECT *
     FROM variables var
     INNER JOIN LATERAL (
-        SELECT entity_id, entry_ids[{startIndex}:{endIndex}] AS schema_slice
+        SELECT entity_id, entry_ids[@startIndex:@endIndex] AS schema_slice, cardinality(entry_ids) AS total_count
         FROM schema_entry_aggregate_history
-        WHERE entity_id = var.entity_id AND from_state_version <= {ledgerState.StateVersion}
+        WHERE entity_id = var.entity_id AND from_state_version <= @stateVersion
         ORDER BY from_state_version DESC
         LIMIT 1
     ) pbah ON TRUE
 )
-SELECT sed.*
+SELECT sed.*, ss.total_count
 FROM schema_slices AS ss
 INNER JOIN LATERAL UNNEST(schema_slice) WITH ORDINALITY AS schema_join(id, ordinality) ON TRUE
 INNER JOIN schema_entry_definition sed ON sed.id = schema_join.id
-ORDER BY schema_join.ordinality ASC;")
-                .AnnotateMetricName()
-                .ToListAsync(token))
+ORDER BY schema_join.ordinality ASC;",
+            parameters: new
+            {
+                entityIds = entityIds.ToList(),
+                startIndex = offset + 1,
+                endIndex = offset + limit,
+                stateVersion = ledgerState.StateVersion,
+            },
+            cancellationToken: token);
+
+        return (await _dbContext.Database.GetDbConnection().QueryAsync<SchemaEntryViewModel>(cd))
+            .ToList()
             .GroupBy(b => b.EntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
     }
@@ -1467,7 +1483,7 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
 
     private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(
         ICollection<Entity> entities,
-        IDictionary<long, PackageBlueprintHistory[]> packageBlueprints,
+        IDictionary<long, PackageBlueprintViewModel[]> packageBlueprints,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
