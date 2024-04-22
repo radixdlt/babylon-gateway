@@ -138,8 +138,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="MetadataInstantArrayValue" /> class.
         /// </summary>
         /// <param name="values">values (required).</param>
+        /// <param name="valuesUnixTimestampSeconds">valuesUnixTimestampSeconds (required).</param>
         /// <param name="type">type (required) (default to MetadataValueType.InstantArray).</param>
-        public MetadataInstantArrayValue(List<string> values = default(List<string>), MetadataValueType type = MetadataValueType.InstantArray) : base(type)
+        public MetadataInstantArrayValue(List<string> values = default(List<string>), List<string> valuesUnixTimestampSeconds = default(List<string>), MetadataValueType type = MetadataValueType.InstantArray) : base(type)
         {
             // to ensure "values" is required (not null)
             if (values == null)
@@ -147,6 +148,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("values is a required property for MetadataInstantArrayValue and cannot be null");
             }
             this.Values = values;
+            // to ensure "valuesUnixTimestampSeconds" is required (not null)
+            if (valuesUnixTimestampSeconds == null)
+            {
+                throw new ArgumentNullException("valuesUnixTimestampSeconds is a required property for MetadataInstantArrayValue and cannot be null");
+            }
+            this.ValuesUnixTimestampSeconds = valuesUnixTimestampSeconds;
         }
 
         /// <summary>
@@ -154,6 +161,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
         public List<string> Values { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ValuesUnixTimestampSeconds
+        /// </summary>
+        [DataMember(Name = "values_unix_timestamp_seconds", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> ValuesUnixTimestampSeconds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -165,6 +178,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class MetadataInstantArrayValue {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Values: ").Append(Values).Append("\n");
+            sb.Append("  ValuesUnixTimestampSeconds: ").Append(ValuesUnixTimestampSeconds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,6 +219,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Values != null &&
                     input.Values != null &&
                     this.Values.SequenceEqual(input.Values)
+                ) && base.Equals(input) && 
+                (
+                    this.ValuesUnixTimestampSeconds == input.ValuesUnixTimestampSeconds ||
+                    this.ValuesUnixTimestampSeconds != null &&
+                    input.ValuesUnixTimestampSeconds != null &&
+                    this.ValuesUnixTimestampSeconds.SequenceEqual(input.ValuesUnixTimestampSeconds)
                 );
         }
 
@@ -220,6 +240,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Values != null)
                 {
                     hashCode = (hashCode * 59) + this.Values.GetHashCode();
+                }
+                if (this.ValuesUnixTimestampSeconds != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValuesUnixTimestampSeconds.GetHashCode();
                 }
                 return hashCode;
             }
