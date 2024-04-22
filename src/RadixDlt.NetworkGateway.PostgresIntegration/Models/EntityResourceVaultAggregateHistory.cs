@@ -71,7 +71,7 @@ using System.Linq;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("entity_resource_vault_aggregate_history")]
-internal class EntityResourceVaultAggregateHistory
+internal class EntityResourceVaultAggregateHistory : IAggregateHolder
 {
     private long[]? _originalVaultEntityIds;
 
@@ -102,6 +102,11 @@ internal class EntityResourceVaultAggregateHistory
     public static EntityResourceVaultAggregateHistory CopyOf(long databaseId, EntityResourceVaultAggregateHistory other, long stateVersion)
     {
         return CopyOrCreate(databaseId, other, other.EntityId, other.ResourceEntityId, stateVersion);
+    }
+
+    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
+    {
+        yield return (nameof(VaultEntityIds), VaultEntityIds.Count);
     }
 
     /// <summary>

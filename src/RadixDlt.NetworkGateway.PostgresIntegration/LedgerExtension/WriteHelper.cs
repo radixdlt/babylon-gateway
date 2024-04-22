@@ -109,6 +109,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(_token);
             await callback(writer, e, _token);
         }
@@ -137,6 +138,7 @@ internal class WriteHelper : IWriteHelper
         {
             var discriminator = GetDiscriminator<EntityType>(e.GetType());
 
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -238,6 +240,7 @@ internal class WriteHelper : IWriteHelper
         {
             var discriminator = GetDiscriminator<LedgerTransactionType>(lt.GetType());
 
+            await HandleAggregateCounts(lt);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.TransactionTreeHash, NpgsqlDbType.Text, token);
@@ -325,6 +328,7 @@ internal class WriteHelper : IWriteHelper
         {
             var discriminator = GetDiscriminator<LedgerTransactionMarkerType>(e.GetType());
 
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.StateVersion, NpgsqlDbType.Bigint, token);
@@ -410,6 +414,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -442,6 +447,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -484,6 +490,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -517,6 +524,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -548,6 +556,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -597,6 +606,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -627,6 +637,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -657,6 +668,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -689,6 +701,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -717,6 +730,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -747,6 +761,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -780,6 +795,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
+            await HandleAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -901,5 +917,16 @@ SELECT
         }
 
         return discriminator;
+    }
+
+    private async ValueTask HandleAggregateCounts(object? e)
+    {
+        if (e is IAggregateHolder ah)
+        {
+            foreach (var (aggregateName, count) in ah.AggregateCounts())
+            {
+                await _observers.ForEachAsync(x => x.AggregateCount(e.GetType().Name, aggregateName, count));
+            }
+        }
     }
 }

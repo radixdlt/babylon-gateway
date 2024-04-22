@@ -329,6 +329,12 @@ internal class DataAggregatorMetricsObserver :
             "The time to complete given processing stage",
             new HistogramConfiguration { LabelNames = new[] { "stage" } });
 
+    private static readonly Counter _aggregateCount = Metrics
+        .CreateCounter(
+            "ng_aggregate_count",
+            "Number of entries hold under the aggregate.",
+            new CounterConfiguration { LabelNames = ["entity", "property"] });
+
     private static readonly Counter _transactionsMarkedCommittedWhichWerePermanentlyRejectedCount = Metrics
         .CreateCounter(
             "ng_db_mempool_transactions_marked_committed_which_were_failed_count",
@@ -537,6 +543,13 @@ internal class DataAggregatorMetricsObserver :
     {
         _mempoolItemsAddedUnScoped.WithLabels(nodeName).Inc(transactionIdsAddedCount);
         _mempoolItemsRemovedUnScoped.WithLabels(nodeName).Inc(transactionIdsRemovedCount);
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask ILedgerExtenderServiceObserver.AggregateCount(string entityName, string propertyName, int count)
+    {
+        _aggregateCount.WithLabels(entityName, propertyName).Inc(count);
 
         return ValueTask.CompletedTask;
     }

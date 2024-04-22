@@ -69,6 +69,8 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerExtenderServiceObserver
 {
+    ValueTask AggregateCount(string entityName, string propertyName, int count);
+
     ValueTask TransactionMarkedCommittedWhichWasPermanentlyRejected();
 
     ValueTask TransactionsCommittedWithGatewayLatency(TimeSpan latency);
