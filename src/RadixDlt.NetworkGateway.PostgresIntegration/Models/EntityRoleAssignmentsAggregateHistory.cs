@@ -69,7 +69,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("entity_role_assignments_aggregate_history")]
-internal class EntityRoleAssignmentsAggregateHistory
+internal class EntityRoleAssignmentsAggregateHistory : IAggregateHolder
 {
     [Key]
     [Column("id")]
@@ -86,4 +86,9 @@ internal class EntityRoleAssignmentsAggregateHistory
 
     [Column("entry_ids")]
     public List<long> EntryIds { get; set; }
+
+    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
+    {
+        yield return (nameof(EntryIds), EntryIds.Count);
+    }
 }

@@ -63,29 +63,10 @@
  */
 
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("package_blueprint_aggregate_history")]
-internal class PackageBlueprintAggregateHistory : IAggregateHolder
+internal interface IAggregateHolder
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("package_entity_id")]
-    public long PackageEntityId { get; set; }
-
-    [Column("package_blueprint_ids")]
-    public List<long> PackageBlueprintIds { get; set; }
-
-    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
-    {
-        yield return (nameof(PackageBlueprintIds), PackageBlueprintIds.Count);
-    }
+    IEnumerable<(string Name, int TotalCount)> AggregateCounts();
 }

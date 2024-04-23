@@ -69,7 +69,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("non_fungible_id_store_history")]
-internal class NonFungibleIdStoreHistory
+internal class NonFungibleIdStoreHistory : IAggregateHolder
 {
     [Key]
     [Column("id")]
@@ -83,4 +83,9 @@ internal class NonFungibleIdStoreHistory
 
     [Column("non_fungible_id_data_ids")]
     public List<long> NonFungibleIdDataIds { get; set; }
+
+    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
+    {
+        yield return (nameof(NonFungibleIdDataIds), NonFungibleIdDataIds.Count);
+    }
 }
