@@ -6,6 +6,7 @@ Release built: _not published yet_
 > - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending.
 > - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
 > - Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
+> - Renamed `state.recovery_role_recovery_attempt` property from `timed_recovery_allowed_after` to `allow_timed_recovery_after` returned from `/state/entity/details` when querying for access controller.
 
 - Fixed broken ledger state lookup (`at_ledger_state`) when using epoch-only constraint and given epoch did not result in any transactions at round `1`.
 - Fixed broken (missing) package blueprint & code, and schema pagination in the `/state/entity/details` endpoint.
