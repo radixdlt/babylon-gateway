@@ -116,7 +116,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="message">message.</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string network = default(string), LedgerStateSelector atLedgerState = default(LedgerStateSelector), string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionMessage message = default(TransactionMessage), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string network = default(string), LedgerStateSelector atLedgerState = default(LedgerStateSelector), string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool? notaryIsSignatory = default(bool?), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionMessage message = default(TransactionMessage), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -204,8 +204,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Whether the notary should count as a signatory (optional, default false)
         /// </summary>
         /// <value>Whether the notary should count as a signatory (optional, default false)</value>
-        [DataMember(Name = "notary_is_signatory", EmitDefaultValue = true)]
-        public bool NotaryIsSignatory { get; set; }
+        [DataMember(Name = "notary_is_signatory", EmitDefaultValue = false)]
+        public bool? NotaryIsSignatory { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
@@ -332,7 +332,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.NotaryIsSignatory == input.NotaryIsSignatory ||
-                    this.NotaryIsSignatory.Equals(input.NotaryIsSignatory)
+                    (this.NotaryIsSignatory != null &&
+                    this.NotaryIsSignatory.Equals(input.NotaryIsSignatory))
                 ) && 
                 (
                     this.TipPercentage == input.TipPercentage ||
@@ -391,7 +392,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NotaryPublicKey.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.NotaryIsSignatory.GetHashCode();
+                if (this.NotaryIsSignatory != null)
+                {
+                    hashCode = (hashCode * 59) + this.NotaryIsSignatory.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
                 hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
                 if (this.SignerPublicKeys != null)

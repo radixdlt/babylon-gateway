@@ -106,7 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="notarizedTransactionHex">A hex-encoded, compiled notarized transaction. (required).</param>
         /// <param name="forceRecalculate">If true, the transaction validity is freshly recalculated without using any caches (defaults false).</param>
-        public LtsTransactionSubmitRequest(string network = default(string), string notarizedTransactionHex = default(string), bool forceRecalculate = default(bool))
+        public LtsTransactionSubmitRequest(string network = default(string), string notarizedTransactionHex = default(string), bool? forceRecalculate = default(bool?))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -141,8 +141,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// If true, the transaction validity is freshly recalculated without using any caches (defaults false)
         /// </summary>
         /// <value>If true, the transaction validity is freshly recalculated without using any caches (defaults false)</value>
-        [DataMember(Name = "force_recalculate", EmitDefaultValue = true)]
-        public bool ForceRecalculate { get; set; }
+        [DataMember(Name = "force_recalculate", EmitDefaultValue = false)]
+        public bool? ForceRecalculate { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -202,7 +202,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.ForceRecalculate == input.ForceRecalculate ||
-                    this.ForceRecalculate.Equals(input.ForceRecalculate)
+                    (this.ForceRecalculate != null &&
+                    this.ForceRecalculate.Equals(input.ForceRecalculate))
                 );
         }
 
@@ -223,7 +224,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NotarizedTransactionHex.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.ForceRecalculate.GetHashCode();
+                if (this.ForceRecalculate != null)
+                {
+                    hashCode = (hashCode * 59) + this.ForceRecalculate.GetHashCode();
+                }
                 return hashCode;
             }
         }

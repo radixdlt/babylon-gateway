@@ -111,7 +111,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="hasPrimaryRoleBadgeWithdrawAttempt">Whether the primary role badge withdraw is currently being attempted. (required).</param>
         /// <param name="recoveryRoleRecoveryAttempt">recoveryRoleRecoveryAttempt.</param>
         /// <param name="hasRecoveryRoleBadgeWithdrawAttempt">Whether the recovery role badge withdraw is currently being attempted. (required).</param>
-        public AccessControllerFieldStateValue(EntityReference controlledVault = default(EntityReference), long timedRecoveryDelayMinutes = default(long), string recoveryBadgeResourceAddress = default(string), bool isPrimaryRoleLocked = default(bool), PrimaryRoleRecoveryAttempt primaryRoleRecoveryAttempt = default(PrimaryRoleRecoveryAttempt), bool hasPrimaryRoleBadgeWithdrawAttempt = default(bool), RecoveryRoleRecoveryAttempt recoveryRoleRecoveryAttempt = default(RecoveryRoleRecoveryAttempt), bool hasRecoveryRoleBadgeWithdrawAttempt = default(bool))
+        public AccessControllerFieldStateValue(EntityReference controlledVault = default(EntityReference), long? timedRecoveryDelayMinutes = default(long?), string recoveryBadgeResourceAddress = default(string), bool isPrimaryRoleLocked = default(bool), PrimaryRoleRecoveryAttempt primaryRoleRecoveryAttempt = default(PrimaryRoleRecoveryAttempt), bool hasPrimaryRoleBadgeWithdrawAttempt = default(bool), RecoveryRoleRecoveryAttempt recoveryRoleRecoveryAttempt = default(RecoveryRoleRecoveryAttempt), bool hasRecoveryRoleBadgeWithdrawAttempt = default(bool))
         {
             // to ensure "controlledVault" is required (not null)
             if (controlledVault == null)
@@ -143,8 +143,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the amount of time (in minutes) that it takes for timed recovery to be done. When not present, then timed recovery can not be performed through this access controller. 
         /// </summary>
         /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the amount of time (in minutes) that it takes for timed recovery to be done. When not present, then timed recovery can not be performed through this access controller. </value>
-        [DataMember(Name = "timed_recovery_delay_minutes", EmitDefaultValue = true)]
-        public long TimedRecoveryDelayMinutes { get; set; }
+        [DataMember(Name = "timed_recovery_delay_minutes", EmitDefaultValue = false)]
+        public long? TimedRecoveryDelayMinutes { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of the resource address
@@ -244,7 +244,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.TimedRecoveryDelayMinutes == input.TimedRecoveryDelayMinutes ||
-                    this.TimedRecoveryDelayMinutes.Equals(input.TimedRecoveryDelayMinutes)
+                    (this.TimedRecoveryDelayMinutes != null &&
+                    this.TimedRecoveryDelayMinutes.Equals(input.TimedRecoveryDelayMinutes))
                 ) && 
                 (
                     this.RecoveryBadgeResourceAddress == input.RecoveryBadgeResourceAddress ||
@@ -288,7 +289,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ControlledVault.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.TimedRecoveryDelayMinutes.GetHashCode();
+                if (this.TimedRecoveryDelayMinutes != null)
+                {
+                    hashCode = (hashCode * 59) + this.TimedRecoveryDelayMinutes.GetHashCode();
+                }
                 if (this.RecoveryBadgeResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.RecoveryBadgeResourceAddress.GetHashCode();

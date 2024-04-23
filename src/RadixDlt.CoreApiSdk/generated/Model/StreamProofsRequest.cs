@@ -107,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="filter">filter.</param>
         /// <param name="maxPageSize">If specified, the maximum number of proofs that will be returned..</param>
         /// <param name="continuationToken">A continuation token is returned if and only if there are further non-empty pages of items currently available. The token can be provided in a following request to fetch the next page of results. The filter and sort should not be changed when re-using the continuation token. .</param>
-        public StreamProofsRequest(string network = default(string), StreamProofsFilter filter = default(StreamProofsFilter), int maxPageSize = default(int), string continuationToken = default(string))
+        public StreamProofsRequest(string network = default(string), StreamProofsFilter filter = default(StreamProofsFilter), int? maxPageSize = default(int?), string continuationToken = default(string))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -137,8 +137,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// If specified, the maximum number of proofs that will be returned.
         /// </summary>
         /// <value>If specified, the maximum number of proofs that will be returned.</value>
-        [DataMember(Name = "max_page_size", EmitDefaultValue = true)]
-        public int MaxPageSize { get; set; }
+        [DataMember(Name = "max_page_size", EmitDefaultValue = false)]
+        public int? MaxPageSize { get; set; }
 
         /// <summary>
         /// A continuation token is returned if and only if there are further non-empty pages of items currently available. The token can be provided in a following request to fetch the next page of results. The filter and sort should not be changed when re-using the continuation token. 
@@ -206,7 +206,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.MaxPageSize == input.MaxPageSize ||
-                    this.MaxPageSize.Equals(input.MaxPageSize)
+                    (this.MaxPageSize != null &&
+                    this.MaxPageSize.Equals(input.MaxPageSize))
                 ) && 
                 (
                     this.ContinuationToken == input.ContinuationToken ||
@@ -232,7 +233,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Filter.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.MaxPageSize.GetHashCode();
+                if (this.MaxPageSize != null)
+                {
+                    hashCode = (hashCode * 59) + this.MaxPageSize.GetHashCode();
+                }
                 if (this.ContinuationToken != null)
                 {
                     hashCode = (hashCode * 59) + this.ContinuationToken.GetHashCode();

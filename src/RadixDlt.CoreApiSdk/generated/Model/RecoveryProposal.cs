@@ -107,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="recoveryRole">recoveryRole (required).</param>
         /// <param name="confirmationRole">confirmationRole (required).</param>
         /// <param name="timedRecoveryDelayMinutes">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the optional proposal delay of timed recoveries. .</param>
-        public RecoveryProposal(AccessRule primaryRole = default(AccessRule), AccessRule recoveryRole = default(AccessRule), AccessRule confirmationRole = default(AccessRule), long timedRecoveryDelayMinutes = default(long))
+        public RecoveryProposal(AccessRule primaryRole = default(AccessRule), AccessRule recoveryRole = default(AccessRule), AccessRule confirmationRole = default(AccessRule), long? timedRecoveryDelayMinutes = default(long?))
         {
             // to ensure "primaryRole" is required (not null)
             if (primaryRole == null)
@@ -152,8 +152,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the optional proposal delay of timed recoveries. 
         /// </summary>
         /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the optional proposal delay of timed recoveries. </value>
-        [DataMember(Name = "timed_recovery_delay_minutes", EmitDefaultValue = true)]
-        public long TimedRecoveryDelayMinutes { get; set; }
+        [DataMember(Name = "timed_recovery_delay_minutes", EmitDefaultValue = false)]
+        public long? TimedRecoveryDelayMinutes { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -219,7 +219,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.TimedRecoveryDelayMinutes == input.TimedRecoveryDelayMinutes ||
-                    this.TimedRecoveryDelayMinutes.Equals(input.TimedRecoveryDelayMinutes)
+                    (this.TimedRecoveryDelayMinutes != null &&
+                    this.TimedRecoveryDelayMinutes.Equals(input.TimedRecoveryDelayMinutes))
                 );
         }
 
@@ -244,7 +245,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ConfirmationRole.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.TimedRecoveryDelayMinutes.GetHashCode();
+                if (this.TimedRecoveryDelayMinutes != null)
+                {
+                    hashCode = (hashCode * 59) + this.TimedRecoveryDelayMinutes.GetHashCode();
+                }
                 return hashCode;
             }
         }
