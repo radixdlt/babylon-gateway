@@ -114,7 +114,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="defaultDepositRule">defaultDepositRule (required).</param>
         /// <param name="isBadgeAuthorizedDepositor">Whether the input &#x60;badge&#x60; belongs to the account&#39;s set of authorized depositors. This field will only be present if any badge was passed in the request. .</param>
         /// <param name="resourceSpecificBehaviours">A map from one of the input &#x60;resource_addresses&#x60; to its specific deposit behavior configured for this account. This field will only be present if an array of specific resource addresses was passed in the request (even if empty). .</param>
-        public LtsStateAccountDepositBehaviourResponse(long stateVersion = default(long), LedgerHeaderSummary ledgerHeaderSummary = default(LedgerHeaderSummary), DefaultDepositRule defaultDepositRule = default(DefaultDepositRule), bool isBadgeAuthorizedDepositor = default(bool), Dictionary<string, ResourceSpecificDepositBehaviour> resourceSpecificBehaviours = default(Dictionary<string, ResourceSpecificDepositBehaviour>))
+        public LtsStateAccountDepositBehaviourResponse(long stateVersion = default(long), LedgerHeaderSummary ledgerHeaderSummary = default(LedgerHeaderSummary), DefaultDepositRule defaultDepositRule = default(DefaultDepositRule), bool? isBadgeAuthorizedDepositor = default(bool?), Dictionary<string, ResourceSpecificDepositBehaviour> resourceSpecificBehaviours = default(Dictionary<string, ResourceSpecificDepositBehaviour>))
         {
             this.StateVersion = stateVersion;
             // to ensure "ledgerHeaderSummary" is required (not null)
@@ -144,8 +144,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Whether the input &#x60;badge&#x60; belongs to the account&#39;s set of authorized depositors. This field will only be present if any badge was passed in the request. 
         /// </summary>
         /// <value>Whether the input &#x60;badge&#x60; belongs to the account&#39;s set of authorized depositors. This field will only be present if any badge was passed in the request. </value>
-        [DataMember(Name = "is_badge_authorized_depositor", EmitDefaultValue = true)]
-        public bool IsBadgeAuthorizedDepositor { get; set; }
+        [DataMember(Name = "is_badge_authorized_depositor", EmitDefaultValue = false)]
+        public bool? IsBadgeAuthorizedDepositor { get; set; }
 
         /// <summary>
         /// A map from one of the input &#x60;resource_addresses&#x60; to its specific deposit behavior configured for this account. This field will only be present if an array of specific resource addresses was passed in the request (even if empty). 
@@ -217,7 +217,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.IsBadgeAuthorizedDepositor == input.IsBadgeAuthorizedDepositor ||
-                    this.IsBadgeAuthorizedDepositor.Equals(input.IsBadgeAuthorizedDepositor)
+                    (this.IsBadgeAuthorizedDepositor != null &&
+                    this.IsBadgeAuthorizedDepositor.Equals(input.IsBadgeAuthorizedDepositor))
                 ) && 
                 (
                     this.ResourceSpecificBehaviours == input.ResourceSpecificBehaviours ||
@@ -242,7 +243,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     hashCode = (hashCode * 59) + this.LedgerHeaderSummary.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.DefaultDepositRule.GetHashCode();
-                hashCode = (hashCode * 59) + this.IsBadgeAuthorizedDepositor.GetHashCode();
+                if (this.IsBadgeAuthorizedDepositor != null)
+                {
+                    hashCode = (hashCode * 59) + this.IsBadgeAuthorizedDepositor.GetHashCode();
+                }
                 if (this.ResourceSpecificBehaviours != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceSpecificBehaviours.GetHashCode();

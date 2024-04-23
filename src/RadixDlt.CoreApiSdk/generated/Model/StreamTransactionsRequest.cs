@@ -110,7 +110,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="transactionFormatOptions">transactionFormatOptions.</param>
         /// <param name="substateFormatOptions">substateFormatOptions.</param>
         /// <param name="includeProofs">Whether to include LedgerProofs (default false).</param>
-        public StreamTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int), SborFormatOptions sborFormatOptions = default(SborFormatOptions), TransactionFormatOptions transactionFormatOptions = default(TransactionFormatOptions), SubstateFormatOptions substateFormatOptions = default(SubstateFormatOptions), bool includeProofs = default(bool))
+        public StreamTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int), SborFormatOptions sborFormatOptions = default(SborFormatOptions), TransactionFormatOptions transactionFormatOptions = default(TransactionFormatOptions), SubstateFormatOptions substateFormatOptions = default(SubstateFormatOptions), bool? includeProofs = default(bool?))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -168,8 +168,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Whether to include LedgerProofs (default false)
         /// </summary>
         /// <value>Whether to include LedgerProofs (default false)</value>
-        [DataMember(Name = "include_proofs", EmitDefaultValue = true)]
-        public bool IncludeProofs { get; set; }
+        [DataMember(Name = "include_proofs", EmitDefaultValue = false)]
+        public bool? IncludeProofs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -251,7 +251,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.IncludeProofs == input.IncludeProofs ||
-                    this.IncludeProofs.Equals(input.IncludeProofs)
+                    (this.IncludeProofs != null &&
+                    this.IncludeProofs.Equals(input.IncludeProofs))
                 );
         }
 
@@ -282,7 +283,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.SubstateFormatOptions.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IncludeProofs.GetHashCode();
+                if (this.IncludeProofs != null)
+                {
+                    hashCode = (hashCode * 59) + this.IncludeProofs.GetHashCode();
+                }
                 return hashCode;
             }
         }

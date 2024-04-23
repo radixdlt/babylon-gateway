@@ -114,7 +114,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="committedStateVersion">committedStateVersion.</param>
         /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. .</param>
         /// <param name="knownPayloads">knownPayloads (required).</param>
-        public LtsTransactionStatusResponse(LtsTransactionIntentStatus intentStatus = default(LtsTransactionIntentStatus), string statusDescription = default(string), long committedStateVersion = default(long), long invalidFromEpoch = default(long), List<LtsTransactionPayloadDetails> knownPayloads = default(List<LtsTransactionPayloadDetails>))
+        public LtsTransactionStatusResponse(LtsTransactionIntentStatus intentStatus = default(LtsTransactionIntentStatus), string statusDescription = default(string), long committedStateVersion = default(long), long? invalidFromEpoch = default(long?), List<LtsTransactionPayloadDetails> knownPayloads = default(List<LtsTransactionPayloadDetails>))
         {
             this.IntentStatus = intentStatus;
             // to ensure "statusDescription" is required (not null)
@@ -150,8 +150,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. 
         /// </summary>
         /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. </value>
-        [DataMember(Name = "invalid_from_epoch", EmitDefaultValue = true)]
-        public long InvalidFromEpoch { get; set; }
+        [DataMember(Name = "invalid_from_epoch", EmitDefaultValue = false)]
+        public long? InvalidFromEpoch { get; set; }
 
         /// <summary>
         /// Gets or Sets KnownPayloads
@@ -222,7 +222,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.InvalidFromEpoch == input.InvalidFromEpoch ||
-                    this.InvalidFromEpoch.Equals(input.InvalidFromEpoch)
+                    (this.InvalidFromEpoch != null &&
+                    this.InvalidFromEpoch.Equals(input.InvalidFromEpoch))
                 ) && 
                 (
                     this.KnownPayloads == input.KnownPayloads ||
@@ -247,7 +248,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     hashCode = (hashCode * 59) + this.StatusDescription.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.CommittedStateVersion.GetHashCode();
-                hashCode = (hashCode * 59) + this.InvalidFromEpoch.GetHashCode();
+                if (this.InvalidFromEpoch != null)
+                {
+                    hashCode = (hashCode * 59) + this.InvalidFromEpoch.GetHashCode();
+                }
                 if (this.KnownPayloads != null)
                 {
                     hashCode = (hashCode * 59) + this.KnownPayloads.GetHashCode();

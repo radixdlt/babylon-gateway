@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="includeReadinessSignals">Whether to include protocol update readiness signals of active validator set (default false)..</param>
-        public StateConsensusManagerRequest(string network = default(string), bool includeReadinessSignals = default(bool))
+        public StateConsensusManagerRequest(string network = default(string), bool? includeReadinessSignals = default(bool?))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -127,8 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Whether to include protocol update readiness signals of active validator set (default false).
         /// </summary>
         /// <value>Whether to include protocol update readiness signals of active validator set (default false).</value>
-        [DataMember(Name = "include_readiness_signals", EmitDefaultValue = true)]
-        public bool IncludeReadinessSignals { get; set; }
+        [DataMember(Name = "include_readiness_signals", EmitDefaultValue = false)]
+        public bool? IncludeReadinessSignals { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -182,7 +182,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.IncludeReadinessSignals == input.IncludeReadinessSignals ||
-                    this.IncludeReadinessSignals.Equals(input.IncludeReadinessSignals)
+                    (this.IncludeReadinessSignals != null &&
+                    this.IncludeReadinessSignals.Equals(input.IncludeReadinessSignals))
                 );
         }
 
@@ -199,7 +200,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IncludeReadinessSignals.GetHashCode();
+                if (this.IncludeReadinessSignals != null)
+                {
+                    hashCode = (hashCode * 59) + this.IncludeReadinessSignals.GetHashCode();
+                }
                 return hashCode;
             }
         }
