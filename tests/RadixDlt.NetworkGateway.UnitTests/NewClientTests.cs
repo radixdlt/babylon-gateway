@@ -63,50 +63,97 @@
  */
 
 using FluentAssertions;
-using RadixDlt.CoreApiSdk.GenericHost.Client;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Abstractions.Serialization;
+using Microsoft.Kiota.Http.HttpClientLibrary;
+using Microsoft.Kiota.Serialization.Json;
+using System.IO;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Xunit;
-using GH = RadixDlt.CoreApiSdk.GenericHost.Model;
-using K = RadixDlt.CoreApiSdk.Kiota.Models;
+using GHC = RadixDlt.CoreApiSdk.GenericHost.Client;
+using GHM = RadixDlt.CoreApiSdk.GenericHost.Model;
+using K = RadixDlt.CoreApiSdk.Kiota;
+using KM = RadixDlt.CoreApiSdk.Kiota.Models;
 
 namespace RadixDlt.NetworkGateway.UnitTests;
 
 public class NewClientTests
 {
+    private const string DeserJsonAllProps = """{"substate_type":"AccessControllerFieldState","is_locked":false,"value":{"recovery_role_recovery_attempt":null,"timed_recovery_delay_minutes":0,"primary_role_recovery_attempt":null,"controlled_vault":{"entity_address":"entity_address","entity_type":"GlobalAccessController","is_global":true},"has_primary_role_badge_withdraw_attempt":false,"has_recovery_role_badge_withdraw_attempt":false,"is_primary_role_locked":false,"recovery_badge_resource_address":"some_address"}}""";
+    private const string DeserJsonNoOptionalProperties = """{"substate_type":"AccessControllerFieldState","is_locked":false,"value":{"recovery_role_recovery_attempt":null,"primary_role_recovery_attempt":null,"controlled_vault":{"entity_address":"entity_address","entity_type":"GlobalAccessController","is_global":true},"has_primary_role_badge_withdraw_attempt":false,"has_recovery_role_badge_withdraw_attempt":false,"is_primary_role_locked":false,"recovery_badge_resource_address":"some_address"}}""";
+
     [Fact]
-    public void GH_SerializeAccessControllerState()
+    public void GH_SerializeAccessControllerStateSubstate()
     {
-        GH.Substate substate = new GH.AccessControllerFieldStateSubstate(
+        GHM.Substate substate = new GHM.AccessControllerFieldStateSubstate(
             isLocked: false,
-            substateType: GH.SubstateType.AccessControllerFieldState,
-            value: new GH.AccessControllerFieldStateValue(
-                controlledVault: new GH.EntityReference("entity_address", GH.EntityType.GlobalAccessController, true),
+            substateType: GHM.SubstateType.AccessControllerFieldState,
+            value: new GHM.AccessControllerFieldStateValue(
+                controlledVault: new GHM.EntityReference("entity_address", GHM.EntityType.GlobalAccessController, true),
                 hasPrimaryRoleBadgeWithdrawAttempt: default,
                 hasRecoveryRoleBadgeWithdrawAttempt: default,
                 isPrimaryRoleLocked: false,
                 recoveryBadgeResourceAddress: "some_address",
-                primaryRoleRecoveryAttempt: new Option<GH.PrimaryRoleRecoveryAttempt?>(),
-                recoveryRoleRecoveryAttempt: new Option<GH.RecoveryRoleRecoveryAttempt?>(),
-                timedRecoveryDelayMinutes: new Option<long?>()));
+                primaryRoleRecoveryAttempt: new GHC.Option<GHM.PrimaryRoleRecoveryAttempt?>(),
+                recoveryRoleRecoveryAttempt: new GHC.Option<GHM.RecoveryRoleRecoveryAttempt?>(),
+                timedRecoveryDelayMinutes: new GHC.Option<long?>()));
 
-        var json = JsonSerializer.Serialize(substate);
+        var options = new JsonSerializerOptions
+        {
+            Converters =
+            {
+                new JsonStringEnumConverter(),
+            },
+        };
+        var json = JsonSerializer.Serialize(substate, options);
+
+/*
+
+broken polymorphism! :(
+
+json = {
+     "substate_type": "AccessControllerFieldState",
+     "is_locked": false
+   }
+
+ */
 
         json.Should().Be("different");
     }
 
     [Fact]
-    public void K_SerializeAccessControllerState()
+    public void GH_DeserializeAccessControllerStateSubstate()
     {
-        K.Substate substate = new K.AccessControllerFieldStateSubstate
+        var options = new JsonSerializerOptions
         {
-            SubstateType = K.SubstateType.AccessControllerFieldState,
-            IsLocked = false,
-            Value = new K.AccessControllerFieldStateValue
+            Converters =
             {
-                ControlledVault = new K.EntityReference
+                new JsonStringEnumConverter(),
+            },
+        };
+        var result = JsonSerializer.Deserialize<GHM.Substate>(DeserJsonAllProps, options);
+
+        // broken polymorphism! :(
+
+        result.Should().Be("different");
+    }
+
+    [Fact]
+    public async Task K_SerializeAccessControllerStateSubstate()
+    {
+        KM.Substate substate = new KM.AccessControllerFieldStateSubstate
+        {
+            SubstateType = KM.SubstateType.AccessControllerFieldState,
+            IsLocked = false,
+            Value = new KM.AccessControllerFieldStateValue
+            {
+                ControlledVault = new KM.EntityReference
                 {
                     EntityAddress = "entity_address",
-                    EntityType = K.EntityType.GlobalAccessController,
+                    EntityType = KM.EntityType.GlobalAccessController,
                     IsGlobal = true,
                 },
                 HasPrimaryRoleBadgeWithdrawAttempt = false,
@@ -119,8 +166,102 @@ public class NewClientTests
             },
         };
 
-        var json = JsonSerializer.Serialize(substate);
+        var authProvider = new AnonymousAuthenticationProvider();
+        var adapter = new HttpClientRequestAdapter(authProvider);
+        var client = new K.MyClass(adapter); // needed to setup writer factories in adapter
+
+        using var writer = adapter.SerializationWriterFactory.GetSerializationWriter("application/json");
+        writer.WriteObjectValue(null, substate);
+        using var writerReader = new StreamReader(writer.GetSerializedContent());
+        var json = await writerReader.ReadToEndAsync();
+
+        /*
+
+ALL GOOD! albeit 'substate_type' isn't a very first property which MAY be problematic for some JSON libraries that rely on its position (such as C#'s System.Text.Json) - then again our current setup also violates this rule
+
+json = {
+             "is_locked": false,
+             "substate_type": "AccessControllerFieldState",
+             "value": {
+               "recovery_role_recovery_attempt": null,
+               "timed_recovery_delay_minutes": null,
+               "primary_role_recovery_attempt": null,
+               "controlled_vault": {
+                 "entity_address": "entity_address",
+                 "entity_type": "GlobalAccessController",
+                 "is_global": true
+               },
+               "has_primary_role_badge_withdraw_attempt": false,
+               "has_recovery_role_badge_withdraw_attempt": false,
+               "is_primary_role_locked": false,
+               "recovery_badge_resource_address": "some_address"
+             }
+           }
+
+         */
 
         json.Should().Be("different");
+    }
+
+    [Fact]
+    public void K_DeserializeAccessControllerStateSubstate()
+    {
+        var authProvider = new AnonymousAuthenticationProvider();
+        var adapter = new HttpClientRequestAdapter(authProvider);
+        var client = new K.MyClass(adapter); // needed to setup writer factories in adapter
+
+        var ss = new MemoryStream(Encoding.UTF8.GetBytes(DeserJsonAllProps));
+        var parseNode = ParseNodeFactoryRegistry.DefaultInstance.GetRootParseNode("application/json", ss);
+
+        var result = parseNode.GetObjectValue<KM.Substate>(KM.Substate.CreateFromDiscriminatorValue);
+
+        // all good!
+
+        result.Should().Be("different");
+    }
+
+    [Fact]
+    public void K_DeserializeAccessControllerStateSubstate_NoOptionalProps()
+    {
+        var authProvider = new AnonymousAuthenticationProvider();
+        var adapter = new HttpClientRequestAdapter(authProvider);
+        var client = new K.MyClass(adapter); // needed to setup writer factories in adapter
+
+        var ss = new MemoryStream(Encoding.UTF8.GetBytes(DeserJsonNoOptionalProperties));
+        var parseNode = ParseNodeFactoryRegistry.DefaultInstance.GetRootParseNode("application/json", ss);
+
+        var result = parseNode.GetObjectValue<KM.Substate>(KM.Substate.CreateFromDiscriminatorValue);
+
+        // all good!
+
+        result.Should().Be("different");
+    }
+
+    [Fact]
+    public async Task K_Deser_Ser_Deser()
+    {
+        var authProvider = new AnonymousAuthenticationProvider();
+        var adapter = new HttpClientRequestAdapter(authProvider);
+        var client = new K.MyClass(adapter); // needed to setup writer factories in adapter
+
+        var ss1 = new MemoryStream(Encoding.UTF8.GetBytes(DeserJsonNoOptionalProperties));
+        var parseNode1 = ParseNodeFactoryRegistry.DefaultInstance.GetRootParseNode("application/json", ss1);
+        var firstDeserResult = parseNode1.GetObjectValue<KM.Substate>(KM.Substate.CreateFromDiscriminatorValue);
+
+        // we cannot use using var writer = adapter.SerializationWriterFactory.GetSerializationWriter("application/json");
+        // as that serializer comes with OnBeforeSerialization hooks that modify value's BackingStore to return only modified properties
+        // see: BackingStoreSerializationWriterProxyFactory's ctor
+        var writer = new JsonSerializationWriter();
+        writer.WriteObjectValue(null, firstDeserResult);
+        using var writerReader = new StreamReader(writer.GetSerializedContent());
+        var serResult = await writerReader.ReadToEndAsync();
+
+        var ss2 = new MemoryStream(Encoding.UTF8.GetBytes(serResult));
+        var parseNode2 = ParseNodeFactoryRegistry.DefaultInstance.GetRootParseNode("application/json", ss2);
+        var secondDeserResult = parseNode2.GetObjectValue<KM.Substate>(KM.Substate.CreateFromDiscriminatorValue);
+
+        // all good!
+
+        firstDeserResult.Should().BeEquivalentTo(secondDeserResult);
     }
 }
