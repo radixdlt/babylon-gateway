@@ -247,6 +247,11 @@ internal class GlobalAccountEntity : ComponentEntity
 {
 }
 
+internal class GlobalAccountLockerEntity : ComponentEntity
+{
+    // TODO: add all locker fields here.
+}
+
 internal class GlobalIdentityEntity : ComponentEntity
 {
 }

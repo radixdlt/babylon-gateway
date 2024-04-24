@@ -360,7 +360,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<GlobalOneResourcePoolEntity>(EntityType.GlobalOneResourcePool)
             .HasValue<GlobalTwoResourcePoolEntity>(EntityType.GlobalTwoResourcePool)
             .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool)
-            .HasValue<GlobalTransactionTrackerEntity>(EntityType.GlobalTransactionTracker);
+            .HasValue<GlobalTransactionTrackerEntity>(EntityType.GlobalTransactionTracker)
+            .HasValue<GlobalAccountLockerEntity>(EntityType.GlobalAccountLocker);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
