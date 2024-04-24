@@ -83,6 +83,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal class WriteHelper : IWriteHelper
 {
+    private static readonly Dictionary<string, Dictionary<string, int>> _maxAggregateCount = new();
+
     private readonly NpgsqlConnection _connection;
     private readonly IModel _model;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
@@ -109,7 +111,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(_token);
             await callback(writer, e, _token);
         }
@@ -138,7 +140,7 @@ internal class WriteHelper : IWriteHelper
         {
             var discriminator = GetDiscriminator<EntityType>(e.GetType());
 
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -240,7 +242,7 @@ internal class WriteHelper : IWriteHelper
         {
             var discriminator = GetDiscriminator<LedgerTransactionType>(lt.GetType());
 
-            await HandleAggregateCounts(lt);
+            await HandleMaxAggregateCounts(lt);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.TransactionTreeHash, NpgsqlDbType.Text, token);
@@ -328,7 +330,7 @@ internal class WriteHelper : IWriteHelper
         {
             var discriminator = GetDiscriminator<LedgerTransactionMarkerType>(e.GetType());
 
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.StateVersion, NpgsqlDbType.Bigint, token);
@@ -414,7 +416,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -447,7 +449,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -490,7 +492,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -524,7 +526,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -556,7 +558,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -606,7 +608,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -637,7 +639,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -668,7 +670,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -701,7 +703,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -730,7 +732,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -761,7 +763,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -795,7 +797,7 @@ internal class WriteHelper : IWriteHelper
 
         foreach (var e in entities)
         {
-            await HandleAggregateCounts(e);
+            await HandleMaxAggregateCounts(e);
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -919,13 +921,24 @@ SELECT
         return discriminator;
     }
 
-    private async ValueTask HandleAggregateCounts(object? e)
+    private async ValueTask HandleMaxAggregateCounts(object? entity)
     {
-        if (e is IAggregateHolder ah)
+        if (entity is not IAggregateHolder aggregateHolder)
         {
-            foreach (var (aggregateName, count) in ah.AggregateCounts())
+            return;
+        }
+
+        var entityName = entity.GetType().Name;
+
+        foreach (var (propertyName, count) in aggregateHolder.AggregateCounts())
+        {
+            var ec = _maxAggregateCount.GetOrAdd(entityName, _ => new Dictionary<string, int>());
+
+            if (!ec.TryGetValue(propertyName, out var maxValueObserved) || maxValueObserved <= count)
             {
-                await _observers.ForEachAsync(x => x.AggregateCount(e.GetType().Name, aggregateName, count));
+                ec[propertyName] = count;
+
+                await _observers.ForEachAsync(x => x.AggregateMaxCount(entityName, propertyName, count));
             }
         }
     }
