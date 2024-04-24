@@ -123,6 +123,7 @@ public sealed record WellKnownAddresses(
     string GenesisHelper,
     string Faucet,
     string PoolPackage,
+    string LockerPackage,
     string TransactionTracker
 );
 
@@ -134,6 +135,7 @@ public enum AddressEntityType
     GlobalGenericComponent,
     InternalGenericComponent,
     GlobalAccount,
+    GlobalAccountLocker,
     GlobalVirtualSecp256k1Account,
     GlobalVirtualEd25519Account,
     GlobalIdentity,
