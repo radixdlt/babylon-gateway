@@ -69,7 +69,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerExtenderServiceObserver
 {
-    ValueTask AggregateCount(string entityName, string propertyName, int count);
+    ValueTask AggregateMaxCount(string entityName, string propertyName, int count);
 
     ValueTask TransactionMarkedCommittedWhichWasPermanentlyRejected();
 
