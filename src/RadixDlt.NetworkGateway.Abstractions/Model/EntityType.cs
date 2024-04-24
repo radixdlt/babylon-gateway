@@ -83,4 +83,5 @@ public enum EntityType
     GlobalTwoResourcePool,
     GlobalMultiResourcePool,
     GlobalTransactionTracker,
+    GlobalAccountLocker,
 }
