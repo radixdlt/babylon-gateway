@@ -80,9 +80,6 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("DefaultNonFungibleIdsPageSize")]
     public int DefaultNonFungibleIdsPageSize { get; set; } = 100;
 
-    [ConfigurationKeyName("RequestTimeout")]
-    public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
-
     [ConfigurationKeyName("DefaultPageSize")]
     public int DefaultPageSize { get; set; } = 100;
 
@@ -91,6 +88,9 @@ public sealed class EndpointOptions
 
     [ConfigurationKeyName("ValidatorsPageSize")]
     public int ValidatorsPageSize { get; set; } = 1000;
+
+    [ConfigurationKeyName("RequestTimeout")]
+    public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
     [ConfigurationKeyName("StateEntityDetailsPageSize")]
     public int StateEntityDetailsMaxPageSize { get; set; } = 20;
@@ -106,6 +106,22 @@ public sealed class EndpointOptions
 
     [ConfigurationKeyName("TransactionStreamMaxFilterCount")]
     public int TransactionStreamMaxFilterCount { get; set; } = 10;
+
+    public int ResolvePageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, DefaultPageSize, MaxPageSize);
+
+    public int ResolveNonFungibleIdsPageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, DefaultNonFungibleIdsPageSize, MaxPageSize);
+
+    public int ResolveHeavyPageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, HeavyPageSize, MaxPageSize);
+
+    private int ResolvePageSize(int? requestPageSize, int defaultPageSize, int maxPageSize)
+    {
+        if (requestPageSize.HasValue)
+        {
+            return requestPageSize.Value < maxPageSize ? requestPageSize.Value : maxPageSize;
+        }
+
+        return defaultPageSize;
+    }
 }
 
 internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptions>

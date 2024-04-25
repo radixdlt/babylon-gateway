@@ -67,8 +67,6 @@
 // </copyright>
 
 using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
@@ -76,7 +74,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 internal class StateAccountResourcePreferencesPageRequestValidator : AbstractValidator<StateAccountResourcePreferencesPageRequest>
 {
     public StateAccountResourcePreferencesPageRequestValidator(
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         PaginableRequestValidator paginableRequestValidator,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
         RadixAddressValidator radixAddressValidator)
@@ -91,8 +88,7 @@ internal class StateAccountResourcePreferencesPageRequestValidator : AbstractVal
             .SetValidator(paginableRequestValidator);
 
         RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+            .GreaterThan(0);
 
         RuleFor(x => x.AccountAddress)
             .SetValidator(radixAddressValidator);

@@ -44,6 +44,7 @@ Release built: _not published yet_
 - Added new endpoint `/state/entity/page/schemas` returning paginable iterator over entity schemas.
 - Added new endpoint `/transaction/account-deposit-pre-validation` which allows to pre-validate if deposits can succeed based on account deposit settings and badges presented, before submitting the transaction. 
 - Fixed wrong request validation logic for maximum number of items in `/state/non-fungible/data`, `/state/non-fungible/data` and `/state/non-fungible/data` endpoints.
+- `limit_per_page` request parameter is no longer validated against `*MaxPageSize` API configuration parameters. In case requested limit exceeds API configuration maximum value is used. This change is meant to reduce clients need to understand and honor API configuration. 
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.

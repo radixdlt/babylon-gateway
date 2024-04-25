@@ -94,7 +94,7 @@ internal class DefaultPackageHandler : IPackageHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (EntityAddress)request.PackageAddress,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.HeavyPageSize
+            Limit: _endpointConfiguration.Value.ResolveHeavyPageSize(request.LimitPerPage)
         );
 
         return await _entityStateQuerier.PackageBlueprints(pageRequest, ledgerState, token);
@@ -106,7 +106,7 @@ internal class DefaultPackageHandler : IPackageHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (EntityAddress)request.PackageAddress,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.HeavyPageSize
+            Limit: _endpointConfiguration.Value.ResolveHeavyPageSize(request.LimitPerPage)
         );
 
         return await _entityStateQuerier.PackageCodes(pageRequest, ledgerState, token);

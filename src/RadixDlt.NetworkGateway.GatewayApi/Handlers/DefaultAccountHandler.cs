@@ -99,7 +99,7 @@ internal class DefaultAccountHandler : IAccountHandler
             accountAddress: (EntityAddress)request.AccountAddress,
             ledgerState: ledgerState,
             offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
+            limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
             token: token);
     }
 
@@ -112,7 +112,7 @@ internal class DefaultAccountHandler : IAccountHandler
             accountAddress: (EntityAddress)request.AccountAddress,
             ledgerState: ledgerState,
             offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
+            limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
             token: token);
     }
 }
