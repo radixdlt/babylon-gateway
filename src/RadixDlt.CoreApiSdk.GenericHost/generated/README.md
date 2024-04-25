@@ -158,7 +158,7 @@ Endpoints do not require authorization.
 - packageCompany: OpenAPI
 - packageCopyright: No Copyright
 - packageDescription: A library generated from a OpenAPI doc
-- packageGuid: {A512130A-A89C-464E-A84B-F823ECE6BFB0}
+- packageGuid: {3F56748F-A8EB-4ED9-A44A-82C30919CEE9}
 - packageName: RadixDlt.CoreApiSdk.GenericHost
 - packageTags: 
 - packageTitle: OpenAPI Library

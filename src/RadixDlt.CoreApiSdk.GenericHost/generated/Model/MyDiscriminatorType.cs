@@ -89,152 +89,81 @@ using RadixDlt.CoreApiSdk.GenericHost.Client;
 namespace RadixDlt.CoreApiSdk.GenericHost.Model
 {
     /// <summary>
-    /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction 
+    /// Defines MyDiscriminatorType
     /// </summary>
-    /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction </value>
-    public enum LtsTransactionIntentStatus
+    public enum MyDiscriminatorType
     {
         /// <summary>
-        /// Enum CommittedSuccess for value: CommittedSuccess
+        /// Enum VariantA for value: VariantA
         /// </summary>
-        CommittedSuccess = 1,
+        VariantA = 1,
 
         /// <summary>
-        /// Enum CommittedFailure for value: CommittedFailure
+        /// Enum VariantB for value: VariantB
         /// </summary>
-        CommittedFailure = 2,
-
-        /// <summary>
-        /// Enum PermanentRejection for value: PermanentRejection
-        /// </summary>
-        PermanentRejection = 3,
-
-        /// <summary>
-        /// Enum InMempool for value: InMempool
-        /// </summary>
-        InMempool = 4,
-
-        /// <summary>
-        /// Enum NotSeen for value: NotSeen
-        /// </summary>
-        NotSeen = 5,
-
-        /// <summary>
-        /// Enum FateUncertain for value: FateUncertain
-        /// </summary>
-        FateUncertain = 6,
-
-        /// <summary>
-        /// Enum FateUncertainButLikelyRejection for value: FateUncertainButLikelyRejection
-        /// </summary>
-        FateUncertainButLikelyRejection = 7
+        VariantB = 2
     }
 
     /// <summary>
-    /// Converts <see cref="LtsTransactionIntentStatus"/> to and from the JSON value
+    /// Converts <see cref="MyDiscriminatorType"/> to and from the JSON value
     /// </summary>
-    public static class LtsTransactionIntentStatusValueConverter
+    public static class MyDiscriminatorTypeValueConverter
     {
         /// <summary>
-        /// Parses a given value to <see cref="LtsTransactionIntentStatus"/>
+        /// Parses a given value to <see cref="MyDiscriminatorType"/>
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static LtsTransactionIntentStatus FromString(string value)
+        public static MyDiscriminatorType FromString(string value)
         {
-            if (value.Equals("CommittedSuccess"))
-                return LtsTransactionIntentStatus.CommittedSuccess;
+            if (value.Equals("VariantA"))
+                return MyDiscriminatorType.VariantA;
 
-            if (value.Equals("CommittedFailure"))
-                return LtsTransactionIntentStatus.CommittedFailure;
+            if (value.Equals("VariantB"))
+                return MyDiscriminatorType.VariantB;
 
-            if (value.Equals("PermanentRejection"))
-                return LtsTransactionIntentStatus.PermanentRejection;
-
-            if (value.Equals("InMempool"))
-                return LtsTransactionIntentStatus.InMempool;
-
-            if (value.Equals("NotSeen"))
-                return LtsTransactionIntentStatus.NotSeen;
-
-            if (value.Equals("FateUncertain"))
-                return LtsTransactionIntentStatus.FateUncertain;
-
-            if (value.Equals("FateUncertainButLikelyRejection"))
-                return LtsTransactionIntentStatus.FateUncertainButLikelyRejection;
-
-            throw new NotImplementedException($"Could not convert value to type LtsTransactionIntentStatus: '{value}'");
+            throw new NotImplementedException($"Could not convert value to type MyDiscriminatorType: '{value}'");
         }
 
         /// <summary>
-        /// Parses a given value to <see cref="LtsTransactionIntentStatus"/>
+        /// Parses a given value to <see cref="MyDiscriminatorType"/>
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static LtsTransactionIntentStatus? FromStringOrDefault(string value)
+        public static MyDiscriminatorType? FromStringOrDefault(string value)
         {
-            if (value.Equals("CommittedSuccess"))
-                return LtsTransactionIntentStatus.CommittedSuccess;
+            if (value.Equals("VariantA"))
+                return MyDiscriminatorType.VariantA;
 
-            if (value.Equals("CommittedFailure"))
-                return LtsTransactionIntentStatus.CommittedFailure;
-
-            if (value.Equals("PermanentRejection"))
-                return LtsTransactionIntentStatus.PermanentRejection;
-
-            if (value.Equals("InMempool"))
-                return LtsTransactionIntentStatus.InMempool;
-
-            if (value.Equals("NotSeen"))
-                return LtsTransactionIntentStatus.NotSeen;
-
-            if (value.Equals("FateUncertain"))
-                return LtsTransactionIntentStatus.FateUncertain;
-
-            if (value.Equals("FateUncertainButLikelyRejection"))
-                return LtsTransactionIntentStatus.FateUncertainButLikelyRejection;
+            if (value.Equals("VariantB"))
+                return MyDiscriminatorType.VariantB;
 
             return null;
         }
 
         /// <summary>
-        /// Converts the <see cref="LtsTransactionIntentStatus"/> to the json value
+        /// Converts the <see cref="MyDiscriminatorType"/> to the json value
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static string ToJsonValue(LtsTransactionIntentStatus value)
+        public static string ToJsonValue(MyDiscriminatorType value)
         {
-            if (value == LtsTransactionIntentStatus.CommittedSuccess)
-                return "CommittedSuccess";
+            if (value == MyDiscriminatorType.VariantA)
+                return "VariantA";
 
-            if (value == LtsTransactionIntentStatus.CommittedFailure)
-                return "CommittedFailure";
-
-            if (value == LtsTransactionIntentStatus.PermanentRejection)
-                return "PermanentRejection";
-
-            if (value == LtsTransactionIntentStatus.InMempool)
-                return "InMempool";
-
-            if (value == LtsTransactionIntentStatus.NotSeen)
-                return "NotSeen";
-
-            if (value == LtsTransactionIntentStatus.FateUncertain)
-                return "FateUncertain";
-
-            if (value == LtsTransactionIntentStatus.FateUncertainButLikelyRejection)
-                return "FateUncertainButLikelyRejection";
+            if (value == MyDiscriminatorType.VariantB)
+                return "VariantB";
 
             throw new NotImplementedException($"Value could not be handled: '{value}'");
         }
     }
 
     /// <summary>
-    /// A Json converter for type <see cref="LtsTransactionIntentStatus"/>
+    /// A Json converter for type <see cref="MyDiscriminatorType"/>
     /// </summary>
     /// <exception cref="NotImplementedException"></exception>
-    public class LtsTransactionIntentStatusJsonConverter : JsonConverter<LtsTransactionIntentStatus>
+    public class MyDiscriminatorTypeJsonConverter : JsonConverter<MyDiscriminatorType>
     {
         /// <summary>
         /// Returns a  from the Json object
@@ -243,13 +172,13 @@ namespace RadixDlt.CoreApiSdk.GenericHost.Model
         /// <param name="typeToConvert"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public override LtsTransactionIntentStatus Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override MyDiscriminatorType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             string? rawValue = reader.GetString();
 
-            LtsTransactionIntentStatus? result = rawValue == null
+            MyDiscriminatorType? result = rawValue == null
                 ? null
-                : LtsTransactionIntentStatusValueConverter.FromStringOrDefault(rawValue);
+                : MyDiscriminatorTypeValueConverter.FromStringOrDefault(rawValue);
 
             if (result != null)
                 return result.Value;
@@ -258,36 +187,36 @@ namespace RadixDlt.CoreApiSdk.GenericHost.Model
         }
 
         /// <summary>
-        /// Writes the LtsTransactionIntentStatus to the json writer
+        /// Writes the MyDiscriminatorType to the json writer
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="ltsTransactionIntentStatus"></param>
+        /// <param name="myDiscriminatorType"></param>
         /// <param name="options"></param>
-        public override void Write(Utf8JsonWriter writer, LtsTransactionIntentStatus ltsTransactionIntentStatus, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, MyDiscriminatorType myDiscriminatorType, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(ltsTransactionIntentStatus.ToString());
+            writer.WriteStringValue(myDiscriminatorType.ToString());
         }
     }
 
     /// <summary>
-    /// A Json converter for type <see cref="LtsTransactionIntentStatus"/>
+    /// A Json converter for type <see cref="MyDiscriminatorType"/>
     /// </summary>
-    public class LtsTransactionIntentStatusNullableJsonConverter : JsonConverter<LtsTransactionIntentStatus?>
+    public class MyDiscriminatorTypeNullableJsonConverter : JsonConverter<MyDiscriminatorType?>
     {
         /// <summary>
-        /// Returns a LtsTransactionIntentStatus from the Json object
+        /// Returns a MyDiscriminatorType from the Json object
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="typeToConvert"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public override LtsTransactionIntentStatus? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override MyDiscriminatorType? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             string? rawValue = reader.GetString();
 
-            LtsTransactionIntentStatus? result = rawValue == null
+            MyDiscriminatorType? result = rawValue == null
                 ? null
-                : LtsTransactionIntentStatusValueConverter.FromStringOrDefault(rawValue);
+                : MyDiscriminatorTypeValueConverter.FromStringOrDefault(rawValue);
 
             if (result != null)
                 return result.Value;
@@ -299,11 +228,11 @@ namespace RadixDlt.CoreApiSdk.GenericHost.Model
         /// Writes the DateTime to the json writer
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="ltsTransactionIntentStatus"></param>
+        /// <param name="myDiscriminatorType"></param>
         /// <param name="options"></param>
-        public override void Write(Utf8JsonWriter writer, LtsTransactionIntentStatus? ltsTransactionIntentStatus, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, MyDiscriminatorType? myDiscriminatorType, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(ltsTransactionIntentStatus?.ToString() ?? "null");
+            writer.WriteStringValue(myDiscriminatorType?.ToString() ?? "null");
         }
     }
 }

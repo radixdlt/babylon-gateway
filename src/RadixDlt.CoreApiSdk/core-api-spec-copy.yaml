@@ -142,7 +142,7 @@ tags:
 
       User transactions are formed of a core "intent", which is then signed by 0+ signatories, before being notarized. The output is called a notarized payload.
       It is this notarized transaction payload which is submitted to the network.
-      
+
       For most users, this construction process will generally happen in their Radix Wallet. If you wish to construct transactions programmatically or offline,
       you will need to integrate the Radix Engine Toolkit into your application for construction and finalization.
 
@@ -166,7 +166,7 @@ tags:
       ## State Model
 
       The Radix Engine State Model can be thought of as a forest of state sub-trees.
-      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them. 
+      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them.
       These substates are typed, and can own other entities, forming a tree of ownership.
 
       Each state sub-tree has a root entity, and a single Bech32M Global Address, with a human-readable-prefix (and prefix byte) matching the root entity type.
@@ -176,7 +176,7 @@ tags:
   - name: Construction
     x-displayName: Transaction Construction
     x-traitTag: true # Don't display endpoints under this tag
-    description: |      
+    description: |
       To construct and submit a transaction using the LTS endpoints:
 
       * Query `/lts/transaction/construction` to retrieve the current epoch (according to your node).
@@ -1117,6 +1117,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
+        '401':
+          description: Needed for Kiota to generate all those types :D
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  a:
+                    $ref: "#/components/schemas/MyPropertyTest"
+                  b:
+                    $ref: "#/components/schemas/MyAllOfTest"
+                  c:
+                    $ref: "#/components/schemas/MyOneOfTest"
+                  d:
+                    $ref: "#/components/schemas/MyDiscriminatorTest"
         '500':
           description: Server error
           content:
@@ -1126,7 +1141,99 @@ paths:
 #############################################################################################
 components:
   schemas:
-#############################################
+
+#
+# GENERATOR TESTS
+#
+    MyPropertyTest:
+      type: object
+      required:
+        - required_nonnullable_value_type
+        - required_nonnullable_reference_type
+        - required_nullable_value_type
+        - required_nullable_reference_type
+      properties:
+        required_nonnullable_value_type:
+          type: integer
+        required_nonnullable_reference_type:
+          type: string
+        required_nullable_value_type:
+          type: integer
+          nullable: true
+        required_nullable_reference_type:
+          type: string
+          nullable: true
+        optional_nonnullable_value_type:
+          type: integer
+        optional_nonnullable_reference_type:
+          type: string
+        optional_nullable_value_type:
+          type: integer
+          nullable: true
+        optional_nullable_reference_type:
+          type: string
+          nullable: true
+
+    MySimpleTypeA:
+      type: object
+      required:
+        - prop_a
+      properties:
+        prop_a:
+          type: integer
+    MySimpleTypeB:
+      type: object
+      properties:
+        prop_b:
+          type: integer
+
+    MyAllOfTest:
+      allOf:
+        - $ref: "#/components/schemas/MySimpleTypeA"
+        - $ref: "#/components/schemas/MySimpleTypeB"
+
+    MyOneOfTest:
+      oneOf:
+        - $ref: "#/components/schemas/MySimpleTypeA"
+        - $ref: "#/components/schemas/MySimpleTypeB"
+
+    MyDiscriminatorType:
+      type: string
+      enum:
+        - VariantA
+        - VariantB
+
+    MyDiscriminatorTest:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/MyDiscriminatorType"
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match MyDiscriminatorType
+          VariantA: '#/components/schemas/MyDiscriminatorTestVariantA'
+          VariantB: '#/components/schemas/MyDiscriminatorTestVariantB'
+    MyDiscriminatorTestVariantA:
+      allOf:
+        - $ref: "#/components/schemas/MyDiscriminatorTest"
+        - type: object
+          properties:
+            prop_a:
+              type: string
+    MyDiscriminatorTestVariantB:
+      allOf:
+        - $ref: "#/components/schemas/MyDiscriminatorTest"
+        - type: object
+          properties:
+            prop_b:
+              type: string
+
+
+
+    #############################################
 # GENERAL / SHARED MODELS - Request Options #
 #############################################
     NetworkIdentifier:
@@ -2479,7 +2586,7 @@ components:
           required:
             - public_key
             - signature
-          description: The EdDSA public key and signature 
+          description: The EdDSA public key and signature
           properties:
             public_key:
               $ref: '#/components/schemas/EddsaEd25519PublicKey'
@@ -3646,7 +3753,7 @@ components:
         mapping:
           # NOTE:
           # There is an important convention to these names, for consistency:
-          # 
+          #
           # For each distinct typed substate, form [SubstateType] = [ModuleSpecifier][SubstateSpecifier][SubstateTypeVersion]
           # - [ModuleSpecifier] is either [ModuleName]Module for non-main modules, or [EntityType] for main modules
           # - [SubstateSpecifier] is either:
@@ -4080,7 +4187,7 @@ components:
           description: |
             The generic substitution is provided remotely by a blueprint type.
             The `resolved_full_type_id` is added by the node, and is always present in the model returned from the transaction stream API.
-            Other APIs may not resolve the type from the blueprint definition. 
+            Other APIs may not resolve the type from the blueprint definition.
           required:
             - blueprint_type_identifier
           properties:
@@ -4817,7 +4924,7 @@ components:
         effective_epoch_start:
           description: |
             The effective time the epoch started. A drift-free measure, used to work out when the
-            epoch should ideally end. 
+            epoch should ideally end.
           $ref: '#/components/schemas/Instant'
         actual_epoch_start:
           description: |
@@ -5419,7 +5526,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -5867,7 +5974,7 @@ components:
           description: |
             If present, this field indicates the entity contributed to the payment of the fee.
             The change in balance will always be negative.
-            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in 
+            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in
             `fee_balance_changes`.
         fee_balance_changes:
           type: array
@@ -6852,7 +6959,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure

@@ -238,6 +238,8 @@ namespace RadixDlt.CoreApiSdk.GenericHost.Client
                 return MethodAuthTypeValueConverter.ToJsonValue(methodAuthType);
             if (obj is ModuleId moduleId)
                 return ModuleIdValueConverter.ToJsonValue(moduleId);
+            if (obj is MyDiscriminatorType myDiscriminatorType)
+                return MyDiscriminatorTypeValueConverter.ToJsonValue(myDiscriminatorType);
             if (obj is NonFungibleIdType nonFungibleIdType)
                 return NonFungibleIdTypeValueConverter.ToJsonValue(nonFungibleIdType);
             if (obj is ObjectHook objectHook)

@@ -74,7 +74,7 @@ namespace RadixDlt.CoreApiSdk.Kiota.Models {
     {
         /// <summary>Stores model information.</summary>
         public IBackingStore BackingStore { get; private set; }
-        /// <summary>The status of the transaction intent, as determined by the node.FateUncertain or FateUncertainButLikelyRejection mean that it&apos;s still possible that a payload containing the transaction </summary>
+        /// <summary>The status of the transaction intent, as determined by the node.FateUncertain or FateUncertainButLikelyRejection mean that it&apos;s still possible that a payload containing the transaction</summary>
         public TransactionIntentStatus? IntentStatus {
             get { return BackingStore?.Get<TransactionIntentStatus?>("intent_status"); }
             set { BackingStore?.Set("intent_status", value); }

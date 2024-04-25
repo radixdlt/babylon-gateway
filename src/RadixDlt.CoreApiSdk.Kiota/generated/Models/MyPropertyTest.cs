@@ -70,70 +70,102 @@ using System.IO;
 using System.Linq;
 using System;
 namespace RadixDlt.CoreApiSdk.Kiota.Models {
-    public class ErrorResponse : IBackedModel, IParsable
+    public class MyPropertyTest : IBackedModel, IParsable 
     {
         /// <summary>Stores model information.</summary>
         public IBackingStore BackingStore { get; private set; }
-        /// <summary>A numeric code corresponding to the given HTTP error code.</summary>
-        public int? Code {
-            get { return BackingStore?.Get<int?>("code"); }
-            set { BackingStore?.Set("code", value); }
-        }
-        /// <summary>The error_type property</summary>
-        public ErrorResponseType? ErrorType {
-            get { return BackingStore?.Get<ErrorResponseType?>("error_type"); }
-            set { BackingStore?.Set("error_type", value); }
-        }
-        /// <summary>A human-readable error message.</summary>
+        /// <summary>The optional_nonnullable_reference_type property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? Message {
-            get { return BackingStore?.Get<string?>("message"); }
-            set { BackingStore?.Set("message", value); }
+        public string? OptionalNonnullableReferenceType {
+            get { return BackingStore?.Get<string?>("optional_nonnullable_reference_type"); }
+            set { BackingStore?.Set("optional_nonnullable_reference_type", value); }
         }
 #nullable restore
 #else
-        public string Message {
-            get { return BackingStore?.Get<string>("message"); }
-            set { BackingStore?.Set("message", value); }
+        public string OptionalNonnullableReferenceType {
+            get { return BackingStore?.Get<string>("optional_nonnullable_reference_type"); }
+            set { BackingStore?.Set("optional_nonnullable_reference_type", value); }
         }
 #endif
-        /// <summary>A GUID to be used when reporting errors, to allow correlation with the Core API&apos;s error logs, in the case where the Core API details are hidden.</summary>
+        /// <summary>The optional_nonnullable_value_type property</summary>
+        public int? OptionalNonnullableValueType {
+            get { return BackingStore?.Get<int?>("optional_nonnullable_value_type"); }
+            set { BackingStore?.Set("optional_nonnullable_value_type", value); }
+        }
+        /// <summary>The optional_nullable_reference_type property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? TraceId {
-            get { return BackingStore?.Get<string?>("trace_id"); }
-            set { BackingStore?.Set("trace_id", value); }
+        public string? OptionalNullableReferenceType {
+            get { return BackingStore?.Get<string?>("optional_nullable_reference_type"); }
+            set { BackingStore?.Set("optional_nullable_reference_type", value); }
         }
 #nullable restore
 #else
-        public string TraceId {
-            get { return BackingStore?.Get<string>("trace_id"); }
-            set { BackingStore?.Set("trace_id", value); }
+        public string OptionalNullableReferenceType {
+            get { return BackingStore?.Get<string>("optional_nullable_reference_type"); }
+            set { BackingStore?.Set("optional_nullable_reference_type", value); }
         }
 #endif
+        /// <summary>The optional_nullable_value_type property</summary>
+        public int? OptionalNullableValueType {
+            get { return BackingStore?.Get<int?>("optional_nullable_value_type"); }
+            set { BackingStore?.Set("optional_nullable_value_type", value); }
+        }
+        /// <summary>The required_nonnullable_reference_type property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? RequiredNonnullableReferenceType {
+            get { return BackingStore?.Get<string?>("required_nonnullable_reference_type"); }
+            set { BackingStore?.Set("required_nonnullable_reference_type", value); }
+        }
+#nullable restore
+#else
+        public string RequiredNonnullableReferenceType {
+            get { return BackingStore?.Get<string>("required_nonnullable_reference_type"); }
+            set { BackingStore?.Set("required_nonnullable_reference_type", value); }
+        }
+#endif
+        /// <summary>The required_nonnullable_value_type property</summary>
+        public int? RequiredNonnullableValueType {
+            get { return BackingStore?.Get<int?>("required_nonnullable_value_type"); }
+            set { BackingStore?.Set("required_nonnullable_value_type", value); }
+        }
+        /// <summary>The required_nullable_reference_type property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? RequiredNullableReferenceType {
+            get { return BackingStore?.Get<string?>("required_nullable_reference_type"); }
+            set { BackingStore?.Set("required_nullable_reference_type", value); }
+        }
+#nullable restore
+#else
+        public string RequiredNullableReferenceType {
+            get { return BackingStore?.Get<string>("required_nullable_reference_type"); }
+            set { BackingStore?.Set("required_nullable_reference_type", value); }
+        }
+#endif
+        /// <summary>The required_nullable_value_type property</summary>
+        public int? RequiredNullableValueType {
+            get { return BackingStore?.Get<int?>("required_nullable_value_type"); }
+            set { BackingStore?.Set("required_nullable_value_type", value); }
+        }
         /// <summary>
-        /// Instantiates a new <see cref="ErrorResponse"/> and sets the default values.
+        /// Instantiates a new <see cref="MyPropertyTest"/> and sets the default values.
         /// </summary>
-        public ErrorResponse()
+        public MyPropertyTest()
         {
             BackingStore = BackingStoreFactorySingleton.Instance.CreateBackingStore();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="ErrorResponse"/></returns>
+        /// <returns>A <see cref="MyPropertyTest"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static ErrorResponse CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static MyPropertyTest CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
-            var mappingValue = parseNode.GetChildNode("error_type")?.GetStringValue();
-            return mappingValue switch
-            {
-                // "Basic" => new BasicErrorResponse(),
-                // "TransactionSubmit" => new TransactionSubmitErrorResponse(),
-                _ => new ErrorResponse(),
-            };
+            return new MyPropertyTest();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -143,10 +175,14 @@ namespace RadixDlt.CoreApiSdk.Kiota.Models {
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                {"code", n => { Code = n.GetIntValue(); } },
-                {"error_type", n => { ErrorType = n.GetEnumValue<ErrorResponseType>(); } },
-                {"message", n => { Message = n.GetStringValue(); } },
-                {"trace_id", n => { TraceId = n.GetStringValue(); } },
+                {"optional_nonnullable_reference_type", n => { OptionalNonnullableReferenceType = n.GetStringValue(); } },
+                {"optional_nonnullable_value_type", n => { OptionalNonnullableValueType = n.GetIntValue(); } },
+                {"optional_nullable_reference_type", n => { OptionalNullableReferenceType = n.GetStringValue(); } },
+                {"optional_nullable_value_type", n => { OptionalNullableValueType = n.GetIntValue(); } },
+                {"required_nonnullable_reference_type", n => { RequiredNonnullableReferenceType = n.GetStringValue(); } },
+                {"required_nonnullable_value_type", n => { RequiredNonnullableValueType = n.GetIntValue(); } },
+                {"required_nullable_reference_type", n => { RequiredNullableReferenceType = n.GetStringValue(); } },
+                {"required_nullable_value_type", n => { RequiredNullableValueType = n.GetIntValue(); } },
             };
         }
         /// <summary>
@@ -156,10 +192,14 @@ namespace RadixDlt.CoreApiSdk.Kiota.Models {
         public virtual void Serialize(ISerializationWriter writer)
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
-            writer.WriteIntValue("code", Code);
-            writer.WriteEnumValue<ErrorResponseType>("error_type", ErrorType);
-            writer.WriteStringValue("message", Message);
-            writer.WriteStringValue("trace_id", TraceId);
+            writer.WriteStringValue("optional_nonnullable_reference_type", OptionalNonnullableReferenceType);
+            writer.WriteIntValue("optional_nonnullable_value_type", OptionalNonnullableValueType);
+            writer.WriteStringValue("optional_nullable_reference_type", OptionalNullableReferenceType);
+            writer.WriteIntValue("optional_nullable_value_type", OptionalNullableValueType);
+            writer.WriteStringValue("required_nonnullable_reference_type", RequiredNonnullableReferenceType);
+            writer.WriteIntValue("required_nonnullable_value_type", RequiredNonnullableValueType);
+            writer.WriteStringValue("required_nullable_reference_type", RequiredNullableReferenceType);
+            writer.WriteIntValue("required_nullable_value_type", RequiredNullableValueType);
         }
     }
 }

@@ -89,9 +89,9 @@ using RadixDlt.CoreApiSdk.GenericHost.Client;
 namespace RadixDlt.CoreApiSdk.GenericHost.Model
 {
     /// <summary>
-    /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction  
+    /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction 
     /// </summary>
-    /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction  </value>
+    /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction </value>
     public enum TransactionIntentStatus
     {
         /// <summary>

@@ -66,22 +66,11 @@
 using System.Runtime.Serialization;
 using System;
 namespace RadixDlt.CoreApiSdk.Kiota.Models {
-    /// <summary>The status of the transaction intent, as determined by the node.FateUncertain or FateUncertainButLikelyRejection mean that it&apos;s still possible that a payload containing the transaction</summary>
-    public enum LtsTransactionIntentStatus
+    public enum MyDiscriminatorType
     {
-        [EnumMember(Value = "CommittedSuccess")]
-        CommittedSuccess,
-        [EnumMember(Value = "CommittedFailure")]
-        CommittedFailure,
-        [EnumMember(Value = "PermanentRejection")]
-        PermanentRejection,
-        [EnumMember(Value = "InMempool")]
-        InMempool,
-        [EnumMember(Value = "NotSeen")]
-        NotSeen,
-        [EnumMember(Value = "FateUncertain")]
-        FateUncertain,
-        [EnumMember(Value = "FateUncertainButLikelyRejection")]
-        FateUncertainButLikelyRejection,
+        [EnumMember(Value = "VariantA")]
+        VariantA,
+        [EnumMember(Value = "VariantB")]
+        VariantB,
     }
 }

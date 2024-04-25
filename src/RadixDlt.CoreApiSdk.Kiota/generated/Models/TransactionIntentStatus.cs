@@ -66,7 +66,7 @@
 using System.Runtime.Serialization;
 using System;
 namespace RadixDlt.CoreApiSdk.Kiota.Models {
-    /// <summary>The status of the transaction intent, as determined by the node.FateUncertain or FateUncertainButLikelyRejection mean that it&apos;s still possible that a payload containing the transaction </summary>
+    /// <summary>The status of the transaction intent, as determined by the node.FateUncertain or FateUncertainButLikelyRejection mean that it&apos;s still possible that a payload containing the transaction</summary>
     public enum TransactionIntentStatus
     {
         [EnumMember(Value = "CommittedSuccess")]

@@ -264,4 +264,24 @@ json = {
 
         firstDeserResult.Should().BeEquivalentTo(secondDeserResult);
     }
+
+    [Fact]
+    public void GH_Discriminator()
+    {
+        var opts = new JsonSerializerOptions
+        {
+            Converters =
+            {
+                new JsonStringEnumConverter(),
+                new GHM.MyDiscriminatorTestJsonConverter(),
+            },
+        };
+
+        var myDiscriminator = new GHM.MyDiscriminatorTestVariantA(GHM.MyDiscriminatorType.VariantA, new GHC.Option<string?>("some_Val"));
+        var json = JsonSerializer.Serialize(myDiscriminator, opts);
+        var deser = JsonSerializer.Deserialize<GHM.MyDiscriminatorTest>("""{"type":"VariantA","prop_a": "some_Val"}""", opts);
+
+        json.Should().Be("different");
+        deser.Should().Be("different");
+    }
 }

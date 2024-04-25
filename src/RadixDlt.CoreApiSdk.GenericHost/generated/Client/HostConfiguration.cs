@@ -353,6 +353,16 @@ namespace RadixDlt.CoreApiSdk.GenericHost.Client
             _jsonOptions.Converters.Add(new MultiResourcePoolFieldStateSubstateJsonConverter());
             _jsonOptions.Converters.Add(new MultiResourcePoolFieldStateValueJsonConverter());
             _jsonOptions.Converters.Add(new MutableFieldJsonConverter());
+            _jsonOptions.Converters.Add(new MyAllOfTestJsonConverter());
+            _jsonOptions.Converters.Add(new MyDiscriminatorTestJsonConverter());
+            _jsonOptions.Converters.Add(new MyDiscriminatorTestVariantAJsonConverter());
+            _jsonOptions.Converters.Add(new MyDiscriminatorTestVariantBJsonConverter());
+            _jsonOptions.Converters.Add(new MyDiscriminatorTypeJsonConverter());
+            _jsonOptions.Converters.Add(new MyDiscriminatorTypeNullableJsonConverter());
+            _jsonOptions.Converters.Add(new MyOneOfTestJsonConverter());
+            _jsonOptions.Converters.Add(new MyPropertyTestJsonConverter());
+            _jsonOptions.Converters.Add(new MySimpleTypeAJsonConverter());
+            _jsonOptions.Converters.Add(new MySimpleTypeBJsonConverter());
             _jsonOptions.Converters.Add(new NetworkConfigurationResponseJsonConverter());
             _jsonOptions.Converters.Add(new NetworkConfigurationResponseVersionJsonConverter());
             _jsonOptions.Converters.Add(new NetworkConfigurationResponseWellKnownAddressesJsonConverter());
