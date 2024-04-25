@@ -90,35 +90,59 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// BootLoaderModuleFieldSystemBootValue
+    /// NetworkDefinition
     /// </summary>
-    [DataContract(Name = "BootLoaderModuleFieldSystemBootValue")]
-    public partial class BootLoaderModuleFieldSystemBootValue : IEquatable<BootLoaderModuleFieldSystemBootValue>
+    [DataContract(Name = "NetworkDefinition")]
+    public partial class NetworkDefinition : IEquatable<NetworkDefinition>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldSystemBootValue" /> class.
+        /// Initializes a new instance of the <see cref="NetworkDefinition" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected BootLoaderModuleFieldSystemBootValue() { }
+        protected NetworkDefinition() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldSystemBootValue" /> class.
+        /// Initializes a new instance of the <see cref="NetworkDefinition" /> class.
         /// </summary>
-        /// <param name="systemParameters">systemParameters (required).</param>
-        public BootLoaderModuleFieldSystemBootValue(SystemParameters systemParameters = default(SystemParameters))
+        /// <param name="id">The logical id of the network (required).</param>
+        /// <param name="logicalName">The logical name of the network (required).</param>
+        /// <param name="hrpSuffix">The network suffix of Bech32m HRPs used for addressing. (required).</param>
+        public NetworkDefinition(int id = default(int), string logicalName = default(string), string hrpSuffix = default(string))
         {
-            // to ensure "systemParameters" is required (not null)
-            if (systemParameters == null)
+            this.Id = id;
+            // to ensure "logicalName" is required (not null)
+            if (logicalName == null)
             {
-                throw new ArgumentNullException("systemParameters is a required property for BootLoaderModuleFieldSystemBootValue and cannot be null");
+                throw new ArgumentNullException("logicalName is a required property for NetworkDefinition and cannot be null");
             }
-            this.SystemParameters = systemParameters;
+            this.LogicalName = logicalName;
+            // to ensure "hrpSuffix" is required (not null)
+            if (hrpSuffix == null)
+            {
+                throw new ArgumentNullException("hrpSuffix is a required property for NetworkDefinition and cannot be null");
+            }
+            this.HrpSuffix = hrpSuffix;
         }
 
         /// <summary>
-        /// Gets or Sets SystemParameters
+        /// The logical id of the network
         /// </summary>
-        [DataMember(Name = "system_parameters", IsRequired = true, EmitDefaultValue = true)]
-        public SystemParameters SystemParameters { get; set; }
+        /// <value>The logical id of the network</value>
+        [DataMember(Name = "id", IsRequired = true, EmitDefaultValue = true)]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// The logical name of the network
+        /// </summary>
+        /// <value>The logical name of the network</value>
+        [DataMember(Name = "logical_name", IsRequired = true, EmitDefaultValue = true)]
+        public string LogicalName { get; set; }
+
+        /// <summary>
+        /// The network suffix of Bech32m HRPs used for addressing.
+        /// </summary>
+        /// <value>The network suffix of Bech32m HRPs used for addressing.</value>
+        [DataMember(Name = "hrp_suffix", IsRequired = true, EmitDefaultValue = true)]
+        public string HrpSuffix { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +151,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class BootLoaderModuleFieldSystemBootValue {\n");
-            sb.Append("  SystemParameters: ").Append(SystemParameters).Append("\n");
+            sb.Append("class NetworkDefinition {\n");
+            sb.Append("  Id: ").Append(Id).Append("\n");
+            sb.Append("  LogicalName: ").Append(LogicalName).Append("\n");
+            sb.Append("  HrpSuffix: ").Append(HrpSuffix).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +175,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as BootLoaderModuleFieldSystemBootValue);
+            return this.Equals(input as NetworkDefinition);
         }
 
         /// <summary>
-        /// Returns true if BootLoaderModuleFieldSystemBootValue instances are equal
+        /// Returns true if NetworkDefinition instances are equal
         /// </summary>
-        /// <param name="input">Instance of BootLoaderModuleFieldSystemBootValue to be compared</param>
+        /// <param name="input">Instance of NetworkDefinition to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(BootLoaderModuleFieldSystemBootValue input)
+        public bool Equals(NetworkDefinition input)
         {
             if (input == null)
             {
@@ -165,9 +191,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.SystemParameters == input.SystemParameters ||
-                    (this.SystemParameters != null &&
-                    this.SystemParameters.Equals(input.SystemParameters))
+                    this.Id == input.Id ||
+                    this.Id.Equals(input.Id)
+                ) && 
+                (
+                    this.LogicalName == input.LogicalName ||
+                    (this.LogicalName != null &&
+                    this.LogicalName.Equals(input.LogicalName))
+                ) && 
+                (
+                    this.HrpSuffix == input.HrpSuffix ||
+                    (this.HrpSuffix != null &&
+                    this.HrpSuffix.Equals(input.HrpSuffix))
                 );
         }
 
@@ -180,9 +215,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.SystemParameters != null)
+                hashCode = (hashCode * 59) + this.Id.GetHashCode();
+                if (this.LogicalName != null)
                 {
-                    hashCode = (hashCode * 59) + this.SystemParameters.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LogicalName.GetHashCode();
+                }
+                if (this.HrpSuffix != null)
+                {
+                    hashCode = (hashCode * 59) + this.HrpSuffix.GetHashCode();
                 }
                 return hashCode;
             }

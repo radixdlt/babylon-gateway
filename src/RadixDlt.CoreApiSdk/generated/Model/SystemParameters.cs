@@ -90,35 +90,75 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// BootLoaderModuleFieldSystemBootValue
+    /// SystemParameters
     /// </summary>
-    [DataContract(Name = "BootLoaderModuleFieldSystemBootValue")]
-    public partial class BootLoaderModuleFieldSystemBootValue : IEquatable<BootLoaderModuleFieldSystemBootValue>
+    [DataContract(Name = "SystemParameters")]
+    public partial class SystemParameters : IEquatable<SystemParameters>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldSystemBootValue" /> class.
+        /// Initializes a new instance of the <see cref="SystemParameters" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected BootLoaderModuleFieldSystemBootValue() { }
+        protected SystemParameters() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldSystemBootValue" /> class.
+        /// Initializes a new instance of the <see cref="SystemParameters" /> class.
         /// </summary>
-        /// <param name="systemParameters">systemParameters (required).</param>
-        public BootLoaderModuleFieldSystemBootValue(SystemParameters systemParameters = default(SystemParameters))
+        /// <param name="networkDefinition">networkDefinition (required).</param>
+        /// <param name="costingParameters">costingParameters (required).</param>
+        /// <param name="limitParameters">limitParameters (required).</param>
+        /// <param name="xrdMaxPerFunctionRoyalty">The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
+        public SystemParameters(NetworkDefinition networkDefinition = default(NetworkDefinition), SystemCostingParameters costingParameters = default(SystemCostingParameters), LimitParameters limitParameters = default(LimitParameters), string xrdMaxPerFunctionRoyalty = default(string))
         {
-            // to ensure "systemParameters" is required (not null)
-            if (systemParameters == null)
+            // to ensure "networkDefinition" is required (not null)
+            if (networkDefinition == null)
             {
-                throw new ArgumentNullException("systemParameters is a required property for BootLoaderModuleFieldSystemBootValue and cannot be null");
+                throw new ArgumentNullException("networkDefinition is a required property for SystemParameters and cannot be null");
             }
-            this.SystemParameters = systemParameters;
+            this.NetworkDefinition = networkDefinition;
+            // to ensure "costingParameters" is required (not null)
+            if (costingParameters == null)
+            {
+                throw new ArgumentNullException("costingParameters is a required property for SystemParameters and cannot be null");
+            }
+            this.CostingParameters = costingParameters;
+            // to ensure "limitParameters" is required (not null)
+            if (limitParameters == null)
+            {
+                throw new ArgumentNullException("limitParameters is a required property for SystemParameters and cannot be null");
+            }
+            this.LimitParameters = limitParameters;
+            // to ensure "xrdMaxPerFunctionRoyalty" is required (not null)
+            if (xrdMaxPerFunctionRoyalty == null)
+            {
+                throw new ArgumentNullException("xrdMaxPerFunctionRoyalty is a required property for SystemParameters and cannot be null");
+            }
+            this.XrdMaxPerFunctionRoyalty = xrdMaxPerFunctionRoyalty;
         }
 
         /// <summary>
-        /// Gets or Sets SystemParameters
+        /// Gets or Sets NetworkDefinition
         /// </summary>
-        [DataMember(Name = "system_parameters", IsRequired = true, EmitDefaultValue = true)]
-        public SystemParameters SystemParameters { get; set; }
+        [DataMember(Name = "network_definition", IsRequired = true, EmitDefaultValue = true)]
+        public NetworkDefinition NetworkDefinition { get; set; }
+
+        /// <summary>
+        /// Gets or Sets CostingParameters
+        /// </summary>
+        [DataMember(Name = "costing_parameters", IsRequired = true, EmitDefaultValue = true)]
+        public SystemCostingParameters CostingParameters { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LimitParameters
+        /// </summary>
+        [DataMember(Name = "limit_parameters", IsRequired = true, EmitDefaultValue = true)]
+        public LimitParameters LimitParameters { get; set; }
+
+        /// <summary>
+        /// The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
+        /// </summary>
+        /// <value>The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
+        [DataMember(Name = "xrd_max_per_function_royalty", IsRequired = true, EmitDefaultValue = true)]
+        public string XrdMaxPerFunctionRoyalty { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +167,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class BootLoaderModuleFieldSystemBootValue {\n");
-            sb.Append("  SystemParameters: ").Append(SystemParameters).Append("\n");
+            sb.Append("class SystemParameters {\n");
+            sb.Append("  NetworkDefinition: ").Append(NetworkDefinition).Append("\n");
+            sb.Append("  CostingParameters: ").Append(CostingParameters).Append("\n");
+            sb.Append("  LimitParameters: ").Append(LimitParameters).Append("\n");
+            sb.Append("  XrdMaxPerFunctionRoyalty: ").Append(XrdMaxPerFunctionRoyalty).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +192,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as BootLoaderModuleFieldSystemBootValue);
+            return this.Equals(input as SystemParameters);
         }
 
         /// <summary>
-        /// Returns true if BootLoaderModuleFieldSystemBootValue instances are equal
+        /// Returns true if SystemParameters instances are equal
         /// </summary>
-        /// <param name="input">Instance of BootLoaderModuleFieldSystemBootValue to be compared</param>
+        /// <param name="input">Instance of SystemParameters to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(BootLoaderModuleFieldSystemBootValue input)
+        public bool Equals(SystemParameters input)
         {
             if (input == null)
             {
@@ -165,9 +208,24 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.SystemParameters == input.SystemParameters ||
-                    (this.SystemParameters != null &&
-                    this.SystemParameters.Equals(input.SystemParameters))
+                    this.NetworkDefinition == input.NetworkDefinition ||
+                    (this.NetworkDefinition != null &&
+                    this.NetworkDefinition.Equals(input.NetworkDefinition))
+                ) && 
+                (
+                    this.CostingParameters == input.CostingParameters ||
+                    (this.CostingParameters != null &&
+                    this.CostingParameters.Equals(input.CostingParameters))
+                ) && 
+                (
+                    this.LimitParameters == input.LimitParameters ||
+                    (this.LimitParameters != null &&
+                    this.LimitParameters.Equals(input.LimitParameters))
+                ) && 
+                (
+                    this.XrdMaxPerFunctionRoyalty == input.XrdMaxPerFunctionRoyalty ||
+                    (this.XrdMaxPerFunctionRoyalty != null &&
+                    this.XrdMaxPerFunctionRoyalty.Equals(input.XrdMaxPerFunctionRoyalty))
                 );
         }
 
@@ -180,9 +238,21 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.SystemParameters != null)
+                if (this.NetworkDefinition != null)
                 {
-                    hashCode = (hashCode * 59) + this.SystemParameters.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NetworkDefinition.GetHashCode();
+                }
+                if (this.CostingParameters != null)
+                {
+                    hashCode = (hashCode * 59) + this.CostingParameters.GetHashCode();
+                }
+                if (this.LimitParameters != null)
+                {
+                    hashCode = (hashCode * 59) + this.LimitParameters.GetHashCode();
+                }
+                if (this.XrdMaxPerFunctionRoyalty != null)
+                {
+                    hashCode = (hashCode * 59) + this.XrdMaxPerFunctionRoyalty.GetHashCode();
                 }
                 return hashCode;
             }
