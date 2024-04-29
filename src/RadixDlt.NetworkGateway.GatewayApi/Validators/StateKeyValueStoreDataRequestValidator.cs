@@ -86,7 +86,7 @@ internal class StateKeyValueStoreDataRequestValidator : AbstractValidator<Gatewa
             {
                 RuleFor(x => x.Keys.Count)
                     .GreaterThan(0)
-                    .LessThan(endpointOptionsSnapshot.Value.MaxPageSize);
+                    .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
 
                 RuleForEach(x => x.Keys)
                     .NotNull()
