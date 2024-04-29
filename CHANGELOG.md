@@ -13,6 +13,7 @@ Release built: _not published yet_
 - Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
 - Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.
 - Fixed pagination of the `/state/validators/list` endpoint where incorrect `cursor` was generated previously.
+- Fixed invalid date-time format for some entity state properties (most notably access controllers and their `recovery_role_recovery_attempt.allow_timed_recovery_after.date_time` property) that was dependent on OS-level locale setup.
 - Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
 - Changed MVC controller and action names. It has no effect on the API itself, but alters prometheus `controler` and `action` labels.
   - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.KeysPage`,

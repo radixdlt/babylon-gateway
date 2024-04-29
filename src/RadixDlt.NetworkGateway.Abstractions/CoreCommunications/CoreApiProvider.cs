@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -101,5 +102,9 @@ public sealed class CoreApiProvider : ICoreApiProvider
         StatusApi = new CoreApi.StatusApi(httpClient, coreApiNode.CoreApiAddress);
         StreamApi = new CoreApi.StreamApi(httpClient, coreApiNode.CoreApiAddress);
         TransactionApi = new CoreApi.TransactionApi(httpClient, coreApiNode.CoreApiAddress);
+
+        StatusApi.ApiClient.SerializerSettings.DateParseHandling = DateParseHandling.None;
+        StreamApi.ApiClient.SerializerSettings.DateParseHandling = DateParseHandling.None;
+        TransactionApi.ApiClient.SerializerSettings.DateParseHandling = DateParseHandling.None;
     }
 }
