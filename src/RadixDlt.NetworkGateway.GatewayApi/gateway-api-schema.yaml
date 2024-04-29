@@ -682,7 +682,8 @@ tags:
 
       ### Pagination
 
-      If the `limit_per_page` request parameter is lower than the number of transactions to be returned, a `next_cursor` will be returned. It can be used in subsequent requests as the `cursor` parameter to fetch further pages.
+      If the `limit_per_page` request hint parameter is lower than the overall number of transactions to be returned or the internal limiter kick in, a `next_cursor` will be returned.
+      It can be used in subsequent requests as the `cursor` parameter to fetch further pages.
 
       For example, the following request will return a cursor:
       ```
