@@ -83,8 +83,7 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
             .Base64();
 
         RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+            .GreaterThan(0);
 
         RuleFor(x => x.FromLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
