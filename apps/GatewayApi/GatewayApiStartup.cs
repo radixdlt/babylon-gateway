@@ -111,6 +111,7 @@ public class GatewayApiStartup
             .AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                options.SerializerSettings.DateParseHandling = DateParseHandling.None;
                 options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
             })
             .ConfigureApiBehaviorOptions(options =>
