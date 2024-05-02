@@ -45,6 +45,7 @@ Release built: 09.05.2024
 > **Breaking Changes:**
 > - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending.
 > - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
+> - Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
 > - Renamed `state.recovery_role_recovery_attempt` property from `timed_recovery_allowed_after` to `allow_timed_recovery_after` returned from `/state/entity/details` when querying for access controller.
 
 - Fixed broken ledger state lookup (`at_ledger_state`) when using epoch-only constraint and given epoch did not result in any transactions at round `1`.
@@ -69,6 +70,7 @@ Release built: 09.05.2024
 - Reworked KVStores storage and changed API surface of this area to improve overall performance. 
 
 ### API Changes
+- Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
 - Changed the `MetadataInstantValue` type and its array counterpart `MetadataInstantArrayValue` to clamp the `value` property within the RFC-3339 compatible date-time year range `1583` to `9999`. Added a `unix_timestamp_seconds` property to these types to give the exact unclamped numerical timestamp value.
 - Added `role_assignments` property to the `StateEntityDetailsResponsePackageDetails`. All global component details returned by the `/state/entity/details` endpoint contain role assignments now.
 - Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.
