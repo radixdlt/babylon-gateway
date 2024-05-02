@@ -108,310 +108,316 @@ namespace RadixDlt.CoreApiSdk.Model
         BootLoaderModuleFieldVmBoot = 2,
 
         /// <summary>
+        /// Enum BootLoaderModuleFieldKernelBoot for value: BootLoaderModuleFieldKernelBoot
+        /// </summary>
+        [EnumMember(Value = "BootLoaderModuleFieldKernelBoot")]
+        BootLoaderModuleFieldKernelBoot = 3,
+
+        /// <summary>
         /// Enum TypeInfoModuleFieldTypeInfo for value: TypeInfoModuleFieldTypeInfo
         /// </summary>
         [EnumMember(Value = "TypeInfoModuleFieldTypeInfo")]
-        TypeInfoModuleFieldTypeInfo = 3,
+        TypeInfoModuleFieldTypeInfo = 4,
 
         /// <summary>
         /// Enum RoleAssignmentModuleFieldOwnerRole for value: RoleAssignmentModuleFieldOwnerRole
         /// </summary>
         [EnumMember(Value = "RoleAssignmentModuleFieldOwnerRole")]
-        RoleAssignmentModuleFieldOwnerRole = 4,
+        RoleAssignmentModuleFieldOwnerRole = 5,
 
         /// <summary>
         /// Enum RoleAssignmentModuleRuleEntry for value: RoleAssignmentModuleRuleEntry
         /// </summary>
         [EnumMember(Value = "RoleAssignmentModuleRuleEntry")]
-        RoleAssignmentModuleRuleEntry = 5,
+        RoleAssignmentModuleRuleEntry = 6,
 
         /// <summary>
         /// Enum RoleAssignmentModuleMutabilityEntry for value: RoleAssignmentModuleMutabilityEntry
         /// </summary>
         [EnumMember(Value = "RoleAssignmentModuleMutabilityEntry")]
-        RoleAssignmentModuleMutabilityEntry = 6,
+        RoleAssignmentModuleMutabilityEntry = 7,
 
         /// <summary>
         /// Enum RoyaltyModuleFieldState for value: RoyaltyModuleFieldState
         /// </summary>
         [EnumMember(Value = "RoyaltyModuleFieldState")]
-        RoyaltyModuleFieldState = 7,
+        RoyaltyModuleFieldState = 8,
 
         /// <summary>
         /// Enum RoyaltyModuleMethodRoyaltyEntry for value: RoyaltyModuleMethodRoyaltyEntry
         /// </summary>
         [EnumMember(Value = "RoyaltyModuleMethodRoyaltyEntry")]
-        RoyaltyModuleMethodRoyaltyEntry = 8,
+        RoyaltyModuleMethodRoyaltyEntry = 9,
 
         /// <summary>
         /// Enum MetadataModuleEntry for value: MetadataModuleEntry
         /// </summary>
         [EnumMember(Value = "MetadataModuleEntry")]
-        MetadataModuleEntry = 9,
+        MetadataModuleEntry = 10,
 
         /// <summary>
         /// Enum PackageFieldRoyaltyAccumulator for value: PackageFieldRoyaltyAccumulator
         /// </summary>
         [EnumMember(Value = "PackageFieldRoyaltyAccumulator")]
-        PackageFieldRoyaltyAccumulator = 10,
+        PackageFieldRoyaltyAccumulator = 11,
 
         /// <summary>
         /// Enum PackageCodeVmTypeEntry for value: PackageCodeVmTypeEntry
         /// </summary>
         [EnumMember(Value = "PackageCodeVmTypeEntry")]
-        PackageCodeVmTypeEntry = 11,
+        PackageCodeVmTypeEntry = 12,
 
         /// <summary>
         /// Enum PackageCodeOriginalCodeEntry for value: PackageCodeOriginalCodeEntry
         /// </summary>
         [EnumMember(Value = "PackageCodeOriginalCodeEntry")]
-        PackageCodeOriginalCodeEntry = 12,
+        PackageCodeOriginalCodeEntry = 13,
 
         /// <summary>
         /// Enum PackageCodeInstrumentedCodeEntry for value: PackageCodeInstrumentedCodeEntry
         /// </summary>
         [EnumMember(Value = "PackageCodeInstrumentedCodeEntry")]
-        PackageCodeInstrumentedCodeEntry = 13,
+        PackageCodeInstrumentedCodeEntry = 14,
 
         /// <summary>
         /// Enum SchemaEntry for value: SchemaEntry
         /// </summary>
         [EnumMember(Value = "SchemaEntry")]
-        SchemaEntry = 14,
+        SchemaEntry = 15,
 
         /// <summary>
         /// Enum PackageBlueprintDefinitionEntry for value: PackageBlueprintDefinitionEntry
         /// </summary>
         [EnumMember(Value = "PackageBlueprintDefinitionEntry")]
-        PackageBlueprintDefinitionEntry = 15,
+        PackageBlueprintDefinitionEntry = 16,
 
         /// <summary>
         /// Enum PackageBlueprintDependenciesEntry for value: PackageBlueprintDependenciesEntry
         /// </summary>
         [EnumMember(Value = "PackageBlueprintDependenciesEntry")]
-        PackageBlueprintDependenciesEntry = 16,
+        PackageBlueprintDependenciesEntry = 17,
 
         /// <summary>
         /// Enum PackageBlueprintRoyaltyEntry for value: PackageBlueprintRoyaltyEntry
         /// </summary>
         [EnumMember(Value = "PackageBlueprintRoyaltyEntry")]
-        PackageBlueprintRoyaltyEntry = 17,
+        PackageBlueprintRoyaltyEntry = 18,
 
         /// <summary>
         /// Enum PackageBlueprintAuthTemplateEntry for value: PackageBlueprintAuthTemplateEntry
         /// </summary>
         [EnumMember(Value = "PackageBlueprintAuthTemplateEntry")]
-        PackageBlueprintAuthTemplateEntry = 18,
+        PackageBlueprintAuthTemplateEntry = 19,
 
         /// <summary>
         /// Enum PackageFieldFunctionAccessRules for value: PackageFieldFunctionAccessRules
         /// </summary>
         [EnumMember(Value = "PackageFieldFunctionAccessRules")]
-        PackageFieldFunctionAccessRules = 19,
+        PackageFieldFunctionAccessRules = 20,
 
         /// <summary>
         /// Enum FungibleResourceManagerFieldDivisibility for value: FungibleResourceManagerFieldDivisibility
         /// </summary>
         [EnumMember(Value = "FungibleResourceManagerFieldDivisibility")]
-        FungibleResourceManagerFieldDivisibility = 20,
+        FungibleResourceManagerFieldDivisibility = 21,
 
         /// <summary>
         /// Enum FungibleResourceManagerFieldTotalSupply for value: FungibleResourceManagerFieldTotalSupply
         /// </summary>
         [EnumMember(Value = "FungibleResourceManagerFieldTotalSupply")]
-        FungibleResourceManagerFieldTotalSupply = 21,
+        FungibleResourceManagerFieldTotalSupply = 22,
 
         /// <summary>
         /// Enum NonFungibleResourceManagerFieldIdType for value: NonFungibleResourceManagerFieldIdType
         /// </summary>
         [EnumMember(Value = "NonFungibleResourceManagerFieldIdType")]
-        NonFungibleResourceManagerFieldIdType = 22,
+        NonFungibleResourceManagerFieldIdType = 23,
 
         /// <summary>
         /// Enum NonFungibleResourceManagerFieldTotalSupply for value: NonFungibleResourceManagerFieldTotalSupply
         /// </summary>
         [EnumMember(Value = "NonFungibleResourceManagerFieldTotalSupply")]
-        NonFungibleResourceManagerFieldTotalSupply = 23,
+        NonFungibleResourceManagerFieldTotalSupply = 24,
 
         /// <summary>
         /// Enum NonFungibleResourceManagerFieldMutableFields for value: NonFungibleResourceManagerFieldMutableFields
         /// </summary>
         [EnumMember(Value = "NonFungibleResourceManagerFieldMutableFields")]
-        NonFungibleResourceManagerFieldMutableFields = 24,
+        NonFungibleResourceManagerFieldMutableFields = 25,
 
         /// <summary>
         /// Enum NonFungibleResourceManagerDataEntry for value: NonFungibleResourceManagerDataEntry
         /// </summary>
         [EnumMember(Value = "NonFungibleResourceManagerDataEntry")]
-        NonFungibleResourceManagerDataEntry = 25,
+        NonFungibleResourceManagerDataEntry = 26,
 
         /// <summary>
         /// Enum FungibleVaultFieldBalance for value: FungibleVaultFieldBalance
         /// </summary>
         [EnumMember(Value = "FungibleVaultFieldBalance")]
-        FungibleVaultFieldBalance = 26,
+        FungibleVaultFieldBalance = 27,
 
         /// <summary>
         /// Enum FungibleVaultFieldFrozenStatus for value: FungibleVaultFieldFrozenStatus
         /// </summary>
         [EnumMember(Value = "FungibleVaultFieldFrozenStatus")]
-        FungibleVaultFieldFrozenStatus = 27,
+        FungibleVaultFieldFrozenStatus = 28,
 
         /// <summary>
         /// Enum NonFungibleVaultFieldBalance for value: NonFungibleVaultFieldBalance
         /// </summary>
         [EnumMember(Value = "NonFungibleVaultFieldBalance")]
-        NonFungibleVaultFieldBalance = 28,
+        NonFungibleVaultFieldBalance = 29,
 
         /// <summary>
         /// Enum NonFungibleVaultFieldFrozenStatus for value: NonFungibleVaultFieldFrozenStatus
         /// </summary>
         [EnumMember(Value = "NonFungibleVaultFieldFrozenStatus")]
-        NonFungibleVaultFieldFrozenStatus = 29,
+        NonFungibleVaultFieldFrozenStatus = 30,
 
         /// <summary>
         /// Enum NonFungibleVaultContentsIndexEntry for value: NonFungibleVaultContentsIndexEntry
         /// </summary>
         [EnumMember(Value = "NonFungibleVaultContentsIndexEntry")]
-        NonFungibleVaultContentsIndexEntry = 30,
+        NonFungibleVaultContentsIndexEntry = 31,
 
         /// <summary>
         /// Enum ConsensusManagerFieldConfig for value: ConsensusManagerFieldConfig
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldConfig")]
-        ConsensusManagerFieldConfig = 31,
+        ConsensusManagerFieldConfig = 32,
 
         /// <summary>
         /// Enum ConsensusManagerFieldState for value: ConsensusManagerFieldState
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldState")]
-        ConsensusManagerFieldState = 32,
+        ConsensusManagerFieldState = 33,
 
         /// <summary>
         /// Enum ConsensusManagerFieldCurrentValidatorSet for value: ConsensusManagerFieldCurrentValidatorSet
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldCurrentValidatorSet")]
-        ConsensusManagerFieldCurrentValidatorSet = 33,
+        ConsensusManagerFieldCurrentValidatorSet = 34,
 
         /// <summary>
         /// Enum ConsensusManagerFieldCurrentProposalStatistic for value: ConsensusManagerFieldCurrentProposalStatistic
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldCurrentProposalStatistic")]
-        ConsensusManagerFieldCurrentProposalStatistic = 34,
+        ConsensusManagerFieldCurrentProposalStatistic = 35,
 
         /// <summary>
         /// Enum ConsensusManagerFieldCurrentTimeRoundedToMinutes for value: ConsensusManagerFieldCurrentTimeRoundedToMinutes
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
-        ConsensusManagerFieldCurrentTimeRoundedToMinutes = 35,
+        ConsensusManagerFieldCurrentTimeRoundedToMinutes = 36,
 
         /// <summary>
         /// Enum ConsensusManagerFieldCurrentTime for value: ConsensusManagerFieldCurrentTime
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldCurrentTime")]
-        ConsensusManagerFieldCurrentTime = 36,
+        ConsensusManagerFieldCurrentTime = 37,
 
         /// <summary>
         /// Enum ConsensusManagerFieldValidatorRewards for value: ConsensusManagerFieldValidatorRewards
         /// </summary>
         [EnumMember(Value = "ConsensusManagerFieldValidatorRewards")]
-        ConsensusManagerFieldValidatorRewards = 37,
+        ConsensusManagerFieldValidatorRewards = 38,
 
         /// <summary>
         /// Enum ConsensusManagerRegisteredValidatorsByStakeIndexEntry for value: ConsensusManagerRegisteredValidatorsByStakeIndexEntry
         /// </summary>
         [EnumMember(Value = "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
-        ConsensusManagerRegisteredValidatorsByStakeIndexEntry = 38,
+        ConsensusManagerRegisteredValidatorsByStakeIndexEntry = 39,
 
         /// <summary>
         /// Enum ValidatorFieldState for value: ValidatorFieldState
         /// </summary>
         [EnumMember(Value = "ValidatorFieldState")]
-        ValidatorFieldState = 39,
+        ValidatorFieldState = 40,
 
         /// <summary>
         /// Enum ValidatorFieldProtocolUpdateReadinessSignal for value: ValidatorFieldProtocolUpdateReadinessSignal
         /// </summary>
         [EnumMember(Value = "ValidatorFieldProtocolUpdateReadinessSignal")]
-        ValidatorFieldProtocolUpdateReadinessSignal = 40,
+        ValidatorFieldProtocolUpdateReadinessSignal = 41,
 
         /// <summary>
         /// Enum AccountFieldState for value: AccountFieldState
         /// </summary>
         [EnumMember(Value = "AccountFieldState")]
-        AccountFieldState = 41,
+        AccountFieldState = 42,
 
         /// <summary>
         /// Enum AccountVaultEntry for value: AccountVaultEntry
         /// </summary>
         [EnumMember(Value = "AccountVaultEntry")]
-        AccountVaultEntry = 42,
+        AccountVaultEntry = 43,
 
         /// <summary>
         /// Enum AccountResourcePreferenceEntry for value: AccountResourcePreferenceEntry
         /// </summary>
         [EnumMember(Value = "AccountResourcePreferenceEntry")]
-        AccountResourcePreferenceEntry = 43,
+        AccountResourcePreferenceEntry = 44,
 
         /// <summary>
         /// Enum AccountAuthorizedDepositorEntry for value: AccountAuthorizedDepositorEntry
         /// </summary>
         [EnumMember(Value = "AccountAuthorizedDepositorEntry")]
-        AccountAuthorizedDepositorEntry = 44,
+        AccountAuthorizedDepositorEntry = 45,
 
         /// <summary>
         /// Enum AccountLockerAccountClaimsEntry for value: AccountLockerAccountClaimsEntry
         /// </summary>
         [EnumMember(Value = "AccountLockerAccountClaimsEntry")]
-        AccountLockerAccountClaimsEntry = 45,
+        AccountLockerAccountClaimsEntry = 46,
 
         /// <summary>
         /// Enum AccessControllerFieldState for value: AccessControllerFieldState
         /// </summary>
         [EnumMember(Value = "AccessControllerFieldState")]
-        AccessControllerFieldState = 46,
+        AccessControllerFieldState = 47,
 
         /// <summary>
         /// Enum GenericScryptoComponentFieldState for value: GenericScryptoComponentFieldState
         /// </summary>
         [EnumMember(Value = "GenericScryptoComponentFieldState")]
-        GenericScryptoComponentFieldState = 47,
+        GenericScryptoComponentFieldState = 48,
 
         /// <summary>
         /// Enum GenericKeyValueStoreEntry for value: GenericKeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "GenericKeyValueStoreEntry")]
-        GenericKeyValueStoreEntry = 48,
+        GenericKeyValueStoreEntry = 49,
 
         /// <summary>
         /// Enum OneResourcePoolFieldState for value: OneResourcePoolFieldState
         /// </summary>
         [EnumMember(Value = "OneResourcePoolFieldState")]
-        OneResourcePoolFieldState = 49,
+        OneResourcePoolFieldState = 50,
 
         /// <summary>
         /// Enum TwoResourcePoolFieldState for value: TwoResourcePoolFieldState
         /// </summary>
         [EnumMember(Value = "TwoResourcePoolFieldState")]
-        TwoResourcePoolFieldState = 50,
+        TwoResourcePoolFieldState = 51,
 
         /// <summary>
         /// Enum MultiResourcePoolFieldState for value: MultiResourcePoolFieldState
         /// </summary>
         [EnumMember(Value = "MultiResourcePoolFieldState")]
-        MultiResourcePoolFieldState = 51,
+        MultiResourcePoolFieldState = 52,
 
         /// <summary>
         /// Enum TransactionTrackerFieldState for value: TransactionTrackerFieldState
         /// </summary>
         [EnumMember(Value = "TransactionTrackerFieldState")]
-        TransactionTrackerFieldState = 52,
+        TransactionTrackerFieldState = 53,
 
         /// <summary>
         /// Enum TransactionTrackerCollectionEntry for value: TransactionTrackerCollectionEntry
         /// </summary>
         [EnumMember(Value = "TransactionTrackerCollectionEntry")]
-        TransactionTrackerCollectionEntry = 53
+        TransactionTrackerCollectionEntry = 54
 
     }
 

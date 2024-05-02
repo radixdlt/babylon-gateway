@@ -84,40 +84,36 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// An optional specification of a historical ledger state at which to execute the request. The \&quot;historical state\&quot; feature (see the &#x60;db.historical_substate_values.enable&#x60; flag) must be enabled on the Node, and the requested point in history must be recent enough (in accordance with the Node&#39;s configured &#x60;state_hash_tree.state_version_history_length&#x60;). 
+    /// BootLoaderModuleFieldKernelBootValue
     /// </summary>
-    [DataContract(Name = "LedgerStateSelector")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(VersionLedgerStateSelector), "ByStateVersion")]
-    [JsonSubtypes.KnownSubType(typeof(VersionLedgerStateSelector), "VersionLedgerStateSelector")]
-    public partial class LedgerStateSelector : IEquatable<LedgerStateSelector>
+    [DataContract(Name = "BootLoaderModuleFieldKernelBootValue")]
+    public partial class BootLoaderModuleFieldKernelBootValue : IEquatable<BootLoaderModuleFieldKernelBootValue>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerStateSelectorType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LedgerStateSelector" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldKernelBootValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LedgerStateSelector() { }
+        protected BootLoaderModuleFieldKernelBootValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LedgerStateSelector" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldKernelBootValue" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public LedgerStateSelector(LedgerStateSelectorType type = default(LedgerStateSelectorType))
+        /// <param name="refCheckCosting">refCheckCosting (required).</param>
+        public BootLoaderModuleFieldKernelBootValue(bool refCheckCosting = default(bool))
         {
-            this.Type = type;
+            this.RefCheckCosting = refCheckCosting;
         }
+
+        /// <summary>
+        /// Gets or Sets RefCheckCosting
+        /// </summary>
+        [DataMember(Name = "ref_check_costing", IsRequired = true, EmitDefaultValue = true)]
+        public bool RefCheckCosting { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -126,8 +122,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LedgerStateSelector {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class BootLoaderModuleFieldKernelBootValue {\n");
+            sb.Append("  RefCheckCosting: ").Append(RefCheckCosting).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -148,15 +144,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LedgerStateSelector);
+            return this.Equals(input as BootLoaderModuleFieldKernelBootValue);
         }
 
         /// <summary>
-        /// Returns true if LedgerStateSelector instances are equal
+        /// Returns true if BootLoaderModuleFieldKernelBootValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of LedgerStateSelector to be compared</param>
+        /// <param name="input">Instance of BootLoaderModuleFieldKernelBootValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LedgerStateSelector input)
+        public bool Equals(BootLoaderModuleFieldKernelBootValue input)
         {
             if (input == null)
             {
@@ -164,8 +160,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.RefCheckCosting == input.RefCheckCosting ||
+                    this.RefCheckCosting.Equals(input.RefCheckCosting)
                 );
         }
 
@@ -178,7 +174,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                hashCode = (hashCode * 59) + this.RefCheckCosting.GetHashCode();
                 return hashCode;
             }
         }

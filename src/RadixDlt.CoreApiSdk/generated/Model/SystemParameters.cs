@@ -107,7 +107,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="costingParameters">costingParameters (required).</param>
         /// <param name="limitParameters">limitParameters (required).</param>
         /// <param name="xrdMaxPerFunctionRoyalty">The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
-        public SystemParameters(NetworkDefinition networkDefinition = default(NetworkDefinition), SystemCostingParameters costingParameters = default(SystemCostingParameters), LimitParameters limitParameters = default(LimitParameters), string xrdMaxPerFunctionRoyalty = default(string))
+        /// <param name="applyAdditionalCosting">Whether to adjust costs for querying fee reserve state and encoding bech32 addresses. (required).</param>
+        public SystemParameters(NetworkDefinition networkDefinition = default(NetworkDefinition), SystemCostingParameters costingParameters = default(SystemCostingParameters), LimitParameters limitParameters = default(LimitParameters), string xrdMaxPerFunctionRoyalty = default(string), bool applyAdditionalCosting = default(bool))
         {
             // to ensure "networkDefinition" is required (not null)
             if (networkDefinition == null)
@@ -133,6 +134,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("xrdMaxPerFunctionRoyalty is a required property for SystemParameters and cannot be null");
             }
             this.XrdMaxPerFunctionRoyalty = xrdMaxPerFunctionRoyalty;
+            this.ApplyAdditionalCosting = applyAdditionalCosting;
         }
 
         /// <summary>
@@ -161,6 +163,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public string XrdMaxPerFunctionRoyalty { get; set; }
 
         /// <summary>
+        /// Whether to adjust costs for querying fee reserve state and encoding bech32 addresses.
+        /// </summary>
+        /// <value>Whether to adjust costs for querying fee reserve state and encoding bech32 addresses.</value>
+        [DataMember(Name = "apply_additional_costing", IsRequired = true, EmitDefaultValue = true)]
+        public bool ApplyAdditionalCosting { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -172,6 +181,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  CostingParameters: ").Append(CostingParameters).Append("\n");
             sb.Append("  LimitParameters: ").Append(LimitParameters).Append("\n");
             sb.Append("  XrdMaxPerFunctionRoyalty: ").Append(XrdMaxPerFunctionRoyalty).Append("\n");
+            sb.Append("  ApplyAdditionalCosting: ").Append(ApplyAdditionalCosting).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -226,6 +236,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.XrdMaxPerFunctionRoyalty == input.XrdMaxPerFunctionRoyalty ||
                     (this.XrdMaxPerFunctionRoyalty != null &&
                     this.XrdMaxPerFunctionRoyalty.Equals(input.XrdMaxPerFunctionRoyalty))
+                ) && 
+                (
+                    this.ApplyAdditionalCosting == input.ApplyAdditionalCosting ||
+                    this.ApplyAdditionalCosting.Equals(input.ApplyAdditionalCosting)
                 );
         }
 
@@ -254,6 +268,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.XrdMaxPerFunctionRoyalty.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.ApplyAdditionalCosting.GetHashCode();
                 return hashCode;
             }
         }

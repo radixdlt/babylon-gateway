@@ -104,6 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="AccessControllerFieldStateValue" /> class.
         /// </summary>
         /// <param name="controlledVault">controlledVault (required).</param>
+        /// <param name="xrdFeeVault">xrdFeeVault.</param>
         /// <param name="timedRecoveryDelayMinutes">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the amount of time (in minutes) that it takes for timed recovery to be done. When not present, then timed recovery can not be performed through this access controller. .</param>
         /// <param name="recoveryBadgeResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="isPrimaryRoleLocked">Whether the primary role is currently locked. (required).</param>
@@ -111,7 +112,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="hasPrimaryRoleBadgeWithdrawAttempt">Whether the primary role badge withdraw is currently being attempted. (required).</param>
         /// <param name="recoveryRoleRecoveryAttempt">recoveryRoleRecoveryAttempt.</param>
         /// <param name="hasRecoveryRoleBadgeWithdrawAttempt">Whether the recovery role badge withdraw is currently being attempted. (required).</param>
-        public AccessControllerFieldStateValue(EntityReference controlledVault = default(EntityReference), long? timedRecoveryDelayMinutes = default(long?), string recoveryBadgeResourceAddress = default(string), bool isPrimaryRoleLocked = default(bool), PrimaryRoleRecoveryAttempt primaryRoleRecoveryAttempt = default(PrimaryRoleRecoveryAttempt), bool hasPrimaryRoleBadgeWithdrawAttempt = default(bool), RecoveryRoleRecoveryAttempt recoveryRoleRecoveryAttempt = default(RecoveryRoleRecoveryAttempt), bool hasRecoveryRoleBadgeWithdrawAttempt = default(bool))
+        public AccessControllerFieldStateValue(EntityReference controlledVault = default(EntityReference), EntityReference xrdFeeVault = default(EntityReference), long? timedRecoveryDelayMinutes = default(long?), string recoveryBadgeResourceAddress = default(string), bool isPrimaryRoleLocked = default(bool), PrimaryRoleRecoveryAttempt primaryRoleRecoveryAttempt = default(PrimaryRoleRecoveryAttempt), bool hasPrimaryRoleBadgeWithdrawAttempt = default(bool), RecoveryRoleRecoveryAttempt recoveryRoleRecoveryAttempt = default(RecoveryRoleRecoveryAttempt), bool hasRecoveryRoleBadgeWithdrawAttempt = default(bool))
         {
             // to ensure "controlledVault" is required (not null)
             if (controlledVault == null)
@@ -128,6 +129,7 @@ namespace RadixDlt.CoreApiSdk.Model
             this.IsPrimaryRoleLocked = isPrimaryRoleLocked;
             this.HasPrimaryRoleBadgeWithdrawAttempt = hasPrimaryRoleBadgeWithdrawAttempt;
             this.HasRecoveryRoleBadgeWithdrawAttempt = hasRecoveryRoleBadgeWithdrawAttempt;
+            this.XrdFeeVault = xrdFeeVault;
             this.TimedRecoveryDelayMinutes = timedRecoveryDelayMinutes;
             this.PrimaryRoleRecoveryAttempt = primaryRoleRecoveryAttempt;
             this.RecoveryRoleRecoveryAttempt = recoveryRoleRecoveryAttempt;
@@ -138,6 +140,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "controlled_vault", IsRequired = true, EmitDefaultValue = true)]
         public EntityReference ControlledVault { get; set; }
+
+        /// <summary>
+        /// Gets or Sets XrdFeeVault
+        /// </summary>
+        [DataMember(Name = "xrd_fee_vault", EmitDefaultValue = true)]
+        public EntityReference XrdFeeVault { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the amount of time (in minutes) that it takes for timed recovery to be done. When not present, then timed recovery can not be performed through this access controller. 
@@ -195,6 +203,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessControllerFieldStateValue {\n");
             sb.Append("  ControlledVault: ").Append(ControlledVault).Append("\n");
+            sb.Append("  XrdFeeVault: ").Append(XrdFeeVault).Append("\n");
             sb.Append("  TimedRecoveryDelayMinutes: ").Append(TimedRecoveryDelayMinutes).Append("\n");
             sb.Append("  RecoveryBadgeResourceAddress: ").Append(RecoveryBadgeResourceAddress).Append("\n");
             sb.Append("  IsPrimaryRoleLocked: ").Append(IsPrimaryRoleLocked).Append("\n");
@@ -243,6 +252,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ControlledVault.Equals(input.ControlledVault))
                 ) && 
                 (
+                    this.XrdFeeVault == input.XrdFeeVault ||
+                    (this.XrdFeeVault != null &&
+                    this.XrdFeeVault.Equals(input.XrdFeeVault))
+                ) && 
+                (
                     this.TimedRecoveryDelayMinutes == input.TimedRecoveryDelayMinutes ||
                     (this.TimedRecoveryDelayMinutes != null &&
                     this.TimedRecoveryDelayMinutes.Equals(input.TimedRecoveryDelayMinutes))
@@ -288,6 +302,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.ControlledVault != null)
                 {
                     hashCode = (hashCode * 59) + this.ControlledVault.GetHashCode();
+                }
+                if (this.XrdFeeVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.XrdFeeVault.GetHashCode();
                 }
                 if (this.TimedRecoveryDelayMinutes != null)
                 {

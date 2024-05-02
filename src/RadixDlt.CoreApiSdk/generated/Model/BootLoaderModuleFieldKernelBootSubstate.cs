@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ValidatorFieldStateSubstate
+    /// BootLoaderModuleFieldKernelBootSubstate
     /// </summary>
-    [DataContract(Name = "ValidatorFieldStateSubstate")]
+    [DataContract(Name = "BootLoaderModuleFieldKernelBootSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorEntrySubstate), "AccountAuthorizedDepositorEntry")]
@@ -147,25 +147,25 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldProtocolUpdateReadinessSignalSubstate), "ValidatorFieldProtocolUpdateReadinessSignal")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
-    public partial class ValidatorFieldStateSubstate : Substate, IEquatable<ValidatorFieldStateSubstate>
+    public partial class BootLoaderModuleFieldKernelBootSubstate : Substate, IEquatable<BootLoaderModuleFieldKernelBootSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorFieldStateSubstate" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldKernelBootSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ValidatorFieldStateSubstate() { }
+        protected BootLoaderModuleFieldKernelBootSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorFieldStateSubstate" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldKernelBootSubstate" /> class.
         /// </summary>
         /// <param name="value">value (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ValidatorFieldState).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.BootLoaderModuleFieldKernelBoot).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public ValidatorFieldStateSubstate(ValidatorFieldStateValue value = default(ValidatorFieldStateValue), SubstateType substateType = SubstateType.ValidatorFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public BootLoaderModuleFieldKernelBootSubstate(BootLoaderModuleFieldKernelBootValue value = default(BootLoaderModuleFieldKernelBootValue), SubstateType substateType = SubstateType.BootLoaderModuleFieldKernelBoot, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "value" is required (not null)
             if (value == null)
             {
-                throw new ArgumentNullException("value is a required property for ValidatorFieldStateSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for BootLoaderModuleFieldKernelBootSubstate and cannot be null");
             }
             this.Value = value;
         }
@@ -174,7 +174,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Value
         /// </summary>
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public ValidatorFieldStateValue Value { get; set; }
+        public BootLoaderModuleFieldKernelBootValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -183,7 +183,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ValidatorFieldStateSubstate {\n");
+            sb.Append("class BootLoaderModuleFieldKernelBootSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
@@ -206,15 +206,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ValidatorFieldStateSubstate);
+            return this.Equals(input as BootLoaderModuleFieldKernelBootSubstate);
         }
 
         /// <summary>
-        /// Returns true if ValidatorFieldStateSubstate instances are equal
+        /// Returns true if BootLoaderModuleFieldKernelBootSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of ValidatorFieldStateSubstate to be compared</param>
+        /// <param name="input">Instance of BootLoaderModuleFieldKernelBootSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ValidatorFieldStateSubstate input)
+        public bool Equals(BootLoaderModuleFieldKernelBootSubstate input)
         {
             if (input == null)
             {
