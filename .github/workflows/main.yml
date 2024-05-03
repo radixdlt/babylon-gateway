@@ -23,425 +23,445 @@ env:
   DOTNET_VERSION: "8.0.x"
 
 jobs:
-  snyk-scan:
-    name: snyk scan
+  phylum_analyze:
+    name: Analyze dependencies with Phylum
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
-
     steps:
-      - uses: RDXWorks-actions/checkout@main
-      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+      - name: Checkout the repo
+        uses: RDXWorks-actions/checkout@main
         with:
-          role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
-          app_name: 'babylon-gateway'
-          step_name: 'snyk-scan'
-          secret_prefix: 'SNYK'
-          secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
-          parse_json: true
-      - name: Setup .NET SDK
-        uses: RDXWorks-actions/setup-dotnet@main
+          fetch-depth: 0
+      - name: Analyze dependencies
+        uses: RDXWorks-actions/phylum-analyze-pr-action@v2.1.1
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-      - name: Install dependencies
-        run: dotnet restore
-      - name: Run Snyk to check for deps vulnerabilities
-        uses: RDXWorks-actions/snyk-actions/dotnet@master
-        with:
-          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=critical
-      - name: Run Snyk to check for code vulnerabilities
-        uses: RDXWorks-actions/snyk-actions/dotnet@master
-        with:
-          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=high
-          command: code test
-      - name: Generate SBOM # check SBOM can be generated but nothing is done with it
-        uses: RDXWorks-actions/snyk-actions/dotnet@master
-        with:
-          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json > sbom.json
-          command: sbom
-
-  build:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: RDXWorks-actions/checkout@main
-      - name: Setup .NET SDK
-        uses: RDXWorks-actions/setup-dotnet@main
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-      - name: Install dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-      - name: Unit tests
-        # Add --verbosity normal to get more noisy logs if required for debugging
-        run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
-
-  setup-tags:
-    runs-on: ubuntu-22.04
-    outputs:
-      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
-      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
-      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
-    steps:
-      - uses: RDXWorks-actions/checkout@main
-      - name: Setup tags for docker image
-        id: setup_tags
-        uses: ./.github/actions/set-variables
-        with:
-          github_event_name: ${{ github.event_name }}
-          github_action_name: ${{ github.event.action}}
-      - name: Publish Gateway Settings
-        uses: RDXWorks-actions/upload-artifact@main
-        with:
-          path: Directory.Build.props
-          name: build_props
-          retention-days: 1
-
-  docker-database-migrations-private:
-    name: AMD Migration
-    needs:
-      - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
-    with:
-      runs_on: ubuntu-22.04
-      image_registry: "docker.io"
-      image_organization: "radixdlt"
-      image_name: "private-babylon-ng-database-migrations"
-      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}-amd64
-      context: "."
-      dockerfile: "./apps/DatabaseMigrations/Dockerfile"
-      platforms: "linux/amd64"
-      restore_artifact: "true"
-      artifact_location: "./"
-      artifact_name: build_props
-      provenance: "false"
-      scan_image: true
-      snyk_target_ref: ${{ github.ref_name }}
-      cache_tag_suffix: "AMD"
-
-  docker-database-migrations-private-arm:
-    name: ARM Migration
-    needs:
-      - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
-    with:
-      runs_on: selfhosted-ubuntu-22.04-arm
-      image_registry: "docker.io"
-      image_organization: "radixdlt"
-      image_name: "private-babylon-ng-database-migrations"
-      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}-arm64
-      context: "."
-      dockerfile: "./apps/DatabaseMigrations/Dockerfile"
-      platforms: "linux/arm64"
-      restore_artifact: "true"
-      artifact_location: "./"
-      artifact_name: build_props
-      provenance: "false"
-      disable_qemu: true
-      cache_tag_suffix: "ARM"
-
-  docker-data-aggregator-private:
-    name: AMD Aggregator
-    needs:
-      - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
-    with:
-      runs_on: ubuntu-22.04
-      image_registry: "docker.io"
-      image_organization: "radixdlt"
-      image_name: "private-babylon-ng-data-aggregator"
-      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}-amd64
-      context: "."
-      dockerfile: "./apps/DataAggregator/Dockerfile"
-      platforms: "linux/amd64"
-      restore_artifact: "true"
-      artifact_location: "./"
-      artifact_name: build_props
-      provenance: "false"
-      scan_image: true
-      snyk_target_ref: ${{ github.ref_name }}
-      cache_tag_suffix: "AMD"
-
-  docker-data-aggregator-private-arm:
-    name: ARM Aggregator
-    needs:
-      - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
-    with:
-      runs_on: selfhosted-ubuntu-22.04-arm
-      image_registry: "docker.io"
-      image_organization: "radixdlt"
-      image_name: "private-babylon-ng-data-aggregator"
-      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}-arm64
-      context: "."
-      dockerfile: "./apps/DataAggregator/Dockerfile"
-      platforms: "linux/arm64"
-      restore_artifact: "true"
-      artifact_location: "./"
-      artifact_name: build_props
-      provenance: "false"
-      disable_qemu: true
-      cache_tag_suffix: "ARM"
-
-  docker-gateway-api-private:
-    name: AMD Gateway
-    needs:
-      - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
-    with:
-      runs_on: ubuntu-22.04
-      image_registry: "docker.io"
-      image_organization: "radixdlt"
-      image_name: "private-babylon-ng-gateway-api"
-      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}-amd64
-      context: "."
-      dockerfile: "./apps/GatewayApi/Dockerfile"
-      platforms: "linux/amd64"
-      restore_artifact: "true"
-      artifact_location: "./"
-      artifact_name: build_props
-      provenance: "false"
-      scan_image: true
-      snyk_target_ref: ${{ github.ref_name }}
-      cache_tag_suffix: "AMD"
-
-  docker-gateway-api-private-arm:
-    name: ARM Gateway
-    needs:
-      - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
-    with:
-      runs_on: selfhosted-ubuntu-22.04-arm
-      image_registry: "docker.io"
-      image_organization: "radixdlt"
-      image_name: "private-babylon-ng-gateway-api"
-      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}-arm64
-      context: "."
-      dockerfile: "./apps/GatewayApi/Dockerfile"
-      platforms: "linux/arm64"
-      restore_artifact: "true"
-      artifact_location: "./"
-      artifact_name: build_props
-      provenance: "false"
-      disable_qemu: true
-      cache_tag_suffix: "ARM"
-
-  join-gateway-images:
-    name: Gateway
-    needs:
-      - docker-gateway-api-private
-      - docker-gateway-api-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
-    with:
-      amd_meta_data_json: ${{ needs.docker-gateway-api-private.outputs.json }}
-      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
-    secrets:
-      role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
-
-  join-aggregator-images:
-    name: Aggregator
-    needs:
-      - docker-data-aggregator-private
-      - docker-data-aggregator-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
-    with:
-      amd_meta_data_json: ${{ needs.docker-data-aggregator-private.outputs.json }}
-      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
-    secrets:
-      role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
-
-  join-migrations-images:
-    name: Migration
-    needs:
-      - docker-database-migrations-private
-      - docker-database-migrations-private-arm
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
-    with:
-      amd_meta_data_json: ${{ needs.docker-database-migrations-private.outputs.json }}
-      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
-    secrets:
-      role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
-
-  deploy-on-mardunet:
-    runs-on: ubuntu-22.04
-    needs:
-      - docker-gateway-api-private
-      - docker-data-aggregator-private
-      - docker-database-migrations-private
-      - join-gateway-images
-      - join-aggregator-images
-      - join-migrations-images
-      - setup-tags
-    if: github.ref == 'refs/heads/develop'
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: RDXWorks-actions/checkout@main
-      - uses: ./.github/actions/fetch-secrets
-        with:
-          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
-          app_name: "babylon-gateway"
-          step_name: "deploy-on-mardunet"
-          secret_prefix: "CF_GITHUB_WORKER"
-          secret_name: "github-actions/radixdlt/babylon-gateway/cloudflare"
-          parse_json: true
-      - name: Process ci.env
-        run: |
-          export $(grep -v '^#' ./deployment/ci.env | xargs)
-          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
-      - name: Check if ci.env changed
-        id: changed-files
-        uses: RDXWorks-actions/changed-files@main
-        with:
-          files: |
-            deployment/ci.env
-      - name: Trigger deployment event ${{ github.ref }}
-        env:
-          NAMESPACE: "ng-mardunet"
-          EVENT_TYPE: "ng_babylon_mardunet"
-        run: |
-          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
-            --header 'Accept: application/vnd.github.v3+json' \
-            --header 'Authorization: Basic ${{env.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
-            --header 'Content-Type: application/json' \
-            --data-raw '{
-                "event_type": "${{env.EVENT_TYPE}}",
-                "client_payload": {
-                  "namespace_postfix": "${{env.NAMESPACE}}",
-                  "ci_env_changed": "${{steps.changed-files.outputs.any_changed}}",
-                  "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
-                  "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
-                  "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}",
-                  "core_docker_tag": "${{env.FULLNODE_VERSION}}"
-                }
-            }'
-
-  deploy-pr:
-    runs-on: ubuntu-22.04
-    needs:
-      - docker-gateway-api-private
-      - docker-data-aggregator-private
-      - docker-database-migrations-private
-      - join-gateway-images
-      - join-aggregator-images
-      - join-migrations-images
-      - setup-tags
-    if: github.event_name == 'pull_request'
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: RDXWorks-actions/checkout@main
-      - uses: ./.github/actions/fetch-secrets
-        with:
-          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
-          app_name: "babylon-gateway"
-          step_name: "deploy-pr"
-          secret_prefix: "CF_GITHUB_WORKER"
-          secret_name: "github-actions/radixdlt/babylon-gateway/cloudflare"
-          parse_json: true
-      - name: setup "namespace_postfix"
-        run: |
-          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          echo "NAMESPACE=pr-$pull_number" >> $GITHUB_ENV
-      - name: Trigger pull request deployment event ${{ github.ref }}
-        env:
-          EVENT_TYPE: "ng_babylon_pr"
-        run: |
-          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
-            --header 'Accept: application/vnd.github.v3+json' \
-            --header 'Authorization:  Basic ${{env.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
-            --header 'Content-Type: application/json' \
-            --data-raw '{
-                "event_type": "${{env.EVENT_TYPE}}",
-                "client_payload": {
-                    "namespace_postfix": "${{env.NAMESPACE}}",
-                    "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
-                    "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
-                    "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}"
-                }
-            }'
-
-  ephemeral-deploy-and-test:
-    runs-on: ubuntu-22.04
-    needs:
-      - docker-gateway-api-private
-      - docker-data-aggregator-private
-      - docker-database-migrations-private
-      - join-gateway-images
-      - join-aggregator-images
-      - join-migrations-images
-      - setup-tags
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: RDXWorks-actions/checkout@main
-      - uses: ./.github/actions/fetch-secrets
-        with:
-          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
-          app_name: "babylon-gateway"
-          step_name: "ephemeral-deploy-and-test"
-          secret_prefix: "JENKINS"
-          secret_name: "github-actions/radixdlt/babylon-gateway/jenkins-api-token"
-          parse_json: true
-      - name: Export branch name in github's environment
-        run: |
-          echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
-          echo "GITHUB_REF_NAME=$GITHUB_REF_NAME" >> $GITHUB_ENV
-          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" >> $GITHUB_ENV
-      - name: Process ci.env
-        run: |
-          export $(grep -v '^#' ./deployment/ci.env | xargs)
-          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
-          echo "POSTGRES_VERSION=$POSTGRES_VERSION" >> $GITHUB_ENV
-      - name: Connect to tailnet
-        uses: radixdlt/public-iac-resuable-artifacts/tailnet@main
-        with:
-          role_name: "arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access"
-          region: "eu-west-2"
-          secret_name: "arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/tailscale-public-workflows-DpiE80"
-      - name: Deploy and test on an ephemeral network
-        uses: RDXWorks-actions/jenkins-job-trigger-action@master
-        with:
-          jenkins_url: "${{ env.JENKINS_URL }}"
-          jenkins_user: ${{ env.JENKINS_USER }}
-          jenkins_token: ${{ env.JENKINS_TOKEN }}
-          job_name: "babylon-testing/job/ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
-          job_params: |
-            {
-              "RADIXDLT_GATEWAY_DOCKER_TAG": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
-              "RADIXDLT_NODE_DOCKER_TAG": "${{ env.FULLNODE_VERSION }}",
-              "RADIXDLT_POSTGRES_APP_VERSION": "${{ env.POSTGRES_VERSION }}",
-              "RADIXDLT_GITHUB_TRIGGER" : "${{ env.GITHUB_REPOSITORY }}:${{ env.GITHUB_REF_NAME }}"
-            }
-          job_timeout: "3600"
-
-  sonarcloud:
-    runs-on: ubuntu-22.04
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: RDXWorks-actions/checkout@main
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: ./.github/actions/fetch-secrets
-        with:
-          role_name: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
-          app_name: "babylon-gateway"
-          step_name: "sonarcloud"
-          secret_prefix: "SONAR"
-          # SonarCloud access token should be generated from https://sonarcloud.io/account/security/
-          secret_name: "github-actions/common/sonar-token"
-          parse_json: true
-      - name: SonarScanner for .NET
-        uses: RDXWorks-actions/sonarscan-dotnet@v2.3.0
-        with:
-          sonarProjectKey: radixdlt_babylon-gateway
-          sonarProjectName: babylon-gateway
-          sonarOrganization: radixdlt-github
-          dotnetTestArguments: --filter RadixDlt.NetworkGateway.UnitTests --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-          sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          phylum_token: ${{ secrets.PHYLUM_API_KEY }}
+          cmd: |
+            phylum-ci \
+              -vv \
+              --audit \
+              --all-deps
+#  snyk-scan:
+#    name: snyk scan
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: RDXWorks-actions/checkout@main
+#      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+#        with:
+#          role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
+#          app_name: 'babylon-gateway'
+#          step_name: 'snyk-scan'
+#          secret_prefix: 'SNYK'
+#          secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
+#          parse_json: true
+#      - name: Setup .NET SDK
+#        uses: RDXWorks-actions/setup-dotnet@main
+#        with:
+#          dotnet-version: ${{ env.DOTNET_VERSION }}
+#      - name: Install dependencies
+#        run: dotnet restore
+#      - name: Run Snyk to check for deps vulnerabilities
+#        uses: RDXWorks-actions/snyk-actions/dotnet@master
+#        with:
+#          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=critical
+#      - name: Run Snyk to check for code vulnerabilities
+#        uses: RDXWorks-actions/snyk-actions/dotnet@master
+#        with:
+#          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=high
+#          command: code test
+#      - name: Generate SBOM # check SBOM can be generated but nothing is done with it
+#        uses: RDXWorks-actions/snyk-actions/dotnet@master
+#        with:
+#          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json > sbom.json
+#          command: sbom
+#
+#  build:
+#    runs-on: ubuntu-22.04
+#    steps:
+#      - uses: RDXWorks-actions/checkout@main
+#      - name: Setup .NET SDK
+#        uses: RDXWorks-actions/setup-dotnet@main
+#        with:
+#          dotnet-version: ${{ env.DOTNET_VERSION }}
+#      - name: Install dependencies
+#        run: dotnet restore
+#      - name: Build
+#        run: dotnet build --configuration Release --no-restore
+#      - name: Unit tests
+#        # Add --verbosity normal to get more noisy logs if required for debugging
+#        run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
+#
+#  setup-tags:
+#    runs-on: ubuntu-22.04
+#    outputs:
+#      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
+#      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
+#      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
+#    steps:
+#      - uses: RDXWorks-actions/checkout@main
+#      - name: Setup tags for docker image
+#        id: setup_tags
+#        uses: ./.github/actions/set-variables
+#        with:
+#          github_event_name: ${{ github.event_name }}
+#          github_action_name: ${{ github.event.action}}
+#      - name: Publish Gateway Settings
+#        uses: RDXWorks-actions/upload-artifact@main
+#        with:
+#          path: Directory.Build.props
+#          name: build_props
+#          retention-days: 1
+#
+#  docker-database-migrations-private:
+#    name: AMD Migration
+#    needs:
+#      - setup-tags
+#    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+#    with:
+#      runs_on: ubuntu-22.04
+#      image_registry: "docker.io"
+#      image_organization: "radixdlt"
+#      image_name: "private-babylon-ng-database-migrations"
+#      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}-amd64
+#      context: "."
+#      dockerfile: "./apps/DatabaseMigrations/Dockerfile"
+#      platforms: "linux/amd64"
+#      restore_artifact: "true"
+#      artifact_location: "./"
+#      artifact_name: build_props
+#      provenance: "false"
+#      scan_image: true
+#      snyk_target_ref: ${{ github.ref_name }}
+#      cache_tag_suffix: "AMD"
+#
+#  docker-database-migrations-private-arm:
+#    name: ARM Migration
+#    needs:
+#      - setup-tags
+#    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+#    with:
+#      runs_on: selfhosted-ubuntu-22.04-arm
+#      image_registry: "docker.io"
+#      image_organization: "radixdlt"
+#      image_name: "private-babylon-ng-database-migrations"
+#      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}-arm64
+#      context: "."
+#      dockerfile: "./apps/DatabaseMigrations/Dockerfile"
+#      platforms: "linux/arm64"
+#      restore_artifact: "true"
+#      artifact_location: "./"
+#      artifact_name: build_props
+#      provenance: "false"
+#      disable_qemu: true
+#      cache_tag_suffix: "ARM"
+#
+#  docker-data-aggregator-private:
+#    name: AMD Aggregator
+#    needs:
+#      - setup-tags
+#    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+#    with:
+#      runs_on: ubuntu-22.04
+#      image_registry: "docker.io"
+#      image_organization: "radixdlt"
+#      image_name: "private-babylon-ng-data-aggregator"
+#      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}-amd64
+#      context: "."
+#      dockerfile: "./apps/DataAggregator/Dockerfile"
+#      platforms: "linux/amd64"
+#      restore_artifact: "true"
+#      artifact_location: "./"
+#      artifact_name: build_props
+#      provenance: "false"
+#      scan_image: true
+#      snyk_target_ref: ${{ github.ref_name }}
+#      cache_tag_suffix: "AMD"
+#
+#  docker-data-aggregator-private-arm:
+#    name: ARM Aggregator
+#    needs:
+#      - setup-tags
+#    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+#    with:
+#      runs_on: selfhosted-ubuntu-22.04-arm
+#      image_registry: "docker.io"
+#      image_organization: "radixdlt"
+#      image_name: "private-babylon-ng-data-aggregator"
+#      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}-arm64
+#      context: "."
+#      dockerfile: "./apps/DataAggregator/Dockerfile"
+#      platforms: "linux/arm64"
+#      restore_artifact: "true"
+#      artifact_location: "./"
+#      artifact_name: build_props
+#      provenance: "false"
+#      disable_qemu: true
+#      cache_tag_suffix: "ARM"
+#
+#  docker-gateway-api-private:
+#    name: AMD Gateway
+#    needs:
+#      - setup-tags
+#    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+#    with:
+#      runs_on: ubuntu-22.04
+#      image_registry: "docker.io"
+#      image_organization: "radixdlt"
+#      image_name: "private-babylon-ng-gateway-api"
+#      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}-amd64
+#      context: "."
+#      dockerfile: "./apps/GatewayApi/Dockerfile"
+#      platforms: "linux/amd64"
+#      restore_artifact: "true"
+#      artifact_location: "./"
+#      artifact_name: build_props
+#      provenance: "false"
+#      scan_image: true
+#      snyk_target_ref: ${{ github.ref_name }}
+#      cache_tag_suffix: "AMD"
+#
+#  docker-gateway-api-private-arm:
+#    name: ARM Gateway
+#    needs:
+#      - setup-tags
+#    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+#    with:
+#      runs_on: selfhosted-ubuntu-22.04-arm
+#      image_registry: "docker.io"
+#      image_organization: "radixdlt"
+#      image_name: "private-babylon-ng-gateway-api"
+#      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}-arm64
+#      context: "."
+#      dockerfile: "./apps/GatewayApi/Dockerfile"
+#      platforms: "linux/arm64"
+#      restore_artifact: "true"
+#      artifact_location: "./"
+#      artifact_name: build_props
+#      provenance: "false"
+#      disable_qemu: true
+#      cache_tag_suffix: "ARM"
+#
+#  join-gateway-images:
+#    name: Gateway
+#    needs:
+#      - docker-gateway-api-private
+#      - docker-gateway-api-private-arm
+#    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
+#    with:
+#      amd_meta_data_json: ${{ needs.docker-gateway-api-private.outputs.json }}
+#      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
+#    secrets:
+#      role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
+#
+#  join-aggregator-images:
+#    name: Aggregator
+#    needs:
+#      - docker-data-aggregator-private
+#      - docker-data-aggregator-private-arm
+#    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
+#    with:
+#      amd_meta_data_json: ${{ needs.docker-data-aggregator-private.outputs.json }}
+#      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
+#    secrets:
+#      role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
+#
+#  join-migrations-images:
+#    name: Migration
+#    needs:
+#      - docker-database-migrations-private
+#      - docker-database-migrations-private-arm
+#    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
+#    with:
+#      amd_meta_data_json: ${{ needs.docker-database-migrations-private.outputs.json }}
+#      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
+#    secrets:
+#      role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
+#
+#  deploy-on-mardunet:
+#    runs-on: ubuntu-22.04
+#    needs:
+#      - docker-gateway-api-private
+#      - docker-data-aggregator-private
+#      - docker-database-migrations-private
+#      - join-gateway-images
+#      - join-aggregator-images
+#      - join-migrations-images
+#      - setup-tags
+#    if: github.ref == 'refs/heads/develop'
+#    permissions:
+#      id-token: write
+#      contents: read
+#    steps:
+#      - uses: RDXWorks-actions/checkout@main
+#      - uses: ./.github/actions/fetch-secrets
+#        with:
+#          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
+#          app_name: "babylon-gateway"
+#          step_name: "deploy-on-mardunet"
+#          secret_prefix: "CF_GITHUB_WORKER"
+#          secret_name: "github-actions/radixdlt/babylon-gateway/cloudflare"
+#          parse_json: true
+#      - name: Process ci.env
+#        run: |
+#          export $(grep -v '^#' ./deployment/ci.env | xargs)
+#          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
+#      - name: Check if ci.env changed
+#        id: changed-files
+#        uses: RDXWorks-actions/changed-files@main
+#        with:
+#          files: |
+#            deployment/ci.env
+#      - name: Trigger deployment event ${{ github.ref }}
+#        env:
+#          NAMESPACE: "ng-mardunet"
+#          EVENT_TYPE: "ng_babylon_mardunet"
+#        run: |
+#          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
+#            --header 'Accept: application/vnd.github.v3+json' \
+#            --header 'Authorization: Basic ${{env.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
+#            --header 'Content-Type: application/json' \
+#            --data-raw '{
+#                "event_type": "${{env.EVENT_TYPE}}",
+#                "client_payload": {
+#                  "namespace_postfix": "${{env.NAMESPACE}}",
+#                  "ci_env_changed": "${{steps.changed-files.outputs.any_changed}}",
+#                  "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
+#                  "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
+#                  "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}",
+#                  "core_docker_tag": "${{env.FULLNODE_VERSION}}"
+#                }
+#            }'
+#
+#  deploy-pr:
+#    runs-on: ubuntu-22.04
+#    needs:
+#      - docker-gateway-api-private
+#      - docker-data-aggregator-private
+#      - docker-database-migrations-private
+#      - join-gateway-images
+#      - join-aggregator-images
+#      - join-migrations-images
+#      - setup-tags
+#    if: github.event_name == 'pull_request'
+#    permissions:
+#      id-token: write
+#      contents: read
+#    steps:
+#      - uses: RDXWorks-actions/checkout@main
+#      - uses: ./.github/actions/fetch-secrets
+#        with:
+#          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
+#          app_name: "babylon-gateway"
+#          step_name: "deploy-pr"
+#          secret_prefix: "CF_GITHUB_WORKER"
+#          secret_name: "github-actions/radixdlt/babylon-gateway/cloudflare"
+#          parse_json: true
+#      - name: setup "namespace_postfix"
+#        run: |
+#          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+#          echo "NAMESPACE=pr-$pull_number" >> $GITHUB_ENV
+#      - name: Trigger pull request deployment event ${{ github.ref }}
+#        env:
+#          EVENT_TYPE: "ng_babylon_pr"
+#        run: |
+#          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
+#            --header 'Accept: application/vnd.github.v3+json' \
+#            --header 'Authorization:  Basic ${{env.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
+#            --header 'Content-Type: application/json' \
+#            --data-raw '{
+#                "event_type": "${{env.EVENT_TYPE}}",
+#                "client_payload": {
+#                    "namespace_postfix": "${{env.NAMESPACE}}",
+#                    "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
+#                    "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
+#                    "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}"
+#                }
+#            }'
+#
+#  ephemeral-deploy-and-test:
+#    runs-on: ubuntu-22.04
+#    needs:
+#      - docker-gateway-api-private
+#      - docker-data-aggregator-private
+#      - docker-database-migrations-private
+#      - join-gateway-images
+#      - join-aggregator-images
+#      - join-migrations-images
+#      - setup-tags
+#    permissions:
+#      id-token: write
+#      contents: read
+#    steps:
+#      - uses: RDXWorks-actions/checkout@main
+#      - uses: ./.github/actions/fetch-secrets
+#        with:
+#          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
+#          app_name: "babylon-gateway"
+#          step_name: "ephemeral-deploy-and-test"
+#          secret_prefix: "JENKINS"
+#          secret_name: "github-actions/radixdlt/babylon-gateway/jenkins-api-token"
+#          parse_json: true
+#      - name: Export branch name in github's environment
+#        run: |
+#          echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+#          echo "GITHUB_REF_NAME=$GITHUB_REF_NAME" >> $GITHUB_ENV
+#          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" >> $GITHUB_ENV
+#      - name: Process ci.env
+#        run: |
+#          export $(grep -v '^#' ./deployment/ci.env | xargs)
+#          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
+#          echo "POSTGRES_VERSION=$POSTGRES_VERSION" >> $GITHUB_ENV
+#      - name: Connect to tailnet
+#        uses: radixdlt/public-iac-resuable-artifacts/tailnet@main
+#        with:
+#          role_name: "arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access"
+#          region: "eu-west-2"
+#          secret_name: "arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/tailscale-public-workflows-DpiE80"
+#      - name: Deploy and test on an ephemeral network
+#        uses: RDXWorks-actions/jenkins-job-trigger-action@master
+#        with:
+#          jenkins_url: "${{ env.JENKINS_URL }}"
+#          jenkins_user: ${{ env.JENKINS_USER }}
+#          jenkins_token: ${{ env.JENKINS_TOKEN }}
+#          job_name: "babylon-testing/job/ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
+#          job_params: |
+#            {
+#              "RADIXDLT_GATEWAY_DOCKER_TAG": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
+#              "RADIXDLT_NODE_DOCKER_TAG": "${{ env.FULLNODE_VERSION }}",
+#              "RADIXDLT_POSTGRES_APP_VERSION": "${{ env.POSTGRES_VERSION }}",
+#              "RADIXDLT_GITHUB_TRIGGER" : "${{ env.GITHUB_REPOSITORY }}:${{ env.GITHUB_REF_NAME }}"
+#            }
+#          job_timeout: "3600"
+#
+#  sonarcloud:
+#    runs-on: ubuntu-22.04
+#    permissions:
+#      id-token: write
+#      contents: read
+#    steps:
+#      - uses: RDXWorks-actions/checkout@main
+#        with:
+#          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+#      - uses: ./.github/actions/fetch-secrets
+#        with:
+#          role_name: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
+#          app_name: "babylon-gateway"
+#          step_name: "sonarcloud"
+#          secret_prefix: "SONAR"
+#          # SonarCloud access token should be generated from https://sonarcloud.io/account/security/
+#          secret_name: "github-actions/common/sonar-token"
+#          parse_json: true
+#      - name: SonarScanner for .NET
+#        uses: RDXWorks-actions/sonarscan-dotnet@v2.3.0
+#        with:
+#          sonarProjectKey: radixdlt_babylon-gateway
+#          sonarProjectName: babylon-gateway
+#          sonarOrganization: radixdlt-github
+#          dotnetTestArguments: --filter RadixDlt.NetworkGateway.UnitTests --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+#          sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
