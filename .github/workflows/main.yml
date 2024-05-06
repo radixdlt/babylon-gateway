@@ -42,6 +42,7 @@ jobs:
             phylum-ci \
               -vv \
               --audit \
+              --force-analysis \
               --all-deps
 #  snyk-scan:
 #    name: snyk scan

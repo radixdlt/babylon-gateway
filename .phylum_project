@@ -3,8 +3,6 @@ name: babylon-gateway
 created_at: 2024-05-06T08:09:00.521877+02:00
 group_name: Interfaces
 depfiles:
-- path: ./sdk/typescript/package-lock.json
-  type: npm
 - path: ./apps/DataAggregator/packages.lock.json
   type: nugetlock
 - path: ./apps/GatewayApi/packages.lock.json
