@@ -201,7 +201,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var transactionsPageRequest = new TransactionStreamPageRequest(
             FromStateVersion: fromLedgerState?.StateVersion,
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
-            PageSize: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
+            PageSize: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
             SearchCriteria: searchCriteria,
             OptIns: request.OptIns ?? GatewayModel.TransactionDetailsOptIns.Default

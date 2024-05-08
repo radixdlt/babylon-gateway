@@ -63,6 +63,7 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
@@ -84,6 +85,7 @@ public interface INetworkConfigurationProvider
 
 public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
+    private readonly ILogger<NetworkConfigurationProvider> _logger;
     private readonly NetworkOptions _networkOptions;
     private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<INetworkConfigurationReaderObserver> _observers;
@@ -92,11 +94,13 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
     public NetworkConfigurationProvider(
         IOptions<NetworkOptions> networkOptions,
         IServiceProvider serviceProvider,
-        IEnumerable<INetworkConfigurationReaderObserver> observers)
+        IEnumerable<INetworkConfigurationReaderObserver> observers,
+        ILogger<NetworkConfigurationProvider> logger)
     {
         _networkOptions = networkOptions.Value;
         _serviceProvider = serviceProvider;
         _observers = observers;
+        _logger = logger;
         _factory = new AsyncLazy<NetworkConfiguration>(ReadNetworkConfiguration, AsyncLazyFlags.RetryOnFailure);
     }
 
@@ -117,9 +121,26 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
             var configuration = await coreApiProvider.StatusApi.StatusNetworkConfigurationPostAsync();
             var status = await coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(_networkOptions.NetworkName));
 
-            var addressTypeDefinitions = configuration.AddressTypes
-                .Select(at => new AddressTypeDefinition(Enum.Parse<AddressEntityType>(at.EntityType.ToString(), true), at.HrpPrefix, (byte)at.AddressBytePrefix, at.AddressByteLength))
-                .ToArray();
+            var addressTypeDefinitions = new List<AddressTypeDefinition>();
+
+            foreach (var addressType in configuration.AddressTypes)
+            {
+                var canParseAddressType = Enum.TryParse<AddressEntityType>(addressType.EntityType.ToString(), true, out var addressEntityType);
+
+                if (!canParseAddressType)
+                {
+                    _logger.LogWarning("Not recognized address type: {addressType} will be ignored. Please check if AddressEntityType list is complete.", addressType.EntityType.ToString());
+                    continue;
+                }
+
+                var definition = new AddressTypeDefinition(
+                    addressEntityType,
+                    addressType.HrpPrefix,
+                    (byte)addressType.AddressBytePrefix,
+                    addressType.AddressByteLength);
+
+                addressTypeDefinitions.Add(definition);
+            }
 
             string GetHrpPrefix(AddressEntityType entityType)
             {

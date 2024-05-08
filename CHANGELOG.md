@@ -5,7 +5,6 @@ Release built: _not published yet_
 > **Breaking Changes:**
 > - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending.
 > - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
-> - Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
 > - Renamed `state.recovery_role_recovery_attempt` property from `timed_recovery_allowed_after` to `allow_timed_recovery_after` returned from `/state/entity/details` when querying for access controller.
 
 - Fixed broken ledger state lookup (`at_ledger_state`) when using epoch-only constraint and given epoch did not result in any transactions at round `1`.
@@ -13,6 +12,7 @@ Release built: _not published yet_
 - Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
 - Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.
 - Fixed pagination of the `/state/validators/list` endpoint where incorrect `cursor` was generated previously.
+- Fixed invalid date-time format for some entity state properties (most notably access controllers and their `recovery_role_recovery_attempt.allow_timed_recovery_after.date_time` property) that was dependent on OS-level locale setup.
 - Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
 - Changed MVC controller and action names. It has no effect on the API itself, but alters prometheus `controler` and `action` labels.
   - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.KeysPage`,
@@ -29,7 +29,6 @@ Release built: _not published yet_
 - Reworked KVStores storage and changed API surface of this area to improve overall performance. 
 
 ### API Changes
-- Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
 - Changed the `MetadataInstantValue` type and its array counterpart `MetadataInstantArrayValue` to clamp the `value` property within the RFC-3339 compatible date-time year range `1583` to `9999`. Added a `unix_timestamp_seconds` property to these types to give the exact unclamped numerical timestamp value.
 - Added `role_assignments` property to the `StateEntityDetailsResponsePackageDetails`. All global component details returned by the `/state/entity/details` endpoint contain role assignments now.
 - Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.
@@ -43,6 +42,8 @@ Release built: _not published yet_
 - Added new endpoint `/state/package/page/codes` returning paginable iterator over package codes.
 - Added new endpoint `/state/entity/page/schemas` returning paginable iterator over entity schemas.
 - Added new endpoint `/transaction/account-deposit-pre-validation` which allows to pre-validate if deposits can succeed based on account deposit settings and badges presented, before submitting the transaction. 
+- Fixed wrong request validation logic for maximum number of items in `/state/non-fungible/data`, `/state/non-fungible/data` and `/state/non-fungible/data` endpoints.
+- `limit_per_page` request parameter is no longer validated against `*MaxPageSize` API configuration parameters. In case requested limit exceeds API configuration maximum value is used. This change is meant to reduce clients need to understand and honor API configuration. 
 
 ### Database changes
 - Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.

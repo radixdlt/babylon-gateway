@@ -682,7 +682,8 @@ tags:
 
       ### Pagination
 
-      If the `limit_per_page` request parameter is lower than the number of transactions to be returned, a `next_cursor` will be returned. It can be used in subsequent requests as the `cursor` parameter to fetch further pages.
+      If the `limit_per_page` request hint parameter is lower than the overall number of transactions to be returned or the internal limiter kick in, a `next_cursor` will be returned.
+      It can be used in subsequent requests as the `cursor` parameter to fetch further pages.
 
       For example, the following request will return a cursor:
       ```
@@ -5358,7 +5359,9 @@ components:
             - fields
           properties:
             variant_id:
-              type: string
+              type: integer
+              minimum: 0
+              maximum: 255
             variant_name:
               type: string
             fields:
@@ -5387,6 +5390,7 @@ components:
         - type: object
           required:
             - element_kind
+            - elements
             - hex
           properties:
             element_kind:
@@ -5445,7 +5449,7 @@ components:
             - value
           properties:
             value:
-              $ref: "#/components/schemas/Address"
+              type: string
     ProgrammaticScryptoSborValueOwn:
       allOf:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
@@ -5454,7 +5458,7 @@ components:
             - value
           properties:
             value:
-              $ref: "#/components/schemas/Address"
+              type: string
     ProgrammaticScryptoSborValueDecimal:
       allOf:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"

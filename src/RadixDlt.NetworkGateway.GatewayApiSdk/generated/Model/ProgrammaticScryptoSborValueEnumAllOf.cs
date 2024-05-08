@@ -106,13 +106,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="variantId">variantId (required).</param>
         /// <param name="variantName">variantName.</param>
         /// <param name="fields">fields (required).</param>
-        public ProgrammaticScryptoSborValueEnumAllOf(string variantId = default(string), string variantName = default(string), List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>))
+        public ProgrammaticScryptoSborValueEnumAllOf(int variantId = default(int), string variantName = default(string), List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>))
         {
-            // to ensure "variantId" is required (not null)
-            if (variantId == null)
-            {
-                throw new ArgumentNullException("variantId is a required property for ProgrammaticScryptoSborValueEnumAllOf and cannot be null");
-            }
             this.VariantId = variantId;
             // to ensure "fields" is required (not null)
             if (fields == null)
@@ -127,7 +122,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets VariantId
         /// </summary>
         [DataMember(Name = "variant_id", IsRequired = true, EmitDefaultValue = true)]
-        public string VariantId { get; set; }
+        public int VariantId { get; set; }
 
         /// <summary>
         /// Gets or Sets VariantName
@@ -189,8 +184,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             return 
                 (
                     this.VariantId == input.VariantId ||
-                    (this.VariantId != null &&
-                    this.VariantId.Equals(input.VariantId))
+                    this.VariantId.Equals(input.VariantId)
                 ) && 
                 (
                     this.VariantName == input.VariantName ||
@@ -214,10 +208,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.VariantId != null)
-                {
-                    hashCode = (hashCode * 59) + this.VariantId.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.VariantId.GetHashCode();
                 if (this.VariantName != null)
                 {
                     hashCode = (hashCode * 59) + this.VariantName.GetHashCode();

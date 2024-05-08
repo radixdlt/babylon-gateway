@@ -80,17 +80,20 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("DefaultNonFungibleIdsPageSize")]
     public int DefaultNonFungibleIdsPageSize { get; set; } = 100;
 
-    [ConfigurationKeyName("RequestTimeout")]
-    public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
-
     [ConfigurationKeyName("DefaultPageSize")]
     public int DefaultPageSize { get; set; } = 100;
 
-    [ConfigurationKeyName("HeavyPageSize")]
-    public int HeavyPageSize { get; set; } = 10;
+    [ConfigurationKeyName("DefaultHeavyCollectionsPageSize")]
+    public int DefaultHeavyCollectionsPageSize { get; set; } = 10;
+
+    [ConfigurationKeyName("MaxHeavyCollectionsPageSize")]
+    public int MaxHeavyCollectionsPageSize { get; set; } = 20;
 
     [ConfigurationKeyName("ValidatorsPageSize")]
     public int ValidatorsPageSize { get; set; } = 1000;
+
+    [ConfigurationKeyName("RequestTimeout")]
+    public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
     [ConfigurationKeyName("StateEntityDetailsPageSize")]
     public int StateEntityDetailsMaxPageSize { get; set; } = 20;
@@ -106,6 +109,22 @@ public sealed class EndpointOptions
 
     [ConfigurationKeyName("TransactionStreamMaxFilterCount")]
     public int TransactionStreamMaxFilterCount { get; set; } = 10;
+
+    public int ResolvePageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, DefaultPageSize, MaxPageSize);
+
+    public int ResolveNonFungibleIdsPageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, DefaultNonFungibleIdsPageSize, MaxPageSize);
+
+    public int ResolveHeavyPageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, DefaultHeavyCollectionsPageSize, MaxHeavyCollectionsPageSize);
+
+    private int ResolvePageSize(int? requestPageSize, int defaultPageSize, int maxPageSize)
+    {
+        if (requestPageSize.HasValue)
+        {
+            return requestPageSize.Value < maxPageSize ? requestPageSize.Value : maxPageSize;
+        }
+
+        return defaultPageSize;
+    }
 }
 
 internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptions>
@@ -120,7 +139,7 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
         RuleFor(x => x.DefaultTransactionsStreamPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
         RuleFor(x => x.DefaultPageSize).GreaterThan(0);
-        RuleFor(x => x.HeavyPageSize).GreaterThan(0);
+        RuleFor(x => x.MaxHeavyCollectionsPageSize).GreaterThan(0);
         RuleFor(x => x.ValidatorsPageSize).GreaterThan(0);
         RuleFor(x => x.StateEntityDetailsMaxPageSize).GreaterThan(0);
         RuleFor(x => x.ExplicitMetadataMaxItems).GreaterThan(0);

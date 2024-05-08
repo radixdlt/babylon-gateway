@@ -105,7 +105,7 @@ internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
             (EntityAddress)request.KeyValueStoreAddress,
             ledgerState,
             GatewayModel.StateKeyValueStoreKeysCursor.FromCursorString(request.Cursor),
-            request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize,
+            _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
             token);
     }
 
