@@ -62,11 +62,27 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public interface IPaginableRequest
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("account_locker_entry_resource_vault_definition")]
+public class AccountLockerEntryResourceVaultDefinition
 {
-    public LedgerStateSelector AtLedgerState { get; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public string Cursor { get; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("account_locker_definition_id")]
+    public long AccountLockerDefinitionId { get; set; }
+
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("vault_entity_id")]
+    public long VaultEntityId { get; set; }
 }

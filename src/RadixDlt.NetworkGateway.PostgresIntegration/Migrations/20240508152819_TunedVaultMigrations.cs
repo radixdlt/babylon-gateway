@@ -62,11 +62,40 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-public interface IPaginableRequest
+#nullable disable
+
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    public LedgerStateSelector AtLedgerState { get; }
+    /// <inheritdoc />
+    public partial class TunedVaultMigrations : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_entity_vault_history_vault_entity_id_from_state_version",
+                table: "entity_vault_history");
 
-    public string Cursor { get; }
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_vault_history_vault_entity_id_from_state_version",
+                table: "entity_vault_history",
+                columns: new[] { "vault_entity_id", "from_state_version" });
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_entity_vault_history_vault_entity_id_from_state_version",
+                table: "entity_vault_history");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_vault_history_vault_entity_id_from_state_version",
+                table: "entity_vault_history",
+                columns: new[] { "vault_entity_id", "from_state_version" },
+                filter: "discriminator = 'non_fungible'");
+        }
+    }
 }

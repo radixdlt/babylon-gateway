@@ -73,7 +73,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Type, long StateVersion)
 {
-    private readonly IList<Action> _postResolveActions = new List<Action>();
+    public enum PostResolvePriority
+    {
+        High,
+        Normal,
+        Low,
+    }
+
+    private readonly IList<Action> _postResolveActionsHighPriority = new List<Action>();
+    private readonly IList<Action> _postResolveActionsNormalPriority = new List<Action>();
+    private readonly IList<Action> _postResolveActionsLowPriority = new List<Action>();
     private Entity? _databaseEntity;
     private ReferencedEntity? _immediateParentReference;
     private bool _resolved;
@@ -150,9 +159,17 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
         return instance;
     }
 
-    public void PostResolveConfigure<T>(Action<T> action)
+    public void PostResolveConfigure<T>(Action<T> action, PostResolvePriority priority = PostResolvePriority.Normal)
     {
-        _postResolveActions.Add(() =>
+        var list = priority switch
+        {
+            PostResolvePriority.High => _postResolveActionsHighPriority,
+            PostResolvePriority.Normal => _postResolveActionsNormalPriority,
+            PostResolvePriority.Low => _postResolveActionsLowPriority,
+            _ => throw new ArgumentOutOfRangeException(nameof(priority), priority, null),
+        };
+
+        list.Add(() =>
         {
             action.Invoke(GetDatabaseEntity<T>());
         });
@@ -170,13 +187,42 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
             throw new InvalidOperationException("Already configured");
         }
 
-        foreach (var action in _postResolveActions)
+        foreach (var action in _postResolveActionsHighPriority)
         {
             action.Invoke();
         }
 
-        _postResolveActions.Clear();
+        foreach (var action in _postResolveActionsNormalPriority)
+        {
+            action.Invoke();
+        }
+
+        foreach (var action in _postResolveActionsLowPriority)
+        {
+            action.Invoke();
+        }
+
+        _postResolveActionsNormalPriority.Clear();
+        _postResolveActionsHighPriority.Clear();
+        _postResolveActionsLowPriority.Clear();
         _postResolveConfigurationInvoked = true;
+    }
+
+    public bool TryGetDatabaseEntity<T>([MaybeNullWhen(false)] out T? entity)
+        where T : class
+    {
+        entity = null;
+
+        var dbEntity = GetDatabaseEntityInternal();
+
+        if (dbEntity is T typedDbEntity)
+        {
+            entity = typedDbEntity;
+
+            return true;
+        }
+
+        return false;
     }
 
     public T GetDatabaseEntity<T>()

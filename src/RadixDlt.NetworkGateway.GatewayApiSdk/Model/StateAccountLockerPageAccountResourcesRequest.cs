@@ -64,9 +64,7 @@
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IPaginableRequest
+public partial class StateAccountLockerPageAccountResourcesRequest : IPaginableRequest
 {
-    public LedgerStateSelector AtLedgerState { get; }
 
-    public string Cursor { get; }
 }

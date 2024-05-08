@@ -62,11 +62,20 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Collections.Generic;
 
-public interface IPaginableRequest
+namespace RadixDlt.CoreApiSdk.Model;
+
+public partial class AccountLockerAccountClaimsEntrySubstate : IEntityAddressPointer, IEntityOwner
 {
-    public LedgerStateSelector AtLedgerState { get; }
+    public IEnumerable<string> GetEntityAddresses()
+    {
+        yield return Key.AccountAddress;
+        yield return Value.ResourceVaults.EntityAddress;
+    }
 
-    public string Cursor { get; }
+    public IEnumerable<EntityReference> GetOwnedEntities()
+    {
+        yield return Value.ResourceVaults;
+    }
 }

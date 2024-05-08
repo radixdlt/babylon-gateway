@@ -62,11 +62,26 @@
  * permissions under this License.
  */
 
+using System.Runtime.Serialization;
+
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IPaginableRequest
+[DataContract]
+public sealed record StateAccountLockerAccountResourcesCursor(long? StateVersionBoundary, long? IdBoundary)
 {
-    public LedgerStateSelector AtLedgerState { get; }
+    [DataMember(Name = "sv", EmitDefaultValue = false)]
+    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
 
-    public string Cursor { get; }
+    [DataMember(Name = "id", EmitDefaultValue = false)]
+    public long? IdBoundary { get; set; } = IdBoundary;
+
+    public static StateAccountLockerAccountResourcesCursor FromCursorString(string cursorString)
+    {
+        return Serializations.FromBase64JsonOrDefault<StateAccountLockerAccountResourcesCursor>(cursorString);
+    }
+
+    public string ToCursorString()
+    {
+        return Serializations.AsBase64Json(this);
+    }
 }

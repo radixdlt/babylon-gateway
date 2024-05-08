@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -148,6 +148,52 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_account_default_deposit_rule_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_locker_entry_definition",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_locker_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    account_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    key_value_store_entity_id = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_locker_entry_definition", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_locker_entry_resource_vault_definition",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_locker_definition_id = table.Column<long>(type: "bigint", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    vault_entity_id = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_locker_entry_resource_vault_definition", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_locker_entry_touch_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_locker_definition_id = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_locker_entry_touch_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -240,7 +286,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     locked_owner_stake_unit_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     pending_owner_stake_unit_unlock_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     royalty_vault_of_entity_id = table.Column<long>(type: "bigint", nullable: true),
-                    resource_entity_id = table.Column<long>(type: "bigint", nullable: true)
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    account_locker_of_account_locker_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    account_locker_of_account_entity_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -880,6 +928,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "account_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_account_locker_entry_definition_account_locker_entity_id_ac~",
+                table: "account_locker_entry_definition",
+                columns: new[] { "account_locker_entity_id", "account_entity_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_locker_entry_resource_vault_definition_account_lock~",
+                table: "account_locker_entry_resource_vault_definition",
+                columns: new[] { "account_locker_definition_id", "from_state_version" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_locker_entry_touch_history_account_locker_definitio~",
+                table: "account_locker_entry_touch_history",
+                columns: new[] { "account_locker_definition_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_account_resource_preference_rule_aggregate_history_account_~",
                 table: "account_resource_preference_rule_aggregate_history",
                 columns: new[] { "account_entity_id", "from_state_version" });
@@ -1215,6 +1280,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "account_default_deposit_rule_history");
+
+            migrationBuilder.DropTable(
+                name: "account_locker_entry_definition");
+
+            migrationBuilder.DropTable(
+                name: "account_locker_entry_resource_vault_definition");
+
+            migrationBuilder.DropTable(
+                name: "account_locker_entry_touch_history");
 
             migrationBuilder.DropTable(
                 name: "account_resource_preference_rule_aggregate_history");

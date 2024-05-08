@@ -1826,7 +1826,7 @@ paths:
 
   /state/account-locker/page/account-resources:
     post:
-      operationId: TBD-state-account-locker-page-account-resources
+      operationId: AccountLockerAccountResourcesPage
       summary: TBD
       description: TBD
       tags:
@@ -1847,9 +1847,9 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /wallet/tbd: # TODO ok, we need to figure out suitable naming scheme, and then rename some types
+  /state/account-locker/tbd: # TODO ok, we need to figure out suitable naming scheme, and then rename some types
     post:
-      operationId: TBD-wallet-tbd-tbd
+      operationId: AccountLockerTBD
       summary: TBD
       description: TBD
       tags:
@@ -1859,14 +1859,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WalletTbdRequest"
+              $ref: "#/components/schemas/StateAccountLockerTbdRequest"
       responses:
         "200":
           description: Validators Uptime
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WalletTbdResponse"
+                $ref: "#/components/schemas/StateAccountLockerTbdResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -4640,6 +4640,58 @@ components:
             account_address:
               $ref: "#/components/schemas/Address"
 
+
+    StateAccountLockerTbdRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          required:
+            - lookup
+          properties:
+            lookup:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateAccountLockerTbdRequestLookupTuple"
+      example:
+        TBD
+    StateAccountLockerTbdRequestLookupTuple:
+      allOf:
+        - $ref: "#/components/schemas/FromLedgerStateMixin"
+        - type: object
+          required:
+            - account_locker_address
+            - account_address
+          properties:
+            account_locker_address:
+              $ref: "#/components/schemas/Address"
+            account_address:
+              $ref: "#/components/schemas/Address"
+
+    StateAccountLockerTbdResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateAccountLockerTbdResponseItem"
+    StateAccountLockerTbdResponseItem:
+      type: object
+      required:
+        - account_locker_address
+        - account_address
+        - resource_last_stored_at_state_version
+      properties:
+        account_locker_address:
+          $ref: "#/components/schemas/Address"
+        account_address:
+          $ref: "#/components/schemas/Address"
+        resource_last_stored_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
     #
     # /state/validators/* Request & Response Types
     #
@@ -4687,62 +4739,6 @@ components:
           properties:
             validators:
               $ref: "#/components/schemas/ValidatorUptimeCollection"
-
-    #
-    # /wallet/* Request & Response Types
-    #
-
-    WalletTbdRequest:
-      allOf:
-        - $ref: "#/components/schemas/AtLedgerStateMixin" # TODO do we even want to support that? if yes, it could technically fall under regular /state/* endpoints
-        - type: object
-          required:
-            - lookup
-          properties:
-            lookup:
-              type: array
-              items:
-                $ref: "#/components/schemas/WalletTbdRequestLookupTuple"
-      example:
-        TBD
-    WalletTbdRequestLookupTuple:
-      allOf:
-        - $ref: "#/components/schemas/FromLedgerStateMixin"
-        - type: object
-          required:
-            - account_locker_address
-            - account_address
-          properties:
-            account_locker_address:
-              $ref: "#/components/schemas/Address"
-            account_address:
-              $ref: "#/components/schemas/Address"
-
-    WalletTbdResponse:
-      allOf:
-        - $ref: "#/components/schemas/LedgerStateMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/WalletTbdResponseItem"
-    WalletTbdResponseItem:
-      type: object
-      required:
-        - account_locker_address
-        - account_address
-        - resource_last_stored_at_state_version
-      properties:
-        account_locker_address:
-          $ref: "#/components/schemas/Address"
-        account_address:
-          $ref: "#/components/schemas/Address"
-        resource_last_stored_at_state_version:
-          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
-
 
     #
     # Errors

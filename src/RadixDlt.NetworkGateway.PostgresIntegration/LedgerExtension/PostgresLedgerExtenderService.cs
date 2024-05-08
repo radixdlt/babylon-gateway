@@ -474,13 +474,57 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.ValidatorFieldStateSubstate validator)
                         {
-                            referencedEntity.PostResolveConfigure(
-                                (GlobalValidatorEntity e) =>
+                            referencedEntity.PostResolveConfigure((GlobalValidatorEntity e) =>
                             {
                                 e.StakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.Value.StakeXrdVault.EntityAddress).DatabaseId;
                                 e.PendingXrdWithdrawVault = referencedEntities.Get((EntityAddress)validator.Value.PendingXrdWithdrawVault.EntityAddress).DatabaseId;
                                 e.LockedOwnerStakeUnitVault = referencedEntities.Get((EntityAddress)validator.Value.LockedOwnerStakeUnitVault.EntityAddress).DatabaseId;
                                 e.PendingOwnerStakeUnitUnlockVault = referencedEntities.Get((EntityAddress)validator.Value.PendingOwnerStakeUnitUnlockVault.EntityAddress).DatabaseId;
+                            });
+                        }
+
+                        // we want to annotate AccountLocker-related KeyValueStores with corresponding AccountLocker+Account pair
+                        if (substateData is CoreModel.AccountLockerAccountClaimsEntrySubstate accountLocker)
+                        {
+                            var account = accountLocker.Key.AccountAddress;
+                            var keyValueStore = accountLocker.Value.ResourceVaults;
+
+                            referencedEntities
+                                .GetOrAdd((EntityAddress)keyValueStore.EntityAddress, ea => new ReferencedEntity(ea, keyValueStore.EntityType, stateVersion))
+                                .PostResolveConfigure((InternalKeyValueStoreEntity e) =>
+                                {
+                                    e.AccountLockerOfAccountLockerEntityId = referencedEntity.DatabaseId;
+                                    e.AccountLockerOfAccountEntityId = referencedEntities.Get((EntityAddress)account).DatabaseId;
+                                });
+                        }
+
+                        // we want to annotate AccountLocker-related Vaults using AccountLocker+Account pair obtained from corresponding KeyValueStore
+                        if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate && referencedEntity.Type is CoreModel.EntityType.InternalFungibleVault or CoreModel.EntityType.InternalNonFungibleVault)
+                        {
+                            referencedEntity.PostResolveConfigure((Entity e) =>
+                            {
+                                if (!e.ParentAncestorId.HasValue)
+                                {
+                                    throw new UnreachableException("Vault cannot be exists without a parent entity.");
+                                }
+
+                                var parent = referencedEntities.GetByDatabaseId(e.ParentAncestorId.Value);
+
+                                if (parent.Type == CoreModel.EntityType.InternalKeyValueStore)
+                                {
+                                    var parentKeyValueStore = parent.GetDatabaseEntity<InternalKeyValueStoreEntity>();
+
+                                    if (parentKeyValueStore.AccountLockerOfAccountLockerEntityId.HasValue && parentKeyValueStore.AccountLockerOfAccountEntityId.HasValue)
+                                    {
+                                        // as we're running in the context of PostResolveConfigure with regular priority we must fallback to low priority action
+                                        referencedEntity.PostResolveConfigure(
+                                            (VaultEntity ve) =>
+                                            {
+                                                ve.AccountLockerOfAccountLockerEntityId = parentKeyValueStore.AccountLockerOfAccountLockerEntityId.Value;
+                                                ve.AccountLockerOfAccountEntityId = parentKeyValueStore.AccountLockerOfAccountEntityId.Value;
+                                            }, ReferencedEntity.PostResolvePriority.Low);
+                                    }
+                                }
                             });
                         }
                     }
@@ -676,6 +720,7 @@ UPDATE pending_transactions
                     CoreModel.EntityType.GlobalTwoResourcePool => new GlobalTwoResourcePoolEntity(),
                     CoreModel.EntityType.GlobalMultiResourcePool => new GlobalMultiResourcePoolEntity(),
                     CoreModel.EntityType.GlobalTransactionTracker => new GlobalTransactionTrackerEntity(),
+                    CoreModel.EntityType.GlobalAccountLocker => new GlobalAccountLockerEntity(),
                     _ => throw new ArgumentOutOfRangeException(nameof(referencedEntity.Type), referencedEntity.Type, "Unexpected entity type"),
                 };
 
@@ -733,16 +778,17 @@ UPDATE pending_transactions
                     throw new InvalidOperationException($"Unable to compute ancestors of entity {childAddress}: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
                 }
 
+                // we must rely on high priority PostResolveConfigure as other callbacks rely on entity hierarchy tree
                 referencedEntities
                     .Get(childAddress)
                     .PostResolveConfigure(
                         (Entity dbe) =>
-                    {
-                        dbe.AncestorIds = allAncestors;
-                        dbe.ParentAncestorId = parentId.Value;
-                        dbe.OwnerAncestorId = ownerId.Value;
-                        dbe.GlobalAncestorId = globalId.Value;
-                    });
+                        {
+                            dbe.AncestorIds = allAncestors;
+                            dbe.ParentAncestorId = parentId.Value;
+                            dbe.OwnerAncestorId = ownerId.Value;
+                            dbe.GlobalAncestorId = globalId.Value;
+                        }, ReferencedEntity.PostResolvePriority.High);
             }
 
             referencedEntities.InvokePostResolveConfiguration();
@@ -772,6 +818,7 @@ UPDATE pending_transactions
         var accountDefaultDepositRuleProcessor = new AccountDefaultDepositRuleProcessor(processorContext);
         var keyValueStoreProcessor = new KeyValueStoreProcessor(processorContext);
         var validatorProcessor = new ValidatorProcessor(processorContext, referencedEntities);
+        var accountLockerProcessor = new AccountLockerProcessor(processorContext, referencedEntities, networkConfiguration.Id);
 
         // step: scan all substates & events to figure out changes
         {
@@ -934,6 +981,7 @@ UPDATE pending_transactions
                         accountAuthorizedDepositorsProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         keyValueStoreProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         validatorProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, passingEpoch);
+                        accountLockerProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -1184,6 +1232,7 @@ UPDATE pending_transactions
             await keyValueStoreProcessor.LoadDependencies();
             await accountAuthorizedDepositorsProcessor.LoadDependencies();
             await accountResourcePreferenceRulesProcessor.LoadDependencies();
+            await accountLockerProcessor.LoadDependencies();
 
             dbReadDuration += sw.Elapsed;
 
@@ -1206,6 +1255,7 @@ UPDATE pending_transactions
             accountResourcePreferenceRulesProcessor.ProcessChanges();
             keyValueStoreProcessor.ProcessChanges();
             validatorProcessor.ProcessChanges();
+            accountLockerProcessor.ProcessChanges();
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1564,6 +1614,7 @@ UPDATE pending_transactions
             rowsInserted += await accountResourcePreferenceRulesProcessor.SaveEntities();
             rowsInserted += await keyValueStoreProcessor.SaveEntities();
             rowsInserted += await validatorProcessor.SaveEntities();
+            rowsInserted += await accountLockerProcessor.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);
 

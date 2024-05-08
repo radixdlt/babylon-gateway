@@ -62,11 +62,15 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IPaginableRequest
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+
+public interface IAccountLockerHandler
 {
-    public LedgerStateSelector AtLedgerState { get; }
+    Task<GatewayModel.StateAccountLockerPageAccountResourcesResponse?> AccountResources(GatewayModel.StateAccountLockerPageAccountResourcesRequest request, CancellationToken token = default);
 
-    public string Cursor { get; }
+    Task<GatewayModel.StateAccountLockerTbdResponse?> Tbd(GatewayModel.StateAccountLockerTbdRequest request, CancellationToken token = default);
 }

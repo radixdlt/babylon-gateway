@@ -62,11 +62,39 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IPaginableRequest
+namespace GatewayApi.Controllers;
+
+[ApiController]
+[Route("state/account-locker")]
+public class StateAccountLockerController : ControllerBase
 {
-    public LedgerStateSelector AtLedgerState { get; }
+    private readonly IAccountLockerHandler _accountLockerHandler;
 
-    public string Cursor { get; }
+    public StateAccountLockerController(IAccountLockerHandler accountLockerHandler)
+    {
+        _accountLockerHandler = accountLockerHandler;
+    }
+
+    [HttpPost("page/account-resources")]
+    public async Task<IActionResult> AccountResourcesPage(GatewayModel.StateAccountLockerPageAccountResourcesRequest request, CancellationToken token = default)
+    {
+        var response = await _accountLockerHandler.AccountResources(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("touched-at")]
+    public async Task<IActionResult> Tbd(GatewayModel.StateAccountLockerTbdRequest request, CancellationToken token = default)
+    {
+        return Ok(await _accountLockerHandler.Tbd(request, token));
+    }
 }

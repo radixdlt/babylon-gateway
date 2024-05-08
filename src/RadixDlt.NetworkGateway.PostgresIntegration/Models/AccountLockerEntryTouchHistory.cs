@@ -62,11 +62,21 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public interface IPaginableRequest
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("account_locker_entry_touch_history")]
+public class AccountLockerEntryTouchHistory
 {
-    public LedgerStateSelector AtLedgerState { get; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public string Cursor { get; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("account_locker_definition_id")]
+    public long AccountLockerDefinitionId { get; set; }
 }

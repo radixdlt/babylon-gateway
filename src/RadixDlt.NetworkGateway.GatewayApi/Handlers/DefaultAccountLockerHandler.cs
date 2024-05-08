@@ -62,11 +62,52 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IPaginableRequest
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+
+internal class DefaultAccountLockerHandler : IAccountLockerHandler
 {
-    public LedgerStateSelector AtLedgerState { get; }
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IEntityStateQuerier _entityStateQuerier;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
-    public string Cursor { get; }
+    public DefaultAccountLockerHandler(
+        ILedgerStateQuerier ledgerStateQuerier,
+        IEntityStateQuerier entityStateQuerier,
+        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    {
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _entityStateQuerier = entityStateQuerier;
+        _endpointConfiguration = endpointConfiguration;
+    }
+
+    public async Task<GatewayModel.StateAccountLockerPageAccountResourcesResponse?> AccountResources(GatewayModel.StateAccountLockerPageAccountResourcesRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var cursor = GatewayModel.StateAccountLockerAccountResourcesCursor.FromCursorString(request.Cursor);
+        var limit = _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage);
+        var pageRequest = new IEntityStateQuerier.AccountLockerPageRequest((EntityAddress)request.AccountLockerAddress, (EntityAddress)request.AccountAddress, cursor, limit);
+
+        return await _entityStateQuerier.AccountLockerPage(pageRequest, ledgerState, token);
+    }
+
+    public async Task<GatewayModel.StateAccountLockerTbdResponse?> Tbd(GatewayModel.StateAccountLockerTbdRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+
+        // TODO read all from state versions, if any
+        var lookup = request.Lookup
+            .Select(l => new IEntityStateQuerier.AccountLockerLookup((EntityAddress)l.AccountLockerAddress, (EntityAddress)l.AccountAddress, default))
+            .ToList();
+
+        return await _entityStateQuerier.AccountLockerTbd(lookup, ledgerState, token);
+    }
 }

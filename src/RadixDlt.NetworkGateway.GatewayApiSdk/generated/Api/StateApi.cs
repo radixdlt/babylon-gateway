@@ -113,6 +113,48 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of StateAccountAuthorizedDepositorsPageResponse</returns>
         ApiResponse<StateAccountAuthorizedDepositorsPageResponse> AccountAuthorizedDepositorsPageWithHttpInfo(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest);
         /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageAccountResourcesRequest"></param>
+        /// <returns>StateAccountLockerPageAccountResourcesResponse</returns>
+        StateAccountLockerPageAccountResourcesResponse AccountLockerAccountResourcesPage(StateAccountLockerPageAccountResourcesRequest stateAccountLockerPageAccountResourcesRequest);
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageAccountResourcesRequest"></param>
+        /// <returns>ApiResponse of StateAccountLockerPageAccountResourcesResponse</returns>
+        ApiResponse<StateAccountLockerPageAccountResourcesResponse> AccountLockerAccountResourcesPageWithHttpInfo(StateAccountLockerPageAccountResourcesRequest stateAccountLockerPageAccountResourcesRequest);
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerTbdRequest"></param>
+        /// <returns>StateAccountLockerTbdResponse</returns>
+        StateAccountLockerTbdResponse AccountLockerTBD(StateAccountLockerTbdRequest stateAccountLockerTbdRequest);
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerTbdRequest"></param>
+        /// <returns>ApiResponse of StateAccountLockerTbdResponse</returns>
+        ApiResponse<StateAccountLockerTbdResponse> AccountLockerTBDWithHttpInfo(StateAccountLockerTbdRequest stateAccountLockerTbdRequest);
+        /// <summary>
         /// Get Account resource preferences
         /// </summary>
         /// <remarks>
@@ -498,6 +540,52 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateAccountAuthorizedDepositorsPageResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateAccountAuthorizedDepositorsPageResponse>> AccountAuthorizedDepositorsPageWithHttpInfoAsync(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageAccountResourcesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountLockerPageAccountResourcesResponse</returns>
+        System.Threading.Tasks.Task<StateAccountLockerPageAccountResourcesResponse> AccountLockerAccountResourcesPageAsync(StateAccountLockerPageAccountResourcesRequest stateAccountLockerPageAccountResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageAccountResourcesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountLockerPageAccountResourcesResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateAccountLockerPageAccountResourcesResponse>> AccountLockerAccountResourcesPageWithHttpInfoAsync(StateAccountLockerPageAccountResourcesRequest stateAccountLockerPageAccountResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerTbdRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountLockerTbdResponse</returns>
+        System.Threading.Tasks.Task<StateAccountLockerTbdResponse> AccountLockerTBDAsync(StateAccountLockerTbdRequest stateAccountLockerTbdRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerTbdRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountLockerTbdResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateAccountLockerTbdResponse>> AccountLockerTBDWithHttpInfoAsync(StateAccountLockerTbdRequest stateAccountLockerTbdRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Account resource preferences
         /// </summary>
@@ -1213,6 +1301,240 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("AccountAuthorizedDepositorsPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// TBD TBD
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageAccountResourcesRequest"></param>
+        /// <returns>StateAccountLockerPageAccountResourcesResponse</returns>
+        public StateAccountLockerPageAccountResourcesResponse AccountLockerAccountResourcesPage(StateAccountLockerPageAccountResourcesRequest stateAccountLockerPageAccountResourcesRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerPageAccountResourcesResponse> localVarResponse = AccountLockerAccountResourcesPageWithHttpInfo(stateAccountLockerPageAccountResourcesRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// TBD TBD
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageAccountResourcesRequest"></param>
+        /// <returns>ApiResponse of StateAccountLockerPageAccountResourcesResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerPageAccountResourcesResponse> AccountLockerAccountResourcesPageWithHttpInfo(StateAccountLockerPageAccountResourcesRequest stateAccountLockerPageAccountResourcesRequest)
+        {
+            // verify the required parameter 'stateAccountLockerPageAccountResourcesRequest' is set
+            if (stateAccountLockerPageAccountResourcesRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountLockerPageAccountResourcesRequest' when calling StateApi->AccountLockerAccountResourcesPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountLockerPageAccountResourcesRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateAccountLockerPageAccountResourcesResponse>("/state/account-locker/page/account-resources", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountLockerAccountResourcesPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// TBD TBD
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageAccountResourcesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountLockerPageAccountResourcesResponse</returns>
+        public async System.Threading.Tasks.Task<StateAccountLockerPageAccountResourcesResponse> AccountLockerAccountResourcesPageAsync(StateAccountLockerPageAccountResourcesRequest stateAccountLockerPageAccountResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerPageAccountResourcesResponse> localVarResponse = await AccountLockerAccountResourcesPageWithHttpInfoAsync(stateAccountLockerPageAccountResourcesRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// TBD TBD
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageAccountResourcesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountLockerPageAccountResourcesResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerPageAccountResourcesResponse>> AccountLockerAccountResourcesPageWithHttpInfoAsync(StateAccountLockerPageAccountResourcesRequest stateAccountLockerPageAccountResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateAccountLockerPageAccountResourcesRequest' is set
+            if (stateAccountLockerPageAccountResourcesRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountLockerPageAccountResourcesRequest' when calling StateApi->AccountLockerAccountResourcesPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountLockerPageAccountResourcesRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateAccountLockerPageAccountResourcesResponse>("/state/account-locker/page/account-resources", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountLockerAccountResourcesPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// TBD TBD
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerTbdRequest"></param>
+        /// <returns>StateAccountLockerTbdResponse</returns>
+        public StateAccountLockerTbdResponse AccountLockerTBD(StateAccountLockerTbdRequest stateAccountLockerTbdRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerTbdResponse> localVarResponse = AccountLockerTBDWithHttpInfo(stateAccountLockerTbdRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// TBD TBD
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerTbdRequest"></param>
+        /// <returns>ApiResponse of StateAccountLockerTbdResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerTbdResponse> AccountLockerTBDWithHttpInfo(StateAccountLockerTbdRequest stateAccountLockerTbdRequest)
+        {
+            // verify the required parameter 'stateAccountLockerTbdRequest' is set
+            if (stateAccountLockerTbdRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountLockerTbdRequest' when calling StateApi->AccountLockerTBD");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountLockerTbdRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateAccountLockerTbdResponse>("/state/account-locker/tbd", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountLockerTBD", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// TBD TBD
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerTbdRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountLockerTbdResponse</returns>
+        public async System.Threading.Tasks.Task<StateAccountLockerTbdResponse> AccountLockerTBDAsync(StateAccountLockerTbdRequest stateAccountLockerTbdRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerTbdResponse> localVarResponse = await AccountLockerTBDWithHttpInfoAsync(stateAccountLockerTbdRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// TBD TBD
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerTbdRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountLockerTbdResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerTbdResponse>> AccountLockerTBDWithHttpInfoAsync(StateAccountLockerTbdRequest stateAccountLockerTbdRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateAccountLockerTbdRequest' is set
+            if (stateAccountLockerTbdRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountLockerTbdRequest' when calling StateApi->AccountLockerTBD");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountLockerTbdRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateAccountLockerTbdResponse>("/state/account-locker/tbd", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountLockerTBD", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

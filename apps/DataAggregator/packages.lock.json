@@ -652,7 +652,7 @@
           "Microsoft.Extensions.Http.Polly": "[8.0.2, )",
           "RadixDlt.NetworkGateway.Abstractions": "[1.5.1-develop, )",
           "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.5.1-develop, )",
-          "RadixDlt.RadixEngineToolkit": "[1.0.10, )"
+          "RadixDlt.RadixEngineToolkit": "[2.1.0-dev4, )"
         }
       },
       "radixdlt.networkgateway.gatewayapisdk": {
@@ -676,7 +676,7 @@
           "RadixDlt.NetworkGateway.Abstractions": "[1.5.1-develop, )",
           "RadixDlt.NetworkGateway.DataAggregator": "[1.5.1-develop, )",
           "RadixDlt.NetworkGateway.GatewayApi": "[1.5.1-develop, )",
-          "RadixDlt.RadixEngineToolkit": "[1.0.10, )"
+          "RadixDlt.RadixEngineToolkit": "[2.1.0-dev4, )"
         }
       },
       "radixdlt.networkgateway.prometheusintegration": {
@@ -863,9 +863,9 @@
       },
       "RadixDlt.RadixEngineToolkit": {
         "type": "CentralTransitive",
-        "requested": "[1.0.10, )",
-        "resolved": "1.0.10",
-        "contentHash": "oNA8NAEPkBhBi0eKtPw1UkuUqAFJJd8MxzK1ehGx6sCNW2xzw3yoB7i0tHdOIIeExpcXG8VvY3/rZ17BhdmgCA=="
+        "requested": "[2.1.0-dev4, )",
+        "resolved": "2.1.0-dev4",
+        "contentHash": "Q04j9cuHuf0r142+IokwxsTa5EB/kr1FoFMhGN+GDbhToos4c81tPCZMc1ROblkNuzOrnY613UVnbUJG44Tkdg=="
       }
     }
   }

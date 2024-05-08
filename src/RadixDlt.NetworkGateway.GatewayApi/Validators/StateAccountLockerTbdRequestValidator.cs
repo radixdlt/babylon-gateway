@@ -62,11 +62,34 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IPaginableRequest
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+
+internal class StateAccountLockerTbdRequestValidator : AbstractValidator<GatewayModel.StateAccountLockerTbdRequest>
 {
-    public LedgerStateSelector AtLedgerState { get; }
+    public StateAccountLockerTbdRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator)
+    {
+        RuleFor(x => x.Lookup)
+            .NotEmpty()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Lookup.Count)
+                    .GreaterThan(0)
+                    .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
 
-    public string Cursor { get; }
+                RuleForEach(x => x.Lookup)
+                    .NotEmpty()
+                    .SetValidator(new StateAccountLockerTbdRequestLookupTupleValidator(ledgerStateSelectorValidator, radixAddressValidator));
+            });
+
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
+    }
 }
