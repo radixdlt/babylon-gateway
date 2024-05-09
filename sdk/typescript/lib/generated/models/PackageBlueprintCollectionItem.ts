@@ -40,7 +40,6 @@ export interface PackageBlueprintCollectionItem {
     version: string;
     /**
      * This type is defined in the Core API as `BlueprintDefinition`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof PackageBlueprintCollectionItem
      */
@@ -53,7 +52,6 @@ export interface PackageBlueprintCollectionItem {
     dependant_entities?: Array<string>;
     /**
      * This type is defined in the Core API as `AuthConfig`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof PackageBlueprintCollectionItem
      */

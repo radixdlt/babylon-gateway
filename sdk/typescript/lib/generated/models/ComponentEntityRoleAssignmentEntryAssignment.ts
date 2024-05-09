@@ -34,7 +34,6 @@ export interface ComponentEntityRoleAssignmentEntryAssignment {
     resolution: RoleAssignmentResolution;
     /**
      * This type is defined in the Core API as `AccessRule`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof ComponentEntityRoleAssignmentEntryAssignment
      */

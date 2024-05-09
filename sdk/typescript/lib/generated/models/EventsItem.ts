@@ -34,7 +34,6 @@ export interface EventsItem {
     name: string;
     /**
      * This type is defined in the Core API as `EventEmitterIdentifier`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof EventsItem
      */

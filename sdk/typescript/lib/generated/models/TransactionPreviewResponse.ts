@@ -34,7 +34,6 @@ export interface TransactionPreviewResponse {
     encoded_receipt: string;
     /**
      * This type is defined in the Core API as `TransactionReceipt`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof TransactionPreviewResponse
      */

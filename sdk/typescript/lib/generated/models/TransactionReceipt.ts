@@ -40,7 +40,6 @@ export interface TransactionReceipt {
     status?: TransactionStatus;
     /**
      * This type is defined in the Core API as `FeeSummary`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof TransactionReceipt
      */
@@ -53,37 +52,32 @@ export interface TransactionReceipt {
     costing_parameters?: object;
     /**
      * This type is defined in the Core API as `FeeDestination`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof TransactionReceipt
      */
     fee_destination?: object;
     /**
      * This type is defined in the Core API as `FeeSource`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof TransactionReceipt
      */
     fee_source?: object;
     /**
      * This type is defined in the Core API as `StateUpdates`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof TransactionReceipt
      */
     state_updates?: object;
     /**
      * Information (number and active validator list) about new epoch if occured.
-This type is defined in the Core API as `NextEpoch`. See the Core API documentation for more details.
-
+     * This type is defined in the Core API as `NextEpoch`. See the Core API documentation for more details.
      * @type {object}
      * @memberof TransactionReceipt
      */
     next_epoch?: object;
     /**
      * The manifest line-by-line engine return data (only present if `status` is `CommittedSuccess`).
-This type is defined in the Core API as `SborData`. See the Core API documentation for more details.
-
+     * This type is defined in the Core API as `SborData`. See the Core API documentation for more details.
      * @type {object}
      * @memberof TransactionReceipt
      */

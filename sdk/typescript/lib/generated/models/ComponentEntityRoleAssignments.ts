@@ -28,7 +28,6 @@ import {
 export interface ComponentEntityRoleAssignments {
     /**
      * This type is defined in the Core API as `OwnerRole`. See the Core API documentation for more details.
-
      * @type {object}
      * @memberof ComponentEntityRoleAssignments
      */
