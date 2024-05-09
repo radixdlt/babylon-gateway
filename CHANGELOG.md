@@ -1,5 +1,5 @@
 ## 1.5.1
-Release built: _not published yet_
+Release built: 09.05.2024
 
 > [!CAUTION]
 > **Breaking Changes:**
