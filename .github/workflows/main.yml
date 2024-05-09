@@ -55,7 +55,7 @@ jobs:
       - name: Generate SBOM # check SBOM can be generated but nothing is done with it
         uses: RDXWorks-actions/snyk-actions/dotnet@master
         with:
-          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json > sbom.json
+          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json --json-file-output sbom.json
           command: sbom
 
   build:
@@ -123,7 +123,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: selfhosted-ubuntu-22.04-arm
+      runs_on: babylon-gateway-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-database-migrations"
@@ -166,7 +166,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: selfhosted-ubuntu-22.04-arm
+      runs_on: babylon-gateway-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-data-aggregator"
@@ -209,7 +209,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: selfhosted-ubuntu-22.04-arm
+      runs_on: babylon-gateway-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-gateway-api"
@@ -371,6 +371,7 @@ jobs:
       - join-aggregator-images
       - join-migrations-images
       - setup-tags
+    if: github.event_name == 'pull_request' && github.base_ref == 'develop'
     permissions:
       id-token: write
       contents: read
@@ -387,19 +388,11 @@ jobs:
       - name: Export branch name in github's environment
         run: |
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
-          echo "GITHUB_REF_NAME=$GITHUB_REF_NAME" >> $GITHUB_ENV
-          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" >> $GITHUB_ENV
       - name: Process ci.env
         run: |
           export $(grep -v '^#' ./deployment/ci.env | xargs)
           echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
           echo "POSTGRES_VERSION=$POSTGRES_VERSION" >> $GITHUB_ENV
-      - name: Connect to tailnet
-        uses: radixdlt/public-iac-resuable-artifacts/tailnet@main
-        with:
-          role_name: "arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access"
-          region: "eu-west-2"
-          secret_name: "arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/tailscale-public-workflows-DpiE80"
       - name: Deploy and test on an ephemeral network
         uses: RDXWorks-actions/jenkins-job-trigger-action@master
         with:
@@ -411,8 +404,7 @@ jobs:
             {
               "RADIXDLT_GATEWAY_DOCKER_TAG": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
               "RADIXDLT_NODE_DOCKER_TAG": "${{ env.FULLNODE_VERSION }}",
-              "RADIXDLT_POSTGRES_APP_VERSION": "${{ env.POSTGRES_VERSION }}",
-              "RADIXDLT_GITHUB_TRIGGER" : "${{ env.GITHUB_REPOSITORY }}:${{ env.GITHUB_REF_NAME }}"
+              "RADIXDLT_POSTGRES_APP_VERSION": "${{ env.POSTGRES_VERSION }}"
             }
           job_timeout: "3600"
 
@@ -435,7 +427,7 @@ jobs:
           secret_name: "github-actions/common/sonar-token"
           parse_json: true
       - name: SonarScanner for .NET
-        uses: RDXWorks-actions/sonarscan-dotnet@v2.3.0
+        uses: RDXWorks-actions/sonarscan-dotnet@v2.2.6
         with:
           sonarProjectKey: radixdlt_babylon-gateway
           sonarProjectName: babylon-gateway
