@@ -106,10 +106,23 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (EntityAddress)request.Address,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
+            Limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage)
         );
 
         return await _entityStateQuerier.EntityMetadata(pageRequest, ledgerState, token);
+    }
+
+    public async Task<GatewayModel.StateEntitySchemaPageResponse?> Schemas(GatewayModel.StateEntitySchemaPageRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+
+        var pageRequest = new IEntityStateQuerier.PageRequest(
+            Address: (EntityAddress)request.Address,
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: _endpointConfiguration.Value.ResolveHeavyPageSize(request.LimitPerPage)
+        );
+
+        return await _entityStateQuerier.EntitySchema(pageRequest, ledgerState, token);
     }
 
     public async Task<GatewayModel.StateEntityFungiblesPageResponse?> Fungibles(GatewayModel.StateEntityFungiblesPageRequest request, CancellationToken token = default)
@@ -120,7 +133,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (EntityAddress)request.Address,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
+            Limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage)
         );
 
         return await _entityStateQuerier.EntityFungibleResourcesPage(pageRequest, aggregatePerVault, request.OptIns ?? GatewayModel.StateEntityFungiblesPageRequestOptIns.Default, ledgerState, token);
@@ -134,7 +147,7 @@ internal class DefaultEntityHandler : IEntityHandler
             Address: (EntityAddress)request.Address,
             ResourceAddress: (EntityAddress)request.ResourceAddress,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
+            Limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage)
         );
 
         return await _entityStateQuerier.EntityFungibleResourceVaults(pageRequest, ledgerState, token);
@@ -148,7 +161,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (EntityAddress)request.Address,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
+            Limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage)
         );
 
         return await _entityStateQuerier.EntityNonFungibleResourcesPage(pageRequest, aggregatePerVault, request.OptIns ?? GatewayModel.StateEntityNonFungiblesPageRequestOptIns.Default, ledgerState,
@@ -165,7 +178,7 @@ internal class DefaultEntityHandler : IEntityHandler
             Address: (EntityAddress)request.Address,
             ResourceAddress: (EntityAddress)request.ResourceAddress,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
+            Limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage)
         );
 
         return await _entityStateQuerier.EntityNonFungibleResourceVaults(pageRequest, request.OptIns ?? GatewayModel.StateEntityNonFungibleResourceVaultsPageOptIns.Default, ledgerState, token);
@@ -180,7 +193,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (EntityAddress)request.Address,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
+            Limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage)
         );
 
         return await _entityStateQuerier.EntityNonFungibleIds(pageRequest, (EntityAddress)request.ResourceAddress, (EntityAddress)request.VaultAddress, ledgerState, token);

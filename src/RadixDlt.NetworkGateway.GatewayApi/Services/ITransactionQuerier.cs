@@ -105,19 +105,21 @@ public class TransactionStreamPageRequestSearchCriteria
 {
     public LedgerTransactionKindFilter Kind { get; set; }
 
-    public List<LedgerTransactionEventFilter> Events { get; set; } = new();
+    public HashSet<LedgerTransactionEventFilter> Events { get; set; } = new();
 
-    public List<EntityAddress> ManifestAccountsDepositedInto { get; set; } = new();
+    public HashSet<EntityAddress> ManifestAccountsDepositedInto { get; set; } = new();
 
-    public List<EntityAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
+    public HashSet<EntityAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
 
-    public List<EntityAddress> ManifestResources { get; set; } = new();
+    public HashSet<EntityAddress> ManifestResources { get; set; } = new();
 
-    public List<EntityAddress> AffectedGlobalEntities { get; set; } = new();
+    public HashSet<EntityAddress> BadgesPresented { get; set; } = new();
 
-    public List<EntityAddress> AccountsWithoutManifestOwnerMethodCalls { get; set; } = new();
+    public HashSet<EntityAddress> AffectedGlobalEntities { get; set; } = new();
 
-    public List<EntityAddress> AccountsWithManifestOwnerMethodCalls { get; set; } = new();
+    public HashSet<EntityAddress> AccountsWithoutManifestOwnerMethodCalls { get; set; } = new();
+
+    public HashSet<EntityAddress> AccountsWithManifestOwnerMethodCalls { get; set; } = new();
 
     public ManifestClassFilter? ManifestClassFilter { get; set; }
 }

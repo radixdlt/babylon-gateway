@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -77,7 +78,7 @@ internal record struct RoleAssignmentEntryDbLookup(long EntityId, string KeyRole
 
 internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
 
-internal record RoleAssignmentsChangePointer(ReferencedEntity ReferencedEntity)
+internal record RoleAssignmentsChangePointer
 {
     public CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
 
@@ -88,8 +89,7 @@ internal class EntityRoleAssignmentProcessor
 {
     private readonly ProcessorContext _context;
 
-    private Dictionary<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer> _changePointers = new();
-    private List<RoleAssignmentsChangePointerLookup> _changeOrder = new();
+    private ChangeTracker<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer> _changes = new();
 
     private Dictionary<long, EntityRoleAssignmentsAggregateHistory> _mostRecentAggregates = new();
     private Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory> _mostRecentEntries = new();
@@ -107,35 +107,29 @@ internal class EntityRoleAssignmentProcessor
     {
         if (substateData is CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate accessRulesFieldOwnerRole)
         {
-            _changePointers
-                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new RoleAssignmentsChangePointer(referencedEntity);
-                })
+            _changes
+                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new RoleAssignmentsChangePointer())
                 .OwnerRole = accessRulesFieldOwnerRole;
         }
 
         if (substateData is CoreModel.RoleAssignmentModuleRuleEntrySubstate roleAssignmentEntry)
         {
-            _changePointers
-                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
-                {
-                    _changeOrder.Add(lookup);
-
-                    return new RoleAssignmentsChangePointer(referencedEntity);
-                })
+            _changes
+                .GetOrAdd(new RoleAssignmentsChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new RoleAssignmentsChangePointer())
                 .Entries.Add(roleAssignmentEntry);
         }
     }
 
+    public async Task LoadDependencies()
+    {
+        _mostRecentEntries.AddRange(await MostRecentEntityRoleAssignmentsEntryHistory());
+        _mostRecentAggregates.AddRange(await MostRecentEntityRoleAssignmentsAggregateHistory());
+    }
+
     public void ProcessChanges()
     {
-        foreach (var lookup in _changeOrder)
+        foreach (var (lookup, change) in _changes.AsEnumerable())
         {
-            var change = _changePointers[lookup];
-
             EntityRoleAssignmentsOwnerRoleHistory? ownerRole = null;
 
             if (change.OwnerRole != null)
@@ -203,7 +197,6 @@ internal class EntityRoleAssignmentProcessor
                     }
                 }
 
-                // TODO introduce entry.IsDeleted extension method
                 if (entry.Value != null)
                 {
                     aggregate.EntryIds.Insert(0, entryHistory.Id);
@@ -212,12 +205,6 @@ internal class EntityRoleAssignmentProcessor
                 _mostRecentEntries[entryLookup] = entryHistory;
             }
         }
-    }
-
-    public async Task LoadMostRecent()
-    {
-        _mostRecentEntries = await MostRecentEntityRoleAssignmentsEntryHistory();
-        _mostRecentAggregates = await MostRecentEntityRoleAssignmentsAggregateHistory();
     }
 
     public async Task<int> SaveEntities()
@@ -231,24 +218,24 @@ internal class EntityRoleAssignmentProcessor
         return rowsInserted;
     }
 
-    private Task<Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityRoleAssignmentsEntryHistory()
+    private async Task<IDictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityRoleAssignmentsEntryHistory()
     {
         var lookupSet = new HashSet<RoleAssignmentEntryDbLookup>();
 
-        foreach (var change in _changePointers.Values)
+        foreach (var (lookup, change) in _changes.AsEnumerable())
         {
             foreach (var entry in change.Entries)
             {
-                lookupSet.Add(new RoleAssignmentEntryDbLookup(change.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
+                lookupSet.Add(new RoleAssignmentEntryDbLookup(lookup.EntityId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
             }
         }
 
         if (!lookupSet.Unzip(x => x.EntityId, x => x.KeyRole, x => x.KeyModule, out var entityIds, out var keyRoles, out var keyModuleIds))
         {
-            return Task.FromResult(new Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>());
+            return ImmutableDictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>(
+        return await _context.ReadHelper.LoadDependencies<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory>(
             @$"
 WITH variables (entity_id, key_role, module_id) AS (
     SELECT UNNEST({entityIds}), UNNEST({keyRoles}), UNNEST({keyModuleIds})
@@ -265,16 +252,16 @@ INNER JOIN LATERAL (
             e => new RoleAssignmentEntryDbLookup(e.EntityId, e.KeyRole, e.KeyModule));
     }
 
-    private Task<Dictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityRoleAssignmentsAggregateHistory()
+    private async Task<IDictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityRoleAssignmentsAggregateHistory()
     {
-        var entityIds = _changeOrder.Select(x => x.EntityId).ToHashSet().ToList();
+        var entityIds = _changes.Keys.Select(x => x.EntityId).ToHashSet().ToList();
 
         if (!entityIds.Any())
         {
-            return Task.FromResult(new Dictionary<long, EntityRoleAssignmentsAggregateHistory>());
+            return ImmutableDictionary<long, EntityRoleAssignmentsAggregateHistory>.Empty;
         }
 
-        return _context.ReadHelper.MostRecent<long, EntityRoleAssignmentsAggregateHistory>(
+        return await _context.ReadHelper.LoadDependencies<long, EntityRoleAssignmentsAggregateHistory>(
             @$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})

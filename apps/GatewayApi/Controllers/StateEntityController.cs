@@ -72,11 +72,11 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("state/entity")]
-public class StateController : ControllerBase
+public class StateEntityController : ControllerBase
 {
     private readonly IEntityHandler _entityHandler;
 
-    public StateController(IEntityHandler entityHandler)
+    public StateEntityController(IEntityHandler entityHandler)
     {
         _entityHandler = entityHandler;
     }
@@ -91,6 +91,16 @@ public class StateController : ControllerBase
     public async Task<IActionResult> MetadataPage(GatewayModel.StateEntityMetadataPageRequest request, CancellationToken token = default)
     {
         var response = await _entityHandler.Metadata(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("page/schemas")]
+    public async Task<IActionResult> SchemasPage(GatewayModel.StateEntitySchemaPageRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.Schemas(request, token);
 
         return response != null
             ? Ok(response)

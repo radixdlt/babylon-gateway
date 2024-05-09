@@ -87,6 +87,7 @@ internal enum LedgerTransactionMarkerOperationType
     AccountDepositedInto,
     AccountWithdrawnFrom,
     AccountOwnerMethodCall,
+    BadgePresented,
 }
 
 [Table("ledger_transaction_markers")]

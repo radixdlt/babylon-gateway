@@ -62,8 +62,9 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 public static class CursorGenerator
 {

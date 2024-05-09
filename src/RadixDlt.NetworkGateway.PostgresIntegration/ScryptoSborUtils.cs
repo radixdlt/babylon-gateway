@@ -65,6 +65,7 @@
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using System;
 using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -147,9 +148,9 @@ internal static class ScryptoSborUtils
             case ToolkitModel.MetadataValue.I64Value i64Value:
                 return new GatewayModel.MetadataI64Value(i64Value.value.ToString());
             case ToolkitModel.MetadataValue.InstantArrayValue instantArrayValue:
-                return new GatewayModel.MetadataInstantArrayValue(instantArrayValue.value.Select(x => DateTimeOffset.FromUnixTimeSeconds(x).AsUtcIsoDateAtSecondsPrecisionString()).ToList());
+                return new GatewayModel.MetadataInstantArrayValue(instantArrayValue.value.Select(ClampDateTimeFormatter.FormatUnixTimestampSeconds).ToList(), instantArrayValue.value.Select(x => x.ToString()).ToList());
             case ToolkitModel.MetadataValue.InstantValue instantValue:
-                return new GatewayModel.MetadataInstantValue(DateTimeOffset.FromUnixTimeSeconds(instantValue.value).AsUtcIsoDateAtSecondsPrecisionString());
+                return new GatewayModel.MetadataInstantValue(ClampDateTimeFormatter.FormatUnixTimestampSeconds(instantValue.value), instantValue.value.ToString());
             case ToolkitModel.MetadataValue.NonFungibleGlobalIdArrayValue nonFungibleGlobalIdArrayValue:
                 return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue
                     .value

@@ -1,3 +1,61 @@
+## 1.5.1
+Release built: 09.05.2024
+
+> [!CAUTION]
+> **Breaking Changes:**
+> - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending.
+> - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
+> - Renamed `state.recovery_role_recovery_attempt` property from `timed_recovery_allowed_after` to `allow_timed_recovery_after` returned from `/state/entity/details` when querying for access controller.
+
+- Fixed broken ledger state lookup (`at_ledger_state`) when using epoch-only constraint and given epoch did not result in any transactions at round `1`.
+- Fixed broken (missing) package blueprint & code, and schema pagination in the `/state/entity/details` endpoint.
+- Fixed unstable package blueprint and code aggregation where changes could overwrite each other if they applied to the same blueprint/package within the same ingestion batch.
+- Fixed validator public key and active set aggregation where unnecessary copy of the key was stored on each epoch change.
+- Fixed pagination of the `/state/validators/list` endpoint where incorrect `cursor` was generated previously.
+- Fixed invalid date-time format for some entity state properties (most notably access controllers and their `recovery_role_recovery_attempt.allow_timed_recovery_after.date_time` property) that was dependent on OS-level locale setup.
+- Added `ng_workers_global_loop_duration_seconds` and `ng_workers_node_loop_duration_seconds` histogram metrics measuring the time it took to process a single iteration of a given worker.
+- Changed MVC controller and action names. It has no effect on the API itself, but alters prometheus `controler` and `action` labels.
+  - `StateKeyValueStoreController.Items` renamed to `StateKeyValueStoreController.KeysPage`,
+  - `StateNonFungibleController.Ids` renamed to `StateNonFungibleController.IdsPage`,
+  - `StatisticsController.Uptime` renamed to `StatisticsController.ValidatorsUptime`,
+  - `StateController` renamed to `StateEntityController`,
+  - `ValidatorStateController` renamed to `StateValidatorsComponent`.
+- Upgraded to .NET 8:
+  - Upgraded runtime and libraries
+  - Dockerfiles no longer specify custom `app` user as it comes built-in with official base images.
+  - Removed now-obsolete or no-longer-needed code.
+  - Prometheus integration exposes new built-in metric `httpclient_request_duration_seconds_bucket` for all registered HTTP clients.
+- Reworked internal data aggregation mechanism to ease up maintenance burden.
+- Reworked KVStores storage and changed API surface of this area to improve overall performance. 
+
+### API Changes
+- Changed the `MetadataInstantValue` type and its array counterpart `MetadataInstantArrayValue` to clamp the `value` property within the RFC-3339 compatible date-time year range `1583` to `9999`. Added a `unix_timestamp_seconds` property to these types to give the exact unclamped numerical timestamp value.
+- Added `role_assignments` property to the `StateEntityDetailsResponsePackageDetails`. All global component details returned by the `/state/entity/details` endpoint contain role assignments now.
+- Added `owning_vault_parent_ancestor_address` and `owning_vault_global_ancestor_address` properties to the response of the `/state/non-fungible/location` endpoint.
+- Added new filter `manifest_badges_presented_filter` to the `/stream/transactions` endpoint which allows filtering transactions by badges presented. 
+- Added new opt-in `component_royalty_config` to the `/state/entity/details` endpoint. When enabled `royalty_config` will be returned for each component.
+- Use strong type definition for the `royalty_config` property of package blueprint and general components details. This is a change to OAS definition only and does not impact returned data format.
+- Introduced upper limit to the overall number of the filters used in the `/stream/transactions` endpoint, defaults to 10.
+- Added new endpoint `/state/account/page/resource-preferences` which allows to read resource preferences for given account.
+- Added new endpoint `/state/account/page/authorized-depositors` which allows to read authorized depositors for given account.
+- Added new endpoint `/state/package/page/blueprints` returning paginable iterator over package blueprints.
+- Added new endpoint `/state/package/page/codes` returning paginable iterator over package codes.
+- Added new endpoint `/state/entity/page/schemas` returning paginable iterator over entity schemas.
+- Added new endpoint `/transaction/account-deposit-pre-validation` which allows to pre-validate if deposits can succeed based on account deposit settings and badges presented, before submitting the transaction. 
+- Fixed wrong request validation logic for maximum number of items in `/state/non-fungible/data`, `/state/non-fungible/data` and `/state/non-fungible/data` endpoints.
+- `limit_per_page` request parameter is no longer validated against `*MaxPageSize` API configuration parameters. In case requested limit exceeds API configuration maximum value is used. This change is meant to reduce clients need to understand and honor API configuration. 
+
+### Database changes
+- Added new `BadgePresented` to `LedgerTransactionMarkerOperationType` enum and started collecting transaction markers for badges presented in transactions.
+- Column `royalty_amount` of `component_method_royalty_entry_history` table contains now the JSON payload representing the royalty amount without wrapping object.
+- Changed schema area:
+    - renamed `schema_history` table to `schema_entry_definition`,
+    - introduced `schema_entry_aggregate_history` table that contains aggregate history of schema entries under given entity.
+- Changed KVStore area:
+  - dropped `key_value_store_aggregate_history` table altogether as we no longer keep track of aggregated KVStores,
+  - introduced `key_value_store_entry_definition` table that defines each and every KVStore entry,
+  - table `key_value_store_entry_history` references rows from `key_value_store_entry_definition` rather `key`s themselves.
+
 ## 1.4.4
 Release built: 27.03.2024
 
@@ -17,7 +75,7 @@ Release built: 06.03.2024
 Release built: 27.02.2024
 
 ### Bug fixes
-- Recreated key value store keys are properly returned from `/state/key-value-store/keys` and `/state/key-value-store/keys`. Previously Gateway did not return keys that were deleted and then recreated. This release fixes existing data in the database and makes sure new ingested data is properly stored in the database.
+- Recreated key value store keys are properly returned from `/state/key-value-store/keys` and `/state/key-value-store/data`. Previously Gateway did not return keys that were deleted and then recreated. This release fixes existing data in the database and makes sure new ingested data is properly stored in the database.
 
 ## 1.4.0
 Release built: 08.02.2024

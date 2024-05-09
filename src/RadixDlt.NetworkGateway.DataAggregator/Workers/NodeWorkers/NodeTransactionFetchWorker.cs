@@ -281,7 +281,7 @@ public sealed class NodeTransactionFetchWorker : BaseNodeWorker
     {
         var lastCommittedTransactionSummary = await _topOfLedgerProvider.GetTopOfLedger(cancellationToken);
         var processTransactionFromStateVersion = lastCommittedTransactionSummary.StateVersion;
-        var maxUpperLimit = processTransactionFromStateVersion + _ledgerConfirmationOptionsMonitor.CurrentValue.MaxTransactionPipelineSizePerNode;
+        var maxUpperLimit = processTransactionFromStateVersion + _ledgerConfirmationOptionsMonitor.CurrentValue.MaxTransactionPipelineSizePerNode + 1;
 
         var shouldFetchNewTransactions = _fetchedTransactionStore.ShouldFetchNewTransactions(nodeName, processTransactionFromStateVersion);
         if (!shouldFetchNewTransactions)

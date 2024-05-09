@@ -83,8 +83,7 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
             .Base64();
 
         RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+            .GreaterThan(0);
 
         RuleFor(x => x.FromLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
@@ -100,6 +99,14 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
             .SetValidator(radixAddressValidator);
 
         RuleForEach(x => x.ManifestAccountsDepositedIntoFilter)
+            .NotNull()
+            .SetValidator(radixAddressValidator);
+
+        RuleForEach(x => x.AffectedGlobalEntitiesFilter)
+            .NotNull()
+            .SetValidator(radixAddressValidator);
+
+        RuleForEach(x => x.ManifestBadgesPresentedFilter)
             .NotNull()
             .SetValidator(radixAddressValidator);
 
@@ -121,5 +128,10 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
         RuleForEach(x => x.EventsFilter)
             .NotNull()
             .SetValidator(new StreamTransactionsRequestEventItemValidator(radixAddressValidator));
+
+        RuleFor(x => x.TotalFilterCount)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.TransactionStreamMaxFilterCount)
+            .WithMessage($"The overall number of filters applied ({{PropertyValue}}) must be less than or equal to {endpointOptionsSnapshot.Value.TransactionStreamMaxFilterCount}.")
+            .OverridePropertyName(string.Empty);
     }
 }

@@ -83,12 +83,19 @@ internal static class CustomTypes
             return;
         }
 
+        DefaultTypeMap.MatchNamesWithUnderscores = true;
+
         // needed to read int[], bigint[] and text[] columns using Dapper
         SqlMapper.AddTypeHandler(new EntityAddressHandler());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<byte[]>());
+
+        SqlMapper.AddTypeHandler(new GenericListHandler<int>());
+        SqlMapper.AddTypeHandler(new GenericListHandler<long>());
+        SqlMapper.AddTypeHandler(new GenericListHandler<string>());
+        SqlMapper.AddTypeHandler(new GenericListHandler<byte[]>());
 
 #pragma warning disable CS0618
         // needed to support custom enums in postgres
@@ -111,6 +118,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ModuleId>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<SborTypeKind>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AuthorizedDepositorBadgeType>();
 #pragma warning restore CS0618
 
         _configured = true;

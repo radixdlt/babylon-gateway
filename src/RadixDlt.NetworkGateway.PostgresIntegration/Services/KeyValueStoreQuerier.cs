@@ -64,7 +64,6 @@
 
 using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -83,7 +82,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
 {
-    private record KeyValueStoreItemsViewModel(long FromStateVersion, byte[] Key, int TotalCount);
+    private record KeyValueStoreEntryViewModel(long Id, byte[] Key, long FromStateVersion, byte[] Value, bool IsDeleted, bool IsLocked, long LastUpdatedAtStateVersion);
 
     private record KeyValueStoreSchemaModel(byte[] KeySchema, long KeyTypeIndex, SborTypeKind KeySborTypeKind, byte[] ValueSchema, long ValueTypeIndex, SborTypeKind ValueSborTypeKind);
 
@@ -98,68 +97,70 @@ internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public async Task<GatewayApiSdk.Model.StateKeyValueStoreKeysResponse> KeyValueStoreItems(
+    public async Task<GatewayApiSdk.Model.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
         EntityAddress keyValueStoreAddress,
         GatewayApiSdk.Model.LedgerState ledgerState,
-        int offset,
-        int limit,
+        GatewayModel.StateKeyValueStoreKeysCursor? cursor,
+        int pageSize,
         CancellationToken token = default)
     {
-        var keyValueStore = await GetEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        var keyValueStore = await QueryHelper.GetEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
         var keyValueStoreSchema = await GetKeyValueStoreSchema(keyValueStore.Id, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
-WITH key_value_store_items_slices AS (
-    SELECT key_value_store_entry_ids[@startIndex:@endIndex] AS key_value_store_items_slice, cardinality(key_value_store_entry_ids) AS key_value_store_items_total_count
-    FROM key_value_store_aggregate_history
-    WHERE key_value_store_entity_id = @keyValueStoreEntityId AND from_state_version <= @stateVersion
+SELECT d.id AS Id, d.key AS Key, d.from_state_version AS FromStateVersion, h.value AS Value, h.is_deleted AS IsDeleted, h.is_locked AS IsLocked, h.from_state_version AS LastUpdatedAtStateVersion
+FROM key_value_store_entry_definition d
+INNER JOIN LATERAL (
+    SELECT *
+    FROM key_value_store_entry_history
+    WHERE key_value_store_entry_definition_id = d.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
-)
-SELECT
-    kvseh.from_state_version AS FromStateVersion,
-    kvseh.key AS Key,
-    kvsits.key_value_store_items_total_count AS TotalCount
-FROM key_value_store_items_slices AS kvsits
-INNER JOIN LATERAL UNNEST(key_value_store_items_slice) WITH ORDINALITY AS key_value_store_join(id, ordinality) ON TRUE
-INNER JOIN key_value_store_entry_history kvseh ON kvseh.id = key_value_store_join.id AND kvseh.is_deleted = FALSE
-ORDER BY key_value_store_join.ordinality ASC
+) h ON TRUE
+WHERE
+    d.key_value_store_entity_id = @keyValueStoreEntityId
+  AND (d.from_state_version, d.id) <= (@cursorStateVersion, @cursorId)
+  AND d.from_state_version <= @stateVersion
+  AND h.is_deleted = false
+ORDER BY d.from_state_version DESC, d.id DESC
+LIMIT @limit
 ;",
             parameters: new
             {
                 keyValueStoreEntityId = keyValueStore.Id,
                 stateVersion = ledgerState.StateVersion,
-                startIndex = offset + 1,
-                endIndex = offset + limit,
+                cursorStateVersion = cursor?.StateVersionBoundary ?? long.MaxValue,
+                cursorId = cursor?.IdBoundary ?? long.MaxValue,
+                limit = pageSize + 1,
             },
             cancellationToken: token);
 
-        var queryResult = (await _dapperWrapper.QueryAsync<KeyValueStoreItemsViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
+        var entriesAndOneMore = (await _dapperWrapper.QueryAsync<KeyValueStoreEntryViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
+        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
 
-        var mappedItems = new List<GatewayModel.StateKeyValueStoreKeysResponseItem>();
+        var items = entriesAndOneMore
+            .Take(pageSize)
+            .Select(e =>
+            {
+                var keyProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.KeySchema, keyValueStoreSchema.KeySborTypeKind, keyValueStoreSchema.KeyTypeIndex, networkId);
 
-        int totalCount = queryResult.FirstOrDefault()?.TotalCount ?? 0;
+                return new GatewayModel.StateKeyValueStoreKeysResponseItem(
+                    key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), keyProgrammaticJson),
+                    lastUpdatedAtStateVersion: e.LastUpdatedAtStateVersion
+                );
+            })
+            .ToList();
 
-        foreach (var item in queryResult)
-        {
-            var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-            var keyProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(item.Key, keyValueStoreSchema.KeySchema, keyValueStoreSchema.KeySborTypeKind,
-                keyValueStoreSchema.KeyTypeIndex, networkId);
-
-            mappedItems.Add(new GatewayModel.StateKeyValueStoreKeysResponseItem(
-                    key: new GatewayModel.ScryptoSborValue(item.Key.ToHex(), keyProgrammaticJson),
-                    lastUpdatedAtStateVersion: item.FromStateVersion
-                )
-            );
-        }
+        var nextCursor = entriesAndOneMore.Count == pageSize + 1
+            ? new GatewayModel.StateKeyValueStoreKeysCursor(entriesAndOneMore.Last().FromStateVersion, entriesAndOneMore.Last().Id).ToCursorString()
+            : null;
 
         return new GatewayApiSdk.Model.StateKeyValueStoreKeysResponse(
             ledgerState: ledgerState,
             keyValueStoreAddress: keyValueStoreAddress,
-            totalCount: totalCount,
-            nextCursor: CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount),
-            items: mappedItems
+            nextCursor: nextCursor,
+            items: items
         );
     }
 
@@ -169,31 +170,32 @@ ORDER BY key_value_store_join.ordinality ASC
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var keyValueStore = await GetEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-        var dbKeys = keys.Distinct().Select(k => (byte[])k).ToList();
+        var keyValueStore = await QueryHelper.GetEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
         var keyValueStoreSchema = await GetKeyValueStoreSchema(keyValueStore.Id, ledgerState, token);
 
-        var entries = await _dbContext
-            .KeyValueStoreEntryHistory
-            .FromSqlInterpolated(@$"
-WITH variables (key) AS (
-    SELECT UNNEST({dbKeys})
-)
-SELECT kvseh.*
-FROM variables
+        var cd = new CommandDefinition(
+            commandText: @"
+SELECT d.id AS Id, d.key AS Key, d.from_state_version AS FromStateVersion, h.value AS Value, h.is_deleted AS IsDeleted, h.is_locked AS IsLocked, h.from_state_version AS LastUpdatedAtStateVersion
+FROM key_value_store_entry_definition d
 INNER JOIN LATERAL (
     SELECT *
     FROM key_value_store_entry_history
-    WHERE key_value_store_entity_id = {keyValueStore.Id} AND key = variables.key AND from_state_version <= {ledgerState.StateVersion}
+    WHERE key_value_store_entry_definition_id = d.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
-) kvseh ON TRUE;")
-            .AnnotateMetricName("GetKeyValueStores")
-            .ToListAsync(token);
+) h ON TRUE
+WHERE d.key_value_store_entity_id = @keyValueStoreEntityId AND d.key = ANY(@keys) AND d.from_state_version <= @stateVersion",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                keyValueStoreEntityId = keyValueStore.Id,
+                keys = keys.Distinct().Select(k => (byte[])k).ToList(),
+            },
+            cancellationToken: token);
 
         var items = new List<GatewayModel.StateKeyValueStoreDataResponseItem>();
 
-        foreach (var e in entries)
+        foreach (var e in await _dapperWrapper.QueryAsync<KeyValueStoreEntryViewModel>(_dbContext.Database.GetDbConnection(), cd))
         {
             if (e.IsDeleted)
             {
@@ -209,7 +211,7 @@ INNER JOIN LATERAL (
             items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(
                 key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), keyProgrammaticJson),
                 value: new GatewayModel.ScryptoSborValue(e.Value.ToHex(), valueProgrammaticJson),
-                lastUpdatedAtStateVersion: e.FromStateVersion,
+                lastUpdatedAtStateVersion: e.LastUpdatedAtStateVersion,
                 isLocked: e.IsLocked));
         }
 
@@ -231,8 +233,8 @@ SELECT
     kvssh.value_type_index AS ValueTypeIndex,
     kvssh.value_sbor_type_kind AS ValueSborTypeKind
 FROM key_value_store_schema_history kvssh
-INNER JOIN schema_history ksh ON ksh.schema_hash = kvssh.key_schema_hash AND ksh.entity_id = kvssh.key_schema_defining_entity_id
-INNER JOIN schema_history vsh ON vsh.schema_hash = kvssh.value_schema_hash AND vsh.entity_id = kvssh.value_schema_defining_entity_id
+INNER JOIN schema_entry_definition ksh ON ksh.schema_hash = kvssh.key_schema_hash AND ksh.entity_id = kvssh.key_schema_defining_entity_id
+INNER JOIN schema_entry_definition vsh ON vsh.schema_hash = kvssh.value_schema_hash AND vsh.entity_id = kvssh.value_schema_defining_entity_id
 WHERE kvssh.key_value_store_entity_id = @entityId AND kvssh.from_state_version <= @stateVersion
 ORDER BY kvssh.from_state_version DESC
 ",
@@ -253,27 +255,5 @@ ORDER BY kvssh.from_state_version DESC
         }
 
         return keyValueStoreSchema;
-    }
-
-    private async Task<TEntity> GetEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
-        where TEntity : Entity
-    {
-        var entity = await _dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .AnnotateMetricName()
-            .FirstOrDefaultAsync(e => e.Address == address, token);
-
-        if (entity == null)
-        {
-            throw new EntityNotFoundException(address.ToString());
-        }
-
-        if (entity is not TEntity typedEntity)
-        {
-            throw new InvalidEntityException(address.ToString());
-        }
-
-        return typedEntity;
     }
 }

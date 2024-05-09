@@ -69,7 +69,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("component_method_royalty_aggregate_history")]
-public class ComponentMethodRoyaltyAggregateHistory
+public class ComponentMethodRoyaltyAggregateHistory : IAggregateHolder
 {
     [Key]
     [Column("id")]
@@ -83,4 +83,9 @@ public class ComponentMethodRoyaltyAggregateHistory
 
     [Column("entry_ids")]
     public List<long> EntryIds { get; set; }
+
+    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
+    {
+        yield return (nameof(EntryIds), EntryIds.Count);
+    }
 }

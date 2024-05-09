@@ -64,6 +64,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using System;
 using System.Collections.Concurrent;
@@ -80,7 +81,7 @@ public interface IFetchedTransactionStore
 
     GatewayModel.CommittedStateIdentifiers? GetStateIdentifiersForStateVersion(long stateVersion);
 
-    List<CoreModel.CommittedTransaction> GetTransactionBatch(long fromStateVersion, int maxBatchSize);
+    List<CoreModel.CommittedTransaction> GetTransactionBatch(long fromStateVersion, int maxBatchSize, int minBatchSize);
 
     void StoreNodeTransactions(string nodeName, List<CoreModel.CommittedTransaction> transactions, int responseSize);
 
@@ -151,25 +152,44 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
         }
     }
 
-    public List<CoreApiSdk.Model.CommittedTransaction> GetTransactionBatch(long fromStateVersion, int maxBatchSize)
+    public List<CoreApiSdk.Model.CommittedTransaction> GetTransactionBatch(long fromStateVersion, int maxBatchSize, int minBatchSize)
     {
         var nodeWithMostTransactions = _transactionsByNode
             .Where(x => x.Value.ContainsKey(fromStateVersion))
             .OrderByDescending(x => x.Value.Count(y => y.Key >= fromStateVersion))
-            .Select(x => x.Value)
             .FirstOrDefault();
 
-        if (nodeWithMostTransactions == null)
+        var nodeTransactions = nodeWithMostTransactions.Value;
+
+        if (nodeTransactions == null)
         {
-            return new List<CoreModel.CommittedTransaction>();
+            return [];
         }
 
-        return nodeWithMostTransactions
+        var transactions = nodeTransactions
             .Where(x => x.Key >= fromStateVersion)
             .OrderBy(x => x.Key)
             .Take(maxBatchSize)
             .Select(x => x.Value.CommittedTransaction)
             .ToList();
+
+        if (transactions.Count < minBatchSize)
+        {
+            _logger.LogDebug(
+                "Number of fetched transaction {transactionCount} is smaller than configured minimum batch size {minBatchSize}. Waiting for more transactions.",
+                transactions.Count,
+                minBatchSize);
+
+            if (!ShouldFetchNewTransactions(nodeWithMostTransactions.Key, fromStateVersion))
+            {
+                throw new ConfigurationException(
+                    "Current configuration doesn't allow to process transaction stream. Transaction store is full and minimum batch size requires to fetch more transaction before processing. Please increase MaxEstimatedTransactionPipelineByteSizePerNode value or set MinCommitBatchSize to smaller value.");
+            }
+
+            return [];
+        }
+
+        return transactions;
     }
 
     public bool ShouldFetchNewTransactions(string nodeName, long committedStateVersion)
@@ -185,7 +205,8 @@ public sealed class FetchedTransactionStore : IFetchedTransactionStore
         {
             _logger.LogDebug(
                 "Fetched transaction store is full. Not fetching new transactions. Store holds: {StoredTransactionsSize} max limit per node: {MaxEstimatedTransactionPipelineByteSizePerNode}",
-                storedTransactionsSize, Config.MaxEstimatedTransactionPipelineByteSizePerNode);
+                storedTransactionsSize,
+                Config.MaxEstimatedTransactionPipelineByteSizePerNode);
         }
 
         return shouldFetchTransactions;

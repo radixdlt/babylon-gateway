@@ -111,6 +111,7 @@ public class GatewayApiStartup
             .AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                options.SerializerSettings.DateParseHandling = DateParseHandling.None;
                 options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
             })
             .ConfigureApiBehaviorOptions(options =>
@@ -121,6 +122,9 @@ public class GatewayApiStartup
         services
             .AddHealthChecks()
             .ForwardToPrometheus();
+
+        services
+            .UseHttpClientMetrics();
     }
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)

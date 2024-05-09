@@ -68,7 +68,13 @@ internal class SequencesHolder
 {
     public long AccountDefaultDepositRuleHistorySequence { get; set; }
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+    public long AccountResourcePreferenceRuleEntryHistorySequence { get; set; }
+
+    public long AccountResourcePreferenceRuleAggregateHistorySequence { get; set; }
+
+    public long AccountAuthorizedDepositorEntryHistorySequence { get; set; }
+
+    public long AccountAuthorizedDepositorAggregateHistorySequence { get; set; }
 
     public long StateHistorySequence { get; set; }
 
@@ -116,7 +122,11 @@ internal class SequencesHolder
 
     public long PackageCodeHistorySequence { get; set; }
 
-    public long SchemaHistorySequence { get; set; }
+    public long SchemaEntryDefinitionSequence { get; set; }
+
+    public long SchemaEntryAggregateHistorySequence { get; set; }
+
+    public long KeyValueStoreEntryDefinitionSequence { get; set; }
 
     public long KeyValueStoreEntryHistorySequence { get; set; }
 
@@ -129,6 +139,4 @@ internal class SequencesHolder
     public long PackageBlueprintAggregateHistorySequence { get; set; }
 
     public long PackageCodeAggregateHistorySequence { get; set; }
-
-    public long KeyValueStoreAggregateHistorySequence { get; set; }
 }

@@ -93,7 +93,7 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (EntityAddress)request.ResourceAddress,
             Offset: cursor?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultNonFungibleIdsPageSize
+            Limit: _endpointConfiguration.Value.ResolveNonFungibleIdsPageSize(request.LimitPerPage)
         );
 
         return await _entityStateQuerier.NonFungibleIds(pageRequest, ledgerState, token);

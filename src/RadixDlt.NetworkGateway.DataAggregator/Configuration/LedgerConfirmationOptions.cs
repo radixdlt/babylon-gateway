@@ -102,6 +102,15 @@ public sealed record LedgerConfirmationOptions
     public long MaxCommitBatchSize { get; set; } = 300;
 
     /// <summary>
+    /// Gets or sets MinCommitBatchSize.
+    /// The minimum batch to send to the ledger extension service for committing.
+    /// It was added to have more control over batch size in tests.
+    /// We expect that best value to be used on production network is 1.
+    /// </summary>
+    [ConfigurationKeyName("MinCommitBatchSize")]
+    public long MinCommitBatchSize { get; set; } = 1;
+
+    /// <summary>
     /// Gets or sets LargeBatchSizeToAddDelay.
     /// LargeBatchSizeToAddDelay determines if the DelayBetweenLargeBatchesMilliseconds should be added.
     /// This is only relevant if a DelayBetweenLargeBatchesMilliseconds is configured.
@@ -158,6 +167,14 @@ internal class LedgerConfirmationOptionsValidator : AbstractOptionsValidator<Led
         RuleFor(x => x.CommitRequiresNodeQuorumTrustProportion).GreaterThan(0);
         RuleFor(x => x.SufficientlySyncedStateVersionThreshold).GreaterThan(0);
         RuleFor(x => x.MaxCommitBatchSize).GreaterThan(0);
+        RuleFor(x => x.MinCommitBatchSize).GreaterThan(0);
+
+        RuleFor(x => x.MinCommitBatchSize).LessThanOrEqualTo(x => x.MaxCommitBatchSize)
+            .WithMessage(x => $"MinCommitBatchSize is set to: {x.MinCommitBatchSize} but must be lower or equal to MaxCommitBatchSize: {x.MaxCommitBatchSize}");
+
+        RuleFor(x => x.MinCommitBatchSize).LessThanOrEqualTo(x => x.MaxTransactionPipelineSizePerNode)
+            .WithMessage(x => $"MinCommitBatchSize is set to: {x.MinCommitBatchSize} but must be lower or equal to MaxTransactionPipelineSizePerNode: {x.MaxTransactionPipelineSizePerNode}");
+
         RuleFor(x => x.LargeBatchSizeToAddDelay).GreaterThan(0);
         RuleFor(x => x.MaxTransactionPipelineSizePerNode).GreaterThan(0);
         RuleFor(x => x.MaxCoreApiTransactionBatchSize).GreaterThan(0);

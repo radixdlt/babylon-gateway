@@ -101,8 +101,13 @@ internal class EntityFungibleVaultHistory : EntityVaultHistory
     public bool IsRoyaltyVault { get; set; }
 }
 
-internal class EntityNonFungibleVaultHistory : EntityVaultHistory
+internal class EntityNonFungibleVaultHistory : EntityVaultHistory, IAggregateHolder
 {
     [Column("non_fungible_ids")]
     public List<long> NonFungibleIds { get; set; }
+
+    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
+    {
+        yield return (nameof(NonFungibleIds), NonFungibleIds.Count);
+    }
 }

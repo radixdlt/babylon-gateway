@@ -71,8 +71,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 [Table("package_blueprint_history")]
 internal class PackageBlueprintHistory
 {
-    [Key]
     [Column("id")]
+    [Key]
     public long Id { get; set; }
 
     [Column("from_state_version")]

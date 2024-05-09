@@ -64,6 +64,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -109,5 +110,11 @@ public sealed class TransactionController : ControllerBase
     public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
     {
         return await _transactionHandler.Submit(request, token);
+    }
+
+    [HttpPost("account-deposit-pre-validation")]
+    public async Task<GatewayModel.AccountDepositPreValidationResponse> AccountDepositPreValidation(GatewayModel.AccountDepositPreValidationRequest request, CancellationToken token)
+    {
+        return await _transactionHandler.AccountDepositPreValidation(request, token);
     }
 }

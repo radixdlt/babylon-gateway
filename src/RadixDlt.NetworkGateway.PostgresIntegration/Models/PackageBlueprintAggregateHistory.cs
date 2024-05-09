@@ -69,7 +69,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("package_blueprint_aggregate_history")]
-internal class PackageBlueprintAggregateHistory
+internal class PackageBlueprintAggregateHistory : IAggregateHolder
 {
     [Key]
     [Column("id")]
@@ -83,4 +83,9 @@ internal class PackageBlueprintAggregateHistory
 
     [Column("package_blueprint_ids")]
     public List<long> PackageBlueprintIds { get; set; }
+
+    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
+    {
+        yield return (nameof(PackageBlueprintIds), PackageBlueprintIds.Count);
+    }
 }

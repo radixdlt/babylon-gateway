@@ -69,7 +69,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
 public sealed class GenericArrayHandler<T> : SqlMapper.TypeHandler<T[]>
 {
-    public override void SetValue(IDbDataParameter parameter, T[] value)
+    public override void SetValue(IDbDataParameter parameter, T[]? value)
     {
         parameter.Value = value;
     }
