@@ -62,38 +62,6 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.Abstractions;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
-
-internal class StateAccountLockerPageAccountResourcesRequestValidator : AbstractValidator<GatewayModel.StateAccountLockerPageAccountResourcesRequest>
-{
-    public StateAccountLockerPageAccountResourcesRequestValidator(
-        LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        RadixAddressValidator radixAddressValidator,
-        PaginableRequestValidator paginableRequestValidator)
-    {
-        RuleFor(x => x.AccountLockerAddress)
-            .NotEmpty()
-            .SetValidator(radixAddressValidator);
-
-        RuleFor(x => x.AccountAddress)
-            .NotEmpty()
-            .SetValidator(radixAddressValidator);
-
-        RuleFor(x => x.ExplicitResourceAddresses); // TODO configure
-
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x)
-            .SetValidator(paginableRequestValidator);
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0);
-    }
-}
+public readonly record struct AccountLockerAddress(EntityAddress LockerAddress, EntityAddress AccountAddress);

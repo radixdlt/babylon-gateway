@@ -70,7 +70,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface IAccountLockerHandler
 {
-    Task<GatewayModel.StateAccountLockerPageAccountResourcesResponse?> AccountResources(GatewayModel.StateAccountLockerPageAccountResourcesRequest request, CancellationToken token = default);
+    Task<GatewayModel.StateAccountLockerPageVaultsResponse?> Vaults(GatewayModel.StateAccountLockerPageVaultsRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.StateAccountLockerTbdResponse?> Tbd(GatewayModel.StateAccountLockerTbdRequest request, CancellationToken token = default);
+    Task<GatewayModel.StateAccountLockersTouchedAtResponse?> TouchedAt(GatewayModel.StateAccountLockersTouchedAtRequest request, CancellationToken token = default);
 }

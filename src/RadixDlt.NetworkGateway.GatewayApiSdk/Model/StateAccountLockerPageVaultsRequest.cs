@@ -62,26 +62,9 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
-
-internal class StateAccountLockerTbdRequestLookupTupleValidator : AbstractValidator<StateAccountLockerTbdRequestLookupTuple>
+public partial class StateAccountLockerPageVaultsRequest : IPaginableRequest
 {
-    public StateAccountLockerTbdRequestLookupTupleValidator(
-        LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        RadixAddressValidator radixAddressValidator)
-    {
-        RuleFor(x => x.FromLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
 
-        RuleFor(x => x.AccountLockerAddress)
-            .NotEmpty()
-            .SetValidator(radixAddressValidator);
-
-        RuleFor(x => x.AccountAddress)
-            .NotEmpty()
-            .SetValidator(radixAddressValidator);
-    }
 }

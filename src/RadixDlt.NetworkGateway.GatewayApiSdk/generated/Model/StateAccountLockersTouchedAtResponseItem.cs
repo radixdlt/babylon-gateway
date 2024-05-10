@@ -90,53 +90,59 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TBD
+    /// StateAccountLockersTouchedAtResponseItem
     /// </summary>
-    [DataContract(Name = "AccountLockerResourceVaultCollection")]
-    public partial class AccountLockerResourceVaultCollection : IEquatable<AccountLockerResourceVaultCollection>
+    [DataContract(Name = "StateAccountLockersTouchedAtResponseItem")]
+    public partial class StateAccountLockersTouchedAtResponseItem : IEquatable<StateAccountLockersTouchedAtResponseItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountLockerResourceVaultCollection" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtResponseItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountLockerResourceVaultCollection() { }
+        protected StateAccountLockersTouchedAtResponseItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountLockerResourceVaultCollection" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtResponseItem" /> class.
         /// </summary>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
-        /// <param name="items">items (required).</param>
-        public AccountLockerResourceVaultCollection(long? totalCount = default(long?), string nextCursor = default(string), List<AccountLockerResourceVault> items = default(List<AccountLockerResourceVault>))
+        /// <param name="lockerAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="accountAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="lastTouchedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
+        public StateAccountLockersTouchedAtResponseItem(string lockerAddress = default(string), string accountAddress = default(string), long lastTouchedAtStateVersion = default(long))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "lockerAddress" is required (not null)
+            if (lockerAddress == null)
             {
-                throw new ArgumentNullException("items is a required property for AccountLockerResourceVaultCollection and cannot be null");
+                throw new ArgumentNullException("lockerAddress is a required property for StateAccountLockersTouchedAtResponseItem and cannot be null");
             }
-            this.Items = items;
-            this.TotalCount = totalCount;
-            this.NextCursor = nextCursor;
+            this.LockerAddress = lockerAddress;
+            // to ensure "accountAddress" is required (not null)
+            if (accountAddress == null)
+            {
+                throw new ArgumentNullException("accountAddress is a required property for StateAccountLockersTouchedAtResponseItem and cannot be null");
+            }
+            this.AccountAddress = accountAddress;
+            this.LastTouchedAtStateVersion = lastTouchedAtStateVersion;
         }
 
         /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "locker_address", IsRequired = true, EmitDefaultValue = true)]
+        public string LockerAddress { get; set; }
 
         /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "account_address", IsRequired = true, EmitDefaultValue = true)]
+        public string AccountAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// The most recent state version underlying object was modified at.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccountLockerResourceVault> Items { get; set; }
+        /// <value>The most recent state version underlying object was modified at.</value>
+        [DataMember(Name = "last_touched_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastTouchedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +151,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountLockerResourceVaultCollection {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class StateAccountLockersTouchedAtResponseItem {\n");
+            sb.Append("  LockerAddress: ").Append(LockerAddress).Append("\n");
+            sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
+            sb.Append("  LastTouchedAtStateVersion: ").Append(LastTouchedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +175,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountLockerResourceVaultCollection);
+            return this.Equals(input as StateAccountLockersTouchedAtResponseItem);
         }
 
         /// <summary>
-        /// Returns true if AccountLockerResourceVaultCollection instances are equal
+        /// Returns true if StateAccountLockersTouchedAtResponseItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountLockerResourceVaultCollection to be compared</param>
+        /// <param name="input">Instance of StateAccountLockersTouchedAtResponseItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountLockerResourceVaultCollection input)
+        public bool Equals(StateAccountLockersTouchedAtResponseItem input)
         {
             if (input == null)
             {
@@ -185,20 +191,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
+                    this.LockerAddress == input.LockerAddress ||
+                    (this.LockerAddress != null &&
+                    this.LockerAddress.Equals(input.LockerAddress))
                 ) && 
                 (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
+                    this.AccountAddress == input.AccountAddress ||
+                    (this.AccountAddress != null &&
+                    this.AccountAddress.Equals(input.AccountAddress))
                 ) && 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.LastTouchedAtStateVersion == input.LastTouchedAtStateVersion ||
+                    this.LastTouchedAtStateVersion.Equals(input.LastTouchedAtStateVersion)
                 );
         }
 
@@ -211,18 +215,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
+                if (this.LockerAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LockerAddress.GetHashCode();
                 }
-                if (this.NextCursor != null)
+                if (this.AccountAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();
                 }
-                if (this.Items != null)
-                {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.LastTouchedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

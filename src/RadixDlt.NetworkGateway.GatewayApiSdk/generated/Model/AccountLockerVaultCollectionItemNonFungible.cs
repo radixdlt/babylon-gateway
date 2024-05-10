@@ -84,64 +84,44 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateAccountLockerPageAccountResourcesRequestAllOf
+    /// AccountLockerVaultCollectionItemNonFungible
     /// </summary>
-    [DataContract(Name = "StateAccountLockerPageAccountResourcesRequest_allOf")]
-    public partial class StateAccountLockerPageAccountResourcesRequestAllOf : IEquatable<StateAccountLockerPageAccountResourcesRequestAllOf>
+    [DataContract(Name = "AccountLockerVaultCollectionItemNonFungible")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(AccountLockerVaultCollectionItemFungible), "Fungible")]
+    [JsonSubtypes.KnownSubType(typeof(AccountLockerVaultCollectionItemNonFungible), "NonFungible")]
+    public partial class AccountLockerVaultCollectionItemNonFungible : AccountLockerVaultCollectionItem, IEquatable<AccountLockerVaultCollectionItemNonFungible>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerPageAccountResourcesRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AccountLockerVaultCollectionItemNonFungible" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateAccountLockerPageAccountResourcesRequestAllOf() { }
+        protected AccountLockerVaultCollectionItemNonFungible() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerPageAccountResourcesRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AccountLockerVaultCollectionItemNonFungible" /> class.
         /// </summary>
-        /// <param name="accountLockerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="accountAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="explicitResourceAddresses">explicitResourceAddresses.</param>
-        public StateAccountLockerPageAccountResourcesRequestAllOf(string accountLockerAddress = default(string), string accountAddress = default(string), List<string> explicitResourceAddresses = default(List<string>))
+        /// <param name="totalCount">totalCount (required).</param>
+        /// <param name="type">type (required) (default to AccountLockerVaultCollectionItemType.NonFungible).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
+        public AccountLockerVaultCollectionItemNonFungible(long totalCount = default(long), AccountLockerVaultCollectionItemType type = AccountLockerVaultCollectionItemType.NonFungible, string resourceAddress = default(string), string vaultAddress = default(string), long lastUpdatedAtStateVersion = default(long)) : base(type, resourceAddress, vaultAddress, lastUpdatedAtStateVersion)
         {
-            // to ensure "accountLockerAddress" is required (not null)
-            if (accountLockerAddress == null)
-            {
-                throw new ArgumentNullException("accountLockerAddress is a required property for StateAccountLockerPageAccountResourcesRequestAllOf and cannot be null");
-            }
-            this.AccountLockerAddress = accountLockerAddress;
-            // to ensure "accountAddress" is required (not null)
-            if (accountAddress == null)
-            {
-                throw new ArgumentNullException("accountAddress is a required property for StateAccountLockerPageAccountResourcesRequestAllOf and cannot be null");
-            }
-            this.AccountAddress = accountAddress;
-            this.ExplicitResourceAddresses = explicitResourceAddresses;
+            this.TotalCount = totalCount;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets TotalCount
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_locker_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountLockerAddress { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets ExplicitResourceAddresses
-        /// </summary>
-        [DataMember(Name = "explicit_resource_addresses", EmitDefaultValue = true)]
-        public List<string> ExplicitResourceAddresses { get; set; }
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public long TotalCount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +130,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateAccountLockerPageAccountResourcesRequestAllOf {\n");
-            sb.Append("  AccountLockerAddress: ").Append(AccountLockerAddress).Append("\n");
-            sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
-            sb.Append("  ExplicitResourceAddresses: ").Append(ExplicitResourceAddresses).Append("\n");
+            sb.Append("class AccountLockerVaultCollectionItemNonFungible {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -162,7 +141,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -174,36 +153,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateAccountLockerPageAccountResourcesRequestAllOf);
+            return this.Equals(input as AccountLockerVaultCollectionItemNonFungible);
         }
 
         /// <summary>
-        /// Returns true if StateAccountLockerPageAccountResourcesRequestAllOf instances are equal
+        /// Returns true if AccountLockerVaultCollectionItemNonFungible instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateAccountLockerPageAccountResourcesRequestAllOf to be compared</param>
+        /// <param name="input">Instance of AccountLockerVaultCollectionItemNonFungible to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateAccountLockerPageAccountResourcesRequestAllOf input)
+        public bool Equals(AccountLockerVaultCollectionItemNonFungible input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.AccountLockerAddress == input.AccountLockerAddress ||
-                    (this.AccountLockerAddress != null &&
-                    this.AccountLockerAddress.Equals(input.AccountLockerAddress))
-                ) && 
-                (
-                    this.AccountAddress == input.AccountAddress ||
-                    (this.AccountAddress != null &&
-                    this.AccountAddress.Equals(input.AccountAddress))
-                ) && 
-                (
-                    this.ExplicitResourceAddresses == input.ExplicitResourceAddresses ||
-                    this.ExplicitResourceAddresses != null &&
-                    input.ExplicitResourceAddresses != null &&
-                    this.ExplicitResourceAddresses.SequenceEqual(input.ExplicitResourceAddresses)
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
                 );
         }
 
@@ -215,19 +182,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.AccountLockerAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccountLockerAddress.GetHashCode();
-                }
-                if (this.AccountAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();
-                }
-                if (this.ExplicitResourceAddresses != null)
-                {
-                    hashCode = (hashCode * 59) + this.ExplicitResourceAddresses.GetHashCode();
-                }
+                int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 return hashCode;
             }
         }

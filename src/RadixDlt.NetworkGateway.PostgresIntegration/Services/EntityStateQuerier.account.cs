@@ -82,17 +82,17 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal partial class EntityStateQuerier
 {
-    private record AccountLockerVaultViewModel(long Id, long FromStateVersion, string ResourceAddress, string VaultAddress, long LastUpdatedAtStateVersion, string? FungibleBalance, int? NonFungibleCount);
+    private record AccountLockerVaultViewModel(long Id, long FromStateVersion, string ResourceAddress, string VaultAddress, long LastUpdatedAtStateVersion, string? FungibleBalance, int? NonFungibleTotalCount);
 
-    private record AccountLockerTbdViewModel(long AccountLockerEntityId, long AccountEntityId, long? LastUpdatedAt);
+    private record AccountLockerTouchedAtViewModel(long AccountLockerEntityId, long AccountEntityId, long LastUpdatedAt);
 
-    public async Task<GatewayModel.StateAccountLockerPageAccountResourcesResponse> AccountLockerPage(
+    public async Task<GatewayModel.StateAccountLockerPageVaultsResponse> AccountLockerVaultsPage(
         IEntityStateQuerier.AccountLockerPageRequest pageRequest,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var accountLocker = await GetEntity<GlobalAccountLockerEntity>(pageRequest.AccountLockerAddress, ledgerState, token);
-        var account = await GetEntity<GlobalAccountEntity>(pageRequest.AccountAddress, ledgerState, token);
+        var accountLocker = await GetEntity<GlobalAccountLockerEntity>(pageRequest.AccountLockerAddress.LockerAddress, ledgerState, token);
+        var account = await GetEntity<GlobalAccountEntity>(pageRequest.AccountLockerAddress.AccountAddress, ledgerState, token);
         var accountLockerEntryDefinition = await _dbContext
             .AccountLockerDefinition
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
@@ -100,17 +100,17 @@ internal partial class EntityStateQuerier
 
         if (accountLockerEntryDefinition == null)
         {
-            throw new EntityNotFoundException("should not use this excetpion"); // TODO should not use this excetpion
+            throw new EntityNotFoundException("should not use this excetpion"); // TODO should not use this exception
         }
 
         var cd = new CommandDefinition(
             commandText: @"
-SELECT d.id AS Id, d.from_state_version AS FromStateVersion, re.address AS ResourceAddress, ve.address AS VaultAddress, vh.from_state_version AS LastUpdatedAtStateVersion, vh.fungible_balance AS FungibleBalance, vh.non_fungible_count AS NonFungibleCount
+SELECT d.id AS Id, d.from_state_version AS FromStateVersion, re.address AS ResourceAddress, ve.address AS VaultAddress, vh.from_state_version AS LastUpdatedAtStateVersion, vh.fungible_balance AS FungibleBalance, vh.non_fungible_total_count AS NonFungibleTotalCount
 FROM account_locker_entry_resource_vault_definition d
 INNER JOIN entities re ON re.id = d.resource_entity_id
 INNER JOIN entities ve ON ve.id = d.vault_entity_id
 INNER JOIN LATERAL (
-    SELECT balance::text AS fungible_balance, cardinality(non_fungible_ids) AS non_fungible_count, from_state_version
+    SELECT balance::text AS fungible_balance, cardinality(non_fungible_ids) AS non_fungible_total_count, from_state_version
     FROM entity_vault_history
     WHERE vault_entity_id = ve.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
@@ -132,43 +132,56 @@ LIMIT @limit;",
             },
             cancellationToken: token);
 
-        var keysAndOneMore = (await _dapperWrapper.QueryAsync<AccountLockerVaultViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
+        var vaultsAndOneMore = (await _dapperWrapper.QueryAsync<AccountLockerVaultViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
 
-        var items = keysAndOneMore
+        var items = vaultsAndOneMore
             .Take(pageRequest.Limit)
             .Select(k =>
             {
-                // TODO maybe we want to differienciate between fungible and non-fungible from day 1?
-                var fungibleAmount = k.FungibleBalance != null ? TokenAmount.FromSubUnitsString(k.FungibleBalance).ToString() : null;
-                var nonFungibleAmount = k.NonFungibleCount.HasValue ? k.NonFungibleCount.ToString() : null;
-                var amount = fungibleAmount ?? nonFungibleAmount ?? throw new UnreachableException("bleee"); // TODO do something
+                GatewayModel.AccountLockerVaultCollectionItem result;
 
-                return new GatewayModel.AccountLockerResourceVault(
-                    resourceAddress: k.ResourceAddress,
-                    vaultAddress: k.VaultAddress,
-                    amount: amount,
-                    lastUpdatedAtStateVersion: k.LastUpdatedAtStateVersion
-                );
+                if (k.FungibleBalance != null)
+                {
+                    result = new GatewayModel.AccountLockerVaultCollectionItemFungible(
+                        amount: TokenAmount.FromSubUnitsString(k.FungibleBalance).ToString(),
+                        resourceAddress: k.ResourceAddress,
+                        vaultAddress: k.VaultAddress,
+                        lastUpdatedAtStateVersion: k.LastUpdatedAtStateVersion);
+                }
+                else if (k.NonFungibleTotalCount.HasValue)
+                {
+                    result = new GatewayModel.AccountLockerVaultCollectionItemNonFungible(
+                        totalCount: k.NonFungibleTotalCount.Value,
+                        resourceAddress: k.ResourceAddress,
+                        vaultAddress: k.VaultAddress,
+                        lastUpdatedAtStateVersion: k.LastUpdatedAtStateVersion);
+                }
+                else
+                {
+                    throw new UnreachableException("bleee2"); // TODO should not use this exception 2
+                }
+
+                return result;
             })
             .ToList();
 
-        var nextCursor = keysAndOneMore.Count == pageRequest.Limit + 1
-            ? new GatewayModel.StateAccountLockerAccountResourcesCursor(keysAndOneMore.Last().FromStateVersion, keysAndOneMore.Last().Id).ToCursorString()
+        var nextCursor = vaultsAndOneMore.Count == pageRequest.Limit + 1
+            ? new GatewayModel.StateAccountLockerAccountResourcesCursor(vaultsAndOneMore.Last().FromStateVersion, vaultsAndOneMore.Last().Id).ToCursorString()
             : null;
 
-        return new GatewayApiSdk.Model.StateAccountLockerPageAccountResourcesResponse(
+        return new GatewayApiSdk.Model.StateAccountLockerPageVaultsResponse(
             ledgerState: ledgerState,
-            accountLockerAddress: accountLocker.Address,
+            lockerAddress: accountLocker.Address,
             accountAddress: account.Address,
             nextCursor: nextCursor,
             items: items
         );
     }
 
-    public async Task<GatewayModel.StateAccountLockerTbdResponse> AccountLockerTbd(IList<IEntityStateQuerier.AccountLockerLookup> lookup, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateAccountLockersTouchedAtResponse> AccountLockersTouchedAt(IList<AccountLockerAddress> accountLockers, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
     {
-        var entityAddresses = lookup.SelectMany(l => new[] { l.AccountLockerAddress, l.AccountAddress }).ToHashSet().ToList();
-        var entities = await GetEntities(entityAddresses, ledgerState, token);
+        var entityAddresses = accountLockers.SelectMany(l => new[] { l.LockerAddress, l.AccountAddress }).ToHashSet().ToList();
+        var entities = await GetEntities(entityAddresses, atLedgerState, token);
         var entitiesByAddress = entities.ToDictionary(e => e.Address);
         var entitiesById = entities.ToDictionary(e => e.Id);
 
@@ -182,24 +195,24 @@ LIMIT @limit;",
             return e.Id;
         }
 
-        lookup.Unzip(l => GetAddressOrThrow(l.AccountLockerAddress), l => GetAddressOrThrow(l.AccountAddress), l => l.FromStateVersion ?? 0, out var accountLockerEntityIds, out var accountEntityIds, out var fromStateVersions);
+        accountLockers.Unzip(l => GetAddressOrThrow(l.LockerAddress), l => GetAddressOrThrow(l.AccountAddress), out var accountLockerEntityIds, out var accountEntityIds);
 
         var cd = new CommandDefinition(
             commandText: @"
 WITH variables AS (
-    SELECT UNNEST(@accountLockerEntityIds) AS account_locker_entity_id, UNNEST(@accountEntityIds) AS account_entity_id, UNNEST(@fromLedgerState) AS from_state_version
+    SELECT UNNEST(@accountLockerEntityIds) AS account_locker_entity_id, UNNEST(@accountEntityIds) AS account_entity_id
 ),
-lookup AS (
-    SELECT d.*, v.from_state_version AS rename_me_from_state_version
+entry_definitions AS (
+    SELECT d.*
     FROM account_locker_entry_definition d, variables v
     WHERE d.account_locker_entity_id = v.account_locker_entity_id AND d.account_entity_id = v.account_entity_id AND d.from_state_version <= @stateVersion
 )
-SELECT l.account_locker_entity_id AS AccountLockerEntityId, l.account_entity_id AS AccountEntityId, th.from_state_version AS LastUpdatedAt
-FROM lookup l
-LEFT JOIN LATERAL (
+SELECT ed.account_locker_entity_id AS AccountLockerEntityId, ed.account_entity_id AS AccountEntityId, th.from_state_version AS LastUpdatedAt
+FROM entry_definitions ed
+INNER JOIN LATERAL (
     SELECT from_state_version
     FROM account_locker_entry_touch_history
-    WHERE account_locker_definition_id = l.id AND from_state_version BETWEEN l.rename_me_from_state_version AND @stateVersion
+    WHERE account_locker_definition_id = ed.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) th ON TRUE;",
@@ -207,21 +220,20 @@ LEFT JOIN LATERAL (
             {
                 accountLockerEntityIds = accountLockerEntityIds,
                 accountEntityIds = accountEntityIds,
-                fromLedgerState = fromStateVersions,
-                stateVersion = ledgerState.StateVersion,
+                stateVersion = atLedgerState.StateVersion,
             },
             cancellationToken: token);
 
-        var items = new List<GatewayModel.StateAccountLockerTbdResponseItem>();
+        var items = new List<GatewayModel.StateAccountLockersTouchedAtResponseItem>();
 
-        foreach (var row in await _dapperWrapper.QueryAsync<AccountLockerTbdViewModel>(_dbContext.Database.GetDbConnection(), cd))
+        foreach (var row in await _dapperWrapper.QueryAsync<AccountLockerTouchedAtViewModel>(_dbContext.Database.GetDbConnection(), cd))
         {
-            items.Add(new GatewayModel.StateAccountLockerTbdResponseItem(
-                accountLockerAddress: entitiesById[row.AccountLockerEntityId].Address,
+            items.Add(new GatewayModel.StateAccountLockersTouchedAtResponseItem(
+                lockerAddress: entitiesById[row.AccountLockerEntityId].Address,
                 accountAddress: entitiesById[row.AccountEntityId].Address,
-                resourceLastStoredAtStateVersion: row.LastUpdatedAt ?? -123));
+                lastTouchedAtStateVersion: row.LastUpdatedAt));
         }
 
-        return new GatewayModel.StateAccountLockerTbdResponse(ledgerState, items);
+        return new GatewayModel.StateAccountLockersTouchedAtResponse(atLedgerState, items);
     }
 }

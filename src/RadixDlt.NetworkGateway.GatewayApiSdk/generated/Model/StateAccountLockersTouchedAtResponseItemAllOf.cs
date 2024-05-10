@@ -90,84 +90,31 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateAccountLockerPageAccountResourcesRequest
+    /// StateAccountLockersTouchedAtResponseItemAllOf
     /// </summary>
-    [DataContract(Name = "StateAccountLockerPageAccountResourcesRequest")]
-    public partial class StateAccountLockerPageAccountResourcesRequest : IEquatable<StateAccountLockerPageAccountResourcesRequest>
+    [DataContract(Name = "StateAccountLockersTouchedAtResponseItem_allOf")]
+    public partial class StateAccountLockersTouchedAtResponseItemAllOf : IEquatable<StateAccountLockersTouchedAtResponseItemAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerPageAccountResourcesRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtResponseItemAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateAccountLockerPageAccountResourcesRequest() { }
+        protected StateAccountLockersTouchedAtResponseItemAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerPageAccountResourcesRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtResponseItemAllOf" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limitPerPage">The page size requested..</param>
-        /// <param name="accountLockerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="accountAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="explicitResourceAddresses">explicitResourceAddresses.</param>
-        public StateAccountLockerPageAccountResourcesRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string accountLockerAddress = default(string), string accountAddress = default(string), List<string> explicitResourceAddresses = default(List<string>))
+        /// <param name="lastTouchedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
+        public StateAccountLockersTouchedAtResponseItemAllOf(long lastTouchedAtStateVersion = default(long))
         {
-            // to ensure "accountLockerAddress" is required (not null)
-            if (accountLockerAddress == null)
-            {
-                throw new ArgumentNullException("accountLockerAddress is a required property for StateAccountLockerPageAccountResourcesRequest and cannot be null");
-            }
-            this.AccountLockerAddress = accountLockerAddress;
-            // to ensure "accountAddress" is required (not null)
-            if (accountAddress == null)
-            {
-                throw new ArgumentNullException("accountAddress is a required property for StateAccountLockerPageAccountResourcesRequest and cannot be null");
-            }
-            this.AccountAddress = accountAddress;
-            this.AtLedgerState = atLedgerState;
-            this.Cursor = cursor;
-            this.LimitPerPage = limitPerPage;
-            this.ExplicitResourceAddresses = explicitResourceAddresses;
+            this.LastTouchedAtStateVersion = lastTouchedAtStateVersion;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// The most recent state version underlying object was modified at.
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// This cursor allows forward pagination, by providing the cursor from the previous request.
-        /// </summary>
-        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = true)]
-        public string Cursor { get; set; }
-
-        /// <summary>
-        /// The page size requested.
-        /// </summary>
-        /// <value>The page size requested.</value>
-        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
-        public int? LimitPerPage { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_locker_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountLockerAddress { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets ExplicitResourceAddresses
-        /// </summary>
-        [DataMember(Name = "explicit_resource_addresses", EmitDefaultValue = true)]
-        public List<string> ExplicitResourceAddresses { get; set; }
+        /// <value>The most recent state version underlying object was modified at.</value>
+        [DataMember(Name = "last_touched_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastTouchedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -176,13 +123,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateAccountLockerPageAccountResourcesRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
-            sb.Append("  AccountLockerAddress: ").Append(AccountLockerAddress).Append("\n");
-            sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
-            sb.Append("  ExplicitResourceAddresses: ").Append(ExplicitResourceAddresses).Append("\n");
+            sb.Append("class StateAccountLockersTouchedAtResponseItemAllOf {\n");
+            sb.Append("  LastTouchedAtStateVersion: ").Append(LastTouchedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -203,15 +145,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateAccountLockerPageAccountResourcesRequest);
+            return this.Equals(input as StateAccountLockersTouchedAtResponseItemAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateAccountLockerPageAccountResourcesRequest instances are equal
+        /// Returns true if StateAccountLockersTouchedAtResponseItemAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateAccountLockerPageAccountResourcesRequest to be compared</param>
+        /// <param name="input">Instance of StateAccountLockersTouchedAtResponseItemAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateAccountLockerPageAccountResourcesRequest input)
+        public bool Equals(StateAccountLockersTouchedAtResponseItemAllOf input)
         {
             if (input == null)
             {
@@ -219,35 +161,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
-                (
-                    this.Cursor == input.Cursor ||
-                    (this.Cursor != null &&
-                    this.Cursor.Equals(input.Cursor))
-                ) && 
-                (
-                    this.LimitPerPage == input.LimitPerPage ||
-                    (this.LimitPerPage != null &&
-                    this.LimitPerPage.Equals(input.LimitPerPage))
-                ) && 
-                (
-                    this.AccountLockerAddress == input.AccountLockerAddress ||
-                    (this.AccountLockerAddress != null &&
-                    this.AccountLockerAddress.Equals(input.AccountLockerAddress))
-                ) && 
-                (
-                    this.AccountAddress == input.AccountAddress ||
-                    (this.AccountAddress != null &&
-                    this.AccountAddress.Equals(input.AccountAddress))
-                ) && 
-                (
-                    this.ExplicitResourceAddresses == input.ExplicitResourceAddresses ||
-                    this.ExplicitResourceAddresses != null &&
-                    input.ExplicitResourceAddresses != null &&
-                    this.ExplicitResourceAddresses.SequenceEqual(input.ExplicitResourceAddresses)
+                    this.LastTouchedAtStateVersion == input.LastTouchedAtStateVersion ||
+                    this.LastTouchedAtStateVersion.Equals(input.LastTouchedAtStateVersion)
                 );
         }
 
@@ -260,30 +175,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
-                }
-                if (this.Cursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
-                }
-                if (this.LimitPerPage != null)
-                {
-                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
-                }
-                if (this.AccountLockerAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccountLockerAddress.GetHashCode();
-                }
-                if (this.AccountAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();
-                }
-                if (this.ExplicitResourceAddresses != null)
-                {
-                    hashCode = (hashCode * 59) + this.ExplicitResourceAddresses.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.LastTouchedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

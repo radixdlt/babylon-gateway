@@ -90,35 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateAccountLockerTbdResponseAllOf
+    /// StateAccountLockersTouchedAtRequestAllOf
     /// </summary>
-    [DataContract(Name = "StateAccountLockerTbdResponse_allOf")]
-    public partial class StateAccountLockerTbdResponseAllOf : IEquatable<StateAccountLockerTbdResponseAllOf>
+    [DataContract(Name = "StateAccountLockersTouchedAtRequest_allOf")]
+    public partial class StateAccountLockersTouchedAtRequestAllOf : IEquatable<StateAccountLockersTouchedAtRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateAccountLockerTbdResponseAllOf() { }
+        protected StateAccountLockersTouchedAtRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtRequestAllOf" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public StateAccountLockerTbdResponseAllOf(List<StateAccountLockerTbdResponseItem> items = default(List<StateAccountLockerTbdResponseItem>))
+        /// <param name="accountLockers">accountLockers (required).</param>
+        public StateAccountLockersTouchedAtRequestAllOf(List<AccountLockerAddress> accountLockers = default(List<AccountLockerAddress>))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "accountLockers" is required (not null)
+            if (accountLockers == null)
             {
-                throw new ArgumentNullException("items is a required property for StateAccountLockerTbdResponseAllOf and cannot be null");
+                throw new ArgumentNullException("accountLockers is a required property for StateAccountLockersTouchedAtRequestAllOf and cannot be null");
             }
-            this.Items = items;
+            this.AccountLockers = accountLockers;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Gets or Sets AccountLockers
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateAccountLockerTbdResponseItem> Items { get; set; }
+        [DataMember(Name = "account_lockers", IsRequired = true, EmitDefaultValue = true)]
+        public List<AccountLockerAddress> AccountLockers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateAccountLockerTbdResponseAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class StateAccountLockersTouchedAtRequestAllOf {\n");
+            sb.Append("  AccountLockers: ").Append(AccountLockers).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateAccountLockerTbdResponseAllOf);
+            return this.Equals(input as StateAccountLockersTouchedAtRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateAccountLockerTbdResponseAllOf instances are equal
+        /// Returns true if StateAccountLockersTouchedAtRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateAccountLockerTbdResponseAllOf to be compared</param>
+        /// <param name="input">Instance of StateAccountLockersTouchedAtRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateAccountLockerTbdResponseAllOf input)
+        public bool Equals(StateAccountLockersTouchedAtRequestAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.AccountLockers == input.AccountLockers ||
+                    this.AccountLockers != null &&
+                    input.AccountLockers != null &&
+                    this.AccountLockers.SequenceEqual(input.AccountLockers)
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.AccountLockers != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccountLockers.GetHashCode();
                 }
                 return hashCode;
             }

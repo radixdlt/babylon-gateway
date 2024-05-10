@@ -90,73 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountLockerResourceVault
+    /// StateAccountLockersTouchedAtResponseAllOf
     /// </summary>
-    [DataContract(Name = "AccountLockerResourceVault")]
-    public partial class AccountLockerResourceVault : IEquatable<AccountLockerResourceVault>
+    [DataContract(Name = "StateAccountLockersTouchedAtResponse_allOf")]
+    public partial class StateAccountLockersTouchedAtResponseAllOf : IEquatable<StateAccountLockersTouchedAtResponseAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountLockerResourceVault" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountLockerResourceVault() { }
+        protected StateAccountLockersTouchedAtResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountLockerResourceVault" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtResponseAllOf" /> class.
         /// </summary>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="vaultAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
-        public AccountLockerResourceVault(string resourceAddress = default(string), string vaultAddress = default(string), string amount = default(string), long lastUpdatedAtStateVersion = default(long))
+        /// <param name="items">items (required).</param>
+        public StateAccountLockersTouchedAtResponseAllOf(List<StateAccountLockersTouchedAtResponseItem> items = default(List<StateAccountLockersTouchedAtResponseItem>))
         {
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for AccountLockerResourceVault and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateAccountLockersTouchedAtResponseAllOf and cannot be null");
             }
-            this.ResourceAddress = resourceAddress;
-            // to ensure "vaultAddress" is required (not null)
-            if (vaultAddress == null)
-            {
-                throw new ArgumentNullException("vaultAddress is a required property for AccountLockerResourceVault and cannot be null");
-            }
-            this.VaultAddress = vaultAddress;
-            // to ensure "amount" is required (not null)
-            if (amount == null)
-            {
-                throw new ArgumentNullException("amount is a required property for AccountLockerResourceVault and cannot be null");
-            }
-            this.Amount = amount;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.Items = items;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
-        public string VaultAddress { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
-
-        /// <summary>
-        /// The most recent state version underlying object was modified at.
-        /// </summary>
-        /// <value>The most recent state version underlying object was modified at.</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateAccountLockersTouchedAtResponseItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -165,11 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountLockerResourceVault {\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  VaultAddress: ").Append(VaultAddress).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("class StateAccountLockersTouchedAtResponseAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -190,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountLockerResourceVault);
+            return this.Equals(input as StateAccountLockersTouchedAtResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if AccountLockerResourceVault instances are equal
+        /// Returns true if StateAccountLockersTouchedAtResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountLockerResourceVault to be compared</param>
+        /// <param name="input">Instance of StateAccountLockersTouchedAtResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountLockerResourceVault input)
+        public bool Equals(StateAccountLockersTouchedAtResponseAllOf input)
         {
             if (input == null)
             {
@@ -206,23 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && 
-                (
-                    this.VaultAddress == input.VaultAddress ||
-                    (this.VaultAddress != null &&
-                    this.VaultAddress.Equals(input.VaultAddress))
-                ) && 
-                (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
-                ) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -235,19 +181,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ResourceAddress != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
-                if (this.VaultAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.VaultAddress.GetHashCode();
-                }
-                if (this.Amount != null)
-                {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

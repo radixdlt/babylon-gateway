@@ -69,24 +69,24 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class StateAccountLockerTbdRequestValidator : AbstractValidator<GatewayModel.StateAccountLockerTbdRequest>
+internal class StateAccountLockersTouchedAtRequestValidator : AbstractValidator<GatewayModel.StateAccountLockersTouchedAtRequest>
 {
-    public StateAccountLockerTbdRequestValidator(
+    public StateAccountLockersTouchedAtRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
         RadixAddressValidator radixAddressValidator)
     {
-        RuleFor(x => x.Lookup)
+        RuleFor(x => x.AccountLockers)
             .NotEmpty()
             .DependentRules(() =>
             {
-                RuleFor(x => x.Lookup.Count)
+                RuleFor(x => x.AccountLockers.Count)
                     .GreaterThan(0)
                     .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
 
-                RuleForEach(x => x.Lookup)
+                RuleForEach(x => x.AccountLockers)
                     .NotEmpty()
-                    .SetValidator(new StateAccountLockerTbdRequestLookupTupleValidator(ledgerStateSelectorValidator, radixAddressValidator));
+                    .SetValidator(new AccountLockerAddressValidator(radixAddressValidator));
             });
 
         RuleFor(x => x.AtLedgerState)

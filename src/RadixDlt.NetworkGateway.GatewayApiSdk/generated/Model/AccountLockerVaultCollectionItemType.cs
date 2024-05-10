@@ -90,122 +90,22 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateAccountLockerTbdRequest
+    /// Defines AccountLockerVaultCollectionItemType
     /// </summary>
-    [DataContract(Name = "StateAccountLockerTbdRequest")]
-    public partial class StateAccountLockerTbdRequest : IEquatable<StateAccountLockerTbdRequest>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum AccountLockerVaultCollectionItemType
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdRequest" /> class.
+        /// Enum Fungible for value: Fungible
         /// </summary>
-        [JsonConstructorAttribute]
-        protected StateAccountLockerTbdRequest() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdRequest" /> class.
-        /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="lookup">lookup (required).</param>
-        public StateAccountLockerTbdRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), List<StateAccountLockerTbdRequestLookupTuple> lookup = default(List<StateAccountLockerTbdRequestLookupTuple>))
-        {
-            // to ensure "lookup" is required (not null)
-            if (lookup == null)
-            {
-                throw new ArgumentNullException("lookup is a required property for StateAccountLockerTbdRequest and cannot be null");
-            }
-            this.Lookup = lookup;
-            this.AtLedgerState = atLedgerState;
-        }
+        [EnumMember(Value = "Fungible")]
+        Fungible = 1,
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// Enum NonFungible for value: NonFungible
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Lookup
-        /// </summary>
-        [DataMember(Name = "lookup", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateAccountLockerTbdRequestLookupTuple> Lookup { get; set; }
-
-        /// <summary>
-        /// Returns the string presentation of the object
-        /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class StateAccountLockerTbdRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  Lookup: ").Append(Lookup).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as StateAccountLockerTbdRequest);
-        }
-
-        /// <summary>
-        /// Returns true if StateAccountLockerTbdRequest instances are equal
-        /// </summary>
-        /// <param name="input">Instance of StateAccountLockerTbdRequest to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(StateAccountLockerTbdRequest input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
-                (
-                    this.Lookup == input.Lookup ||
-                    this.Lookup != null &&
-                    input.Lookup != null &&
-                    this.Lookup.SequenceEqual(input.Lookup)
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                if (this.AtLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
-                }
-                if (this.Lookup != null)
-                {
-                    hashCode = (hashCode * 59) + this.Lookup.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "NonFungible")]
+        NonFungible = 2
 
     }
 

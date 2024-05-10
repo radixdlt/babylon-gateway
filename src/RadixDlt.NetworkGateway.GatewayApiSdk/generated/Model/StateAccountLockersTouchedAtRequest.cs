@@ -90,50 +90,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateAccountLockerPageAccountResourcesResponseAllOf
+    /// StateAccountLockersTouchedAtRequest
     /// </summary>
-    [DataContract(Name = "StateAccountLockerPageAccountResourcesResponse_allOf")]
-    public partial class StateAccountLockerPageAccountResourcesResponseAllOf : IEquatable<StateAccountLockerPageAccountResourcesResponseAllOf>
+    [DataContract(Name = "StateAccountLockersTouchedAtRequest")]
+    public partial class StateAccountLockersTouchedAtRequest : IEquatable<StateAccountLockersTouchedAtRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerPageAccountResourcesResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateAccountLockerPageAccountResourcesResponseAllOf() { }
+        protected StateAccountLockersTouchedAtRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerPageAccountResourcesResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtRequest" /> class.
         /// </summary>
-        /// <param name="accountLockerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="accountAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public StateAccountLockerPageAccountResourcesResponseAllOf(string accountLockerAddress = default(string), string accountAddress = default(string))
+        /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="accountLockers">accountLockers (required).</param>
+        public StateAccountLockersTouchedAtRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), List<AccountLockerAddress> accountLockers = default(List<AccountLockerAddress>))
         {
-            // to ensure "accountLockerAddress" is required (not null)
-            if (accountLockerAddress == null)
+            // to ensure "accountLockers" is required (not null)
+            if (accountLockers == null)
             {
-                throw new ArgumentNullException("accountLockerAddress is a required property for StateAccountLockerPageAccountResourcesResponseAllOf and cannot be null");
+                throw new ArgumentNullException("accountLockers is a required property for StateAccountLockersTouchedAtRequest and cannot be null");
             }
-            this.AccountLockerAddress = accountLockerAddress;
-            // to ensure "accountAddress" is required (not null)
-            if (accountAddress == null)
-            {
-                throw new ArgumentNullException("accountAddress is a required property for StateAccountLockerPageAccountResourcesResponseAllOf and cannot be null");
-            }
-            this.AccountAddress = accountAddress;
+            this.AccountLockers = accountLockers;
+            this.AtLedgerState = atLedgerState;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_locker_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountLockerAddress { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets AccountLockers
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountAddress { get; set; }
+        [DataMember(Name = "account_lockers", IsRequired = true, EmitDefaultValue = true)]
+        public List<AccountLockerAddress> AccountLockers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +135,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateAccountLockerPageAccountResourcesResponseAllOf {\n");
-            sb.Append("  AccountLockerAddress: ").Append(AccountLockerAddress).Append("\n");
-            sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
+            sb.Append("class StateAccountLockersTouchedAtRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  AccountLockers: ").Append(AccountLockers).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +158,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateAccountLockerPageAccountResourcesResponseAllOf);
+            return this.Equals(input as StateAccountLockersTouchedAtRequest);
         }
 
         /// <summary>
-        /// Returns true if StateAccountLockerPageAccountResourcesResponseAllOf instances are equal
+        /// Returns true if StateAccountLockersTouchedAtRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateAccountLockerPageAccountResourcesResponseAllOf to be compared</param>
+        /// <param name="input">Instance of StateAccountLockersTouchedAtRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateAccountLockerPageAccountResourcesResponseAllOf input)
+        public bool Equals(StateAccountLockersTouchedAtRequest input)
         {
             if (input == null)
             {
@@ -181,14 +174,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AccountLockerAddress == input.AccountLockerAddress ||
-                    (this.AccountLockerAddress != null &&
-                    this.AccountLockerAddress.Equals(input.AccountLockerAddress))
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.AccountAddress == input.AccountAddress ||
-                    (this.AccountAddress != null &&
-                    this.AccountAddress.Equals(input.AccountAddress))
+                    this.AccountLockers == input.AccountLockers ||
+                    this.AccountLockers != null &&
+                    input.AccountLockers != null &&
+                    this.AccountLockers.SequenceEqual(input.AccountLockers)
                 );
         }
 
@@ -201,13 +195,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AccountLockerAddress != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccountLockerAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.AccountAddress != null)
+                if (this.AccountLockers != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccountLockers.GetHashCode();
                 }
                 return hashCode;
             }

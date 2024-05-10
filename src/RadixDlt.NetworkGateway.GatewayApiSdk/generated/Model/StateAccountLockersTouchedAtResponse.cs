@@ -90,53 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateAccountLockerPageAccountResourcesResponse
+    /// StateAccountLockersTouchedAtResponse
     /// </summary>
-    [DataContract(Name = "StateAccountLockerPageAccountResourcesResponse")]
-    public partial class StateAccountLockerPageAccountResourcesResponse : IEquatable<StateAccountLockerPageAccountResourcesResponse>
+    [DataContract(Name = "StateAccountLockersTouchedAtResponse")]
+    public partial class StateAccountLockersTouchedAtResponse : IEquatable<StateAccountLockersTouchedAtResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerPageAccountResourcesResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateAccountLockerPageAccountResourcesResponse() { }
+        protected StateAccountLockersTouchedAtResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerPageAccountResourcesResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
-        /// <param name="accountLockerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="accountAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public StateAccountLockerPageAccountResourcesResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string nextCursor = default(string), List<AccountLockerResourceVault> items = default(List<AccountLockerResourceVault>), string accountLockerAddress = default(string), string accountAddress = default(string))
+        public StateAccountLockersTouchedAtResponse(LedgerState ledgerState = default(LedgerState), List<StateAccountLockersTouchedAtResponseItem> items = default(List<StateAccountLockersTouchedAtResponseItem>))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for StateAccountLockerPageAccountResourcesResponse and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for StateAccountLockersTouchedAtResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for StateAccountLockerPageAccountResourcesResponse and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateAccountLockersTouchedAtResponse and cannot be null");
             }
             this.Items = items;
-            // to ensure "accountLockerAddress" is required (not null)
-            if (accountLockerAddress == null)
-            {
-                throw new ArgumentNullException("accountLockerAddress is a required property for StateAccountLockerPageAccountResourcesResponse and cannot be null");
-            }
-            this.AccountLockerAddress = accountLockerAddress;
-            // to ensure "accountAddress" is required (not null)
-            if (accountAddress == null)
-            {
-                throw new ArgumentNullException("accountAddress is a required property for StateAccountLockerPageAccountResourcesResponse and cannot be null");
-            }
-            this.AccountAddress = accountAddress;
-            this.TotalCount = totalCount;
-            this.NextCursor = nextCursor;
         }
 
         /// <summary>
@@ -146,38 +128,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
-
-        /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
-
-        /// <summary>
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccountLockerResourceVault> Items { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_locker_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountLockerAddress { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountAddress { get; set; }
+        public List<StateAccountLockersTouchedAtResponseItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -186,13 +140,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateAccountLockerPageAccountResourcesResponse {\n");
+            sb.Append("class StateAccountLockersTouchedAtResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
-            sb.Append("  AccountLockerAddress: ").Append(AccountLockerAddress).Append("\n");
-            sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -213,15 +163,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateAccountLockerPageAccountResourcesResponse);
+            return this.Equals(input as StateAccountLockersTouchedAtResponse);
         }
 
         /// <summary>
-        /// Returns true if StateAccountLockerPageAccountResourcesResponse instances are equal
+        /// Returns true if StateAccountLockersTouchedAtResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateAccountLockerPageAccountResourcesResponse to be compared</param>
+        /// <param name="input">Instance of StateAccountLockersTouchedAtResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateAccountLockerPageAccountResourcesResponse input)
+        public bool Equals(StateAccountLockersTouchedAtResponse input)
         {
             if (input == null)
             {
@@ -234,30 +184,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
-                (
                     this.Items == input.Items ||
                     this.Items != null &&
                     input.Items != null &&
                     this.Items.SequenceEqual(input.Items)
-                ) && 
-                (
-                    this.AccountLockerAddress == input.AccountLockerAddress ||
-                    (this.AccountLockerAddress != null &&
-                    this.AccountLockerAddress.Equals(input.AccountLockerAddress))
-                ) && 
-                (
-                    this.AccountAddress == input.AccountAddress ||
-                    (this.AccountAddress != null &&
-                    this.AccountAddress.Equals(input.AccountAddress))
                 );
         }
 
@@ -274,25 +204,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.TotalCount != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
                 if (this.Items != null)
                 {
                     hashCode = (hashCode * 59) + this.Items.GetHashCode();
-                }
-                if (this.AccountLockerAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccountLockerAddress.GetHashCode();
-                }
-                if (this.AccountAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();
                 }
                 return hashCode;
             }

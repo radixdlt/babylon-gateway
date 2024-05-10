@@ -62,9 +62,21 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using FluentValidation;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public partial class StateAccountLockerPageAccountResourcesRequest : IPaginableRequest
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+
+internal class AccountLockerAddressValidator : AbstractValidator<GatewayModel.AccountLockerAddress>
 {
+    public AccountLockerAddressValidator(RadixAddressValidator radixAddressValidator)
+    {
+        RuleFor(x => x.LockerAddress)
+            .NotEmpty()
+            .SetValidator(radixAddressValidator);
 
+        RuleFor(x => x.AccountAddress)
+            .NotEmpty()
+            .SetValidator(radixAddressValidator);
+    }
 }

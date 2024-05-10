@@ -90,51 +90,69 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateAccountLockerTbdRequestLookupTuple
+    /// StateAccountLockerPageVaultsRequest
     /// </summary>
-    [DataContract(Name = "StateAccountLockerTbdRequestLookupTuple")]
-    public partial class StateAccountLockerTbdRequestLookupTuple : IEquatable<StateAccountLockerTbdRequestLookupTuple>
+    [DataContract(Name = "StateAccountLockerPageVaultsRequest")]
+    public partial class StateAccountLockerPageVaultsRequest : IEquatable<StateAccountLockerPageVaultsRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdRequestLookupTuple" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockerPageVaultsRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateAccountLockerTbdRequestLookupTuple() { }
+        protected StateAccountLockerPageVaultsRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdRequestLookupTuple" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockerPageVaultsRequest" /> class.
         /// </summary>
-        /// <param name="fromLedgerState">fromLedgerState.</param>
-        /// <param name="accountLockerAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limitPerPage">The page size requested..</param>
+        /// <param name="lockerAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="accountAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public StateAccountLockerTbdRequestLookupTuple(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string accountLockerAddress = default(string), string accountAddress = default(string))
+        public StateAccountLockerPageVaultsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string lockerAddress = default(string), string accountAddress = default(string))
         {
-            // to ensure "accountLockerAddress" is required (not null)
-            if (accountLockerAddress == null)
+            // to ensure "lockerAddress" is required (not null)
+            if (lockerAddress == null)
             {
-                throw new ArgumentNullException("accountLockerAddress is a required property for StateAccountLockerTbdRequestLookupTuple and cannot be null");
+                throw new ArgumentNullException("lockerAddress is a required property for StateAccountLockerPageVaultsRequest and cannot be null");
             }
-            this.AccountLockerAddress = accountLockerAddress;
+            this.LockerAddress = lockerAddress;
             // to ensure "accountAddress" is required (not null)
             if (accountAddress == null)
             {
-                throw new ArgumentNullException("accountAddress is a required property for StateAccountLockerTbdRequestLookupTuple and cannot be null");
+                throw new ArgumentNullException("accountAddress is a required property for StateAccountLockerPageVaultsRequest and cannot be null");
             }
             this.AccountAddress = accountAddress;
-            this.FromLedgerState = fromLedgerState;
+            this.AtLedgerState = atLedgerState;
+            this.Cursor = cursor;
+            this.LimitPerPage = limitPerPage;
         }
 
         /// <summary>
-        /// Gets or Sets FromLedgerState
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector FromLedgerState { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
+
+        /// <summary>
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// </summary>
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the address.
         /// </summary>
         /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "account_locker_address", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountLockerAddress { get; set; }
+        [DataMember(Name = "locker_address", IsRequired = true, EmitDefaultValue = true)]
+        public string LockerAddress { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the address.
@@ -150,9 +168,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateAccountLockerTbdRequestLookupTuple {\n");
-            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
-            sb.Append("  AccountLockerAddress: ").Append(AccountLockerAddress).Append("\n");
+            sb.Append("class StateAccountLockerPageVaultsRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
+            sb.Append("  LockerAddress: ").Append(LockerAddress).Append("\n");
             sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -174,15 +194,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateAccountLockerTbdRequestLookupTuple);
+            return this.Equals(input as StateAccountLockerPageVaultsRequest);
         }
 
         /// <summary>
-        /// Returns true if StateAccountLockerTbdRequestLookupTuple instances are equal
+        /// Returns true if StateAccountLockerPageVaultsRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateAccountLockerTbdRequestLookupTuple to be compared</param>
+        /// <param name="input">Instance of StateAccountLockerPageVaultsRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateAccountLockerTbdRequestLookupTuple input)
+        public bool Equals(StateAccountLockerPageVaultsRequest input)
         {
             if (input == null)
             {
@@ -190,14 +210,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.FromLedgerState == input.FromLedgerState ||
-                    (this.FromLedgerState != null &&
-                    this.FromLedgerState.Equals(input.FromLedgerState))
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.AccountLockerAddress == input.AccountLockerAddress ||
-                    (this.AccountLockerAddress != null &&
-                    this.AccountLockerAddress.Equals(input.AccountLockerAddress))
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
+                ) && 
+                (
+                    this.LockerAddress == input.LockerAddress ||
+                    (this.LockerAddress != null &&
+                    this.LockerAddress.Equals(input.LockerAddress))
                 ) && 
                 (
                     this.AccountAddress == input.AccountAddress ||
@@ -215,13 +245,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.FromLedgerState != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.AccountLockerAddress != null)
+                if (this.Cursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccountLockerAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.LimitPerPage != null)
+                {
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
+                }
+                if (this.LockerAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.LockerAddress.GetHashCode();
                 }
                 if (this.AccountAddress != null)
                 {

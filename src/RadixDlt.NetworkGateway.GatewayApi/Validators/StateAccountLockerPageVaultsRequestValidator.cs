@@ -62,50 +62,36 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentValidation;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class DefaultAccountLockerHandler : IAccountLockerHandler
+internal class StateAccountLockerPageVaultsRequestValidator : AbstractValidator<GatewayModel.StateAccountLockerPageVaultsRequest>
 {
-    private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IEntityStateQuerier _entityStateQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
-
-    public DefaultAccountLockerHandler(
-        ILedgerStateQuerier ledgerStateQuerier,
-        IEntityStateQuerier entityStateQuerier,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    public StateAccountLockerPageVaultsRequestValidator(
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        RadixAddressValidator radixAddressValidator,
+        PaginableRequestValidator paginableRequestValidator)
     {
-        _ledgerStateQuerier = ledgerStateQuerier;
-        _entityStateQuerier = entityStateQuerier;
-        _endpointConfiguration = endpointConfiguration;
-    }
+        RuleFor(x => x.LockerAddress)
+            .NotEmpty()
+            .SetValidator(radixAddressValidator);
 
-    public async Task<GatewayModel.StateAccountLockerPageVaultsResponse?> Vaults(GatewayModel.StateAccountLockerPageVaultsRequest request, CancellationToken token = default)
-    {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var cursor = GatewayModel.StateAccountLockerAccountResourcesCursor.FromCursorString(request.Cursor);
-        var limit = _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage);
-        var pageRequest = new IEntityStateQuerier.AccountLockerPageRequest(new AccountLockerAddress((EntityAddress)request.LockerAddress, (EntityAddress)request.AccountAddress), cursor, limit);
+        RuleFor(x => x.AccountAddress)
+            .NotEmpty()
+            .SetValidator(radixAddressValidator);
 
-        return await _entityStateQuerier.AccountLockerVaultsPage(pageRequest, ledgerState, token);
-    }
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
-    public async Task<GatewayModel.StateAccountLockersTouchedAtResponse?> TouchedAt(GatewayModel.StateAccountLockersTouchedAtRequest request, CancellationToken token = default)
-    {
-        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var accountLockers = request.AccountLockers
-            .Select(l => new AccountLockerAddress((EntityAddress)l.LockerAddress, (EntityAddress)l.AccountAddress))
-            .ToList();
+        RuleFor(x => x.Cursor)
+            .Base64();
 
-        return await _entityStateQuerier.AccountLockersTouchedAt(accountLockers, atLedgerState, token);
+        RuleFor(x => x)
+            .SetValidator(paginableRequestValidator);
+
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0);
     }
 }

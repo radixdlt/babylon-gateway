@@ -64,7 +64,6 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -72,7 +71,6 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 namespace GatewayApi.Controllers;
 
 [ApiController]
-[Route("state/account-locker")]
 public class StateAccountLockerController : ControllerBase
 {
     private readonly IAccountLockerHandler _accountLockerHandler;
@@ -82,19 +80,19 @@ public class StateAccountLockerController : ControllerBase
         _accountLockerHandler = accountLockerHandler;
     }
 
-    [HttpPost("page/account-resources")]
-    public async Task<IActionResult> AccountResourcesPage(GatewayModel.StateAccountLockerPageAccountResourcesRequest request, CancellationToken token = default)
+    [HttpPost("state/account-locker/page/vaults")]
+    public async Task<IActionResult> VaultsPage(GatewayModel.StateAccountLockerPageVaultsRequest request, CancellationToken token = default)
     {
-        var response = await _accountLockerHandler.AccountResources(request, token);
+        var response = await _accountLockerHandler.Vaults(request, token);
 
         return response != null
             ? Ok(response)
             : NotFound();
     }
 
-    [HttpPost("touched-at")]
-    public async Task<IActionResult> Tbd(GatewayModel.StateAccountLockerTbdRequest request, CancellationToken token = default)
+    [HttpPost("state/account-lockers/touched-at")]
+    public async Task<IActionResult> TouchedAt(GatewayModel.StateAccountLockersTouchedAtRequest request, CancellationToken token = default)
     {
-        return Ok(await _accountLockerHandler.Tbd(request, token));
+        return Ok(await _accountLockerHandler.TouchedAt(request, token));
     }
 }

@@ -90,35 +90,30 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateAccountLockerTbdRequestAllOf
+    /// AccountLockerVaultCollectionItemNonFungibleAllOf
     /// </summary>
-    [DataContract(Name = "StateAccountLockerTbdRequest_allOf")]
-    public partial class StateAccountLockerTbdRequestAllOf : IEquatable<StateAccountLockerTbdRequestAllOf>
+    [DataContract(Name = "AccountLockerVaultCollectionItemNonFungible_allOf")]
+    public partial class AccountLockerVaultCollectionItemNonFungibleAllOf : IEquatable<AccountLockerVaultCollectionItemNonFungibleAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AccountLockerVaultCollectionItemNonFungibleAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateAccountLockerTbdRequestAllOf() { }
+        protected AccountLockerVaultCollectionItemNonFungibleAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AccountLockerVaultCollectionItemNonFungibleAllOf" /> class.
         /// </summary>
-        /// <param name="lookup">lookup (required).</param>
-        public StateAccountLockerTbdRequestAllOf(List<StateAccountLockerTbdRequestLookupTuple> lookup = default(List<StateAccountLockerTbdRequestLookupTuple>))
+        /// <param name="totalCount">totalCount (required).</param>
+        public AccountLockerVaultCollectionItemNonFungibleAllOf(long totalCount = default(long))
         {
-            // to ensure "lookup" is required (not null)
-            if (lookup == null)
-            {
-                throw new ArgumentNullException("lookup is a required property for StateAccountLockerTbdRequestAllOf and cannot be null");
-            }
-            this.Lookup = lookup;
+            this.TotalCount = totalCount;
         }
 
         /// <summary>
-        /// Gets or Sets Lookup
+        /// Gets or Sets TotalCount
         /// </summary>
-        [DataMember(Name = "lookup", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateAccountLockerTbdRequestLookupTuple> Lookup { get; set; }
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public long TotalCount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +122,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateAccountLockerTbdRequestAllOf {\n");
-            sb.Append("  Lookup: ").Append(Lookup).Append("\n");
+            sb.Append("class AccountLockerVaultCollectionItemNonFungibleAllOf {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +144,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateAccountLockerTbdRequestAllOf);
+            return this.Equals(input as AccountLockerVaultCollectionItemNonFungibleAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateAccountLockerTbdRequestAllOf instances are equal
+        /// Returns true if AccountLockerVaultCollectionItemNonFungibleAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateAccountLockerTbdRequestAllOf to be compared</param>
+        /// <param name="input">Instance of AccountLockerVaultCollectionItemNonFungibleAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateAccountLockerTbdRequestAllOf input)
+        public bool Equals(AccountLockerVaultCollectionItemNonFungibleAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +160,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Lookup == input.Lookup ||
-                    this.Lookup != null &&
-                    input.Lookup != null &&
-                    this.Lookup.SequenceEqual(input.Lookup)
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
                 );
         }
 
@@ -181,10 +174,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Lookup != null)
-                {
-                    hashCode = (hashCode * 59) + this.Lookup.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 return hashCode;
             }
         }

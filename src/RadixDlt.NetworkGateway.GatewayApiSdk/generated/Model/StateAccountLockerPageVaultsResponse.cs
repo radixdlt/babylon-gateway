@@ -90,35 +90,94 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountLockerResourceVaultCollectionAllOf
+    /// StateAccountLockerPageVaultsResponse
     /// </summary>
-    [DataContract(Name = "AccountLockerResourceVaultCollection_allOf")]
-    public partial class AccountLockerResourceVaultCollectionAllOf : IEquatable<AccountLockerResourceVaultCollectionAllOf>
+    [DataContract(Name = "StateAccountLockerPageVaultsResponse")]
+    public partial class StateAccountLockerPageVaultsResponse : IEquatable<StateAccountLockerPageVaultsResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountLockerResourceVaultCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockerPageVaultsResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountLockerResourceVaultCollectionAllOf() { }
+        protected StateAccountLockerPageVaultsResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountLockerResourceVaultCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateAccountLockerPageVaultsResponse" /> class.
         /// </summary>
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
-        public AccountLockerResourceVaultCollectionAllOf(List<AccountLockerResourceVault> items = default(List<AccountLockerResourceVault>))
+        /// <param name="lockerAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="accountAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        public StateAccountLockerPageVaultsResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string nextCursor = default(string), List<AccountLockerVaultCollectionItem> items = default(List<AccountLockerVaultCollectionItem>), string lockerAddress = default(string), string accountAddress = default(string))
         {
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
+            {
+                throw new ArgumentNullException("ledgerState is a required property for StateAccountLockerPageVaultsResponse and cannot be null");
+            }
+            this.LedgerState = ledgerState;
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for AccountLockerResourceVaultCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateAccountLockerPageVaultsResponse and cannot be null");
             }
             this.Items = items;
+            // to ensure "lockerAddress" is required (not null)
+            if (lockerAddress == null)
+            {
+                throw new ArgumentNullException("lockerAddress is a required property for StateAccountLockerPageVaultsResponse and cannot be null");
+            }
+            this.LockerAddress = lockerAddress;
+            // to ensure "accountAddress" is required (not null)
+            if (accountAddress == null)
+            {
+                throw new ArgumentNullException("accountAddress is a required property for StateAccountLockerPageVaultsResponse and cannot be null");
+            }
+            this.AccountAddress = accountAddress;
+            this.TotalCount = totalCount;
+            this.NextCursor = nextCursor;
         }
+
+        /// <summary>
+        /// Gets or Sets LedgerState
+        /// </summary>
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
+
+        /// <summary>
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
+
+        /// <summary>
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
 
         /// <summary>
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccountLockerResourceVault> Items { get; set; }
+        public List<AccountLockerVaultCollectionItem> Items { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "locker_address", IsRequired = true, EmitDefaultValue = true)]
+        public string LockerAddress { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "account_address", IsRequired = true, EmitDefaultValue = true)]
+        public string AccountAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +186,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountLockerResourceVaultCollectionAllOf {\n");
+            sb.Append("class StateAccountLockerPageVaultsResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  LockerAddress: ").Append(LockerAddress).Append("\n");
+            sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +213,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountLockerResourceVaultCollectionAllOf);
+            return this.Equals(input as StateAccountLockerPageVaultsResponse);
         }
 
         /// <summary>
-        /// Returns true if AccountLockerResourceVaultCollectionAllOf instances are equal
+        /// Returns true if StateAccountLockerPageVaultsResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountLockerResourceVaultCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of StateAccountLockerPageVaultsResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountLockerResourceVaultCollectionAllOf input)
+        public bool Equals(StateAccountLockerPageVaultsResponse input)
         {
             if (input == null)
             {
@@ -165,10 +229,35 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
+                ) && 
+                (
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
+                ) && 
+                (
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
+                ) && 
+                (
                     this.Items == input.Items ||
                     this.Items != null &&
                     input.Items != null &&
                     this.Items.SequenceEqual(input.Items)
+                ) && 
+                (
+                    this.LockerAddress == input.LockerAddress ||
+                    (this.LockerAddress != null &&
+                    this.LockerAddress.Equals(input.LockerAddress))
+                ) && 
+                (
+                    this.AccountAddress == input.AccountAddress ||
+                    (this.AccountAddress != null &&
+                    this.AccountAddress.Equals(input.AccountAddress))
                 );
         }
 
@@ -181,9 +270,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.LedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                }
+                if (this.TotalCount != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                }
+                if (this.NextCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                }
                 if (this.Items != null)
                 {
                     hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                }
+                if (this.LockerAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.LockerAddress.GetHashCode();
+                }
+                if (this.AccountAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();
                 }
                 return hashCode;
             }

@@ -84,54 +84,50 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateAccountLockerTbdResponse
+    /// AccountLockerVaultCollectionItemFungible
     /// </summary>
-    [DataContract(Name = "StateAccountLockerTbdResponse")]
-    public partial class StateAccountLockerTbdResponse : IEquatable<StateAccountLockerTbdResponse>
+    [DataContract(Name = "AccountLockerVaultCollectionItemFungible")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(AccountLockerVaultCollectionItemFungible), "Fungible")]
+    [JsonSubtypes.KnownSubType(typeof(AccountLockerVaultCollectionItemNonFungible), "NonFungible")]
+    public partial class AccountLockerVaultCollectionItemFungible : AccountLockerVaultCollectionItem, IEquatable<AccountLockerVaultCollectionItemFungible>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdResponse" /> class.
+        /// Initializes a new instance of the <see cref="AccountLockerVaultCollectionItemFungible" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateAccountLockerTbdResponse() { }
+        protected AccountLockerVaultCollectionItemFungible() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateAccountLockerTbdResponse" /> class.
+        /// Initializes a new instance of the <see cref="AccountLockerVaultCollectionItemFungible" /> class.
         /// </summary>
-        /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="items">items (required).</param>
-        public StateAccountLockerTbdResponse(LedgerState ledgerState = default(LedgerState), List<StateAccountLockerTbdResponseItem> items = default(List<StateAccountLockerTbdResponseItem>))
+        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        /// <param name="type">type (required) (default to AccountLockerVaultCollectionItemType.Fungible).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">The most recent state version underlying object was modified at. (required).</param>
+        public AccountLockerVaultCollectionItemFungible(string amount = default(string), AccountLockerVaultCollectionItemType type = AccountLockerVaultCollectionItemType.Fungible, string resourceAddress = default(string), string vaultAddress = default(string), long lastUpdatedAtStateVersion = default(long)) : base(type, resourceAddress, vaultAddress, lastUpdatedAtStateVersion)
         {
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
+            // to ensure "amount" is required (not null)
+            if (amount == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for StateAccountLockerTbdResponse and cannot be null");
+                throw new ArgumentNullException("amount is a required property for AccountLockerVaultCollectionItemFungible and cannot be null");
             }
-            this.LedgerState = ledgerState;
-            // to ensure "items" is required (not null)
-            if (items == null)
-            {
-                throw new ArgumentNullException("items is a required property for StateAccountLockerTbdResponse and cannot be null");
-            }
-            this.Items = items;
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Items
-        /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateAccountLockerTbdResponseItem> Items { get; set; }
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateAccountLockerTbdResponse {\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class AccountLockerVaultCollectionItemFungible {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -151,7 +147,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -163,31 +159,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateAccountLockerTbdResponse);
+            return this.Equals(input as AccountLockerVaultCollectionItemFungible);
         }
 
         /// <summary>
-        /// Returns true if StateAccountLockerTbdResponse instances are equal
+        /// Returns true if AccountLockerVaultCollectionItemFungible instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateAccountLockerTbdResponse to be compared</param>
+        /// <param name="input">Instance of AccountLockerVaultCollectionItemFungible to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateAccountLockerTbdResponse input)
+        public bool Equals(AccountLockerVaultCollectionItemFungible input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
-                ) && 
-                (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -199,14 +189,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.LedgerState != null)
+                int hashCode = base.GetHashCode();
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
-                }
-                if (this.Items != null)
-                {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }
