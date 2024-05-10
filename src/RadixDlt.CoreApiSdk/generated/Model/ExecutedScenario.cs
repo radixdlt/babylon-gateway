@@ -90,35 +90,72 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// BootLoaderModuleFieldKernelBootSubstateAllOf
+    /// ExecutedScenario
     /// </summary>
-    [DataContract(Name = "BootLoaderModuleFieldKernelBootSubstate_allOf")]
-    public partial class BootLoaderModuleFieldKernelBootSubstateAllOf : IEquatable<BootLoaderModuleFieldKernelBootSubstateAllOf>
+    [DataContract(Name = "ExecutedScenario")]
+    public partial class ExecutedScenario : IEquatable<ExecutedScenario>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldKernelBootSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ExecutedScenario" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected BootLoaderModuleFieldKernelBootSubstateAllOf() { }
+        protected ExecutedScenario() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldKernelBootSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ExecutedScenario" /> class.
         /// </summary>
-        /// <param name="value">value (required).</param>
-        public BootLoaderModuleFieldKernelBootSubstateAllOf(Object value = default(Object))
+        /// <param name="sequenceNumber">An index of the Scenario (reflecting its execution order). (required).</param>
+        /// <param name="logicalName">logicalName (required).</param>
+        /// <param name="committedTransactions">Transactions successfully committed by the Scenario. (required).</param>
+        /// <param name="addresses">Well-named addresses touched/created by the Scenario, keyed by their name.  (required).</param>
+        public ExecutedScenario(int sequenceNumber = default(int), string logicalName = default(string), List<ExecutedScenarioTransaction> committedTransactions = default(List<ExecutedScenarioTransaction>), Dictionary<string, string> addresses = default(Dictionary<string, string>))
         {
-            // to ensure "value" is required (not null)
-            if (value == null)
+            this.SequenceNumber = sequenceNumber;
+            // to ensure "logicalName" is required (not null)
+            if (logicalName == null)
             {
-                throw new ArgumentNullException("value is a required property for BootLoaderModuleFieldKernelBootSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("logicalName is a required property for ExecutedScenario and cannot be null");
             }
-            this.Value = value;
+            this.LogicalName = logicalName;
+            // to ensure "committedTransactions" is required (not null)
+            if (committedTransactions == null)
+            {
+                throw new ArgumentNullException("committedTransactions is a required property for ExecutedScenario and cannot be null");
+            }
+            this.CommittedTransactions = committedTransactions;
+            // to ensure "addresses" is required (not null)
+            if (addresses == null)
+            {
+                throw new ArgumentNullException("addresses is a required property for ExecutedScenario and cannot be null");
+            }
+            this.Addresses = addresses;
         }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// An index of the Scenario (reflecting its execution order).
         /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public Object Value { get; set; }
+        /// <value>An index of the Scenario (reflecting its execution order).</value>
+        [DataMember(Name = "sequence_number", IsRequired = true, EmitDefaultValue = true)]
+        public int SequenceNumber { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LogicalName
+        /// </summary>
+        [DataMember(Name = "logical_name", IsRequired = true, EmitDefaultValue = true)]
+        public string LogicalName { get; set; }
+
+        /// <summary>
+        /// Transactions successfully committed by the Scenario.
+        /// </summary>
+        /// <value>Transactions successfully committed by the Scenario.</value>
+        [DataMember(Name = "committed_transactions", IsRequired = true, EmitDefaultValue = true)]
+        public List<ExecutedScenarioTransaction> CommittedTransactions { get; set; }
+
+        /// <summary>
+        /// Well-named addresses touched/created by the Scenario, keyed by their name. 
+        /// </summary>
+        /// <value>Well-named addresses touched/created by the Scenario, keyed by their name. </value>
+        [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, string> Addresses { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +164,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class BootLoaderModuleFieldKernelBootSubstateAllOf {\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("class ExecutedScenario {\n");
+            sb.Append("  SequenceNumber: ").Append(SequenceNumber).Append("\n");
+            sb.Append("  LogicalName: ").Append(LogicalName).Append("\n");
+            sb.Append("  CommittedTransactions: ").Append(CommittedTransactions).Append("\n");
+            sb.Append("  Addresses: ").Append(Addresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +189,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as BootLoaderModuleFieldKernelBootSubstateAllOf);
+            return this.Equals(input as ExecutedScenario);
         }
 
         /// <summary>
-        /// Returns true if BootLoaderModuleFieldKernelBootSubstateAllOf instances are equal
+        /// Returns true if ExecutedScenario instances are equal
         /// </summary>
-        /// <param name="input">Instance of BootLoaderModuleFieldKernelBootSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of ExecutedScenario to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(BootLoaderModuleFieldKernelBootSubstateAllOf input)
+        public bool Equals(ExecutedScenario input)
         {
             if (input == null)
             {
@@ -165,9 +205,25 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.SequenceNumber == input.SequenceNumber ||
+                    this.SequenceNumber.Equals(input.SequenceNumber)
+                ) && 
+                (
+                    this.LogicalName == input.LogicalName ||
+                    (this.LogicalName != null &&
+                    this.LogicalName.Equals(input.LogicalName))
+                ) && 
+                (
+                    this.CommittedTransactions == input.CommittedTransactions ||
+                    this.CommittedTransactions != null &&
+                    input.CommittedTransactions != null &&
+                    this.CommittedTransactions.SequenceEqual(input.CommittedTransactions)
+                ) && 
+                (
+                    this.Addresses == input.Addresses ||
+                    this.Addresses != null &&
+                    input.Addresses != null &&
+                    this.Addresses.SequenceEqual(input.Addresses)
                 );
         }
 
@@ -180,9 +236,18 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Value != null)
+                hashCode = (hashCode * 59) + this.SequenceNumber.GetHashCode();
+                if (this.LogicalName != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LogicalName.GetHashCode();
+                }
+                if (this.CommittedTransactions != null)
+                {
+                    hashCode = (hashCode * 59) + this.CommittedTransactions.GetHashCode();
+                }
+                if (this.Addresses != null)
+                {
+                    hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
                 }
                 return hashCode;
             }

@@ -90,72 +90,54 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ExecutedGenesisScenario
+    /// CostingModuleConfig
     /// </summary>
-    [DataContract(Name = "ExecutedGenesisScenario")]
-    public partial class ExecutedGenesisScenario : IEquatable<ExecutedGenesisScenario>
+    [DataContract(Name = "CostingModuleConfig")]
+    public partial class CostingModuleConfig : IEquatable<CostingModuleConfig>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExecutedGenesisScenario" /> class.
+        /// Initializes a new instance of the <see cref="CostingModuleConfig" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ExecutedGenesisScenario() { }
+        protected CostingModuleConfig() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExecutedGenesisScenario" /> class.
+        /// Initializes a new instance of the <see cref="CostingModuleConfig" /> class.
         /// </summary>
-        /// <param name="sequenceNumber">An index of the Scenario on the list of all Scenarios that were executed. Note: the stored sequence numbers do not necessarily have to be consecutive (e.g. in a case where some configured Scenario failed to execute or failed to write results to the database).  (required).</param>
-        /// <param name="logicalName">logicalName (required).</param>
-        /// <param name="committedTransactions">Transactions successfully committed by the Scenario. (required).</param>
-        /// <param name="addresses">Well-named addresses touched/created by the Scenario, keyed by their name.  (required).</param>
-        public ExecutedGenesisScenario(int sequenceNumber = default(int), string logicalName = default(string), List<ExecutedScenarioTransaction> committedTransactions = default(List<ExecutedScenarioTransaction>), Dictionary<string, string> addresses = default(Dictionary<string, string>))
+        /// <param name="xrdMaxPerFunctionRoyalty">The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
+        /// <param name="applyExecutionCostForAllSystemCalls">Whether to apply execution costing for all system calls. (required).</param>
+        /// <param name="applyBootRefCheckCosting">Whether to apply costing for reference checks on boot. (required).</param>
+        public CostingModuleConfig(string xrdMaxPerFunctionRoyalty = default(string), bool applyExecutionCostForAllSystemCalls = default(bool), bool applyBootRefCheckCosting = default(bool))
         {
-            this.SequenceNumber = sequenceNumber;
-            // to ensure "logicalName" is required (not null)
-            if (logicalName == null)
+            // to ensure "xrdMaxPerFunctionRoyalty" is required (not null)
+            if (xrdMaxPerFunctionRoyalty == null)
             {
-                throw new ArgumentNullException("logicalName is a required property for ExecutedGenesisScenario and cannot be null");
+                throw new ArgumentNullException("xrdMaxPerFunctionRoyalty is a required property for CostingModuleConfig and cannot be null");
             }
-            this.LogicalName = logicalName;
-            // to ensure "committedTransactions" is required (not null)
-            if (committedTransactions == null)
-            {
-                throw new ArgumentNullException("committedTransactions is a required property for ExecutedGenesisScenario and cannot be null");
-            }
-            this.CommittedTransactions = committedTransactions;
-            // to ensure "addresses" is required (not null)
-            if (addresses == null)
-            {
-                throw new ArgumentNullException("addresses is a required property for ExecutedGenesisScenario and cannot be null");
-            }
-            this.Addresses = addresses;
+            this.XrdMaxPerFunctionRoyalty = xrdMaxPerFunctionRoyalty;
+            this.ApplyExecutionCostForAllSystemCalls = applyExecutionCostForAllSystemCalls;
+            this.ApplyBootRefCheckCosting = applyBootRefCheckCosting;
         }
 
         /// <summary>
-        /// An index of the Scenario on the list of all Scenarios that were executed. Note: the stored sequence numbers do not necessarily have to be consecutive (e.g. in a case where some configured Scenario failed to execute or failed to write results to the database). 
+        /// The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
         /// </summary>
-        /// <value>An index of the Scenario on the list of all Scenarios that were executed. Note: the stored sequence numbers do not necessarily have to be consecutive (e.g. in a case where some configured Scenario failed to execute or failed to write results to the database). </value>
-        [DataMember(Name = "sequence_number", IsRequired = true, EmitDefaultValue = true)]
-        public int SequenceNumber { get; set; }
+        /// <value>The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
+        [DataMember(Name = "xrd_max_per_function_royalty", IsRequired = true, EmitDefaultValue = true)]
+        public string XrdMaxPerFunctionRoyalty { get; set; }
 
         /// <summary>
-        /// Gets or Sets LogicalName
+        /// Whether to apply execution costing for all system calls.
         /// </summary>
-        [DataMember(Name = "logical_name", IsRequired = true, EmitDefaultValue = true)]
-        public string LogicalName { get; set; }
+        /// <value>Whether to apply execution costing for all system calls.</value>
+        [DataMember(Name = "apply_execution_cost_for_all_system_calls", IsRequired = true, EmitDefaultValue = true)]
+        public bool ApplyExecutionCostForAllSystemCalls { get; set; }
 
         /// <summary>
-        /// Transactions successfully committed by the Scenario.
+        /// Whether to apply costing for reference checks on boot.
         /// </summary>
-        /// <value>Transactions successfully committed by the Scenario.</value>
-        [DataMember(Name = "committed_transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<ExecutedScenarioTransaction> CommittedTransactions { get; set; }
-
-        /// <summary>
-        /// Well-named addresses touched/created by the Scenario, keyed by their name. 
-        /// </summary>
-        /// <value>Well-named addresses touched/created by the Scenario, keyed by their name. </value>
-        [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
-        public Dictionary<string, string> Addresses { get; set; }
+        /// <value>Whether to apply costing for reference checks on boot.</value>
+        [DataMember(Name = "apply_boot_ref_check_costing", IsRequired = true, EmitDefaultValue = true)]
+        public bool ApplyBootRefCheckCosting { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -164,11 +146,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ExecutedGenesisScenario {\n");
-            sb.Append("  SequenceNumber: ").Append(SequenceNumber).Append("\n");
-            sb.Append("  LogicalName: ").Append(LogicalName).Append("\n");
-            sb.Append("  CommittedTransactions: ").Append(CommittedTransactions).Append("\n");
-            sb.Append("  Addresses: ").Append(Addresses).Append("\n");
+            sb.Append("class CostingModuleConfig {\n");
+            sb.Append("  XrdMaxPerFunctionRoyalty: ").Append(XrdMaxPerFunctionRoyalty).Append("\n");
+            sb.Append("  ApplyExecutionCostForAllSystemCalls: ").Append(ApplyExecutionCostForAllSystemCalls).Append("\n");
+            sb.Append("  ApplyBootRefCheckCosting: ").Append(ApplyBootRefCheckCosting).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -189,15 +170,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ExecutedGenesisScenario);
+            return this.Equals(input as CostingModuleConfig);
         }
 
         /// <summary>
-        /// Returns true if ExecutedGenesisScenario instances are equal
+        /// Returns true if CostingModuleConfig instances are equal
         /// </summary>
-        /// <param name="input">Instance of ExecutedGenesisScenario to be compared</param>
+        /// <param name="input">Instance of CostingModuleConfig to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ExecutedGenesisScenario input)
+        public bool Equals(CostingModuleConfig input)
         {
             if (input == null)
             {
@@ -205,25 +186,17 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.SequenceNumber == input.SequenceNumber ||
-                    this.SequenceNumber.Equals(input.SequenceNumber)
+                    this.XrdMaxPerFunctionRoyalty == input.XrdMaxPerFunctionRoyalty ||
+                    (this.XrdMaxPerFunctionRoyalty != null &&
+                    this.XrdMaxPerFunctionRoyalty.Equals(input.XrdMaxPerFunctionRoyalty))
                 ) && 
                 (
-                    this.LogicalName == input.LogicalName ||
-                    (this.LogicalName != null &&
-                    this.LogicalName.Equals(input.LogicalName))
+                    this.ApplyExecutionCostForAllSystemCalls == input.ApplyExecutionCostForAllSystemCalls ||
+                    this.ApplyExecutionCostForAllSystemCalls.Equals(input.ApplyExecutionCostForAllSystemCalls)
                 ) && 
                 (
-                    this.CommittedTransactions == input.CommittedTransactions ||
-                    this.CommittedTransactions != null &&
-                    input.CommittedTransactions != null &&
-                    this.CommittedTransactions.SequenceEqual(input.CommittedTransactions)
-                ) && 
-                (
-                    this.Addresses == input.Addresses ||
-                    this.Addresses != null &&
-                    input.Addresses != null &&
-                    this.Addresses.SequenceEqual(input.Addresses)
+                    this.ApplyBootRefCheckCosting == input.ApplyBootRefCheckCosting ||
+                    this.ApplyBootRefCheckCosting.Equals(input.ApplyBootRefCheckCosting)
                 );
         }
 
@@ -236,19 +209,12 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.SequenceNumber.GetHashCode();
-                if (this.LogicalName != null)
+                if (this.XrdMaxPerFunctionRoyalty != null)
                 {
-                    hashCode = (hashCode * 59) + this.LogicalName.GetHashCode();
+                    hashCode = (hashCode * 59) + this.XrdMaxPerFunctionRoyalty.GetHashCode();
                 }
-                if (this.CommittedTransactions != null)
-                {
-                    hashCode = (hashCode * 59) + this.CommittedTransactions.GetHashCode();
-                }
-                if (this.Addresses != null)
-                {
-                    hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.ApplyExecutionCostForAllSystemCalls.GetHashCode();
+                hashCode = (hashCode * 59) + this.ApplyBootRefCheckCosting.GetHashCode();
                 return hashCode;
             }
         }

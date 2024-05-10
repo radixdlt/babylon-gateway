@@ -90,94 +90,28 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// BootLoaderModuleFieldKernelBootValue
+    /// Defines BootLoaderType
     /// </summary>
-    [DataContract(Name = "BootLoaderModuleFieldKernelBootValue")]
-    public partial class BootLoaderModuleFieldKernelBootValue : IEquatable<BootLoaderModuleFieldKernelBootValue>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum BootLoaderType
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldKernelBootValue" /> class.
+        /// Enum KernelBoot for value: KernelBoot
         /// </summary>
-        [JsonConstructorAttribute]
-        protected BootLoaderModuleFieldKernelBootValue() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldKernelBootValue" /> class.
-        /// </summary>
-        /// <param name="refCheckCosting">refCheckCosting (required).</param>
-        public BootLoaderModuleFieldKernelBootValue(bool refCheckCosting = default(bool))
-        {
-            this.RefCheckCosting = refCheckCosting;
-        }
+        [EnumMember(Value = "KernelBoot")]
+        KernelBoot = 1,
 
         /// <summary>
-        /// Gets or Sets RefCheckCosting
+        /// Enum SystemBoot for value: SystemBoot
         /// </summary>
-        [DataMember(Name = "ref_check_costing", IsRequired = true, EmitDefaultValue = true)]
-        public bool RefCheckCosting { get; set; }
+        [EnumMember(Value = "SystemBoot")]
+        SystemBoot = 2,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum VmBoot for value: VmBoot
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class BootLoaderModuleFieldKernelBootValue {\n");
-            sb.Append("  RefCheckCosting: ").Append(RefCheckCosting).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as BootLoaderModuleFieldKernelBootValue);
-        }
-
-        /// <summary>
-        /// Returns true if BootLoaderModuleFieldKernelBootValue instances are equal
-        /// </summary>
-        /// <param name="input">Instance of BootLoaderModuleFieldKernelBootValue to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(BootLoaderModuleFieldKernelBootValue input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.RefCheckCosting == input.RefCheckCosting ||
-                    this.RefCheckCosting.Equals(input.RefCheckCosting)
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.RefCheckCosting.GetHashCode();
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "VmBoot")]
+        VmBoot = 3
 
     }
 

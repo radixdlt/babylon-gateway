@@ -103,8 +103,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ScenariosResponse" /> class.
         /// </summary>
-        /// <param name="executedScenarios">Scenarios executed as part of Genesis (in their execution order). (required).</param>
-        public ScenariosResponse(List<ExecutedGenesisScenario> executedScenarios = default(List<ExecutedGenesisScenario>))
+        /// <param name="executedScenarios">Scenarios executed as part of Genesis and Protocol Updates, in their execution order.  (required).</param>
+        public ScenariosResponse(List<ExecutedScenario> executedScenarios = default(List<ExecutedScenario>))
         {
             // to ensure "executedScenarios" is required (not null)
             if (executedScenarios == null)
@@ -115,11 +115,11 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Scenarios executed as part of Genesis (in their execution order).
+        /// Scenarios executed as part of Genesis and Protocol Updates, in their execution order. 
         /// </summary>
-        /// <value>Scenarios executed as part of Genesis (in their execution order).</value>
+        /// <value>Scenarios executed as part of Genesis and Protocol Updates, in their execution order. </value>
         [DataMember(Name = "executed_scenarios", IsRequired = true, EmitDefaultValue = true)]
-        public List<ExecutedGenesisScenario> ExecutedScenarios { get; set; }
+        public List<ExecutedScenario> ExecutedScenarios { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

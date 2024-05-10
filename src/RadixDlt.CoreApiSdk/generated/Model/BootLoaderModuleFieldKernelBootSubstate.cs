@@ -160,7 +160,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.BootLoaderModuleFieldKernelBoot).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public BootLoaderModuleFieldKernelBootSubstate(BootLoaderModuleFieldKernelBootValue value = default(BootLoaderModuleFieldKernelBootValue), SubstateType substateType = SubstateType.BootLoaderModuleFieldKernelBoot, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public BootLoaderModuleFieldKernelBootSubstate(Object value = default(Object), SubstateType substateType = SubstateType.BootLoaderModuleFieldKernelBoot, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "value" is required (not null)
             if (value == null)
@@ -174,7 +174,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Value
         /// </summary>
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public BootLoaderModuleFieldKernelBootValue Value { get; set; }
+        public Object Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

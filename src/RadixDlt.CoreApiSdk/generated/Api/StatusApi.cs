@@ -135,7 +135,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Get Scenarios&#39; results.
         /// </summary>
         /// <remarks>
-        /// Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// Get results of test \&quot;Scenarios\&quot; executed on this Network. Note: these Scenarios are meant to only be executed on test Networks; on a production Node, the response is expected to be empty. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="scenariosRequest"></param>
@@ -146,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Get Scenarios&#39; results.
         /// </summary>
         /// <remarks>
-        /// Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// Get results of test \&quot;Scenarios\&quot; executed on this Network. Note: these Scenarios are meant to only be executed on test Networks; on a production Node, the response is expected to be empty. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="scenariosRequest"></param>
@@ -209,7 +209,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Get Scenarios&#39; results.
         /// </summary>
         /// <remarks>
-        /// Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// Get results of test \&quot;Scenarios\&quot; executed on this Network. Note: these Scenarios are meant to only be executed on test Networks; on a production Node, the response is expected to be empty. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="scenariosRequest"></param>
@@ -221,7 +221,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Get Scenarios&#39; results.
         /// </summary>
         /// <remarks>
-        /// Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// Get results of test \&quot;Scenarios\&quot; executed on this Network. Note: these Scenarios are meant to only be executed on test Networks; on a production Node, the response is expected to be empty. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="scenariosRequest"></param>
@@ -660,7 +660,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Get Scenarios&#39; results. Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// Get Scenarios&#39; results. Get results of test \&quot;Scenarios\&quot; executed on this Network. Note: these Scenarios are meant to only be executed on test Networks; on a production Node, the response is expected to be empty. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="scenariosRequest"></param>
@@ -672,7 +672,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Get Scenarios&#39; results. Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// Get Scenarios&#39; results. Get results of test \&quot;Scenarios\&quot; executed on this Network. Note: these Scenarios are meant to only be executed on test Networks; on a production Node, the response is expected to be empty. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="scenariosRequest"></param>
@@ -716,7 +716,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Get Scenarios&#39; results. Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// Get Scenarios&#39; results. Get results of test \&quot;Scenarios\&quot; executed on this Network. Note: these Scenarios are meant to only be executed on test Networks; on a production Node, the response is expected to be empty. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="scenariosRequest"></param>
@@ -729,7 +729,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Get Scenarios&#39; results. Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// Get Scenarios&#39; results. Get results of test \&quot;Scenarios\&quot; executed on this Network. Note: these Scenarios are meant to only be executed on test Networks; on a production Node, the response is expected to be empty. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="scenariosRequest"></param>

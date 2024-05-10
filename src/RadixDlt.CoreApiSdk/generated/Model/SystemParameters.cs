@@ -104,11 +104,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="SystemParameters" /> class.
         /// </summary>
         /// <param name="networkDefinition">networkDefinition (required).</param>
+        /// <param name="costingModuleConfig">costingModuleConfig (required).</param>
         /// <param name="costingParameters">costingParameters (required).</param>
         /// <param name="limitParameters">limitParameters (required).</param>
-        /// <param name="xrdMaxPerFunctionRoyalty">The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
-        /// <param name="applyAdditionalCosting">Whether to adjust costs for querying fee reserve state and encoding bech32 addresses. (required).</param>
-        public SystemParameters(NetworkDefinition networkDefinition = default(NetworkDefinition), SystemCostingParameters costingParameters = default(SystemCostingParameters), LimitParameters limitParameters = default(LimitParameters), string xrdMaxPerFunctionRoyalty = default(string), bool applyAdditionalCosting = default(bool))
+        public SystemParameters(NetworkDefinition networkDefinition = default(NetworkDefinition), CostingModuleConfig costingModuleConfig = default(CostingModuleConfig), SystemCostingParameters costingParameters = default(SystemCostingParameters), LimitParameters limitParameters = default(LimitParameters))
         {
             // to ensure "networkDefinition" is required (not null)
             if (networkDefinition == null)
@@ -116,6 +115,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("networkDefinition is a required property for SystemParameters and cannot be null");
             }
             this.NetworkDefinition = networkDefinition;
+            // to ensure "costingModuleConfig" is required (not null)
+            if (costingModuleConfig == null)
+            {
+                throw new ArgumentNullException("costingModuleConfig is a required property for SystemParameters and cannot be null");
+            }
+            this.CostingModuleConfig = costingModuleConfig;
             // to ensure "costingParameters" is required (not null)
             if (costingParameters == null)
             {
@@ -128,13 +133,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("limitParameters is a required property for SystemParameters and cannot be null");
             }
             this.LimitParameters = limitParameters;
-            // to ensure "xrdMaxPerFunctionRoyalty" is required (not null)
-            if (xrdMaxPerFunctionRoyalty == null)
-            {
-                throw new ArgumentNullException("xrdMaxPerFunctionRoyalty is a required property for SystemParameters and cannot be null");
-            }
-            this.XrdMaxPerFunctionRoyalty = xrdMaxPerFunctionRoyalty;
-            this.ApplyAdditionalCosting = applyAdditionalCosting;
         }
 
         /// <summary>
@@ -142,6 +140,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "network_definition", IsRequired = true, EmitDefaultValue = true)]
         public NetworkDefinition NetworkDefinition { get; set; }
+
+        /// <summary>
+        /// Gets or Sets CostingModuleConfig
+        /// </summary>
+        [DataMember(Name = "costing_module_config", IsRequired = true, EmitDefaultValue = true)]
+        public CostingModuleConfig CostingModuleConfig { get; set; }
 
         /// <summary>
         /// Gets or Sets CostingParameters
@@ -156,20 +160,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public LimitParameters LimitParameters { get; set; }
 
         /// <summary>
-        /// The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
-        /// </summary>
-        /// <value>The string-encoded decimal representing the maximum amount of XRD configurable for a single function&#39;s royalty. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
-        [DataMember(Name = "xrd_max_per_function_royalty", IsRequired = true, EmitDefaultValue = true)]
-        public string XrdMaxPerFunctionRoyalty { get; set; }
-
-        /// <summary>
-        /// Whether to adjust costs for querying fee reserve state and encoding bech32 addresses.
-        /// </summary>
-        /// <value>Whether to adjust costs for querying fee reserve state and encoding bech32 addresses.</value>
-        [DataMember(Name = "apply_additional_costing", IsRequired = true, EmitDefaultValue = true)]
-        public bool ApplyAdditionalCosting { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -178,10 +168,9 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class SystemParameters {\n");
             sb.Append("  NetworkDefinition: ").Append(NetworkDefinition).Append("\n");
+            sb.Append("  CostingModuleConfig: ").Append(CostingModuleConfig).Append("\n");
             sb.Append("  CostingParameters: ").Append(CostingParameters).Append("\n");
             sb.Append("  LimitParameters: ").Append(LimitParameters).Append("\n");
-            sb.Append("  XrdMaxPerFunctionRoyalty: ").Append(XrdMaxPerFunctionRoyalty).Append("\n");
-            sb.Append("  ApplyAdditionalCosting: ").Append(ApplyAdditionalCosting).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -223,6 +212,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.NetworkDefinition.Equals(input.NetworkDefinition))
                 ) && 
                 (
+                    this.CostingModuleConfig == input.CostingModuleConfig ||
+                    (this.CostingModuleConfig != null &&
+                    this.CostingModuleConfig.Equals(input.CostingModuleConfig))
+                ) && 
+                (
                     this.CostingParameters == input.CostingParameters ||
                     (this.CostingParameters != null &&
                     this.CostingParameters.Equals(input.CostingParameters))
@@ -231,15 +225,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.LimitParameters == input.LimitParameters ||
                     (this.LimitParameters != null &&
                     this.LimitParameters.Equals(input.LimitParameters))
-                ) && 
-                (
-                    this.XrdMaxPerFunctionRoyalty == input.XrdMaxPerFunctionRoyalty ||
-                    (this.XrdMaxPerFunctionRoyalty != null &&
-                    this.XrdMaxPerFunctionRoyalty.Equals(input.XrdMaxPerFunctionRoyalty))
-                ) && 
-                (
-                    this.ApplyAdditionalCosting == input.ApplyAdditionalCosting ||
-                    this.ApplyAdditionalCosting.Equals(input.ApplyAdditionalCosting)
                 );
         }
 
@@ -256,6 +241,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NetworkDefinition.GetHashCode();
                 }
+                if (this.CostingModuleConfig != null)
+                {
+                    hashCode = (hashCode * 59) + this.CostingModuleConfig.GetHashCode();
+                }
                 if (this.CostingParameters != null)
                 {
                     hashCode = (hashCode * 59) + this.CostingParameters.GetHashCode();
@@ -264,11 +253,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.LimitParameters.GetHashCode();
                 }
-                if (this.XrdMaxPerFunctionRoyalty != null)
-                {
-                    hashCode = (hashCode * 59) + this.XrdMaxPerFunctionRoyalty.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.ApplyAdditionalCosting.GetHashCode();
                 return hashCode;
             }
         }

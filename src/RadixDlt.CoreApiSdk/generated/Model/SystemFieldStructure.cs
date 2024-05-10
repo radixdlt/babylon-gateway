@@ -110,6 +110,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "field_kind", IsRequired = true, EmitDefaultValue = true)]
         public SystemFieldKind FieldKind { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BootLoaderType
+        /// </summary>
+        [DataMember(Name = "boot_loader_type", EmitDefaultValue = true)]
+        public BootLoaderType? BootLoaderType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemFieldStructure" /> class.
         /// </summary>
@@ -119,10 +125,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="SystemFieldStructure" /> class.
         /// </summary>
         /// <param name="fieldKind">fieldKind (required).</param>
+        /// <param name="bootLoaderType">bootLoaderType.</param>
         /// <param name="type">type (required) (default to SubstateSystemStructureType.SystemField).</param>
-        public SystemFieldStructure(SystemFieldKind fieldKind = default(SystemFieldKind), SubstateSystemStructureType type = SubstateSystemStructureType.SystemField) : base(type)
+        public SystemFieldStructure(SystemFieldKind fieldKind = default(SystemFieldKind), BootLoaderType? bootLoaderType = default(BootLoaderType?), SubstateSystemStructureType type = SubstateSystemStructureType.SystemField) : base(type)
         {
             this.FieldKind = fieldKind;
+            this.BootLoaderType = bootLoaderType;
         }
 
         /// <summary>
@@ -135,6 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class SystemFieldStructure {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  FieldKind: ").Append(FieldKind).Append("\n");
+            sb.Append("  BootLoaderType: ").Append(BootLoaderType).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,6 +182,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.FieldKind == input.FieldKind ||
                     this.FieldKind.Equals(input.FieldKind)
+                ) && base.Equals(input) && 
+                (
+                    this.BootLoaderType == input.BootLoaderType ||
+                    this.BootLoaderType.Equals(input.BootLoaderType)
                 );
         }
 
@@ -186,6 +199,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = base.GetHashCode();
                 hashCode = (hashCode * 59) + this.FieldKind.GetHashCode();
+                hashCode = (hashCode * 59) + this.BootLoaderType.GetHashCode();
                 return hashCode;
             }
         }
