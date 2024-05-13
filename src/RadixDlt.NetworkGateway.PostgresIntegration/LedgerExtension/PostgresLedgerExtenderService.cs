@@ -339,6 +339,7 @@ UPDATE pending_transactions
                             CoreModel.EntityType.GlobalValidator => typeof(GlobalValidatorEntity),
                             CoreModel.EntityType.GlobalGenericComponent => typeof(GlobalGenericComponentEntity),
                             CoreModel.EntityType.GlobalAccount => typeof(GlobalAccountEntity),
+                            CoreModel.EntityType.GlobalAccountLocker => typeof(GlobalAccountLockerEntity),
                             CoreModel.EntityType.GlobalIdentity => typeof(GlobalIdentityEntity),
                             CoreModel.EntityType.GlobalAccessController => typeof(GlobalAccessControllerEntity),
                             CoreModel.EntityType.GlobalVirtualSecp256k1Account => typeof(GlobalAccountEntity),
@@ -622,6 +623,7 @@ UPDATE pending_transactions
                     GlobalValidatorEntity => CoreModel.EntityType.GlobalValidator,
                     GlobalGenericComponentEntity => CoreModel.EntityType.GlobalGenericComponent,
                     GlobalAccountEntity => CoreModel.EntityType.GlobalAccount,
+                    GlobalAccountLockerEntity => CoreModel.EntityType.GlobalAccountLocker,
                     GlobalIdentityEntity => CoreModel.EntityType.GlobalIdentity,
                     GlobalAccessControllerEntity => CoreModel.EntityType.GlobalAccessController,
 

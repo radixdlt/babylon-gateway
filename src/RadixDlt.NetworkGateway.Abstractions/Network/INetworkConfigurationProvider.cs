@@ -195,6 +195,7 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
                 GenesisHelper: wa.GenesisHelper,
                 Faucet: wa.Faucet,
                 PoolPackage: wa.PoolPackage,
+                LockerPackage: wa.LockerPackage,
                 TransactionTracker: wa.TransactionTracker
             );
 

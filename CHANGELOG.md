@@ -1,3 +1,12 @@
+## 1.6.0
+Release built: _not published yet_
+
+### API Changes
+- Added `well_known_addresses.locker_package` address to `/status/network-configuration` endpoint.
+
+### Database changes
+- 
+
 ## 1.5.1
 Release built: 09.05.2024
 

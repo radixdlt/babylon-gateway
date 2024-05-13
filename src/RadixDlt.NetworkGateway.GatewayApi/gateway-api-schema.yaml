@@ -3071,6 +3071,7 @@ components:
             - genesis_helper
             - faucet
             - pool_package
+            - locker_package
             - transaction_tracker
           properties:
             xrd:
@@ -3128,6 +3129,8 @@ components:
             faucet:
               $ref: "#/components/schemas/Address"
             pool_package:
+              $ref: "#/components/schemas/Address"
+            locker_package:
               $ref: "#/components/schemas/Address"
             transaction_tracker:
               $ref: "#/components/schemas/Address"
