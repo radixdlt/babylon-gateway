@@ -71,6 +71,11 @@ public partial class AccessControllerFieldStateSubstate : IEntityOwner, IEntityA
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
         yield return Value.ControlledVault;
+
+        if (Value.XrdFeeVault != null)
+        {
+            yield return Value.XrdFeeVault;
+        }
     }
 
     public IEnumerable<string> GetEntityAddresses()

@@ -113,6 +113,48 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of StateAccountAuthorizedDepositorsPageResponse</returns>
         ApiResponse<StateAccountAuthorizedDepositorsPageResponse> AccountAuthorizedDepositorsPageWithHttpInfo(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest);
         /// <summary>
+        /// Get Account Locker Vaults Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the resource vaults associated with a given account locker. The returned response is in a paginated format, ordered by the most recent resource vault creation on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageVaultsRequest"></param>
+        /// <returns>StateAccountLockerPageVaultsResponse</returns>
+        StateAccountLockerPageVaultsResponse AccountLockerVaultsPage(StateAccountLockerPageVaultsRequest stateAccountLockerPageVaultsRequest);
+
+        /// <summary>
+        /// Get Account Locker Vaults Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the resource vaults associated with a given account locker. The returned response is in a paginated format, ordered by the most recent resource vault creation on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageVaultsRequest"></param>
+        /// <returns>ApiResponse of StateAccountLockerPageVaultsResponse</returns>
+        ApiResponse<StateAccountLockerPageVaultsResponse> AccountLockerVaultsPageWithHttpInfo(StateAccountLockerPageVaultsRequest stateAccountLockerPageVaultsRequest);
+        /// <summary>
+        /// Get Most Recent Touch of Account Lockers
+        /// </summary>
+        /// <remarks>
+        /// Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockersTouchedAtRequest"></param>
+        /// <returns>StateAccountLockersTouchedAtResponse</returns>
+        StateAccountLockersTouchedAtResponse AccountLockersTouchedAt(StateAccountLockersTouchedAtRequest stateAccountLockersTouchedAtRequest);
+
+        /// <summary>
+        /// Get Most Recent Touch of Account Lockers
+        /// </summary>
+        /// <remarks>
+        /// Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockersTouchedAtRequest"></param>
+        /// <returns>ApiResponse of StateAccountLockersTouchedAtResponse</returns>
+        ApiResponse<StateAccountLockersTouchedAtResponse> AccountLockersTouchedAtWithHttpInfo(StateAccountLockersTouchedAtRequest stateAccountLockersTouchedAtRequest);
+        /// <summary>
         /// Get Account resource preferences
         /// </summary>
         /// <remarks>
@@ -498,6 +540,52 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateAccountAuthorizedDepositorsPageResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateAccountAuthorizedDepositorsPageResponse>> AccountAuthorizedDepositorsPageWithHttpInfoAsync(StateAccountAuthorizedDepositorsPageRequest stateAccountAuthorizedDepositorsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Account Locker Vaults Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the resource vaults associated with a given account locker. The returned response is in a paginated format, ordered by the most recent resource vault creation on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageVaultsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountLockerPageVaultsResponse</returns>
+        System.Threading.Tasks.Task<StateAccountLockerPageVaultsResponse> AccountLockerVaultsPageAsync(StateAccountLockerPageVaultsRequest stateAccountLockerPageVaultsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Account Locker Vaults Page
+        /// </summary>
+        /// <remarks>
+        /// Returns all the resource vaults associated with a given account locker. The returned response is in a paginated format, ordered by the most recent resource vault creation on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageVaultsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountLockerPageVaultsResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateAccountLockerPageVaultsResponse>> AccountLockerVaultsPageWithHttpInfoAsync(StateAccountLockerPageVaultsRequest stateAccountLockerPageVaultsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Most Recent Touch of Account Lockers
+        /// </summary>
+        /// <remarks>
+        /// Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockersTouchedAtRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountLockersTouchedAtResponse</returns>
+        System.Threading.Tasks.Task<StateAccountLockersTouchedAtResponse> AccountLockersTouchedAtAsync(StateAccountLockersTouchedAtRequest stateAccountLockersTouchedAtRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Most Recent Touch of Account Lockers
+        /// </summary>
+        /// <remarks>
+        /// Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockersTouchedAtRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountLockersTouchedAtResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateAccountLockersTouchedAtResponse>> AccountLockersTouchedAtWithHttpInfoAsync(StateAccountLockersTouchedAtRequest stateAccountLockersTouchedAtRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Account resource preferences
         /// </summary>
@@ -1213,6 +1301,240 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("AccountAuthorizedDepositorsPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Account Locker Vaults Page Returns all the resource vaults associated with a given account locker. The returned response is in a paginated format, ordered by the most recent resource vault creation on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageVaultsRequest"></param>
+        /// <returns>StateAccountLockerPageVaultsResponse</returns>
+        public StateAccountLockerPageVaultsResponse AccountLockerVaultsPage(StateAccountLockerPageVaultsRequest stateAccountLockerPageVaultsRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerPageVaultsResponse> localVarResponse = AccountLockerVaultsPageWithHttpInfo(stateAccountLockerPageVaultsRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Account Locker Vaults Page Returns all the resource vaults associated with a given account locker. The returned response is in a paginated format, ordered by the most recent resource vault creation on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageVaultsRequest"></param>
+        /// <returns>ApiResponse of StateAccountLockerPageVaultsResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerPageVaultsResponse> AccountLockerVaultsPageWithHttpInfo(StateAccountLockerPageVaultsRequest stateAccountLockerPageVaultsRequest)
+        {
+            // verify the required parameter 'stateAccountLockerPageVaultsRequest' is set
+            if (stateAccountLockerPageVaultsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountLockerPageVaultsRequest' when calling StateApi->AccountLockerVaultsPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountLockerPageVaultsRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateAccountLockerPageVaultsResponse>("/state/account-locker/page/vaults", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountLockerVaultsPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Account Locker Vaults Page Returns all the resource vaults associated with a given account locker. The returned response is in a paginated format, ordered by the most recent resource vault creation on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageVaultsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountLockerPageVaultsResponse</returns>
+        public async System.Threading.Tasks.Task<StateAccountLockerPageVaultsResponse> AccountLockerVaultsPageAsync(StateAccountLockerPageVaultsRequest stateAccountLockerPageVaultsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerPageVaultsResponse> localVarResponse = await AccountLockerVaultsPageWithHttpInfoAsync(stateAccountLockerPageVaultsRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Account Locker Vaults Page Returns all the resource vaults associated with a given account locker. The returned response is in a paginated format, ordered by the most recent resource vault creation on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockerPageVaultsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountLockerPageVaultsResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockerPageVaultsResponse>> AccountLockerVaultsPageWithHttpInfoAsync(StateAccountLockerPageVaultsRequest stateAccountLockerPageVaultsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateAccountLockerPageVaultsRequest' is set
+            if (stateAccountLockerPageVaultsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountLockerPageVaultsRequest' when calling StateApi->AccountLockerVaultsPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountLockerPageVaultsRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateAccountLockerPageVaultsResponse>("/state/account-locker/page/vaults", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountLockerVaultsPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockersTouchedAtRequest"></param>
+        /// <returns>StateAccountLockersTouchedAtResponse</returns>
+        public StateAccountLockersTouchedAtResponse AccountLockersTouchedAt(StateAccountLockersTouchedAtRequest stateAccountLockersTouchedAtRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockersTouchedAtResponse> localVarResponse = AccountLockersTouchedAtWithHttpInfo(stateAccountLockersTouchedAtRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockersTouchedAtRequest"></param>
+        /// <returns>ApiResponse of StateAccountLockersTouchedAtResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockersTouchedAtResponse> AccountLockersTouchedAtWithHttpInfo(StateAccountLockersTouchedAtRequest stateAccountLockersTouchedAtRequest)
+        {
+            // verify the required parameter 'stateAccountLockersTouchedAtRequest' is set
+            if (stateAccountLockersTouchedAtRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountLockersTouchedAtRequest' when calling StateApi->AccountLockersTouchedAt");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountLockersTouchedAtRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateAccountLockersTouchedAtResponse>("/state/account-lockers/touched-at", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountLockersTouchedAt", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockersTouchedAtRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountLockersTouchedAtResponse</returns>
+        public async System.Threading.Tasks.Task<StateAccountLockersTouchedAtResponse> AccountLockersTouchedAtAsync(StateAccountLockersTouchedAtRequest stateAccountLockersTouchedAtRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockersTouchedAtResponse> localVarResponse = await AccountLockersTouchedAtWithHttpInfoAsync(stateAccountLockersTouchedAtRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountLockersTouchedAtRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountLockersTouchedAtResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateAccountLockersTouchedAtResponse>> AccountLockersTouchedAtWithHttpInfoAsync(StateAccountLockersTouchedAtRequest stateAccountLockersTouchedAtRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateAccountLockersTouchedAtRequest' is set
+            if (stateAccountLockersTouchedAtRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountLockersTouchedAtRequest' when calling StateApi->AccountLockersTouchedAt");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountLockersTouchedAtRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateAccountLockersTouchedAtResponse>("/state/account-lockers/touched-at", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("AccountLockersTouchedAt", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

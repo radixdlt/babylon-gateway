@@ -1824,6 +1824,56 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /state/account-locker/page/vaults:
+    post:
+      operationId: AccountLockerVaultsPage
+      summary: Get Account Locker Vaults Page
+      description: |
+        Returns all the resource vaults associated with a given account locker.
+        The returned response is in a paginated format, ordered by the most recent resource vault creation on the ledger.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateAccountLockerPageVaultsRequest"
+      responses:
+        "200":
+          description: Account Locker vaults (paginated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateAccountLockerPageVaultsResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /state/account-lockers/touched-at:
+    post:
+      operationId: AccountLockersTouchedAt
+      summary: Get Most Recent Touch of Account Lockers
+      description: |
+        Returns most recent state version given account locker has been touched. Touch refers to the creation of the account locker itself as well as any modification to its contents, such as
+        resource claim, airdrop or store.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateAccountLockersTouchedAtRequest"
+      responses:
+        "200":
+          description: Account locker account pair last touch state version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateAccountLockersTouchedAtResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
   /statistics/validators/uptime:
     post:
       operationId: ValidatorsUptime
@@ -2178,6 +2228,17 @@ components:
         programmatic_json:
           $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
 
+    AccountLockerAddress:
+      type: object
+      required:
+        - locker_address
+        - account_address
+      properties:
+        locker_address:
+          $ref: "#/components/schemas/Address"
+        account_address:
+          $ref: "#/components/schemas/Address"
+
     EntityMetadataCollection:
       description: Entity metadata collection.
       allOf:
@@ -2217,6 +2278,65 @@ components:
           properties:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
+
+    AccountLockerVaultCollection:
+      description: Account Locker Account Resources Collection
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/AccountLockerVaultCollectionItem"
+    AccountLockerVaultCollectionItemType:
+      type: string
+      enum:
+        - Fungible
+        - NonFungible
+    AccountLockerVaultCollectionItem:
+      type: object
+      required:
+        - type
+        - resource_address
+        - vault_address
+        - last_updated_at_state_version
+      properties:
+        type:
+          $ref: "#/components/schemas/AccountLockerVaultCollectionItemType"
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        vault_address:
+          $ref: "#/components/schemas/Address"
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match AccountLockerVaultCollectionItemType
+          Fungible: "#/components/schemas/AccountLockerVaultCollectionItemFungible"
+          NonFungible: "#/components/schemas/AccountLockerVaultCollectionItemNonFungible"
+    AccountLockerVaultCollectionItemFungible:
+      allOf:
+        - $ref: "#/components/schemas/AccountLockerVaultCollectionItem"
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              $ref: "#/components/schemas/BigDecimal"
+    AccountLockerVaultCollectionItemNonFungible:
+      allOf:
+        - $ref: "#/components/schemas/AccountLockerVaultCollectionItem"
+        - type: object
+          required:
+            - total_count
+          properties:
+            total_count:
+              type: integer
+              format: int64
 
     EntitySchemaCollection:
       allOf:
@@ -4528,6 +4648,57 @@ components:
         is_locked:
           type: boolean
 
+    StateAccountLockerPageVaultsRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - $ref: "#/components/schemas/AccountLockerAddress"
+      example:
+        locker_address: "<locker-address>"
+        account_address: "<account-address>"
+
+    StateAccountLockerPageVaultsResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/AccountLockerVaultCollection"
+        - $ref: "#/components/schemas/AccountLockerAddress"
+
+    StateAccountLockersTouchedAtRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          required:
+            - account_lockers
+          properties:
+            account_lockers:
+              type: array
+              items:
+                $ref: "#/components/schemas/AccountLockerAddress"
+      example:
+        account_lockers:
+          - locker_address: "<locker-address>"
+            account_address: "<account-address>"
+
+    StateAccountLockersTouchedAtResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateAccountLockersTouchedAtResponseItem"
+    StateAccountLockersTouchedAtResponseItem:
+      allOf:
+        - $ref: "#/components/schemas/AccountLockerAddress"
+        - type: object
+          required:
+            - last_touched_at_state_version
+          properties:
+            last_touched_at_state_version:
+              $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
     #
     # /state/validators/* Request & Response Types
@@ -4609,6 +4780,7 @@ components:
       discriminator:
         propertyName: type
         mapping:
+          AccountLockerNotFoundError: "#/components/schemas/AccountLockerNotFoundError"
           EntityNotFoundError: "#/components/schemas/EntityNotFoundError"
           InvalidEntityError: "#/components/schemas/InvalidEntityError"
           NotSyncedUpError: "#/components/schemas/NotSyncedUpError"
@@ -4616,6 +4788,10 @@ components:
           InvalidTransactionError: "#/components/schemas/InvalidTransactionError"
           TransactionNotFoundError: "#/components/schemas/TransactionNotFoundError"
           InternalServerError: "#/components/schemas/InternalServerError"
+    AccountLockerNotFoundError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - $ref: "#/components/schemas/AccountLockerAddress"
     EntityNotFoundError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
