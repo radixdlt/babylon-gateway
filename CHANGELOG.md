@@ -1,5 +1,5 @@
 ## 1.5.2
-Release built: 13.05.2024
+Release built: 14.05.2024
 
 - Fixed broken Core API SDK
 
