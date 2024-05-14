@@ -126,7 +126,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="genesisHelperPackage">genesisHelperPackage (required).</param>
         /// <param name="faucetPackage">faucetPackage (required).</param>
         /// <param name="poolPackage">poolPackage (required).</param>
-        /// <param name="lockerPackage">lockerPackage (required).</param>
+        /// <param name="lockerPackage">lockerPackage.</param>
         /// <param name="consensusManager">consensusManager (required).</param>
         /// <param name="genesisHelper">genesisHelper (required).</param>
         /// <param name="faucet">faucet (required).</param>
@@ -271,12 +271,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("poolPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.PoolPackage = poolPackage;
-            // to ensure "lockerPackage" is required (not null)
-            if (lockerPackage == null)
-            {
-                throw new ArgumentNullException("lockerPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
-            }
-            this.LockerPackage = lockerPackage;
             // to ensure "consensusManager" is required (not null)
             if (consensusManager == null)
             {
@@ -301,6 +295,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("transactionTracker is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.TransactionTracker = transactionTracker;
+            this.LockerPackage = lockerPackage;
         }
 
         /// <summary>
@@ -444,7 +439,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets LockerPackage
         /// </summary>
-        [DataMember(Name = "locker_package", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "locker_package", EmitDefaultValue = true)]
         public string LockerPackage { get; set; }
 
         /// <summary>
