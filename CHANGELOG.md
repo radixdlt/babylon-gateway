@@ -11,6 +11,11 @@ Release built: _not published yet_
 - Added two new columns `account_locker_of_account_entity_id` and `account_locker_of_account_locker_entity_id` to the `entities` table filled for AccountLocker-related Vaults and KeyValueStores.
 - Changed `IX_entity_vault_history_vault_entity_id_from_state_version` index to match all existing vaults rather non-fungible ones only.
 
+## 1.5.2
+Release built: 14.05.2024
+
+- Fixed broken Core API SDK
+
 ## 1.5.1
 Release built: 09.05.2024
 
