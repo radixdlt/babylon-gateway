@@ -95,6 +95,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// </summary>
     [DataContract(Name = "GatewayError")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(AccountLockerNotFoundError), "AccountLockerNotFoundError")]
     [JsonSubtypes.KnownSubType(typeof(EntityNotFoundError), "EntityNotFoundError")]
     [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
     [JsonSubtypes.KnownSubType(typeof(InvalidEntityError), "InvalidEntityError")]

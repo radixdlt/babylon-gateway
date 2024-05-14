@@ -74,6 +74,8 @@ public interface IEntityStateQuerier
 {
     public sealed record PageRequest(EntityAddress Address, int Offset, int Limit);
 
+    public sealed record AccountLockerPageRequest(AccountLockerAddress AccountLockerAddress, GatewayModel.StateAccountLockerAccountResourcesCursor? Cursor, int Limit);
+
     public sealed record ResourceVaultsPageRequest(EntityAddress Address, EntityAddress ResourceAddress, int Offset, int Limit);
 
     Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(
@@ -144,4 +146,8 @@ public interface IEntityStateQuerier
     Task<GatewayModel.StatePackageBlueprintPageResponse?> PackageBlueprints(PageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.StatePackageCodePageResponse?> PackageCodes(PageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+
+    Task<GatewayModel.StateAccountLockerPageVaultsResponse> AccountLockerVaultsPage(AccountLockerPageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+
+    Task<GatewayModel.StateAccountLockersTouchedAtResponse> AccountLockersTouchedAt(IList<AccountLockerAddress> accountLockers, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
 }

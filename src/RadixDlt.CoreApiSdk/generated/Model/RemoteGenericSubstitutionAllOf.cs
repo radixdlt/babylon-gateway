@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The generic substitution is provided remotely by a blueprint type. The &#x60;resolved_full_type_id&#x60; is added by the node, and is always present in the model returned from the transaction stream API. Other APIs may not resolve the type from the blueprint definition.  
+    /// The generic substitution is provided remotely by a blueprint type. The &#x60;resolved_full_type_id&#x60; is added by the node, and is always present in the model returned from the transaction stream API. Other APIs may not resolve the type from the blueprint definition. 
     /// </summary>
     [DataContract(Name = "RemoteGenericSubstitution_allOf")]
     public partial class RemoteGenericSubstitutionAllOf : IEquatable<RemoteGenericSubstitutionAllOf>

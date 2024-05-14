@@ -109,6 +109,12 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityResourceAggregatedVaultsHistory> EntityResourceAggregatedVaultsHistory => Set<EntityResourceAggregatedVaultsHistory>();
 
+    public DbSet<AccountLockerEntryDefinition> AccountLockerDefinition => Set<AccountLockerEntryDefinition>();
+
+    public DbSet<AccountLockerEntryResourceVaultDefinition> AccountLockerEntryResourceVaultDefinition => Set<AccountLockerEntryResourceVaultDefinition>();
+
+    public DbSet<AccountLockerEntryTouchHistory> AccountLockerEntryTouchHistory => Set<AccountLockerEntryTouchHistory>();
+
     public DbSet<AccountDefaultDepositRuleHistory> AccountDefaultDepositRuleHistory => Set<AccountDefaultDepositRuleHistory>();
 
     public DbSet<AccountResourcePreferenceRuleEntryHistory> AccountResourcePreferenceRuleEntryHistory => Set<AccountResourcePreferenceRuleEntryHistory>();
@@ -197,7 +203,7 @@ internal abstract class CommonDbContext : DbContext
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
-        HookupEntities(modelBuilder);
+        HookupDefinitions(modelBuilder);
         HookupHistory(modelBuilder);
         HookupStatistics(modelBuilder);
     }
@@ -329,7 +335,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(pt => pt.IntentHash);
     }
 
-    private static void HookupEntities(ModelBuilder modelBuilder)
+    private static void HookupDefinitions(ModelBuilder modelBuilder)
     {
         modelBuilder
             .Entity<Entity>()
@@ -362,10 +368,45 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool)
             .HasValue<GlobalTransactionTrackerEntity>(EntityType.GlobalTransactionTracker)
             .HasValue<GlobalAccountLockerEntity>(EntityType.GlobalAccountLocker);
+
+        modelBuilder
+            .Entity<SchemaEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.SchemaHash });
+
+        modelBuilder
+            .Entity<KeyValueStoreEntryDefinition>()
+            .HasIndex(e => new { e.KeyValueStoreEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<KeyValueStoreEntryDefinition>()
+            .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key });
+
+        modelBuilder
+            .Entity<NonFungibleIdData>()
+            .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<NonFungibleIdData>()
+            .HasIndex(e => new { e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion })
+            .IsUnique();
+
+        modelBuilder
+            .Entity<AccountLockerEntryDefinition>()
+            .HasIndex(e => new { e.AccountLockerEntityId, e.AccountEntityId })
+            .IsUnique();
+
+        modelBuilder
+            .Entity<AccountLockerEntryResourceVaultDefinition>()
+            .HasIndex(e => new { e.AccountLockerDefinitionId, e.FromStateVersion })
+            .IsUnique();
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
     {
+        modelBuilder
+            .Entity<AccountLockerEntryTouchHistory>()
+            .HasIndex(e => new { e.AccountLockerDefinitionId, e.FromStateVersion });
+
         modelBuilder
             .Entity<StateHistory>()
             .HasDiscriminator<StateType>(DiscriminatorColumnName)
@@ -440,8 +481,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion })
-            .HasFilter("discriminator = 'non_fungible'");
+            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<EntityRoleAssignmentsOwnerRoleHistory>()
@@ -472,15 +512,6 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<NonFungibleIdData>()
-            .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<NonFungibleIdData>()
-            .HasIndex(e => new { e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion })
-            .IsUnique();
-
-        modelBuilder
             .Entity<NonFungibleIdDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
 
@@ -509,10 +540,6 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<SchemaEntryDefinition>()
-            .HasIndex(e => new { e.EntityId, e.SchemaHash });
-
-        modelBuilder
             .Entity<SchemaEntryAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
@@ -531,14 +558,6 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.Epoch);
-
-        modelBuilder
-            .Entity<KeyValueStoreEntryDefinition>()
-            .HasIndex(e => new { e.KeyValueStoreEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<KeyValueStoreEntryDefinition>()
-            .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key });
 
         modelBuilder
             .Entity<KeyValueStoreEntryHistory>()
