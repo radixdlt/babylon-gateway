@@ -91,7 +91,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_default_deposit_rule", new[] { "accept", "reject", "allow_existing" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_resource_preference_rule", new[] { "allowed", "disallowed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "authorized_depositor_badge_type", new[] { "resource", "non_fungible" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity", "global_one_resource_pool", "global_two_resource_pool", "global_multi_resource_pool", "global_transaction_tracker" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity", "global_one_resource_pool", "global_two_resource_pool", "global_multi_resource_pool", "global_transaction_tracker", "global_account_locker" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from", "account_owner_method_call", "badge_presented" });
@@ -200,6 +200,96 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("AccountEntityId", "FromStateVersion");
 
                     b.ToTable("account_default_deposit_rule_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountLockerEntryDefinition", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_entity_id");
+
+                    b.Property<long>("AccountLockerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("KeyValueStoreEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("key_value_store_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountLockerEntityId", "AccountEntityId")
+                        .IsUnique();
+
+                    b.ToTable("account_locker_entry_definition");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountLockerEntryResourceVaultDefinition", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountLockerDefinitionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_definition_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.Property<long>("VaultEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("vault_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountLockerDefinitionId", "FromStateVersion")
+                        .IsUnique();
+
+                    b.ToTable("account_locker_entry_resource_vault_definition");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountLockerEntryTouchHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountLockerDefinitionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_definition_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountLockerDefinitionId", "FromStateVersion");
+
+                    b.ToTable("account_locker_entry_touch_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountResourcePreferenceRuleAggregateHistory", b =>
@@ -721,8 +811,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("OwnerEntityId", "FromStateVersion")
                         .HasFilter("is_royalty_vault = true");
 
-                    b.HasIndex("VaultEntityId", "FromStateVersion")
-                        .HasFilter("discriminator = 'non_fungible'");
+                    b.HasIndex("VaultEntityId", "FromStateVersion");
 
                     b.HasIndex("GlobalEntityId", "VaultEntityId", "FromStateVersion");
 
@@ -1794,6 +1883,38 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(EntityType.GlobalAccountComponent);
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalAccountLockerEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<List<ModuleId>>("AssignedModuleIds")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("module_id[]")
+                        .HasColumnName("assigned_module_ids");
+
+                    b.Property<string>("BlueprintName")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
+                    b.Property<long>("PackageId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_id");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue(EntityType.GlobalAccountLocker);
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalConsensusManager", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
@@ -2174,6 +2295,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<long?>("AccountLockerOfAccountEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_of_account_entity_id");
+
+                    b.Property<long?>("AccountLockerOfAccountLockerEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_of_account_locker_entity_id");
+
                     b.Property<List<ModuleId>>("AssignedModuleIds")
                         .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
@@ -2247,6 +2378,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<long?>("AccountLockerOfAccountEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_of_account_entity_id");
+
+                    b.Property<long?>("AccountLockerOfAccountLockerEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_of_account_locker_entity_id");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue(EntityType.InternalKeyValueStore);
@@ -2255,6 +2396,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.InternalNonFungibleVaultEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<long?>("AccountLockerOfAccountEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_of_account_entity_id");
+
+                    b.Property<long?>("AccountLockerOfAccountLockerEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_of_account_locker_entity_id");
 
                     b.Property<List<ModuleId>>("AssignedModuleIds")
                         .IsRequired()

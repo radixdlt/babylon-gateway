@@ -197,6 +197,12 @@ internal abstract class VaultEntity : ComponentEntity
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
 
+    [Column("account_locker_of_account_locker_entity_id")]
+    public long? AccountLockerOfAccountLockerEntityId { get; set; }
+
+    [Column("account_locker_of_account_entity_id")]
+    public long? AccountLockerOfAccountEntityId { get; set; }
+
     public override List<long> CorrelatedEntities
     {
         get
@@ -247,6 +253,10 @@ internal class GlobalAccountEntity : ComponentEntity
 {
 }
 
+internal class GlobalAccountLockerEntity : ComponentEntity
+{
+}
+
 internal class GlobalIdentityEntity : ComponentEntity
 {
 }
@@ -279,6 +289,11 @@ internal class VirtualIdentityEntity : GlobalIdentityEntity
 
 internal class InternalKeyValueStoreEntity : Entity
 {
+    [Column("account_locker_of_account_locker_entity_id")]
+    public long? AccountLockerOfAccountLockerEntityId { get; set; }
+
+    [Column("account_locker_of_account_entity_id")]
+    public long? AccountLockerOfAccountEntityId { get; set; }
 }
 
 internal class GlobalAccessControllerEntity : ComponentEntity

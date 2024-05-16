@@ -276,7 +276,7 @@ FROM variables
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_vault_history
-    WHERE vault_entity_id = variables.vault_entity_id AND discriminator = 'non_fungible'
+    WHERE vault_entity_id = variables.vault_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) evh ON true;")
@@ -435,6 +435,9 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
         var cd = new CommandDefinition(
             commandText: @"
 SELECT
+    nextval('account_locker_entry_definition_id_seq') AS AccountLockerEntryDefinitionSequence,
+    nextval('account_locker_entry_resource_vault_definition_id_seq') AS AccountLockerEntryResourceVaultDefinitionSequence,
+    nextval('account_locker_entry_touch_history_id_seq') AS AccountLockerEntryTouchHistorySequence,
     nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
     nextval('account_resource_preference_rule_entry_history_id_seq') AS AccountResourcePreferenceRuleEntryHistorySequence,
     nextval('account_resource_preference_rule_aggregate_history_id_seq') AS AccountResourcePreferenceRuleAggregateHistorySequence,

@@ -102,7 +102,7 @@ internal static class Extensions
     }
 
     public static bool Unzip<TIn, TOut1, TOut2>(
-        this HashSet<TIn> input,
+        this ICollection<TIn> input,
         Func<TIn, TOut1> out1Selector,
         Func<TIn, TOut2> out2Selector,
         [NotNullWhen(true)] out List<TOut1>? out1,
@@ -133,7 +133,7 @@ internal static class Extensions
     }
 
     public static bool Unzip<TIn, TOut1, TOut2, TOut3>(
-        this HashSet<TIn> input,
+        this ICollection<TIn> input,
         Func<TIn, TOut1> out1Selector,
         Func<TIn, TOut2> out2Selector,
         Func<TIn, TOut3> out3Selector,

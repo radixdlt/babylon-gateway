@@ -1,3 +1,16 @@
+## 1.6.0
+Release built: _not published yet_
+
+### API Changes
+- Added `well_known_addresses.locker_package` address property to the `/status/network-configuration` endpoint response.
+- Added a new endpoint `/state/account-locker/page/vaults` which allows to read all resource vaults for a given AccountLocker.
+- Added a new endpoint `/state/account-lockers/touched-at` which allows to read last touch state version for a given collection of AccountLockers.
+
+### Database changes
+- Added a new set of AccountLocker-related tables: `account_locker_entry_definition`, `account_locker_entry_resource_vault_definition` and `account_locker_entry_touch_history`.
+- Added two new columns `account_locker_of_account_entity_id` and `account_locker_of_account_locker_entity_id` to the `entities` table filled for AccountLocker-related Vaults and KeyValueStores.
+- Changed `IX_entity_vault_history_vault_entity_id_from_state_version` index to match all existing vaults rather non-fungible ones only.
+
 ## 1.5.2
 Release built: 14.05.2024
 

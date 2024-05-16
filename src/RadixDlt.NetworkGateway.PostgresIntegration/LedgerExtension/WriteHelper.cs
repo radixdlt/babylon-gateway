@@ -133,7 +133,7 @@ internal class WriteHelper : IWriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, stake_vault_entity_id, pending_xrd_withdraw_vault_entity_id, locked_owner_stake_unit_vault_entity_id, pending_owner_stake_unit_unlock_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)",
+            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, stake_vault_entity_id, pending_xrd_withdraw_vault_entity_id, locked_owner_stake_unit_vault_entity_id, pending_owner_stake_unit_unlock_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id, account_locker_of_account_locker_entity_id, account_locker_of_account_entity_id) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var e in entities)
@@ -210,6 +210,22 @@ internal class WriteHelper : IWriteHelper
             {
                 await writer.WriteAsync(nfve.ResourceEntityId, NpgsqlDbType.Bigint, token);
                 await writer.WriteNullAsync(token);
+            }
+            else
+            {
+                await writer.WriteNullAsync(token);
+                await writer.WriteNullAsync(token);
+            }
+
+            if (e is InternalKeyValueStoreEntity kvse)
+            {
+                await writer.WriteAsync(kvse.AccountLockerOfAccountLockerEntityId, token);
+                await writer.WriteAsync(kvse.AccountLockerOfAccountEntityId, token);
+            }
+            else if (e is VaultEntity ve)
+            {
+                await writer.WriteAsync(ve.AccountLockerOfAccountLockerEntityId, token);
+                await writer.WriteAsync(ve.AccountLockerOfAccountEntityId, token);
             }
             else
             {
@@ -826,6 +842,9 @@ internal class WriteHelper : IWriteHelper
         var cd = new CommandDefinition(
             commandText: @"
 SELECT
+    setval('account_locker_entry_definition_id_seq', @accountLockerEntryDefinitionSequence),
+    setval('account_locker_entry_resource_vault_definition_id_seq', @accountLockerEntryResourceVaultDefinitionSequence),
+    setval('account_locker_entry_touch_history_id_seq', @accountLockerEntryTouchHistorySequence),
     setval('account_default_deposit_rule_history_id_seq', @accountDefaultDepositRuleHistorySequence),
     setval('account_resource_preference_rule_entry_history_id_seq', @accountResourcePreferenceRuleEntryHistorySequence),
     setval('account_resource_preference_rule_aggregate_history_id_seq', @accountResourcePreferenceRuleAggregateHistorySequence),
@@ -866,6 +885,9 @@ SELECT
 ",
             parameters: new
             {
+                accountLockerEntryDefinitionSequence = sequences.AccountLockerEntryDefinitionSequence,
+                accountLockerEntryResourceVaultDefinitionSequence = sequences.AccountLockerEntryResourceVaultDefinitionSequence,
+                accountLockerEntryTouchHistorySequence = sequences.AccountLockerEntryTouchHistorySequence,
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
                 accountResourcePreferenceRuleEntryHistorySequence = sequences.AccountResourcePreferenceRuleEntryHistorySequence,
                 accountResourcePreferenceRuleAggregateHistorySequence = sequences.AccountResourcePreferenceRuleAggregateHistorySequence,
