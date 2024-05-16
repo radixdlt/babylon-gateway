@@ -137,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Most Recent Touch of Account Lockers
         /// </summary>
         /// <remarks>
-        /// Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// Returns most recent state version given account locker has been touched. Touch refers to the creation of the account locker itself as well as any modification to its contents, such as resource claim, airdrop or store. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateAccountLockersTouchedAtRequest"></param>
@@ -148,7 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Most Recent Touch of Account Lockers
         /// </summary>
         /// <remarks>
-        /// Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// Returns most recent state version given account locker has been touched. Touch refers to the creation of the account locker itself as well as any modification to its contents, such as resource claim, airdrop or store. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateAccountLockersTouchedAtRequest"></param>
@@ -567,7 +567,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Most Recent Touch of Account Lockers
         /// </summary>
         /// <remarks>
-        /// Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// Returns most recent state version given account locker has been touched. Touch refers to the creation of the account locker itself as well as any modification to its contents, such as resource claim, airdrop or store. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateAccountLockersTouchedAtRequest"></param>
@@ -579,7 +579,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Most Recent Touch of Account Lockers
         /// </summary>
         /// <remarks>
-        /// Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// Returns most recent state version given account locker has been touched. Touch refers to the creation of the account locker itself as well as any modification to its contents, such as resource claim, airdrop or store. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateAccountLockersTouchedAtRequest"></param>
@@ -1425,7 +1425,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the creation of the account locker itself as well as any modification to its contents, such as resource claim, airdrop or store. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateAccountLockersTouchedAtRequest"></param>
@@ -1437,7 +1437,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the creation of the account locker itself as well as any modification to its contents, such as resource claim, airdrop or store. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateAccountLockersTouchedAtRequest"></param>
@@ -1481,7 +1481,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the creation of the account locker itself as well as any modification to its contents, such as resource claim, airdrop or store. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateAccountLockersTouchedAtRequest"></param>
@@ -1494,7 +1494,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the account locker creation and any modification to its contents such as resource claim, airdrop or store. 
+        /// Get Most Recent Touch of Account Lockers Returns most recent state version given account locker has been touched. Touch refers to the creation of the account locker itself as well as any modification to its contents, such as resource claim, airdrop or store. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateAccountLockersTouchedAtRequest"></param>
