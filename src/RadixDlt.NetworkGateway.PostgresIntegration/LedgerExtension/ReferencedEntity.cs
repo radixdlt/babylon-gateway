@@ -73,7 +73,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Type, long StateVersion)
 {
-    private readonly IList<Action> _postResolveActions = new List<Action>();
+    public enum PostResolvePriority
+    {
+        High,
+        Normal,
+        Low,
+    }
+
+    private readonly IList<Action> _postResolveActionsHighPriority = new List<Action>();
+    private readonly IList<Action> _postResolveActionsNormalPriority = new List<Action>();
+    private readonly IList<Action> _postResolveActionsLowPriority = new List<Action>();
     private Entity? _databaseEntity;
     private ReferencedEntity? _immediateParentReference;
     private bool _resolved;
@@ -87,11 +96,9 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
 
     public long? DatabaseParentAncestorId => GetDatabaseEntityInternal().ParentAncestorId;
 
-    public long DatabaseOwnerAncestorId =>
-        GetDatabaseEntityInternal().OwnerAncestorId ?? throw new InvalidOperationException("OwnerAncestorId not set, probably global entity or incorrectly configured one.");
+    public long DatabaseOwnerAncestorId => GetDatabaseEntityInternal().OwnerAncestorId ?? throw new InvalidOperationException("OwnerAncestorId not set, probably global entity or incorrectly configured one.");
 
-    public long DatabaseGlobalAncestorId => GetDatabaseEntityInternal().GlobalAncestorId ??
-                                            throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
+    public long DatabaseGlobalAncestorId => GetDatabaseEntityInternal().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
 
     public long AffectedGlobalEntityId => IsGlobal ? DatabaseId : DatabaseGlobalAncestorId;
 
@@ -150,9 +157,17 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
         return instance;
     }
 
-    public void PostResolveConfigure<T>(Action<T> action)
+    public void PostResolveConfigure<T>(Action<T> action, PostResolvePriority priority = PostResolvePriority.Normal)
     {
-        _postResolveActions.Add(() =>
+        var list = priority switch
+        {
+            PostResolvePriority.High => _postResolveActionsHighPriority,
+            PostResolvePriority.Normal => _postResolveActionsNormalPriority,
+            PostResolvePriority.Low => _postResolveActionsLowPriority,
+            _ => throw new ArgumentOutOfRangeException(nameof(priority), priority, null),
+        };
+
+        list.Add(() =>
         {
             action.Invoke(GetDatabaseEntity<T>());
         });
@@ -170,12 +185,24 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
             throw new InvalidOperationException("Already configured");
         }
 
-        foreach (var action in _postResolveActions)
+        foreach (var action in _postResolveActionsHighPriority)
         {
             action.Invoke();
         }
 
-        _postResolveActions.Clear();
+        foreach (var action in _postResolveActionsNormalPriority)
+        {
+            action.Invoke();
+        }
+
+        foreach (var action in _postResolveActionsLowPriority)
+        {
+            action.Invoke();
+        }
+
+        _postResolveActionsHighPriority.Clear();
+        _postResolveActionsNormalPriority.Clear();
+        _postResolveActionsLowPriority.Clear();
         _postResolveConfigurationInvoked = true;
     }
 
@@ -209,7 +236,6 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
     /// <returns>The string representation of the type for debugging.</returns>
     public override string ToString()
     {
-        return
-            $"{nameof(ReferencedEntity)} {{ {nameof(Address)}: {Address}, {nameof(IsGlobal)}: {IsGlobal}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
+        return $"{nameof(ReferencedEntity)} {{ {nameof(Address)}: {Address}, {nameof(IsGlobal)}: {IsGlobal}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
     }
 }

@@ -74,6 +74,7 @@ public sealed class RadixAddressValidator : AbstractValidator<string>
 {
     public RadixAddressValidator(INetworkConfigurationProvider networkConfigurationProvider)
     {
+        // Cannot use .CustomAsync() as ASP.NET's validation pipeline is not asynchronous, see: https://docs.fluentvalidation.net/en/latest/async.html
         RuleFor(x => x)
             .Custom((address, context) =>
             {
