@@ -808,7 +808,7 @@ UPDATE pending_transactions
         var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, token);
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
         var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
-        var entitySchemaProcessor = new EntitySchemaProcessor(processorContext);
+        var entitySchemaProcessor = new EntitySchemaProcessor(processorContext, networkConfiguration.Id);
         var componentMethodRoyaltyProcessor = new ComponentMethodRoyaltyProcessor(processorContext);
         var entityRoleAssignmentProcessor = new EntityRoleAssignmentProcessor(processorContext);
         var packageCodeProcessor = new PackageCodeProcessor(processorContext, networkConfiguration.Id);
@@ -999,6 +999,7 @@ UPDATE pending_transactions
                         }
 
                         packageCodeProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
+                        entitySchemaProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);

@@ -62,30 +62,32 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+#nullable disable
 
-[Table("schema_entry_definition")]
-internal class SchemaEntryDefinition
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    /// <inheritdoc />
+    public partial class AddIsDeletedToSchemaEntryDefinition : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<bool>(
+                name: "is_deleted",
+                table: "schema_entry_definition",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
+        }
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("schema_hash")]
-    public byte[] SchemaHash { get; set; }
-
-    [Column("schema")]
-    public byte[] Schema { get; set; }
-
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "is_deleted",
+                table: "schema_entry_definition");
+        }
+    }
 }

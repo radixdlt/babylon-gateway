@@ -1284,3 +1284,22 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240515144302_AddIsDeletedToSchemaEntryDefinition') THEN
+    ALTER TABLE schema_entry_definition ADD is_deleted boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240515144302_AddIsDeletedToSchemaEntryDefinition') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20240515144302_AddIsDeletedToSchemaEntryDefinition', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+
