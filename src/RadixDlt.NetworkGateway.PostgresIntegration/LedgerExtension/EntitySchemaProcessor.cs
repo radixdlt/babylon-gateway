@@ -93,7 +93,7 @@ internal class EntitySchemaProcessor
     private readonly ChangeTracker<SchemaChangePointerLookup, SchemaChangePointer> _changes = new();
 
     private readonly Dictionary<long, SchemaEntryAggregateHistory> _mostRecentAggregates = new();
-    private readonly Dictionary<SchemaDefinitionEntryDbLookup, SchemaEntryDefinition> _schemasToBeDeleted = new();
+    private readonly Dictionary<SchemaDefinitionEntryDbLookup, SchemaEntryDefinition> _existingSchemas = new();
 
     private readonly List<SchemaEntryAggregateHistory> _aggregatesToAdd = new();
     private readonly List<SchemaEntryDefinition> _definitionsToAdd = new();
@@ -132,7 +132,7 @@ internal class EntitySchemaProcessor
     public async Task LoadDependencies()
     {
         _mostRecentAggregates.AddRange(await MostRecentSchemaEntryAggregateHistory());
-        _schemasToBeDeleted.AddRange(await LoadSchemaDefinitionsToBeDeleted());
+        _existingSchemas.AddRange(await LoadExistingSchemas());
     }
 
     public void ProcessChanges()
@@ -173,7 +173,6 @@ internal class EntitySchemaProcessor
                     EntityId = lookup.EntityId,
                     SchemaHash = entry.Key.SchemaHash.ConvertFromHex(),
                     Schema = entry.Value.Schema.SborData.Hex.ConvertFromHex(),
-                    IsDeleted = false,
                 };
 
                 _definitionsToAdd.Add(entryDefinition);
@@ -185,7 +184,7 @@ internal class EntitySchemaProcessor
             {
                 var entryLookup = new SchemaDefinitionEntryDbLookup(lookup.EntityId, deletedSchemaHash.ConvertFromHex());
 
-                if (_schemasToBeDeleted.TryGetValue(entryLookup, out var previousEntry))
+                if (_existingSchemas.TryGetValue(entryLookup, out var previousEntry))
                 {
                     var currentPosition = aggregate.EntryIds.IndexOf(previousEntry.Id);
 
@@ -202,18 +201,6 @@ internal class EntitySchemaProcessor
                 {
                     throw new UnreachableException($"Unexpected situation where SchemaEntryDefinition with EntityId:{entryLookup.EntityId}, SchemaHash:{deletedSchemaHash} got deleted but wasn't found in gateway database.");
                 }
-
-                var entryDefinition = new SchemaEntryDefinition
-                {
-                    Id = _context.Sequences.SchemaEntryDefinitionSequence++,
-                    FromStateVersion = lookup.StateVersion,
-                    EntityId = lookup.EntityId,
-                    SchemaHash = deletedSchemaHash.ConvertFromHex(),
-                    Schema = previousEntry.Schema,
-                    IsDeleted = true,
-                };
-
-                _definitionsToAdd.Add(entryDefinition);
             }
         }
     }
@@ -254,7 +241,7 @@ INNER JOIN LATERAL (
             e => e.EntityId);
     }
 
-    private async Task<IDictionary<SchemaDefinitionEntryDbLookup, SchemaEntryDefinition>> LoadSchemaDefinitionsToBeDeleted()
+    private async Task<IDictionary<SchemaDefinitionEntryDbLookup, SchemaEntryDefinition>> LoadExistingSchemas()
     {
         var lookupSet = new HashSet<SchemaDefinitionEntryDbLookup>();
 
@@ -273,24 +260,15 @@ INNER JOIN LATERAL (
 
         return await _context.ReadHelper.LoadDependencies<SchemaDefinitionEntryDbLookup, SchemaEntryDefinition>(
             @$"
-WITH variables (entity_id, schema_hash) AS (
-    SELECT UNNEST({entityIds}), UNNEST({schemaHashes})
-)
-SELECT sedh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM schema_entry_definition
-    WHERE entity_id = variables.entity_id AND schema_hash = variables.schema_hash
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) sedh ON true;",
+SELECT *
+FROM schema_entry_definition
+WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHashes}));",
             e => new SchemaDefinitionEntryDbLookup(e.EntityId, e.SchemaHash));
     }
 
     private Task<int> CopySchemaEntryDefinitions() => _context.WriteHelper.Copy(
         _definitionsToAdd,
-        "COPY schema_entry_definition (id, from_state_version, entity_id, schema_hash, schema, is_deleted) FROM STDIN (FORMAT BINARY)",
+        "COPY schema_entry_definition (id, from_state_version, entity_id, schema_hash, schema) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -298,7 +276,6 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
         });
 
     private Task<int> CopySchemaEntryAggregateHistory() => _context.WriteHelper.Copy(

@@ -85,7 +85,4 @@ internal class SchemaEntryDefinition
 
     [Column("schema")]
     public byte[] Schema { get; set; }
-
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
 }
