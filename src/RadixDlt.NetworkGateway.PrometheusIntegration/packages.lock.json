@@ -383,7 +383,7 @@
           "Microsoft.Extensions.Http.Polly": "[8.0.2, )",
           "RadixDlt.NetworkGateway.Abstractions": "[1.6.0-develop, )",
           "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.6.0-develop, )",
-          "RadixDlt.RadixEngineToolkit": "[2.1.0-dev5, )"
+          "RadixDlt.RadixEngineToolkit": "[2.1.0-dev6, )"
         }
       },
       "radixdlt.networkgateway.gatewayapisdk": {
@@ -506,9 +506,9 @@
       },
       "RadixDlt.RadixEngineToolkit": {
         "type": "CentralTransitive",
-        "requested": "[2.1.0-dev5, )",
-        "resolved": "2.1.0-dev5",
-        "contentHash": "pJY7s7Q+E1QcRrZUBWrBOrV6khO27+IJaYb1rUUzMFi2GVsNfrp7XbWYglfvvxxt9e5XtPlJXC6TvF5aE3E5Xw=="
+        "requested": "[2.1.0-dev6, )",
+        "resolved": "2.1.0-dev6",
+        "contentHash": "aM3Apew+1y/RYwy5KE99KBEkcF1C+3mQBAQxNaZ7+dwpDqEqj1ucDvajm92Y+EshGApdn8Usz1Zmtz88kbif5Q=="
       }
     }
   }
