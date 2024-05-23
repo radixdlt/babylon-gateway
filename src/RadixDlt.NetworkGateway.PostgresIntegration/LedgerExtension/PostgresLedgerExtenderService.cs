@@ -259,6 +259,8 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdatePendingTransactions), sw.Elapsed, null));
         }
 
+        var relationshipProcessor = new RelationshipProcessor(referencedEntities);
+
         // step: scan for any referenced entities
         {
             var sw = Stopwatch.StartNew();
@@ -378,6 +380,7 @@ UPDATE pending_transactions
                                 referencedEntities
                                     .GetOrAdd((EntityAddress)oe.EntityAddress, ea => new ReferencedEntity(ea, oe.EntityType, stateVersion))
                                     .IsImmediateChildOf(referencedEntity);
+
                                 childToParentEntities[(EntityAddress)oe.EntityAddress] = (EntityAddress)substateId.EntityAddress;
                             }
                         }
@@ -387,11 +390,8 @@ UPDATE pending_transactions
                             referencedEntities
                                 .GetOrAdd((EntityAddress)rv.EntityAddress, _ => new ReferencedEntity((EntityAddress)rv.EntityAddress, rv.EntityType, stateVersion))
                                 .IsImmediateChildOf(referencedEntity);
-                            childToParentEntities[(EntityAddress)rv.EntityAddress] = (EntityAddress)substateId.EntityAddress;
 
-                            referencedEntities
-                                .Get((EntityAddress)rv.EntityAddress)
-                                .PostResolveConfigure((InternalFungibleVaultEntity e) => e.RoyaltyVaultOfEntityId = referencedEntity.DatabaseId);
+                            childToParentEntities[(EntityAddress)rv.EntityAddress] = (EntityAddress)substateId.EntityAddress;
                         }
 
                         foreach (var entityAddress in substate.SystemStructure.GetEntityAddresses())
@@ -409,124 +409,51 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.FungibleResourceManagerFieldDivisibilitySubstate fungibleResourceManager)
                         {
-                            referencedEntity.PostResolveConfigure((GlobalFungibleResourceEntity e) => e.Divisibility = fungibleResourceManager.Value.Divisibility);
+                            referencedEntity.PostResolveConfigure((GlobalFungibleResourceEntity e) =>
+                            {
+                                e.Divisibility = fungibleResourceManager.Value.Divisibility;
+                            });
                         }
 
                         if (substateData is CoreModel.NonFungibleResourceManagerFieldIdTypeSubstate nonFungibleResourceManagerFieldIdTypeSubstate)
                         {
-                            referencedEntity.PostResolveConfigure(
-                                (GlobalNonFungibleResourceEntity e) => e.NonFungibleIdType =
-                                nonFungibleResourceManagerFieldIdTypeSubstate.Value.NonFungibleIdType switch
+                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) =>
+                            {
+                                e.NonFungibleIdType = nonFungibleResourceManagerFieldIdTypeSubstate.Value.NonFungibleIdType switch
                                 {
                                     CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
                                     CoreModel.NonFungibleIdType.Integer => NonFungibleIdType.Integer,
                                     CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
                                     CoreModel.NonFungibleIdType.RUID => NonFungibleIdType.RUID,
                                     _ => throw new ArgumentOutOfRangeException(nameof(e.NonFungibleIdType), e.NonFungibleIdType, "Unexpected value of NonFungibleIdType"),
-                                });
+                                };
+                            });
                         }
 
-                        if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
+                        if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate && typeInfoSubstate.Value.Details is CoreModel.ObjectTypeInfoDetails objectDetails)
                         {
-                            switch (typeInfoSubstate.Value.Details)
+                            referencedEntity.PostResolveConfigure((ComponentEntity e) =>
                             {
-                                case CoreModel.ObjectTypeInfoDetails objectDetails:
-                                    referencedEntity.PostResolveConfigure(
-                                        (ComponentEntity e) =>
+                                e.AssignedModuleIds = objectDetails.ModuleVersions
+                                    .Select(x =>
                                     {
-                                        e.AssignedModuleIds = objectDetails
-                                            .ModuleVersions
-                                                .Select(
-                                                    x =>
-                                            {
-                                                return x.Module switch
-                                                {
-                                                    CoreModel.AttachedModuleId.Metadata => ModuleId.Metadata,
-                                                    CoreModel.AttachedModuleId.Royalty => ModuleId.Royalty,
-                                                    CoreModel.AttachedModuleId.RoleAssignment => ModuleId.RoleAssignment,
-                                                    _ => throw new ArgumentOutOfRangeException(nameof(x.Module), x.Module, "Unexpected value of AssignedModule"),
-                                                };
-                                            })
-                                            .OrderBy(x => x)
-                                            .ToList();
-
-                                        e.PackageId = referencedEntities.Get((EntityAddress)objectDetails.BlueprintInfo.PackageAddress).DatabaseId;
-                                        e.BlueprintName = objectDetails.BlueprintInfo.BlueprintName;
-                                        e.BlueprintVersion = objectDetails.BlueprintInfo.BlueprintVersion;
-                                    });
-
-                                    if (objectDetails.BlueprintInfo.BlueprintName is CoreModel.NativeBlueprintNames.FungibleVault or CoreModel.NativeBlueprintNames.NonFungibleVault)
-                                    {
-                                        referencedEntity.PostResolveConfigure(
-                                            (VaultEntity e) =>
+                                        return x.Module switch
                                         {
-                                            e.ResourceEntityId = referencedEntities.Get((EntityAddress)objectDetails.BlueprintInfo.OuterObject).DatabaseId;
-                                        });
-                                    }
+                                            CoreModel.AttachedModuleId.Metadata => ModuleId.Metadata,
+                                            CoreModel.AttachedModuleId.Royalty => ModuleId.Royalty,
+                                            CoreModel.AttachedModuleId.RoleAssignment => ModuleId.RoleAssignment,
+                                            _ => throw new ArgumentOutOfRangeException(nameof(x.Module), x.Module, "Unexpected value of AssignedModule"),
+                                        };
+                                    })
+                                    .OrderBy(x => x)
+                                    .ToList();
 
-                                    break;
-                                case CoreModel.KeyValueStoreTypeInfoDetails:
-                                    break;
-                                default:
-                                    throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Value.Details.Type}' value");
-                            }
-                        }
-
-                        if (substateData is CoreModel.ValidatorFieldStateSubstate validator)
-                        {
-                            referencedEntity.PostResolveConfigure((GlobalValidatorEntity e) =>
-                            {
-                                e.StakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.Value.StakeXrdVault.EntityAddress).DatabaseId;
-                                e.PendingXrdWithdrawVault = referencedEntities.Get((EntityAddress)validator.Value.PendingXrdWithdrawVault.EntityAddress).DatabaseId;
-                                e.LockedOwnerStakeUnitVault = referencedEntities.Get((EntityAddress)validator.Value.LockedOwnerStakeUnitVault.EntityAddress).DatabaseId;
-                                e.PendingOwnerStakeUnitUnlockVault = referencedEntities.Get((EntityAddress)validator.Value.PendingOwnerStakeUnitUnlockVault.EntityAddress).DatabaseId;
+                                e.BlueprintName = objectDetails.BlueprintInfo.BlueprintName;
+                                e.BlueprintVersion = objectDetails.BlueprintInfo.BlueprintVersion;
                             });
                         }
 
-                        // we want to annotate AccountLocker-related KeyValueStores with corresponding AccountLocker+Account pair
-                        if (substateData is CoreModel.AccountLockerAccountClaimsEntrySubstate accountLocker)
-                        {
-                            var account = accountLocker.Key.AccountAddress;
-                            var keyValueStore = accountLocker.Value.ResourceVaults;
-
-                            referencedEntities
-                                .GetOrAdd((EntityAddress)keyValueStore.EntityAddress, ea => new ReferencedEntity(ea, keyValueStore.EntityType, stateVersion))
-                                .PostResolveConfigure((InternalKeyValueStoreEntity e) =>
-                                {
-                                    e.AccountLockerOfAccountLockerEntityId = referencedEntity.DatabaseId;
-                                    e.AccountLockerOfAccountEntityId = referencedEntities.Get((EntityAddress)account).DatabaseId;
-                                });
-                        }
-
-                        // we want to annotate AccountLocker-related Vaults using AccountLocker+Account pair obtained from corresponding KeyValueStore
-                        if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate && referencedEntity.Type is CoreModel.EntityType.InternalFungibleVault or CoreModel.EntityType.InternalNonFungibleVault)
-                        {
-                            referencedEntity.PostResolveConfigure((Entity e) =>
-                            {
-                                if (!e.ParentAncestorId.HasValue)
-                                {
-                                    throw new UnreachableException("Vault cannot exists without a parent entity.");
-                                }
-
-                                var parent = referencedEntities.GetByDatabaseId(e.ParentAncestorId.Value);
-
-                                if (parent.Type == CoreModel.EntityType.InternalKeyValueStore)
-                                {
-                                    var parentKeyValueStore = parent.GetDatabaseEntity<InternalKeyValueStoreEntity>();
-
-                                    if (parentKeyValueStore.AccountLockerOfAccountLockerEntityId.HasValue && parentKeyValueStore.AccountLockerOfAccountEntityId.HasValue)
-                                    {
-                                        // as we're running in the context of PostResolveConfigure with regular priority we must fallback to low priority action
-                                        referencedEntity.PostResolveConfigure(
-                                            (VaultEntity ve) =>
-                                            {
-                                                ve.AccountLockerOfAccountLockerEntityId = parentKeyValueStore.AccountLockerOfAccountLockerEntityId.Value;
-                                                ve.AccountLockerOfAccountEntityId = parentKeyValueStore.AccountLockerOfAccountEntityId.Value;
-                                            }, ReferencedEntity.PostResolvePriority.Low);
-                                    }
-                                }
-                            });
-                        }
+                        relationshipProcessor.ScanUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -781,14 +708,13 @@ UPDATE pending_transactions
                 // we must rely on high priority PostResolveConfigure as other callbacks rely on the entity hierarchy tree
                 referencedEntities
                     .Get(childAddress)
-                    .PostResolveConfigure(
-                        (Entity dbe) =>
-                        {
-                            dbe.AncestorIds = allAncestors;
-                            dbe.ParentAncestorId = parentId.Value;
-                            dbe.OwnerAncestorId = ownerId.Value;
-                            dbe.GlobalAncestorId = globalId.Value;
-                        }, ReferencedEntity.PostResolvePriority.High);
+                    .PostResolveConfigureHigh((Entity dbe) =>
+                    {
+                        dbe.AncestorIds = allAncestors;
+                        dbe.ParentAncestorId = parentId.Value;
+                        dbe.OwnerAncestorId = ownerId.Value;
+                        dbe.GlobalAncestorId = globalId.Value;
+                    });
             }
 
             referencedEntities.InvokePostResolveConfiguration();
@@ -829,7 +755,6 @@ UPDATE pending_transactions
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
                 var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
-                long? newEpoch = null;
                 long? passingEpoch = null;
                 var affectedGlobalEntities = new HashSet<long>();
 
@@ -845,7 +770,7 @@ UPDATE pending_transactions
                         if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleVaultFieldBalanceSubstate)
                         {
                             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
-                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.GetResourceEntityId());
                             var amount = TokenAmount.FromDecimalString(fungibleVaultFieldBalanceSubstate.Value.Amount);
 
                             vaultSnapshots.Add(new FungibleVaultSnapshot(referencedEntity, resourceEntity, amount, stateVersion));
@@ -868,7 +793,7 @@ UPDATE pending_transactions
                         if (substateData is CoreModel.NonFungibleVaultFieldBalanceSubstate nonFungibleVaultFieldBalanceSubstate)
                         {
                             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
-                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.GetResourceEntityId());
                             var amount = long.Parse(nonFungibleVaultFieldBalanceSubstate.Value.Amount, NumberFormatInfo.InvariantInfo);
 
                             var previousAmountRaw = (substate.PreviousValue?.SubstateData as CoreModel.NonFungibleVaultFieldBalanceSubstate)?.Value.Amount;
@@ -886,7 +811,7 @@ UPDATE pending_transactions
                         if (substateData is CoreModel.NonFungibleVaultContentsIndexEntrySubstate nonFungibleVaultContentsIndexEntrySubstate)
                         {
                             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
-                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.GetResourceEntityId());
                             var simpleRep = nonFungibleVaultContentsIndexEntrySubstate.Key.NonFungibleLocalId.SimpleRep;
 
                             vaultSnapshots.Add(new NonFungibleVaultSnapshot(referencedEntity, resourceEntity, simpleRep, false, stateVersion));
@@ -913,8 +838,7 @@ UPDATE pending_transactions
                         {
                             if (consensusManagerFieldStateSubstate.Value.Round == 0)
                             {
-                                newEpoch = consensusManagerFieldStateSubstate.Value.Epoch;
-                                passingEpoch = newEpoch - 1;
+                                passingEpoch = consensusManagerFieldStateSubstate.Value.Epoch - 1;
                             }
                         }
 
@@ -992,7 +916,7 @@ UPDATE pending_transactions
 
                         if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
-                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
+                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().GetResourceEntityId());
                             var simpleRep = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex);
 
                             vaultSnapshots.Add(new NonFungibleVaultSnapshot(referencedEntity, resourceEntity, simpleRep, true, stateVersion));
@@ -1058,7 +982,7 @@ UPDATE pending_transactions
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
+                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().GetResourceEntityId(),
                                 Quantity = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.AsStr()),
                             });
                         }
@@ -1071,7 +995,7 @@ UPDATE pending_transactions
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
+                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().GetResourceEntityId(),
                                 Quantity = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.AsStr()),
                             });
                         }
@@ -1084,7 +1008,7 @@ UPDATE pending_transactions
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
+                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().GetResourceEntityId(),
                                 Quantity = TokenAmount.FromDecimalString(nonFungibleVaultWithdrawalEvent.Length.ToString()),
                             });
                         }
@@ -1097,7 +1021,7 @@ UPDATE pending_transactions
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
+                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().GetResourceEntityId(),
                                 Quantity = TokenAmount.FromDecimalString(nonFungibleVaultDepositEvent.Length.ToString()),
                             });
                         }
@@ -1402,8 +1326,7 @@ UPDATE pending_transactions
                     {
                         AggregateEntityResourceUsingSubstates(fe.ReferencedVault, fe.ReferencedResource, fe.StateVersion, true);
 
-                        vaultHistoryToAdd.Add(
-                            new EntityFungibleVaultHistory
+                        vaultHistoryToAdd.Add(new EntityFungibleVaultHistory
                         {
                             Id = sequences.EntityVaultHistorySequence++,
                             FromStateVersion = fe.StateVersion,

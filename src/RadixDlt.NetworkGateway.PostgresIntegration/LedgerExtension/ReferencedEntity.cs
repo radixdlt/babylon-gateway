@@ -73,7 +73,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Type, long StateVersion)
 {
-    public enum PostResolvePriority
+    private enum PostResolvePriority
     {
         High,
         Normal,
@@ -157,21 +157,11 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
         return instance;
     }
 
-    public void PostResolveConfigure<T>(Action<T> action, PostResolvePriority priority = PostResolvePriority.Normal)
-    {
-        var list = priority switch
-        {
-            PostResolvePriority.High => _postResolveActionsHighPriority,
-            PostResolvePriority.Normal => _postResolveActionsNormalPriority,
-            PostResolvePriority.Low => _postResolveActionsLowPriority,
-            _ => throw new ArgumentOutOfRangeException(nameof(priority), priority, null),
-        };
+    public void PostResolveConfigureHigh<T>(Action<T> action) => PostResolveConfigure(action, PostResolvePriority.High);
 
-        list.Add(() =>
-        {
-            action.Invoke(GetDatabaseEntity<T>());
-        });
-    }
+    public void PostResolveConfigure<T>(Action<T> action) => PostResolveConfigure(action, PostResolvePriority.Normal);
+
+    public void PostResolveConfigureLow<T>(Action<T> action) => PostResolveConfigure(action, PostResolvePriority.Low);
 
     public void InvokePostResolveConfiguration()
     {
@@ -228,6 +218,22 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
         }
 
         return de;
+    }
+
+    private void PostResolveConfigure<T>(Action<T> action, PostResolvePriority priority)
+    {
+        var list = priority switch
+        {
+            PostResolvePriority.High => _postResolveActionsHighPriority,
+            PostResolvePriority.Normal => _postResolveActionsNormalPriority,
+            PostResolvePriority.Low => _postResolveActionsLowPriority,
+            _ => throw new ArgumentOutOfRangeException(nameof(priority), priority, null),
+        };
+
+        list.Add(() =>
+        {
+            action.Invoke(GetDatabaseEntity<T>());
+        });
     }
 
     /// <summary>

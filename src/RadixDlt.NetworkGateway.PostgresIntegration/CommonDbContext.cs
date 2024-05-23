@@ -183,6 +183,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<AccountDefaultDepositRule>();
         modelBuilder.HasPostgresEnum<AccountResourcePreferenceRule>();
         modelBuilder.HasPostgresEnum<EntityType>();
+        modelBuilder.HasPostgresEnum<EntityRelationship>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionManifestClass>();
