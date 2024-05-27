@@ -1,13 +1,13 @@
 # Database migrations
 For most of the releases database schema differs between versions. To easily migrate/deploy database schema we are using EntityFramework migrations.
 
-For further reading, visit official Microsoft documentation on entity framework migration https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli
+For further reading, visit the official Microsoft documentation on Entity Framework migration https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli
 
 ## Executing migrations
-There are two supported methods of applying migrations. Executing Idempotent SQL script or using built docker image. You can choose whichever you prefer.
+There are two supported methods of applying migrations. Executing Idempotent SQL script or using programmatic Entity Framework migrations (for simplicity they can be applied using docker image). You can choose whichever you prefer.
 
 ### Docker image
-For each release, we publish a docker image which is responsible for migrating the database. Similar to idempotent SQL script it takes care of applying each migration only once and applying only missing migrations.
+For each release, we publish a docker image which is responsible for migrating the database. Similarly to the idempotent SQL script, it takes care of applying each migration only once and applying only missing migrations.
 
 Image can be found here:
 https://hub.docker.com/r/radixdlt/babylon-ng-database-migrations
@@ -15,7 +15,7 @@ https://hub.docker.com/r/radixdlt/babylon-ng-database-migrations
 To migrate the database you just need to run that image providing a connection string to the database. To do that you need to set an environment variable for the docker container `ConnectionStrings__NetworkGatewayMigrations`.
 
 ### Idempotent SQL script
-It is a Raw SQL script that has to be executed on a database. It takes care of applying each migration only once and applying only missing migrations.
+It is a Raw SQL script that has to be executed on the database. It takes care of applying each migration only once and applying only missing migrations.
 
 It can be found in the [migrations directory](../src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/IdempotentApplyMigrations.sql)
 
