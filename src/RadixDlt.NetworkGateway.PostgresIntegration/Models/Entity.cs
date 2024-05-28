@@ -77,7 +77,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 [Table("entities")]
 internal abstract class Entity
 {
-    internal record CorrelatedEntity(EntityRelationship Relationship, long Id);
+    internal record CorrelatedEntity(EntityRelationship Relationship, long EntityId);
 
     private HashSet<CorrelatedEntity>? _correlatedEntities;
 
@@ -126,14 +126,14 @@ internal abstract class Entity
         Correlations.Add(new CorrelatedEntity(relationship, entityId));
     }
 
-    protected bool TryGetCorrelation(EntityRelationship relationship, [NotNullWhen(true)] out CorrelatedEntity? correlation)
+    public bool TryGetCorrelation(EntityRelationship relationship, [NotNullWhen(true)] out CorrelatedEntity? correlation)
     {
         correlation = Correlations.SingleOrDefault(x => x.Relationship == relationship);
 
         return correlation != null;
     }
 
-    protected CorrelatedEntity GetCorrelation(EntityRelationship relationship)
+    public CorrelatedEntity GetCorrelation(EntityRelationship relationship)
     {
         if (TryGetCorrelation(relationship, out var definition))
         {
@@ -171,18 +171,18 @@ internal abstract class ComponentEntity : Entity
     [Column("assigned_module_ids")]
     public List<ModuleId> AssignedModuleIds { get; set; }
 
-    public long GetPackageId() => GetCorrelation(EntityRelationship.ComponentPackage).Id;
+    public long GetPackageId() => GetCorrelation(EntityRelationship.ComponentPackage).EntityId;
 }
 
 internal class GlobalValidatorEntity : ComponentEntity
 {
-    public long GetStakeVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorStakeVault).Id;
+    public long GetStakeVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorStakeVault).EntityId;
 
-    public long GetPendingXrdWithdrawVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorPendingXrdWithdrawVault).Id;
+    public long GetPendingXrdWithdrawVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorPendingXrdWithdrawVault).EntityId;
 
-    public long GetLockedOwnerStakeUnitVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorLockedOwnerStakeUnitVault).Id;
+    public long GetLockedOwnerStakeUnitVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorLockedOwnerStakeUnitVault).EntityId;
 
-    public long GetPendingOwnerStakeUnitUnlockVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorPendingOwnerStakeUnitUnlockVault).Id;
+    public long GetPendingOwnerStakeUnitUnlockVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorPendingOwnerStakeUnitUnlockVault).EntityId;
 }
 
 internal class GlobalConsensusManager : ComponentEntity
@@ -191,7 +191,7 @@ internal class GlobalConsensusManager : ComponentEntity
 
 internal abstract class VaultEntity : ComponentEntity
 {
-    public long GetResourceEntityId() => GetCorrelation(EntityRelationship.VaultResource).Id;
+    public long GetResourceEntityId() => GetCorrelation(EntityRelationship.VaultResource).EntityId;
 
     public bool TryGetAccountLockerEntryDbLookup(out AccountLockerEntryDbLookup lookup)
     {
@@ -199,7 +199,7 @@ internal abstract class VaultEntity : ComponentEntity
 
         if (TryGetCorrelation(EntityRelationship.AccountLockerLocker, out var locker) && TryGetCorrelation(EntityRelationship.AccountLockerAccount, out var account))
         {
-            lookup = new AccountLockerEntryDbLookup(locker.Id, account.Id);
+            lookup = new AccountLockerEntryDbLookup(locker.EntityId, account.EntityId);
 
             return true;
         }
@@ -271,7 +271,7 @@ internal class InternalKeyValueStoreEntity : Entity
 
         if (TryGetCorrelation(EntityRelationship.AccountLockerLocker, out var locker) && TryGetCorrelation(EntityRelationship.AccountLockerAccount, out var account))
         {
-            lookup = new AccountLockerEntryDbLookup(locker.Id, account.Id);
+            lookup = new AccountLockerEntryDbLookup(locker.EntityId, account.EntityId);
 
             return true;
         }

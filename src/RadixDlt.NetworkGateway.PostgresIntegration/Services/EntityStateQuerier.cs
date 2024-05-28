@@ -68,6 +68,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
@@ -1445,9 +1446,9 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
                 lookup.Add(entity.GlobalAncestorId.Value);
             }
 
-            if (entity is ComponentEntity componentEntity)
+            if (entity.TryGetCorrelation(EntityRelationship.ComponentPackage, out var packageCorrelation))
             {
-                lookup.Add(componentEntity.GetPackageId());
+                lookup.Add(packageCorrelation.EntityId);
             }
 
             if (entity is VaultEntity vaultEntity)

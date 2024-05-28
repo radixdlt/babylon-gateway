@@ -151,7 +151,7 @@ internal class WriteHelper : IWriteHelper
             await writer.WriteAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.GlobalAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Correlations.Select(x => x.Relationship).ToArray(), "entity_relationship[]", token);
-            await writer.WriteAsync(e.Correlations.Select(x => x.Id).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Correlations.Select(x => x.EntityId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(discriminator, "entity_type", token);
 
             if (e is ComponentEntity ce)
