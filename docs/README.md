@@ -12,6 +12,7 @@ In this folder are the following docs:
 * [API Specifications](./api-specifications.md)
 * [Configuration](./configuration.md)
 * [Monitoring](./monitoring.md)
+* [Database migrations](./database_migrations.md)
 
 Other useful docs in this codebase:
 
