@@ -64,17 +64,23 @@
 
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("entities")]
 internal abstract class Entity
 {
+    internal record CorrelatedEntity(EntityRelationship Relationship, long EntityId);
+
+    private HashSet<CorrelatedEntity>? _correlatedEntities;
+
     [Key]
     [Column("id")]
     public long Id { get; set; }
@@ -100,22 +106,42 @@ internal abstract class Entity
     [Column("global_ancestor_id")]
     public long? GlobalAncestorId { get; set; }
 
-    [Column("correlated_entities")]
-    public virtual List<long> CorrelatedEntities
-    {
-        get
-        {
-            return new List<long>(AncestorIds?.ToArray() ?? Array.Empty<long>());
-        }
+    [Column("correlated_entity_relationships")]
+    public List<EntityRelationship> CorrelatedEntityRelationships { get; set; } = new();
 
-        private set
-        {
-            /* setter needed for EF Core only */
-        }
-    }
+    [Column("correlated_entity_ids")]
+    public List<long> CorrelatedEntityIds { get; set; } = new();
 
     [MemberNotNullWhen(true, nameof(AncestorIds), nameof(ParentAncestorId), nameof(OwnerAncestorId), nameof(GlobalAncestorId))]
     public bool HasParent => AncestorIds != null;
+
+    [NotMapped]
+    public ISet<CorrelatedEntity> Correlations
+    {
+        get => _correlatedEntities ??= new HashSet<CorrelatedEntity>(CorrelatedEntityRelationships.Zip(CorrelatedEntityIds).Select(x => new CorrelatedEntity(x.First, x.Second)));
+    }
+
+    public void AddCorrelation(EntityRelationship relationship, long entityId)
+    {
+        Correlations.Add(new CorrelatedEntity(relationship, entityId));
+    }
+
+    public bool TryGetCorrelation(EntityRelationship relationship, [NotNullWhen(true)] out CorrelatedEntity? correlation)
+    {
+        correlation = Correlations.SingleOrDefault(x => x.Relationship == relationship);
+
+        return correlation != null;
+    }
+
+    public CorrelatedEntity GetCorrelation(EntityRelationship relationship)
+    {
+        if (TryGetCorrelation(relationship, out var definition))
+        {
+            return definition;
+        }
+
+        throw new ArgumentException("Relationship not found", nameof(relationship));
+    }
 }
 
 internal abstract class ResourceEntity : ComponentEntity
@@ -136,9 +162,6 @@ internal class GlobalNonFungibleResourceEntity : ResourceEntity
 
 internal abstract class ComponentEntity : Entity
 {
-    [Column("package_id")]
-    public long PackageId { get; set; }
-
     [Column("blueprint_name")]
     public string BlueprintName { get; set; }
 
@@ -148,44 +171,18 @@ internal abstract class ComponentEntity : Entity
     [Column("assigned_module_ids")]
     public List<ModuleId> AssignedModuleIds { get; set; }
 
-    public override List<long> CorrelatedEntities
-    {
-        get
-        {
-            var ce = base.CorrelatedEntities;
-            ce.Add(PackageId);
-
-            return ce;
-        }
-    }
+    public long GetPackageId() => GetCorrelation(EntityRelationship.ComponentPackage).EntityId;
 }
 
 internal class GlobalValidatorEntity : ComponentEntity
 {
-    [Column("stake_vault_entity_id")]
-    public long StakeVaultEntityId { get; set; }
+    public long GetStakeVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorStakeVault).EntityId;
 
-    [Column("pending_xrd_withdraw_vault_entity_id")]
-    public long PendingXrdWithdrawVault { get; set; }
+    public long GetPendingXrdWithdrawVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorPendingXrdWithdrawVault).EntityId;
 
-    [Column("locked_owner_stake_unit_vault_entity_id")]
-    public long LockedOwnerStakeUnitVault { get; set; }
+    public long GetLockedOwnerStakeUnitVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorLockedOwnerStakeUnitVault).EntityId;
 
-    [Column("pending_owner_stake_unit_unlock_vault_entity_id")]
-    public long PendingOwnerStakeUnitUnlockVault { get; set; }
-
-    public override List<long> CorrelatedEntities
-    {
-        get
-        {
-            var ce = base.CorrelatedEntities;
-            ce.Add(StakeVaultEntityId);
-            ce.Add(PendingXrdWithdrawVault);
-            ce.Add(LockedOwnerStakeUnitVault);
-            ce.Add(PendingOwnerStakeUnitUnlockVault);
-            return ce;
-        }
-    }
+    public long GetPendingOwnerStakeUnitUnlockVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorPendingOwnerStakeUnitUnlockVault).EntityId;
 }
 
 internal class GlobalConsensusManager : ComponentEntity
@@ -194,47 +191,26 @@ internal class GlobalConsensusManager : ComponentEntity
 
 internal abstract class VaultEntity : ComponentEntity
 {
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
+    public long GetResourceEntityId() => GetCorrelation(EntityRelationship.VaultResource).EntityId;
 
-    [Column("account_locker_of_account_locker_entity_id")]
-    public long? AccountLockerOfAccountLockerEntityId { get; set; }
-
-    [Column("account_locker_of_account_entity_id")]
-    public long? AccountLockerOfAccountEntityId { get; set; }
-
-    public override List<long> CorrelatedEntities
+    public bool TryGetAccountLockerEntryDbLookup(out AccountLockerEntryDbLookup lookup)
     {
-        get
+        lookup = default;
+
+        if (TryGetCorrelation(EntityRelationship.AccountLockerLocker, out var locker) && TryGetCorrelation(EntityRelationship.AccountLockerAccount, out var account))
         {
-            var ce = base.CorrelatedEntities;
-            ce.Add(ResourceEntityId);
-            return ce;
+            lookup = new AccountLockerEntryDbLookup(locker.EntityId, account.EntityId);
+
+            return true;
         }
+
+        return false;
     }
 }
 
 internal class InternalFungibleVaultEntity : VaultEntity
 {
-    [Column("royalty_vault_of_entity_id")]
-    public long? RoyaltyVaultOfEntityId { get; set; }
-
-    public bool IsRoyaltyVault => RoyaltyVaultOfEntityId != null;
-
-    public override List<long> CorrelatedEntities
-    {
-        get
-        {
-            var ce = base.CorrelatedEntities;
-
-            if (RoyaltyVaultOfEntityId.HasValue)
-            {
-                ce.Add(RoyaltyVaultOfEntityId.Value);
-            }
-
-            return ce;
-        }
-    }
+    public bool IsRoyaltyVault => TryGetCorrelation(EntityRelationship.VaultRoyalty, out _);
 }
 
 internal class InternalNonFungibleVaultEntity : VaultEntity
@@ -289,11 +265,19 @@ internal class VirtualIdentityEntity : GlobalIdentityEntity
 
 internal class InternalKeyValueStoreEntity : Entity
 {
-    [Column("account_locker_of_account_locker_entity_id")]
-    public long? AccountLockerOfAccountLockerEntityId { get; set; }
+    public bool TryGetAccountLockerEntryDbLookup(out AccountLockerEntryDbLookup lookup)
+    {
+        lookup = default;
 
-    [Column("account_locker_of_account_entity_id")]
-    public long? AccountLockerOfAccountEntityId { get; set; }
+        if (TryGetCorrelation(EntityRelationship.AccountLockerLocker, out var locker) && TryGetCorrelation(EntityRelationship.AccountLockerAccount, out var account))
+        {
+            lookup = new AccountLockerEntryDbLookup(locker.EntityId, account.EntityId);
+
+            return true;
+        }
+
+        return false;
+    }
 }
 
 internal class GlobalAccessControllerEntity : ComponentEntity

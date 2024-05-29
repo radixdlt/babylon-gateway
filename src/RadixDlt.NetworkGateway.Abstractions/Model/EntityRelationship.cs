@@ -62,29 +62,20 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore.Migrations;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-#nullable disable
-
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+public enum EntityRelationship
 {
-    /// <inheritdoc />
-    public partial class NewAccountLockerEntityType : Migration
-    {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker,global_account_locker")
-                .OldAnnotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker");
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker")
-                .OldAnnotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker,global_account_locker");
-        }
-    }
+    ComponentPackage,
+    ValidatorStakeVault,
+    ValidatorPendingXrdWithdrawVault,
+    ValidatorLockedOwnerStakeUnitVault,
+    ValidatorPendingOwnerStakeUnitUnlockVault,
+    VaultResource,
+    VaultRoyalty,
+    VaultResourcePool,
+    AccountLockerLocker,
+    AccountLockerAccount,
+    ResourcePoolUnit,
+    ResourcePoolResource,
 }

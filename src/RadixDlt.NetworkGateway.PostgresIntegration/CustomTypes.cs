@@ -102,6 +102,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountDefaultDepositRule>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountResourcePreferenceRule>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityRelationship>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionManifestClass>();

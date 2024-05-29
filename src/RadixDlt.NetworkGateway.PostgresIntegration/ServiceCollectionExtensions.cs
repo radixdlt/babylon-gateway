@@ -102,6 +102,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<AccountDefaultDepositRule>();
                 dataSourceBuilder.MapEnum<AccountResourcePreferenceRule>();
                 dataSourceBuilder.MapEnum<EntityType>();
+                dataSourceBuilder.MapEnum<EntityRelationship>();
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
                 dataSourceBuilder.MapEnum<LedgerTransactionType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionManifestClass>();

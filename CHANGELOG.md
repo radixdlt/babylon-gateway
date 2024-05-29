@@ -1,3 +1,9 @@
+## 1.7.0
+Release built: _not released yet_
+
+### Database changes
+- Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
+
 ## 1.6.1
 Release built: 21.05.2024
 
