@@ -62,91 +62,33 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal class ValidatorQuerier : IValidatorQuerier
+[Table("validator_cumulative_emission_history")]
+internal class ValidatorCumulativeEmissionHistory
 {
-    private readonly ReadOnlyDbContext _dbContext;
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public ValidatorQuerier(ReadOnlyDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(
-        IList<EntityAddress> validatorAddresses,
-        GatewayModel.LedgerState ledgerState,
-        GatewayModel.LedgerState? fromLedgerState,
-        CancellationToken token = default)
-    {
-        var addresses = validatorAddresses.Select(a => (string)a).ToHashSet().ToList();
+    [Column("validator_entity_id")]
+    public long ValidatorEntityId { get; set; }
 
-        var validators = await _dbContext
-            .Entities
-            .Where(e => addresses.Contains(e.Address) && e.FromStateVersion <= ledgerState.StateVersion)
-            .AnnotateMetricName("GetValidators")
-            .ToDictionaryAsync(e => e.Id, e => e.Address, token);
+    [Column("epoch_number")]
+    public long EpochNumber { get; set; }
 
-        var validatorIds = validators.Keys.ToList();
-        var epochFrom = fromLedgerState?.Epoch ?? 0;
-        var epochTo = ledgerState.Epoch;
+    [Column("proposals_made")]
+    public long ProposalsMade { get; set; }
 
-        var validatorUptime = await _dbContext
-            .ValidatorCumulativeEmissionHistory
-            .FromSqlInterpolated($@"
-WITH variables AS (SELECT UNNEST({validatorIds}) AS validator_entity_id)
-SELECT
-    h.id,
-    h.from_state_version,
-    h.validator_entity_id,
-    h.epoch_number,
-    h.proposals_made - COALESCE(l.proposals_made, 0) AS proposals_made,
-    h.proposals_missed - COALESCE(l.proposals_missed, 0) AS proposals_missed,
-    h.participation_in_active_set - COALESCE(l.participation_in_active_set, 0) AS participation_in_active_set
-FROM variables var
-INNER JOIN LATERAL (
-    SELECT *
-    FROM validator_cumulative_emission_history
-    WHERE validator_entity_id = var.validator_entity_id AND epoch_number <= {epochTo}
-    ORDER BY epoch_number DESC
-    LIMIT 1
-) h ON TRUE
-LEFT JOIN LATERAL (
-    SELECT *
-    FROM validator_cumulative_emission_history
-    WHERE validator_entity_id = var.validator_entity_id AND epoch_number >= {epochFrom} AND epoch_number < h.epoch_number
-    ORDER BY epoch_number
-    LIMIT 1
-) l ON TRUE")
-            .ToDictionaryAsync(e => e.ValidatorEntityId, token);
+    [Column("proposals_missed")]
+    public long ProposalsMissed { get; set; }
 
-        var items = validators
-            .Select(v =>
-            {
-                long? proposalsMadeSum = null;
-                long? proposalsMissedSum = null;
-                long epochsActiveIn = 0;
-
-                if (validatorUptime.TryGetValue(v.Key, out var uptime))
-                {
-                    proposalsMadeSum = uptime.ProposalsMade;
-                    proposalsMissedSum = uptime.ProposalsMissed;
-                    epochsActiveIn = uptime.ParticipationInActiveSet;
-                }
-
-                return new GatewayModel.ValidatorUptimeCollectionItem(v.Value, proposalsMadeSum, proposalsMissedSum, epochsActiveIn);
-            })
-            .ToList();
-
-        return new GatewayModel.ValidatorsUptimeResponse(ledgerState, new GatewayModel.ValidatorUptimeCollection(items));
-    }
+    [Column("participation_in_active_set")]
+    public long ParticipationInActiveSet { get; set; }
 }

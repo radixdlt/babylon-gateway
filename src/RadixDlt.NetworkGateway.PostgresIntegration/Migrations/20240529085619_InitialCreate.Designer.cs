@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240528113230_InitialCreate")]
+    [Migration("20240529085619_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1714,7 +1714,47 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("validator_active_set_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorEmissionStatistics", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorCumulativeEmissionHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EpochNumber")
+                        .HasColumnType("bigint")
+                        .HasColumnName("epoch_number");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ParticipationInActiveSet")
+                        .HasColumnType("bigint")
+                        .HasColumnName("participation_in_active_set");
+
+                    b.Property<long>("ProposalsMade")
+                        .HasColumnType("bigint")
+                        .HasColumnName("proposals_made");
+
+                    b.Property<long>("ProposalsMissed")
+                        .HasColumnType("bigint")
+                        .HasColumnName("proposals_missed");
+
+                    b.Property<long>("ValidatorEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("validator_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ValidatorEntityId", "EpochNumber");
+
+                    b.ToTable("validator_cumulative_emission_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorEmissionHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1747,9 +1787,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("ValidatorEntityId", "EpochNumber");
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ValidatorEntityId", "EpochNumber"), new[] { "ProposalsMade", "ProposalsMissed" });
-
-                    b.ToTable("validator_emission_statistics");
+                    b.ToTable("validator_emission_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorPublicKeyHistory", b =>

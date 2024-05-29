@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("validator_emission_statistics")]
-internal class ValidatorEmissionStatistics
+[Table("validator_emission_history")]
+internal class ValidatorEmissionHistory
 {
     [Key]
     [Column("id")]
