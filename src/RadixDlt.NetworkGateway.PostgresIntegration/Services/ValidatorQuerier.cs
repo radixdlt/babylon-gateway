@@ -127,6 +127,7 @@ LEFT JOIN LATERAL (
     ORDER BY epoch_number
     LIMIT 1
 ) l ON TRUE")
+            .AnnotateMetricName("ValidatorUptime")
             .ToDictionaryAsync(e => e.ValidatorEntityId, token);
 
         var items = validators
