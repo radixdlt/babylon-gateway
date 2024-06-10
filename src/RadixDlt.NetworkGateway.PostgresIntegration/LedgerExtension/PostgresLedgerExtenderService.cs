@@ -729,7 +729,6 @@ UPDATE pending_transactions
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
-        var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
         var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, token);
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
@@ -744,6 +743,7 @@ UPDATE pending_transactions
         var accountDefaultDepositRuleProcessor = new AccountDefaultDepositRuleProcessor(processorContext);
         var keyValueStoreProcessor = new KeyValueStoreProcessor(processorContext);
         var validatorProcessor = new ValidatorProcessor(processorContext, referencedEntities);
+        var validatorEmissionProcessor = new ValidatorEmissionProcessor(processorContext);
         var accountLockerProcessor = new AccountLockerProcessor(processorContext, referencedEntities, networkConfiguration.Id);
 
         // step: scan all substates & events to figure out changes
@@ -960,20 +960,9 @@ UPDATE pending_transactions
 
                         using var decodedEvent = EventDecoder.DecodeEvent(@event, networkConfiguration.Id);
 
-                        if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
-                        {
-                            validatorEmissionStatisticsToAdd.Add(
-                                new ValidatorEmissionStatistics
-                            {
-                                Id = sequences.ValidatorEmissionStatisticsSequence++,
-                                FromStateVersion = stateVersion,
-                                ValidatorEntityId = eventEmitterEntity.DatabaseId,
-                                EpochNumber = (long)validatorUptimeEvent.epoch,
-                                ProposalsMade = (long)validatorUptimeEvent.proposalsMade,
-                                ProposalsMissed = (long)validatorUptimeEvent.proposalsMissed,
-                            });
-                        }
-                        else if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
+                        validatorEmissionProcessor.VisitEvent(decodedEvent, eventEmitterEntity, stateVersion);
+
+                        if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
                         {
                             ledgerTransactionMarkersToAdd.Add(
                                 new EventLedgerTransactionMarker
@@ -1154,6 +1143,7 @@ UPDATE pending_transactions
             await packageCodeProcessor.LoadDependencies();
             await packageBlueprintProcessor.LoadDependencies();
             await validatorProcessor.LoadDependencies();
+            await validatorEmissionProcessor.LoadDependencies();
             await keyValueStoreProcessor.LoadDependencies();
             await accountAuthorizedDepositorsProcessor.LoadDependencies();
             await accountResourcePreferenceRulesProcessor.LoadDependencies();
@@ -1180,6 +1170,7 @@ UPDATE pending_transactions
             accountResourcePreferenceRulesProcessor.ProcessChanges();
             keyValueStoreProcessor.ProcessChanges();
             validatorProcessor.ProcessChanges();
+            validatorEmissionProcessor.ProcessChanges();
             accountLockerProcessor.ProcessChanges();
 
             foreach (var e in nonFungibleIdChanges)
@@ -1522,7 +1513,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
 
@@ -1538,6 +1528,7 @@ UPDATE pending_transactions
             rowsInserted += await accountResourcePreferenceRulesProcessor.SaveEntities();
             rowsInserted += await keyValueStoreProcessor.SaveEntities();
             rowsInserted += await validatorProcessor.SaveEntities();
+            rowsInserted += await validatorEmissionProcessor.SaveEntities();
             rowsInserted += await accountLockerProcessor.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);

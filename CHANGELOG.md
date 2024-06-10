@@ -1,8 +1,11 @@
 ## 1.7.0
 Release built: _not released yet_
 
+- Optimized `/statistics/validators/uptime` endpoint processing time.
+
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
+- Replaced per-epoch validator emissions (`validator_emission_statistics` table) with their cumulative statistics (`validator_cumulative_emission_history` table).
 
 ## 1.6.1
 Release built: 21.05.2024

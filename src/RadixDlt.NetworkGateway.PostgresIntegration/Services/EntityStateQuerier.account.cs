@@ -96,6 +96,7 @@ internal partial class EntityStateQuerier
         var accountLockerEntryDefinition = await _dbContext
             .AccountLockerDefinition
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
+            .AnnotateMetricName("AccountLockerEntryDefinition")
             .FirstOrDefaultAsync(e => e.AccountLockerEntityId == accountLocker.Id && e.AccountEntityId == account.Id, token);
 
         if (accountLockerEntryDefinition == null)
@@ -132,7 +133,7 @@ LIMIT @limit;",
             },
             cancellationToken: token);
 
-        var vaultsAndOneMore = (await _dapperWrapper.QueryAsync<AccountLockerVaultViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
+        var vaultsAndOneMore = (await _dapperWrapper.QueryAsync<AccountLockerVaultViewModel>(_dbContext.Database.GetDbConnection(), cd, "vaultsAndOneMore")).ToList();
 
         var items = vaultsAndOneMore
             .Take(pageRequest.Limit)

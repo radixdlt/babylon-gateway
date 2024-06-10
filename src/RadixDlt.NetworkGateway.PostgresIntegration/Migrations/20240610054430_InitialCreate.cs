@@ -819,7 +819,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "validator_emission_statistics",
+                name: "validator_cumulative_emission_history",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -828,11 +828,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     epoch_number = table.Column<long>(type: "bigint", nullable: false),
                     proposals_made = table.Column<long>(type: "bigint", nullable: false),
-                    proposals_missed = table.Column<long>(type: "bigint", nullable: false)
+                    proposals_missed = table.Column<long>(type: "bigint", nullable: false),
+                    participation_in_active_set = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_validator_emission_statistics", x => x.id);
+                    table.PrimaryKey("PK_validator_cumulative_emission_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1245,10 +1246,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "validator_public_key_history_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_validator_emission_statistics_validator_entity_id_epoch_num~",
-                table: "validator_emission_statistics",
-                columns: new[] { "validator_entity_id", "epoch_number" })
-                .Annotation("Npgsql:IndexInclude", new[] { "proposals_made", "proposals_missed" });
+                name: "IX_validator_cumulative_emission_history_validator_entity_id_e~",
+                table: "validator_cumulative_emission_history",
+                columns: new[] { "validator_entity_id", "epoch_number" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_validator_public_key_history_validator_entity_id_from_state~",
@@ -1385,7 +1385,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "validator_active_set_history");
 
             migrationBuilder.DropTable(
-                name: "validator_emission_statistics");
+                name: "validator_cumulative_emission_history");
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");

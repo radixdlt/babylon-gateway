@@ -560,39 +560,6 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyValidatorEmissionStatistics(ICollection<ValidatorEmissionStatistics> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ValidatorEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EpochNumber, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ProposalsMade, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ProposalsMissed, NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyValidatorEmissionStatistics), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyNonFungibleIdData(ICollection<NonFungibleIdData> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -827,7 +794,7 @@ SELECT
     setval('schema_entry_aggregate_history_id_seq', @schemaEntryAggregateHistorySequence),
     setval('key_value_store_entry_definition_id_seq', @keyValueStoreEntryDefinitionSequence),
     setval('key_value_store_entry_history_id_seq', @keyValueStoreEntryHistorySequence),
-    setval('validator_emission_statistics_id_seq', @validatorEmissionStatisticsSequence),
+    setval('validator_cumulative_emission_history_id_seq', @validatorCumulativeEmissionHistorySequence),
     setval('non_fungible_schema_history_id_seq', @NonFungibleSchemaHistorySequence),
     setval('key_value_store_schema_history_id_seq', @KeyValueSchemaHistorySequence),
     setval('package_blueprint_aggregate_history_id_seq', @packageBlueprintAggregateHistorySequence),
@@ -870,7 +837,7 @@ SELECT
                 schemaEntryAggregateHistorySequence = sequences.SchemaEntryAggregateHistorySequence,
                 keyValueStoreEntryDefinitionSequence = sequences.KeyValueStoreEntryDefinitionSequence,
                 keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
-                validatorEmissionStatisticsSequence = sequences.ValidatorEmissionStatisticsSequence,
+                validatorCumulativeEmissionHistorySequence = sequences.ValidatorCumulativeEmissionHistorySequence,
                 nonFungibleSchemaHistorySequence = sequences.NonFungibleSchemaHistorySequence,
                 keyValueSchemaHistorySequence = sequences.KeyValueSchemaHistorySequence,
                 packageBlueprintAggregateHistorySequence = sequences.PackageBlueprintAggregateHistorySequence,

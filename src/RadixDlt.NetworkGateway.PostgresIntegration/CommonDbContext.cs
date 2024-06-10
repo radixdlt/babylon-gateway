@@ -161,7 +161,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
 
-    public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
+    public DbSet<ValidatorCumulativeEmissionHistory> ValidatorCumulativeEmissionHistory => Set<ValidatorCumulativeEmissionHistory>();
 
     public DbSet<NonFungibleSchemaHistory> NonFungibleSchemaHistory => Set<NonFungibleSchemaHistory>();
 
@@ -206,7 +206,6 @@ internal abstract class CommonDbContext : DbContext
         HookupPendingTransactions(modelBuilder);
         HookupDefinitions(modelBuilder);
         HookupHistory(modelBuilder);
-        HookupStatistics(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -603,13 +602,9 @@ internal abstract class CommonDbContext : DbContext
             .Entity<AccountAuthorizedResourceBadgeDepositorEntryHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion })
             .HasFilter("discriminator = 'resource'");
-    }
 
-    private static void HookupStatistics(ModelBuilder modelBuilder)
-    {
         modelBuilder
-            .Entity<ValidatorEmissionStatistics>()
-            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber })
-            .IncludeProperties(e => new { e.ProposalsMade, e.ProposalsMissed });
+            .Entity<ValidatorCumulativeEmissionHistory>()
+            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
     }
 }
