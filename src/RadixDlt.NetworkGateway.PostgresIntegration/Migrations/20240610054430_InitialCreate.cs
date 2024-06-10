@@ -837,23 +837,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "validator_emission_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    epoch_number = table.Column<long>(type: "bigint", nullable: false),
-                    proposals_made = table.Column<long>(type: "bigint", nullable: false),
-                    proposals_missed = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_validator_emission_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "validator_public_key_history",
                 columns: table => new
                 {
@@ -1268,11 +1251,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "validator_entity_id", "epoch_number" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_validator_emission_history_validator_entity_id_epoch_number",
-                table: "validator_emission_history",
-                columns: new[] { "validator_entity_id", "epoch_number" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_validator_public_key_history_validator_entity_id_from_state~",
                 table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "from_state_version" });
@@ -1408,9 +1386,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "validator_cumulative_emission_history");
-
-            migrationBuilder.DropTable(
-                name: "validator_emission_history");
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");

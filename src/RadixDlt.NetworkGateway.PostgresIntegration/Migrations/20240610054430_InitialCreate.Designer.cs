@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240529085619_InitialCreate")]
+    [Migration("20240610054430_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1752,42 +1752,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("ValidatorEntityId", "EpochNumber");
 
                     b.ToTable("validator_cumulative_emission_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorEmissionHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("EpochNumber")
-                        .HasColumnType("bigint")
-                        .HasColumnName("epoch_number");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long>("ProposalsMade")
-                        .HasColumnType("bigint")
-                        .HasColumnName("proposals_made");
-
-                    b.Property<long>("ProposalsMissed")
-                        .HasColumnType("bigint")
-                        .HasColumnName("proposals_missed");
-
-                    b.Property<long>("ValidatorEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_entity_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ValidatorEntityId", "EpochNumber");
-
-                    b.ToTable("validator_emission_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorPublicKeyHistory", b =>

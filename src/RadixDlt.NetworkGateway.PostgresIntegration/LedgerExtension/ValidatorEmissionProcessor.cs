@@ -75,11 +75,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal class ValidatorEmissionProcessor
 {
+    private record Emission(long FromStateVersion, long ValidatorEntityId, long EpochNumber, long ProposalsMade, long ProposalsMissed);
+
     private readonly ProcessorContext _context;
 
     private Dictionary<long, ValidatorCumulativeEmissionHistory> _mostRecentCumulativeEmissions = new();
 
-    private List<ValidatorEmissionHistory> _emissionsToAdd = new();
+    private List<Emission> _emissions = new();
     private List<ValidatorCumulativeEmissionHistory> _cumulativeEmissionsToAdd = new();
 
     public ValidatorEmissionProcessor(ProcessorContext context)
@@ -91,15 +93,12 @@ internal class ValidatorEmissionProcessor
     {
         if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
         {
-            _emissionsToAdd.Add(new ValidatorEmissionHistory
-            {
-                Id = _context.Sequences.ValidatorEmissionHistorySequence++,
-                FromStateVersion = stateVersion,
-                ValidatorEntityId = eventEmitterEntity.DatabaseId,
-                EpochNumber = (long)validatorUptimeEvent.epoch,
-                ProposalsMade = (long)validatorUptimeEvent.proposalsMade,
-                ProposalsMissed = (long)validatorUptimeEvent.proposalsMissed,
-            });
+            _emissions.Add(new Emission(
+                stateVersion,
+                eventEmitterEntity.DatabaseId,
+                (long)validatorUptimeEvent.epoch,
+                (long)validatorUptimeEvent.proposalsMade,
+                (long)validatorUptimeEvent.proposalsMissed));
         }
     }
 
@@ -110,7 +109,7 @@ internal class ValidatorEmissionProcessor
 
     public void ProcessChanges()
     {
-        foreach (var emission in _emissionsToAdd)
+        foreach (var emission in _emissions)
         {
             var proposalsMade = 0L;
             var proposalsMissed = 0L;
@@ -147,7 +146,6 @@ internal class ValidatorEmissionProcessor
     {
         var rowsInserted = 0;
 
-        rowsInserted += await CopyEmissionHistory();
         rowsInserted += await CopyCumulativeEmissionHistory();
 
         return rowsInserted;
@@ -155,7 +153,7 @@ internal class ValidatorEmissionProcessor
 
     private async Task<IDictionary<long, ValidatorCumulativeEmissionHistory>> MostRecentCumulativeEmissions()
     {
-        var validatorEntityIds = _emissionsToAdd.Select(e => e.ValidatorEntityId).ToHashSet().ToList();
+        var validatorEntityIds = _emissions.Select(e => e.ValidatorEntityId).ToHashSet().ToList();
 
         if (!validatorEntityIds.Any())
         {
@@ -178,19 +176,6 @@ INNER JOIN LATERAL (
 ) vceh ON true;",
             e => e.ValidatorEntityId);
     }
-
-    private Task<int> CopyEmissionHistory() => _context.WriteHelper.Copy(
-        _emissionsToAdd,
-        "COPY validator_emission_history (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)",
-        async (writer, e, token) =>
-        {
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ValidatorEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EpochNumber, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ProposalsMade, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ProposalsMissed, NpgsqlDbType.Bigint, token);
-        });
 
     private Task<int> CopyCumulativeEmissionHistory() => _context.WriteHelper.Copy(
         _cumulativeEmissionsToAdd,

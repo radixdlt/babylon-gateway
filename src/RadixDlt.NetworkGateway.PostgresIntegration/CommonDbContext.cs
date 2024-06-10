@@ -161,8 +161,6 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
 
-    public DbSet<ValidatorEmissionHistory> ValidatorEmissionHistory => Set<ValidatorEmissionHistory>();
-
     public DbSet<ValidatorCumulativeEmissionHistory> ValidatorCumulativeEmissionHistory => Set<ValidatorCumulativeEmissionHistory>();
 
     public DbSet<NonFungibleSchemaHistory> NonFungibleSchemaHistory => Set<NonFungibleSchemaHistory>();
@@ -604,10 +602,6 @@ internal abstract class CommonDbContext : DbContext
             .Entity<AccountAuthorizedResourceBadgeDepositorEntryHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion })
             .HasFilter("discriminator = 'resource'");
-
-        modelBuilder
-            .Entity<ValidatorEmissionHistory>()
-            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
 
         modelBuilder
             .Entity<ValidatorCumulativeEmissionHistory>()

@@ -5,10 +5,7 @@ Release built: _not released yet_
 
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
-- Reworked validator emissions:
-  - Renamed `validator_emission_statistics` table to `validator_emission_history`.
-  - Dropped `INCLUDE(proposals_made, proposals_missed)` from the indices in the table above as they're no longer needed.
-  - Added `validator_cumulative_emission_history` table containing cumulative values from the `validator_emission_history` table.
+- Replaced per-epoch validator emissions (`validator_emission_statistics` table) with their cumulative statistics (`validator_cumulative_emission_history` table).
 
 ## 1.6.1
 Release built: 21.05.2024
