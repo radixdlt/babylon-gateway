@@ -1900,6 +1900,31 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /statistics/page/resource-owners/:
+    post:
+      operationId: ResourceOwnersPage
+      summary: Get Resource Owners Page
+      description: |
+        Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending.
+      tags:
+        - Statistics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourceOwnersRequest"
+      responses:
+        "200":
+          description: Validators Uptime
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceOwnersResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+
 components:
   responses:
     ErrorResponse:
@@ -3114,6 +3139,63 @@ components:
           description: number of epochs validator was active in.
           type: integer
           format: int64
+
+    ResourceOwnersCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                 $ref: "#/components/schemas/ResourceOwnersCollectionItem"
+
+    ResourceOwnersResourceType:
+      type: string
+      enum:
+        - FungibleResource
+        - NonFungibleResource
+    ResourceOwnersCollectionItem:
+      type: object
+      required:
+        - type
+        - owner_address
+      properties:
+        type:
+          $ref: "#/components/schemas/ResourceOwnersResourceType"
+        owner_address:
+          $ref: "#/components/schemas/Address"
+      discriminator:
+        propertyName: type
+        mapping:
+          # Must match ResourceOwnersResourceType
+          FungibleResource: "#/components/schemas/ResourceOwnersCollectionFungibleResourceItem"
+          NonFungibleResource: "#/components/schemas/ResourceOwnersCollectionNonFungibleResourceItem"
+
+    ResourceOwnersCollectionFungibleResourceItem:
+      allOf:
+        - $ref: "#/components/schemas/ResourceOwnersCollectionItem"
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              $ref: "#/components/schemas/BigDecimal"
+
+
+    ResourceOwnersCollectionNonFungibleResourceItem:
+      allOf:
+        - $ref: "#/components/schemas/ResourceOwnersCollectionItem"
+        - type: object
+          required:
+            - non_fungible_ids_count
+          properties:
+            non_fungible_ids_count:
+              type: integer
+              format: int64
+
 
     ValidatorCollection:
       allOf:
@@ -4893,6 +4975,23 @@ components:
           properties:
             validators:
               $ref: "#/components/schemas/ValidatorUptimeCollection"
+
+    ResourceOwnersRequest:
+      allOf:
+      - $ref: "#/components/schemas/CursorLimitMixin"
+      - type: object
+        properties:
+          resource_address:
+            $ref: "#/components/schemas/Address"
+
+    ResourceOwnersResponse:
+      allOf:
+        - type: object
+          required:
+            - owners
+          properties:
+            owners:
+              $ref: "#/components/schemas/ResourceOwnersCollection"
 
     #
     # Errors
