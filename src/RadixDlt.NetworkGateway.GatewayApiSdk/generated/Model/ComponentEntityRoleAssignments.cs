@@ -103,9 +103,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignments" /> class.
         /// </summary>
-        /// <param name="owner">This type is defined in the Core API as &#x60;OwnerRole&#x60;. See the Core API documentation for more details.  (required).</param>
+        /// <param name="owner">owner (required).</param>
         /// <param name="entries">entries (required).</param>
-        public ComponentEntityRoleAssignments(Object owner = default(Object), List<ComponentEntityRoleAssignmentEntry> entries = default(List<ComponentEntityRoleAssignmentEntry>))
+        public ComponentEntityRoleAssignments(CaOwnerRole owner = default(CaOwnerRole), List<ComponentEntityRoleAssignmentEntry> entries = default(List<ComponentEntityRoleAssignmentEntry>))
         {
             // to ensure "owner" is required (not null)
             if (owner == null)
@@ -122,11 +122,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;OwnerRole&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets Owner
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;OwnerRole&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "owner", IsRequired = true, EmitDefaultValue = true)]
-        public Object Owner { get; set; }
+        public CaOwnerRole Owner { get; set; }
 
         /// <summary>
         /// Gets or Sets Entries

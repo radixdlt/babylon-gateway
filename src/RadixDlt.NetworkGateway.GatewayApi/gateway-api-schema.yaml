@@ -2384,22 +2384,18 @@ components:
         version:
           type: string
         definition:
-          type: object
-          description: |
-            This type is defined in the Core API as `BlueprintDefinition`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaBlueprintDefinition"
         dependant_entities:
           type: array
           items:
             $ref: "#/components/schemas/Address"
         auth_template:
-          type: object
-          description: |
-            This type is defined in the Core API as `AuthConfig`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaAuthConfig"
         auth_template_is_locked:
           type: boolean
           nullable: true
         royalty_config:
-          $ref: "#/components/schemas/BlueprintRoyaltyConfig"
+          $ref: "coreapi.yaml#/components/schemas/CaBlueprintRoyaltyConfig"
         royalty_config_is_locked:
           type: boolean
           nullable: true
@@ -2436,9 +2432,7 @@ components:
         - entries
       properties:
         owner:
-          type: object
-          description: |
-            This type is defined in the Core API as `OwnerRole`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaOwnerRole"
         entries:
           type: array
           items:
@@ -2460,9 +2454,7 @@ components:
             resolution:
               $ref: "#/components/schemas/RoleAssignmentResolution"
             explicit_rule:
-              type: object
-              description: |
-                This type is defined in the Core API as `AccessRule`. See the Core API documentation for more details.
+              $ref: "coreapi.yaml#/components/schemas/CaAccessRule"
         updater_roles:
           type: array
           items:
@@ -2903,10 +2895,7 @@ components:
           items:
             $ref: "#/components/schemas/ManifestClass"
         message:
-          type: object
-          description: |
-            The optional transaction message.
-            This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaTransactionMessage"
         balance_changes:
           $ref: "#/components/schemas/TransactionBalanceChanges"
 
@@ -2959,43 +2948,39 @@ components:
 
     TransactionReceipt:
       type: object
+      description: The transaction execution receipt
+      required:
+        - status
+        - state_updates
+        - fee_summary
+        - costing_parameters
       properties:
         status:
           $ref: "#/components/schemas/TransactionStatus"
         fee_summary:
-          type: object
-          description: |
-            This type is defined in the Core API as `FeeSummary`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaFeeSummary"
         costing_parameters:
-          type: object
-        fee_destination:
-          type: object
-          description: |
-            This type is defined in the Core API as `FeeDestination`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaCostingParameters"
         fee_source:
-          type: object
-          description: |
-            This type is defined in the Core API as `FeeSource`. See the Core API documentation for more details.
+          description: Only present if the `status` is not `Rejected`.
+          $ref: "coreapi.yaml#/components/schemas/CaFeeSource"
+        fee_destination:
+          description: Only present if the `status` is not `Rejected`.
+          $ref: "coreapi.yaml#/components/schemas/CaFeeDestination"
         state_updates:
-          type: object
-          description: |
-            This type is defined in the Core API as `StateUpdates`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaStateUpdates"
         next_epoch:
-          type: object
-          description: |
-            Information (number and active validator list) about new epoch if occured.
-            This type is defined in the Core API as `NextEpoch`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaNextEpoch"
         output:
-          type: object
-          description: |
-            The manifest line-by-line engine return data (only present if `status` is `CommittedSuccess`).
-            This type is defined in the Core API as `SborData`. See the Core API documentation for more details.
+          type: array
+          description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`)
+          items:
+            $ref: "coreapi.yaml#/components/schemas/CaSborData"
         events:
           description: Events emitted by a transaction.
           type: array
           items:
             $ref: "#/components/schemas/EventsItem"
-
         error_message:
           description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
@@ -3011,9 +2996,7 @@ components:
         name:
           type: string
         emitter:
-          type: object
-          description: |
-            This type is defined in the Core API as `EventEmitterIdentifier`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaEventEmitterIdentifier"
         data:
           $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
 
@@ -3097,11 +3080,7 @@ components:
         pending_owner_stake_unit_unlock_vault:
           $ref: "#/components/schemas/ValidatorVaultItem"
         state:
-          type: object
-          nullable: true
-          description: |
-            Validator inner state representation.
-            This type is defined in the Core API as `ValidatorFieldStateValue`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaValidatorFieldStateValue"
         active_in_epoch:
           $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpoch"
         metadata:
@@ -3377,15 +3356,11 @@ components:
         encoded_receipt:
           $ref: "#/components/schemas/HexString"
         receipt:
-          type: object
-          description: |
-            This type is defined in the Core API as `TransactionReceipt`. See the Core API documentation for more details.
+          $ref: "coreapi.yaml#/components/schemas/CaTransactionReceipt"
         resource_changes:
           type: array
           items:
-            type: object
-            description: |
-              This type is defined in the Core API as `InstructionResourceChanges`. See the Core API documentation for more details.
+            $ref: "coreapi.yaml#/components/schemas/CaInstructionResourceChanges"
         logs:
           type: array
           items:
@@ -4069,6 +4044,7 @@ components:
               type: string
             blueprint_version:
               type: string
+            # TODO use somehow strongly-typed model
             state:
               type: object
               description: |
@@ -4081,7 +4057,7 @@ components:
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
             royalty_config:
-              $ref: "#/components/schemas/ComponentRoyaltyConfig"
+              $ref: "coreapi.yaml#/components/schemas/CaBlueprintRoyaltyConfig"
 
     StateAccountResourcePreferencesPageRequest:
       allOf:
@@ -5665,65 +5641,3 @@ components:
           properties:
             value:
               type: string
-
-    #
-    # Royalties (partially copied from Core API)
-    #
-
-    BlueprintRoyaltyConfig:
-      type: object
-      required:
-        - is_enabled
-      properties:
-        is_enabled:
-          type: boolean
-        method_rules:
-          description: The royalty rules by method. The array is only present if royalties are enabled.
-          type: array
-          items:
-            $ref: "#/components/schemas/BlueprintMethodRoyalty"
-    BlueprintMethodRoyalty:
-      type: object
-      required:
-        - method_name
-      properties:
-        method_name:
-          type: string
-        royalty_amount:
-          description: The due royalty; missing field denotes a free method.
-          $ref: "#/components/schemas/RoyaltyAmount"
-    ComponentRoyaltyConfig:
-      type: object
-      required:
-        - is_enabled
-      properties:
-        is_enabled:
-          type: boolean
-        method_rules:
-          description: The royalty rules by method. The array is only present if royalties are enabled.
-          type: array
-          items:
-            $ref: "#/components/schemas/ComponentMethodRoyalty"
-    ComponentMethodRoyalty:
-      type: object
-      required:
-        - method_name
-      properties:
-        method_name:
-          type: string
-        royalty_amount:
-          description: The due royalty; missing field denotes a free method.
-          $ref: "#/components/schemas/RoyaltyAmount"
-    RoyaltyAmount:
-      type: object
-      required:
-        - amount
-        - unit
-      properties:
-        amount:
-          $ref: "#/components/schemas/BigDecimal"
-        unit:
-          type: string
-          enum:
-            - XRD
-            - USD

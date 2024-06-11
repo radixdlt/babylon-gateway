@@ -104,10 +104,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionPreviewResponse" /> class.
         /// </summary>
         /// <param name="encodedReceipt">Hex-encoded binary blob. (required).</param>
-        /// <param name="receipt">This type is defined in the Core API as &#x60;TransactionReceipt&#x60;. See the Core API documentation for more details.  (required).</param>
+        /// <param name="receipt">receipt (required).</param>
         /// <param name="resourceChanges">resourceChanges (required).</param>
         /// <param name="logs">logs (required).</param>
-        public TransactionPreviewResponse(string encodedReceipt = default(string), Object receipt = default(Object), List<Object> resourceChanges = default(List<Object>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
+        public TransactionPreviewResponse(string encodedReceipt = default(string), CaTransactionReceipt receipt = default(CaTransactionReceipt), List<CaInstructionResourceChanges> resourceChanges = default(List<CaInstructionResourceChanges>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
         {
             // to ensure "encodedReceipt" is required (not null)
             if (encodedReceipt == null)
@@ -143,17 +143,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string EncodedReceipt { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;TransactionReceipt&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets Receipt
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;TransactionReceipt&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public Object Receipt { get; set; }
+        public CaTransactionReceipt Receipt { get; set; }
 
         /// <summary>
         /// Gets or Sets ResourceChanges
         /// </summary>
         [DataMember(Name = "resource_changes", IsRequired = true, EmitDefaultValue = true)]
-        public List<Object> ResourceChanges { get; set; }
+        public List<CaInstructionResourceChanges> ResourceChanges { get; set; }
 
         /// <summary>
         /// Gets or Sets Logs

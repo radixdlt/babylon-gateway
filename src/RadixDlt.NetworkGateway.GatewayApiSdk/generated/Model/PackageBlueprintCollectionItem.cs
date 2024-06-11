@@ -105,13 +105,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="name">name (required).</param>
         /// <param name="version">version (required).</param>
-        /// <param name="definition">This type is defined in the Core API as &#x60;BlueprintDefinition&#x60;. See the Core API documentation for more details.  (required).</param>
+        /// <param name="definition">definition (required).</param>
         /// <param name="dependantEntities">dependantEntities.</param>
-        /// <param name="authTemplate">This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. .</param>
+        /// <param name="authTemplate">authTemplate.</param>
         /// <param name="authTemplateIsLocked">authTemplateIsLocked.</param>
         /// <param name="royaltyConfig">royaltyConfig.</param>
         /// <param name="royaltyConfigIsLocked">royaltyConfigIsLocked.</param>
-        public PackageBlueprintCollectionItem(string name = default(string), string version = default(string), Object definition = default(Object), List<string> dependantEntities = default(List<string>), Object authTemplate = default(Object), bool? authTemplateIsLocked = default(bool?), BlueprintRoyaltyConfig royaltyConfig = default(BlueprintRoyaltyConfig), bool? royaltyConfigIsLocked = default(bool?))
+        public PackageBlueprintCollectionItem(string name = default(string), string version = default(string), CaBlueprintDefinition definition = default(CaBlueprintDefinition), List<string> dependantEntities = default(List<string>), CaAuthConfig authTemplate = default(CaAuthConfig), bool? authTemplateIsLocked = default(bool?), CaBlueprintRoyaltyConfig royaltyConfig = default(CaBlueprintRoyaltyConfig), bool? royaltyConfigIsLocked = default(bool?))
         {
             // to ensure "name" is required (not null)
             if (name == null)
@@ -151,11 +151,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string _Version { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;BlueprintDefinition&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets Definition
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;BlueprintDefinition&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "definition", IsRequired = true, EmitDefaultValue = true)]
-        public Object Definition { get; set; }
+        public CaBlueprintDefinition Definition { get; set; }
 
         /// <summary>
         /// Gets or Sets DependantEntities
@@ -164,11 +163,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<string> DependantEntities { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets AuthTemplate
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;AuthConfig&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "auth_template", EmitDefaultValue = true)]
-        public Object AuthTemplate { get; set; }
+        public CaAuthConfig AuthTemplate { get; set; }
 
         /// <summary>
         /// Gets or Sets AuthTemplateIsLocked
@@ -180,7 +178,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets RoyaltyConfig
         /// </summary>
         [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
-        public BlueprintRoyaltyConfig RoyaltyConfig { get; set; }
+        public CaBlueprintRoyaltyConfig RoyaltyConfig { get; set; }
 
         /// <summary>
         /// Gets or Sets RoyaltyConfigIsLocked
