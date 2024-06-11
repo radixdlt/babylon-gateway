@@ -92,6 +92,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Get Resource Owners Page
+        /// </summary>
+        /// <remarks>
+        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="resourceOwnersRequest"></param>
+        /// <returns>ResourceOwnersResponse</returns>
+        ResourceOwnersResponse ResourceOwnersPage(ResourceOwnersRequest resourceOwnersRequest);
+
+        /// <summary>
+        /// Get Resource Owners Page
+        /// </summary>
+        /// <remarks>
+        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="resourceOwnersRequest"></param>
+        /// <returns>ApiResponse of ResourceOwnersResponse</returns>
+        ApiResponse<ResourceOwnersResponse> ResourceOwnersPageWithHttpInfo(ResourceOwnersRequest resourceOwnersRequest);
+        /// <summary>
         /// Get Validators Uptime
         /// </summary>
         /// <remarks>
@@ -121,6 +142,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     public interface IStatisticsApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
+        /// <summary>
+        /// Get Resource Owners Page
+        /// </summary>
+        /// <remarks>
+        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="resourceOwnersRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ResourceOwnersResponse</returns>
+        System.Threading.Tasks.Task<ResourceOwnersResponse> ResourceOwnersPageAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Resource Owners Page
+        /// </summary>
+        /// <remarks>
+        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="resourceOwnersRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (ResourceOwnersResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<ResourceOwnersResponse>> ResourceOwnersPageWithHttpInfoAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Validators Uptime
         /// </summary>
@@ -355,6 +399,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
                 return _exceptionFactory;
             }
             set { _exceptionFactory = value; }
+        }
+
+        /// <summary>
+        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="resourceOwnersRequest"></param>
+        /// <returns>ResourceOwnersResponse</returns>
+        public ResourceOwnersResponse ResourceOwnersPage(ResourceOwnersRequest resourceOwnersRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse> localVarResponse = ResourceOwnersPageWithHttpInfo(resourceOwnersRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="resourceOwnersRequest"></param>
+        /// <returns>ApiResponse of ResourceOwnersResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse> ResourceOwnersPageWithHttpInfo(ResourceOwnersRequest resourceOwnersRequest)
+        {
+            // verify the required parameter 'resourceOwnersRequest' is set
+            if (resourceOwnersRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'resourceOwnersRequest' when calling StatisticsApi->ResourceOwnersPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = resourceOwnersRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<ResourceOwnersResponse>("/statistics/page/resource-owners/", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("ResourceOwnersPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="resourceOwnersRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ResourceOwnersResponse</returns>
+        public async System.Threading.Tasks.Task<ResourceOwnersResponse> ResourceOwnersPageAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse> localVarResponse = await ResourceOwnersPageWithHttpInfoAsync(resourceOwnersRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="resourceOwnersRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (ResourceOwnersResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse>> ResourceOwnersPageWithHttpInfoAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'resourceOwnersRequest' is set
+            if (resourceOwnersRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'resourceOwnersRequest' when calling StatisticsApi->ResourceOwnersPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = resourceOwnersRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<ResourceOwnersResponse>("/statistics/page/resource-owners/", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("ResourceOwnersPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
         }
 
         /// <summary>
