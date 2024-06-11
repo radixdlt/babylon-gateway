@@ -103,8 +103,7 @@ public static class ServiceCollectionExtensions
             .AddValidatableOptionsAtSection<MonitoringOptions, MonitoringOptionsValidator>("DataAggregator:Monitoring")
             .AddValidatableOptionsAtSection<MempoolOptions, MempoolOptionsValidator>("DataAggregator:Mempool")
             .AddValidatableOptionsAtSection<NodeWorkersOptions, NodeWorkersOptionsValidator>("DataAggregator:NodeWorkers")
-            .AddValidatableOptionsAtSection<LedgerConfirmationOptions, LedgerConfirmationOptionsValidator>("DataAggregator:LedgerConfirmation")
-            .AddValidatableOptionsAtSection<TransactionAssertionsOptions, TransactionAssertionsOptionsValidator>("DataAggregator:TransactionAssertions");
+            .AddValidatableOptionsAtSection<LedgerConfirmationOptions, LedgerConfirmationOptionsValidator>("DataAggregator:LedgerConfirmation");
 
         // Globally-Scoped services
         AddGlobalScopedServices(services);

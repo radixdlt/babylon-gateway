@@ -72,34 +72,11 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 public sealed record LedgerConfirmationOptions
 {
     /// <summary>
-    /// Gets or sets CommitRequiresNodeQuorumTrustProportion.
-    /// Requires at least this proportion of enabled nodes to commit (by trust weighting).
-    /// </summary>
-    [ConfigurationKeyName("CommitRequiresNodeQuorumTrustProportion")]
-    public decimal CommitRequiresNodeQuorumTrustProportion { get; set; } = 0.51m;
-
-    /// <summary>
-    /// Gets or sets OnlyUseSufficientlySyncedUpNodesForQuorumCalculation.
-    /// If enabled, the quorum calculation only takes account of nodes which are considered "sufficiently synced up".
-    /// </summary>
-    /// <seealso cref="SufficientlySyncedStateVersionThreshold"/>
-    [ConfigurationKeyName("OnlyUseSufficientlySyncedUpNodesForQuorumCalculation")]
-    public bool OnlyUseSufficientlySyncedUpNodesForQuorumCalculation { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets SufficientlySyncedThreshold.
-    /// A node is considered sufficiently synced up if its reported top of ledger state version is with this
-    /// many transactions of the top of the db ledger (or ahead of the db ledger).
-    /// </summary>
-    [ConfigurationKeyName("SufficientlySyncedStateVersionThreshold")]
-    public long SufficientlySyncedStateVersionThreshold { get; set; } = 1000;
-
-    /// <summary>
     /// Gets or sets MaxCommitBatchSize.
     /// The maximum batch to send to the ledger extension service for committing.
     /// </summary>
     [ConfigurationKeyName("MaxCommitBatchSize")]
-    public long MaxCommitBatchSize { get; set; } = 300;
+    public long MaxCommitBatchSize { get; set; } = 1000;
 
     /// <summary>
     /// Gets or sets MinCommitBatchSize.
@@ -120,7 +97,7 @@ public sealed record LedgerConfirmationOptions
     /// or equal to MaxCommitBatchSize.
     /// </summary>
     [ConfigurationKeyName("LargeBatchSizeToAddDelay")]
-    public long LargeBatchSizeToAddDelay { get; set; } = 100;
+    public long LargeBatchSizeToAddDelay { get; set; } = 500;
 
     /// <summary>
     /// Gets or sets DelayBetweenLargeBatchesMilliseconds.
@@ -164,17 +141,14 @@ internal class LedgerConfirmationOptionsValidator : AbstractOptionsValidator<Led
 {
     public LedgerConfirmationOptionsValidator()
     {
-        RuleFor(x => x.CommitRequiresNodeQuorumTrustProportion).GreaterThan(0);
-        RuleFor(x => x.SufficientlySyncedStateVersionThreshold).GreaterThan(0);
         RuleFor(x => x.MaxCommitBatchSize).GreaterThan(0);
         RuleFor(x => x.MinCommitBatchSize).GreaterThan(0);
-
-        RuleFor(x => x.MinCommitBatchSize).LessThanOrEqualTo(x => x.MaxCommitBatchSize)
+        RuleFor(x => x.MinCommitBatchSize)
+            .LessThanOrEqualTo(x => x.MaxCommitBatchSize)
             .WithMessage(x => $"MinCommitBatchSize is set to: {x.MinCommitBatchSize} but must be lower or equal to MaxCommitBatchSize: {x.MaxCommitBatchSize}");
-
-        RuleFor(x => x.MinCommitBatchSize).LessThanOrEqualTo(x => x.MaxTransactionPipelineSizePerNode)
+        RuleFor(x => x.MinCommitBatchSize)
+            .LessThanOrEqualTo(x => x.MaxTransactionPipelineSizePerNode)
             .WithMessage(x => $"MinCommitBatchSize is set to: {x.MinCommitBatchSize} but must be lower or equal to MaxTransactionPipelineSizePerNode: {x.MaxTransactionPipelineSizePerNode}");
-
         RuleFor(x => x.LargeBatchSizeToAddDelay).GreaterThan(0);
         RuleFor(x => x.MaxTransactionPipelineSizePerNode).GreaterThan(0);
         RuleFor(x => x.MaxCoreApiTransactionBatchSize).GreaterThan(0);
