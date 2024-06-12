@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// The transaction execution receipt
+    /// TransactionReceipt
     /// </summary>
     [DataContract(Name = "TransactionReceipt")]
     public partial class TransactionReceipt : IEquatable<TransactionReceipt>
@@ -110,11 +110,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
         /// </summary>
         /// <param name="status">status (required).</param>
-        /// <param name="feeSummary">feeSummary (required).</param>
-        /// <param name="costingParameters">costingParameters (required).</param>
+        /// <param name="feeSummary">feeSummary.</param>
+        /// <param name="costingParameters">costingParameters.</param>
         /// <param name="feeSource">feeSource.</param>
         /// <param name="feeDestination">feeDestination.</param>
-        /// <param name="stateUpdates">stateUpdates (required).</param>
+        /// <param name="stateUpdates">stateUpdates.</param>
         /// <param name="nextEpoch">nextEpoch.</param>
         /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
         /// <param name="events">Events emitted by a transaction..</param>
@@ -122,26 +122,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TransactionReceipt(TransactionStatus status = default(TransactionStatus), CaFeeSummary feeSummary = default(CaFeeSummary), CaCostingParameters costingParameters = default(CaCostingParameters), CaFeeSource feeSource = default(CaFeeSource), CaFeeDestination feeDestination = default(CaFeeDestination), CaStateUpdates stateUpdates = default(CaStateUpdates), CaNextEpoch nextEpoch = default(CaNextEpoch), List<CaSborData> output = default(List<CaSborData>), List<EventsItem> events = default(List<EventsItem>), string errorMessage = default(string))
         {
             this.Status = status;
-            // to ensure "feeSummary" is required (not null)
-            if (feeSummary == null)
-            {
-                throw new ArgumentNullException("feeSummary is a required property for TransactionReceipt and cannot be null");
-            }
             this.FeeSummary = feeSummary;
-            // to ensure "costingParameters" is required (not null)
-            if (costingParameters == null)
-            {
-                throw new ArgumentNullException("costingParameters is a required property for TransactionReceipt and cannot be null");
-            }
             this.CostingParameters = costingParameters;
-            // to ensure "stateUpdates" is required (not null)
-            if (stateUpdates == null)
-            {
-                throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
-            }
-            this.StateUpdates = stateUpdates;
             this.FeeSource = feeSource;
             this.FeeDestination = feeDestination;
+            this.StateUpdates = stateUpdates;
             this.NextEpoch = nextEpoch;
             this.Output = output;
             this.Events = events;
@@ -151,13 +136,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets FeeSummary
         /// </summary>
-        [DataMember(Name = "fee_summary", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
         public CaFeeSummary FeeSummary { get; set; }
 
         /// <summary>
         /// Gets or Sets CostingParameters
         /// </summary>
-        [DataMember(Name = "costing_parameters", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "costing_parameters", EmitDefaultValue = true)]
         public CaCostingParameters CostingParameters { get; set; }
 
         /// <summary>
@@ -175,7 +160,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets StateUpdates
         /// </summary>
-        [DataMember(Name = "state_updates", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "state_updates", EmitDefaultValue = true)]
         public CaStateUpdates StateUpdates { get; set; }
 
         /// <summary>

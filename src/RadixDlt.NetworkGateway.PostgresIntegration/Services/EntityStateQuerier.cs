@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.CoreApiMapping;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -920,7 +921,7 @@ INNER JOIN LATERAL (
                     new GatewayModel.ValidatorVaultItem(pendingXrdWithdrawVaultVault.Balance.ToString(), pendingXrdWithdrawVaultVault.FromStateVersion, vaultAddresses[pendingXrdWithdrawVaultVault.VaultEntityId]),
                     new GatewayModel.ValidatorVaultItem(lockedOwnerStakeUnitVault.Balance.ToString(), lockedOwnerStakeUnitVault.FromStateVersion, vaultAddresses[lockedOwnerStakeUnitVault.VaultEntityId]),
                     new GatewayModel.ValidatorVaultItem(pendingOwnerStakeUnitUnlockVault.Balance.ToString(), pendingOwnerStakeUnitUnlockVault.FromStateVersion, vaultAddresses[pendingOwnerStakeUnitUnlockVault.VaultEntityId]),
-                    new JRaw(stateHistory[v.Id].JsonState),
+                    CoreModelMapping.CaValidatorFieldStateValue(stateHistory[v.Id].JsonState),
                     activeInEpoch,
                     metadataById[v.Id],
                     effectiveFeeFactor

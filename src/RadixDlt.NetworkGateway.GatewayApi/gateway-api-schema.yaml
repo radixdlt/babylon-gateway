@@ -1,3 +1,5 @@
+# TODO does not account for Core SDK specific nonreq_nonnull_pre_processing and nonreq_nonnull_post_processing
+
 openapi: 3.0.0
 info:
   version: v1.6.1
@@ -2948,12 +2950,8 @@ components:
 
     TransactionReceipt:
       type: object
-      description: The transaction execution receipt
       required:
         - status
-        - state_updates
-        - fee_summary
-        - costing_parameters
       properties:
         status:
           $ref: "#/components/schemas/TransactionStatus"

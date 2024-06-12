@@ -62,11 +62,10 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.CoreApiMapping;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
@@ -156,8 +155,8 @@ internal static class GatewayModelExtensions
         string? payloadHash = null;
         string? intentHash = null;
         string? rawHex = null;
-        JRaw? message = null;
         string? manifestInstructions = null;
+        GatewayModel.CaTransactionMessage? message = null;
         List<GatewayModel.ManifestClass>? manifestClasses = null;
 
         if (lt is UserLedgerTransaction ult)
@@ -165,24 +164,22 @@ internal static class GatewayModelExtensions
             payloadHash = ult.PayloadHash;
             intentHash = ult.IntentHash;
             rawHex = optIns.RawHex ? ult.RawPayload.ToHex() : null;
-            message = ult.Message != null ? new JRaw(ult.Message) : null;
             manifestInstructions = optIns.ManifestInstructions ? ult.ManifestInstructions : null;
+            message = ult.Message != null ? CoreModelMapping.CaTransactionMessage(ult.Message) : null;
             manifestClasses = ult.ManifestClasses.Select(mc => mc.ToGatewayModel()).ToList();
         }
 
-        var receipt = new GatewayModel.TransactionReceipt
-        {
-            ErrorMessage = lt.EngineReceipt.ErrorMessage,
-            Status = ToGatewayModel(lt.EngineReceipt.Status),
-            Output = optIns.ReceiptOutput && lt.EngineReceipt.Output != null ? new JRaw(lt.EngineReceipt.Output) : null,
-            FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.EngineReceipt.FeeSummary) : null,
-            FeeDestination = optIns.ReceiptFeeDestination && lt.EngineReceipt.FeeDestination != null ? new JRaw(lt.EngineReceipt.FeeDestination) : null,
-            FeeSource = optIns.ReceiptFeeSource && lt.EngineReceipt.FeeSource != null ? new JRaw(lt.EngineReceipt.FeeSource) : null,
-            CostingParameters = optIns.ReceiptCostingParameters ? new JRaw(lt.EngineReceipt.CostingParameters) : null,
-            NextEpoch = lt.EngineReceipt.NextEpoch != null ? new JRaw(lt.EngineReceipt.NextEpoch) : null,
-            StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.EngineReceipt.StateUpdates) : null,
-            Events = optIns.ReceiptEvents ? events?.Select(x => new GatewayModel.EventsItem(x.Name, new JRaw(x.Emitter), x.Data)).ToList() : null,
-        };
+        var receipt = new GatewayModel.TransactionReceipt(
+            status: lt.EngineReceipt.Status.ToGatewayModel(),
+            feeSummary: optIns.ReceiptFeeSummary ? CoreModelMapping.CaFeeSummary(lt.EngineReceipt.FeeSummary) : null,
+            costingParameters: optIns.ReceiptCostingParameters ? CoreModelMapping.CaCostingParameters(lt.EngineReceipt.CostingParameters) : null,
+            feeSource: optIns.ReceiptFeeSource && lt.EngineReceipt.FeeSource != null ? CoreModelMapping.CaFeeSource(lt.EngineReceipt.FeeSource) : null,
+            feeDestination: optIns.ReceiptFeeDestination && lt.EngineReceipt.FeeDestination != null ? CoreModelMapping.CaFeeDestination(lt.EngineReceipt.FeeDestination) : null,
+            stateUpdates: optIns.ReceiptStateChanges ? CoreModelMapping.CaStateUpdates(lt.EngineReceipt.StateUpdates) : null,
+            nextEpoch: lt.EngineReceipt.NextEpoch != null ? CoreModelMapping.CaNextEpoch(lt.EngineReceipt.NextEpoch) : null,
+            output: optIns.ReceiptOutput && lt.EngineReceipt.Output != null ? CoreModelMapping.CaListSborData(lt.EngineReceipt.Output) : null,
+            events: optIns.ReceiptEvents ? events?.Select(x => new GatewayModel.EventsItem(x.Name, CoreModelMapping.CaEventEmitterIdentifier(x.Emitter), x.Data)).ToList() : null,
+            errorMessage: lt.EngineReceipt.ErrorMessage);
 
         return new GatewayModel.CommittedTransactionInfo(
             stateVersion: lt.StateVersion,
@@ -237,11 +234,11 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.ComponentRoyaltyConfig ToGatewayModel(this ComponentMethodRoyaltyEntryHistory[]? input)
+    public static GatewayModel.CaBlueprintRoyaltyConfig ToGatewayModel(this ComponentMethodRoyaltyEntryHistory[]? input)
     {
-        return new GatewayModel.ComponentRoyaltyConfig(
+        return new GatewayModel.CaBlueprintRoyaltyConfig(
             isEnabled: input != null,
-            methodRules: input?.Select(e => new GatewayModel.ComponentMethodRoyalty(e.MethodName, TranscodeRoyaltyAmount(e.RoyaltyAmount))).ToList());
+            methodRules: input?.Select(e => new GatewayModel.CaBlueprintMethodRoyalty(e.MethodName, CoreModelMapping.CaRoyaltyAmount(e.RoyaltyAmount))).ToList());
     }
 
     public static GatewayModel.PackageBlueprintCollectionItem ToGatewayModel(this PackageBlueprintHistory input, Dictionary<long, EntityAddress> correlatedAddresses)
@@ -249,11 +246,11 @@ internal static class GatewayModelExtensions
         return new GatewayModel.PackageBlueprintCollectionItem(
             name: input.Name,
             version: input.Version,
-            definition: new JRaw(input.Definition),
+            definition: CoreModelMapping.CaBlueprintDefinition(input.Definition),
             dependantEntities: input.DependantEntityIds?.Select(de => correlatedAddresses[de].ToString()).ToList(),
-            authTemplate: input.AuthTemplate != null ? new JRaw(input.AuthTemplate) : null,
+            authTemplate: CoreModelMapping.CaAuthConfig(input.AuthTemplate),
             authTemplateIsLocked: input.AuthTemplateIsLocked,
-            royaltyConfig: input.RoyaltyConfig != null ? TranscodeBlueprintRoyaltyConfig(input.RoyaltyConfig) : null,
+            royaltyConfig: CoreModelMapping.CaBlueprintRoyaltyConfig(input.RoyaltyConfig),
             royaltyConfigIsLocked: input.RoyaltyConfigIsLocked
         );
     }
@@ -337,23 +334,6 @@ internal static class GatewayModelExtensions
         return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
     }
 
-    private static GatewayModel.RoyaltyAmount? ToGatewayModel(this CoreModel.RoyaltyAmount? input)
-    {
-        if (input == null)
-        {
-            return null;
-        }
-
-        var unit = input.Unit switch
-        {
-            CoreModel.RoyaltyAmount.UnitEnum.XRD => GatewayModel.RoyaltyAmount.UnitEnum.XRD,
-            CoreModel.RoyaltyAmount.UnitEnum.USD => GatewayModel.RoyaltyAmount.UnitEnum.USD,
-            _ => throw new UnreachableException($"Didn't expect {input.Unit} value"),
-        };
-
-        return new GatewayModel.RoyaltyAmount(input.Amount, unit);
-    }
-
     private static GatewayModel.TransactionFungibleFeeBalanceChangeType ToGatewayModel(this CoreModel.LtsFeeFungibleResourceBalanceChangeType input)
     {
         return input switch
@@ -364,41 +344,5 @@ internal static class GatewayModelExtensions
             CoreModel.LtsFeeFungibleResourceBalanceChangeType.RoyaltyDistributed => GatewayModel.TransactionFungibleFeeBalanceChangeType.RoyaltyDistributed,
             _ => throw new UnreachableException($"Didn't expect {input} value"),
         };
-    }
-
-    private static GatewayModel.RoyaltyAmount? TranscodeRoyaltyAmount(string? input)
-    {
-        if (input == null)
-        {
-            return null;
-        }
-
-        return JsonConvert.DeserializeObject<CoreModel.RoyaltyAmount>(input).ToGatewayModel();
-    }
-
-    private static GatewayModel.BlueprintRoyaltyConfig? TranscodeBlueprintRoyaltyConfig(string? input)
-    {
-        if (input == null)
-        {
-            return null;
-        }
-
-        var coreModel = JsonConvert.DeserializeObject<CoreModel.BlueprintRoyaltyConfig>(input);
-
-        if (coreModel == null)
-        {
-            return null;
-        }
-
-        List<GatewayModel.BlueprintMethodRoyalty>? methodRules = null;
-
-        if (coreModel.MethodRules != null)
-        {
-            methodRules = coreModel.MethodRules
-                .Select(mr => new GatewayModel.BlueprintMethodRoyalty(mr.MethodName, mr.RoyaltyAmount.ToGatewayModel()))
-                .ToList();
-        }
-
-        return new GatewayModel.BlueprintRoyaltyConfig(coreModel.IsEnabled, methodRules);
     }
 }
