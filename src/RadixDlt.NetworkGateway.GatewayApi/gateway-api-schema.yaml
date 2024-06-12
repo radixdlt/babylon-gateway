@@ -1,5 +1,3 @@
-# TODO does not account for Core SDK specific nonreq_nonnull_pre_processing and nonreq_nonnull_post_processing
-
 openapi: 3.0.0
 info:
   version: v1.6.1
@@ -4042,20 +4040,22 @@ components:
               type: string
             blueprint_version:
               type: string
-            # TODO use somehow strongly-typed model
             state:
-              type: object
-              description: |
-                A representation of a component's inner state. If this entity is a `GenericComponent`, this field will be in a programmatic JSON
-                structure (you can deserialize it as a `ProgrammaticScryptoSborValue`). Otherwise, for "native" components such as `Account`,
-                `Validator`, `AccessController`, `OneResourcePool`, `TwoResourcePool`, and `MultiResourcePool`, this field will be a
-                custom JSON model defined in the Core API schema.
+              $ref: "#/components/schemas/StateEntityDetailsResponseComponentDetailsState"
             role_assignments:
               $ref: "#/components/schemas/ComponentEntityRoleAssignments"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
             royalty_config:
               $ref: "coreapi.yaml#/components/schemas/CaBlueprintRoyaltyConfig"
+    StateEntityDetailsResponseComponentDetailsState:
+      oneOf:
+        - $ref: "coreapi.yaml#/components/schemas/CaGenericScryptoComponentFieldStateValue"
+        - $ref: "coreapi.yaml#/components/schemas/CaValidatorFieldStateValue"
+        - $ref: "coreapi.yaml#/components/schemas/CaAccessControllerFieldStateValue"
+        - $ref: "coreapi.yaml#/components/schemas/CaOneResourcePoolFieldStateValue"
+        - $ref: "coreapi.yaml#/components/schemas/CaTwoResourcePoolFieldStateValue"
+        - $ref: "coreapi.yaml#/components/schemas/CaMultiResourcePoolFieldStateValue"
 
     StateAccountResourcePreferencesPageRequest:
       allOf:

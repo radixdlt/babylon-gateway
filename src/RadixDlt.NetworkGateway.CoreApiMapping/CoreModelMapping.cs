@@ -168,6 +168,41 @@ public static partial class CoreModelMapping
             : null;
     }
 
+    public static GatewayModel.CaGenericScryptoComponentFieldStateValue? CaGenericScryptoComponentFieldStateValue(string? raw)
+    {
+        return TryDeserialize<CoreModel.GenericScryptoComponentFieldStateValue>(raw, out var source)
+            ? source.ToGatewayCaModel()
+            : null;
+    }
+
+    public static GatewayModel.CaAccessControllerFieldStateValue? CaAccessControllerFieldStateValue(string? raw)
+    {
+        return TryDeserialize<CoreModel.AccessControllerFieldStateValue>(raw, out var source)
+            ? source.ToGatewayCaModel()
+            : null;
+    }
+
+    public static GatewayModel.CaOneResourcePoolFieldStateValue? CaOneResourcePoolFieldStateValue(string? raw)
+    {
+        return TryDeserialize<CoreModel.OneResourcePoolFieldStateValue>(raw, out var source)
+            ? source.ToGatewayCaModel()
+            : null;
+    }
+
+    public static GatewayModel.CaTwoResourcePoolFieldStateValue? CaTwoResourcePoolFieldStateValue(string? raw)
+    {
+        return TryDeserialize<CoreModel.TwoResourcePoolFieldStateValue>(raw, out var source)
+            ? source.ToGatewayCaModel()
+            : null;
+    }
+
+    public static GatewayModel.CaMultiResourcePoolFieldStateValue? CaMultiResourcePoolFieldStateValue(string? raw)
+    {
+        return TryDeserialize<CoreModel.MultiResourcePoolFieldStateValue>(raw, out var source)
+            ? source.ToGatewayCaModel()
+            : null;
+    }
+
     public static GatewayModel.CaOwnerRole? CaOwnerRole(string? raw)
     {
         return TryDeserialize<CoreModel.OwnerRole>(raw, out var source)
@@ -283,6 +318,16 @@ public static partial class CoreModelMapping
     private static partial GatewayModel.CaBlueprintRoyaltyConfig ToGatewayCaModel(this CoreModel.BlueprintRoyaltyConfig source);
 
     private static partial GatewayModel.CaValidatorFieldStateValue ToGatewayCaModel(this CoreModel.ValidatorFieldStateValue source);
+
+    private static partial GatewayModel.CaGenericScryptoComponentFieldStateValue ToGatewayCaModel(this CoreModel.GenericScryptoComponentFieldStateValue source);
+
+    private static partial GatewayModel.CaAccessControllerFieldStateValue ToGatewayCaModel(this CoreModel.AccessControllerFieldStateValue source);
+
+    private static partial GatewayModel.CaOneResourcePoolFieldStateValue ToGatewayCaModel(this CoreModel.OneResourcePoolFieldStateValue source);
+
+    private static partial GatewayModel.CaTwoResourcePoolFieldStateValue ToGatewayCaModel(this CoreModel.TwoResourcePoolFieldStateValue source);
+
+    private static partial GatewayModel.CaMultiResourcePoolFieldStateValue ToGatewayCaModel(this CoreModel.MultiResourcePoolFieldStateValue source);
 
     private static partial GatewayModel.CaAccessRule ToGatewayCaModel(this CoreModel.AccessRule source);
 

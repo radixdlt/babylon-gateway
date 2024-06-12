@@ -180,7 +180,7 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
                 packageAddress: networkConfiguration.WellKnownAddresses.AccountPackage,
                 blueprintName: "Account",
                 blueprintVersion: "1.0.0",
-                state: new GatewayModel.CaAccountFieldStateValue(GatewayModel.CaDefaultDepositRule.Accept),
+                state: new GatewayModel.StateEntityDetailsResponseComponentDetailsState(new GatewayModel.CaAccountFieldStateValue(GatewayModel.CaDefaultDepositRule.Accept)),
                 roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, securifyRule.Concat(_virtualAccountRoleAssignmentEntries).ToList()),
                 royaltyVaultBalance: null)
             : new GatewayModel.StateEntityDetailsResponseComponentDetails(
