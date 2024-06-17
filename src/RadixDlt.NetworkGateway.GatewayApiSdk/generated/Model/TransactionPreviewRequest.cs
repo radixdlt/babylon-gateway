@@ -112,8 +112,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
         /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, used to ensure the transaction intent is unique. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
+        /// <param name="message">message.</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), CoreApiTransactionMessage message = default(CoreApiTransactionMessage), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "manifest" is required (not null)
             if (manifest == null)
@@ -140,6 +141,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.BlobsHex = blobsHex;
             this.NotaryPublicKey = notaryPublicKey;
             this.NotaryIsSignatory = notaryIsSignatory;
+            this.Message = message;
         }
 
         /// <summary>
@@ -205,6 +207,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<PublicKey> SignerPublicKeys { get; set; }
 
         /// <summary>
+        /// Gets or Sets Message
+        /// </summary>
+        [DataMember(Name = "message", EmitDefaultValue = true)]
+        public CoreApiTransactionMessage Message { get; set; }
+
+        /// <summary>
         /// Gets or Sets Flags
         /// </summary>
         [DataMember(Name = "flags", IsRequired = true, EmitDefaultValue = true)]
@@ -227,6 +235,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
             sb.Append("  Nonce: ").Append(Nonce).Append("\n");
             sb.Append("  SignerPublicKeys: ").Append(SignerPublicKeys).Append("\n");
+            sb.Append("  Message: ").Append(Message).Append("\n");
             sb.Append("  Flags: ").Append(Flags).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -306,6 +315,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.SignerPublicKeys.SequenceEqual(input.SignerPublicKeys)
                 ) && 
                 (
+                    this.Message == input.Message ||
+                    (this.Message != null &&
+                    this.Message.Equals(input.Message))
+                ) && 
+                (
                     this.Flags == input.Flags ||
                     (this.Flags != null &&
                     this.Flags.Equals(input.Flags))
@@ -341,6 +355,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.SignerPublicKeys != null)
                 {
                     hashCode = (hashCode * 59) + this.SignerPublicKeys.GetHashCode();
+                }
+                if (this.Message != null)
+                {
+                    hashCode = (hashCode * 59) + this.Message.GetHashCode();
                 }
                 if (this.Flags != null)
                 {

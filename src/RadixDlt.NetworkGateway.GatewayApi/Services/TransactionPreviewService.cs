@@ -130,7 +130,8 @@ internal class TransactionPreviewService : ITransactionPreviewService
         var coreRequestFlags = new CoreModel.TransactionPreviewRequestFlags(
             useFreeCredit: request.Flags.UseFreeCredit,
             assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
-            skipEpochCheck: request.Flags.SkipEpochCheck);
+            skipEpochCheck: request.Flags.SkipEpochCheck,
+            disableAuthChecks: request.Flags.DisableAuthChecks);
 
         var coreRequest = new CoreModel.TransactionPreviewRequest(
             network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
@@ -143,6 +144,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
             tipPercentage: request.TipPercentage,
             nonce: request.Nonce,
             signerPublicKeys: request.SignerPublicKeys.Select(ToCoreModel).ToList(),
+            message: request.Message.ToCoreModel(),
             flags: coreRequestFlags);
 
         var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() =>
