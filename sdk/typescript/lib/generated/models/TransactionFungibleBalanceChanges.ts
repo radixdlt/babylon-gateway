@@ -33,7 +33,6 @@ export interface TransactionFungibleBalanceChanges {
     resource_address: string;
     /**
      * The string-encoded decimal representing the amount of change for the fungible resource.
-
      * @type {string}
      * @memberof TransactionFungibleBalanceChanges
      */

@@ -108,11 +108,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="pendingXrdWithdrawVault">pendingXrdWithdrawVault (required).</param>
         /// <param name="lockedOwnerStakeUnitVault">lockedOwnerStakeUnitVault (required).</param>
         /// <param name="pendingOwnerStakeUnitUnlockVault">pendingOwnerStakeUnitUnlockVault (required).</param>
-        /// <param name="state">Validator inner state representation. This type is defined in the Core API as &#x60;ValidatorFieldStateValue&#x60;. See the Core API documentation for more details.  (required).</param>
+        /// <param name="state">state (required).</param>
         /// <param name="activeInEpoch">activeInEpoch.</param>
         /// <param name="metadata">metadata (required).</param>
         /// <param name="effectiveFeeFactor">effectiveFeeFactor (required).</param>
-        public ValidatorCollectionItem(string address = default(string), ValidatorVaultItem stakeVault = default(ValidatorVaultItem), ValidatorVaultItem pendingXrdWithdrawVault = default(ValidatorVaultItem), ValidatorVaultItem lockedOwnerStakeUnitVault = default(ValidatorVaultItem), ValidatorVaultItem pendingOwnerStakeUnitUnlockVault = default(ValidatorVaultItem), Object state = default(Object), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection), ValidatorCollectionItemEffectiveFeeFactor effectiveFeeFactor = default(ValidatorCollectionItemEffectiveFeeFactor))
+        public ValidatorCollectionItem(string address = default(string), ValidatorVaultItem stakeVault = default(ValidatorVaultItem), ValidatorVaultItem pendingXrdWithdrawVault = default(ValidatorVaultItem), ValidatorVaultItem lockedOwnerStakeUnitVault = default(ValidatorVaultItem), ValidatorVaultItem pendingOwnerStakeUnitUnlockVault = default(ValidatorVaultItem), CoreApiValidatorFieldStateValue state = default(CoreApiValidatorFieldStateValue), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection), ValidatorCollectionItemEffectiveFeeFactor effectiveFeeFactor = default(ValidatorCollectionItemEffectiveFeeFactor))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -197,11 +197,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public ValidatorVaultItem PendingOwnerStakeUnitUnlockVault { get; set; }
 
         /// <summary>
-        /// Validator inner state representation. This type is defined in the Core API as &#x60;ValidatorFieldStateValue&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets State
         /// </summary>
-        /// <value>Validator inner state representation. This type is defined in the Core API as &#x60;ValidatorFieldStateValue&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
-        public Object State { get; set; }
+        public CoreApiValidatorFieldStateValue State { get; set; }
 
         /// <summary>
         /// Gets or Sets ActiveInEpoch

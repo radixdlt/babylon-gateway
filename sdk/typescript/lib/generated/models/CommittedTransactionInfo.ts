@@ -13,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CoreApiTransactionMessage } from './CoreApiTransactionMessage';
+import {
+    CoreApiTransactionMessageFromJSON,
+    CoreApiTransactionMessageFromJSONTyped,
+    CoreApiTransactionMessageToJSON,
+} from './CoreApiTransactionMessage';
 import type { ManifestClass } from './ManifestClass';
 import {
     ManifestClassFromJSON,
@@ -124,28 +130,24 @@ export interface CommittedTransactionInfo {
     receipt?: TransactionReceipt;
     /**
      * A text-representation of a transaction manifest.
-This field will be present only for user transactions and when explicitly opted-in using `manifest_instructions` flag.
-
+     * This field will be present only for user transactions and when explicitly opted-in using `manifest_instructions` flag.
      * @type {string}
      * @memberof CommittedTransactionInfo
      */
     manifest_instructions?: string | null;
     /**
      * A collection of zero or more manifest classes ordered from the most specific class to the least specific one.
-This field will be present only for user transactions.
-
+     * This field will be present only for user transactions.
      * @type {Array<ManifestClass>}
      * @memberof CommittedTransactionInfo
      */
     manifest_classes?: Array<ManifestClass> | null;
     /**
-     * The optional transaction message.
-This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiTransactionMessage}
      * @memberof CommittedTransactionInfo
      */
-    message?: object;
+    message?: CoreApiTransactionMessage;
     /**
      * 
      * @type {TransactionBalanceChanges}
@@ -193,7 +195,7 @@ export function CommittedTransactionInfoFromJSONTyped(json: any, ignoreDiscrimin
         'receipt': !exists(json, 'receipt') ? undefined : TransactionReceiptFromJSON(json['receipt']),
         'manifest_instructions': !exists(json, 'manifest_instructions') ? undefined : json['manifest_instructions'],
         'manifest_classes': !exists(json, 'manifest_classes') ? undefined : (json['manifest_classes'] === null ? null : (json['manifest_classes'] as Array<any>).map(ManifestClassFromJSON)),
-        'message': !exists(json, 'message') ? undefined : json['message'],
+        'message': !exists(json, 'message') ? undefined : CoreApiTransactionMessageFromJSON(json['message']),
         'balance_changes': !exists(json, 'balance_changes') ? undefined : TransactionBalanceChangesFromJSON(json['balance_changes']),
     };
 }
@@ -222,7 +224,7 @@ export function CommittedTransactionInfoToJSON(value?: CommittedTransactionInfo 
         'receipt': TransactionReceiptToJSON(value.receipt),
         'manifest_instructions': value.manifest_instructions,
         'manifest_classes': value.manifest_classes === undefined ? undefined : (value.manifest_classes === null ? null : (value.manifest_classes as Array<any>).map(ManifestClassToJSON)),
-        'message': value.message,
+        'message': CoreApiTransactionMessageToJSON(value.message),
         'balance_changes': TransactionBalanceChangesToJSON(value.balance_changes),
     };
 }

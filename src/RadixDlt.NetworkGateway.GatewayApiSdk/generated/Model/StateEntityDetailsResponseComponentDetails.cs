@@ -114,12 +114,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="packageAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="blueprintVersion">blueprintVersion (required).</param>
-        /// <param name="state">A representation of a component&#39;s inner state. If this entity is a &#x60;GenericComponent&#x60;, this field will be in a programmatic JSON structure (you can deserialize it as a &#x60;ProgrammaticScryptoSborValue&#x60;). Otherwise, for \&quot;native\&quot; components such as &#x60;Account&#x60;, &#x60;Validator&#x60;, &#x60;AccessController&#x60;, &#x60;OneResourcePool&#x60;, &#x60;TwoResourcePool&#x60;, and &#x60;MultiResourcePool&#x60;, this field will be a custom JSON model defined in the Core API schema. .</param>
+        /// <param name="state">state.</param>
         /// <param name="roleAssignments">roleAssignments.</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="royaltyConfig">royaltyConfig.</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Component).</param>
-        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
+        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), StateEntityDetailsResponseComponentDetailsState state = default(StateEntityDetailsResponseComponentDetailsState), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), CoreApiBlueprintRoyaltyConfig royaltyConfig = default(CoreApiBlueprintRoyaltyConfig), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -160,11 +160,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string BlueprintVersion { get; set; }
 
         /// <summary>
-        /// A representation of a component&#39;s inner state. If this entity is a &#x60;GenericComponent&#x60;, this field will be in a programmatic JSON structure (you can deserialize it as a &#x60;ProgrammaticScryptoSborValue&#x60;). Otherwise, for \&quot;native\&quot; components such as &#x60;Account&#x60;, &#x60;Validator&#x60;, &#x60;AccessController&#x60;, &#x60;OneResourcePool&#x60;, &#x60;TwoResourcePool&#x60;, and &#x60;MultiResourcePool&#x60;, this field will be a custom JSON model defined in the Core API schema. 
+        /// Gets or Sets State
         /// </summary>
-        /// <value>A representation of a component&#39;s inner state. If this entity is a &#x60;GenericComponent&#x60;, this field will be in a programmatic JSON structure (you can deserialize it as a &#x60;ProgrammaticScryptoSborValue&#x60;). Otherwise, for \&quot;native\&quot; components such as &#x60;Account&#x60;, &#x60;Validator&#x60;, &#x60;AccessController&#x60;, &#x60;OneResourcePool&#x60;, &#x60;TwoResourcePool&#x60;, and &#x60;MultiResourcePool&#x60;, this field will be a custom JSON model defined in the Core API schema. </value>
         [DataMember(Name = "state", EmitDefaultValue = true)]
-        public Object State { get; set; }
+        public StateEntityDetailsResponseComponentDetailsState State { get; set; }
 
         /// <summary>
         /// Gets or Sets RoleAssignments
@@ -183,7 +182,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets RoyaltyConfig
         /// </summary>
         [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
-        public ComponentRoyaltyConfig RoyaltyConfig { get; set; }
+        public CoreApiBlueprintRoyaltyConfig RoyaltyConfig { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

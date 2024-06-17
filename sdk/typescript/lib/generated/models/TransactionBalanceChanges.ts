@@ -40,21 +40,18 @@ import {
 export interface TransactionBalanceChanges {
     /**
      * A list of all fee-related fungible balance changes per entity and resource.
-
      * @type {Array<TransactionFungibleFeeBalanceChanges>}
      * @memberof TransactionBalanceChanges
      */
     fungible_fee_balance_changes: Array<TransactionFungibleFeeBalanceChanges>;
     /**
      * A list of all non-fee-related fungible balance changes per entity and resource.
-
      * @type {Array<TransactionFungibleBalanceChanges>}
      * @memberof TransactionBalanceChanges
      */
     fungible_balance_changes: Array<TransactionFungibleBalanceChanges>;
     /**
      * A list of all non-fungible changes per entity and resource.
-
      * @type {Array<TransactionNonFungibleBalanceChanges>}
      * @memberof TransactionBalanceChanges
      */

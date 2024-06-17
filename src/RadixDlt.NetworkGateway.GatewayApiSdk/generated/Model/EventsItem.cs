@@ -104,9 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EventsItem" /> class.
         /// </summary>
         /// <param name="name">name (required).</param>
-        /// <param name="emitter">This type is defined in the Core API as &#x60;EventEmitterIdentifier&#x60;. See the Core API documentation for more details.  (required).</param>
+        /// <param name="emitter">emitter (required).</param>
         /// <param name="data">data (required).</param>
-        public EventsItem(string name = default(string), Object emitter = default(Object), ProgrammaticScryptoSborValue data = default(ProgrammaticScryptoSborValue))
+        public EventsItem(string name = default(string), CoreApiEventEmitterIdentifier emitter = default(CoreApiEventEmitterIdentifier), ProgrammaticScryptoSborValue data = default(ProgrammaticScryptoSborValue))
         {
             // to ensure "name" is required (not null)
             if (name == null)
@@ -135,11 +135,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Name { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;EventEmitterIdentifier&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets Emitter
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;EventEmitterIdentifier&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "emitter", IsRequired = true, EmitDefaultValue = true)]
-        public Object Emitter { get; set; }
+        public CoreApiEventEmitterIdentifier Emitter { get; set; }
 
         /// <summary>
         /// Gets or Sets Data

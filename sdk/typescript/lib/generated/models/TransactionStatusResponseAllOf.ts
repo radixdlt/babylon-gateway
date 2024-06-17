@@ -52,7 +52,6 @@ export interface TransactionStatusResponseAllOf {
     intent_status: TransactionIntentStatus;
     /**
      * An additional description to clarify the intent status.
-
      * @type {string}
      * @memberof TransactionStatusResponseAllOf
      */
@@ -65,7 +64,6 @@ export interface TransactionStatusResponseAllOf {
     known_payloads: Array<TransactionStatusResponseKnownPayloadItem>;
     /**
      * If the intent was committed, this gives the state version when this intent was committed.
-
      * @type {number}
      * @memberof TransactionStatusResponseAllOf
      */
@@ -78,10 +76,9 @@ export interface TransactionStatusResponseAllOf {
     permanently_rejects_at_epoch?: number | null;
     /**
      * The most relevant error message received, due to a rejection or commit as failure.
-Please note that presence of an error message doesn't imply that the intent
-will definitely reject or fail. This could represent a temporary error (such as out
-of fees), or an error with a payload which doesn't end up being committed.
-
+     * Please note that presence of an error message doesn't imply that the intent
+     * will definitely reject or fail. This could represent a temporary error (such as out
+     * of fees), or an error with a payload which doesn't end up being committed.
      * @type {string}
      * @memberof TransactionStatusResponseAllOf
      */

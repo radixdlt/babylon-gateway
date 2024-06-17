@@ -110,19 +110,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryAssignment" /> class.
         /// </summary>
         /// <param name="resolution">resolution (required).</param>
-        /// <param name="explicitRule">This type is defined in the Core API as &#x60;AccessRule&#x60;. See the Core API documentation for more details. .</param>
-        public ComponentEntityRoleAssignmentEntryAssignment(RoleAssignmentResolution resolution = default(RoleAssignmentResolution), Object explicitRule = default(Object))
+        /// <param name="explicitRule">explicitRule.</param>
+        public ComponentEntityRoleAssignmentEntryAssignment(RoleAssignmentResolution resolution = default(RoleAssignmentResolution), CoreApiAccessRule explicitRule = default(CoreApiAccessRule))
         {
             this.Resolution = resolution;
             this.ExplicitRule = explicitRule;
         }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;AccessRule&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets ExplicitRule
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;AccessRule&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "explicit_rule", EmitDefaultValue = true)]
-        public Object ExplicitRule { get; set; }
+        public CoreApiAccessRule ExplicitRule { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

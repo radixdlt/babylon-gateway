@@ -13,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CoreApiValidatorFieldStateValue } from './CoreApiValidatorFieldStateValue';
+import {
+    CoreApiValidatorFieldStateValueFromJSON,
+    CoreApiValidatorFieldStateValueFromJSONTyped,
+    CoreApiValidatorFieldStateValueToJSON,
+} from './CoreApiValidatorFieldStateValue';
 import type { EntityMetadataCollection } from './EntityMetadataCollection';
 import {
     EntityMetadataCollectionFromJSON,
@@ -75,13 +81,11 @@ export interface ValidatorCollectionItem {
      */
     pending_owner_stake_unit_unlock_vault: ValidatorVaultItem;
     /**
-     * Validator inner state representation.
-This type is defined in the Core API as `ValidatorFieldStateValue`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiValidatorFieldStateValue}
      * @memberof ValidatorCollectionItem
      */
-    state: object | null;
+    state: CoreApiValidatorFieldStateValue;
     /**
      * 
      * @type {ValidatorCollectionItemActiveInEpoch}
@@ -134,7 +138,7 @@ export function ValidatorCollectionItemFromJSONTyped(json: any, ignoreDiscrimina
         'pending_xrd_withdraw_vault': ValidatorVaultItemFromJSON(json['pending_xrd_withdraw_vault']),
         'locked_owner_stake_unit_vault': ValidatorVaultItemFromJSON(json['locked_owner_stake_unit_vault']),
         'pending_owner_stake_unit_unlock_vault': ValidatorVaultItemFromJSON(json['pending_owner_stake_unit_unlock_vault']),
-        'state': json['state'],
+        'state': CoreApiValidatorFieldStateValueFromJSON(json['state']),
         'active_in_epoch': !exists(json, 'active_in_epoch') ? undefined : ValidatorCollectionItemActiveInEpochFromJSON(json['active_in_epoch']),
         'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
         'effective_fee_factor': ValidatorCollectionItemEffectiveFeeFactorFromJSON(json['effective_fee_factor']),
@@ -155,7 +159,7 @@ export function ValidatorCollectionItemToJSON(value?: ValidatorCollectionItem | 
         'pending_xrd_withdraw_vault': ValidatorVaultItemToJSON(value.pending_xrd_withdraw_vault),
         'locked_owner_stake_unit_vault': ValidatorVaultItemToJSON(value.locked_owner_stake_unit_vault),
         'pending_owner_stake_unit_unlock_vault': ValidatorVaultItemToJSON(value.pending_owner_stake_unit_unlock_vault),
-        'state': value.state,
+        'state': CoreApiValidatorFieldStateValueToJSON(value.state),
         'active_in_epoch': ValidatorCollectionItemActiveInEpochToJSON(value.active_in_epoch),
         'metadata': EntityMetadataCollectionToJSON(value.metadata),
         'effective_fee_factor': ValidatorCollectionItemEffectiveFeeFactorToJSON(value.effective_fee_factor),

@@ -13,6 +13,48 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CoreApiCostingParameters } from './CoreApiCostingParameters';
+import {
+    CoreApiCostingParametersFromJSON,
+    CoreApiCostingParametersFromJSONTyped,
+    CoreApiCostingParametersToJSON,
+} from './CoreApiCostingParameters';
+import type { CoreApiFeeDestination } from './CoreApiFeeDestination';
+import {
+    CoreApiFeeDestinationFromJSON,
+    CoreApiFeeDestinationFromJSONTyped,
+    CoreApiFeeDestinationToJSON,
+} from './CoreApiFeeDestination';
+import type { CoreApiFeeSource } from './CoreApiFeeSource';
+import {
+    CoreApiFeeSourceFromJSON,
+    CoreApiFeeSourceFromJSONTyped,
+    CoreApiFeeSourceToJSON,
+} from './CoreApiFeeSource';
+import type { CoreApiFeeSummary } from './CoreApiFeeSummary';
+import {
+    CoreApiFeeSummaryFromJSON,
+    CoreApiFeeSummaryFromJSONTyped,
+    CoreApiFeeSummaryToJSON,
+} from './CoreApiFeeSummary';
+import type { CoreApiNextEpoch } from './CoreApiNextEpoch';
+import {
+    CoreApiNextEpochFromJSON,
+    CoreApiNextEpochFromJSONTyped,
+    CoreApiNextEpochToJSON,
+} from './CoreApiNextEpoch';
+import type { CoreApiSborData } from './CoreApiSborData';
+import {
+    CoreApiSborDataFromJSON,
+    CoreApiSborDataFromJSONTyped,
+    CoreApiSborDataToJSON,
+} from './CoreApiSborData';
+import type { CoreApiStateUpdates } from './CoreApiStateUpdates';
+import {
+    CoreApiStateUpdatesFromJSON,
+    CoreApiStateUpdatesFromJSONTyped,
+    CoreApiStateUpdatesToJSON,
+} from './CoreApiStateUpdates';
 import type { EventsItem } from './EventsItem';
 import {
     EventsItemFromJSON,
@@ -37,57 +79,49 @@ export interface TransactionReceipt {
      * @type {TransactionStatus}
      * @memberof TransactionReceipt
      */
-    status?: TransactionStatus;
-    /**
-     * This type is defined in the Core API as `FeeSummary`. See the Core API documentation for more details.
-
-     * @type {object}
-     * @memberof TransactionReceipt
-     */
-    fee_summary?: object;
+    status: TransactionStatus;
     /**
      * 
-     * @type {object}
+     * @type {CoreApiFeeSummary}
      * @memberof TransactionReceipt
      */
-    costing_parameters?: object;
+    fee_summary?: CoreApiFeeSummary;
     /**
-     * This type is defined in the Core API as `FeeDestination`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiCostingParameters}
      * @memberof TransactionReceipt
      */
-    fee_destination?: object;
+    costing_parameters?: CoreApiCostingParameters;
     /**
-     * This type is defined in the Core API as `FeeSource`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiFeeSource}
      * @memberof TransactionReceipt
      */
-    fee_source?: object;
+    fee_source?: CoreApiFeeSource;
     /**
-     * This type is defined in the Core API as `StateUpdates`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiFeeDestination}
      * @memberof TransactionReceipt
      */
-    state_updates?: object;
+    fee_destination?: CoreApiFeeDestination;
     /**
-     * Information (number and active validator list) about new epoch if occured.
-This type is defined in the Core API as `NextEpoch`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiStateUpdates}
      * @memberof TransactionReceipt
      */
-    next_epoch?: object;
+    state_updates?: CoreApiStateUpdates;
     /**
-     * The manifest line-by-line engine return data (only present if `status` is `CommittedSuccess`).
-This type is defined in the Core API as `SborData`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiNextEpoch}
      * @memberof TransactionReceipt
      */
-    output?: object;
+    next_epoch?: CoreApiNextEpoch;
+    /**
+     * The manifest line-by-line engine return data (only present if `status` is `Succeeded`)
+     * @type {Array<CoreApiSborData>}
+     * @memberof TransactionReceipt
+     */
+    output?: Array<CoreApiSborData>;
     /**
      * Events emitted by a transaction.
      * @type {Array<EventsItem>}
@@ -107,6 +141,7 @@ This type is defined in the Core API as `SborData`. See the Core API documentati
  */
 export function instanceOfTransactionReceipt(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "status" in value;
 
     return isInstance;
 }
@@ -121,14 +156,14 @@ export function TransactionReceiptFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
-        'status': !exists(json, 'status') ? undefined : TransactionStatusFromJSON(json['status']),
-        'fee_summary': !exists(json, 'fee_summary') ? undefined : json['fee_summary'],
-        'costing_parameters': !exists(json, 'costing_parameters') ? undefined : json['costing_parameters'],
-        'fee_destination': !exists(json, 'fee_destination') ? undefined : json['fee_destination'],
-        'fee_source': !exists(json, 'fee_source') ? undefined : json['fee_source'],
-        'state_updates': !exists(json, 'state_updates') ? undefined : json['state_updates'],
-        'next_epoch': !exists(json, 'next_epoch') ? undefined : json['next_epoch'],
-        'output': !exists(json, 'output') ? undefined : json['output'],
+        'status': TransactionStatusFromJSON(json['status']),
+        'fee_summary': !exists(json, 'fee_summary') ? undefined : CoreApiFeeSummaryFromJSON(json['fee_summary']),
+        'costing_parameters': !exists(json, 'costing_parameters') ? undefined : CoreApiCostingParametersFromJSON(json['costing_parameters']),
+        'fee_source': !exists(json, 'fee_source') ? undefined : CoreApiFeeSourceFromJSON(json['fee_source']),
+        'fee_destination': !exists(json, 'fee_destination') ? undefined : CoreApiFeeDestinationFromJSON(json['fee_destination']),
+        'state_updates': !exists(json, 'state_updates') ? undefined : CoreApiStateUpdatesFromJSON(json['state_updates']),
+        'next_epoch': !exists(json, 'next_epoch') ? undefined : CoreApiNextEpochFromJSON(json['next_epoch']),
+        'output': !exists(json, 'output') ? undefined : ((json['output'] as Array<any>).map(CoreApiSborDataFromJSON)),
         'events': !exists(json, 'events') ? undefined : ((json['events'] as Array<any>).map(EventsItemFromJSON)),
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
@@ -144,13 +179,13 @@ export function TransactionReceiptToJSON(value?: TransactionReceipt | null): any
     return {
         
         'status': TransactionStatusToJSON(value.status),
-        'fee_summary': value.fee_summary,
-        'costing_parameters': value.costing_parameters,
-        'fee_destination': value.fee_destination,
-        'fee_source': value.fee_source,
-        'state_updates': value.state_updates,
-        'next_epoch': value.next_epoch,
-        'output': value.output,
+        'fee_summary': CoreApiFeeSummaryToJSON(value.fee_summary),
+        'costing_parameters': CoreApiCostingParametersToJSON(value.costing_parameters),
+        'fee_source': CoreApiFeeSourceToJSON(value.fee_source),
+        'fee_destination': CoreApiFeeDestinationToJSON(value.fee_destination),
+        'state_updates': CoreApiStateUpdatesToJSON(value.state_updates),
+        'next_epoch': CoreApiNextEpochToJSON(value.next_epoch),
+        'output': value.output === undefined ? undefined : ((value.output as Array<any>).map(CoreApiSborDataToJSON)),
         'events': value.events === undefined ? undefined : ((value.events as Array<any>).map(EventsItemToJSON)),
         'error_message': value.error_message,
     };

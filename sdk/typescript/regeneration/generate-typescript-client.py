@@ -7,6 +7,7 @@ logger = logging.getLogger()
 logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', level=logging.INFO)
 
 API_SCHEMA_LOCATION = '../../../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-schema.yaml'
+SEALED_CORE_API_TYPES_SCHEMA_LOCATION = '../../../src/RadixDlt.NetworkGateway.GatewayApi/core-api-sealed-types.yaml'
 API_GENERATED_DESTINATION = '../lib/generated'
 
 OPENAPI_GENERATION_FOLDER='.'
@@ -194,6 +195,11 @@ if __name__ == "__main__":
 
     api_schema_temp_filename = os.path.join(OPENAPI_TEMP_GENERATION_FOLDER, 'gateway-api-schema.yaml')
     prepare_schema_for_generation(API_SCHEMA_LOCATION, api_schema_temp_filename)
+    
+    logging.info('Loading API Schema from {}, and preparing it...'.format(os.path.abspath(SEALED_CORE_API_TYPES_SCHEMA_LOCATION)))
+
+    sealed_core_api_types_schema_temp_filename = os.path.join(OPENAPI_TEMP_GENERATION_FOLDER, 'core-api-sealed-types.yaml')
+    prepare_schema_for_generation(SEALED_CORE_API_TYPES_SCHEMA_LOCATION, sealed_core_api_types_schema_temp_filename)
 
     logging.info('Generating code from prepared schema...')
 

@@ -367,13 +367,22 @@
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Nito.AsyncEx.Coordination": "[5.1.2, )",
-          "RadixDlt.CoreApiSdk": "[1.6.0-develop, )"
+          "RadixDlt.CoreApiSdk": "[1.7.0-develop, )"
+        }
+      },
+      "radixdlt.networkgateway.coreapimapping": {
+        "type": "Project",
+        "dependencies": {
+          "Newtonsoft.Json": "[13.0.3, )",
+          "RadixDlt.CoreApiSdk": "[1.7.0-develop, )",
+          "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.7.0-develop, )",
+          "Riok.Mapperly": "[3.5.1, )"
         }
       },
       "radixdlt.networkgateway.dataaggregator": {
         "type": "Project",
         "dependencies": {
-          "RadixDlt.NetworkGateway.Abstractions": "[1.6.0-develop, )"
+          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )"
         }
       },
       "radixdlt.networkgateway.gatewayapi": {
@@ -381,8 +390,9 @@
         "dependencies": {
           "FluentValidation.AspNetCore": "[11.3.0, )",
           "Microsoft.Extensions.Http.Polly": "[8.0.2, )",
-          "RadixDlt.NetworkGateway.Abstractions": "[1.6.0-develop, )",
-          "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.6.0-develop, )",
+          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )",
+          "RadixDlt.NetworkGateway.CoreApiMapping": "[1.7.0-develop, )",
+          "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.7.0-develop, )",
           "RadixDlt.RadixEngineToolkit": "[2.1.0-dev6, )"
         }
       },
@@ -509,6 +519,12 @@
         "requested": "[2.1.0-dev6, )",
         "resolved": "2.1.0-dev6",
         "contentHash": "aM3Apew+1y/RYwy5KE99KBEkcF1C+3mQBAQxNaZ7+dwpDqEqj1ucDvajm92Y+EshGApdn8Usz1Zmtz88kbif5Q=="
+      },
+      "Riok.Mapperly": {
+        "type": "CentralTransitive",
+        "requested": "[3.5.1, )",
+        "resolved": "3.5.1",
+        "contentHash": "ECFSdemqIN7HoCu8lOtGYW15fYK5XgSg9tpaspdevi4rj6Z4KomMQz6bKID1L5WMHxjyexix250wP5eAF0iKNw=="
       }
     }
   }

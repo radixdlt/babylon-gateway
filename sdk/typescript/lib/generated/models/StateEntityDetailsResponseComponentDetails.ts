@@ -19,12 +19,18 @@ import {
     ComponentEntityRoleAssignmentsFromJSONTyped,
     ComponentEntityRoleAssignmentsToJSON,
 } from './ComponentEntityRoleAssignments';
-import type { ComponentRoyaltyConfig } from './ComponentRoyaltyConfig';
+import type { CoreApiBlueprintRoyaltyConfig } from './CoreApiBlueprintRoyaltyConfig';
 import {
-    ComponentRoyaltyConfigFromJSON,
-    ComponentRoyaltyConfigFromJSONTyped,
-    ComponentRoyaltyConfigToJSON,
-} from './ComponentRoyaltyConfig';
+    CoreApiBlueprintRoyaltyConfigFromJSON,
+    CoreApiBlueprintRoyaltyConfigFromJSONTyped,
+    CoreApiBlueprintRoyaltyConfigToJSON,
+} from './CoreApiBlueprintRoyaltyConfig';
+import type { StateEntityDetailsResponseComponentDetailsState } from './StateEntityDetailsResponseComponentDetailsState';
+import {
+    StateEntityDetailsResponseComponentDetailsStateFromJSON,
+    StateEntityDetailsResponseComponentDetailsStateFromJSONTyped,
+    StateEntityDetailsResponseComponentDetailsStateToJSON,
+} from './StateEntityDetailsResponseComponentDetailsState';
 
 /**
  * 
@@ -57,15 +63,11 @@ export interface StateEntityDetailsResponseComponentDetails {
      */
     blueprint_version: string;
     /**
-     * A representation of a component's inner state. If this entity is a `GenericComponent`, this field will be in a programmatic JSON
-structure (you can deserialize it as a `ProgrammaticScryptoSborValue`). Otherwise, for "native" components such as `Account`,
-`Validator`, `AccessController`, `OneResourcePool`, `TwoResourcePool`, and `MultiResourcePool`, this field will be a
-custom JSON model defined in the Core API schema.
-
-     * @type {object}
+     * 
+     * @type {StateEntityDetailsResponseComponentDetailsState}
      * @memberof StateEntityDetailsResponseComponentDetails
      */
-    state?: object;
+    state?: StateEntityDetailsResponseComponentDetailsState;
     /**
      * 
      * @type {ComponentEntityRoleAssignments}
@@ -80,10 +82,10 @@ custom JSON model defined in the Core API schema.
     royalty_vault_balance?: string;
     /**
      * 
-     * @type {ComponentRoyaltyConfig}
+     * @type {CoreApiBlueprintRoyaltyConfig}
      * @memberof StateEntityDetailsResponseComponentDetails
      */
-    royalty_config?: ComponentRoyaltyConfig;
+    royalty_config?: CoreApiBlueprintRoyaltyConfig;
 }
 
 
@@ -122,10 +124,10 @@ export function StateEntityDetailsResponseComponentDetailsFromJSONTyped(json: an
         'package_address': !exists(json, 'package_address') ? undefined : json['package_address'],
         'blueprint_name': json['blueprint_name'],
         'blueprint_version': json['blueprint_version'],
-        'state': !exists(json, 'state') ? undefined : json['state'],
+        'state': !exists(json, 'state') ? undefined : StateEntityDetailsResponseComponentDetailsStateFromJSON(json['state']),
         'role_assignments': !exists(json, 'role_assignments') ? undefined : ComponentEntityRoleAssignmentsFromJSON(json['role_assignments']),
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
-        'royalty_config': !exists(json, 'royalty_config') ? undefined : ComponentRoyaltyConfigFromJSON(json['royalty_config']),
+        'royalty_config': !exists(json, 'royalty_config') ? undefined : CoreApiBlueprintRoyaltyConfigFromJSON(json['royalty_config']),
     };
 }
 
@@ -142,10 +144,10 @@ export function StateEntityDetailsResponseComponentDetailsToJSON(value?: StateEn
         'package_address': value.package_address,
         'blueprint_name': value.blueprint_name,
         'blueprint_version': value.blueprint_version,
-        'state': value.state,
+        'state': StateEntityDetailsResponseComponentDetailsStateToJSON(value.state),
         'role_assignments': ComponentEntityRoleAssignmentsToJSON(value.role_assignments),
         'royalty_vault_balance': value.royalty_vault_balance,
-        'royalty_config': ComponentRoyaltyConfigToJSON(value.royalty_config),
+        'royalty_config': CoreApiBlueprintRoyaltyConfigToJSON(value.royalty_config),
     };
 }
 

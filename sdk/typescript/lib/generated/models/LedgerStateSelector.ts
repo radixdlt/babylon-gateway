@@ -15,9 +15,8 @@
 import { exists, mapValues } from '../runtime';
 /**
  * Optional. This allows for a request to be made against a historic state.
-If a constraint is specified, the Gateway will resolve the request against the ledger state at that time.
-If not specified, requests will be made with respect to the top of the committed ledger.
-
+ * If a constraint is specified, the Gateway will resolve the request against the ledger state at that time.
+ * If not specified, requests will be made with respect to the top of the committed ledger.
  * @export
  * @interface LedgerStateSelector
  */

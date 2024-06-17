@@ -379,7 +379,16 @@
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Nito.AsyncEx.Coordination": "[5.1.2, )",
-          "RadixDlt.CoreApiSdk": "[1.6.0-develop, )"
+          "RadixDlt.CoreApiSdk": "[1.7.0-develop, )"
+        }
+      },
+      "radixdlt.networkgateway.coreapimapping": {
+        "type": "Project",
+        "dependencies": {
+          "Newtonsoft.Json": "[13.0.3, )",
+          "RadixDlt.CoreApiSdk": "[1.7.0-develop, )",
+          "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.7.0-develop, )",
+          "Riok.Mapperly": "[3.5.1, )"
         }
       },
       "radixdlt.networkgateway.gatewayapisdk": {
@@ -478,6 +487,12 @@
         "dependencies": {
           "Polly.Core": "8.3.0"
         }
+      },
+      "Riok.Mapperly": {
+        "type": "CentralTransitive",
+        "requested": "[3.5.1, )",
+        "resolved": "3.5.1",
+        "contentHash": "ECFSdemqIN7HoCu8lOtGYW15fYK5XgSg9tpaspdevi4rj6Z4KomMQz6bKID1L5WMHxjyexix250wP5eAF0iKNw=="
       }
     }
   }
