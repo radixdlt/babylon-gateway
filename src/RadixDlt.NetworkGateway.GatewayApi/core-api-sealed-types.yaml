@@ -4368,6 +4368,7 @@ components:
             An optional helper vault storing some amount of XRD that can be used by any of the roles
             for locking fees.
         timed_recovery_delay_minutes:
+          nullable: true
           type: integer
           format: int64
           minimum: 0
@@ -4426,6 +4427,7 @@ components:
         confirmation_role:
           $ref: "#/components/schemas/CoreApiAccessRule"
         timed_recovery_delay_minutes:
+          nullable: true
           type: integer
           format: int64
           minimum: 0
