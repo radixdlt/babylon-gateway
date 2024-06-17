@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="receipt">receipt (required).</param>
         /// <param name="resourceChanges">resourceChanges (required).</param>
         /// <param name="logs">logs (required).</param>
-        public TransactionPreviewResponse(string encodedReceipt = default(string), CaTransactionReceipt receipt = default(CaTransactionReceipt), List<CaInstructionResourceChanges> resourceChanges = default(List<CaInstructionResourceChanges>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
+        public TransactionPreviewResponse(string encodedReceipt = default(string), CoreApiTransactionReceipt receipt = default(CoreApiTransactionReceipt), List<CoreApiInstructionResourceChanges> resourceChanges = default(List<CoreApiInstructionResourceChanges>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
         {
             // to ensure "encodedReceipt" is required (not null)
             if (encodedReceipt == null)
@@ -146,13 +146,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Receipt
         /// </summary>
         [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public CaTransactionReceipt Receipt { get; set; }
+        public CoreApiTransactionReceipt Receipt { get; set; }
 
         /// <summary>
         /// Gets or Sets ResourceChanges
         /// </summary>
         [DataMember(Name = "resource_changes", IsRequired = true, EmitDefaultValue = true)]
-        public List<CaInstructionResourceChanges> ResourceChanges { get; set; }
+        public List<CoreApiInstructionResourceChanges> ResourceChanges { get; set; }
 
         /// <summary>
         /// Gets or Sets Logs

@@ -112,7 +112,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="activeInEpoch">activeInEpoch.</param>
         /// <param name="metadata">metadata (required).</param>
         /// <param name="effectiveFeeFactor">effectiveFeeFactor (required).</param>
-        public ValidatorCollectionItem(string address = default(string), ValidatorVaultItem stakeVault = default(ValidatorVaultItem), ValidatorVaultItem pendingXrdWithdrawVault = default(ValidatorVaultItem), ValidatorVaultItem lockedOwnerStakeUnitVault = default(ValidatorVaultItem), ValidatorVaultItem pendingOwnerStakeUnitUnlockVault = default(ValidatorVaultItem), CaValidatorFieldStateValue state = default(CaValidatorFieldStateValue), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection), ValidatorCollectionItemEffectiveFeeFactor effectiveFeeFactor = default(ValidatorCollectionItemEffectiveFeeFactor))
+        public ValidatorCollectionItem(string address = default(string), ValidatorVaultItem stakeVault = default(ValidatorVaultItem), ValidatorVaultItem pendingXrdWithdrawVault = default(ValidatorVaultItem), ValidatorVaultItem lockedOwnerStakeUnitVault = default(ValidatorVaultItem), ValidatorVaultItem pendingOwnerStakeUnitUnlockVault = default(ValidatorVaultItem), CoreApiValidatorFieldStateValue state = default(CoreApiValidatorFieldStateValue), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection), ValidatorCollectionItemEffectiveFeeFactor effectiveFeeFactor = default(ValidatorCollectionItemEffectiveFeeFactor))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -200,7 +200,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets State
         /// </summary>
         [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
-        public CaValidatorFieldStateValue State { get; set; }
+        public CoreApiValidatorFieldStateValue State { get; set; }
 
         /// <summary>
         /// Gets or Sets ActiveInEpoch

@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="name">name (required).</param>
         /// <param name="emitter">emitter (required).</param>
         /// <param name="data">data (required).</param>
-        public EventsItem(string name = default(string), CaEventEmitterIdentifier emitter = default(CaEventEmitterIdentifier), ProgrammaticScryptoSborValue data = default(ProgrammaticScryptoSborValue))
+        public EventsItem(string name = default(string), CoreApiEventEmitterIdentifier emitter = default(CoreApiEventEmitterIdentifier), ProgrammaticScryptoSborValue data = default(ProgrammaticScryptoSborValue))
         {
             // to ensure "name" is required (not null)
             if (name == null)
@@ -138,7 +138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Emitter
         /// </summary>
         [DataMember(Name = "emitter", IsRequired = true, EmitDefaultValue = true)]
-        public CaEventEmitterIdentifier Emitter { get; set; }
+        public CoreApiEventEmitterIdentifier Emitter { get; set; }
 
         /// <summary>
         /// Gets or Sets Data

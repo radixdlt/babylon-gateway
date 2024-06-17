@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="roleAssignments">roleAssignments.</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="royaltyConfig">royaltyConfig.</param>
-        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), StateEntityDetailsResponseComponentDetailsState state = default(StateEntityDetailsResponseComponentDetailsState), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), CaBlueprintRoyaltyConfig royaltyConfig = default(CaBlueprintRoyaltyConfig))
+        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), StateEntityDetailsResponseComponentDetailsState state = default(StateEntityDetailsResponseComponentDetailsState), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), CoreApiBlueprintRoyaltyConfig royaltyConfig = default(CoreApiBlueprintRoyaltyConfig))
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -173,7 +173,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets RoyaltyConfig
         /// </summary>
         [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
-        public CaBlueprintRoyaltyConfig RoyaltyConfig { get; set; }
+        public CoreApiBlueprintRoyaltyConfig RoyaltyConfig { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

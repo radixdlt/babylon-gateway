@@ -99,10 +99,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsState" /> class
-        /// with the <see cref="CaGenericScryptoComponentFieldStateValue" /> class
+        /// with the <see cref="CoreApiGenericScryptoComponentFieldStateValue" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of CaGenericScryptoComponentFieldStateValue.</param>
-        public StateEntityDetailsResponseComponentDetailsState(CaGenericScryptoComponentFieldStateValue actualInstance)
+        /// <param name="actualInstance">An instance of CoreApiGenericScryptoComponentFieldStateValue.</param>
+        public StateEntityDetailsResponseComponentDetailsState(CoreApiGenericScryptoComponentFieldStateValue actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -111,10 +111,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsState" /> class
-        /// with the <see cref="CaValidatorFieldStateValue" /> class
+        /// with the <see cref="CoreApiAccountFieldStateValue" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of CaValidatorFieldStateValue.</param>
-        public StateEntityDetailsResponseComponentDetailsState(CaValidatorFieldStateValue actualInstance)
+        /// <param name="actualInstance">An instance of CoreApiAccountFieldStateValue.</param>
+        public StateEntityDetailsResponseComponentDetailsState(CoreApiAccountFieldStateValue actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -123,10 +123,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsState" /> class
-        /// with the <see cref="CaAccountFieldStateValue" /> class
+        /// with the <see cref="CoreApiValidatorFieldStateValue" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of CaAccountFieldStateValue.</param>
-        public StateEntityDetailsResponseComponentDetailsState(CaAccountFieldStateValue actualInstance)
+        /// <param name="actualInstance">An instance of CoreApiValidatorFieldStateValue.</param>
+        public StateEntityDetailsResponseComponentDetailsState(CoreApiValidatorFieldStateValue actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -135,10 +135,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsState" /> class
-        /// with the <see cref="CaAccessControllerFieldStateValue" /> class
+        /// with the <see cref="CoreApiAccessControllerFieldStateValue" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of CaAccessControllerFieldStateValue.</param>
-        public StateEntityDetailsResponseComponentDetailsState(CaAccessControllerFieldStateValue actualInstance)
+        /// <param name="actualInstance">An instance of CoreApiAccessControllerFieldStateValue.</param>
+        public StateEntityDetailsResponseComponentDetailsState(CoreApiAccessControllerFieldStateValue actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -147,10 +147,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsState" /> class
-        /// with the <see cref="CaOneResourcePoolFieldStateValue" /> class
+        /// with the <see cref="CoreApiOneResourcePoolFieldStateValue" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of CaOneResourcePoolFieldStateValue.</param>
-        public StateEntityDetailsResponseComponentDetailsState(CaOneResourcePoolFieldStateValue actualInstance)
+        /// <param name="actualInstance">An instance of CoreApiOneResourcePoolFieldStateValue.</param>
+        public StateEntityDetailsResponseComponentDetailsState(CoreApiOneResourcePoolFieldStateValue actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -159,10 +159,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsState" /> class
-        /// with the <see cref="CaTwoResourcePoolFieldStateValue" /> class
+        /// with the <see cref="CoreApiTwoResourcePoolFieldStateValue" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of CaTwoResourcePoolFieldStateValue.</param>
-        public StateEntityDetailsResponseComponentDetailsState(CaTwoResourcePoolFieldStateValue actualInstance)
+        /// <param name="actualInstance">An instance of CoreApiTwoResourcePoolFieldStateValue.</param>
+        public StateEntityDetailsResponseComponentDetailsState(CoreApiTwoResourcePoolFieldStateValue actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -171,10 +171,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsState" /> class
-        /// with the <see cref="CaMultiResourcePoolFieldStateValue" /> class
+        /// with the <see cref="CoreApiMultiResourcePoolFieldStateValue" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of CaMultiResourcePoolFieldStateValue.</param>
-        public StateEntityDetailsResponseComponentDetailsState(CaMultiResourcePoolFieldStateValue actualInstance)
+        /// <param name="actualInstance">An instance of CoreApiMultiResourcePoolFieldStateValue.</param>
+        public StateEntityDetailsResponseComponentDetailsState(CoreApiMultiResourcePoolFieldStateValue actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -195,109 +195,109 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             set
             {
-                if (value.GetType() == typeof(CaAccessControllerFieldStateValue))
+                if (value.GetType() == typeof(CoreApiAccessControllerFieldStateValue))
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(CaAccountFieldStateValue))
+                else if (value.GetType() == typeof(CoreApiAccountFieldStateValue))
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(CaGenericScryptoComponentFieldStateValue))
+                else if (value.GetType() == typeof(CoreApiGenericScryptoComponentFieldStateValue))
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(CaMultiResourcePoolFieldStateValue))
+                else if (value.GetType() == typeof(CoreApiMultiResourcePoolFieldStateValue))
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(CaOneResourcePoolFieldStateValue))
+                else if (value.GetType() == typeof(CoreApiOneResourcePoolFieldStateValue))
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(CaTwoResourcePoolFieldStateValue))
+                else if (value.GetType() == typeof(CoreApiTwoResourcePoolFieldStateValue))
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(CaValidatorFieldStateValue))
+                else if (value.GetType() == typeof(CoreApiValidatorFieldStateValue))
                 {
                     this._actualInstance = value;
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: CaAccessControllerFieldStateValue, CaAccountFieldStateValue, CaGenericScryptoComponentFieldStateValue, CaMultiResourcePoolFieldStateValue, CaOneResourcePoolFieldStateValue, CaTwoResourcePoolFieldStateValue, CaValidatorFieldStateValue");
+                    throw new ArgumentException("Invalid instance found. Must be the following types: CoreApiAccessControllerFieldStateValue, CoreApiAccountFieldStateValue, CoreApiGenericScryptoComponentFieldStateValue, CoreApiMultiResourcePoolFieldStateValue, CoreApiOneResourcePoolFieldStateValue, CoreApiTwoResourcePoolFieldStateValue, CoreApiValidatorFieldStateValue");
                 }
             }
         }
 
         /// <summary>
-        /// Get the actual instance of `CaGenericScryptoComponentFieldStateValue`. If the actual instance is not `CaGenericScryptoComponentFieldStateValue`,
+        /// Get the actual instance of `CoreApiGenericScryptoComponentFieldStateValue`. If the actual instance is not `CoreApiGenericScryptoComponentFieldStateValue`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of CaGenericScryptoComponentFieldStateValue</returns>
-        public CaGenericScryptoComponentFieldStateValue GetCaGenericScryptoComponentFieldStateValue()
+        /// <returns>An instance of CoreApiGenericScryptoComponentFieldStateValue</returns>
+        public CoreApiGenericScryptoComponentFieldStateValue GetCoreApiGenericScryptoComponentFieldStateValue()
         {
-            return (CaGenericScryptoComponentFieldStateValue)this.ActualInstance;
+            return (CoreApiGenericScryptoComponentFieldStateValue)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `CaValidatorFieldStateValue`. If the actual instance is not `CaValidatorFieldStateValue`,
+        /// Get the actual instance of `CoreApiAccountFieldStateValue`. If the actual instance is not `CoreApiAccountFieldStateValue`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of CaValidatorFieldStateValue</returns>
-        public CaValidatorFieldStateValue GetCaValidatorFieldStateValue()
+        /// <returns>An instance of CoreApiAccountFieldStateValue</returns>
+        public CoreApiAccountFieldStateValue GetCoreApiAccountFieldStateValue()
         {
-            return (CaValidatorFieldStateValue)this.ActualInstance;
+            return (CoreApiAccountFieldStateValue)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `CaAccountFieldStateValue`. If the actual instance is not `CaAccountFieldStateValue`,
+        /// Get the actual instance of `CoreApiValidatorFieldStateValue`. If the actual instance is not `CoreApiValidatorFieldStateValue`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of CaAccountFieldStateValue</returns>
-        public CaAccountFieldStateValue GetCaAccountFieldStateValue()
+        /// <returns>An instance of CoreApiValidatorFieldStateValue</returns>
+        public CoreApiValidatorFieldStateValue GetCoreApiValidatorFieldStateValue()
         {
-            return (CaAccountFieldStateValue)this.ActualInstance;
+            return (CoreApiValidatorFieldStateValue)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `CaAccessControllerFieldStateValue`. If the actual instance is not `CaAccessControllerFieldStateValue`,
+        /// Get the actual instance of `CoreApiAccessControllerFieldStateValue`. If the actual instance is not `CoreApiAccessControllerFieldStateValue`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of CaAccessControllerFieldStateValue</returns>
-        public CaAccessControllerFieldStateValue GetCaAccessControllerFieldStateValue()
+        /// <returns>An instance of CoreApiAccessControllerFieldStateValue</returns>
+        public CoreApiAccessControllerFieldStateValue GetCoreApiAccessControllerFieldStateValue()
         {
-            return (CaAccessControllerFieldStateValue)this.ActualInstance;
+            return (CoreApiAccessControllerFieldStateValue)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `CaOneResourcePoolFieldStateValue`. If the actual instance is not `CaOneResourcePoolFieldStateValue`,
+        /// Get the actual instance of `CoreApiOneResourcePoolFieldStateValue`. If the actual instance is not `CoreApiOneResourcePoolFieldStateValue`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of CaOneResourcePoolFieldStateValue</returns>
-        public CaOneResourcePoolFieldStateValue GetCaOneResourcePoolFieldStateValue()
+        /// <returns>An instance of CoreApiOneResourcePoolFieldStateValue</returns>
+        public CoreApiOneResourcePoolFieldStateValue GetCoreApiOneResourcePoolFieldStateValue()
         {
-            return (CaOneResourcePoolFieldStateValue)this.ActualInstance;
+            return (CoreApiOneResourcePoolFieldStateValue)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `CaTwoResourcePoolFieldStateValue`. If the actual instance is not `CaTwoResourcePoolFieldStateValue`,
+        /// Get the actual instance of `CoreApiTwoResourcePoolFieldStateValue`. If the actual instance is not `CoreApiTwoResourcePoolFieldStateValue`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of CaTwoResourcePoolFieldStateValue</returns>
-        public CaTwoResourcePoolFieldStateValue GetCaTwoResourcePoolFieldStateValue()
+        /// <returns>An instance of CoreApiTwoResourcePoolFieldStateValue</returns>
+        public CoreApiTwoResourcePoolFieldStateValue GetCoreApiTwoResourcePoolFieldStateValue()
         {
-            return (CaTwoResourcePoolFieldStateValue)this.ActualInstance;
+            return (CoreApiTwoResourcePoolFieldStateValue)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `CaMultiResourcePoolFieldStateValue`. If the actual instance is not `CaMultiResourcePoolFieldStateValue`,
+        /// Get the actual instance of `CoreApiMultiResourcePoolFieldStateValue`. If the actual instance is not `CoreApiMultiResourcePoolFieldStateValue`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of CaMultiResourcePoolFieldStateValue</returns>
-        public CaMultiResourcePoolFieldStateValue GetCaMultiResourcePoolFieldStateValue()
+        /// <returns>An instance of CoreApiMultiResourcePoolFieldStateValue</returns>
+        public CoreApiMultiResourcePoolFieldStateValue GetCoreApiMultiResourcePoolFieldStateValue()
         {
-            return (CaMultiResourcePoolFieldStateValue)this.ActualInstance;
+            return (CoreApiMultiResourcePoolFieldStateValue)this.ActualInstance;
         }
 
         /// <summary>
@@ -341,141 +341,141 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(CaAccessControllerFieldStateValue).GetProperty("AdditionalProperties") == null)
+                if (typeof(CoreApiAccessControllerFieldStateValue).GetProperty("AdditionalProperties") == null)
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaAccessControllerFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiAccessControllerFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
                 }
                 else
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaAccessControllerFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiAccessControllerFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("CaAccessControllerFieldStateValue");
+                matchedTypes.Add("CoreApiAccessControllerFieldStateValue");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CaAccessControllerFieldStateValue: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CoreApiAccessControllerFieldStateValue: {1}", jsonString, exception.ToString()));
             }
 
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(CaAccountFieldStateValue).GetProperty("AdditionalProperties") == null)
+                if (typeof(CoreApiAccountFieldStateValue).GetProperty("AdditionalProperties") == null)
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaAccountFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiAccountFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
                 }
                 else
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaAccountFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiAccountFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("CaAccountFieldStateValue");
+                matchedTypes.Add("CoreApiAccountFieldStateValue");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CaAccountFieldStateValue: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CoreApiAccountFieldStateValue: {1}", jsonString, exception.ToString()));
             }
 
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(CaGenericScryptoComponentFieldStateValue).GetProperty("AdditionalProperties") == null)
+                if (typeof(CoreApiGenericScryptoComponentFieldStateValue).GetProperty("AdditionalProperties") == null)
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaGenericScryptoComponentFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiGenericScryptoComponentFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
                 }
                 else
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaGenericScryptoComponentFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiGenericScryptoComponentFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("CaGenericScryptoComponentFieldStateValue");
+                matchedTypes.Add("CoreApiGenericScryptoComponentFieldStateValue");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CaGenericScryptoComponentFieldStateValue: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CoreApiGenericScryptoComponentFieldStateValue: {1}", jsonString, exception.ToString()));
             }
 
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(CaMultiResourcePoolFieldStateValue).GetProperty("AdditionalProperties") == null)
+                if (typeof(CoreApiMultiResourcePoolFieldStateValue).GetProperty("AdditionalProperties") == null)
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaMultiResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiMultiResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
                 }
                 else
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaMultiResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiMultiResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("CaMultiResourcePoolFieldStateValue");
+                matchedTypes.Add("CoreApiMultiResourcePoolFieldStateValue");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CaMultiResourcePoolFieldStateValue: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CoreApiMultiResourcePoolFieldStateValue: {1}", jsonString, exception.ToString()));
             }
 
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(CaOneResourcePoolFieldStateValue).GetProperty("AdditionalProperties") == null)
+                if (typeof(CoreApiOneResourcePoolFieldStateValue).GetProperty("AdditionalProperties") == null)
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaOneResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiOneResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
                 }
                 else
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaOneResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiOneResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("CaOneResourcePoolFieldStateValue");
+                matchedTypes.Add("CoreApiOneResourcePoolFieldStateValue");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CaOneResourcePoolFieldStateValue: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CoreApiOneResourcePoolFieldStateValue: {1}", jsonString, exception.ToString()));
             }
 
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(CaTwoResourcePoolFieldStateValue).GetProperty("AdditionalProperties") == null)
+                if (typeof(CoreApiTwoResourcePoolFieldStateValue).GetProperty("AdditionalProperties") == null)
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaTwoResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiTwoResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
                 }
                 else
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaTwoResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiTwoResourcePoolFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("CaTwoResourcePoolFieldStateValue");
+                matchedTypes.Add("CoreApiTwoResourcePoolFieldStateValue");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CaTwoResourcePoolFieldStateValue: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CoreApiTwoResourcePoolFieldStateValue: {1}", jsonString, exception.ToString()));
             }
 
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(CaValidatorFieldStateValue).GetProperty("AdditionalProperties") == null)
+                if (typeof(CoreApiValidatorFieldStateValue).GetProperty("AdditionalProperties") == null)
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaValidatorFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiValidatorFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.SerializerSettings));
                 }
                 else
                 {
-                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CaValidatorFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
+                    newStateEntityDetailsResponseComponentDetailsState = new StateEntityDetailsResponseComponentDetailsState(JsonConvert.DeserializeObject<CoreApiValidatorFieldStateValue>(jsonString, StateEntityDetailsResponseComponentDetailsState.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("CaValidatorFieldStateValue");
+                matchedTypes.Add("CoreApiValidatorFieldStateValue");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CaValidatorFieldStateValue: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into CoreApiValidatorFieldStateValue: {1}", jsonString, exception.ToString()));
             }
 
             if (match == 0)

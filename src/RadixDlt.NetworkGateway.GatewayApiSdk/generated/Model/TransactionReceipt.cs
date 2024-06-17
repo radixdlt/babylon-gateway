@@ -119,7 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
         /// <param name="events">Events emitted by a transaction..</param>
         /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), CaFeeSummary feeSummary = default(CaFeeSummary), CaCostingParameters costingParameters = default(CaCostingParameters), CaFeeSource feeSource = default(CaFeeSource), CaFeeDestination feeDestination = default(CaFeeDestination), CaStateUpdates stateUpdates = default(CaStateUpdates), CaNextEpoch nextEpoch = default(CaNextEpoch), List<CaSborData> output = default(List<CaSborData>), List<EventsItem> events = default(List<EventsItem>), string errorMessage = default(string))
+        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), CoreApiFeeSummary feeSummary = default(CoreApiFeeSummary), CoreApiCostingParameters costingParameters = default(CoreApiCostingParameters), CoreApiFeeSource feeSource = default(CoreApiFeeSource), CoreApiFeeDestination feeDestination = default(CoreApiFeeDestination), CoreApiStateUpdates stateUpdates = default(CoreApiStateUpdates), CoreApiNextEpoch nextEpoch = default(CoreApiNextEpoch), List<CoreApiSborData> output = default(List<CoreApiSborData>), List<EventsItem> events = default(List<EventsItem>), string errorMessage = default(string))
         {
             this.Status = status;
             this.FeeSummary = feeSummary;
@@ -137,44 +137,44 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets FeeSummary
         /// </summary>
         [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
-        public CaFeeSummary FeeSummary { get; set; }
+        public CoreApiFeeSummary FeeSummary { get; set; }
 
         /// <summary>
         /// Gets or Sets CostingParameters
         /// </summary>
         [DataMember(Name = "costing_parameters", EmitDefaultValue = true)]
-        public CaCostingParameters CostingParameters { get; set; }
+        public CoreApiCostingParameters CostingParameters { get; set; }
 
         /// <summary>
         /// Gets or Sets FeeSource
         /// </summary>
         [DataMember(Name = "fee_source", EmitDefaultValue = true)]
-        public CaFeeSource FeeSource { get; set; }
+        public CoreApiFeeSource FeeSource { get; set; }
 
         /// <summary>
         /// Gets or Sets FeeDestination
         /// </summary>
         [DataMember(Name = "fee_destination", EmitDefaultValue = true)]
-        public CaFeeDestination FeeDestination { get; set; }
+        public CoreApiFeeDestination FeeDestination { get; set; }
 
         /// <summary>
         /// Gets or Sets StateUpdates
         /// </summary>
         [DataMember(Name = "state_updates", EmitDefaultValue = true)]
-        public CaStateUpdates StateUpdates { get; set; }
+        public CoreApiStateUpdates StateUpdates { get; set; }
 
         /// <summary>
         /// Gets or Sets NextEpoch
         /// </summary>
         [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
-        public CaNextEpoch NextEpoch { get; set; }
+        public CoreApiNextEpoch NextEpoch { get; set; }
 
         /// <summary>
         /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)
         /// </summary>
         /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)</value>
         [DataMember(Name = "output", EmitDefaultValue = true)]
-        public List<CaSborData> Output { get; set; }
+        public List<CoreApiSborData> Output { get; set; }
 
         /// <summary>
         /// Events emitted by a transaction.

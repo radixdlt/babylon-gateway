@@ -156,7 +156,7 @@ internal static class GatewayModelExtensions
         string? intentHash = null;
         string? rawHex = null;
         string? manifestInstructions = null;
-        GatewayModel.CaTransactionMessage? message = null;
+        GatewayModel.CoreApiTransactionMessage? message = null;
         List<GatewayModel.ManifestClass>? manifestClasses = null;
 
         if (lt is UserLedgerTransaction ult)
@@ -234,11 +234,11 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.CaBlueprintRoyaltyConfig ToGatewayModel(this ComponentMethodRoyaltyEntryHistory[]? input)
+    public static GatewayModel.CoreApiBlueprintRoyaltyConfig ToGatewayModel(this ComponentMethodRoyaltyEntryHistory[]? input)
     {
-        return new GatewayModel.CaBlueprintRoyaltyConfig(
+        return new GatewayModel.CoreApiBlueprintRoyaltyConfig(
             isEnabled: input != null,
-            methodRules: input?.Select(e => new GatewayModel.CaBlueprintMethodRoyalty(e.MethodName, CoreModelMapping.CaRoyaltyAmount(e.RoyaltyAmount))).ToList());
+            methodRules: input?.Select(e => new GatewayModel.CoreApiBlueprintMethodRoyalty(e.MethodName, CoreModelMapping.CaRoyaltyAmount(e.RoyaltyAmount))).ToList());
     }
 
     public static GatewayModel.PackageBlueprintCollectionItem ToGatewayModel(this PackageBlueprintHistory input, Dictionary<long, EntityAddress> correlatedAddresses)

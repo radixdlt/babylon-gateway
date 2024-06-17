@@ -80,151 +80,151 @@ public static partial class CoreModelMapping
         ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
     };
 
-    public static partial GatewayModel.CaTransactionReceipt ToGatewayCaModel(this CoreModel.TransactionReceipt source);
+    public static partial GatewayModel.CoreApiTransactionReceipt ToGatewayCaModel(this CoreModel.TransactionReceipt source);
 
-    public static partial List<GatewayModel.CaInstructionResourceChanges> ToGatewayCaModel(this List<CoreModel.InstructionResourceChanges> source);
+    public static partial List<GatewayModel.CoreApiInstructionResourceChanges> ToGatewayCaModel(this List<CoreModel.InstructionResourceChanges> source);
 
-    public static GatewayModel.CaAuthConfig? CaAuthConfig(string? raw)
+    public static GatewayModel.CoreApiAuthConfig? CaAuthConfig(string? raw)
     {
         return TryDeserialize<CoreModel.AuthConfig>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaFeeSummary? CaFeeSummary(string? raw)
+    public static GatewayModel.CoreApiFeeSummary? CaFeeSummary(string? raw)
     {
         return TryDeserialize<CoreModel.FeeSummary>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaCostingParameters? CaCostingParameters(string? raw)
+    public static GatewayModel.CoreApiCostingParameters? CaCostingParameters(string? raw)
     {
         return TryDeserialize<CoreModel.CostingParameters>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaFeeSource? CaFeeSource(string? raw)
+    public static GatewayModel.CoreApiFeeSource? CaFeeSource(string? raw)
     {
         return TryDeserialize<CoreModel.FeeSource>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaFeeDestination? CaFeeDestination(string? raw)
+    public static GatewayModel.CoreApiFeeDestination? CaFeeDestination(string? raw)
     {
         return TryDeserialize<CoreModel.FeeDestination>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaStateUpdates?CaStateUpdates(string? raw)
+    public static GatewayModel.CoreApiStateUpdates?CaStateUpdates(string? raw)
     {
         return TryDeserialize<CoreModel.StateUpdates>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaNextEpoch? CaNextEpoch(string? raw)
+    public static GatewayModel.CoreApiNextEpoch? CaNextEpoch(string? raw)
     {
         return TryDeserialize<CoreModel.NextEpoch>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static List<GatewayModel.CaSborData>? CaListSborData(string? raw)
+    public static List<GatewayModel.CoreApiSborData>? CaListSborData(string? raw)
     {
         return TryDeserialize<List<CoreModel.SborData>>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaEventEmitterIdentifier? CaEventEmitterIdentifier(string? raw)
+    public static GatewayModel.CoreApiEventEmitterIdentifier? CaEventEmitterIdentifier(string? raw)
     {
         return TryDeserialize<CoreModel.EventEmitterIdentifier>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaTransactionMessage? CaTransactionMessage(string? raw)
+    public static GatewayModel.CoreApiTransactionMessage? CaTransactionMessage(string? raw)
     {
         return TryDeserialize<CoreModel.TransactionMessage>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaBlueprintDefinition? CaBlueprintDefinition(string? raw)
+    public static GatewayModel.CoreApiBlueprintDefinition? CaBlueprintDefinition(string? raw)
     {
         return TryDeserialize<CoreModel.BlueprintDefinition>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaValidatorFieldStateValue? CaValidatorFieldStateValue(string? raw)
+    public static GatewayModel.CoreApiValidatorFieldStateValue? CaValidatorFieldStateValue(string? raw)
     {
         return TryDeserialize<CoreModel.ValidatorFieldStateValue>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaGenericScryptoComponentFieldStateValue? CaGenericScryptoComponentFieldStateValue(string? raw)
+    public static GatewayModel.CoreApiGenericScryptoComponentFieldStateValue? CaGenericScryptoComponentFieldStateValue(string? raw)
     {
         return TryDeserialize<CoreModel.GenericScryptoComponentFieldStateValue>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaAccessControllerFieldStateValue? CaAccessControllerFieldStateValue(string? raw)
+    public static GatewayModel.CoreApiAccessControllerFieldStateValue? CaAccessControllerFieldStateValue(string? raw)
     {
         return TryDeserialize<CoreModel.AccessControllerFieldStateValue>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaOneResourcePoolFieldStateValue? CaOneResourcePoolFieldStateValue(string? raw)
+    public static GatewayModel.CoreApiOneResourcePoolFieldStateValue? CaOneResourcePoolFieldStateValue(string? raw)
     {
         return TryDeserialize<CoreModel.OneResourcePoolFieldStateValue>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaTwoResourcePoolFieldStateValue? CaTwoResourcePoolFieldStateValue(string? raw)
+    public static GatewayModel.CoreApiTwoResourcePoolFieldStateValue? CaTwoResourcePoolFieldStateValue(string? raw)
     {
         return TryDeserialize<CoreModel.TwoResourcePoolFieldStateValue>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaMultiResourcePoolFieldStateValue? CaMultiResourcePoolFieldStateValue(string? raw)
+    public static GatewayModel.CoreApiMultiResourcePoolFieldStateValue? CaMultiResourcePoolFieldStateValue(string? raw)
     {
         return TryDeserialize<CoreModel.MultiResourcePoolFieldStateValue>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaOwnerRole? CaOwnerRole(string? raw)
+    public static GatewayModel.CoreApiOwnerRole? CaOwnerRole(string? raw)
     {
         return TryDeserialize<CoreModel.OwnerRole>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaAccessRule? CaAccessRule(string? raw)
+    public static GatewayModel.CoreApiAccessRule? CaAccessRule(string? raw)
     {
         return TryDeserialize<CoreModel.AccessRule>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaRoyaltyAmount? CaRoyaltyAmount(string? raw)
+    public static GatewayModel.CoreApiRoyaltyAmount? CaRoyaltyAmount(string? raw)
     {
         return TryDeserialize<CoreModel.RoyaltyAmount>(raw, out var source)
             ? source.ToGatewayCaModel()
             : null;
     }
 
-    public static GatewayModel.CaBlueprintRoyaltyConfig? CaBlueprintRoyaltyConfig(string? raw)
+    public static GatewayModel.CoreApiBlueprintRoyaltyConfig? CaBlueprintRoyaltyConfig(string? raw)
     {
         return TryDeserialize<CoreModel.BlueprintRoyaltyConfig>(raw, out var source)
             ? source.ToGatewayCaModel()
@@ -244,18 +244,18 @@ public static partial class CoreModelMapping
     // TODO remove everything below once Riok.Mapperly issue with nullable #enable and Dictionary<string?, ...> gets fixed
 
     [UserMapping(Default = true)]
-    private static GatewayModel.CaBlueprintDefinition ToGatewayCaModel(this CoreModel.BlueprintDefinition source)
+    private static GatewayModel.CoreApiBlueprintDefinition ToGatewayCaModel(this CoreModel.BlueprintDefinition source)
     {
-        return new GatewayModel.CaBlueprintDefinition(
+        return new GatewayModel.CoreApiBlueprintDefinition(
             _interface: source.Interface.ToGatewayCaModel(),
             functionExports: source.FunctionExports.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToGatewayCaModel()),
             hookExports: source.HookExports.Select(x => x.ToGatewayCaModel()).ToList());
     }
 
     [UserMapping(Default = true)]
-    private static GatewayModel.CaBlueprintInterface ToGatewayCaModel(this CoreModel.BlueprintInterface source)
+    private static GatewayModel.CoreApiBlueprintInterface ToGatewayCaModel(this CoreModel.BlueprintInterface source)
     {
-        return new GatewayModel.CaBlueprintInterface(
+        return new GatewayModel.CoreApiBlueprintInterface(
             outerBlueprint: source.OuterBlueprint,
             genericTypeParameters: source.GenericTypeParameters.Select(x => x.ToGatewayCaModel()).ToList(),
             isTransient: source.IsTransient,
@@ -267,9 +267,9 @@ public static partial class CoreModelMapping
     }
 
     [UserMapping(Default = true)]
-    private static GatewayModel.CaAuthConfig ToGatewayCaModel(this CoreModel.AuthConfig source)
+    private static GatewayModel.CoreApiAuthConfig ToGatewayCaModel(this CoreModel.AuthConfig source)
     {
-        return new GatewayModel.CaAuthConfig(
+        return new GatewayModel.CoreApiAuthConfig(
             functionAuthType: source.FunctionAuthType.ToGatewayCaModel(),
             functionAccessRules: source.FunctionAccessRules.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToGatewayCaModel()),
             methodAuthType: source.MethodAuthType.ToGatewayCaModel(),
@@ -277,73 +277,73 @@ public static partial class CoreModelMapping
     }
 
     [UserMapping(Default = true)]
-    private static GatewayModel.CaStaticRoleDefinitionAuthTemplate ToGatewayCaModel(this CoreModel.StaticRoleDefinitionAuthTemplate source)
+    private static GatewayModel.CoreApiStaticRoleDefinitionAuthTemplate ToGatewayCaModel(this CoreModel.StaticRoleDefinitionAuthTemplate source)
     {
-        return new GatewayModel.CaStaticRoleDefinitionAuthTemplate(
+        return new GatewayModel.CoreApiStaticRoleDefinitionAuthTemplate(
             roleSpecification: source.RoleSpecification.ToGatewayCaModel(),
             roles: source.Roles.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToGatewayCaModel()),
             methodAccessibilityMap: source.MethodAccessibilityMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToGatewayCaModel()));
     }
 
-    private static partial GatewayModel.CaRoleSpecification ToGatewayCaModel(this CoreModel.RoleSpecification source);
+    private static partial GatewayModel.CoreApiRoleSpecification ToGatewayCaModel(this CoreModel.RoleSpecification source);
 
-    private static partial GatewayModel.CaFunctionAuthType ToGatewayCaModel(this CoreModel.FunctionAuthType source);
+    private static partial GatewayModel.CoreApiFunctionAuthType ToGatewayCaModel(this CoreModel.FunctionAuthType source);
 
-    private static partial GatewayModel.CaMethodAuthType ToGatewayCaModel(this CoreModel.MethodAuthType source);
+    private static partial GatewayModel.CoreApiMethodAuthType ToGatewayCaModel(this CoreModel.MethodAuthType source);
 
-    private static partial GatewayModel.CaMethodAccessibility ToGatewayCaModel(this CoreModel.MethodAccessibility source);
+    private static partial GatewayModel.CoreApiMethodAccessibility ToGatewayCaModel(this CoreModel.MethodAccessibility source);
 
-    private static partial GatewayModel.CaRoleDetails ToGatewayCaModel(this CoreModel.RoleDetails source);
+    private static partial GatewayModel.CoreApiRoleDetails ToGatewayCaModel(this CoreModel.RoleDetails source);
 
-    private static partial GatewayModel.CaFeeSummary ToGatewayCaModel(this CoreModel.FeeSummary source);
+    private static partial GatewayModel.CoreApiFeeSummary ToGatewayCaModel(this CoreModel.FeeSummary source);
 
-    private static partial GatewayModel.CaCostingParameters ToGatewayCaModel(this CoreModel.CostingParameters source);
+    private static partial GatewayModel.CoreApiCostingParameters ToGatewayCaModel(this CoreModel.CostingParameters source);
 
-    private static partial GatewayModel.CaFeeSource ToGatewayCaModel(this CoreModel.FeeSource source);
+    private static partial GatewayModel.CoreApiFeeSource ToGatewayCaModel(this CoreModel.FeeSource source);
 
-    private static partial GatewayModel.CaFeeDestination ToGatewayCaModel(this CoreModel.FeeDestination source);
+    private static partial GatewayModel.CoreApiFeeDestination ToGatewayCaModel(this CoreModel.FeeDestination source);
 
-    private static partial GatewayModel.CaStateUpdates ToGatewayCaModel(this CoreModel.StateUpdates source);
+    private static partial GatewayModel.CoreApiStateUpdates ToGatewayCaModel(this CoreModel.StateUpdates source);
 
-    private static partial GatewayModel.CaNextEpoch ToGatewayCaModel(this CoreModel.NextEpoch source);
+    private static partial GatewayModel.CoreApiNextEpoch ToGatewayCaModel(this CoreModel.NextEpoch source);
 
-    private static partial List<GatewayModel.CaSborData> ToGatewayCaModel(this List<CoreModel.SborData> source);
+    private static partial List<GatewayModel.CoreApiSborData> ToGatewayCaModel(this List<CoreModel.SborData> source);
 
-    private static partial GatewayModel.CaEventEmitterIdentifier ToGatewayCaModel(this CoreModel.EventEmitterIdentifier source);
+    private static partial GatewayModel.CoreApiEventEmitterIdentifier ToGatewayCaModel(this CoreModel.EventEmitterIdentifier source);
 
-    private static partial GatewayModel.CaTransactionMessage ToGatewayCaModel(this CoreModel.TransactionMessage source);
+    private static partial GatewayModel.CoreApiTransactionMessage ToGatewayCaModel(this CoreModel.TransactionMessage source);
 
-    private static partial GatewayModel.CaRoyaltyAmount ToGatewayCaModel(this CoreModel.RoyaltyAmount source);
+    private static partial GatewayModel.CoreApiRoyaltyAmount ToGatewayCaModel(this CoreModel.RoyaltyAmount source);
 
-    private static partial GatewayModel.CaBlueprintRoyaltyConfig ToGatewayCaModel(this CoreModel.BlueprintRoyaltyConfig source);
+    private static partial GatewayModel.CoreApiBlueprintRoyaltyConfig ToGatewayCaModel(this CoreModel.BlueprintRoyaltyConfig source);
 
-    private static partial GatewayModel.CaValidatorFieldStateValue ToGatewayCaModel(this CoreModel.ValidatorFieldStateValue source);
+    private static partial GatewayModel.CoreApiValidatorFieldStateValue ToGatewayCaModel(this CoreModel.ValidatorFieldStateValue source);
 
-    private static partial GatewayModel.CaGenericScryptoComponentFieldStateValue ToGatewayCaModel(this CoreModel.GenericScryptoComponentFieldStateValue source);
+    private static partial GatewayModel.CoreApiGenericScryptoComponentFieldStateValue ToGatewayCaModel(this CoreModel.GenericScryptoComponentFieldStateValue source);
 
-    private static partial GatewayModel.CaAccessControllerFieldStateValue ToGatewayCaModel(this CoreModel.AccessControllerFieldStateValue source);
+    private static partial GatewayModel.CoreApiAccessControllerFieldStateValue ToGatewayCaModel(this CoreModel.AccessControllerFieldStateValue source);
 
-    private static partial GatewayModel.CaOneResourcePoolFieldStateValue ToGatewayCaModel(this CoreModel.OneResourcePoolFieldStateValue source);
+    private static partial GatewayModel.CoreApiOneResourcePoolFieldStateValue ToGatewayCaModel(this CoreModel.OneResourcePoolFieldStateValue source);
 
-    private static partial GatewayModel.CaTwoResourcePoolFieldStateValue ToGatewayCaModel(this CoreModel.TwoResourcePoolFieldStateValue source);
+    private static partial GatewayModel.CoreApiTwoResourcePoolFieldStateValue ToGatewayCaModel(this CoreModel.TwoResourcePoolFieldStateValue source);
 
-    private static partial GatewayModel.CaMultiResourcePoolFieldStateValue ToGatewayCaModel(this CoreModel.MultiResourcePoolFieldStateValue source);
+    private static partial GatewayModel.CoreApiMultiResourcePoolFieldStateValue ToGatewayCaModel(this CoreModel.MultiResourcePoolFieldStateValue source);
 
-    private static partial GatewayModel.CaAccessRule ToGatewayCaModel(this CoreModel.AccessRule source);
+    private static partial GatewayModel.CoreApiAccessRule ToGatewayCaModel(this CoreModel.AccessRule source);
 
-    private static partial GatewayModel.CaOwnerRole ToGatewayCaModel(this CoreModel.OwnerRole source);
+    private static partial GatewayModel.CoreApiOwnerRole ToGatewayCaModel(this CoreModel.OwnerRole source);
 
-    private static partial GatewayModel.CaPackageExport ToGatewayCaModel(this CoreModel.PackageExport source);
+    private static partial GatewayModel.CoreApiPackageExport ToGatewayCaModel(this CoreModel.PackageExport source);
 
-    private static partial GatewayModel.CaGenericTypeParameter ToGatewayCaModel(this CoreModel.GenericTypeParameter source);
+    private static partial GatewayModel.CoreApiGenericTypeParameter ToGatewayCaModel(this CoreModel.GenericTypeParameter source);
 
-    private static partial GatewayModel.CaIndexedStateSchema ToGatewayCaModel(this CoreModel.IndexedStateSchema source);
+    private static partial GatewayModel.CoreApiIndexedStateSchema ToGatewayCaModel(this CoreModel.IndexedStateSchema source);
 
-    private static partial GatewayModel.CaFunctionSchema ToGatewayCaModel(this CoreModel.FunctionSchema source);
+    private static partial GatewayModel.CoreApiFunctionSchema ToGatewayCaModel(this CoreModel.FunctionSchema source);
 
-    private static partial GatewayModel.CaBlueprintPayloadDef ToGatewayCaModel(this CoreModel.BlueprintPayloadDef source);
+    private static partial GatewayModel.CoreApiBlueprintPayloadDef ToGatewayCaModel(this CoreModel.BlueprintPayloadDef source);
 
-    private static partial GatewayModel.CaScopedTypeId ToGatewayCaModel(this CoreModel.ScopedTypeId source);
+    private static partial GatewayModel.CoreApiScopedTypeId ToGatewayCaModel(this CoreModel.ScopedTypeId source);
 
-    private static partial GatewayModel.CaHookExport ToGatewayCaModel(this CoreModel.HookExport source);
+    private static partial GatewayModel.CoreApiHookExport ToGatewayCaModel(this CoreModel.HookExport source);
 }

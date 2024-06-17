@@ -111,7 +111,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="resolution">resolution (required).</param>
         /// <param name="explicitRule">explicitRule.</param>
-        public ComponentEntityRoleAssignmentEntryAssignment(RoleAssignmentResolution resolution = default(RoleAssignmentResolution), CaAccessRule explicitRule = default(CaAccessRule))
+        public ComponentEntityRoleAssignmentEntryAssignment(RoleAssignmentResolution resolution = default(RoleAssignmentResolution), CoreApiAccessRule explicitRule = default(CoreApiAccessRule))
         {
             this.Resolution = resolution;
             this.ExplicitRule = explicitRule;
@@ -121,7 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets ExplicitRule
         /// </summary>
         [DataMember(Name = "explicit_rule", EmitDefaultValue = true)]
-        public CaAccessRule ExplicitRule { get; set; }
+        public CoreApiAccessRule ExplicitRule { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

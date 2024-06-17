@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="owner">owner (required).</param>
         /// <param name="entries">entries (required).</param>
-        public ComponentEntityRoleAssignments(CaOwnerRole owner = default(CaOwnerRole), List<ComponentEntityRoleAssignmentEntry> entries = default(List<ComponentEntityRoleAssignmentEntry>))
+        public ComponentEntityRoleAssignments(CoreApiOwnerRole owner = default(CoreApiOwnerRole), List<ComponentEntityRoleAssignmentEntry> entries = default(List<ComponentEntityRoleAssignmentEntry>))
         {
             // to ensure "owner" is required (not null)
             if (owner == null)
@@ -125,7 +125,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Owner
         /// </summary>
         [DataMember(Name = "owner", IsRequired = true, EmitDefaultValue = true)]
-        public CaOwnerRole Owner { get; set; }
+        public CoreApiOwnerRole Owner { get; set; }
 
         /// <summary>
         /// Gets or Sets Entries

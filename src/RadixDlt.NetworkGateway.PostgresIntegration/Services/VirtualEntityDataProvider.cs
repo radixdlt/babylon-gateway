@@ -157,15 +157,15 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
         var ownerBadgeRawHex = ownerBadgeBytes.ToArray().ToHex();
         var ownerBadgeProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(ownerBadgeBytes, networkConfiguration.Id);
 
-        var roleAssignmentOwnerProofLocalId = new GatewayModel.CaNonFungibleLocalId(
+        var roleAssignmentOwnerProofLocalId = new GatewayModel.CoreApiNonFungibleLocalId(
             simpleRep: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes)),
-            idType: GatewayModel.CaNonFungibleIdType.Bytes,
+            idType: GatewayModel.CoreApiNonFungibleIdType.Bytes,
             sborHex: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborEncode(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes)).ToArray().ToHex());
         var roleAssignmentOwnerProofGlobalId = await IsSecp256k1(decoded)
-            ? new GatewayModel.CaNonFungibleGlobalId(networkConfiguration.WellKnownAddresses.Secp256k1SignatureVirtualBadge, roleAssignmentOwnerProofLocalId)
-            : new GatewayModel.CaNonFungibleGlobalId(networkConfiguration.WellKnownAddresses.Ed25519SignatureVirtualBadge, roleAssignmentOwnerProofLocalId);
-        var ownerRule = new GatewayModel.CaProtectedAccessRule(new GatewayModel.CaProofAccessRuleNode(new GatewayModel.CaRequireProofRule(new GatewayModel.CaNonFungibleRequirement(roleAssignmentOwnerProofGlobalId))));
-        var roleAssignmentOwner = new GatewayModel.CaOwnerRole(rule: ownerRule, updater: GatewayModel.CaOwnerRoleUpdater.Object);
+            ? new GatewayModel.CoreApiNonFungibleGlobalId(networkConfiguration.WellKnownAddresses.Secp256k1SignatureVirtualBadge, roleAssignmentOwnerProofLocalId)
+            : new GatewayModel.CoreApiNonFungibleGlobalId(networkConfiguration.WellKnownAddresses.Ed25519SignatureVirtualBadge, roleAssignmentOwnerProofLocalId);
+        var ownerRule = new GatewayModel.CoreApiProtectedAccessRule(new GatewayModel.CoreApiProofAccessRuleNode(new GatewayModel.CoreApiRequireProofRule(new GatewayModel.CoreApiNonFungibleRequirement(roleAssignmentOwnerProofGlobalId))));
+        var roleAssignmentOwner = new GatewayModel.CoreApiOwnerRole(rule: ownerRule, updater: GatewayModel.CoreApiOwnerRoleUpdater.Object);
 
         var securifyRule = new[]
         {
@@ -180,7 +180,7 @@ internal class VirtualEntityDataProvider : IVirtualEntityDataProvider
                 packageAddress: networkConfiguration.WellKnownAddresses.AccountPackage,
                 blueprintName: "Account",
                 blueprintVersion: "1.0.0",
-                state: new GatewayModel.StateEntityDetailsResponseComponentDetailsState(new GatewayModel.CaAccountFieldStateValue(GatewayModel.CaDefaultDepositRule.Accept)),
+                state: new GatewayModel.StateEntityDetailsResponseComponentDetailsState(new GatewayModel.CoreApiAccountFieldStateValue(GatewayModel.CoreApiDefaultDepositRule.Accept)),
                 roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(roleAssignmentOwner, securifyRule.Concat(_virtualAccountRoleAssignmentEntries).ToList()),
                 royaltyVaultBalance: null)
             : new GatewayModel.StateEntityDetailsResponseComponentDetails(

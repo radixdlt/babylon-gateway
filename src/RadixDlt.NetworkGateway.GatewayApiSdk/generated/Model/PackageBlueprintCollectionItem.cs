@@ -111,7 +111,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="authTemplateIsLocked">authTemplateIsLocked.</param>
         /// <param name="royaltyConfig">royaltyConfig.</param>
         /// <param name="royaltyConfigIsLocked">royaltyConfigIsLocked.</param>
-        public PackageBlueprintCollectionItem(string name = default(string), string version = default(string), CaBlueprintDefinition definition = default(CaBlueprintDefinition), List<string> dependantEntities = default(List<string>), CaAuthConfig authTemplate = default(CaAuthConfig), bool? authTemplateIsLocked = default(bool?), CaBlueprintRoyaltyConfig royaltyConfig = default(CaBlueprintRoyaltyConfig), bool? royaltyConfigIsLocked = default(bool?))
+        public PackageBlueprintCollectionItem(string name = default(string), string version = default(string), CoreApiBlueprintDefinition definition = default(CoreApiBlueprintDefinition), List<string> dependantEntities = default(List<string>), CoreApiAuthConfig authTemplate = default(CoreApiAuthConfig), bool? authTemplateIsLocked = default(bool?), CoreApiBlueprintRoyaltyConfig royaltyConfig = default(CoreApiBlueprintRoyaltyConfig), bool? royaltyConfigIsLocked = default(bool?))
         {
             // to ensure "name" is required (not null)
             if (name == null)
@@ -154,7 +154,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Definition
         /// </summary>
         [DataMember(Name = "definition", IsRequired = true, EmitDefaultValue = true)]
-        public CaBlueprintDefinition Definition { get; set; }
+        public CoreApiBlueprintDefinition Definition { get; set; }
 
         /// <summary>
         /// Gets or Sets DependantEntities
@@ -166,7 +166,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets AuthTemplate
         /// </summary>
         [DataMember(Name = "auth_template", EmitDefaultValue = true)]
-        public CaAuthConfig AuthTemplate { get; set; }
+        public CoreApiAuthConfig AuthTemplate { get; set; }
 
         /// <summary>
         /// Gets or Sets AuthTemplateIsLocked
@@ -178,7 +178,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets RoyaltyConfig
         /// </summary>
         [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
-        public CaBlueprintRoyaltyConfig RoyaltyConfig { get; set; }
+        public CoreApiBlueprintRoyaltyConfig RoyaltyConfig { get; set; }
 
         /// <summary>
         /// Gets or Sets RoyaltyConfigIsLocked

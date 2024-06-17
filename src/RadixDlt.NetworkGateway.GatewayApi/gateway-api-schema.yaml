@@ -2384,18 +2384,18 @@ components:
         version:
           type: string
         definition:
-          $ref: "coreapi.yaml#/components/schemas/CaBlueprintDefinition"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiBlueprintDefinition"
         dependant_entities:
           type: array
           items:
             $ref: "#/components/schemas/Address"
         auth_template:
-          $ref: "coreapi.yaml#/components/schemas/CaAuthConfig"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiAuthConfig"
         auth_template_is_locked:
           type: boolean
           nullable: true
         royalty_config:
-          $ref: "coreapi.yaml#/components/schemas/CaBlueprintRoyaltyConfig"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiBlueprintRoyaltyConfig"
         royalty_config_is_locked:
           type: boolean
           nullable: true
@@ -2432,7 +2432,7 @@ components:
         - entries
       properties:
         owner:
-          $ref: "coreapi.yaml#/components/schemas/CaOwnerRole"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiOwnerRole"
         entries:
           type: array
           items:
@@ -2454,7 +2454,7 @@ components:
             resolution:
               $ref: "#/components/schemas/RoleAssignmentResolution"
             explicit_rule:
-              $ref: "coreapi.yaml#/components/schemas/CaAccessRule"
+              $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiAccessRule"
         updater_roles:
           type: array
           items:
@@ -2895,7 +2895,7 @@ components:
           items:
             $ref: "#/components/schemas/ManifestClass"
         message:
-          $ref: "coreapi.yaml#/components/schemas/CaTransactionMessage"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiTransactionMessage"
         balance_changes:
           $ref: "#/components/schemas/TransactionBalanceChanges"
 
@@ -2954,24 +2954,24 @@ components:
         status:
           $ref: "#/components/schemas/TransactionStatus"
         fee_summary:
-          $ref: "coreapi.yaml#/components/schemas/CaFeeSummary"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiFeeSummary"
         costing_parameters:
-          $ref: "coreapi.yaml#/components/schemas/CaCostingParameters"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiCostingParameters"
         fee_source:
           description: Only present if the `status` is not `Rejected`.
-          $ref: "coreapi.yaml#/components/schemas/CaFeeSource"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiFeeSource"
         fee_destination:
           description: Only present if the `status` is not `Rejected`.
-          $ref: "coreapi.yaml#/components/schemas/CaFeeDestination"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiFeeDestination"
         state_updates:
-          $ref: "coreapi.yaml#/components/schemas/CaStateUpdates"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiStateUpdates"
         next_epoch:
-          $ref: "coreapi.yaml#/components/schemas/CaNextEpoch"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiNextEpoch"
         output:
           type: array
           description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`)
           items:
-            $ref: "coreapi.yaml#/components/schemas/CaSborData"
+            $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiSborData"
         events:
           description: Events emitted by a transaction.
           type: array
@@ -2992,7 +2992,7 @@ components:
         name:
           type: string
         emitter:
-          $ref: "coreapi.yaml#/components/schemas/CaEventEmitterIdentifier"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiEventEmitterIdentifier"
         data:
           $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
 
@@ -3076,7 +3076,7 @@ components:
         pending_owner_stake_unit_unlock_vault:
           $ref: "#/components/schemas/ValidatorVaultItem"
         state:
-          $ref: "coreapi.yaml#/components/schemas/CaValidatorFieldStateValue"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiValidatorFieldStateValue"
         active_in_epoch:
           $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpoch"
         metadata:
@@ -3352,11 +3352,11 @@ components:
         encoded_receipt:
           $ref: "#/components/schemas/HexString"
         receipt:
-          $ref: "coreapi.yaml#/components/schemas/CaTransactionReceipt"
+          $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiTransactionReceipt"
         resource_changes:
           type: array
           items:
-            $ref: "coreapi.yaml#/components/schemas/CaInstructionResourceChanges"
+            $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiInstructionResourceChanges"
         logs:
           type: array
           items:
@@ -4047,15 +4047,16 @@ components:
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
             royalty_config:
-              $ref: "coreapi.yaml#/components/schemas/CaBlueprintRoyaltyConfig"
+              $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiBlueprintRoyaltyConfig"
     StateEntityDetailsResponseComponentDetailsState:
       oneOf:
-        - $ref: "coreapi.yaml#/components/schemas/CaGenericScryptoComponentFieldStateValue"
-        - $ref: "coreapi.yaml#/components/schemas/CaValidatorFieldStateValue"
-        - $ref: "coreapi.yaml#/components/schemas/CaAccessControllerFieldStateValue"
-        - $ref: "coreapi.yaml#/components/schemas/CaOneResourcePoolFieldStateValue"
-        - $ref: "coreapi.yaml#/components/schemas/CaTwoResourcePoolFieldStateValue"
-        - $ref: "coreapi.yaml#/components/schemas/CaMultiResourcePoolFieldStateValue"
+        - $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiGenericScryptoComponentFieldStateValue"
+        - $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiAccountFieldStateValue"
+        - $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiValidatorFieldStateValue"
+        - $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiAccessControllerFieldStateValue"
+        - $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiOneResourcePoolFieldStateValue"
+        - $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiTwoResourcePoolFieldStateValue"
+        - $ref: "core-api-sealed-types.yaml#/components/schemas/CoreApiMultiResourcePoolFieldStateValue"
 
     StateAccountResourcePreferencesPageRequest:
       allOf:
