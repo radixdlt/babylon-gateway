@@ -13,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CoreApiAccessRule } from './CoreApiAccessRule';
+import {
+    CoreApiAccessRuleFromJSON,
+    CoreApiAccessRuleFromJSONTyped,
+    CoreApiAccessRuleToJSON,
+} from './CoreApiAccessRule';
 import type { RoleAssignmentResolution } from './RoleAssignmentResolution';
 import {
     RoleAssignmentResolutionFromJSON,
@@ -33,12 +39,11 @@ export interface ComponentEntityRoleAssignmentEntryAssignment {
      */
     resolution: RoleAssignmentResolution;
     /**
-     * This type is defined in the Core API as `AccessRule`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiAccessRule}
      * @memberof ComponentEntityRoleAssignmentEntryAssignment
      */
-    explicit_rule?: object;
+    explicit_rule?: CoreApiAccessRule;
 }
 
 /**
@@ -62,7 +67,7 @@ export function ComponentEntityRoleAssignmentEntryAssignmentFromJSONTyped(json: 
     return {
         
         'resolution': RoleAssignmentResolutionFromJSON(json['resolution']),
-        'explicit_rule': !exists(json, 'explicit_rule') ? undefined : json['explicit_rule'],
+        'explicit_rule': !exists(json, 'explicit_rule') ? undefined : CoreApiAccessRuleFromJSON(json['explicit_rule']),
     };
 }
 
@@ -76,7 +81,7 @@ export function ComponentEntityRoleAssignmentEntryAssignmentToJSON(value?: Compo
     return {
         
         'resolution': RoleAssignmentResolutionToJSON(value.resolution),
-        'explicit_rule': value.explicit_rule,
+        'explicit_rule': CoreApiAccessRuleToJSON(value.explicit_rule),
     };
 }
 

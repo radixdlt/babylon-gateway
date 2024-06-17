@@ -15,7 +15,6 @@
 import { exists, mapValues } from '../runtime';
 /**
  * See documentation of `MetadataInstantValue` for detailed description of `values` vs `values_unix_timestamp_seconds`.
-
  * @export
  * @interface MetadataInstantArrayValueAllOf
  */

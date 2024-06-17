@@ -15,7 +15,6 @@
 
 /**
  * A more specific payload status. See the description field for further information.
-
  * @export
  */
 export const TransactionPayloadStatus = {

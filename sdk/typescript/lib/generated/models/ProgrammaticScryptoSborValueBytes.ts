@@ -34,18 +34,16 @@ export interface ProgrammaticScryptoSborValueBytes {
     kind: ProgrammaticScryptoSborValueBytesKindEnum;
     /**
      * The name of the type of this value.
-This is only output when a schema is present and the type has a name.
-This property is ignored when the value is used as an input to the API.
-
+     * This is only output when a schema is present and the type has a name.
+     * This property is ignored when the value is used as an input to the API.
      * @type {string}
      * @memberof ProgrammaticScryptoSborValueBytes
      */
     type_name?: string | null;
     /**
      * The name of the field which hosts this value.
-This property is only included if this value is a child of a `Tuple` or `Enum` with named fields.
-This property is ignored when the value is used as an input to the API.
-
+     * This property is only included if this value is a child of a `Tuple` or `Enum` with named fields.
+     * This property is ignored when the value is used as an input to the API.
      * @type {string}
      * @memberof ProgrammaticScryptoSborValueBytes
      */

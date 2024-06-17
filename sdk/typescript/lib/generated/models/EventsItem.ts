@@ -13,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CoreApiEventEmitterIdentifier } from './CoreApiEventEmitterIdentifier';
+import {
+    CoreApiEventEmitterIdentifierFromJSON,
+    CoreApiEventEmitterIdentifierFromJSONTyped,
+    CoreApiEventEmitterIdentifierToJSON,
+} from './CoreApiEventEmitterIdentifier';
 import type { ProgrammaticScryptoSborValue } from './ProgrammaticScryptoSborValue';
 import {
     ProgrammaticScryptoSborValueFromJSON,
@@ -33,12 +39,11 @@ export interface EventsItem {
      */
     name: string;
     /**
-     * This type is defined in the Core API as `EventEmitterIdentifier`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiEventEmitterIdentifier}
      * @memberof EventsItem
      */
-    emitter: object;
+    emitter: CoreApiEventEmitterIdentifier;
     /**
      * 
      * @type {ProgrammaticScryptoSborValue}
@@ -70,7 +75,7 @@ export function EventsItemFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     return {
         
         'name': json['name'],
-        'emitter': json['emitter'],
+        'emitter': CoreApiEventEmitterIdentifierFromJSON(json['emitter']),
         'data': ProgrammaticScryptoSborValueFromJSON(json['data']),
     };
 }
@@ -85,7 +90,7 @@ export function EventsItemToJSON(value?: EventsItem | null): any {
     return {
         
         'name': value.name,
-        'emitter': value.emitter,
+        'emitter': CoreApiEventEmitterIdentifierToJSON(value.emitter),
         'data': ProgrammaticScryptoSborValueToJSON(value.data),
     };
 }

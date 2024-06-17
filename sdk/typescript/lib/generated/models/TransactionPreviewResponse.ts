@@ -13,6 +13,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CoreApiInstructionResourceChanges } from './CoreApiInstructionResourceChanges';
+import {
+    CoreApiInstructionResourceChangesFromJSON,
+    CoreApiInstructionResourceChangesFromJSONTyped,
+    CoreApiInstructionResourceChangesToJSON,
+} from './CoreApiInstructionResourceChanges';
+import type { CoreApiTransactionReceipt } from './CoreApiTransactionReceipt';
+import {
+    CoreApiTransactionReceiptFromJSON,
+    CoreApiTransactionReceiptFromJSONTyped,
+    CoreApiTransactionReceiptToJSON,
+} from './CoreApiTransactionReceipt';
 import type { TransactionPreviewResponseLogsInner } from './TransactionPreviewResponseLogsInner';
 import {
     TransactionPreviewResponseLogsInnerFromJSON,
@@ -33,18 +45,17 @@ export interface TransactionPreviewResponse {
      */
     encoded_receipt: string;
     /**
-     * This type is defined in the Core API as `TransactionReceipt`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiTransactionReceipt}
      * @memberof TransactionPreviewResponse
      */
-    receipt: object;
+    receipt: CoreApiTransactionReceipt;
     /**
      * 
-     * @type {Array<object>}
+     * @type {Array<CoreApiInstructionResourceChanges>}
      * @memberof TransactionPreviewResponse
      */
-    resource_changes: Array<object>;
+    resource_changes: Array<CoreApiInstructionResourceChanges>;
     /**
      * 
      * @type {Array<TransactionPreviewResponseLogsInner>}
@@ -77,8 +88,8 @@ export function TransactionPreviewResponseFromJSONTyped(json: any, ignoreDiscrim
     return {
         
         'encoded_receipt': json['encoded_receipt'],
-        'receipt': json['receipt'],
-        'resource_changes': json['resource_changes'],
+        'receipt': CoreApiTransactionReceiptFromJSON(json['receipt']),
+        'resource_changes': ((json['resource_changes'] as Array<any>).map(CoreApiInstructionResourceChangesFromJSON)),
         'logs': ((json['logs'] as Array<any>).map(TransactionPreviewResponseLogsInnerFromJSON)),
     };
 }
@@ -93,8 +104,8 @@ export function TransactionPreviewResponseToJSON(value?: TransactionPreviewRespo
     return {
         
         'encoded_receipt': value.encoded_receipt,
-        'receipt': value.receipt,
-        'resource_changes': value.resource_changes,
+        'receipt': CoreApiTransactionReceiptToJSON(value.receipt),
+        'resource_changes': ((value.resource_changes as Array<any>).map(CoreApiInstructionResourceChangesToJSON)),
         'logs': ((value.logs as Array<any>).map(TransactionPreviewResponseLogsInnerToJSON)),
     };
 }
