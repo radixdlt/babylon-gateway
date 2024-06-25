@@ -3,6 +3,9 @@ Release built: _not released yet_
 
 - Optimized `/statistics/validators/uptime` endpoint processing time.
 
+### API Changes
+- Added support for the missing `message` and `flags.disable_auth_checks` properties in the `/transaction/preview` endpoint request.
+
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
 - Replaced per-epoch validator emissions (`validator_emission_statistics` table) with their cumulative statistics (`validator_cumulative_emission_history` table).
