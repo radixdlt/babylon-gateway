@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
@@ -87,12 +89,14 @@ internal class TransactionPreviewService : ITransactionPreviewService
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ICoreApiProvider _coreApiProvider;
     private readonly IEnumerable<ITransactionPreviewServiceObserver> _observers;
+    private readonly ILogger _logger;
 
-    public TransactionPreviewService(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, IEnumerable<ITransactionPreviewServiceObserver> observers)
+    public TransactionPreviewService(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, IEnumerable<ITransactionPreviewServiceObserver> observers, ILogger<TransactionPreviewService> logger)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _coreApiProvider = coreApiProvider;
         _observers = observers;
+        _logger = logger;
     }
 
     public async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
@@ -119,8 +123,9 @@ internal class TransactionPreviewService : ITransactionPreviewService
 
     private async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewAndCreateResponse(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
     {
-        CoreModel.PublicKey ToCoreModel(GatewayModel.PublicKey publicKey) => publicKey switch
+        CoreModel.PublicKey? MapPublicKey(GatewayModel.PublicKey? publicKey) => publicKey switch
         {
+            null => null,
             GatewayModel.PublicKeyEcdsaSecp256k1 ecdsaSecp256K1 => new CoreModel.EcdsaSecp256k1PublicKey(ecdsaSecp256K1.KeyHex),
             GatewayModel.PublicKeyEddsaEd25519 eddsaEd25519 => new CoreModel.EddsaEd25519PublicKey(eddsaEd25519.KeyHex),
             _ => throw new UnreachableException($"Didn't expect {publicKey.GetType().Name} type"),
@@ -129,7 +134,24 @@ internal class TransactionPreviewService : ITransactionPreviewService
         var coreRequestFlags = new CoreModel.TransactionPreviewRequestFlags(
             useFreeCredit: request.Flags.UseFreeCredit,
             assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
-            skipEpochCheck: request.Flags.SkipEpochCheck);
+            skipEpochCheck: request.Flags.SkipEpochCheck,
+            disableAuthChecks: request.Flags.DisableAuthChecks);
+
+        CoreModel.TransactionMessage? message = null;
+
+        if (request.Message != null)
+        {
+            try
+            {
+                message = (request.Message as JObject)?.ToObject<CoreModel.TransactionMessage>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unable to parse TX message");
+
+                throw InvalidRequestException.FromOtherError("Unable to parse TX message");
+            }
+        }
 
         var coreRequest = new CoreModel.TransactionPreviewRequest(
             network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
@@ -137,11 +159,12 @@ internal class TransactionPreviewService : ITransactionPreviewService
             blobsHex: request.BlobsHex,
             startEpochInclusive: request.StartEpochInclusive,
             endEpochExclusive: request.EndEpochExclusive,
-            notaryPublicKey: request.NotaryPublicKey != null ? ToCoreModel(request.NotaryPublicKey) : null,
+            notaryPublicKey: MapPublicKey(request.NotaryPublicKey),
             notaryIsSignatory: request.NotaryIsSignatory,
             tipPercentage: request.TipPercentage,
             nonce: request.Nonce,
-            signerPublicKeys: request.SignerPublicKeys.Select(ToCoreModel).ToList(),
+            signerPublicKeys: request.SignerPublicKeys.Select(MapPublicKey).ToList(),
+            message: message,
             flags: coreRequestFlags);
 
         var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() =>
