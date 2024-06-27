@@ -43,6 +43,8 @@ While all three main system parts are technically independent of each other it i
 **Note:** Babylon Network Gateway is **NOT** compatible with previous Olympia version. Brand-new, clean database must be used. 
 If you're upgrading from Olympia and deploying for the very first time you may want to run Database Migrations application with `WIPE_DATABASE=true` configuration parameter to drop existing database and recreate it. This is irreversible operation. **Proceed with caution!**  
 
+Read more about [database maintenance](./docs/database-maintenance.md) and [database migrations](./docs/database-migrations.md). 
+
 ## Dependencies
 
 Mandatory dependencies:
