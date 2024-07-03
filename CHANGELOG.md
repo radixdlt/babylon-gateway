@@ -3,6 +3,9 @@ Release built: _not released yet_
 
 - Optimized `/statistics/validators/uptime` endpoint processing time.
 
+### Bug fixes
+- Properly indexes manifest classes. Some transactions might have been previously misclassified as `Transfer` and `AccountDepositSettingsUpdate`, i.e. empty transactions with only `lock_fee` instruction.
+
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
 - Replaced per-epoch validator emissions (`validator_emission_statistics` table) with their cumulative statistics (`validator_cumulative_emission_history` table).
