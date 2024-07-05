@@ -122,8 +122,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="totalSupply">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalBurned">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        /// <param name="nonFungibleDataMutableFields">nonFungibleDataMutableFields (required).</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.NonFungibleResource).</param>
-        public StateEntityDetailsResponseNonFungibleResourceDetails(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleResource) : base(type)
+        public StateEntityDetailsResponseNonFungibleResourceDetails(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), List<string> nonFungibleDataMutableFields = default(List<string>), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleResource) : base(type)
         {
             // to ensure "roleAssignments" is required (not null)
             if (roleAssignments == null)
@@ -150,6 +151,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("totalBurned is a required property for StateEntityDetailsResponseNonFungibleResourceDetails and cannot be null");
             }
             this.TotalBurned = totalBurned;
+            // to ensure "nonFungibleDataMutableFields" is required (not null)
+            if (nonFungibleDataMutableFields == null)
+            {
+                throw new ArgumentNullException("nonFungibleDataMutableFields is a required property for StateEntityDetailsResponseNonFungibleResourceDetails and cannot be null");
+            }
+            this.NonFungibleDataMutableFields = nonFungibleDataMutableFields;
         }
 
         /// <summary>
@@ -180,6 +187,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string TotalBurned { get; set; }
 
         /// <summary>
+        /// Gets or Sets NonFungibleDataMutableFields
+        /// </summary>
+        [DataMember(Name = "non_fungible_data_mutable_fields", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> NonFungibleDataMutableFields { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -193,6 +206,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
             sb.Append("  TotalBurned: ").Append(TotalBurned).Append("\n");
+            sb.Append("  NonFungibleDataMutableFields: ").Append(NonFungibleDataMutableFields).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -251,6 +265,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TotalBurned == input.TotalBurned ||
                     (this.TotalBurned != null &&
                     this.TotalBurned.Equals(input.TotalBurned))
+                ) && base.Equals(input) && 
+                (
+                    this.NonFungibleDataMutableFields == input.NonFungibleDataMutableFields ||
+                    this.NonFungibleDataMutableFields != null &&
+                    input.NonFungibleDataMutableFields != null &&
+                    this.NonFungibleDataMutableFields.SequenceEqual(input.NonFungibleDataMutableFields)
                 );
         }
 
@@ -279,6 +299,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.TotalBurned != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalBurned.GetHashCode();
+                }
+                if (this.NonFungibleDataMutableFields != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleDataMutableFields.GetHashCode();
                 }
                 return hashCode;
             }

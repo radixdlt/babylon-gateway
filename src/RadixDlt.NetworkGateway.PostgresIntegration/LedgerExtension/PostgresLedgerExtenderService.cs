@@ -415,6 +415,14 @@ UPDATE pending_transactions
                             });
                         }
 
+                        if (substateData is CoreModel.NonFungibleResourceManagerFieldMutableFieldsSubstate mutableFields)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) =>
+                            {
+                                e.NonFungibleDataMutableFields = mutableFields.Value.MutableFields.Select(x => x.Name).ToList();
+                            });
+                        }
+
                         if (substateData is CoreModel.NonFungibleResourceManagerFieldIdTypeSubstate nonFungibleResourceManagerFieldIdTypeSubstate)
                         {
                             referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) =>

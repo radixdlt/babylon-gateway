@@ -158,6 +158,9 @@ internal class GlobalNonFungibleResourceEntity : ResourceEntity
 {
     [Column("non_fungible_id_type")]
     public NonFungibleIdType NonFungibleIdType { get; set; }
+
+    [Column("non_fungible_data_mutable_fields")]
+    public List<string> NonFungibleDataMutableFields { get; set; }
 }
 
 internal abstract class ComponentEntity : Entity

@@ -8,10 +8,12 @@ Release built: _not released yet_
 
 ### API Changes
 - Added support for the missing `message` and `flags.disable_auth_checks` properties in the `/transaction/preview` endpoint request.
+- Added list of mutable non fungible data fields `non_fungible_data_mutable_fields` returned from `/state/entity/details` endpoint.
 
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
 - Replaced per-epoch validator emissions (`validator_emission_statistics` table) with their cumulative statistics (`validator_cumulative_emission_history` table).
+- Added `non_fungible_data_mutable_fields` to `entities` table. Which contains list of all mutable non fungible data fields for non fungible resource entities.
 
 ## 1.6.1
 Release built: 21.05.2024

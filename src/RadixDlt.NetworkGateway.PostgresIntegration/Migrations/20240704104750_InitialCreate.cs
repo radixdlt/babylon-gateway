@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -281,7 +281,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     blueprint_version = table.Column<string>(type: "text", nullable: true),
                     assigned_module_ids = table.Column<List<ModuleId>>(type: "module_id[]", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
-                    non_fungible_id_type = table.Column<NonFungibleIdType>(type: "non_fungible_id_type", nullable: true)
+                    non_fungible_id_type = table.Column<NonFungibleIdType>(type: "non_fungible_id_type", nullable: true),
+                    non_fungible_data_mutable_fields = table.Column<List<string>>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {

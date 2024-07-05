@@ -3992,6 +3992,7 @@ components:
             - total_supply
             - total_minted
             - total_burned
+            - non_fungible_data_mutable_fields
           properties:
             role_assignments:
               $ref: "#/components/schemas/ComponentEntityRoleAssignments"
@@ -4003,6 +4004,10 @@ components:
               $ref: "#/components/schemas/BigDecimal"
             total_burned:
               $ref: "#/components/schemas/BigDecimal"
+            non_fungible_data_mutable_fields:
+              type: array
+              items:
+                type: string
     StateEntityDetailsResponseFungibleVaultDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"

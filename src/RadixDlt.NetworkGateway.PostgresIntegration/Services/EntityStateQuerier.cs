@@ -208,7 +208,9 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         totalSupply: nonFungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
-                        nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel());
+                        nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel(),
+                        nonFungibleDataMutableFields: nfrme.NonFungibleDataMutableFields
+                        );
                     break;
 
                 case GlobalPackageEntity pe:
