@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -76,7 +75,6 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CoreClient = RadixDlt.CoreApiSdk.Client;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace GatewayApi.ExceptionHandlingMiddleware;

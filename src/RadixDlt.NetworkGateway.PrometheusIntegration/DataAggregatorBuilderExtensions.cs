@@ -67,7 +67,6 @@ using Prometheus;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;

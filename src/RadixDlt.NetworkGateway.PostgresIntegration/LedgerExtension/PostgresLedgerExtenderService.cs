@@ -605,7 +605,6 @@ UPDATE pending_transactions
                     GlobalAccountLockerEntity => CoreModel.EntityType.GlobalAccountLocker,
                     GlobalIdentityEntity => CoreModel.EntityType.GlobalIdentity,
                     GlobalAccessControllerEntity => CoreModel.EntityType.GlobalAccessController,
-
                     // skipped GlobalVirtualSecp256k1Account, GlobalVirtualSecp256k1Identity, GlobalVirtualEd25519Account and GlobalVirtualEd25519Identity as they are virtual
                     GlobalFungibleResourceEntity => CoreModel.EntityType.GlobalFungibleResource,
                     InternalFungibleVaultEntity => CoreModel.EntityType.InternalFungibleVault,

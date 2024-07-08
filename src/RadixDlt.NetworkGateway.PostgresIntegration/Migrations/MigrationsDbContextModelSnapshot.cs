@@ -68,10 +68,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable

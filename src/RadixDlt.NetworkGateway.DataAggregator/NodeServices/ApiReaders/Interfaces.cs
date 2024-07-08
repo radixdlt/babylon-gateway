@@ -65,7 +65,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreApi = RadixDlt.CoreApiSdk.Api;
 using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 

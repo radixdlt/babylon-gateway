@@ -154,13 +154,18 @@ internal class GlobalFungibleResourceEntity : ResourceEntity
     public int Divisibility { get; set; }
 }
 
-internal class GlobalNonFungibleResourceEntity : ResourceEntity
+internal class GlobalNonFungibleResourceEntity : ResourceEntity, IAggregateHolder
 {
     [Column("non_fungible_id_type")]
     public NonFungibleIdType NonFungibleIdType { get; set; }
 
     [Column("non_fungible_data_mutable_fields")]
     public List<string> NonFungibleDataMutableFields { get; set; }
+
+    public IEnumerable<(string Name, int TotalCount)> AggregateCounts()
+    {
+        yield return (nameof(NonFungibleDataMutableFields), NonFungibleDataMutableFields.Count);
+    }
 }
 
 internal abstract class ComponentEntity : Entity
