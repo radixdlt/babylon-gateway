@@ -730,13 +730,13 @@ UPDATE pending_transactions
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
 
-        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, token);
+        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, networkConfiguration, token);
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
         var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
-        var entitySchemaProcessor = new EntitySchemaProcessor(processorContext, networkConfiguration.Id);
+        var entitySchemaProcessor = new EntitySchemaProcessor(processorContext);
         var componentMethodRoyaltyProcessor = new ComponentMethodRoyaltyProcessor(processorContext);
         var entityRoleAssignmentProcessor = new EntityRoleAssignmentProcessor(processorContext);
-        var packageCodeProcessor = new PackageCodeProcessor(processorContext, networkConfiguration.Id);
+        var packageCodeProcessor = new PackageCodeProcessor(processorContext);
         var packageBlueprintProcessor = new PackageBlueprintProcessor(processorContext, referencedEntities);
         var accountAuthorizedDepositorsProcessor = new AccountAuthorizedDepositorsProcessor(processorContext, referencedEntities);
         var accountResourcePreferenceRulesProcessor = new AccountResourcePreferenceRulesProcessor(processorContext, referencedEntities);
@@ -744,7 +744,7 @@ UPDATE pending_transactions
         var keyValueStoreProcessor = new KeyValueStoreProcessor(processorContext);
         var validatorProcessor = new ValidatorProcessor(processorContext, referencedEntities);
         var validatorEmissionProcessor = new ValidatorEmissionProcessor(processorContext);
-        var accountLockerProcessor = new AccountLockerProcessor(processorContext, referencedEntities, networkConfiguration.Id);
+        var accountLockerProcessor = new AccountLockerProcessor(processorContext, referencedEntities);
 
         // step: scan all substates & events to figure out changes
         {

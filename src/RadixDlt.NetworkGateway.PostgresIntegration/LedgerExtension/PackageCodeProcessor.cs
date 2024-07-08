@@ -93,7 +93,6 @@ internal record PackageCodeChangePointer
 internal class PackageCodeProcessor
 {
     private readonly ProcessorContext _context;
-    private readonly byte _networkId;
 
     private ChangeTracker<PackageCodeChangePointerLookup, PackageCodeChangePointer> _changes = new();
 
@@ -103,10 +102,9 @@ internal class PackageCodeProcessor
     private List<PackageCodeAggregateHistory> _aggregatesToAdd = new();
     private List<PackageCodeHistory> _entriesToAdd = new();
 
-    public PackageCodeProcessor(ProcessorContext context, byte networkId)
+    public PackageCodeProcessor(ProcessorContext context)
     {
         _context = context;
-        _networkId = networkId;
     }
 
     public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
@@ -131,7 +129,7 @@ internal class PackageCodeProcessor
         if (substateId.SubstateType == CoreModel.SubstateType.PackageCodeVmTypeEntry)
         {
             var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
-            var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkId);
+            var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _context.NetworkConfiguration.Id);
 
             _changes
                 .GetOrAdd(new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex(), stateVersion), _ => new PackageCodeChangePointer())
@@ -141,7 +139,7 @@ internal class PackageCodeProcessor
         if (substateId.SubstateType == CoreModel.SubstateType.PackageCodeOriginalCodeEntry)
         {
             var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
-            var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkId);
+            var code_hash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _context.NetworkConfiguration.Id);
 
             _changes
                 .GetOrAdd(new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)code_hash.Hex.ConvertFromHex(), stateVersion), _ => new PackageCodeChangePointer())
