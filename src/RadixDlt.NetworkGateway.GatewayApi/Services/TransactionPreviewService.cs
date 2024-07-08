@@ -67,6 +67,7 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
+using RadixDlt.NetworkGateway.CoreApiMapping;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -176,8 +177,8 @@ internal class TransactionPreviewService : ITransactionPreviewService
 
             return new GatewayModel.TransactionPreviewResponse(
                 encodedReceipt: coreResponse.EncodedReceipt,
-                receipt: coreResponse.Receipt,
-                resourceChanges: coreResponse.InstructionResourceChanges.Cast<object>().ToList(),
+                receipt: coreResponse.Receipt.ToGatewayCaModel(),
+                resourceChanges: coreResponse.InstructionResourceChanges.ToGatewayCaModel(),
                 logs: coreResponse.Logs.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
         }
 

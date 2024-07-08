@@ -13,12 +13,24 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { BlueprintRoyaltyConfig } from './BlueprintRoyaltyConfig';
+import type { CoreApiAuthConfig } from './CoreApiAuthConfig';
 import {
-    BlueprintRoyaltyConfigFromJSON,
-    BlueprintRoyaltyConfigFromJSONTyped,
-    BlueprintRoyaltyConfigToJSON,
-} from './BlueprintRoyaltyConfig';
+    CoreApiAuthConfigFromJSON,
+    CoreApiAuthConfigFromJSONTyped,
+    CoreApiAuthConfigToJSON,
+} from './CoreApiAuthConfig';
+import type { CoreApiBlueprintDefinition } from './CoreApiBlueprintDefinition';
+import {
+    CoreApiBlueprintDefinitionFromJSON,
+    CoreApiBlueprintDefinitionFromJSONTyped,
+    CoreApiBlueprintDefinitionToJSON,
+} from './CoreApiBlueprintDefinition';
+import type { CoreApiBlueprintRoyaltyConfig } from './CoreApiBlueprintRoyaltyConfig';
+import {
+    CoreApiBlueprintRoyaltyConfigFromJSON,
+    CoreApiBlueprintRoyaltyConfigFromJSONTyped,
+    CoreApiBlueprintRoyaltyConfigToJSON,
+} from './CoreApiBlueprintRoyaltyConfig';
 
 /**
  * 
@@ -39,12 +51,11 @@ export interface PackageBlueprintCollectionItem {
      */
     version: string;
     /**
-     * This type is defined in the Core API as `BlueprintDefinition`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiBlueprintDefinition}
      * @memberof PackageBlueprintCollectionItem
      */
-    definition: object;
+    definition: CoreApiBlueprintDefinition;
     /**
      * 
      * @type {Array<string>}
@@ -52,12 +63,11 @@ export interface PackageBlueprintCollectionItem {
      */
     dependant_entities?: Array<string>;
     /**
-     * This type is defined in the Core API as `AuthConfig`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiAuthConfig}
      * @memberof PackageBlueprintCollectionItem
      */
-    auth_template?: object;
+    auth_template?: CoreApiAuthConfig;
     /**
      * 
      * @type {boolean}
@@ -66,10 +76,10 @@ export interface PackageBlueprintCollectionItem {
     auth_template_is_locked?: boolean | null;
     /**
      * 
-     * @type {BlueprintRoyaltyConfig}
+     * @type {CoreApiBlueprintRoyaltyConfig}
      * @memberof PackageBlueprintCollectionItem
      */
-    royalty_config?: BlueprintRoyaltyConfig;
+    royalty_config?: CoreApiBlueprintRoyaltyConfig;
     /**
      * 
      * @type {boolean}
@@ -102,11 +112,11 @@ export function PackageBlueprintCollectionItemFromJSONTyped(json: any, ignoreDis
         
         'name': json['name'],
         'version': json['version'],
-        'definition': json['definition'],
+        'definition': CoreApiBlueprintDefinitionFromJSON(json['definition']),
         'dependant_entities': !exists(json, 'dependant_entities') ? undefined : json['dependant_entities'],
-        'auth_template': !exists(json, 'auth_template') ? undefined : json['auth_template'],
+        'auth_template': !exists(json, 'auth_template') ? undefined : CoreApiAuthConfigFromJSON(json['auth_template']),
         'auth_template_is_locked': !exists(json, 'auth_template_is_locked') ? undefined : json['auth_template_is_locked'],
-        'royalty_config': !exists(json, 'royalty_config') ? undefined : BlueprintRoyaltyConfigFromJSON(json['royalty_config']),
+        'royalty_config': !exists(json, 'royalty_config') ? undefined : CoreApiBlueprintRoyaltyConfigFromJSON(json['royalty_config']),
         'royalty_config_is_locked': !exists(json, 'royalty_config_is_locked') ? undefined : json['royalty_config_is_locked'],
     };
 }
@@ -122,11 +132,11 @@ export function PackageBlueprintCollectionItemToJSON(value?: PackageBlueprintCol
         
         'name': value.name,
         'version': value.version,
-        'definition': value.definition,
+        'definition': CoreApiBlueprintDefinitionToJSON(value.definition),
         'dependant_entities': value.dependant_entities,
-        'auth_template': value.auth_template,
+        'auth_template': CoreApiAuthConfigToJSON(value.auth_template),
         'auth_template_is_locked': value.auth_template_is_locked,
-        'royalty_config': BlueprintRoyaltyConfigToJSON(value.royalty_config),
+        'royalty_config': CoreApiBlueprintRoyaltyConfigToJSON(value.royalty_config),
         'royalty_config_is_locked': value.royalty_config_is_locked,
     };
 }

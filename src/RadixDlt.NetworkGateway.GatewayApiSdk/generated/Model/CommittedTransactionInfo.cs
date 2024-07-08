@@ -124,9 +124,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="receipt">receipt.</param>
         /// <param name="manifestInstructions">A text-representation of a transaction manifest. This field will be present only for user transactions and when explicitly opted-in using &#x60;manifest_instructions&#x60; flag. .</param>
         /// <param name="manifestClasses">A collection of zero or more manifest classes ordered from the most specific class to the least specific one. This field will be present only for user transactions. .</param>
-        /// <param name="message">The optional transaction message. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. .</param>
+        /// <param name="message">message.</param>
         /// <param name="balanceChanges">balanceChanges.</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHash = default(string), string intentHash = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), string manifestInstructions = default(string), List<ManifestClass> manifestClasses = default(List<ManifestClass>), Object message = default(Object), TransactionBalanceChanges balanceChanges = default(TransactionBalanceChanges))
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHash = default(string), string intentHash = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), string manifestInstructions = default(string), List<ManifestClass> manifestClasses = default(List<ManifestClass>), CoreApiTransactionMessage message = default(CoreApiTransactionMessage), TransactionBalanceChanges balanceChanges = default(TransactionBalanceChanges))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
@@ -243,11 +243,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<ManifestClass> ManifestClasses { get; set; }
 
         /// <summary>
-        /// The optional transaction message. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets Message
         /// </summary>
-        /// <value>The optional transaction message. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "message", EmitDefaultValue = true)]
-        public Object Message { get; set; }
+        public CoreApiTransactionMessage Message { get; set; }
 
         /// <summary>
         /// Gets or Sets BalanceChanges

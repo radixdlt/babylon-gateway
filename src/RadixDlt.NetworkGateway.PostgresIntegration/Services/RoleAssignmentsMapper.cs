@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.CoreApiMapping;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -120,7 +120,7 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
             var allModulesKeys = mainModuleKeys.Concat(assignedNativeModuleKeys).ToList();
 
             return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
-                new JRaw(ownerRole),
+                CoreModelMapping.CaOwnerRole(ownerRole),
                 GetEntries(entity.Id, allModulesKeys, roleAssignments)
             );
         });
@@ -136,7 +136,7 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
             {
                 var existingRoleAssignments = roleAssignments
                     .Where(e => e.EntityId == entityId && e.KeyRole == role.Key.Name && e.KeyModule == role.Key.ModuleId)
-                    .Select(x => new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Explicit, new JRaw(x.RoleAssignments)))
+                    .Select(x => new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Explicit, CoreModelMapping.CaAccessRule(x.RoleAssignments)))
                     .FirstOrDefault();
 
                 return new GatewayModel.ComponentEntityRoleAssignmentEntry(

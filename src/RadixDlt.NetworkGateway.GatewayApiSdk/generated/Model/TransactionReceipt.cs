@@ -99,28 +99,33 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets Status
         /// </summary>
-        [DataMember(Name = "status", EmitDefaultValue = true)]
-        public TransactionStatus? Status { get; set; }
+        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionStatus Status { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
         /// </summary>
-        /// <param name="status">status.</param>
-        /// <param name="feeSummary">This type is defined in the Core API as &#x60;FeeSummary&#x60;. See the Core API documentation for more details. .</param>
+        [JsonConstructorAttribute]
+        protected TransactionReceipt() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// </summary>
+        /// <param name="status">status (required).</param>
+        /// <param name="feeSummary">feeSummary.</param>
         /// <param name="costingParameters">costingParameters.</param>
-        /// <param name="feeDestination">This type is defined in the Core API as &#x60;FeeDestination&#x60;. See the Core API documentation for more details. .</param>
-        /// <param name="feeSource">This type is defined in the Core API as &#x60;FeeSource&#x60;. See the Core API documentation for more details. .</param>
-        /// <param name="stateUpdates">This type is defined in the Core API as &#x60;StateUpdates&#x60;. See the Core API documentation for more details. .</param>
-        /// <param name="nextEpoch">Information (number and active validator list) about new epoch if occured. This type is defined in the Core API as &#x60;NextEpoch&#x60;. See the Core API documentation for more details. .</param>
-        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;CommittedSuccess&#x60;). This type is defined in the Core API as &#x60;SborData&#x60;. See the Core API documentation for more details. .</param>
+        /// <param name="feeSource">feeSource.</param>
+        /// <param name="feeDestination">feeDestination.</param>
+        /// <param name="stateUpdates">stateUpdates.</param>
+        /// <param name="nextEpoch">nextEpoch.</param>
+        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
         /// <param name="events">Events emitted by a transaction..</param>
         /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(TransactionStatus? status = default(TransactionStatus?), Object feeSummary = default(Object), Object costingParameters = default(Object), Object feeDestination = default(Object), Object feeSource = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), List<EventsItem> events = default(List<EventsItem>), string errorMessage = default(string))
+        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), CoreApiFeeSummary feeSummary = default(CoreApiFeeSummary), CoreApiCostingParameters costingParameters = default(CoreApiCostingParameters), CoreApiFeeSource feeSource = default(CoreApiFeeSource), CoreApiFeeDestination feeDestination = default(CoreApiFeeDestination), CoreApiStateUpdates stateUpdates = default(CoreApiStateUpdates), CoreApiNextEpoch nextEpoch = default(CoreApiNextEpoch), List<CoreApiSborData> output = default(List<CoreApiSborData>), List<EventsItem> events = default(List<EventsItem>), string errorMessage = default(string))
         {
             this.Status = status;
             this.FeeSummary = feeSummary;
             this.CostingParameters = costingParameters;
-            this.FeeDestination = feeDestination;
             this.FeeSource = feeSource;
+            this.FeeDestination = feeDestination;
             this.StateUpdates = stateUpdates;
             this.NextEpoch = nextEpoch;
             this.Output = output;
@@ -129,52 +134,47 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;FeeSummary&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets FeeSummary
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;FeeSummary&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
-        public Object FeeSummary { get; set; }
+        public CoreApiFeeSummary FeeSummary { get; set; }
 
         /// <summary>
         /// Gets or Sets CostingParameters
         /// </summary>
         [DataMember(Name = "costing_parameters", EmitDefaultValue = true)]
-        public Object CostingParameters { get; set; }
+        public CoreApiCostingParameters CostingParameters { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;FeeDestination&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets FeeSource
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;FeeDestination&#x60;. See the Core API documentation for more details. </value>
-        [DataMember(Name = "fee_destination", EmitDefaultValue = true)]
-        public Object FeeDestination { get; set; }
-
-        /// <summary>
-        /// This type is defined in the Core API as &#x60;FeeSource&#x60;. See the Core API documentation for more details. 
-        /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;FeeSource&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "fee_source", EmitDefaultValue = true)]
-        public Object FeeSource { get; set; }
+        public CoreApiFeeSource FeeSource { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;StateUpdates&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets FeeDestination
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;StateUpdates&#x60;. See the Core API documentation for more details. </value>
+        [DataMember(Name = "fee_destination", EmitDefaultValue = true)]
+        public CoreApiFeeDestination FeeDestination { get; set; }
+
+        /// <summary>
+        /// Gets or Sets StateUpdates
+        /// </summary>
         [DataMember(Name = "state_updates", EmitDefaultValue = true)]
-        public Object StateUpdates { get; set; }
+        public CoreApiStateUpdates StateUpdates { get; set; }
 
         /// <summary>
-        /// Information (number and active validator list) about new epoch if occured. This type is defined in the Core API as &#x60;NextEpoch&#x60;. See the Core API documentation for more details. 
+        /// Gets or Sets NextEpoch
         /// </summary>
-        /// <value>Information (number and active validator list) about new epoch if occured. This type is defined in the Core API as &#x60;NextEpoch&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
-        public Object NextEpoch { get; set; }
+        public CoreApiNextEpoch NextEpoch { get; set; }
 
         /// <summary>
-        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;CommittedSuccess&#x60;). This type is defined in the Core API as &#x60;SborData&#x60;. See the Core API documentation for more details. 
+        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)
         /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;CommittedSuccess&#x60;). This type is defined in the Core API as &#x60;SborData&#x60;. See the Core API documentation for more details. </value>
+        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)</value>
         [DataMember(Name = "output", EmitDefaultValue = true)]
-        public Object Output { get; set; }
+        public List<CoreApiSborData> Output { get; set; }
 
         /// <summary>
         /// Events emitted by a transaction.
@@ -201,8 +201,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
             sb.Append("  CostingParameters: ").Append(CostingParameters).Append("\n");
-            sb.Append("  FeeDestination: ").Append(FeeDestination).Append("\n");
             sb.Append("  FeeSource: ").Append(FeeSource).Append("\n");
+            sb.Append("  FeeDestination: ").Append(FeeDestination).Append("\n");
             sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
             sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
             sb.Append("  Output: ").Append(Output).Append("\n");
@@ -258,14 +258,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.CostingParameters.Equals(input.CostingParameters))
                 ) && 
                 (
-                    this.FeeDestination == input.FeeDestination ||
-                    (this.FeeDestination != null &&
-                    this.FeeDestination.Equals(input.FeeDestination))
-                ) && 
-                (
                     this.FeeSource == input.FeeSource ||
                     (this.FeeSource != null &&
                     this.FeeSource.Equals(input.FeeSource))
+                ) && 
+                (
+                    this.FeeDestination == input.FeeDestination ||
+                    (this.FeeDestination != null &&
+                    this.FeeDestination.Equals(input.FeeDestination))
                 ) && 
                 (
                     this.StateUpdates == input.StateUpdates ||
@@ -279,8 +279,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 ) && 
                 (
                     this.Output == input.Output ||
-                    (this.Output != null &&
-                    this.Output.Equals(input.Output))
+                    this.Output != null &&
+                    input.Output != null &&
+                    this.Output.SequenceEqual(input.Output)
                 ) && 
                 (
                     this.Events == input.Events ||
@@ -313,13 +314,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.CostingParameters.GetHashCode();
                 }
-                if (this.FeeDestination != null)
-                {
-                    hashCode = (hashCode * 59) + this.FeeDestination.GetHashCode();
-                }
                 if (this.FeeSource != null)
                 {
                     hashCode = (hashCode * 59) + this.FeeSource.GetHashCode();
+                }
+                if (this.FeeDestination != null)
+                {
+                    hashCode = (hashCode * 59) + this.FeeDestination.GetHashCode();
                 }
                 if (this.StateUpdates != null)
                 {

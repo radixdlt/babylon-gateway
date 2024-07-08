@@ -15,7 +15,6 @@
 
 /**
  * A status concerning the Gateway's handling status of this pending transaction.
-
  * @export
  */
 export const TransactionPayloadGatewayHandlingStatus = {

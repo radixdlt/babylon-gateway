@@ -19,6 +19,12 @@ import {
     ComponentEntityRoleAssignmentEntryFromJSONTyped,
     ComponentEntityRoleAssignmentEntryToJSON,
 } from './ComponentEntityRoleAssignmentEntry';
+import type { CoreApiOwnerRole } from './CoreApiOwnerRole';
+import {
+    CoreApiOwnerRoleFromJSON,
+    CoreApiOwnerRoleFromJSONTyped,
+    CoreApiOwnerRoleToJSON,
+} from './CoreApiOwnerRole';
 
 /**
  * 
@@ -27,12 +33,11 @@ import {
  */
 export interface ComponentEntityRoleAssignments {
     /**
-     * This type is defined in the Core API as `OwnerRole`. See the Core API documentation for more details.
-
-     * @type {object}
+     * 
+     * @type {CoreApiOwnerRole}
      * @memberof ComponentEntityRoleAssignments
      */
-    owner: object;
+    owner: CoreApiOwnerRole;
     /**
      * 
      * @type {Array<ComponentEntityRoleAssignmentEntry>}
@@ -62,7 +67,7 @@ export function ComponentEntityRoleAssignmentsFromJSONTyped(json: any, ignoreDis
     }
     return {
         
-        'owner': json['owner'],
+        'owner': CoreApiOwnerRoleFromJSON(json['owner']),
         'entries': ((json['entries'] as Array<any>).map(ComponentEntityRoleAssignmentEntryFromJSON)),
     };
 }
@@ -76,7 +81,7 @@ export function ComponentEntityRoleAssignmentsToJSON(value?: ComponentEntityRole
     }
     return {
         
-        'owner': value.owner,
+        'owner': CoreApiOwnerRoleToJSON(value.owner),
         'entries': ((value.entries as Array<any>).map(ComponentEntityRoleAssignmentEntryToJSON)),
     };
 }

@@ -65,12 +65,12 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.CoreApiMapping;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -298,16 +298,28 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                 case ComponentEntity ce:
                     ComponentMethodRoyaltyEntryHistory[]? componentRoyaltyConfig = null;
 
-                    stateHistory.TryGetValue(ce.Id, out var state);
+                    stateHistory.TryGetValue(ce.Id, out var rawState);
                     roleAssignmentsHistory.TryGetValue(ce.Id, out var roleAssignments);
                     componentRoyaltyConfigs?.TryGetValue(ce.Id, out componentRoyaltyConfig);
                     var componentRoyaltyVaultBalance = royaltyVaultsBalances?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
+
+                    var state = rawState == null
+                        ? null
+                        : ce switch
+                        {
+                            GlobalValidatorEntity => new GatewayModel.StateEntityDetailsResponseComponentDetailsState(CoreModelMapping.CaValidatorFieldStateValue(rawState)),
+                            GlobalAccessControllerEntity => new GatewayModel.StateEntityDetailsResponseComponentDetailsState(CoreModelMapping.CaAccessControllerFieldStateValue(rawState)),
+                            GlobalOneResourcePoolEntity => new GatewayModel.StateEntityDetailsResponseComponentDetailsState(CoreModelMapping.CaOneResourcePoolFieldStateValue(rawState)),
+                            GlobalTwoResourcePoolEntity => new GatewayModel.StateEntityDetailsResponseComponentDetailsState(CoreModelMapping.CaTwoResourcePoolFieldStateValue(rawState)),
+                            GlobalMultiResourcePoolEntity => new GatewayModel.StateEntityDetailsResponseComponentDetailsState(CoreModelMapping.CaMultiResourcePoolFieldStateValue(rawState)),
+                            _ => new GatewayModel.StateEntityDetailsResponseComponentDetailsState(CoreModelMapping.CaGenericScryptoComponentFieldStateValue(rawState)),
+                        };
 
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         packageAddress: correlatedAddresses[ce.GetPackageId()],
                         blueprintName: ce.BlueprintName,
                         blueprintVersion: ce.BlueprintVersion,
-                        state: state != null ? new JRaw(state) : null,
+                        state: state,
                         roleAssignments: roleAssignments,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null,
                         royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null
@@ -920,7 +932,7 @@ INNER JOIN LATERAL (
                     new GatewayModel.ValidatorVaultItem(pendingXrdWithdrawVaultVault.Balance.ToString(), pendingXrdWithdrawVaultVault.FromStateVersion, vaultAddresses[pendingXrdWithdrawVaultVault.VaultEntityId]),
                     new GatewayModel.ValidatorVaultItem(lockedOwnerStakeUnitVault.Balance.ToString(), lockedOwnerStakeUnitVault.FromStateVersion, vaultAddresses[lockedOwnerStakeUnitVault.VaultEntityId]),
                     new GatewayModel.ValidatorVaultItem(pendingOwnerStakeUnitUnlockVault.Balance.ToString(), pendingOwnerStakeUnitUnlockVault.FromStateVersion, vaultAddresses[pendingOwnerStakeUnitUnlockVault.VaultEntityId]),
-                    new JRaw(stateHistory[v.Id].JsonState),
+                    CoreModelMapping.CaValidatorFieldStateValue(stateHistory[v.Id].JsonState),
                     activeInEpoch,
                     metadataById[v.Id],
                     effectiveFeeFactor
