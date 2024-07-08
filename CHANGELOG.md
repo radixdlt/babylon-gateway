@@ -3,6 +3,9 @@ Release built: _not released yet_
 
 - Optimized `/statistics/validators/uptime` endpoint processing time.
 
+### Bug fixes
+- Properly indexes manifest classes. Some transactions might have been previously misclassified as `Transfer` and `AccountDepositSettingsUpdate`, i.e. empty transactions with only `lock_fee` instruction.
+
 ### API Changes
 - Added support for the missing `message` and `flags.disable_auth_checks` properties in the `/transaction/preview` endpoint request.
 
