@@ -106,11 +106,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="useFreeCredit">useFreeCredit (required).</param>
         /// <param name="assumeAllSignatureProofs">assumeAllSignatureProofs (required).</param>
         /// <param name="skipEpochCheck">skipEpochCheck (required).</param>
-        public TransactionPreviewRequestFlags(bool useFreeCredit = default(bool), bool assumeAllSignatureProofs = default(bool), bool skipEpochCheck = default(bool))
+        /// <param name="disableAuthChecks">disableAuthChecks.</param>
+        public TransactionPreviewRequestFlags(bool useFreeCredit = default(bool), bool assumeAllSignatureProofs = default(bool), bool skipEpochCheck = default(bool), bool disableAuthChecks = default(bool))
         {
             this.UseFreeCredit = useFreeCredit;
             this.AssumeAllSignatureProofs = assumeAllSignatureProofs;
             this.SkipEpochCheck = skipEpochCheck;
+            this.DisableAuthChecks = disableAuthChecks;
         }
 
         /// <summary>
@@ -132,6 +134,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool SkipEpochCheck { get; set; }
 
         /// <summary>
+        /// Gets or Sets DisableAuthChecks
+        /// </summary>
+        [DataMember(Name = "disable_auth_checks", EmitDefaultValue = true)]
+        public bool DisableAuthChecks { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -142,6 +150,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  UseFreeCredit: ").Append(UseFreeCredit).Append("\n");
             sb.Append("  AssumeAllSignatureProofs: ").Append(AssumeAllSignatureProofs).Append("\n");
             sb.Append("  SkipEpochCheck: ").Append(SkipEpochCheck).Append("\n");
+            sb.Append("  DisableAuthChecks: ").Append(DisableAuthChecks).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,6 +197,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.SkipEpochCheck == input.SkipEpochCheck ||
                     this.SkipEpochCheck.Equals(input.SkipEpochCheck)
+                ) && 
+                (
+                    this.DisableAuthChecks == input.DisableAuthChecks ||
+                    this.DisableAuthChecks.Equals(input.DisableAuthChecks)
                 );
         }
 
@@ -203,6 +216,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 hashCode = (hashCode * 59) + this.UseFreeCredit.GetHashCode();
                 hashCode = (hashCode * 59) + this.AssumeAllSignatureProofs.GetHashCode();
                 hashCode = (hashCode * 59) + this.SkipEpochCheck.GetHashCode();
+                hashCode = (hashCode * 59) + this.DisableAuthChecks.GetHashCode();
                 return hashCode;
             }
         }

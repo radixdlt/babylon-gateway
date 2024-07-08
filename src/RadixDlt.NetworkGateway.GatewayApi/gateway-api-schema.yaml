@@ -3353,6 +3353,10 @@ components:
           items:
             $ref: "#/components/schemas/PublicKey"
           description: A list of public keys to be used as transaction signers
+        message:
+          type: object
+          description: |
+            This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
         flags:
           type: object
           required:
@@ -3365,6 +3369,8 @@ components:
             assume_all_signature_proofs:
               type: boolean
             skip_epoch_check:
+              type: boolean
+            disable_auth_checks:
               type: boolean
     TransactionPreviewResponse:
       type: object
@@ -3841,7 +3847,7 @@ components:
               $ref: "#/components/schemas/StateEntityDetailsOptIns"
             addresses:
               type: array
-              description: limited to max 100 items.
+              description: limited to max 20 items.
               items:
                 $ref: "#/components/schemas/Address"
             aggregation_level:
