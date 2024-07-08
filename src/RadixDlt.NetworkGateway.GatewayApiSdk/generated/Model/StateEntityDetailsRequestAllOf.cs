@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateEntityDetailsRequestAllOf" /> class.
         /// </summary>
         /// <param name="optIns">optIns.</param>
-        /// <param name="addresses">limited to max 100 items. (required).</param>
+        /// <param name="addresses">limited to max 20 items. (required).</param>
         /// <param name="aggregationLevel">aggregationLevel.</param>
         public StateEntityDetailsRequestAllOf(StateEntityDetailsOptIns optIns = default(StateEntityDetailsOptIns), List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
@@ -131,9 +131,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public StateEntityDetailsOptIns OptIns { get; set; }
 
         /// <summary>
-        /// limited to max 100 items.
+        /// limited to max 20 items.
         /// </summary>
-        /// <value>limited to max 100 items.</value>
+        /// <value>limited to max 20 items.</value>
         [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
         public List<string> Addresses { get; set; }
 
