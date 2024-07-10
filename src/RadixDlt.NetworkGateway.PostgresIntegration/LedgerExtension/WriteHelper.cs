@@ -348,6 +348,16 @@ internal class WriteHelper : IWriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     break;
+                case EventGlobalEmitterTransactionMarker egetm:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(egetm.EntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    break;
                 case ManifestClassMarker ttm:
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);

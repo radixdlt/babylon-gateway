@@ -265,7 +265,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
             .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress)
             .HasValue<ManifestClassMarker>(LedgerTransactionMarkerType.ManifestClass)
-            .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity);
+            .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity)
+            .HasValue<EventGlobalEmitterTransactionMarker>(LedgerTransactionMarkerType.EventGlobalEmitter);
 
         modelBuilder
             .Entity<LedgerTransactionMarker>()
@@ -290,6 +291,11 @@ internal abstract class CommonDbContext : DbContext
             .Entity<AffectedGlobalEntityTransactionMarker>()
             .HasIndex(e => new { e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'affected_global_entity'");
+
+        modelBuilder
+            .Entity<EventGlobalEmitterTransactionMarker>()
+            .HasIndex(e => new { e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'event_global_emitter'");
 
         modelBuilder
             .Entity<ManifestClassMarker>()

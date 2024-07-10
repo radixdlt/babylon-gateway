@@ -62,80 +62,87 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayModel.StreamTransactionsRequest>
+internal class GlobalEventEmitterProcessor
 {
-    public StreamTransactionsRequestValidator(
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
-        LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        RadixAddressValidator radixAddressValidator)
+    private readonly long[] _excludedEntityIds;
+    private readonly ProcessorContext _context;
+    private readonly ReferencedEntityDictionary _referencedEntities;
+    private readonly Dictionary<long, HashSet<long>> _globalEventEmitters = new();
+
+    public GlobalEventEmitterProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
     {
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+        _context = context;
+        _referencedEntities = referencedEntities;
+        _excludedEntityIds = new[]
+        {
+            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
+            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.Xrd).DatabaseId,
+        };
+    }
 
-        RuleFor(x => x.Cursor)
-            .Base64();
+    public void VisitEvent(CoreModel.Event @event, long stateVersion)
+    {
+        switch (@event.Type.Emitter)
+        {
+            case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
+                var methodEventEmitterEntity = _referencedEntities.Get((EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress);
+                var globalEventEmitterEntityId = methodEventEmitterEntity.GlobalEventEmitterEntityId;
 
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0);
+                if (!_excludedEntityIds.Contains(globalEventEmitterEntityId))
+                {
+                    TrackEvent(stateVersion, methodEventEmitterEntity.GlobalEventEmitterEntityId);
+                }
 
-        RuleFor(x => x.FromLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+                break;
+            case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
+                var functionEventEmitterEntity = _referencedEntities.Get((EntityAddress)functionEventEmitterIdentifier.PackageAddress);
+                TrackEvent(stateVersion, functionEventEmitterEntity.GlobalEventEmitterEntityId);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException($"Unexpected event emitter type {@event.Type.Emitter.GetType()}");
+        }
+    }
 
-        RuleFor(x => x.KindFilter)
-            .IsInEnum();
+    public List<EventGlobalEmitterTransactionMarker> CreateTransactionMarkers()
+    {
+        var ledgerTransactionMarkers = _globalEventEmitters
+            .SelectMany(
+                stateVersionEventEmitters =>
+                {
+                    return stateVersionEventEmitters
+                        .Value
+                        .Select(
+                            entityId => new EventGlobalEmitterTransactionMarker
+                            {
+                                Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                                EntityId = entityId,
+                                StateVersion = stateVersionEventEmitters.Key,
+                            })
+                        .ToList();
+                })
+            .ToList();
 
-        RuleFor(x => x.Order)
-            .IsInEnum();
+        return ledgerTransactionMarkers;
+    }
 
-        RuleForEach(x => x.ManifestAccountsWithdrawnFromFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
+    private void TrackEvent(long stateVersion, long entityId)
+    {
+        if (!_globalEventEmitters.TryGetValue(stateVersion, out var list))
+        {
+            list = new HashSet<long>();
+            _globalEventEmitters.Add(stateVersion, list);
+        }
 
-        RuleForEach(x => x.ManifestAccountsDepositedIntoFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.AffectedGlobalEntitiesFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.EventGlobalEmittersFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.ManifestBadgesPresentedFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.ManifestResourcesFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.AccountsWithManifestOwnerMethodCalls)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.AccountsWithoutManifestOwnerMethodCalls)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleFor(x => x.ManifestClassFilter)
-            .SetValidator(new ManifestClassFilterValidator());
-
-        RuleForEach(x => x.EventsFilter)
-            .NotNull()
-            .SetValidator(new StreamTransactionsRequestEventItemValidator(radixAddressValidator));
-
-        RuleFor(x => x.TotalFilterCount)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.TransactionStreamMaxFilterCount)
-            .WithMessage($"The overall number of filters applied ({{PropertyValue}}) must be less than or equal to {endpointOptionsSnapshot.Value.TransactionStreamMaxFilterCount}.")
-            .OverridePropertyName(string.Empty);
+        list.Add(entityId);
     }
 }

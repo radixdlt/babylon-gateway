@@ -113,6 +113,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .Concat(request.SearchCriteria.ManifestResources)
             .Concat(request.SearchCriteria.BadgesPresented)
             .Concat(request.SearchCriteria.AffectedGlobalEntities)
+            .Concat(request.SearchCriteria.EventGlobalEmitters)
             .Concat(request.SearchCriteria.Events.SelectMany(e =>
             {
                 var addresses = new List<EntityAddress>();
@@ -221,6 +222,24 @@ internal class TransactionQuerier : ITransactionQuerier
                 searchQuery = searchQuery
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<AffectedGlobalEntityTransactionMarker>()
+                    .Where(agetm => agetm.EntityId == entityId)
+                    .Where(agetm => agetm.StateVersion <= upperStateVersion && agetm.StateVersion >= (lowerStateVersion ?? agetm.StateVersion))
+                    .Select(agetm => agetm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.EventGlobalEmitters.Any())
+        {
+            foreach (var entityAddress in request.SearchCriteria.EventGlobalEmitters)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<EventGlobalEmitterTransactionMarker>()
                     .Where(agetm => agetm.EntityId == entityId)
                     .Where(agetm => agetm.StateVersion <= upperStateVersion && agetm.StateVersion >= (lowerStateVersion ?? agetm.StateVersion))
                     .Select(agetm => agetm.StateVersion);

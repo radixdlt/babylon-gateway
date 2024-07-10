@@ -165,18 +165,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limitPerPage">The page size requested..</param>
         /// <param name="kindFilter">Limit returned transactions by their kind. Defaults to &#x60;user&#x60;..</param>
-        /// <param name="manifestAccountsWithdrawnFromFilter">manifestAccountsWithdrawnFromFilter.</param>
-        /// <param name="manifestAccountsDepositedIntoFilter">manifestAccountsDepositedIntoFilter.</param>
-        /// <param name="manifestBadgesPresentedFilter">manifestBadgesPresentedFilter.</param>
-        /// <param name="manifestResourcesFilter">manifestResourcesFilter.</param>
-        /// <param name="affectedGlobalEntitiesFilter">affectedGlobalEntitiesFilter.</param>
-        /// <param name="eventsFilter">eventsFilter.</param>
-        /// <param name="accountsWithManifestOwnerMethodCalls">accountsWithManifestOwnerMethodCalls.</param>
-        /// <param name="accountsWithoutManifestOwnerMethodCalls">accountsWithoutManifestOwnerMethodCalls.</param>
+        /// <param name="manifestAccountsWithdrawnFromFilter">Allows specifying an array of account addresses. If specified, the response will contain only transactions with a manifest containing withdrawals from the given accounts..</param>
+        /// <param name="manifestAccountsDepositedIntoFilter">Similar to &#x60;manifest_accounts_withdrawn_from_filter&#x60;, but will return only transactions with a manifest containing deposits to the given accounts..</param>
+        /// <param name="manifestBadgesPresentedFilter">Allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented..</param>
+        /// <param name="manifestResourcesFilter">Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage)..</param>
+        /// <param name="affectedGlobalEntitiesFilter">Allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as \&quot;affected\&quot; by a transaction if any of its state (or its descendents&#39; state) was modified as a result of the transaction. For performance reasons consensus manager and transaction tracker are excluded from that filter..</param>
+        /// <param name="eventsFilter">Filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event..</param>
+        /// <param name="accountsWithManifestOwnerMethodCalls">Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information..</param>
+        /// <param name="accountsWithoutManifestOwnerMethodCalls">Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information..</param>
         /// <param name="manifestClassFilter">manifestClassFilter.</param>
+        /// <param name="eventGlobalEmittersFilter">Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter..</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
         /// <param name="optIns">optIns.</param>
-        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestBadgesPresentedFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), List<string> accountsWithManifestOwnerMethodCalls = default(List<string>), List<string> accountsWithoutManifestOwnerMethodCalls = default(List<string>), StreamTransactionsRequestAllOfManifestClassFilter manifestClassFilter = default(StreamTransactionsRequestAllOfManifestClassFilter), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
+        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestBadgesPresentedFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), List<string> accountsWithManifestOwnerMethodCalls = default(List<string>), List<string> accountsWithoutManifestOwnerMethodCalls = default(List<string>), StreamTransactionsRequestAllOfManifestClassFilter manifestClassFilter = default(StreamTransactionsRequestAllOfManifestClassFilter), List<string> eventGlobalEmittersFilter = default(List<string>), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
         {
             this.AtLedgerState = atLedgerState;
             this.FromLedgerState = fromLedgerState;
@@ -192,6 +193,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.AccountsWithManifestOwnerMethodCalls = accountsWithManifestOwnerMethodCalls;
             this.AccountsWithoutManifestOwnerMethodCalls = accountsWithoutManifestOwnerMethodCalls;
             this.ManifestClassFilter = manifestClassFilter;
+            this.EventGlobalEmittersFilter = eventGlobalEmittersFilter;
             this.Order = order;
             this.OptIns = optIns;
         }
@@ -223,50 +225,58 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public int? LimitPerPage { get; set; }
 
         /// <summary>
-        /// Gets or Sets ManifestAccountsWithdrawnFromFilter
+        /// Allows specifying an array of account addresses. If specified, the response will contain only transactions with a manifest containing withdrawals from the given accounts.
         /// </summary>
+        /// <value>Allows specifying an array of account addresses. If specified, the response will contain only transactions with a manifest containing withdrawals from the given accounts.</value>
         [DataMember(Name = "manifest_accounts_withdrawn_from_filter", EmitDefaultValue = true)]
         public List<string> ManifestAccountsWithdrawnFromFilter { get; set; }
 
         /// <summary>
-        /// Gets or Sets ManifestAccountsDepositedIntoFilter
+        /// Similar to &#x60;manifest_accounts_withdrawn_from_filter&#x60;, but will return only transactions with a manifest containing deposits to the given accounts.
         /// </summary>
+        /// <value>Similar to &#x60;manifest_accounts_withdrawn_from_filter&#x60;, but will return only transactions with a manifest containing deposits to the given accounts.</value>
         [DataMember(Name = "manifest_accounts_deposited_into_filter", EmitDefaultValue = true)]
         public List<string> ManifestAccountsDepositedIntoFilter { get; set; }
 
         /// <summary>
-        /// Gets or Sets ManifestBadgesPresentedFilter
+        /// Allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented.
         /// </summary>
+        /// <value>Allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented.</value>
         [DataMember(Name = "manifest_badges_presented_filter", EmitDefaultValue = true)]
         public List<string> ManifestBadgesPresentedFilter { get; set; }
 
         /// <summary>
-        /// Gets or Sets ManifestResourcesFilter
+        /// Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
         /// </summary>
+        /// <value>Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).</value>
         [DataMember(Name = "manifest_resources_filter", EmitDefaultValue = true)]
         public List<string> ManifestResourcesFilter { get; set; }
 
         /// <summary>
-        /// Gets or Sets AffectedGlobalEntitiesFilter
+        /// Allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as \&quot;affected\&quot; by a transaction if any of its state (or its descendents&#39; state) was modified as a result of the transaction. For performance reasons consensus manager and transaction tracker are excluded from that filter.
         /// </summary>
+        /// <value>Allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as \&quot;affected\&quot; by a transaction if any of its state (or its descendents&#39; state) was modified as a result of the transaction. For performance reasons consensus manager and transaction tracker are excluded from that filter.</value>
         [DataMember(Name = "affected_global_entities_filter", EmitDefaultValue = true)]
         public List<string> AffectedGlobalEntitiesFilter { get; set; }
 
         /// <summary>
-        /// Gets or Sets EventsFilter
+        /// Filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
         /// </summary>
+        /// <value>Filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.</value>
         [DataMember(Name = "events_filter", EmitDefaultValue = true)]
         public List<StreamTransactionsRequestEventFilterItem> EventsFilter { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccountsWithManifestOwnerMethodCalls
+        /// Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
         /// </summary>
+        /// <value>Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.</value>
         [DataMember(Name = "accounts_with_manifest_owner_method_calls", EmitDefaultValue = true)]
         public List<string> AccountsWithManifestOwnerMethodCalls { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccountsWithoutManifestOwnerMethodCalls
+        /// Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
         /// </summary>
+        /// <value>Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.</value>
         [DataMember(Name = "accounts_without_manifest_owner_method_calls", EmitDefaultValue = true)]
         public List<string> AccountsWithoutManifestOwnerMethodCalls { get; set; }
 
@@ -275,6 +285,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "manifest_class_filter", EmitDefaultValue = true)]
         public StreamTransactionsRequestAllOfManifestClassFilter ManifestClassFilter { get; set; }
+
+        /// <summary>
+        /// Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter.
+        /// </summary>
+        /// <value>Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter.</value>
+        [DataMember(Name = "event_global_emitters_filter", EmitDefaultValue = true)]
+        public List<string> EventGlobalEmittersFilter { get; set; }
 
         /// <summary>
         /// Gets or Sets OptIns
@@ -304,6 +321,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  AccountsWithManifestOwnerMethodCalls: ").Append(AccountsWithManifestOwnerMethodCalls).Append("\n");
             sb.Append("  AccountsWithoutManifestOwnerMethodCalls: ").Append(AccountsWithoutManifestOwnerMethodCalls).Append("\n");
             sb.Append("  ManifestClassFilter: ").Append(ManifestClassFilter).Append("\n");
+            sb.Append("  EventGlobalEmittersFilter: ").Append(EventGlobalEmittersFilter).Append("\n");
             sb.Append("  Order: ").Append(Order).Append("\n");
             sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("}\n");
@@ -419,6 +437,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ManifestClassFilter.Equals(input.ManifestClassFilter))
                 ) && 
                 (
+                    this.EventGlobalEmittersFilter == input.EventGlobalEmittersFilter ||
+                    this.EventGlobalEmittersFilter != null &&
+                    input.EventGlobalEmittersFilter != null &&
+                    this.EventGlobalEmittersFilter.SequenceEqual(input.EventGlobalEmittersFilter)
+                ) && 
+                (
                     this.Order == input.Order ||
                     this.Order.Equals(input.Order)
                 ) && 
@@ -490,6 +514,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.ManifestClassFilter != null)
                 {
                     hashCode = (hashCode * 59) + this.ManifestClassFilter.GetHashCode();
+                }
+                if (this.EventGlobalEmittersFilter != null)
+                {
+                    hashCode = (hashCode * 59) + this.EventGlobalEmittersFilter.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Order.GetHashCode();
                 if (this.OptIns != null)

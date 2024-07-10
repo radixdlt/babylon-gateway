@@ -611,25 +611,27 @@ tags:
 
       The currently supported filters are:
 
-      * `kind_filter` - one of `User`, `EpochChange`, `All`. You can use that filter to query for certain kinds of transactions. Defaults to `User`.
+      * `kind_filter` - One of `User`, `EpochChange`, `All`. You can use that filter to query for certain kinds of transactions. Defaults to `User`.
 
-      * `manifest_accounts_withdrawn_from_filter` - allows specifying an array of account addresses. If specified, the response will contain only transactions with a manifest containing withdrawals from the given accounts.
+      * `manifest_accounts_withdrawn_from_filter` - Allows specifying an array of account addresses. If specified, the response will contain only transactions with a manifest containing withdrawals from the given accounts.
 
-      * `manifest_accounts_deposited_into_filter` - similar to withdrawn, but will return only transactions with a manifest containing deposits to the given accounts.
+      * `manifest_accounts_deposited_into_filter` - Similar to withdrawn, but will return only transactions with a manifest containing deposits to the given accounts.
 
-      * `manifest_resources_filter` - allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
+      * `manifest_resources_filter` - Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
 
-      * `manifest_badges_presented_filter` - allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented.
+      * `manifest_badges_presented_filter` - Allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented.
 
-      * `accounts_with_manifest_owner_method_calls` - allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
+      * `accounts_with_manifest_owner_method_calls` - Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
 
-      * `accounts_without_manifest_owner_method_calls` - allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
+      * `accounts_without_manifest_owner_method_calls` - Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
 
-      * `manifest_class_filter` - allows filtering to transactions which match the given manifest classification. If specified, the response will contain only transactions which have a class that matches the filter. If `match_only_most_specific` set to true, only transactions where the queried class is most specific will be returned. See the [docs on manifest classification](https://docs.radixdlt.com/docs/conforming-transaction-manifest-types) for more information.
+      * `manifest_class_filter` - Allows filtering to transactions which match the given manifest classification. If specified, the response will contain only transactions which have a class that matches the filter. If `match_only_most_specific` set to true, only transactions where the queried class is most specific will be returned. See the [docs on manifest classification](https://docs.radixdlt.com/docs/conforming-transaction-manifest-types) for more information.
 
-      * `affected_global_entities_filter` - allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as "affected" by a transaction if any of its state (or its descendents' state) was modified as a result of the transaction.
+      * `affected_global_entities_filter` - Allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as "affected" by a transaction if any of its state (or its descendents' state) was modified as a result of the transaction. For performance reasons consensus manager and transaction tracker are excluded from that filter.
 
-      * `events_filter` - filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
+      * `event_global_emitters_filter` - Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter.
+
+      * `events_filter` - Filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
 
       Each filter is a complex object where you can specify:
       - `event` (required) - the event tag. Currently only the following tags are supported:
@@ -3753,38 +3755,47 @@ components:
                 - EpochChange
                 - All
             manifest_accounts_withdrawn_from_filter:
+              description: Allows specifying an array of account addresses. If specified, the response will contain only transactions with a manifest containing withdrawals from the given accounts.
               type: array
               items:
                 $ref: "#/components/schemas/Address"
             manifest_accounts_deposited_into_filter:
+              description: Similar to `manifest_accounts_withdrawn_from_filter`, but will return only transactions with a manifest containing deposits to the given accounts.
               type: array
               items:
                 $ref: "#/components/schemas/Address"
             manifest_badges_presented_filter:
+              description: Allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented.
               type: array
               items:
                 $ref: "#/components/schemas/Address"
             manifest_resources_filter:
+              description: Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
               type: array
               items:
                 $ref: "#/components/schemas/Address"
             affected_global_entities_filter:
+              description: Allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as "affected" by a transaction if any of its state (or its descendents' state) was modified as a result of the transaction. For performance reasons consensus manager and transaction tracker are excluded from that filter.
               type: array
               items:
                 $ref: "#/components/schemas/Address"
             events_filter:
+              description: Filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
               type: array
               items:
                 $ref: "#/components/schemas/StreamTransactionsRequestEventFilterItem"
             accounts_with_manifest_owner_method_calls:
+              description: Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
               type: array
               items:
                 $ref: "#/components/schemas/Address"
             accounts_without_manifest_owner_method_calls:
+              description: Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information.
               type: array
               items:
                 $ref: "#/components/schemas/Address"
             manifest_class_filter:
+              description: Allows filtering to transactions which match the given manifest classification. If specified, the response will contain only transactions which have a class that matches the filter. If `match_only_most_specific` set to true, only transactions where the queried class is most specific will be returned. See the [docs on manifest classification](https://docs.radixdlt.com/docs/conforming-transaction-manifest-types) for more information.
               type: object
               required:
                 - class
@@ -3794,6 +3805,11 @@ components:
                 match_only_most_specific:
                   type: boolean
                   default: false
+            event_global_emitters_filter:
+              description: Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter.
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
