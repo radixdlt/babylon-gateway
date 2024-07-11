@@ -84,9 +84,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class TransactionQuerier : ITransactionQuerier
 {
-    private record SchemaLookup(long EntityId, ValueBytes SchemaHash);
-
     internal record Event(string Name, string Emitter, GatewayModel.ProgrammaticScryptoSborValue Data);
+
+    private record SchemaLookup(long EntityId, ValueBytes SchemaHash);
 
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;

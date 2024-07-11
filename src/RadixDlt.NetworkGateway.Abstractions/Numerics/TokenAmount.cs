@@ -72,13 +72,13 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
 {
     public const string StringForNaN = "NaN";
 
-    private const int DecimalPrecision = 18;
-
-    private static readonly BigInteger _divisor;
-
     public static readonly TokenAmount Zero;
     public static readonly TokenAmount NaN;
     public static readonly TokenAmount OneFullUnit;
+
+    private const int DecimalPrecision = 18;
+
+    private static readonly BigInteger _divisor;
 
     static TokenAmount()
     {

@@ -76,6 +76,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal record struct SchemaDefinitionEntryDbLookup(long EntityId, ValueBytes SchemaHash);
+
 internal record struct SchemaChangePointerLookup(long EntityId, long StateVersion);
 
 internal record SchemaChangePointer
