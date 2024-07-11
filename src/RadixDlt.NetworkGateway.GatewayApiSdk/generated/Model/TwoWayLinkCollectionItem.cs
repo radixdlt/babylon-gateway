@@ -90,97 +90,33 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponseItem
+    /// TBD
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponseItem")]
-    public partial class StateEntityDetailsResponseItem : IEquatable<StateEntityDetailsResponseItem>
+    [DataContract(Name = "TwoWayLinkCollectionItem")]
+    public partial class TwoWayLinkCollectionItem : IEquatable<TwoWayLinkCollectionItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="TwoWayLinkCollectionItem" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected StateEntityDetailsResponseItem() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItem" /> class.
-        /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="fungibleResources">fungibleResources.</param>
-        /// <param name="nonFungibleResources">nonFungibleResources.</param>
-        /// <param name="ancestorIdentities">ancestorIdentities.</param>
-        /// <param name="metadata">metadata (required).</param>
-        /// <param name="explicitMetadata">explicitMetadata.</param>
-        /// <param name="details">details.</param>
-        /// <param name="twoWayLinks">twoWayLinks.</param>
-        public StateEntityDetailsResponseItem(string address = default(string), FungibleResourcesCollection fungibleResources = default(FungibleResourcesCollection), NonFungibleResourcesCollection nonFungibleResources = default(NonFungibleResourcesCollection), StateEntityDetailsResponseItemAncestorIdentities ancestorIdentities = default(StateEntityDetailsResponseItemAncestorIdentities), EntityMetadataCollection metadata = default(EntityMetadataCollection), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails), TwoWayLinkCollection twoWayLinks = default(TwoWayLinkCollection))
+        /// <param name="netType">netType.</param>
+        /// <param name="netDump">netDump.</param>
+        public TwoWayLinkCollectionItem(string netType = default(string), string netDump = default(string))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
-            {
-                throw new ArgumentNullException("address is a required property for StateEntityDetailsResponseItem and cannot be null");
-            }
-            this.Address = address;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for StateEntityDetailsResponseItem and cannot be null");
-            }
-            this.Metadata = metadata;
-            this.FungibleResources = fungibleResources;
-            this.NonFungibleResources = nonFungibleResources;
-            this.AncestorIdentities = ancestorIdentities;
-            this.ExplicitMetadata = explicitMetadata;
-            this.Details = details;
-            this.TwoWayLinks = twoWayLinks;
+            this.NetType = netType;
+            this.NetDump = netDump;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets NetType
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "net_type", EmitDefaultValue = true)]
+        public string NetType { get; set; }
 
         /// <summary>
-        /// Gets or Sets FungibleResources
+        /// Gets or Sets NetDump
         /// </summary>
-        [DataMember(Name = "fungible_resources", EmitDefaultValue = true)]
-        public FungibleResourcesCollection FungibleResources { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NonFungibleResources
-        /// </summary>
-        [DataMember(Name = "non_fungible_resources", EmitDefaultValue = true)]
-        public NonFungibleResourcesCollection NonFungibleResources { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AncestorIdentities
-        /// </summary>
-        [DataMember(Name = "ancestor_identities", EmitDefaultValue = true)]
-        public StateEntityDetailsResponseItemAncestorIdentities AncestorIdentities { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Metadata
-        /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public EntityMetadataCollection Metadata { get; set; }
-
-        /// <summary>
-        /// Gets or Sets ExplicitMetadata
-        /// </summary>
-        [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
-        public EntityMetadataCollection ExplicitMetadata { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Details
-        /// </summary>
-        [DataMember(Name = "details", EmitDefaultValue = true)]
-        public StateEntityDetailsResponseItemDetails Details { get; set; }
-
-        /// <summary>
-        /// Gets or Sets TwoWayLinks
-        /// </summary>
-        [DataMember(Name = "two_way_links", EmitDefaultValue = true)]
-        public TwoWayLinkCollection TwoWayLinks { get; set; }
+        [DataMember(Name = "net_dump", EmitDefaultValue = true)]
+        public string NetDump { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -189,15 +125,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponseItem {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  FungibleResources: ").Append(FungibleResources).Append("\n");
-            sb.Append("  NonFungibleResources: ").Append(NonFungibleResources).Append("\n");
-            sb.Append("  AncestorIdentities: ").Append(AncestorIdentities).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
-            sb.Append("  ExplicitMetadata: ").Append(ExplicitMetadata).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
-            sb.Append("  TwoWayLinks: ").Append(TwoWayLinks).Append("\n");
+            sb.Append("class TwoWayLinkCollectionItem {\n");
+            sb.Append("  NetType: ").Append(NetType).Append("\n");
+            sb.Append("  NetDump: ").Append(NetDump).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -218,15 +148,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponseItem);
+            return this.Equals(input as TwoWayLinkCollectionItem);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponseItem instances are equal
+        /// Returns true if TwoWayLinkCollectionItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponseItem to be compared</param>
+        /// <param name="input">Instance of TwoWayLinkCollectionItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponseItem input)
+        public bool Equals(TwoWayLinkCollectionItem input)
         {
             if (input == null)
             {
@@ -234,44 +164,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.NetType == input.NetType ||
+                    (this.NetType != null &&
+                    this.NetType.Equals(input.NetType))
                 ) && 
                 (
-                    this.FungibleResources == input.FungibleResources ||
-                    (this.FungibleResources != null &&
-                    this.FungibleResources.Equals(input.FungibleResources))
-                ) && 
-                (
-                    this.NonFungibleResources == input.NonFungibleResources ||
-                    (this.NonFungibleResources != null &&
-                    this.NonFungibleResources.Equals(input.NonFungibleResources))
-                ) && 
-                (
-                    this.AncestorIdentities == input.AncestorIdentities ||
-                    (this.AncestorIdentities != null &&
-                    this.AncestorIdentities.Equals(input.AncestorIdentities))
-                ) && 
-                (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
-                ) && 
-                (
-                    this.ExplicitMetadata == input.ExplicitMetadata ||
-                    (this.ExplicitMetadata != null &&
-                    this.ExplicitMetadata.Equals(input.ExplicitMetadata))
-                ) && 
-                (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
-                ) && 
-                (
-                    this.TwoWayLinks == input.TwoWayLinks ||
-                    (this.TwoWayLinks != null &&
-                    this.TwoWayLinks.Equals(input.TwoWayLinks))
+                    this.NetDump == input.NetDump ||
+                    (this.NetDump != null &&
+                    this.NetDump.Equals(input.NetDump))
                 );
         }
 
@@ -284,37 +184,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.NetType != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NetType.GetHashCode();
                 }
-                if (this.FungibleResources != null)
+                if (this.NetDump != null)
                 {
-                    hashCode = (hashCode * 59) + this.FungibleResources.GetHashCode();
-                }
-                if (this.NonFungibleResources != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibleResources.GetHashCode();
-                }
-                if (this.AncestorIdentities != null)
-                {
-                    hashCode = (hashCode * 59) + this.AncestorIdentities.GetHashCode();
-                }
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
-                }
-                if (this.ExplicitMetadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.ExplicitMetadata.GetHashCode();
-                }
-                if (this.Details != null)
-                {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
-                }
-                if (this.TwoWayLinks != null)
-                {
-                    hashCode = (hashCode * 59) + this.TwoWayLinks.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NetDump.GetHashCode();
                 }
                 return hashCode;
             }

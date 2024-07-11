@@ -78,7 +78,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 /// </summary>
 internal abstract class CommonDbContext : DbContext
 {
-    private const string DiscriminatorColumnName = "discriminator";
+    internal const string DiscriminatorColumnName = "discriminator";
 
     /// <summary>
     /// Gets LedgerTransactions.
@@ -171,6 +171,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountAuthorizedDepositorAggregateHistory> AccountAuthorizedDepositorAggregateHistory => Set<AccountAuthorizedDepositorAggregateHistory>();
 
+    public DbSet<UnverifiedTwoWayLinkAggregateHistory> UnverifiedTwoWayLinkAggregateHistory => Set<UnverifiedTwoWayLinkAggregateHistory>();
+
+    public DbSet<UnverifiedTwoWayLinkEntryHistory> UnverifiedTwoWayLinkEntryHistory => Set<UnverifiedTwoWayLinkEntryHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -201,6 +205,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<SborTypeKind>();
         modelBuilder.HasPostgresEnum<StateType>();
         modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
+        modelBuilder.HasPostgresEnum<TwoWayLink>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -606,5 +611,22 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<ValidatorCumulativeEmissionHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
+
+        modelBuilder
+            .Entity<UnverifiedTwoWayLinkAggregateHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<UnverifiedTwoWayLinkEntryHistory>()
+            .HasDiscriminator(e => e.Discriminator)
+            .HasValue<DappAccountTypeUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappAccountType)
+            .HasValue<DappDefinitionUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappDefinition)
+            .HasValue<DappDefinitionsUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappDefinitions)
+            .HasValue<DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappClaimedEntities)
+            .HasValue<DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappClaimedWebsites);
+
+        modelBuilder
+            .Entity<UnverifiedTwoWayLinkEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.Discriminator, e.FromStateVersion });
     }
 }

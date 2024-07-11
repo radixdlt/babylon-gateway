@@ -65,6 +65,7 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -74,6 +75,7 @@ using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
@@ -154,7 +156,14 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var packageSchemaHistory = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
-        var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
+        // TODO add opt-in flag?
+        var unverifiedTwoWayLinks = await GetUnverifiedTwoWayLinks(entities, ledgerState, token);
+
+        var extendedEntities = await ResolveExtendedEntities(entities, unverifiedTwoWayLinks, ledgerState, token);
+        var correlatedAddresses = await GetCorrelatedEntityAddresses(extendedEntities, packageBlueprintHistory, ledgerState, token);
+
+        // TODO add opt-in flag?
+        var resolvedTwoWayLinks = new TwoWayLinkResolver(new UnverifiedTwoWayLinks(extendedEntities, unverifiedTwoWayLinks)).Resolve(entities);
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)
@@ -338,6 +347,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                 }
             }
 
+            var twoWayLinks = resolvedTwoWayLinks.TryGetValue(entity.Id, out var entityTwoWayLinks)
+                ? new GatewayModel.TwoWayLinkCollection(entityTwoWayLinks.Select(x => x.ToGatewayModel(correlatedAddresses)).ToList())
+                : null;
+
             items.Add(new GatewayModel.StateEntityDetailsResponseItem(
                 address: entity.Address,
                 fungibleResources: haveFungibles ? fungibles : null,
@@ -345,7 +358,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                 ancestorIdentities: ancestorIdentities,
                 metadata: metadata[entity.Id],
                 explicitMetadata: explicitMetadata?[entity.Id],
-                details: details));
+                details: details,
+                twoWayLinks: twoWayLinks));
         }
 
         return new GatewayModel.StateEntityDetailsResponse(ledgerState, items);
@@ -1429,6 +1443,93 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
             .ToDictionary(g => g.Key, g => g.ToArray());
     }
 
+    private async Task<List<UnverifiedTwoWayLinkEntryHistory>> GetUnverifiedTwoWayLinks(ICollection<Entity> entities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var entityIds = entities.Select(e => e.Id).ToList();
+
+        // TODO we may want to exclude massive UNNESTs in first_entry_round_unnested?
+        return await _dbContext
+            .UnverifiedTwoWayLinkEntryHistory
+            .FromSqlInterpolated(@$"
+WITH
+    variables (entity_id) AS (SELECT UNNEST({entityIds})),
+    first_aggregate_round AS (
+        SELECT ah.*
+        FROM variables var
+        INNER JOIN LATERAL (
+            SELECT *
+            FROM unverified_two_way_link_aggregate_history
+            WHERE entity_id = var.entity_id AND from_state_version <= {ledgerState.StateVersion}
+            ORDER BY from_state_version DESC
+            LIMIT 1
+        ) ah ON TRUE
+    ),
+    first_entry_round AS (
+        SELECT eh.*
+        FROM first_aggregate_round ah
+        INNER JOIN LATERAL UNNEST(ah.entry_ids) AS entry_id ON TRUE
+        INNER JOIN unverified_two_way_link_entry_history eh ON eh.id = entry_id
+    ),
+    first_entry_round_unnested AS (
+        SELECT DISTINCT UNNEST(fer.entity_ids) AS entity_id
+        FROM first_entry_round fer
+        EXCEPT
+        SELECT entity_id
+        FROM variables
+    ),
+    second_aggregate_round AS (
+        SELECT ah.*
+        FROM first_entry_round_unnested feru
+        INNER JOIN LATERAL (
+            SELECT *
+            FROM unverified_two_way_link_aggregate_history
+            WHERE entity_id = feru.entity_id AND from_state_version <= {ledgerState.StateVersion}
+            ORDER BY from_state_version DESC
+            LIMIT 1
+        ) ah ON TRUE
+    ),
+    second_entry_round AS (
+        SELECT eh.*
+        FROM second_aggregate_round ah
+        INNER JOIN LATERAL UNNEST(ah.entry_ids) AS entry_id ON TRUE
+        INNER JOIN unverified_two_way_link_entry_history eh ON eh.id = entry_id
+    )
+SELECT *
+FROM first_entry_round
+UNION ALL
+SELECT *
+FROM second_entry_round;")
+            .AnnotateMetricName()
+            .ToListAsync(token);
+    }
+
+    private async Task<ICollection<Entity>> ResolveExtendedEntities(
+        ICollection<Entity> entities,
+        List<UnverifiedTwoWayLinkEntryHistory> unverifiedTwoWayLinks,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token)
+    {
+        var candidateEntityIds = new HashSet<long>();
+
+        candidateEntityIds.UnionWith(unverifiedTwoWayLinks.Select(e => e.EntityId));
+        candidateEntityIds.UnionWith(unverifiedTwoWayLinks.SelectMany(e => e.ReferencedEntityIds()));
+
+        var missingEntityIds = candidateEntityIds.Except(entities.Select(e => e.Id)).ToList();
+
+        if (missingEntityIds.Count == 0)
+        {
+            return entities;
+        }
+
+        var extendedEntities = await _dbContext
+            .Entities
+            .Where(e => missingEntityIds.Contains(e.Id) && e.FromStateVersion <= ledgerState.StateVersion)
+            .AnnotateMetricName()
+            .ToListAsync(token);
+
+        return entities.Concat(extendedEntities).ToList();
+    }
+
     private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(
         ICollection<Entity> entities,
         IDictionary<long, PackageBlueprintViewModel[]> packageBlueprints,
@@ -1439,6 +1540,8 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
 
         foreach (var entity in entities)
         {
+            lookup.Add(entity.Id);
+
             if (entity.HasParent)
             {
                 lookup.Add(entity.ParentAncestorId.Value);

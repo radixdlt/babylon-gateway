@@ -101,7 +101,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible")
                 .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
-                .Annotation("Npgsql:Enum:state_type", "json,sbor");
+                .Annotation("Npgsql:Enum:state_type", "json,sbor")
+                .Annotation("Npgsql:Enum:two_way_link", "dapp_account_type,dapp_definition,dapp_definitions,dapp_claimed_websites,dapp_claimed_entities");
 
             migrationBuilder.CreateTable(
                 name: "account_authorized_depositor_aggregate_history",
@@ -819,6 +820,41 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "unverified_two_way_link_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_unverified_two_way_link_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "unverified_two_way_link_entry_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    is_locked = table.Column<bool>(type: "boolean", nullable: false),
+                    discriminator = table.Column<TwoWayLink>(type: "two_way_link", nullable: false),
+                    value = table.Column<string>(type: "text", nullable: true),
+                    entity_ids = table.Column<long[]>(type: "bigint[]", nullable: true),
+                    claimed_websites = table.Column<string[]>(type: "text[]", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_unverified_two_way_link_entry_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_cumulative_emission_history",
                 columns: table => new
                 {
@@ -1231,6 +1267,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_unverified_two_way_link_aggregate_history_entity_id_from_st~",
+                table: "unverified_two_way_link_aggregate_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_unverified_two_way_link_entry_history_entity_id_discriminat~",
+                table: "unverified_two_way_link_entry_history",
+                columns: new[] { "entity_id", "discriminator", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_active_set_history_epoch",
                 table: "validator_active_set_history",
                 column: "epoch");
@@ -1380,6 +1426,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "state_history");
+
+            migrationBuilder.DropTable(
+                name: "unverified_two_way_link_aggregate_history");
+
+            migrationBuilder.DropTable(
+                name: "unverified_two_way_link_entry_history");
 
             migrationBuilder.DropTable(
                 name: "validator_active_set_history");

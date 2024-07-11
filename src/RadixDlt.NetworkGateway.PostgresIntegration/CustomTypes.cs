@@ -120,6 +120,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<SborTypeKind>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<AuthorizedDepositorBadgeType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<TwoWayLink>();
 #pragma warning restore CS0618
 
         _configured = true;

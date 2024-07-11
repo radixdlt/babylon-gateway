@@ -62,91 +62,116 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("unverified_two_way_link_entry_history")]
+internal abstract class UnverifiedTwoWayLinkEntryHistory
 {
-    public long AccountLockerEntryDefinitionSequence { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public long AccountLockerEntryResourceVaultDefinitionSequence { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public long AccountLockerEntryTouchHistorySequence { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
 
-    public long AccountResourcePreferenceRuleEntryHistorySequence { get; set; }
+    // TODO is it relevant? drop it?
+    [Column("is_locked")]
+    public bool IsLocked { get; set; }
 
-    public long AccountResourcePreferenceRuleAggregateHistorySequence { get; set; }
+    [Column(CommonDbContext.DiscriminatorColumnName)]
+    public TwoWayLink Discriminator { get; set; }
 
-    public long AccountAuthorizedDepositorEntryHistorySequence { get; set; }
+    public abstract IEnumerable<long> ReferencedEntityIds();
+}
 
-    public long AccountAuthorizedDepositorAggregateHistorySequence { get; set; }
+internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory
+{
+    // TODO use enum?
+    [Column("value")]
+    public string Value { get; set; }
 
-    public long StateHistorySequence { get; set; }
+    public override IEnumerable<long> ReferencedEntityIds() => Enumerable.Empty<long>();
+}
 
-    public long EntitySequence { get; set; }
+internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
+{
+    // TODO use string[]? Values and share it with DappAccountType, similarly to how we did it with entity_ids?
+    [Column("claimed_websites")]
+    public string[]? ClaimedWebsites { get; set; }
 
-    public long EntityMetadataHistorySequence { get; set; }
+    public override IEnumerable<long> ReferencedEntityIds() => Enumerable.Empty<long>();
 
-    public long EntityMetadataAggregateHistorySequence { get; set; }
+    public IEnumerable<(string Name, int TotalCount)> AggregateCounts()
+    {
+        if (ClaimedWebsites != null)
+        {
+            yield return (nameof(ClaimedWebsites), ClaimedWebsites.Length);
+        }
+    }
+}
 
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
+internal class DappDefinitionUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory
+{
+    [NotMapped]
+    public long DappDefinitionEntityId
+    {
+        get
+        {
+            return DappEntityIds?.FirstOrDefault() ?? default;
+        }
 
-    public long EntityResourceAggregateHistorySequence { get; set; }
+        set
+        {
+            DappEntityIds = new[] { value };
+        }
+    }
 
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
+    [Column("entity_ids")]
+    public long[]? DappEntityIds { get; set; }
 
-    public long EntityVaultHistorySequence { get; set; }
+    public override IEnumerable<long> ReferencedEntityIds() => DappEntityIds ?? Enumerable.Empty<long>();
+}
 
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
+internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
+{
+    [Column("entity_ids")]
+    public long[]? DappDefinitionEntityIds { get; set; }
 
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
+    public override IEnumerable<long> ReferencedEntityIds() => DappDefinitionEntityIds ?? Enumerable.Empty<long>();
 
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
+    public IEnumerable<(string Name, int TotalCount)> AggregateCounts()
+    {
+        if (DappDefinitionEntityIds != null)
+        {
+            yield return (nameof(DappDefinitionEntityIds), DappDefinitionEntityIds.Length);
+        }
+    }
+}
 
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
+internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
+{
+    [Column("entity_ids")]
+    public long[]? ClaimedEntityIds { get; set; }
 
-    public long ComponentMethodRoyaltyAggregateHistorySequence { get; set; }
+    public override IEnumerable<long> ReferencedEntityIds() => ClaimedEntityIds ?? Enumerable.Empty<long>();
 
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long NonFungibleIdLocationHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long SchemaEntryDefinitionSequence { get; set; }
-
-    public long SchemaEntryAggregateHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryDefinitionSequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorCumulativeEmissionHistorySequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
-
-    public long PackageBlueprintAggregateHistorySequence { get; set; }
-
-    public long PackageCodeAggregateHistorySequence { get; set; }
-
-    public long UnverifiedTwoWayLinkAggregateHistorySequence { get; set; }
-
-    public long UnverifiedTwoWayLinkEntryHistorySequence { get; set; }
+    public IEnumerable<(string Name, int TotalCount)> AggregateCounts()
+    {
+        if (ClaimedEntityIds != null)
+        {
+            yield return (nameof(ClaimedEntityIds), ClaimedEntityIds.Length);
+        }
+    }
 }

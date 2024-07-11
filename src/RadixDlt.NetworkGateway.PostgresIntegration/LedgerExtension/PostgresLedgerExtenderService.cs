@@ -259,7 +259,9 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdatePendingTransactions), sw.Elapsed, null));
         }
 
+        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, networkConfiguration, token);
         var relationshipProcessor = new RelationshipProcessor(referencedEntities);
+        var twoWayLinkProcessor = new TwoWayLinkProcessor(processorContext, referencedEntities);
 
         // step: scan for any referenced entities
         {
@@ -454,6 +456,7 @@ UPDATE pending_transactions
                         }
 
                         relationshipProcessor.ScanUpsert(substateData, referencedEntity, stateVersion);
+                        twoWayLinkProcessor.ScanUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -730,7 +733,6 @@ UPDATE pending_transactions
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
 
-        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, networkConfiguration, token);
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
         var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
         var entitySchemaProcessor = new EntitySchemaProcessor(processorContext);
@@ -906,6 +908,7 @@ UPDATE pending_transactions
                         keyValueStoreProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         validatorProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, passingEpoch);
                         accountLockerProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        twoWayLinkProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -924,6 +927,7 @@ UPDATE pending_transactions
 
                         packageCodeProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                         entitySchemaProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
+                        twoWayLinkProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
@@ -1148,6 +1152,7 @@ UPDATE pending_transactions
             await accountAuthorizedDepositorsProcessor.LoadDependencies();
             await accountResourcePreferenceRulesProcessor.LoadDependencies();
             await accountLockerProcessor.LoadDependencies();
+            await twoWayLinkProcessor.LoadDependencies();
 
             dbReadDuration += sw.Elapsed;
 
@@ -1172,6 +1177,7 @@ UPDATE pending_transactions
             validatorProcessor.ProcessChanges();
             validatorEmissionProcessor.ProcessChanges();
             accountLockerProcessor.ProcessChanges();
+            twoWayLinkProcessor.ProcessChanges();
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1530,6 +1536,7 @@ UPDATE pending_transactions
             rowsInserted += await validatorProcessor.SaveEntities();
             rowsInserted += await validatorEmissionProcessor.SaveEntities();
             rowsInserted += await accountLockerProcessor.SaveEntities();
+            rowsInserted += await twoWayLinkProcessor.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);
 

@@ -2279,6 +2279,26 @@ components:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
 
+    TwoWayLinkCollection:
+      description: TBD # TODO TBD
+      allOf:
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/TwoWayLinkCollectionItem"
+    TwoWayLinkCollectionItem: # TODO add discriminator and multiple types
+      description: TBD # TODO TBD
+      type: object
+      properties:
+        net_type:
+          type: string
+        net_dump:
+          type: string
+
     AccountLockerVaultCollection:
       description: Account Locker Account Resources Collection
       allOf:
@@ -3925,6 +3945,8 @@ components:
           $ref: "#/components/schemas/EntityMetadataCollection"
         details:
           $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
+        two_way_links:
+          $ref: "#/components/schemas/TwoWayLinkCollection"
     StateEntityDetailsResponseItemAncestorIdentities:
       type: object
       properties:

@@ -85,6 +85,25 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
+    public static GatewayModel.TwoWayLinkCollectionItem ToGatewayModel(this ResolvedTwoWayLink input, Dictionary<long, EntityAddress> correlatedAddresses)
+    {
+        var dump = input switch
+        {
+            DappAccountTypeResolvedTwoWayLink dappAccountType => dappAccountType.Value,
+            DappClaimedEntityResolvedTwoWayLink dappClaimedEntity => correlatedAddresses[dappClaimedEntity.EntityId].ToString(),
+            DappClaimedWebsiteResolvedTwoWayLink dappClaimedWebsite => dappClaimedWebsite.Origin.ToString(),
+            DappDefinitionResolvedTwoWayLink dappDefinition => correlatedAddresses[dappDefinition.EntityId].ToString(),
+            DappDefinitionsResolvedTwoWayLink dappDefinitions => correlatedAddresses[dappDefinitions.EntityId].ToString(),
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
+
+        var validity = input.IsValid
+            ? "# VALID #"
+            : $"### INVALID ({input.InvalidReason}) ###";
+
+        return new GatewayModel.TwoWayLinkCollectionItem(input.GetType().Name, dump + " " + validity);
+    }
+
     public static GatewayModel.AccountDefaultDepositRule ToGatewayModel(this AccountDefaultDepositRule input)
     {
         return input switch

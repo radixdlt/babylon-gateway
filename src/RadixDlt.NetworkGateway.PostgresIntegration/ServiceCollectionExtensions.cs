@@ -120,6 +120,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<SborTypeKind>();
                 dataSourceBuilder.MapEnum<StateType>();
                 dataSourceBuilder.MapEnum<AuthorizedDepositorBadgeType>();
+                dataSourceBuilder.MapEnum<TwoWayLink>();
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },
