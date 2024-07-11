@@ -68,6 +68,7 @@ using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable

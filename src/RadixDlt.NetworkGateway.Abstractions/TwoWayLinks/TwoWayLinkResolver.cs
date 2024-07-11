@@ -69,71 +69,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
-
-public enum TwoWayLinkType
-{
-    DappAccountType,
-    DappDefinition,
-    DappDefinitions,
-    DappClaimedWebsites,
-    DappClaimedEntities,
-}
-
-public abstract class UnverifiedTwoWayLink
-{
-    public required long FromStateVersion { get; init;  }
-
-    public required EntityAddress EntityAddress { get; init; }
-}
-
-public sealed class DappAccountTypeUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required string Value { get; init; } // TODO use enum?
-}
-
-public sealed class DappClaimedWebsitesUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required ICollection<Uri> ClaimedWebsites { get; init; }
-}
-
-public sealed class DappClaimedEntitiesUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required ICollection<EntityAddress> ClaimedEntities { get; init; }
-}
-
-public sealed class DappDefinitionUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required EntityAddress DappDefinition { get; init; }
-}
-
-public sealed class DappDefinitionsUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required ICollection<EntityAddress> DappDefinitions { get; init; }
-}
-
-public abstract record ResolvedTwoWayLink(string? InvalidReason)
-{
-    public bool IsValid => InvalidReason == null;
-}
-
-public sealed record DappAccountTypeResolvedTwoWayLink(string Value, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
-
-public sealed record DappClaimedEntityResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
-
-public sealed record DappClaimedWebsiteResolvedTwoWayLink(Uri Origin, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
-
-public sealed record DappDefinitionResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
-
-public sealed record DappDefinitionsResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
-
-public interface IUnverifiedTwoWayLinksCollection
-{
-    public bool TryGetTwoWayLinks(EntityAddress entityAddress, [NotNullWhen(true)] out List<UnverifiedTwoWayLink>? twoWayLinks);
-
-    public bool TryGetTwoWayLink<T>(EntityAddress entityAddress, [NotNullWhen(true)] out T? twoWayLink)
-        where T : UnverifiedTwoWayLink;
-}
+namespace RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
 
 public sealed class TwoWayLinkResolver
 {
