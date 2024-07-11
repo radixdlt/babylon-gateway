@@ -62,13 +62,51 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
-public enum TwoWayLink
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
+
+internal class UnverifiedTwoWayLinks : IUnverifiedTwoWayLinksCollection
 {
-    DappAccountType,
-    DappDefinition,
-    DappDefinitions,
-    DappClaimedWebsites,
-    DappClaimedEntities,
+    private readonly IDictionary<EntityAddress, List<UnverifiedTwoWayLinkEntryHistory>> _unverified;
+    private readonly IDictionary<long, EntityAddress> _entityAddresses;
+
+    public UnverifiedTwoWayLinks(ICollection<UnverifiedTwoWayLinkEntryHistory> unverified, IDictionary<long, EntityAddress> entityAddresses)
+    {
+        _unverified = unverified.GroupBy(e => entityAddresses[e.EntityId]).ToDictionary(g => g.Key, g => g.ToList());
+        _entityAddresses = entityAddresses;
+    }
+
+    public bool TryGetTwoWayLinks(EntityAddress entityAddress, [NotNullWhen(true)] out List<UnverifiedTwoWayLink>? twoWayLinks)
+    {
+        twoWayLinks = default;
+
+        if (_unverified.TryGetValue(entityAddress, out var x))
+        {
+            twoWayLinks = x.Where(y => !y.IsDeleted).Select(y => y.MapXxx(_entityAddresses)).ToList();
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool TryGetTwoWayLink<T>(EntityAddress entityAddress, [NotNullWhen(true)] out T? twoWayLink)
+        where T : UnverifiedTwoWayLink
+    {
+        twoWayLink = default;
+
+        if (TryGetTwoWayLinks(entityAddress, out var twoWayLinks))
+        {
+            twoWayLink = twoWayLinks.OfType<T>().FirstOrDefault();
+
+            return twoWayLink != default;
+        }
+
+        return false;
+    }
 }

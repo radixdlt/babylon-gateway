@@ -77,7 +77,7 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct UnverifiedTwoWayLinkEntryDbLookup(long EntityId, TwoWayLink Discriminator);
+internal record struct UnverifiedTwoWayLinkEntryDbLookup(long EntityId, TwoWayLinkType Type);
 
 internal class TwoWayLinkProcessor
 {
@@ -258,7 +258,7 @@ internal class TwoWayLinkProcessor
     {
         foreach (var entry in _entriesToAdd)
         {
-            var lookup = new UnverifiedTwoWayLinkEntryDbLookup(entry.EntityId, _context.WriteHelper.GetDiscriminator<TwoWayLink>(entry.GetType()));
+            var lookup = new UnverifiedTwoWayLinkEntryDbLookup(entry.EntityId, _context.WriteHelper.GetDiscriminator<TwoWayLinkType>(entry.GetType()));
 
             UnverifiedTwoWayLinkAggregateHistory aggregate;
 
@@ -317,10 +317,10 @@ internal class TwoWayLinkProcessor
     private async Task<IDictionary<UnverifiedTwoWayLinkEntryDbLookup, UnverifiedTwoWayLinkEntryHistory>> MostRecentEntryHistory()
     {
         var lookupSet = _entriesToAdd
-            .Select(e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<TwoWayLink>(e.GetType())))
+            .Select(e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<TwoWayLinkType>(e.GetType())))
             .ToHashSet();
 
-        if (!lookupSet.Unzip(x => x.EntityId, x => x.Discriminator, out var entityIds, out var discriminators))
+        if (!lookupSet.Unzip(x => x.EntityId, x => x.Type, out var entityIds, out var discriminators))
         {
             return ImmutableDictionary<UnverifiedTwoWayLinkEntryDbLookup, UnverifiedTwoWayLinkEntryHistory>.Empty;
         }
@@ -339,7 +339,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) eh ON true;",
-            e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<TwoWayLink>(e.GetType())));
+            e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<TwoWayLinkType>(e.GetType())));
     }
 
     private async Task<IDictionary<long, UnverifiedTwoWayLinkAggregateHistory>> MostRecentAggregateHistory()
@@ -373,14 +373,14 @@ INNER JOIN LATERAL (
         "COPY unverified_two_way_link_entry_history (id, from_state_version, entity_id, is_deleted, is_locked, discriminator, value, entity_ids, claimed_websites) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
-            var discriminator = _context.WriteHelper.GetDiscriminator<TwoWayLink>(e.GetType());
+            var discriminator = _context.WriteHelper.GetDiscriminator<TwoWayLinkType>(e.GetType());
 
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(discriminator, "two_way_link", token);
+            await writer.WriteAsync(discriminator, "two_way_link_type", token);
 
             switch (e)
             {

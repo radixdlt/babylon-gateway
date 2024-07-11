@@ -65,7 +65,6 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -75,7 +74,6 @@ using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
@@ -158,12 +156,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
         // TODO add opt-in flag?
         var unverifiedTwoWayLinks = await GetUnverifiedTwoWayLinks(entities, ledgerState, token);
-
-        var extendedEntities = await ResolveExtendedEntities(entities, unverifiedTwoWayLinks, ledgerState, token);
-        var correlatedAddresses = await GetCorrelatedEntityAddresses(extendedEntities, packageBlueprintHistory, ledgerState, token);
+        var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, unverifiedTwoWayLinks, ledgerState, token);
 
         // TODO add opt-in flag?
-        var resolvedTwoWayLinks = new TwoWayLinkResolver(new UnverifiedTwoWayLinks(extendedEntities, unverifiedTwoWayLinks)).Resolve(entities);
+        var resolvedTwoWayLinks = new TwoWayLinkResolver(new UnverifiedTwoWayLinks(unverifiedTwoWayLinks, correlatedAddresses), false, true).Resolve(entities.Select(e => e.Address).ToList());
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)
@@ -347,8 +343,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                 }
             }
 
-            var twoWayLinks = resolvedTwoWayLinks.TryGetValue(entity.Id, out var entityTwoWayLinks)
-                ? new GatewayModel.TwoWayLinkCollection(entityTwoWayLinks.Select(x => x.ToGatewayModel(correlatedAddresses)).ToList())
+            var twoWayLinks = resolvedTwoWayLinks.TryGetValue(entity.Address, out var entityTwoWayLinks)
+                ? new GatewayModel.TwoWayLinkCollection(entityTwoWayLinks.Select(x => x.ToGatewayModel()).ToList())
                 : null;
 
             items.Add(new GatewayModel.StateEntityDetailsResponseItem(
@@ -1503,36 +1499,10 @@ FROM second_entry_round;")
             .ToListAsync(token);
     }
 
-    private async Task<ICollection<Entity>> ResolveExtendedEntities(
-        ICollection<Entity> entities,
-        List<UnverifiedTwoWayLinkEntryHistory> unverifiedTwoWayLinks,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token)
-    {
-        var candidateEntityIds = new HashSet<long>();
-
-        candidateEntityIds.UnionWith(unverifiedTwoWayLinks.Select(e => e.EntityId));
-        candidateEntityIds.UnionWith(unverifiedTwoWayLinks.SelectMany(e => e.ReferencedEntityIds()));
-
-        var missingEntityIds = candidateEntityIds.Except(entities.Select(e => e.Id)).ToList();
-
-        if (missingEntityIds.Count == 0)
-        {
-            return entities;
-        }
-
-        var extendedEntities = await _dbContext
-            .Entities
-            .Where(e => missingEntityIds.Contains(e.Id) && e.FromStateVersion <= ledgerState.StateVersion)
-            .AnnotateMetricName()
-            .ToListAsync(token);
-
-        return entities.Concat(extendedEntities).ToList();
-    }
-
     private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(
         ICollection<Entity> entities,
         IDictionary<long, PackageBlueprintViewModel[]> packageBlueprints,
+        ICollection<UnverifiedTwoWayLinkEntryHistory>? unverifiedTwoWayLinks,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
@@ -1563,6 +1533,15 @@ FROM second_entry_round;")
         foreach (var dependantEntityId in packageBlueprints.Values.SelectMany(x => x).SelectMany(x => x.DependantEntityIds?.ToArray() ?? Array.Empty<long>()))
         {
             lookup.Add(dependantEntityId);
+        }
+
+        if (unverifiedTwoWayLinks != null)
+        {
+            foreach (var unverifiedTwoWayLink in unverifiedTwoWayLinks)
+            {
+                lookup.Add(unverifiedTwoWayLink.EntityId);
+                lookup.UnionWith(unverifiedTwoWayLink.ReferencedEntityIds());
+            }
         }
 
         var ids = lookup.ToList();

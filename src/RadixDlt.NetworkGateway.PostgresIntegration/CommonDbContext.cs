@@ -205,7 +205,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<SborTypeKind>();
         modelBuilder.HasPostgresEnum<StateType>();
         modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
-        modelBuilder.HasPostgresEnum<TwoWayLink>();
+        modelBuilder.HasPostgresEnum<TwoWayLinkType>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -619,11 +619,11 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<UnverifiedTwoWayLinkEntryHistory>()
             .HasDiscriminator(e => e.Discriminator)
-            .HasValue<DappAccountTypeUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappAccountType)
-            .HasValue<DappDefinitionUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappDefinition)
-            .HasValue<DappDefinitionsUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappDefinitions)
-            .HasValue<DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappClaimedEntities)
-            .HasValue<DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory>(TwoWayLink.DappClaimedWebsites);
+            .HasValue<DappAccountTypeUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappAccountType)
+            .HasValue<DappDefinitionUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappDefinition)
+            .HasValue<DappDefinitionsUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappDefinitions)
+            .HasValue<DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappClaimedEntities)
+            .HasValue<DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappClaimedWebsites);
 
         modelBuilder
             .Entity<UnverifiedTwoWayLinkEntryHistory>()

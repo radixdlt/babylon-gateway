@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -91,9 +93,11 @@ internal abstract class UnverifiedTwoWayLinkEntryHistory
     public bool IsLocked { get; set; }
 
     [Column(CommonDbContext.DiscriminatorColumnName)]
-    public TwoWayLink Discriminator { get; set; }
+    public TwoWayLinkType Discriminator { get; set; }
 
     public abstract IEnumerable<long> ReferencedEntityIds();
+
+    public abstract UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities);
 }
 
 internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory
@@ -103,6 +107,16 @@ internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWa
     public string Value { get; set; }
 
     public override IEnumerable<long> ReferencedEntityIds() => Enumerable.Empty<long>();
+
+    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    {
+        return new DappAccountTypeUnverifiedTwoWayLink
+        {
+            FromStateVersion = FromStateVersion,
+            EntityAddress = correlatedEntities[EntityId],
+            Value = Value,
+        };
+    }
 }
 
 internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
@@ -119,6 +133,16 @@ internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : UnverifiedT
         {
             yield return (nameof(ClaimedWebsites), ClaimedWebsites.Length);
         }
+    }
+
+    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    {
+        return new DappClaimedWebsitesUnverifiedTwoWayLink
+        {
+            FromStateVersion = FromStateVersion,
+            EntityAddress = correlatedEntities[EntityId],
+            ClaimedWebsites = ClaimedWebsites!.Select(x => new Uri(x)).ToList(),
+        };
     }
 }
 
@@ -142,6 +166,16 @@ internal class DappDefinitionUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWay
     public long[]? DappEntityIds { get; set; }
 
     public override IEnumerable<long> ReferencedEntityIds() => DappEntityIds ?? Enumerable.Empty<long>();
+
+    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    {
+        return new DappDefinitionUnverifiedTwoWayLink
+        {
+            FromStateVersion = FromStateVersion,
+            EntityAddress = correlatedEntities[EntityId],
+            DappDefinition = correlatedEntities[DappDefinitionEntityId],
+        };
+    }
 }
 
 internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
@@ -158,6 +192,18 @@ internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWa
             yield return (nameof(DappDefinitionEntityIds), DappDefinitionEntityIds.Length);
         }
     }
+
+    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    {
+        // TODO ensure has value (applies to all of those)
+
+        return new DappDefinitionsUnverifiedTwoWayLink
+        {
+            FromStateVersion = FromStateVersion,
+            EntityAddress = correlatedEntities[EntityId],
+            DappDefinitions = DappDefinitionEntityIds!.Select(x => correlatedEntities[x]).ToList(),
+        };
+    }
 }
 
 internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
@@ -173,5 +219,17 @@ internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : UnverifiedT
         {
             yield return (nameof(ClaimedEntityIds), ClaimedEntityIds.Length);
         }
+    }
+
+    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    {
+        // TODO ensure has value (applies to all of those)
+
+        return new DappClaimedEntitiesUnverifiedTwoWayLink
+        {
+            FromStateVersion = FromStateVersion,
+            EntityAddress = correlatedEntities[EntityId],
+            ClaimedEntities = ClaimedEntityIds!.Select(x => correlatedEntities[x]).ToList(),
+        };
     }
 }

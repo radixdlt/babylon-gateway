@@ -102,7 +102,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible")
                 .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
                 .Annotation("Npgsql:Enum:state_type", "json,sbor")
-                .Annotation("Npgsql:Enum:two_way_link", "dapp_account_type,dapp_definition,dapp_definitions,dapp_claimed_websites,dapp_claimed_entities");
+                .Annotation("Npgsql:Enum:two_way_link_type", "dapp_account_type,dapp_definition,dapp_definitions,dapp_claimed_websites,dapp_claimed_entities");
 
             migrationBuilder.CreateTable(
                 name: "account_authorized_depositor_aggregate_history",
@@ -844,7 +844,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     is_locked = table.Column<bool>(type: "boolean", nullable: false),
-                    discriminator = table.Column<TwoWayLink>(type: "two_way_link", nullable: false),
+                    discriminator = table.Column<TwoWayLinkType>(type: "two_way_link_type", nullable: false),
                     value = table.Column<string>(type: "text", nullable: true),
                     entity_ids = table.Column<long[]>(type: "bigint[]", nullable: true),
                     claimed_websites = table.Column<string[]>(type: "text[]", nullable: true)

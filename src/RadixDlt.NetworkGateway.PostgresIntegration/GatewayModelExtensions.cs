@@ -85,15 +85,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
-    public static GatewayModel.TwoWayLinkCollectionItem ToGatewayModel(this ResolvedTwoWayLink input, Dictionary<long, EntityAddress> correlatedAddresses)
+    public static GatewayModel.TwoWayLinkCollectionItem ToGatewayModel(this ResolvedTwoWayLink input)
     {
         var dump = input switch
         {
             DappAccountTypeResolvedTwoWayLink dappAccountType => dappAccountType.Value,
-            DappClaimedEntityResolvedTwoWayLink dappClaimedEntity => correlatedAddresses[dappClaimedEntity.EntityId].ToString(),
+            DappClaimedEntityResolvedTwoWayLink dappClaimedEntity => dappClaimedEntity.EntityAddress.ToString(),
             DappClaimedWebsiteResolvedTwoWayLink dappClaimedWebsite => dappClaimedWebsite.Origin.ToString(),
-            DappDefinitionResolvedTwoWayLink dappDefinition => correlatedAddresses[dappDefinition.EntityId].ToString(),
-            DappDefinitionsResolvedTwoWayLink dappDefinitions => correlatedAddresses[dappDefinitions.EntityId].ToString(),
+            DappDefinitionResolvedTwoWayLink dappDefinition => dappDefinition.EntityAddress.ToString(),
+            DappDefinitionsResolvedTwoWayLink dappDefinitions => dappDefinitions.EntityAddress.ToString(),
             _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
         };
 

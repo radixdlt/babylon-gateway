@@ -80,6 +80,11 @@ public readonly record struct EntityAddress
 
     public bool IsGlobal => !IsInternal;
 
+    // TODO this is not a good design
+    public bool IsAccount => _address.StartsWith("account_");
+
+    public bool IsResource => _address.StartsWith("resource_");
+
     public static implicit operator string(EntityAddress ra) => ra._address;
 
     public static explicit operator EntityAddress(string text) => new(text);
