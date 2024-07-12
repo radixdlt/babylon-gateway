@@ -110,7 +110,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="roleAssignments">roleAssignments.</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="royaltyConfig">royaltyConfig.</param>
-        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig))
+        /// <param name="twoWayLinkedDappAddress">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="twoWayLinkedDapps">twoWayLinkedDapps.</param>
+        /// <param name="twoWayLinkedEntities">twoWayLinkedEntities.</param>
+        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig), string twoWayLinkedDappAddress = default(string), TwoWayLinkedDappsCollection twoWayLinkedDapps = default(TwoWayLinkedDappsCollection), TwoWayLinkedEntitiesCollection twoWayLinkedEntities = default(TwoWayLinkedEntitiesCollection))
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -129,6 +132,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.RoleAssignments = roleAssignments;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
             this.RoyaltyConfig = royaltyConfig;
+            this.TwoWayLinkedDappAddress = twoWayLinkedDappAddress;
+            this.TwoWayLinkedDapps = twoWayLinkedDapps;
+            this.TwoWayLinkedEntities = twoWayLinkedEntities;
         }
 
         /// <summary>
@@ -177,6 +183,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public ComponentRoyaltyConfig RoyaltyConfig { get; set; }
 
         /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "two_way_linked_dapp_address", EmitDefaultValue = true)]
+        public string TwoWayLinkedDappAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TwoWayLinkedDapps
+        /// </summary>
+        [DataMember(Name = "two_way_linked_dapps", EmitDefaultValue = true)]
+        public TwoWayLinkedDappsCollection TwoWayLinkedDapps { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TwoWayLinkedEntities
+        /// </summary>
+        [DataMember(Name = "two_way_linked_entities", EmitDefaultValue = true)]
+        public TwoWayLinkedEntitiesCollection TwoWayLinkedEntities { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -191,6 +216,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
+            sb.Append("  TwoWayLinkedDappAddress: ").Append(TwoWayLinkedDappAddress).Append("\n");
+            sb.Append("  TwoWayLinkedDapps: ").Append(TwoWayLinkedDapps).Append("\n");
+            sb.Append("  TwoWayLinkedEntities: ").Append(TwoWayLinkedEntities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -260,6 +288,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.RoyaltyConfig == input.RoyaltyConfig ||
                     (this.RoyaltyConfig != null &&
                     this.RoyaltyConfig.Equals(input.RoyaltyConfig))
+                ) && 
+                (
+                    this.TwoWayLinkedDappAddress == input.TwoWayLinkedDappAddress ||
+                    (this.TwoWayLinkedDappAddress != null &&
+                    this.TwoWayLinkedDappAddress.Equals(input.TwoWayLinkedDappAddress))
+                ) && 
+                (
+                    this.TwoWayLinkedDapps == input.TwoWayLinkedDapps ||
+                    (this.TwoWayLinkedDapps != null &&
+                    this.TwoWayLinkedDapps.Equals(input.TwoWayLinkedDapps))
+                ) && 
+                (
+                    this.TwoWayLinkedEntities == input.TwoWayLinkedEntities ||
+                    (this.TwoWayLinkedEntities != null &&
+                    this.TwoWayLinkedEntities.Equals(input.TwoWayLinkedEntities))
                 );
         }
 
@@ -299,6 +342,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.RoyaltyConfig != null)
                 {
                     hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
+                }
+                if (this.TwoWayLinkedDappAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.TwoWayLinkedDappAddress.GetHashCode();
+                }
+                if (this.TwoWayLinkedDapps != null)
+                {
+                    hashCode = (hashCode * 59) + this.TwoWayLinkedDapps.GetHashCode();
+                }
+                if (this.TwoWayLinkedEntities != null)
+                {
+                    hashCode = (hashCode * 59) + this.TwoWayLinkedEntities.GetHashCode();
                 }
                 return hashCode;
             }

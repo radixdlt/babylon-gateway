@@ -90,26 +90,26 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TBD
+    /// TwoWayLinkedDappsCollectionAllOf
     /// </summary>
-    [DataContract(Name = "TwoWayLinkCollection")]
-    public partial class TwoWayLinkCollection : IEquatable<TwoWayLinkCollection>
+    [DataContract(Name = "TwoWayLinkedDappsCollection_allOf")]
+    public partial class TwoWayLinkedDappsCollectionAllOf : IEquatable<TwoWayLinkedDappsCollectionAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TwoWayLinkCollection" /> class.
+        /// Initializes a new instance of the <see cref="TwoWayLinkedDappsCollectionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TwoWayLinkCollection() { }
+        protected TwoWayLinkedDappsCollectionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TwoWayLinkCollection" /> class.
+        /// Initializes a new instance of the <see cref="TwoWayLinkedDappsCollectionAllOf" /> class.
         /// </summary>
         /// <param name="items">items (required).</param>
-        public TwoWayLinkCollection(List<TwoWayLinkCollectionItem> items = default(List<TwoWayLinkCollectionItem>))
+        public TwoWayLinkedDappsCollectionAllOf(List<TwoWayLinkedDappsCollectionItem> items = default(List<TwoWayLinkedDappsCollectionItem>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for TwoWayLinkCollection and cannot be null");
+                throw new ArgumentNullException("items is a required property for TwoWayLinkedDappsCollectionAllOf and cannot be null");
             }
             this.Items = items;
         }
@@ -118,7 +118,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<TwoWayLinkCollectionItem> Items { get; set; }
+        public List<TwoWayLinkedDappsCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TwoWayLinkCollection {\n");
+            sb.Append("class TwoWayLinkedDappsCollectionAllOf {\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -149,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TwoWayLinkCollection);
+            return this.Equals(input as TwoWayLinkedDappsCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if TwoWayLinkCollection instances are equal
+        /// Returns true if TwoWayLinkedDappsCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TwoWayLinkCollection to be compared</param>
+        /// <param name="input">Instance of TwoWayLinkedDappsCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TwoWayLinkCollection input)
+        public bool Equals(TwoWayLinkedDappsCollectionAllOf input)
         {
             if (input == null)
             {

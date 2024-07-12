@@ -108,7 +108,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="totalSupply">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalBurned">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        public StateEntityDetailsResponseFungibleResourceDetailsAllOf(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string))
+        /// <param name="twoWayLinkedDapps">twoWayLinkedDapps.</param>
+        public StateEntityDetailsResponseFungibleResourceDetailsAllOf(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), TwoWayLinkedDappsCollection twoWayLinkedDapps = default(TwoWayLinkedDappsCollection))
         {
             // to ensure "roleAssignments" is required (not null)
             if (roleAssignments == null)
@@ -135,6 +136,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("totalBurned is a required property for StateEntityDetailsResponseFungibleResourceDetailsAllOf and cannot be null");
             }
             this.TotalBurned = totalBurned;
+            this.TwoWayLinkedDapps = twoWayLinkedDapps;
         }
 
         /// <summary>
@@ -171,6 +173,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string TotalBurned { get; set; }
 
         /// <summary>
+        /// Gets or Sets TwoWayLinkedDapps
+        /// </summary>
+        [DataMember(Name = "two_way_linked_dapps", EmitDefaultValue = true)]
+        public TwoWayLinkedDappsCollection TwoWayLinkedDapps { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -183,6 +191,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
             sb.Append("  TotalBurned: ").Append(TotalBurned).Append("\n");
+            sb.Append("  TwoWayLinkedDapps: ").Append(TwoWayLinkedDapps).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -241,6 +250,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TotalBurned == input.TotalBurned ||
                     (this.TotalBurned != null &&
                     this.TotalBurned.Equals(input.TotalBurned))
+                ) && 
+                (
+                    this.TwoWayLinkedDapps == input.TwoWayLinkedDapps ||
+                    (this.TwoWayLinkedDapps != null &&
+                    this.TwoWayLinkedDapps.Equals(input.TwoWayLinkedDapps))
                 );
         }
 
@@ -269,6 +283,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.TotalBurned != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalBurned.GetHashCode();
+                }
+                if (this.TwoWayLinkedDapps != null)
+                {
+                    hashCode = (hashCode * 59) + this.TwoWayLinkedDapps.GetHashCode();
                 }
                 return hashCode;
             }

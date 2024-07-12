@@ -110,8 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="metadata">metadata (required).</param>
         /// <param name="explicitMetadata">explicitMetadata.</param>
         /// <param name="details">details.</param>
-        /// <param name="twoWayLinks">twoWayLinks.</param>
-        public StateEntityDetailsResponseItem(string address = default(string), FungibleResourcesCollection fungibleResources = default(FungibleResourcesCollection), NonFungibleResourcesCollection nonFungibleResources = default(NonFungibleResourcesCollection), StateEntityDetailsResponseItemAncestorIdentities ancestorIdentities = default(StateEntityDetailsResponseItemAncestorIdentities), EntityMetadataCollection metadata = default(EntityMetadataCollection), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails), TwoWayLinkCollection twoWayLinks = default(TwoWayLinkCollection))
+        public StateEntityDetailsResponseItem(string address = default(string), FungibleResourcesCollection fungibleResources = default(FungibleResourcesCollection), NonFungibleResourcesCollection nonFungibleResources = default(NonFungibleResourcesCollection), StateEntityDetailsResponseItemAncestorIdentities ancestorIdentities = default(StateEntityDetailsResponseItemAncestorIdentities), EntityMetadataCollection metadata = default(EntityMetadataCollection), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -130,7 +129,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.AncestorIdentities = ancestorIdentities;
             this.ExplicitMetadata = explicitMetadata;
             this.Details = details;
-            this.TwoWayLinks = twoWayLinks;
         }
 
         /// <summary>
@@ -177,12 +175,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public StateEntityDetailsResponseItemDetails Details { get; set; }
 
         /// <summary>
-        /// Gets or Sets TwoWayLinks
-        /// </summary>
-        [DataMember(Name = "two_way_links", EmitDefaultValue = true)]
-        public TwoWayLinkCollection TwoWayLinks { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -197,7 +189,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("  ExplicitMetadata: ").Append(ExplicitMetadata).Append("\n");
             sb.Append("  Details: ").Append(Details).Append("\n");
-            sb.Append("  TwoWayLinks: ").Append(TwoWayLinks).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -267,11 +258,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Details == input.Details ||
                     (this.Details != null &&
                     this.Details.Equals(input.Details))
-                ) && 
-                (
-                    this.TwoWayLinks == input.TwoWayLinks ||
-                    (this.TwoWayLinks != null &&
-                    this.TwoWayLinks.Equals(input.TwoWayLinks))
                 );
         }
 
@@ -311,10 +297,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Details != null)
                 {
                     hashCode = (hashCode * 59) + this.Details.GetHashCode();
-                }
-                if (this.TwoWayLinks != null)
-                {
-                    hashCode = (hashCode * 59) + this.TwoWayLinks.GetHashCode();
                 }
                 return hashCode;
             }

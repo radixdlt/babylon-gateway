@@ -2279,9 +2279,10 @@ components:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
 
-    TwoWayLinkCollection:
-      description: TBD # TODO TBD
+    TwoWayLinkedDappsCollection:
+      description: A collection of two-way linked (resolved & verified) dApps linked to the entity defining this collection.
       allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
           required:
             - items
@@ -2289,15 +2290,34 @@ components:
             items:
               type: array
               items:
-                $ref: "#/components/schemas/TwoWayLinkCollectionItem"
-    TwoWayLinkCollectionItem: # TODO add discriminator and multiple types
-      description: TBD # TODO TBD
+                $ref: "#/components/schemas/TwoWayLinkedDappsCollectionItem"
+    TwoWayLinkedDappsCollectionItem:
       type: object
+      required:
+        - dapp_address
       properties:
-        net_type:
-          type: string
-        net_dump:
-          type: string
+        dapp_address:
+          $ref: "#/components/schemas/Address"
+
+    TwoWayLinkedEntitiesCollection:
+      description: A collection of two-way linked (resolved & verified) entities linked to the entity defining this collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/TwoWayLinkedEntitiesCollectionItem"
+    TwoWayLinkedEntitiesCollectionItem:
+      type: object
+      required:
+        - entity_address
+      properties:
+        entity_address:
+          $ref: "#/components/schemas/Address"
 
     AccountLockerVaultCollection:
       description: Account Locker Account Resources Collection
@@ -3945,8 +3965,6 @@ components:
           $ref: "#/components/schemas/EntityMetadataCollection"
         details:
           $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
-        two_way_links:
-          $ref: "#/components/schemas/TwoWayLinkCollection"
     StateEntityDetailsResponseItemAncestorIdentities:
       type: object
       properties:
@@ -4004,6 +4022,8 @@ components:
               $ref: "#/components/schemas/BigDecimal"
             total_burned:
               $ref: "#/components/schemas/BigDecimal"
+            two_way_linked_dapps:
+              $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
     StateEntityDetailsResponseNonFungibleResourceDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -4025,6 +4045,8 @@ components:
               $ref: "#/components/schemas/BigDecimal"
             total_burned:
               $ref: "#/components/schemas/BigDecimal"
+            two_way_linked_dapps:
+              $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
     StateEntityDetailsResponseFungibleVaultDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -4083,6 +4105,9 @@ components:
               $ref: "#/components/schemas/EntitySchemaCollection"
             role_assignments:
               $ref: "#/components/schemas/ComponentEntityRoleAssignments"
+            two_way_linked_dapp_address:
+              description: Two-way linked (resolved & verified) dApp address, if any.
+              $ref: "#/components/schemas/Address"
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -4110,6 +4135,15 @@ components:
               $ref: "#/components/schemas/BigDecimal"
             royalty_config:
               $ref: "#/components/schemas/ComponentRoyaltyConfig"
+            two_way_linked_dapp_address:
+              description: Two-way linked (resolved & verified) dApp address, if any. Applicible to non-Account components only.
+              $ref: "#/components/schemas/Address"
+            two_way_linked_dapps:
+              description: Applicible to Account components only.
+              $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
+            two_way_linked_entities:
+              description: Applicible to Account components only.
+              $ref: "#/components/schemas/TwoWayLinkedEntitiesCollection"
 
     StateAccountResourcePreferencesPageRequest:
       allOf:

@@ -90,35 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TwoWayLinkCollectionAllOf
+    /// TwoWayLinkedDappsCollectionItem
     /// </summary>
-    [DataContract(Name = "TwoWayLinkCollection_allOf")]
-    public partial class TwoWayLinkCollectionAllOf : IEquatable<TwoWayLinkCollectionAllOf>
+    [DataContract(Name = "TwoWayLinkedDappsCollectionItem")]
+    public partial class TwoWayLinkedDappsCollectionItem : IEquatable<TwoWayLinkedDappsCollectionItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TwoWayLinkCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TwoWayLinkedDappsCollectionItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TwoWayLinkCollectionAllOf() { }
+        protected TwoWayLinkedDappsCollectionItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TwoWayLinkCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TwoWayLinkedDappsCollectionItem" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public TwoWayLinkCollectionAllOf(List<TwoWayLinkCollectionItem> items = default(List<TwoWayLinkCollectionItem>))
+        /// <param name="dappAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        public TwoWayLinkedDappsCollectionItem(string dappAddress = default(string))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "dappAddress" is required (not null)
+            if (dappAddress == null)
             {
-                throw new ArgumentNullException("items is a required property for TwoWayLinkCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("dappAddress is a required property for TwoWayLinkedDappsCollectionItem and cannot be null");
             }
-            this.Items = items;
+            this.DappAddress = dappAddress;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<TwoWayLinkCollectionItem> Items { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "dapp_address", IsRequired = true, EmitDefaultValue = true)]
+        public string DappAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TwoWayLinkCollectionAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class TwoWayLinkedDappsCollectionItem {\n");
+            sb.Append("  DappAddress: ").Append(DappAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TwoWayLinkCollectionAllOf);
+            return this.Equals(input as TwoWayLinkedDappsCollectionItem);
         }
 
         /// <summary>
-        /// Returns true if TwoWayLinkCollectionAllOf instances are equal
+        /// Returns true if TwoWayLinkedDappsCollectionItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of TwoWayLinkCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of TwoWayLinkedDappsCollectionItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TwoWayLinkCollectionAllOf input)
+        public bool Equals(TwoWayLinkedDappsCollectionItem input)
         {
             if (input == null)
             {
@@ -165,10 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.DappAddress == input.DappAddress ||
+                    (this.DappAddress != null &&
+                    this.DappAddress.Equals(input.DappAddress))
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.DappAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DappAddress.GetHashCode();
                 }
                 return hashCode;
             }

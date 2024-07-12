@@ -121,11 +121,11 @@ public sealed class TwoWayLinkResolver
 
     private IEnumerable<DappAccountTypeResolvedTwoWayLink> Resolve(EntityAddress entityAddress, DappAccountTypeUnverifiedTwoWayLink dappAccountType)
     {
-        var invalidReason = ValidateDappAccountType(entityAddress, dappAccountType.Value);
+        var validationFailure = ValidateDappAccountType(entityAddress, dappAccountType.Value);
 
-        if (invalidReason != null || !_resolveValidOnly)
+        if (validationFailure == null || !_resolveValidOnly)
         {
-            yield return new DappAccountTypeResolvedTwoWayLink(dappAccountType.Value, invalidReason);
+            yield return new DappAccountTypeResolvedTwoWayLink(dappAccountType.Value, validationFailure);
         }
     }
 
@@ -133,11 +133,11 @@ public sealed class TwoWayLinkResolver
     {
         foreach (var claimedEntity in dappClaimedEntities.ClaimedEntities)
         {
-            var invalidReason = ValidateDappClaimedEntitiesEntry(entityAddress, claimedEntity);
+            var validationFailure = ValidateDappClaimedEntitiesEntry(entityAddress, claimedEntity);
 
-            if (invalidReason != null || !_resolveValidOnly)
+            if (validationFailure == null || !_resolveValidOnly)
             {
-                yield return new DappClaimedEntityResolvedTwoWayLink(claimedEntity, invalidReason);
+                yield return new DappClaimedEntityResolvedTwoWayLink(claimedEntity, validationFailure);
             }
         }
     }
@@ -148,11 +148,11 @@ public sealed class TwoWayLinkResolver
 
         await Parallel.ForEachAsync(dappClaimedWebsites.ClaimedWebsites, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (claimedWebsite, _) =>
         {
-            var invalidReason = await ValidateDappClaimedWebsitesEntry(entityAddress, claimedWebsite);
+            var validationFailure = await ValidateDappClaimedWebsitesEntry(entityAddress, claimedWebsite);
 
-            if (invalidReason != null || !_resolveValidOnly)
+            if (validationFailure == null || !_resolveValidOnly)
             {
-                result.Enqueue(new DappClaimedWebsiteResolvedTwoWayLink(claimedWebsite, invalidReason));
+                result.Enqueue(new DappClaimedWebsiteResolvedTwoWayLink(claimedWebsite, validationFailure));
             }
         });
 
@@ -163,22 +163,22 @@ public sealed class TwoWayLinkResolver
     {
         foreach (var dappDefinition in dappDefinitions.DappDefinitions)
         {
-            var invalidReason = ValidateDappDefinitionsEntry(entityAddress, dappDefinition);
+            var validationFailure = ValidateDappDefinitionsEntry(entityAddress, dappDefinition);
 
-            if (invalidReason != null || !_resolveValidOnly)
+            if (validationFailure == null || !_resolveValidOnly)
             {
-                yield return new DappDefinitionsResolvedTwoWayLink(dappDefinition, invalidReason);
+                yield return new DappDefinitionsResolvedTwoWayLink(dappDefinition, validationFailure);
             }
         }
     }
 
     private IEnumerable<DappDefinitionResolvedTwoWayLink> Resolve(EntityAddress entityAddress, DappDefinitionUnverifiedTwoWayLink dappDefinition)
     {
-        var invalidReason = ValidateDappDefinition(entityAddress, dappDefinition.DappDefinition);
+        var validationFailure = ValidateDappDefinition(entityAddress, dappDefinition.DappDefinition);
 
-        if (invalidReason != null || !_resolveValidOnly)
+        if (validationFailure == null || !_resolveValidOnly)
         {
-            yield return new DappDefinitionResolvedTwoWayLink(dappDefinition.DappDefinition, invalidReason);
+            yield return new DappDefinitionResolvedTwoWayLink(dappDefinition.DappDefinition, validationFailure);
         }
     }
 
@@ -363,7 +363,7 @@ public sealed class TwoWayLinkResolver
 
     private string? ValidateDappDefinition(EntityAddress entityAddress, EntityAddress otherEntityAddress)
     {
-        if (!entityAddress.IsResource)
+        if (entityAddress.IsResource)
         {
             return "entity is a resource";
         }

@@ -86,23 +86,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
-    public static GatewayModel.TwoWayLinkCollectionItem ToGatewayModel(this ResolvedTwoWayLink input)
+    public static GatewayModel.TwoWayLinkedDappsCollectionItem ToGatewayModel(this DappDefinitionsResolvedTwoWayLink input)
     {
-        var dump = input switch
-        {
-            DappAccountTypeResolvedTwoWayLink dappAccountType => dappAccountType.Value,
-            DappClaimedEntityResolvedTwoWayLink dappClaimedEntity => dappClaimedEntity.EntityAddress.ToString(),
-            DappClaimedWebsiteResolvedTwoWayLink dappClaimedWebsite => dappClaimedWebsite.Origin.ToString(),
-            DappDefinitionResolvedTwoWayLink dappDefinition => dappDefinition.EntityAddress.ToString(),
-            DappDefinitionsResolvedTwoWayLink dappDefinitions => dappDefinitions.EntityAddress.ToString(),
-            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
-        };
+        return new GatewayModel.TwoWayLinkedDappsCollectionItem(input.EntityAddress);
+    }
 
-        var validity = input.IsValid
-            ? "# VALID #"
-            : $"### INVALID ({input.InvalidReason}) ###";
-
-        return new GatewayModel.TwoWayLinkCollectionItem(input.GetType().Name, dump + " " + validity);
+    public static GatewayModel.TwoWayLinkedEntitiesCollectionItem ToGatewayModel(this DappClaimedEntityResolvedTwoWayLink input)
+    {
+        return new GatewayModel.TwoWayLinkedEntitiesCollectionItem(input.EntityAddress);
     }
 
     public static GatewayModel.AccountDefaultDepositRule ToGatewayModel(this AccountDefaultDepositRule input)

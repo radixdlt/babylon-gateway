@@ -117,7 +117,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="blueprints">blueprints.</param>
         /// <param name="schemas">schemas.</param>
         /// <param name="roleAssignments">roleAssignments.</param>
-        public StateEntityDetailsResponsePackageDetailsAllOf(PackageCodeCollection codes = default(PackageCodeCollection), PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), PackageBlueprintCollection blueprints = default(PackageBlueprintCollection), EntitySchemaCollection schemas = default(EntitySchemaCollection), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments))
+        /// <param name="twoWayLinkedDappAddress">Bech32m-encoded human readable version of the address..</param>
+        public StateEntityDetailsResponsePackageDetailsAllOf(PackageCodeCollection codes = default(PackageCodeCollection), PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), PackageBlueprintCollection blueprints = default(PackageBlueprintCollection), EntitySchemaCollection schemas = default(EntitySchemaCollection), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string twoWayLinkedDappAddress = default(string))
         {
             // to ensure "codes" is required (not null)
             if (codes == null)
@@ -142,6 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.Blueprints = blueprints;
             this.Schemas = schemas;
             this.RoleAssignments = roleAssignments;
+            this.TwoWayLinkedDappAddress = twoWayLinkedDappAddress;
         }
 
         /// <summary>
@@ -190,6 +192,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public ComponentEntityRoleAssignments RoleAssignments { get; set; }
 
         /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "two_way_linked_dapp_address", EmitDefaultValue = true)]
+        public string TwoWayLinkedDappAddress { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -205,6 +214,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
             sb.Append("  Schemas: ").Append(Schemas).Append("\n");
             sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
+            sb.Append("  TwoWayLinkedDappAddress: ").Append(TwoWayLinkedDappAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -278,6 +288,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.RoleAssignments == input.RoleAssignments ||
                     (this.RoleAssignments != null &&
                     this.RoleAssignments.Equals(input.RoleAssignments))
+                ) && 
+                (
+                    this.TwoWayLinkedDappAddress == input.TwoWayLinkedDappAddress ||
+                    (this.TwoWayLinkedDappAddress != null &&
+                    this.TwoWayLinkedDappAddress.Equals(input.TwoWayLinkedDappAddress))
                 );
         }
 
@@ -318,6 +333,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.RoleAssignments != null)
                 {
                     hashCode = (hashCode * 59) + this.RoleAssignments.GetHashCode();
+                }
+                if (this.TwoWayLinkedDappAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.TwoWayLinkedDappAddress.GetHashCode();
                 }
                 return hashCode;
             }
