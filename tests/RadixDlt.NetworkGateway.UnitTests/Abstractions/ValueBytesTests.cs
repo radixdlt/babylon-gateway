@@ -68,7 +68,6 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.UnitTests.Abstractions;

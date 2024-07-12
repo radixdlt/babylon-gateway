@@ -415,6 +415,14 @@ UPDATE pending_transactions
                             });
                         }
 
+                        if (substateData is CoreModel.NonFungibleResourceManagerFieldMutableFieldsSubstate mutableFields)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) =>
+                            {
+                                e.NonFungibleDataMutableFields = mutableFields.Value.MutableFields.Select(x => x.Name).ToList();
+                            });
+                        }
+
                         if (substateData is CoreModel.NonFungibleResourceManagerFieldIdTypeSubstate nonFungibleResourceManagerFieldIdTypeSubstate)
                         {
                             referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) =>
@@ -597,7 +605,6 @@ UPDATE pending_transactions
                     GlobalAccountLockerEntity => CoreModel.EntityType.GlobalAccountLocker,
                     GlobalIdentityEntity => CoreModel.EntityType.GlobalIdentity,
                     GlobalAccessControllerEntity => CoreModel.EntityType.GlobalAccessController,
-
                     // skipped GlobalVirtualSecp256k1Account, GlobalVirtualSecp256k1Identity, GlobalVirtualEd25519Account and GlobalVirtualEd25519Identity as they are virtual
                     GlobalFungibleResourceEntity => CoreModel.EntityType.GlobalFungibleResource,
                     InternalFungibleVaultEntity => CoreModel.EntityType.InternalFungibleVault,
