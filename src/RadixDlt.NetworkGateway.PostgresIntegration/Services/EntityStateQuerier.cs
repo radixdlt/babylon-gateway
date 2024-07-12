@@ -160,7 +160,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, unverifiedTwoWayLinks, ledgerState, token);
 
         // TODO add opt-in flag?
-        var resolvedTwoWayLinks = new TwoWayLinkResolver(new UnverifiedTwoWayLinks(unverifiedTwoWayLinks, correlatedAddresses), false, true).Resolve(entities.Select(e => e.Address).ToList());
+        var resolvedTwoWayLinks = await new TwoWayLinkResolver(new UnverifiedTwoWayLinks(unverifiedTwoWayLinks, correlatedAddresses), true, true).Resolve(entities.Select(e => e.Address).ToList());
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)

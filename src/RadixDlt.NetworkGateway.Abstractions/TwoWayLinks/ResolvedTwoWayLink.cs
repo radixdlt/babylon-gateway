@@ -66,6 +66,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
 
+// TODO use strongly-typed validtiy result (valid, invalid(details), unknown(details))
 public abstract record ResolvedTwoWayLink(string? InvalidReason)
 {
     public bool IsValid => InvalidReason == null;
