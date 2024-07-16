@@ -78,6 +78,7 @@ public partial class StreamTransactionsRequest
             result += ManifestBadgesPresentedFilter?.Count ?? 0;
             result += ManifestResourcesFilter?.Count ?? 0;
             result += AffectedGlobalEntitiesFilter?.Count ?? 0;
+            result += EventGlobalEmittersFilter?.Count ?? 0;
             result += EventsFilter?.Count ?? 0;
             result += AccountsWithManifestOwnerMethodCalls?.Count ?? 0;
             result += AccountsWithoutManifestOwnerMethodCalls?.Count ?? 0;

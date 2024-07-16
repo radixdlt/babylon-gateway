@@ -145,3 +145,9 @@ internal class AffectedGlobalEntityTransactionMarker : LedgerTransactionMarker
     [Column("entity_id")]
     public long EntityId { get; set; }
 }
+
+internal class EventGlobalEmitterTransactionMarker : LedgerTransactionMarker
+{
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+}

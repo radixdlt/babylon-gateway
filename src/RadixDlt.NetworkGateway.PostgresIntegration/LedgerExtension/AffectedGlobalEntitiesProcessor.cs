@@ -62,80 +62,69 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+// <copyright file="AffectedGlobalEntitiesProcessor.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
+using System.Linq;
 
-internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayModel.StreamTransactionsRequest>
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+
+internal class AffectedGlobalEntitiesProcessor
 {
-    public StreamTransactionsRequestValidator(
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
-        LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        RadixAddressValidator radixAddressValidator)
+    private readonly long[] _excludedEntityIds;
+    private readonly ProcessorContext _context;
+    private readonly Dictionary<long, HashSet<long>> _affectedGlobalEntities = new();
+
+    public AffectedGlobalEntitiesProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
     {
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+        _context = context;
+        _excludedEntityIds = new[]
+        {
+            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
+            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.TransactionTracker).DatabaseId,
+        };
+    }
 
-        RuleFor(x => x.Cursor)
-            .Base64();
+    public void VisitUpsert(ReferencedEntity referencedEntity, long stateVersion)
+    {
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
+    }
 
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0);
+    public void VisitDelete(ReferencedEntity referencedEntity, long stateVersion)
+    {
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
+    }
 
-        RuleFor(x => x.FromLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+    public HashSet<long> GetAllAffectedGlobalEntities(long stateVersion)
+    {
+        return _affectedGlobalEntities.TryGetValue(stateVersion, out var hashSet) ? hashSet : new HashSet<long>();
+    }
 
-        RuleFor(x => x.KindFilter)
-            .IsInEnum();
-
-        RuleFor(x => x.Order)
-            .IsInEnum();
-
-        RuleForEach(x => x.ManifestAccountsWithdrawnFromFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.ManifestAccountsDepositedIntoFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.AffectedGlobalEntitiesFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.EventGlobalEmittersFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.ManifestBadgesPresentedFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.ManifestResourcesFilter)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.AccountsWithManifestOwnerMethodCalls)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleForEach(x => x.AccountsWithoutManifestOwnerMethodCalls)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
-
-        RuleFor(x => x.ManifestClassFilter)
-            .SetValidator(new ManifestClassFilterValidator());
-
-        RuleForEach(x => x.EventsFilter)
-            .NotNull()
-            .SetValidator(new StreamTransactionsRequestEventItemValidator(radixAddressValidator));
-
-        RuleFor(x => x.TotalFilterCount)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.TransactionStreamMaxFilterCount)
-            .WithMessage($"The overall number of filters applied ({{PropertyValue}}) must be less than or equal to {endpointOptionsSnapshot.Value.TransactionStreamMaxFilterCount}.")
-            .OverridePropertyName(string.Empty);
+    public IEnumerable<AffectedGlobalEntityTransactionMarker> CreateTransactionMarkers()
+    {
+        foreach (var stateVersionAffectedEntities in _affectedGlobalEntities)
+        {
+            foreach (var entityId in stateVersionAffectedEntities.Value)
+            {
+                if (!_excludedEntityIds.Contains(entityId))
+                {
+                    yield return new AffectedGlobalEntityTransactionMarker
+                    {
+                        Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                        EntityId = entityId,
+                        StateVersion = stateVersionAffectedEntities.Key,
+                    };
+                }
+            }
+        }
     }
 }

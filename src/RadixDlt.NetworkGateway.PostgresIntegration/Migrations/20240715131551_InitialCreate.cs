@@ -90,7 +90,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call,badge_presented")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,manifest_class")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash")
                 .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
@@ -1070,6 +1070,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_markers_entity_id_state_version",
+                table: "ledger_transaction_markers",
+                columns: new[] { "entity_id", "state_version" },
+                filter: "discriminator = 'event_global_emitter'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_entity_id_state_version1",
                 table: "ledger_transaction_markers",
                 columns: new[] { "entity_id", "state_version" },
                 filter: "discriminator = 'affected_global_entity'");

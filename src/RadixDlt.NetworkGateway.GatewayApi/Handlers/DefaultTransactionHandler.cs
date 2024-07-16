@@ -167,6 +167,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         };
 
         request.AffectedGlobalEntitiesFilter?.ForEach(a => searchCriteria.AffectedGlobalEntities.Add((EntityAddress)a));
+        request.EventGlobalEmittersFilter?.ForEach(a => searchCriteria.EventGlobalEmitters.Add((EntityAddress)a));
         request.ManifestAccountsDepositedIntoFilter?.ForEach(a => searchCriteria.ManifestAccountsDepositedInto.Add((EntityAddress)a));
         request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add((EntityAddress)a));
         request.ManifestBadgesPresentedFilter?.ForEach(a => searchCriteria.BadgesPresented.Add((EntityAddress)a));

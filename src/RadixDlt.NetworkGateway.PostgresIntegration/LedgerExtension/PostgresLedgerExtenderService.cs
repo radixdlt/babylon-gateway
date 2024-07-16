@@ -265,6 +265,10 @@ UPDATE pending_transactions
         {
             var sw = Stopwatch.StartNew();
 
+            referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.TransactionTracker);
+            referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.ConsensusManager);
+            referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.Xrd);
+
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
@@ -752,6 +756,8 @@ UPDATE pending_transactions
         var validatorProcessor = new ValidatorProcessor(processorContext, referencedEntities);
         var validatorEmissionProcessor = new ValidatorEmissionProcessor(processorContext);
         var accountLockerProcessor = new AccountLockerProcessor(processorContext, referencedEntities, networkConfiguration.Id);
+        var globalEventEmitterProcessor = new GlobalEventEmitterProcessor(processorContext, referencedEntities, networkConfiguration);
+        var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
 
         // step: scan all substates & events to figure out changes
         {
@@ -763,7 +769,6 @@ UPDATE pending_transactions
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
                 var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
                 long? passingEpoch = null;
-                var affectedGlobalEntities = new HashSet<long>();
 
                 try
                 {
@@ -772,7 +777,6 @@ UPDATE pending_transactions
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
                         var referencedEntity = referencedEntities.Get((EntityAddress)substateId.EntityAddress);
-                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
                         if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleVaultFieldBalanceSubstate)
                         {
@@ -913,13 +917,13 @@ UPDATE pending_transactions
                         keyValueStoreProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         validatorProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, passingEpoch);
                         accountLockerProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        affectedGlobalEntitiesProcessor.VisitUpsert(referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                     {
                         var substateId = deletedSubstate.SubstateId;
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
-                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
                         if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
@@ -929,13 +933,14 @@ UPDATE pending_transactions
                             vaultSnapshots.Add(new NonFungibleVaultSnapshot(referencedEntity, resourceEntity, simpleRep, true, stateVersion));
                         }
 
+                        affectedGlobalEntitiesProcessor.VisitDelete(referencedEntity, stateVersion);
                         packageCodeProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                         entitySchemaProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
 
-                    transaction.AffectedGlobalEntities = affectedGlobalEntities.ToArray();
+                    transaction.AffectedGlobalEntities = affectedGlobalEntitiesProcessor.GetAllAffectedGlobalEntities(stateVersion).ToArray();
                     transaction.ReceiptEventEmitters = events.Select(e => e.Type.Emitter.ToJson()).ToArray();
                     transaction.ReceiptEventNames = events.Select(e => e.Type.Name).ToArray();
                     transaction.ReceiptEventSbors = events.Select(e => e.Data.GetDataBytes()).ToArray();
@@ -944,17 +949,10 @@ UPDATE pending_transactions
                     transaction.ReceiptEventTypeIndexes = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray();
                     transaction.ReceiptEventSborTypeKinds = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray();
 
-                    ledgerTransactionMarkersToAdd.AddRange(
-                        affectedGlobalEntities.Select(
-                            affectedEntity => new AffectedGlobalEntityTransactionMarker
-                    {
-                        Id = sequences.LedgerTransactionMarkerSequence++,
-                        EntityId = affectedEntity,
-                        StateVersion = stateVersion,
-                    }));
-
                     foreach (var @event in events)
                     {
+                        globalEventEmitterProcessor.VisitEvent(@event, stateVersion);
+
                         if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter
                             || methodEventEmitter.ObjectModuleId != CoreModel.ModuleId.Main
                             || methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalGenericComponent
@@ -1179,6 +1177,8 @@ UPDATE pending_transactions
             validatorProcessor.ProcessChanges();
             validatorEmissionProcessor.ProcessChanges();
             accountLockerProcessor.ProcessChanges();
+            ledgerTransactionMarkersToAdd.AddRange(globalEventEmitterProcessor.CreateTransactionMarkers());
+            ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntitiesProcessor.CreateTransactionMarkers());
 
             foreach (var e in nonFungibleIdChanges)
             {
