@@ -69,7 +69,6 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -79,7 +78,7 @@ internal class AffectedGlobalEntitiesProcessor
 {
     private readonly long[] _excludedEntityIds;
     private readonly ProcessorContext _context;
-    private readonly Dictionary<long, HashSet<(long EntityId, CoreApiSdk.Model.EntityType EntityType)>> _affectedGlobalEntities = new();
+    private readonly Dictionary<long, HashSet<long>> _affectedGlobalEntities = new();
 
     public AffectedGlobalEntitiesProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
     {
@@ -93,51 +92,39 @@ internal class AffectedGlobalEntitiesProcessor
 
     public void VisitUpsert(ReferencedEntity referencedEntity, long stateVersion)
     {
-        TrackAffectedEntity(stateVersion, referencedEntity.AffectedGlobalEntityId, referencedEntity.Type);
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
     }
 
     public void VisitDelete(ReferencedEntity referencedEntity, long stateVersion)
     {
-        TrackAffectedEntity(stateVersion, referencedEntity.AffectedGlobalEntityId, referencedEntity.Type);
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
     }
 
-    public long[] GetAllAffectedGlobalEntities(long stateVersion)
+    public HashSet<long> GetAllAffectedGlobalEntities(long stateVersion)
     {
-        var found = _affectedGlobalEntities.TryGetValue(stateVersion, out var list);
-        return found ? list!.Select(x => x.EntityId).ToArray() : Array.Empty<long>();
+        return _affectedGlobalEntities.TryGetValue(stateVersion, out var hashSet) ? hashSet : new HashSet<long>();
     }
 
-    public List<AffectedGlobalEntityTransactionMarker> CreateTransactionMarkers()
+    public IEnumerable<AffectedGlobalEntityTransactionMarker> CreateTransactionMarkers()
     {
-        var ledgerTransactionMarkers = _affectedGlobalEntities
-            .SelectMany(
-                x =>
-                {
-                    return x
-                        .Value
-                        .Where(y => !_excludedEntityIds.Contains(y.EntityId))
-                        .Select(
-                            y => new AffectedGlobalEntityTransactionMarker
-                            {
-                                Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                                EntityId = y.EntityId,
-                                StateVersion = x.Key,
-                            })
-                        .ToList();
-                })
-            .ToList();
-
-        return ledgerTransactionMarkers;
-    }
-
-    private void TrackAffectedEntity(long stateVersion, long entityId, CoreApiSdk.Model.EntityType entityType)
-    {
-        if (!_affectedGlobalEntities.TryGetValue(stateVersion, out var list))
+        foreach (var stateVersionAffectedEntities in _affectedGlobalEntities)
         {
-            list = new HashSet<(long EntityId, CoreApiSdk.Model.EntityType EntityType)>();
-            _affectedGlobalEntities[stateVersion] = list;
+            foreach (var entityId in stateVersionAffectedEntities.Value)
+            {
+                if (!_excludedEntityIds.Contains(entityId))
+                {
+                    yield return new AffectedGlobalEntityTransactionMarker
+                    {
+                        Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                        EntityId = entityId,
+                        StateVersion = stateVersionAffectedEntities.Key,
+                    };
+                }
+            }
         }
-
-        list.Add(new(entityId, entityType));
     }
 }

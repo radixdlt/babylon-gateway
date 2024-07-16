@@ -940,7 +940,7 @@ UPDATE pending_transactions
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
 
-                    transaction.AffectedGlobalEntities = affectedGlobalEntitiesProcessor.GetAllAffectedGlobalEntities(stateVersion);
+                    transaction.AffectedGlobalEntities = affectedGlobalEntitiesProcessor.GetAllAffectedGlobalEntities(stateVersion).ToArray();
                     transaction.ReceiptEventEmitters = events.Select(e => e.Type.Emitter.ToJson()).ToArray();
                     transaction.ReceiptEventNames = events.Select(e => e.Type.Name).ToArray();
                     transaction.ReceiptEventSbors = events.Select(e => e.Data.GetDataBytes()).ToArray();

@@ -100,49 +100,36 @@ internal class GlobalEventEmitterProcessor
 
                 if (!_excludedEntityIds.Contains(globalEventEmitterEntityId))
                 {
-                    TrackEvent(stateVersion, methodEventEmitterEntity.GlobalEventEmitterEntityId);
+                    _globalEventEmitters
+                        .GetOrAdd(stateVersion, _ => new HashSet<long>())
+                        .Add(globalEventEmitterEntityId);
                 }
 
                 break;
             case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
                 var functionEventEmitterEntity = _referencedEntities.Get((EntityAddress)functionEventEmitterIdentifier.PackageAddress);
-                TrackEvent(stateVersion, functionEventEmitterEntity.GlobalEventEmitterEntityId);
+                _globalEventEmitters
+                    .GetOrAdd(stateVersion, _ => new HashSet<long>())
+                    .Add(functionEventEmitterEntity.GlobalEventEmitterEntityId);
                 break;
             default:
                 throw new ArgumentOutOfRangeException($"Unexpected event emitter type {@event.Type.Emitter.GetType()}");
         }
     }
 
-    public List<EventGlobalEmitterTransactionMarker> CreateTransactionMarkers()
+    public IEnumerable<EventGlobalEmitterTransactionMarker> CreateTransactionMarkers()
     {
-        var ledgerTransactionMarkers = _globalEventEmitters
-            .SelectMany(
-                stateVersionEventEmitters =>
-                {
-                    return stateVersionEventEmitters
-                        .Value
-                        .Select(
-                            entityId => new EventGlobalEmitterTransactionMarker
-                            {
-                                Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                                EntityId = entityId,
-                                StateVersion = stateVersionEventEmitters.Key,
-                            })
-                        .ToList();
-                })
-            .ToList();
-
-        return ledgerTransactionMarkers;
-    }
-
-    private void TrackEvent(long stateVersion, long entityId)
-    {
-        if (!_globalEventEmitters.TryGetValue(stateVersion, out var list))
+        foreach (var stateVersionAffectedEntities in _globalEventEmitters)
         {
-            list = new HashSet<long>();
-            _globalEventEmitters.Add(stateVersion, list);
+            foreach (var entityId in stateVersionAffectedEntities.Value)
+            {
+                yield return new EventGlobalEmitterTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    EntityId = entityId,
+                    StateVersion = stateVersionAffectedEntities.Key,
+                };
+            }
         }
-
-        list.Add(entityId);
     }
 }
