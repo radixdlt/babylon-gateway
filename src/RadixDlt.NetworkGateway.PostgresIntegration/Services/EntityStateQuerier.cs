@@ -71,7 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -1454,7 +1454,6 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
     {
         var entityIds = entities.Select(e => e.Id).ToList();
 
-        // TODO we may want to exclude massive UNNESTs in first_entry_round_unnested?
         return await _dbContext
             .UnverifiedTwoWayLinkEntryHistory
             .FromSqlInterpolated(@$"

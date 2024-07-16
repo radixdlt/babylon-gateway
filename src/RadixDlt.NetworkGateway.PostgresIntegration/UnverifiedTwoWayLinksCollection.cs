@@ -63,8 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -74,22 +73,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal class UnverifiedTwoWayLinks : IUnverifiedTwoWayLinksCollection
 {
-    private readonly IDictionary<EntityAddress, List<UnverifiedTwoWayLinkEntryHistory>> _unverified;
+    private readonly IDictionary<EntityAddress, List<UnverifiedTwoWayLinkEntryHistory>> _unverifiedByEntity;
     private readonly IDictionary<long, EntityAddress> _entityAddresses;
 
     public UnverifiedTwoWayLinks(ICollection<UnverifiedTwoWayLinkEntryHistory> unverified, IDictionary<long, EntityAddress> entityAddresses)
     {
-        _unverified = unverified.GroupBy(e => entityAddresses[e.EntityId]).ToDictionary(g => g.Key, g => g.ToList());
+        _unverifiedByEntity = unverified.GroupBy(e => entityAddresses[e.EntityId]).ToDictionary(g => g.Key, g => g.ToList());
         _entityAddresses = entityAddresses;
     }
 
-    public bool TryGetTwoWayLinks(EntityAddress entityAddress, [NotNullWhen(true)] out List<UnverifiedTwoWayLink>? twoWayLinks)
+    public bool TryGetTwoWayLinks(EntityAddress entityAddress, [NotNullWhen(true)] out IEnumerable<UnverifiedTwoWayLink>? twoWayLinks)
     {
         twoWayLinks = default;
 
-        if (_unverified.TryGetValue(entityAddress, out var x))
+        if (_unverifiedByEntity.TryGetValue(entityAddress, out var x))
         {
-            twoWayLinks = x.Where(y => !y.IsDeleted).Select(y => y.MapXxx(_entityAddresses)).ToList();
+            twoWayLinks = x.Where(y => !y.IsDeleted).Select(y => y.MapToDomain(_entityAddresses));
             return true;
         }
 

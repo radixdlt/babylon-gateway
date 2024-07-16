@@ -64,7 +64,7 @@
 
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
@@ -77,34 +77,10 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct UnverifiedTwoWayLinkEntryDbLookup(long EntityId, TwoWayLinkType Type);
+internal record struct UnverifiedTwoWayLinkEntryDbLookup(long EntityId, StandardMetadataKey Type);
 
 internal class TwoWayLinkProcessor
 {
-    // TODO rename? should we accept all three of them?
-    private static readonly CoreModel.EntityType[] _allAccountTypes = new[]
-    {
-        CoreModel.EntityType.GlobalAccount,
-        CoreModel.EntityType.GlobalVirtualEd25519Account,
-        CoreModel.EntityType.GlobalVirtualSecp256k1Account,
-    };
-
-    // TODO rename? should we accept all three of them?
-    private static readonly CoreModel.EntityType[] _allResourceTypes = new[]
-    {
-        CoreModel.EntityType.GlobalFungibleResource,
-        CoreModel.EntityType.GlobalNonFungibleResource,
-    };
-
-    // TODO rename? should we accept all three of them?
-    private static readonly CoreModel.EntityType[] _allAccountClaimedEntityTypes = new[]
-    {
-        CoreModel.EntityType.GlobalGenericComponent,
-        CoreModel.EntityType.GlobalPackage,
-        CoreModel.EntityType.GlobalFungibleResource,
-        CoreModel.EntityType.GlobalNonFungibleResource,
-    };
-
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
 
@@ -120,26 +96,12 @@ internal class TwoWayLinkProcessor
         _referencedEntities = referencedEntities;
     }
 
-    public void ScanUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
-    {
-        // TODO pointless? JSON data_struct already defines referenced_entities / owned_entities
-    }
-
     public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
     {
         if (substateData is not CoreModel.MetadataModuleEntrySubstate metadataEntry)
         {
             return;
         }
-
-        var entityType = referencedEntity.Type;
-        var key = metadataEntry.Key.Name;
-        var re = metadataEntry.Value?.DataStruct.ReferencedEntities.Select(x => _referencedEntities.Get((EntityAddress)x.EntityAddress).DatabaseId).ToArray();
-
-        // TODO should we validate target entity types?
-        // TODO are the top-level if-checks on entity type valid at all?
-        // TODO do we want to react somehow when we encounter invalid data? maybe at least log something?
-        // TODO those known keys should be stored in some static class
 
         bool TryParseValue<T>([NotNullWhen(true)] out T? value)
             where T : GatewayModel.MetadataTypedValue
@@ -158,10 +120,11 @@ internal class TwoWayLinkProcessor
             return false;
         }
 
-        // accounts
-        if (_allAccountTypes.Contains(entityType))
+        var key = metadataEntry.Key.Name;
+
+        if (referencedEntity.Address.IsAccount)
         {
-            if (key == "account_type" && TryParseValue<GatewayModel.MetadataStringValue>(out var accountType))
+            if (key == StandardMetadataConstants.DappAccountType && TryParseValue<GatewayModel.MetadataStringValue>(out var accountType))
             {
                 _entriesToAdd.Add(new DappAccountTypeUnverifiedTwoWayLinkEntryHistory
                 {
@@ -173,7 +136,7 @@ internal class TwoWayLinkProcessor
                     Value = accountType.Value,
                 });
             }
-            else if (key == "claimed_websites" && TryParseValue<GatewayModel.MetadataOriginArrayValue>(out var claimedWebsites))
+            else if (key == StandardMetadataConstants.DappClaimedWebsites && TryParseValue<GatewayModel.MetadataOriginArrayValue>(out var claimedWebsites))
             {
                 _entriesToAdd.Add(new DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory
                 {
@@ -185,7 +148,7 @@ internal class TwoWayLinkProcessor
                     ClaimedWebsites = claimedWebsites.Values.ToArray(),
                 });
             }
-            else if (key == "claimed_entities")
+            else if (key == StandardMetadataConstants.DappClaimedEntities && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var claimedEntities))
             {
                 _entriesToAdd.Add(new DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory
                 {
@@ -194,10 +157,10 @@ internal class TwoWayLinkProcessor
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
                     IsLocked = substateData.IsLocked,
-                    ClaimedEntityIds = re,
+                    ClaimedEntityIds = claimedEntities.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
                 });
             }
-            else if (key == "dapp_definitions")
+            else if (key == StandardMetadataConstants.DappDefinitions && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var dappDefinitions))
             {
                 _entriesToAdd.Add(new DappDefinitionsUnverifiedTwoWayLinkEntryHistory
                 {
@@ -206,14 +169,13 @@ internal class TwoWayLinkProcessor
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
                     IsLocked = substateData.IsLocked,
-                    DappDefinitionEntityIds = re,
+                    DappDefinitionEntityIds = dappDefinitions.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
                 });
             }
         }
-
-        if (_allResourceTypes.Contains(entityType))
+        else if (referencedEntity.Address.IsResource)
         {
-            if (key == "dapp_definitions")
+            if (key == StandardMetadataConstants.DappDefinitions && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var dappDefinitions))
             {
                 _entriesToAdd.Add(new DappDefinitionsUnverifiedTwoWayLinkEntryHistory
                 {
@@ -222,13 +184,13 @@ internal class TwoWayLinkProcessor
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
                     IsLocked = substateData.IsLocked,
-                    DappDefinitionEntityIds = re,
+                    DappDefinitionEntityIds = dappDefinitions.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
                 });
             }
         }
         else if (referencedEntity.Address.IsGlobal)
         {
-            if (key == "dapp_definition")
+            if (key == StandardMetadataConstants.DappDefinition && TryParseValue<GatewayModel.MetadataGlobalAddressValue>(out var dappDefinition))
             {
                 _entriesToAdd.Add(new DappDefinitionUnverifiedTwoWayLinkEntryHistory
                 {
@@ -237,15 +199,10 @@ internal class TwoWayLinkProcessor
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
                     IsLocked = substateData.IsLocked,
-                    DappDefinitionEntityId = re?.FirstOrDefault() ?? default, // TODO throw?
+                    DappDefinitionEntityId = _referencedEntities.Get((EntityAddress)dappDefinition.Value).DatabaseId,
                 });
             }
         }
-    }
-
-    public void VisitDelete(CoreModel.SubstateId substateId, ReferencedEntity referencedEntity, long stateVersion)
-    {
-        // TODO pointless? metadata entries get only updated to null value
     }
 
     public async Task LoadDependencies()
@@ -258,7 +215,7 @@ internal class TwoWayLinkProcessor
     {
         foreach (var entry in _entriesToAdd)
         {
-            var lookup = new UnverifiedTwoWayLinkEntryDbLookup(entry.EntityId, _context.WriteHelper.GetDiscriminator<TwoWayLinkType>(entry.GetType()));
+            var lookup = new UnverifiedTwoWayLinkEntryDbLookup(entry.EntityId, _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(entry.GetType()));
 
             UnverifiedTwoWayLinkAggregateHistory aggregate;
 
@@ -317,7 +274,7 @@ internal class TwoWayLinkProcessor
     private async Task<IDictionary<UnverifiedTwoWayLinkEntryDbLookup, UnverifiedTwoWayLinkEntryHistory>> MostRecentEntryHistory()
     {
         var lookupSet = _entriesToAdd
-            .Select(e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<TwoWayLinkType>(e.GetType())))
+            .Select(e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(e.GetType())))
             .ToHashSet();
 
         if (!lookupSet.Unzip(x => x.EntityId, x => x.Type, out var entityIds, out var discriminators))
@@ -339,7 +296,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) eh ON true;",
-            e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<TwoWayLinkType>(e.GetType())));
+            e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(e.GetType())));
     }
 
     private async Task<IDictionary<long, UnverifiedTwoWayLinkAggregateHistory>> MostRecentAggregateHistory()
@@ -373,7 +330,7 @@ INNER JOIN LATERAL (
         "COPY unverified_two_way_link_entry_history (id, from_state_version, entity_id, is_deleted, is_locked, discriminator, value, entity_ids, claimed_websites) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
-            var discriminator = _context.WriteHelper.GetDiscriminator<TwoWayLinkType>(e.GetType());
+            var discriminator = _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(e.GetType());
 
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);

@@ -71,7 +71,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -1714,7 +1714,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<TwoWayLinkType>("Discriminator")
+                    b.Property<StandardMetadataKey>("Discriminator")
                         .HasColumnType("two_way_link_type")
                         .HasColumnName("discriminator");
 
@@ -1740,7 +1740,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("unverified_two_way_link_entry_history");
 
-                    b.HasDiscriminator<TwoWayLinkType>("Discriminator");
+                    b.HasDiscriminator<StandardMetadataKey>("Discriminator");
 
                     b.UseTphMappingStrategy();
                 });
@@ -2671,7 +2671,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("unverified_two_way_link_entry_history");
 
-                    b.HasDiscriminator().HasValue(TwoWayLinkType.DappAccountType);
+                    b.HasDiscriminator().HasValue(StandardMetadataKey.DappAccountType);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory", b =>
@@ -2685,7 +2685,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("unverified_two_way_link_entry_history");
 
-                    b.HasDiscriminator().HasValue(TwoWayLinkType.DappClaimedEntities);
+                    b.HasDiscriminator().HasValue(StandardMetadataKey.DappClaimedEntities);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory", b =>
@@ -2698,7 +2698,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("unverified_two_way_link_entry_history");
 
-                    b.HasDiscriminator().HasValue(TwoWayLinkType.DappClaimedWebsites);
+                    b.HasDiscriminator().HasValue(StandardMetadataKey.DappClaimedWebsites);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappDefinitionUnverifiedTwoWayLinkEntryHistory", b =>
@@ -2712,7 +2712,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("unverified_two_way_link_entry_history");
 
-                    b.HasDiscriminator().HasValue(TwoWayLinkType.DappDefinition);
+                    b.HasDiscriminator().HasValue(StandardMetadataKey.DappDefinition);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappDefinitionsUnverifiedTwoWayLinkEntryHistory", b =>
@@ -2726,7 +2726,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("unverified_two_way_link_entry_history");
 
-                    b.HasDiscriminator().HasValue(TwoWayLinkType.DappDefinitions);
+                    b.HasDiscriminator().HasValue(StandardMetadataKey.DappDefinitions);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>

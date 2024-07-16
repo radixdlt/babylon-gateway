@@ -9,7 +9,7 @@ Release built: _not released yet_
 ### API Changes
 - Added support for the missing `message` and `flags.disable_auth_checks` properties in the `/transaction/preview` endpoint request.
 - Added support for two-way linked dApps in the `/state/entity/details` endpoint.
-  - Brand-new `two_way_linked_*` properties on the `datils` property of Resources, Accounts, Packages and other global components.
+  - Brand-new `two_way_linked_*` properties on the `details` property of Resources, Accounts, Packages and other global components.
   - See https://docs.radixdlt.com/docs/metadata-for-verification#metadata-standards-for-verification-of-onledger-entities for detailed specification.
 
 ### Database changes

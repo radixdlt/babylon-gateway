@@ -76,11 +76,10 @@ public readonly record struct EntityAddress
         _address = address;
     }
 
-    public bool IsInternal => _address.StartsWith("internal_");
-
     public bool IsGlobal => !IsInternal;
 
-    // TODO this is not a good design
+    public bool IsInternal => _address.StartsWith("internal_");
+
     public bool IsAccount => _address.StartsWith("account_");
 
     public bool IsResource => _address.StartsWith("resource_");

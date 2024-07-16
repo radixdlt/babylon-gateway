@@ -63,11 +63,12 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -88,27 +89,25 @@ internal abstract class UnverifiedTwoWayLinkEntryHistory
     [Column("is_deleted")]
     public bool IsDeleted { get; set; }
 
-    // TODO is it relevant? drop it?
     [Column("is_locked")]
     public bool IsLocked { get; set; }
 
     [Column(CommonDbContext.DiscriminatorColumnName)]
-    public TwoWayLinkType Discriminator { get; set; }
+    public StandardMetadataKey Discriminator { get; set; }
 
     public abstract IEnumerable<long> ReferencedEntityIds();
 
-    public abstract UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities);
+    public abstract UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities);
 }
 
 internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory
 {
-    // TODO use enum?
     [Column("value")]
     public string Value { get; set; }
 
     public override IEnumerable<long> ReferencedEntityIds() => Enumerable.Empty<long>();
 
-    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
     {
         return new DappAccountTypeUnverifiedTwoWayLink
         {
@@ -121,7 +120,6 @@ internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWa
 
 internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
 {
-    // TODO use string[]? Values and share it with DappAccountType, similarly to how we did it with entity_ids?
     [Column("claimed_websites")]
     public string[]? ClaimedWebsites { get; set; }
 
@@ -135,7 +133,7 @@ internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : UnverifiedT
         }
     }
 
-    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
     {
         return new DappClaimedWebsitesUnverifiedTwoWayLink
         {
@@ -167,7 +165,7 @@ internal class DappDefinitionUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWay
 
     public override IEnumerable<long> ReferencedEntityIds() => DappEntityIds ?? Enumerable.Empty<long>();
 
-    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
     {
         return new DappDefinitionUnverifiedTwoWayLink
         {
@@ -193,16 +191,25 @@ internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWa
         }
     }
 
-    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
     {
-        // TODO ensure has value (applies to all of those)
+        EnsureMappable();
 
         return new DappDefinitionsUnverifiedTwoWayLink
         {
             FromStateVersion = FromStateVersion,
             EntityAddress = correlatedEntities[EntityId],
-            DappDefinitions = DappDefinitionEntityIds!.Select(x => correlatedEntities[x]).ToList(),
+            DappDefinitions = DappDefinitionEntityIds.Select(x => correlatedEntities[x]).ToList(),
         };
+    }
+
+    [MemberNotNull(nameof(DappDefinitionEntityIds))]
+    private void EnsureMappable()
+    {
+        if (IsDeleted || DappDefinitionEntityIds == null)
+        {
+            throw new InvalidOperationException("Cannot map deleted object");
+        }
     }
 }
 
@@ -221,15 +228,24 @@ internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : UnverifiedT
         }
     }
 
-    public override UnverifiedTwoWayLink MapXxx(IDictionary<long, EntityAddress> correlatedEntities)
+    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
     {
-        // TODO ensure has value (applies to all of those)
+        EnsureMappable();
 
         return new DappClaimedEntitiesUnverifiedTwoWayLink
         {
             FromStateVersion = FromStateVersion,
             EntityAddress = correlatedEntities[EntityId],
-            ClaimedEntities = ClaimedEntityIds!.Select(x => correlatedEntities[x]).ToList(),
+            ClaimedEntities = ClaimedEntityIds.Select(x => correlatedEntities[x]).ToList(),
         };
+    }
+
+    [MemberNotNull(nameof(ClaimedEntityIds))]
+    private void EnsureMappable()
+    {
+        if (IsDeleted || ClaimedEntityIds == null)
+        {
+            throw new InvalidOperationException("Cannot map deleted object");
+        }
     }
 }

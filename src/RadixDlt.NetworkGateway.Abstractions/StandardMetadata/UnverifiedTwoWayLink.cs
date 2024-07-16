@@ -63,21 +63,39 @@
  */
 
 using System;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 
-// TODO use strongly-typed validtiy result (valid, invalid(details), unknown(details))
-public abstract record ResolvedTwoWayLink(string? InvalidReason)
+public abstract class UnverifiedTwoWayLink
 {
-    public bool IsValid => InvalidReason == null;
+    public required long FromStateVersion { get; init;  }
+
+    public required EntityAddress EntityAddress { get; init; }
 }
 
-public sealed record DappAccountTypeResolvedTwoWayLink(string Value, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+// This is more of a marker rather actual two-way link
+public sealed class DappAccountTypeUnverifiedTwoWayLink : UnverifiedTwoWayLink
+{
+    public required string Value { get; init; }
+}
 
-public sealed record DappClaimedEntityResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+public sealed class DappClaimedWebsitesUnverifiedTwoWayLink : UnverifiedTwoWayLink
+{
+    public required ICollection<Uri> ClaimedWebsites { get; init; }
+}
 
-public sealed record DappClaimedWebsiteResolvedTwoWayLink(Uri Origin, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+public sealed class DappClaimedEntitiesUnverifiedTwoWayLink : UnverifiedTwoWayLink
+{
+    public required ICollection<EntityAddress> ClaimedEntities { get; init; }
+}
 
-public sealed record DappDefinitionResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+public sealed class DappDefinitionUnverifiedTwoWayLink : UnverifiedTwoWayLink
+{
+    public required EntityAddress DappDefinition { get; init; }
+}
 
-public sealed record DappDefinitionsResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+public sealed class DappDefinitionsUnverifiedTwoWayLink : UnverifiedTwoWayLink
+{
+    public required ICollection<EntityAddress> DappDefinitions { get; init; }
+}

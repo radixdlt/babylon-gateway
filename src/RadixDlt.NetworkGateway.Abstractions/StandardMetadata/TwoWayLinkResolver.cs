@@ -62,25 +62,23 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 
 public sealed class TwoWayLinkResolver
 {
-    private readonly IUnverifiedTwoWayLinksCollection _unverifiedTwoWayLinksCollection;
+    private readonly IUnverifiedTwoWayLinksCollection _unverified;
     private readonly bool _resolveValidOnly;
     private readonly bool _validateOnLedgerOnly;
 
-    public TwoWayLinkResolver(IUnverifiedTwoWayLinksCollection unverifiedTwoWayLinksCollection, bool resolveValidOnly, bool validateOnLedgerOnly)
+    public TwoWayLinkResolver(IUnverifiedTwoWayLinksCollection unverified, bool resolveValidOnly, bool validateOnLedgerOnly)
     {
-        _unverifiedTwoWayLinksCollection = unverifiedTwoWayLinksCollection;
+        _unverified = unverified;
         _resolveValidOnly = resolveValidOnly;
         _validateOnLedgerOnly = validateOnLedgerOnly;
     }
@@ -91,7 +89,7 @@ public sealed class TwoWayLinkResolver
 
         foreach (var entityAddress in entityAddresses)
         {
-            if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLinks(entityAddress, out var unverifiedTwoWayLinks))
+            if (!_unverified.TryGetTwoWayLinks(entityAddress, out var unverifiedTwoWayLinks))
             {
                 continue;
             }
@@ -108,6 +106,11 @@ public sealed class TwoWayLinkResolver
                     _ => throw new ArgumentOutOfRangeException(nameof(unverifiedTwoWayLink), unverifiedTwoWayLink, null),
                 };
 
+                if (_resolveValidOnly)
+                {
+                    resolved = resolved.Where(x => x.IsValid);
+                }
+
                 var list = results.TryGetValue(entityAddress, out var existing) ? existing : new List<ResolvedTwoWayLink>();
 
                 list.AddRange(resolved);
@@ -119,14 +122,11 @@ public sealed class TwoWayLinkResolver
         return results;
     }
 
-    private IEnumerable<DappAccountTypeResolvedTwoWayLink> Resolve(EntityAddress entityAddress, DappAccountTypeUnverifiedTwoWayLink dappAccountType)
+    private IEnumerable<DappAccountMarkerResolvedTwoWayLink> Resolve(EntityAddress entityAddress, DappAccountTypeUnverifiedTwoWayLink dappAccountType)
     {
         var validationFailure = ValidateDappAccountType(entityAddress, dappAccountType.Value);
 
-        if (validationFailure == null || !_resolveValidOnly)
-        {
-            yield return new DappAccountTypeResolvedTwoWayLink(dappAccountType.Value, validationFailure);
-        }
+        yield return new DappAccountMarkerResolvedTwoWayLink(validationFailure);
     }
 
     private IEnumerable<DappClaimedEntityResolvedTwoWayLink> Resolve(EntityAddress entityAddress, DappClaimedEntitiesUnverifiedTwoWayLink dappClaimedEntities)
@@ -135,10 +135,7 @@ public sealed class TwoWayLinkResolver
         {
             var validationFailure = ValidateDappClaimedEntitiesEntry(entityAddress, claimedEntity);
 
-            if (validationFailure == null || !_resolveValidOnly)
-            {
-                yield return new DappClaimedEntityResolvedTwoWayLink(claimedEntity, validationFailure);
-            }
+            yield return new DappClaimedEntityResolvedTwoWayLink(claimedEntity, validationFailure);
         }
     }
 
@@ -150,10 +147,7 @@ public sealed class TwoWayLinkResolver
         {
             var validationFailure = await ValidateDappClaimedWebsitesEntry(entityAddress, claimedWebsite);
 
-            if (validationFailure == null || !_resolveValidOnly)
-            {
-                result.Enqueue(new DappClaimedWebsiteResolvedTwoWayLink(claimedWebsite, validationFailure));
-            }
+            result.Enqueue(new DappClaimedWebsiteResolvedTwoWayLink(claimedWebsite, validationFailure));
         });
 
         return result;
@@ -165,10 +159,7 @@ public sealed class TwoWayLinkResolver
         {
             var validationFailure = ValidateDappDefinitionsEntry(entityAddress, dappDefinition);
 
-            if (validationFailure == null || !_resolveValidOnly)
-            {
-                yield return new DappDefinitionsResolvedTwoWayLink(dappDefinition, validationFailure);
-            }
+            yield return new DappDefinitionsResolvedTwoWayLink(dappDefinition, validationFailure);
         }
     }
 
@@ -176,22 +167,19 @@ public sealed class TwoWayLinkResolver
     {
         var validationFailure = ValidateDappDefinition(entityAddress, dappDefinition.DappDefinition);
 
-        if (validationFailure == null || !_resolveValidOnly)
-        {
-            yield return new DappDefinitionResolvedTwoWayLink(dappDefinition.DappDefinition, validationFailure);
-        }
+        yield return new DappDefinitionResolvedTwoWayLink(dappDefinition.DappDefinition, validationFailure);
     }
 
     private string? ValidateDappAccountType(EntityAddress entityAddress, string dappAccountType)
     {
         if (!entityAddress.IsAccount)
         {
-            return "entity is not of an account type"; // a) entity + NOT_ACCOUNT
+            return "entity is not of an account type";
         }
 
-        if (dappAccountType != "dapp definition")
+        if (dappAccountType != StandardMetadataConstants.DappAccountTypeDappDefinition)
         {
-            return "expected 'dapp definition'"; // b) entity INVALID_ACC_TYPE
+            return "expected 'dapp definition'";
         }
 
         return null;
@@ -201,29 +189,29 @@ public sealed class TwoWayLinkResolver
     {
         if (!entityAddress.IsAccount)
         {
-            return "entity is not of an account type"; // a) entity + NOT_ACCOUNT
+            return "entity is not of an account type";
         }
 
-        if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(entityAddress, out var dappAccountType) || dappAccountType.Value != "dapp definition")
+        if (!_unverified.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(entityAddress, out var dappAccountType) || dappAccountType.Value != StandardMetadataConstants.DappAccountTypeDappDefinition)
         {
-            return "entity misses dappAccountType=dapp definition marker"; // c) entity + MISSING_ACC_TYPE_DAPP_DEF
+            return "entity misses dappAccountType=dapp definition marker";
         }
 
         if (otherEntityAddress.IsResource)
         {
-            if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappDefinitionsUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappDefinitions))
+            if (!_unverified.TryGetTwoWayLink<DappDefinitionsUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappDefinitions))
             {
-                return "other entity two way link of type dapp_definitions not found"; // d) other entity + MISSING_DAPP_DEFS
+                return "other entity two way link of type dapp_definitions not found";
             }
 
             if (!otherDappDefinitions.DappDefinitions.Contains(entityAddress))
             {
-                return "claimed entity not found in other's entity dapp_definitions"; // e) entity + other entity +
+                return "claimed entity not found in other's entity dapp_definitions";
             }
         }
         else if (otherEntityAddress.IsGlobal)
         {
-            if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappDefinitionUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappDefinition))
+            if (!_unverified.TryGetTwoWayLink<DappDefinitionUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappDefinition))
             {
                 return "other entity two way link of type dapp_definition not found";
             }
@@ -241,26 +229,14 @@ public sealed class TwoWayLinkResolver
         return null;
     }
 
-    private class WellKnownRadix
-    {
-        public class DappEntry
-        {
-            [JsonProperty("dAppDefinitionAddress")]
-            public EntityAddress DappDefinitionAddress { get; set; }
-        }
-
-        [JsonProperty("dApps")]
-        public ICollection<DappEntry>? Dapps { get; set; }
-    }
-
-    private async Task<string?> ValidateDappClaimedWebsitesEntry(EntityAddress entityAddress, Uri claimedWebsite)
+    private async ValueTask<string?> ValidateDappClaimedWebsitesEntry(EntityAddress entityAddress, Uri claimedWebsite)
     {
         if (!entityAddress.IsAccount)
         {
             return "entity is not of an account type";
         }
 
-        if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(entityAddress, out var dappAccountType) || dappAccountType.Value != "dapp definition")
+        if (!_unverified.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(entityAddress, out var dappAccountType) || dappAccountType.Value != StandardMetadataConstants.DappAccountTypeDappDefinition)
         {
             return "entity misses dappAccountType=dapp definition marker";
         }
@@ -270,48 +246,21 @@ public sealed class TwoWayLinkResolver
             return "off-ledger validation disabled";
         }
 
-        if (!Uri.TryCreate(claimedWebsite, "/.well-known/radix.json", out var url))
+        if (!Uri.TryCreate(claimedWebsite, "/.well-known/radix.json", out _))
         {
             return "unable to construct validation url";
         }
 
-        // TODO super naive implementation!!! do NOT use on production!!!
-        // TODO external "resolver" service in this case
+        await ValueTask.CompletedTask;
 
-        try
-        {
-            using var hc = new HttpClient();
-            using var response = await hc.GetAsync(url);
-
-            response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            var wellKnown = JsonConvert.DeserializeObject<WellKnownRadix>(json);
-
-            if (wellKnown == null || wellKnown.Dapps == null)
-            {
-                return "invalid http response";
-            }
-
-            if (wellKnown.Dapps.All(dapp => dapp.DappDefinitionAddress != entityAddress))
-            {
-                return "entity not found in JSON file";
-            }
-        }
-        catch (Exception ex)
-        {
-            return "general error: " + ex.Message;
-
-            // todo log etc
-        }
-
-        return null;
+        return "not implemented yet";
     }
 
     private string? ValidateDappDefinitionsEntry(EntityAddress entityAddress, EntityAddress otherEntityAddress)
     {
         if (entityAddress.IsAccount)
         {
-            if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(entityAddress, out var dappAccountType) || dappAccountType.Value != "dapp definition")
+            if (!_unverified.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(entityAddress, out var dappAccountType) || dappAccountType.Value != StandardMetadataConstants.DappAccountTypeDappDefinition)
             {
                 return "entity misses dappAccountType=dapp definition marked";
             }
@@ -321,7 +270,7 @@ public sealed class TwoWayLinkResolver
                 return "other entity is not of type account";
             }
 
-            if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappDefinitionsUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappDefinitions))
+            if (!_unverified.TryGetTwoWayLink<DappDefinitionsUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappDefinitions))
             {
                 return "other entity misses dapp_definitions";
             }
@@ -338,12 +287,12 @@ public sealed class TwoWayLinkResolver
                 return "other entity is not of type account";
             }
 
-            if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappAccountType) || otherDappAccountType.Value != "dapp definition")
+            if (!_unverified.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappAccountType) || otherDappAccountType.Value != StandardMetadataConstants.DappAccountTypeDappDefinition)
             {
                 return "other entity misses dappAccountType=dapp definition marker";
             }
 
-            if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappClaimedEntitiesUnverifiedTwoWayLink>(otherEntityAddress, out var otherClaimedEntities))
+            if (!_unverified.TryGetTwoWayLink<DappClaimedEntitiesUnverifiedTwoWayLink>(otherEntityAddress, out var otherClaimedEntities))
             {
                 return "other entity misses claimed_entities";
             }
@@ -378,19 +327,19 @@ public sealed class TwoWayLinkResolver
             return "other entity is not of account type";
         }
 
-        if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappAccountType) || otherDappAccountType.Value != "dapp definition")
+        if (!_unverified.TryGetTwoWayLink<DappAccountTypeUnverifiedTwoWayLink>(otherEntityAddress, out var otherDappAccountType) || otherDappAccountType.Value != StandardMetadataConstants.DappAccountTypeDappDefinition)
         {
-            return "other entity misses dappAccountType=dapp definition marker";
+            return "other entity misses account_type marker";
         }
 
-        if (!_unverifiedTwoWayLinksCollection.TryGetTwoWayLink<DappClaimedEntitiesUnverifiedTwoWayLink>(otherEntityAddress, out var otherClaimedEntities))
+        if (!_unverified.TryGetTwoWayLink<DappClaimedEntitiesUnverifiedTwoWayLink>(otherEntityAddress, out var otherClaimedEntities))
         {
-            return "other entity two way link of type claimed_entities not found";
+            return "other entity two-way link of type claimed_entities not found";
         }
 
         if (!otherClaimedEntities.ClaimedEntities.Contains(entityAddress))
         {
-            return "claimed entity id not found in other's entity dapp_definitions";
+            return "claimed entity id not found in dapp_definitions of the other entity";
         }
 
         return null;

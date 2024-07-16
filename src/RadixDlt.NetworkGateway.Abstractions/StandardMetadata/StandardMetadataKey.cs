@@ -62,39 +62,13 @@
  * permissions under this License.
  */
 
-using System;
-using System.Collections.Generic;
+namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 
-namespace RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
-
-public abstract class UnverifiedTwoWayLink
+public enum StandardMetadataKey
 {
-    public required long FromStateVersion { get; init;  }
-
-    public required EntityAddress EntityAddress { get; init; }
-}
-
-public sealed class DappAccountTypeUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required string Value { get; init; } // TODO use enum?
-}
-
-public sealed class DappClaimedWebsitesUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required ICollection<Uri> ClaimedWebsites { get; init; }
-}
-
-public sealed class DappClaimedEntitiesUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required ICollection<EntityAddress> ClaimedEntities { get; init; }
-}
-
-public sealed class DappDefinitionUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required EntityAddress DappDefinition { get; init; }
-}
-
-public sealed class DappDefinitionsUnverifiedTwoWayLink : UnverifiedTwoWayLink
-{
-    public required ICollection<EntityAddress> DappDefinitions { get; init; }
+    DappAccountType,
+    DappDefinition,
+    DappDefinitions,
+    DappClaimedWebsites,
+    DappClaimedEntities,
 }

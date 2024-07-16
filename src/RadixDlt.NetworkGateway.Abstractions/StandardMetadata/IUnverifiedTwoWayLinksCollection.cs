@@ -65,11 +65,11 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 
 public interface IUnverifiedTwoWayLinksCollection
 {
-    public bool TryGetTwoWayLinks(EntityAddress entityAddress, [NotNullWhen(true)] out List<UnverifiedTwoWayLink>? twoWayLinks);
+    public bool TryGetTwoWayLinks(EntityAddress entityAddress, [NotNullWhen(true)] out IEnumerable<UnverifiedTwoWayLink>? twoWayLinks);
 
     public bool TryGetTwoWayLink<T>(EntityAddress entityAddress, [NotNullWhen(true)] out T? twoWayLink)
         where T : UnverifiedTwoWayLink;

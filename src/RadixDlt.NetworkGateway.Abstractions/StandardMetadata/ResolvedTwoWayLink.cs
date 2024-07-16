@@ -62,13 +62,23 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+using System;
 
-public enum TwoWayLinkType
+namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
+
+// TODO use TwoWayLinkError rather string? for error
+public abstract record ResolvedTwoWayLink(string? InvalidReason)
 {
-    DappAccountType,
-    DappDefinition,
-    DappDefinitions,
-    DappClaimedWebsites,
-    DappClaimedEntities,
+    public bool IsValid => InvalidReason == null;
 }
+
+// This is more of a marker rather actual two-way link
+public sealed record DappAccountMarkerResolvedTwoWayLink(string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+
+public sealed record DappClaimedEntityResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+
+public sealed record DappClaimedWebsiteResolvedTwoWayLink(Uri Origin, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+
+public sealed record DappDefinitionResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+
+public sealed record DappDefinitionsResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);

@@ -66,7 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
@@ -206,7 +206,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<SborTypeKind>();
         modelBuilder.HasPostgresEnum<StateType>();
         modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
-        modelBuilder.HasPostgresEnum<TwoWayLinkType>();
+        modelBuilder.HasPostgresEnum<StandardMetadataKey>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -620,11 +620,11 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<UnverifiedTwoWayLinkEntryHistory>()
             .HasDiscriminator(e => e.Discriminator)
-            .HasValue<DappAccountTypeUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappAccountType)
-            .HasValue<DappDefinitionUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappDefinition)
-            .HasValue<DappDefinitionsUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappDefinitions)
-            .HasValue<DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappClaimedEntities)
-            .HasValue<DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory>(TwoWayLinkType.DappClaimedWebsites);
+            .HasValue<DappAccountTypeUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappAccountType)
+            .HasValue<DappDefinitionUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappDefinition)
+            .HasValue<DappDefinitionsUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappDefinitions)
+            .HasValue<DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappClaimedEntities)
+            .HasValue<DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappClaimedWebsites);
 
         modelBuilder
             .Entity<UnverifiedTwoWayLinkEntryHistory>()

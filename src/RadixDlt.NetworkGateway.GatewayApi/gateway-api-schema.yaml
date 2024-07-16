@@ -4136,13 +4136,13 @@ components:
             royalty_config:
               $ref: "#/components/schemas/ComponentRoyaltyConfig"
             two_way_linked_dapp_address:
-              description: Two-way linked (resolved & verified) dApp address, if any. Applicible to non-Account components only.
+              description: Two-way linked (resolved & verified) dApp address, if any. Applicable to non-Account dApp components only.
               $ref: "#/components/schemas/Address"
             two_way_linked_dapps:
-              description: Applicible to Account components only.
+              description: Applicable to dApp definition accounts only.
               $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
             two_way_linked_entities:
-              description: Applicible to Account components only.
+              description: Applicable to dApp definition accounts only.
               $ref: "#/components/schemas/TwoWayLinkedEntitiesCollection"
 
     StateAccountResourcePreferencesPageRequest:

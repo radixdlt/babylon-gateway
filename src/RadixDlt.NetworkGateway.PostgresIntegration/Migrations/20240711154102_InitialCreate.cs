@@ -68,7 +68,7 @@ using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.TwoWayLinks;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable
@@ -845,7 +845,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     is_locked = table.Column<bool>(type: "boolean", nullable: false),
-                    discriminator = table.Column<TwoWayLinkType>(type: "two_way_link_type", nullable: false),
+                    discriminator = table.Column<StandardMetadataKey>(type: "two_way_link_type", nullable: false),
                     value = table.Column<string>(type: "text", nullable: true),
                     entity_ids = table.Column<long[]>(type: "bigint[]", nullable: true),
                     claimed_websites = table.Column<string[]>(type: "text[]", nullable: true)
