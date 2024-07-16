@@ -2319,6 +2319,16 @@ components:
         entity_address:
           $ref: "#/components/schemas/Address"
 
+    TwoWayLinkedDappOnLedgerDetails:
+      type: object
+      properties:
+        dapps:
+          $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
+        entities:
+          $ref: "#/components/schemas/TwoWayLinkedEntitiesCollection"
+        primary_locker:
+          $ref: "#/components/schemas/Address"
+
     AccountLockerVaultCollection:
       description: Account Locker Account Resources Collection
       allOf:
@@ -3934,6 +3944,10 @@ components:
           type: array
           items:
             type: string
+        dapp_two_way_links:
+          description: if set to `true`, on-ledger dApp two-way links (resolved & verified) are returned. See https://docs.radixdlt.com/docs/metadata-for-verification for more details.
+          type: boolean
+          default: false
     StateEntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -4138,12 +4152,9 @@ components:
             two_way_linked_dapp_address:
               description: Two-way linked (resolved & verified) dApp address, if any. Applicable to non-Account dApp components only.
               $ref: "#/components/schemas/Address"
-            two_way_linked_dapps:
-              description: Applicable to dApp definition accounts only.
-              $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
-            two_way_linked_entities:
-              description: Applicable to dApp definition accounts only.
-              $ref: "#/components/schemas/TwoWayLinkedEntitiesCollection"
+            two_way_linked_dapp_details:
+              description: Two-way linked (resolved & verified) dApp details. Applicable to dApp definition accounts only and limited to on-ledger information only.
+              $ref: "#/components/schemas/TwoWayLinkedDappOnLedgerDetails"
 
     StateAccountResourcePreferencesPageRequest:
       allOf:

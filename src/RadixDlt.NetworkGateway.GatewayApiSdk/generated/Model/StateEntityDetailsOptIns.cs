@@ -104,7 +104,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="packageRoyaltyVaultBalance">if set to &#x60;true&#x60;, &#x60;royalty_vault_balance&#x60; for package entities is returned. (default to false).</param>
         /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint. (default to false).</param>
         /// <param name="explicitMetadata">allows specifying explicitly metadata properties which should be returned in response..</param>
-        public StateEntityDetailsOptIns(bool ancestorIdentities = false, bool componentRoyaltyConfig = false, bool componentRoyaltyVaultBalance = false, bool packageRoyaltyVaultBalance = false, bool nonFungibleIncludeNfids = false, List<string> explicitMetadata = default(List<string>))
+        /// <param name="dappTwoWayLinks">if set to &#x60;true&#x60;, on-ledger dApp two-way links (resolved &amp; verified) are returned. See https://docs.radixdlt.com/docs/metadata-for-verification for more details. (default to false).</param>
+        public StateEntityDetailsOptIns(bool ancestorIdentities = false, bool componentRoyaltyConfig = false, bool componentRoyaltyVaultBalance = false, bool packageRoyaltyVaultBalance = false, bool nonFungibleIncludeNfids = false, List<string> explicitMetadata = default(List<string>), bool dappTwoWayLinks = false)
         {
             this.AncestorIdentities = ancestorIdentities;
             this.ComponentRoyaltyConfig = componentRoyaltyConfig;
@@ -112,6 +113,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.PackageRoyaltyVaultBalance = packageRoyaltyVaultBalance;
             this.NonFungibleIncludeNfids = nonFungibleIncludeNfids;
             this.ExplicitMetadata = explicitMetadata;
+            this.DappTwoWayLinks = dappTwoWayLinks;
         }
 
         /// <summary>
@@ -157,6 +159,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<string> ExplicitMetadata { get; set; }
 
         /// <summary>
+        /// if set to &#x60;true&#x60;, on-ledger dApp two-way links (resolved &amp; verified) are returned. See https://docs.radixdlt.com/docs/metadata-for-verification for more details.
+        /// </summary>
+        /// <value>if set to &#x60;true&#x60;, on-ledger dApp two-way links (resolved &amp; verified) are returned. See https://docs.radixdlt.com/docs/metadata-for-verification for more details.</value>
+        [DataMember(Name = "dapp_two_way_links", EmitDefaultValue = true)]
+        public bool DappTwoWayLinks { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -170,6 +179,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  PackageRoyaltyVaultBalance: ").Append(PackageRoyaltyVaultBalance).Append("\n");
             sb.Append("  NonFungibleIncludeNfids: ").Append(NonFungibleIncludeNfids).Append("\n");
             sb.Append("  ExplicitMetadata: ").Append(ExplicitMetadata).Append("\n");
+            sb.Append("  DappTwoWayLinks: ").Append(DappTwoWayLinks).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -230,6 +240,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ExplicitMetadata != null &&
                     input.ExplicitMetadata != null &&
                     this.ExplicitMetadata.SequenceEqual(input.ExplicitMetadata)
+                ) && 
+                (
+                    this.DappTwoWayLinks == input.DappTwoWayLinks ||
+                    this.DappTwoWayLinks.Equals(input.DappTwoWayLinks)
                 );
         }
 
@@ -251,6 +265,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ExplicitMetadata.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.DappTwoWayLinks.GetHashCode();
                 return hashCode;
             }
         }

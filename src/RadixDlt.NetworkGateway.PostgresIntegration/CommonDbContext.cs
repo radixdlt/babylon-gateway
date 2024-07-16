@@ -624,7 +624,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<DappDefinitionUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappDefinition)
             .HasValue<DappDefinitionsUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappDefinitions)
             .HasValue<DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappClaimedEntities)
-            .HasValue<DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappClaimedWebsites);
+            .HasValue<DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappClaimedWebsites)
+            .HasValue<DappAccountLockerUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappAccountLocker);
 
         modelBuilder
             .Entity<UnverifiedTwoWayLinkEntryHistory>()

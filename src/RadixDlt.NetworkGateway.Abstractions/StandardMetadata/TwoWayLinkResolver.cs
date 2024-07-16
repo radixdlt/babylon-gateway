@@ -83,9 +83,9 @@ public sealed class TwoWayLinkResolver
         _validateOnLedgerOnly = validateOnLedgerOnly;
     }
 
-    public async ValueTask<Dictionary<EntityAddress, List<ResolvedTwoWayLink>>> Resolve(ICollection<EntityAddress> entityAddresses)
+    public async ValueTask<IDictionary<EntityAddress, List<ResolvedTwoWayLink>>> Resolve(ICollection<EntityAddress> entityAddresses)
     {
-        var results = new Dictionary<EntityAddress, List<ResolvedTwoWayLink>>();
+        var results = new ConcurrentDictionary<EntityAddress, List<ResolvedTwoWayLink>>();
 
         foreach (var entityAddress in entityAddresses)
         {
@@ -94,9 +94,15 @@ public sealed class TwoWayLinkResolver
                 continue;
             }
 
+            // first round
             foreach (var unverifiedTwoWayLink in unverifiedTwoWayLinks)
             {
-                IEnumerable<ResolvedTwoWayLink> resolved = unverifiedTwoWayLink switch
+                if (unverifiedTwoWayLink is DappAccountLockerUnverifiedTwoWayLink)
+                {
+                    continue;
+                }
+
+                IEnumerable<ResolvedTwoWayLink> candidates = unverifiedTwoWayLink switch
                 {
                     DappAccountTypeUnverifiedTwoWayLink dappAccountType => Resolve(entityAddress, dappAccountType),
                     DappClaimedEntitiesUnverifiedTwoWayLink dappClaimedEntities => Resolve(entityAddress, dappClaimedEntities),
@@ -108,14 +114,28 @@ public sealed class TwoWayLinkResolver
 
                 if (_resolveValidOnly)
                 {
-                    resolved = resolved.Where(x => x.IsValid);
+                    candidates = candidates.Where(x => x.IsValid);
                 }
 
-                var list = results.TryGetValue(entityAddress, out var existing) ? existing : new List<ResolvedTwoWayLink>();
+                results.GetOrAdd(entityAddress, _ => []).AddRange(candidates);
+            }
 
-                list.AddRange(resolved);
+            // second round
+            foreach (var unverifiedTwoWayLink in unverifiedTwoWayLinks)
+            {
+                if (unverifiedTwoWayLink is not DappAccountLockerUnverifiedTwoWayLink dappAccountLocker)
+                {
+                    continue;
+                }
 
-                results[entityAddress] = list;
+                var candidates = Resolve(entityAddress, dappAccountLocker, results);
+
+                if (_resolveValidOnly)
+                {
+                    candidates = candidates.Where(x => x.IsValid);
+                }
+
+                results.GetOrAdd(entityAddress, _ => []).AddRange(candidates);
             }
         }
 
@@ -168,6 +188,13 @@ public sealed class TwoWayLinkResolver
         var validationFailure = ValidateDappDefinition(entityAddress, dappDefinition.DappDefinition);
 
         yield return new DappDefinitionResolvedTwoWayLink(dappDefinition.DappDefinition, validationFailure);
+    }
+
+    private IEnumerable<DappAccountLockerResolvedTwoWayLink> Resolve(EntityAddress entityAddress, DappAccountLockerUnverifiedTwoWayLink dappAccountLocker, IDictionary<EntityAddress, List<ResolvedTwoWayLink>> alreadyResolved)
+    {
+        var validationFailure = ValidateDappAccountLocker(entityAddress, dappAccountLocker.LockerAddress, alreadyResolved);
+
+        yield return new DappAccountLockerResolvedTwoWayLink(dappAccountLocker.LockerAddress, validationFailure);
     }
 
     private string? ValidateDappAccountType(EntityAddress entityAddress, string dappAccountType)
@@ -340,6 +367,36 @@ public sealed class TwoWayLinkResolver
         if (!otherClaimedEntities.ClaimedEntities.Contains(entityAddress))
         {
             return "claimed entity id not found in dapp_definitions of the other entity";
+        }
+
+        return null;
+    }
+
+    private string? ValidateDappAccountLocker(EntityAddress entityAddress, EntityAddress lockerEntityAddress, IDictionary<EntityAddress, List<ResolvedTwoWayLink>> alreadyResolved)
+    {
+        if (!entityAddress.IsAccount)
+        {
+            return "entity is not of an account type";
+        }
+
+        if (!lockerEntityAddress.IsLocker)
+        {
+            return "entity is not of a locker type";
+        }
+
+        if (!alreadyResolved.TryGetValue(entityAddress, out var entityAlreadyResolved))
+        {
+            return "missing already resolved on entity";
+        }
+
+        if (!entityAlreadyResolved.OfType<DappAccountMarkerResolvedTwoWayLink>().Any(def => def.IsValid))
+        {
+            return "entity misses account_type=dapp definition marker";
+        }
+
+        if (!entityAlreadyResolved.OfType<DappClaimedEntityResolvedTwoWayLink>().Any(def => def.IsValid && def.EntityAddress == lockerEntityAddress))
+        {
+            return "entity misses valid(!) claimed_entities pointing to " + lockerEntityAddress;
         }
 
         return null;

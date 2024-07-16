@@ -64,6 +64,7 @@
 
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -75,6 +76,7 @@ internal class UnverifiedTwoWayLinks : IUnverifiedTwoWayLinksCollection
 {
     private readonly IDictionary<EntityAddress, List<UnverifiedTwoWayLinkEntryHistory>> _unverifiedByEntity;
     private readonly IDictionary<long, EntityAddress> _entityAddresses;
+    private readonly Dictionary<EntityAddress, List<UnverifiedTwoWayLink>?> _cache = new();
 
     public UnverifiedTwoWayLinks(ICollection<UnverifiedTwoWayLinkEntryHistory> unverified, IDictionary<long, EntityAddress> entityAddresses)
     {
@@ -82,17 +84,26 @@ internal class UnverifiedTwoWayLinks : IUnverifiedTwoWayLinksCollection
         _entityAddresses = entityAddresses;
     }
 
-    public bool TryGetTwoWayLinks(EntityAddress entityAddress, [NotNullWhen(true)] out IEnumerable<UnverifiedTwoWayLink>? twoWayLinks)
+    public bool TryGetTwoWayLinks(EntityAddress entityAddress, [NotNullWhen(true)] out IReadOnlyCollection<UnverifiedTwoWayLink>? twoWayLinks)
     {
-        twoWayLinks = default;
-
-        if (_unverifiedByEntity.TryGetValue(entityAddress, out var x))
+        twoWayLinks = _cache.GetOrAdd(entityAddress, _ =>
         {
-            twoWayLinks = x.Where(y => !y.IsDeleted).Select(y => y.MapToDomain(_entityAddresses));
-            return true;
-        }
+            List<UnverifiedTwoWayLink>? result = null;
 
-        return false;
+            if (_unverifiedByEntity.TryGetValue(entityAddress, out var candidates))
+            {
+                var some = candidates.Where(y => !y.IsDeleted).Select(y => y.MapToDomain(_entityAddresses)).ToList();
+
+                if (some.Count > 0)
+                {
+                    result = new(some);
+                }
+            }
+
+            return result;
+        });
+
+        return twoWayLinks != null;
     }
 
     public bool TryGetTwoWayLink<T>(EntityAddress entityAddress, [NotNullWhen(true)] out T? twoWayLink)

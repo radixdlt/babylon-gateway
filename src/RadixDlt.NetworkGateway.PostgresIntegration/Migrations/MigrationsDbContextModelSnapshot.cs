@@ -109,8 +109,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "sbor_type_kind", new[] { "well_known", "schema_local" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "standard_metadata_key", new[] { "dapp_account_type", "dapp_definition", "dapp_definitions", "dapp_claimed_websites", "dapp_claimed_entities", "dapp_account_locker" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "state_type", new[] { "json", "sbor" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "two_way_link_type", new[] { "dapp_account_type", "dapp_definition", "dapp_definitions", "dapp_claimed_websites", "dapp_claimed_entities" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedDepositorAggregateHistory", b =>
@@ -1715,7 +1715,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<StandardMetadataKey>("Discriminator")
-                        .HasColumnType("two_way_link_type")
+                        .HasColumnType("standard_metadata_key")
                         .HasColumnName("discriminator");
 
                     b.Property<long>("EntityId")
@@ -2660,14 +2660,28 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(StateType.Sbor);
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappAccountLockerUnverifiedTwoWayLinkEntryHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
+
+                    b.Property<long[]>("EntityIds")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("entity_ids");
+
+                    b.ToTable("unverified_two_way_link_entry_history");
+
+                    b.HasDiscriminator().HasValue(StandardMetadataKey.DappAccountLocker);
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappAccountTypeUnverifiedTwoWayLinkEntryHistory", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
 
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("value");
+                    b.Property<string[]>("Values")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text[]")
+                        .HasColumnName("values");
 
                     b.ToTable("unverified_two_way_link_entry_history");
 
@@ -2678,7 +2692,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
 
-                    b.Property<long[]>("ClaimedEntityIds")
+                    b.Property<long[]>("EntityIds")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint[]")
                         .HasColumnName("entity_ids");
@@ -2692,9 +2706,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
 
-                    b.Property<string[]>("ClaimedWebsites")
+                    b.Property<string[]>("Values")
+                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text[]")
-                        .HasColumnName("claimed_websites");
+                        .HasColumnName("values");
 
                     b.ToTable("unverified_two_way_link_entry_history");
 
@@ -2705,7 +2720,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
 
-                    b.Property<long[]>("DappEntityIds")
+                    b.Property<long[]>("EntityIds")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint[]")
                         .HasColumnName("entity_ids");
@@ -2719,7 +2734,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
 
-                    b.Property<long[]>("DappDefinitionEntityIds")
+                    b.Property<long[]>("EntityIds")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint[]")
                         .HasColumnName("entity_ids");

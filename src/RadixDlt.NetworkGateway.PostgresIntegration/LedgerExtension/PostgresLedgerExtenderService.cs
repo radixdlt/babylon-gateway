@@ -456,7 +456,6 @@ UPDATE pending_transactions
                         }
 
                         relationshipProcessor.ScanUpsert(substateData, referencedEntity, stateVersion);
-                        twoWayLinkProcessor.ScanUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -927,7 +926,6 @@ UPDATE pending_transactions
 
                         packageCodeProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                         entitySchemaProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
-                        twoWayLinkProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);

@@ -172,6 +172,18 @@ internal class TwoWayLinkProcessor
                     DappDefinitionEntityIds = dappDefinitions.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
                 });
             }
+            else if (key == StandardMetadataConstants.DappAccountLocker && TryParseValue<GatewayModel.MetadataGlobalAddressValue>(out var dappAccountLocker))
+            {
+                _entriesToAdd.Add(new DappAccountLockerUnverifiedTwoWayLinkEntryHistory
+                {
+                    Id = _context.Sequences.UnverifiedTwoWayLinkEntryHistorySequence++,
+                    FromStateVersion = stateVersion,
+                    EntityId = referencedEntity.DatabaseId,
+                    IsDeleted = metadataEntry.Value == null,
+                    IsLocked = substateData.IsLocked,
+                    AccountLockerEntityId = _referencedEntities.Get((EntityAddress)dappAccountLocker.Value).DatabaseId,
+                });
+            }
         }
         else if (referencedEntity.Address.IsResource)
         {
@@ -327,7 +339,7 @@ INNER JOIN LATERAL (
 
     private Task<int> CopyUnverifiedTwoWayLinkEntryHistory() => _context.WriteHelper.Copy(
         _entriesToAdd,
-        "COPY unverified_two_way_link_entry_history (id, from_state_version, entity_id, is_deleted, is_locked, discriminator, value, entity_ids, claimed_websites) FROM STDIN (FORMAT BINARY)",
+        "COPY unverified_two_way_link_entry_history (id, from_state_version, entity_id, is_deleted, is_locked, discriminator, values, entity_ids) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             var discriminator = _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(e.GetType());
@@ -337,34 +349,17 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(discriminator, "two_way_link_type", token);
+            await writer.WriteAsync(discriminator, "standard_metadata_key", token);
 
             switch (e)
             {
-                case DappAccountTypeUnverifiedTwoWayLinkEntryHistory at:
-                    await writer.WriteAsync(at.Value, NpgsqlDbType.Text, token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory ce:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(ce.ClaimedEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                case StringBasedUnverifiedTwoWayLinkEntryHistory stringBased:
+                    await writer.WriteAsync(stringBased.Values, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
                     break;
-                case DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory cw:
+                case EntityBasedUnverifiedTwoWayLinkEntryHistory entityBased:
                     await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(cw.ClaimedWebsites, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
-                    break;
-                case DappDefinitionsUnverifiedTwoWayLinkEntryHistory dds:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(dds.DappDefinitionEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case DappDefinitionUnverifiedTwoWayLinkEntryHistory dd:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(new[] { dd.DappDefinitionEntityId }, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(entityBased.EntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(e));

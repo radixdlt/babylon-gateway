@@ -102,8 +102,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible")
                 .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
-                .Annotation("Npgsql:Enum:state_type", "json,sbor")
-                .Annotation("Npgsql:Enum:two_way_link_type", "dapp_account_type,dapp_definition,dapp_definitions,dapp_claimed_websites,dapp_claimed_entities");
+                .Annotation("Npgsql:Enum:standard_metadata_key", "dapp_account_type,dapp_definition,dapp_definitions,dapp_claimed_websites,dapp_claimed_entities,dapp_account_locker")
+                .Annotation("Npgsql:Enum:state_type", "json,sbor");
 
             migrationBuilder.CreateTable(
                 name: "account_authorized_depositor_aggregate_history",
@@ -845,10 +845,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     is_locked = table.Column<bool>(type: "boolean", nullable: false),
-                    discriminator = table.Column<StandardMetadataKey>(type: "two_way_link_type", nullable: false),
-                    value = table.Column<string>(type: "text", nullable: true),
+                    discriminator = table.Column<StandardMetadataKey>(type: "standard_metadata_key", nullable: false),
                     entity_ids = table.Column<long[]>(type: "bigint[]", nullable: true),
-                    claimed_websites = table.Column<string[]>(type: "text[]", nullable: true)
+                    values = table.Column<string[]>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {

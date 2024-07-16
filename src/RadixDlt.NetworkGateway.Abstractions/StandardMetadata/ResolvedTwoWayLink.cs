@@ -82,3 +82,5 @@ public sealed record DappClaimedWebsiteResolvedTwoWayLink(Uri Origin, string? In
 public sealed record DappDefinitionResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
 
 public sealed record DappDefinitionsResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+
+public sealed record DappAccountLockerResolvedTwoWayLink(EntityAddress LockerAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);

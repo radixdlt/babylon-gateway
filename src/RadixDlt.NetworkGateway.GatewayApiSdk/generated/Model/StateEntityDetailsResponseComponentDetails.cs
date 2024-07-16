@@ -119,10 +119,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="royaltyConfig">royaltyConfig.</param>
         /// <param name="twoWayLinkedDappAddress">Bech32m-encoded human readable version of the address..</param>
-        /// <param name="twoWayLinkedDapps">twoWayLinkedDapps.</param>
-        /// <param name="twoWayLinkedEntities">twoWayLinkedEntities.</param>
+        /// <param name="twoWayLinkedDappDetails">twoWayLinkedDappDetails.</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Component).</param>
-        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig), string twoWayLinkedDappAddress = default(string), TwoWayLinkedDappsCollection twoWayLinkedDapps = default(TwoWayLinkedDappsCollection), TwoWayLinkedEntitiesCollection twoWayLinkedEntities = default(TwoWayLinkedEntitiesCollection), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
+        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig), string twoWayLinkedDappAddress = default(string), TwoWayLinkedDappOnLedgerDetails twoWayLinkedDappDetails = default(TwoWayLinkedDappOnLedgerDetails), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -142,8 +141,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.RoyaltyVaultBalance = royaltyVaultBalance;
             this.RoyaltyConfig = royaltyConfig;
             this.TwoWayLinkedDappAddress = twoWayLinkedDappAddress;
-            this.TwoWayLinkedDapps = twoWayLinkedDapps;
-            this.TwoWayLinkedEntities = twoWayLinkedEntities;
+            this.TwoWayLinkedDappDetails = twoWayLinkedDappDetails;
         }
 
         /// <summary>
@@ -199,16 +197,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string TwoWayLinkedDappAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets TwoWayLinkedDapps
+        /// Gets or Sets TwoWayLinkedDappDetails
         /// </summary>
-        [DataMember(Name = "two_way_linked_dapps", EmitDefaultValue = true)]
-        public TwoWayLinkedDappsCollection TwoWayLinkedDapps { get; set; }
-
-        /// <summary>
-        /// Gets or Sets TwoWayLinkedEntities
-        /// </summary>
-        [DataMember(Name = "two_way_linked_entities", EmitDefaultValue = true)]
-        public TwoWayLinkedEntitiesCollection TwoWayLinkedEntities { get; set; }
+        [DataMember(Name = "two_way_linked_dapp_details", EmitDefaultValue = true)]
+        public TwoWayLinkedDappOnLedgerDetails TwoWayLinkedDappDetails { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -227,8 +219,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
             sb.Append("  TwoWayLinkedDappAddress: ").Append(TwoWayLinkedDappAddress).Append("\n");
-            sb.Append("  TwoWayLinkedDapps: ").Append(TwoWayLinkedDapps).Append("\n");
-            sb.Append("  TwoWayLinkedEntities: ").Append(TwoWayLinkedEntities).Append("\n");
+            sb.Append("  TwoWayLinkedDappDetails: ").Append(TwoWayLinkedDappDetails).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -305,14 +296,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TwoWayLinkedDappAddress.Equals(input.TwoWayLinkedDappAddress))
                 ) && base.Equals(input) && 
                 (
-                    this.TwoWayLinkedDapps == input.TwoWayLinkedDapps ||
-                    (this.TwoWayLinkedDapps != null &&
-                    this.TwoWayLinkedDapps.Equals(input.TwoWayLinkedDapps))
-                ) && base.Equals(input) && 
-                (
-                    this.TwoWayLinkedEntities == input.TwoWayLinkedEntities ||
-                    (this.TwoWayLinkedEntities != null &&
-                    this.TwoWayLinkedEntities.Equals(input.TwoWayLinkedEntities))
+                    this.TwoWayLinkedDappDetails == input.TwoWayLinkedDappDetails ||
+                    (this.TwoWayLinkedDappDetails != null &&
+                    this.TwoWayLinkedDappDetails.Equals(input.TwoWayLinkedDappDetails))
                 );
         }
 
@@ -357,13 +343,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.TwoWayLinkedDappAddress.GetHashCode();
                 }
-                if (this.TwoWayLinkedDapps != null)
+                if (this.TwoWayLinkedDappDetails != null)
                 {
-                    hashCode = (hashCode * 59) + this.TwoWayLinkedDapps.GetHashCode();
-                }
-                if (this.TwoWayLinkedEntities != null)
-                {
-                    hashCode = (hashCode * 59) + this.TwoWayLinkedEntities.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TwoWayLinkedDappDetails.GetHashCode();
                 }
                 return hashCode;
             }

@@ -100,95 +100,129 @@ internal abstract class UnverifiedTwoWayLinkEntryHistory
     public abstract UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities);
 }
 
-internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory
+internal abstract class StringBasedUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
 {
-    [Column("value")]
-    public string Value { get; set; }
+    [Column("values")]
+    public string[]? Values { get; set; }
 
     public override IEnumerable<long> ReferencedEntityIds() => Enumerable.Empty<long>();
 
+    public IEnumerable<(string Name, int TotalCount)> AggregateCounts()
+    {
+        if (Values != null)
+        {
+            yield return (nameof(Values), Values.Length);
+        }
+    }
+
+    [MemberNotNull(nameof(Values))]
+    protected void EnsureMappable()
+    {
+        if (IsDeleted || Values == null || Values.Length == 0)
+        {
+            throw new InvalidOperationException("Cannot map deleted / incomplete object");
+        }
+    }
+}
+
+internal abstract class EntityBasedUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
+{
+    [Column("entity_ids")]
+    public long[]? EntityIds { get; set; }
+
+    public override IEnumerable<long> ReferencedEntityIds() => EntityIds ?? Enumerable.Empty<long>();
+
+    public IEnumerable<(string Name, int TotalCount)> AggregateCounts()
+    {
+        if (EntityIds != null)
+        {
+            yield return (nameof(EntityIds), EntityIds.Length);
+        }
+    }
+
+    [MemberNotNull(nameof(EntityIds))]
+    protected void EnsureMappable()
+    {
+        if (IsDeleted || EntityIds == null || EntityIds.Length == 0)
+        {
+            throw new InvalidOperationException("Cannot map deleted / incomplete object");
+        }
+    }
+}
+
+internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : StringBasedUnverifiedTwoWayLinkEntryHistory
+{
+    [NotMapped]
+    public string? Value
+    {
+        get => Values?.FirstOrDefault();
+        set => Values = value == null ? null : new[] { value };
+    }
+
     public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
     {
+        EnsureMappable();
+
         return new DappAccountTypeUnverifiedTwoWayLink
         {
             FromStateVersion = FromStateVersion,
             EntityAddress = correlatedEntities[EntityId],
-            Value = Value,
+            Value = Values.First(),
         };
     }
 }
 
-internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
+internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : StringBasedUnverifiedTwoWayLinkEntryHistory
 {
-    [Column("claimed_websites")]
-    public string[]? ClaimedWebsites { get; set; }
-
-    public override IEnumerable<long> ReferencedEntityIds() => Enumerable.Empty<long>();
-
-    public IEnumerable<(string Name, int TotalCount)> AggregateCounts()
+    [NotMapped]
+    public string[]? ClaimedWebsites
     {
-        if (ClaimedWebsites != null)
-        {
-            yield return (nameof(ClaimedWebsites), ClaimedWebsites.Length);
-        }
+        get => Values;
+        set => Values = value;
     }
 
     public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
     {
+        EnsureMappable();
+
         return new DappClaimedWebsitesUnverifiedTwoWayLink
         {
             FromStateVersion = FromStateVersion,
             EntityAddress = correlatedEntities[EntityId],
-            ClaimedWebsites = ClaimedWebsites!.Select(x => new Uri(x)).ToList(),
+            ClaimedWebsites = Values.Select(x => new Uri(x)).ToList(),
         };
     }
 }
 
-internal class DappDefinitionUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory
+internal class DappDefinitionUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
 {
     [NotMapped]
-    public long DappDefinitionEntityId
+    public long? DappDefinitionEntityId
     {
-        get
-        {
-            return DappEntityIds?.FirstOrDefault() ?? default;
-        }
-
-        set
-        {
-            DappEntityIds = new[] { value };
-        }
+        get => EntityIds?.FirstOrDefault();
+        set => EntityIds = !value.HasValue ? null : new[] { value.Value };
     }
-
-    [Column("entity_ids")]
-    public long[]? DappEntityIds { get; set; }
-
-    public override IEnumerable<long> ReferencedEntityIds() => DappEntityIds ?? Enumerable.Empty<long>();
 
     public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
     {
+        EnsureMappable();
+
         return new DappDefinitionUnverifiedTwoWayLink
         {
             FromStateVersion = FromStateVersion,
             EntityAddress = correlatedEntities[EntityId],
-            DappDefinition = correlatedEntities[DappDefinitionEntityId],
+            DappDefinition = correlatedEntities[EntityIds.First()],
         };
     }
 }
 
-internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
+internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
 {
-    [Column("entity_ids")]
-    public long[]? DappDefinitionEntityIds { get; set; }
-
-    public override IEnumerable<long> ReferencedEntityIds() => DappDefinitionEntityIds ?? Enumerable.Empty<long>();
-
-    public IEnumerable<(string Name, int TotalCount)> AggregateCounts()
+    [NotMapped]
+    public long[]? DappDefinitionEntityIds
     {
-        if (DappDefinitionEntityIds != null)
-        {
-            yield return (nameof(DappDefinitionEntityIds), DappDefinitionEntityIds.Length);
-        }
+        get => EntityIds;
+        set => EntityIds = value;
     }
 
     public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
@@ -199,33 +233,18 @@ internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWa
         {
             FromStateVersion = FromStateVersion,
             EntityAddress = correlatedEntities[EntityId],
-            DappDefinitions = DappDefinitionEntityIds.Select(x => correlatedEntities[x]).ToList(),
+            DappDefinitions = EntityIds.Select(x => correlatedEntities[x]).ToList(),
         };
-    }
-
-    [MemberNotNull(nameof(DappDefinitionEntityIds))]
-    private void EnsureMappable()
-    {
-        if (IsDeleted || DappDefinitionEntityIds == null)
-        {
-            throw new InvalidOperationException("Cannot map deleted object");
-        }
     }
 }
 
-internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
+internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
 {
-    [Column("entity_ids")]
-    public long[]? ClaimedEntityIds { get; set; }
-
-    public override IEnumerable<long> ReferencedEntityIds() => ClaimedEntityIds ?? Enumerable.Empty<long>();
-
-    public IEnumerable<(string Name, int TotalCount)> AggregateCounts()
+    [NotMapped]
+    public long[]? ClaimedEntityIds
     {
-        if (ClaimedEntityIds != null)
-        {
-            yield return (nameof(ClaimedEntityIds), ClaimedEntityIds.Length);
-        }
+        get => EntityIds;
+        set => EntityIds = value;
     }
 
     public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
@@ -236,16 +255,29 @@ internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : UnverifiedT
         {
             FromStateVersion = FromStateVersion,
             EntityAddress = correlatedEntities[EntityId],
-            ClaimedEntities = ClaimedEntityIds.Select(x => correlatedEntities[x]).ToList(),
+            ClaimedEntities = EntityIds.Select(x => correlatedEntities[x]).ToList(),
         };
     }
+}
 
-    [MemberNotNull(nameof(ClaimedEntityIds))]
-    private void EnsureMappable()
+internal class DappAccountLockerUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
+{
+    [NotMapped]
+    public long? AccountLockerEntityId
     {
-        if (IsDeleted || ClaimedEntityIds == null)
+        get => EntityIds?.FirstOrDefault();
+        set => EntityIds = !value.HasValue ? null : new[] { value.Value };
+    }
+
+    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
+    {
+        EnsureMappable();
+
+        return new DappAccountLockerUnverifiedTwoWayLink
         {
-            throw new InvalidOperationException("Cannot map deleted object");
-        }
+            FromStateVersion = FromStateVersion,
+            EntityAddress = correlatedEntities[EntityId],
+            LockerAddress = correlatedEntities[EntityIds.First()],
+        };
     }
 }

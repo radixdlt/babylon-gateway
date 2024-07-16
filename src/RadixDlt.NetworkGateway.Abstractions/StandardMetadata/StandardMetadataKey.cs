@@ -71,4 +71,5 @@ public enum StandardMetadataKey
     DappDefinitions,
     DappClaimedWebsites,
     DappClaimedEntities,
+    DappAccountLocker,
 }

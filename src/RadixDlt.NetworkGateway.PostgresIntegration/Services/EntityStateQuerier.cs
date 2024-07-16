@@ -155,12 +155,16 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var packageSchemaHistory = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
-        // TODO add opt-in flag?
-        var unverifiedTwoWayLinks = await GetUnverifiedTwoWayLinks(entities, ledgerState, token);
+
+        var unverifiedTwoWayLinks = optIns.DappTwoWayLinks
+            ? await GetUnverifiedTwoWayLinks(entities, ledgerState, token)
+            : null;
+
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, unverifiedTwoWayLinks, ledgerState, token);
 
-        // TODO add opt-in flag?
-        var resolvedTwoWayLinks = await new TwoWayLinkResolver(new UnverifiedTwoWayLinks(unverifiedTwoWayLinks, correlatedAddresses), true, true).Resolve(entities.Select(e => e.Address).ToList());
+        var resolvedTwoWayLinks = unverifiedTwoWayLinks != null
+            ? await new TwoWayLinkResolver(new UnverifiedTwoWayLinks(unverifiedTwoWayLinks, correlatedAddresses), true, true).Resolve(entities.Select(e => e.Address).ToList())
+            : ImmutableDictionary<EntityAddress, List<ResolvedTwoWayLink>>.Empty;
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)
@@ -312,9 +316,20 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
                 case ComponentEntity ce:
                     ComponentMethodRoyaltyEntryHistory[]? componentRoyaltyConfig = null;
+                    GatewayModel.TwoWayLinkedDappOnLedgerDetails? twoWayLinkedDappOnLedgerDetails = null;
                     var nonAccountTwoWayLinkedDapp = twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress;
-                    var accountTwoWayLinkedDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
-                    var accountTwoWayLinkedEntities = twoWayLinks?.OfType<DappClaimedEntityResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+
+                    if (ce is GlobalAccountEntity && twoWayLinks?.OfType<DappAccountMarkerResolvedTwoWayLink>().Any() == true)
+                    {
+                        var accountTwoWayLinkedDapps = twoWayLinks.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var accountTwoWayLinkedEntities = twoWayLinks.OfType<DappClaimedEntityResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var accountTwoWayLinkedLocker = twoWayLinks.OfType<DappAccountLockerResolvedTwoWayLink>().FirstOrDefault()?.LockerAddress;
+
+                        twoWayLinkedDappOnLedgerDetails = new GatewayModel.TwoWayLinkedDappOnLedgerDetails(
+                            dapps: accountTwoWayLinkedDapps.Any() ? new GatewayModel.TwoWayLinkedDappsCollection(items: accountTwoWayLinkedDapps) : null,
+                            entities: accountTwoWayLinkedEntities.Any() ? new GatewayModel.TwoWayLinkedEntitiesCollection(items: accountTwoWayLinkedEntities) : null,
+                            primaryLocker: accountTwoWayLinkedLocker);
+                    }
 
                     stateHistory.TryGetValue(ce.Id, out var state);
                     roleAssignmentsHistory.TryGetValue(ce.Id, out var roleAssignments);
@@ -330,9 +345,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null,
                         royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null,
                         twoWayLinkedDappAddress: nonAccountTwoWayLinkedDapp,
-                        twoWayLinkedDapps: accountTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: accountTwoWayLinkedDapps) : null,
-                        twoWayLinkedEntities: accountTwoWayLinkedEntities?.Any() == true ? new GatewayModel.TwoWayLinkedEntitiesCollection(items: accountTwoWayLinkedEntities) : null
-                    );
+                        twoWayLinkedDappDetails: twoWayLinkedDappOnLedgerDetails);
                     break;
             }
 

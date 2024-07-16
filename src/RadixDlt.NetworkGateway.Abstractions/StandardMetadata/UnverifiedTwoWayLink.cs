@@ -99,3 +99,8 @@ public sealed class DappDefinitionsUnverifiedTwoWayLink : UnverifiedTwoWayLink
 {
     public required ICollection<EntityAddress> DappDefinitions { get; init; }
 }
+
+public sealed class DappAccountLockerUnverifiedTwoWayLink : UnverifiedTwoWayLink
+{
+    public required EntityAddress LockerAddress { get; init; }
+}
