@@ -103,10 +103,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewRequestFlags" /> class.
         /// </summary>
-        /// <param name="useFreeCredit">useFreeCredit (required).</param>
-        /// <param name="assumeAllSignatureProofs">assumeAllSignatureProofs (required).</param>
-        /// <param name="skipEpochCheck">skipEpochCheck (required).</param>
-        /// <param name="disableAuthChecks">disableAuthChecks.</param>
+        /// <param name="useFreeCredit">Whether to use a virtual, preview-only pool of XRD to pay for all execution fees.  (required).</param>
+        /// <param name="assumeAllSignatureProofs">Whether the virtual signature proofs should be automatically placed in the auth zone.  (required).</param>
+        /// <param name="skipEpochCheck">Whether to skip the epoch range check (i.e. ignoring the &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified).  Note: effectively, without an epoch range, the Radix Engine cannot perform the *intent hash duplicate* detection, which means that this check will be skipped as well.  (required).</param>
+        /// <param name="disableAuthChecks">Whether to skip the auth checks during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own. If doing this, be warned:   * Only resources which were potentially mintable/burnable at creation time     will be mintable/burnable, due to feature flags on the resource.   * Please see the below warning about unexpected results if using this approach.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the resulting execution result might not be valid for your needs. For example,   if I used this flag to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. .</param>
         public TransactionPreviewRequestFlags(bool useFreeCredit = default(bool), bool assumeAllSignatureProofs = default(bool), bool skipEpochCheck = default(bool), bool disableAuthChecks = default(bool))
         {
             this.UseFreeCredit = useFreeCredit;
@@ -116,26 +116,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets UseFreeCredit
+        /// Whether to use a virtual, preview-only pool of XRD to pay for all execution fees. 
         /// </summary>
+        /// <value>Whether to use a virtual, preview-only pool of XRD to pay for all execution fees. </value>
         [DataMember(Name = "use_free_credit", IsRequired = true, EmitDefaultValue = true)]
         public bool UseFreeCredit { get; set; }
 
         /// <summary>
-        /// Gets or Sets AssumeAllSignatureProofs
+        /// Whether the virtual signature proofs should be automatically placed in the auth zone. 
         /// </summary>
+        /// <value>Whether the virtual signature proofs should be automatically placed in the auth zone. </value>
         [DataMember(Name = "assume_all_signature_proofs", IsRequired = true, EmitDefaultValue = true)]
         public bool AssumeAllSignatureProofs { get; set; }
 
         /// <summary>
-        /// Gets or Sets SkipEpochCheck
+        /// Whether to skip the epoch range check (i.e. ignoring the &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified).  Note: effectively, without an epoch range, the Radix Engine cannot perform the *intent hash duplicate* detection, which means that this check will be skipped as well. 
         /// </summary>
+        /// <value>Whether to skip the epoch range check (i.e. ignoring the &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified).  Note: effectively, without an epoch range, the Radix Engine cannot perform the *intent hash duplicate* detection, which means that this check will be skipped as well. </value>
         [DataMember(Name = "skip_epoch_check", IsRequired = true, EmitDefaultValue = true)]
         public bool SkipEpochCheck { get; set; }
 
         /// <summary>
-        /// Gets or Sets DisableAuthChecks
+        /// Whether to skip the auth checks during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own. If doing this, be warned:   * Only resources which were potentially mintable/burnable at creation time     will be mintable/burnable, due to feature flags on the resource.   * Please see the below warning about unexpected results if using this approach.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the resulting execution result might not be valid for your needs. For example,   if I used this flag to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. 
         /// </summary>
+        /// <value>Whether to skip the auth checks during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own. If doing this, be warned:   * Only resources which were potentially mintable/burnable at creation time     will be mintable/burnable, due to feature flags on the resource.   * Please see the below warning about unexpected results if using this approach.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the resulting execution result might not be valid for your needs. For example,   if I used this flag to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. </value>
         [DataMember(Name = "disable_auth_checks", EmitDefaultValue = true)]
         public bool DisableAuthChecks { get; set; }
 
