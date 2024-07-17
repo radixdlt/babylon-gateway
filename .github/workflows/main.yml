@@ -405,6 +405,7 @@ jobs:
               "RADIXDLT_GATEWAY_DOCKER_TAG": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
               "RADIXDLT_NODE_DOCKER_TAG": "${{ env.FULLNODE_VERSION }}",
               "RADIXDLT_POSTGRES_APP_VERSION": "${{ env.POSTGRES_VERSION }}",
+              "RADIXDLT_GITHUB_TRIGGER" : "${{ env.GITHUB_REPOSITORY }}:${{ env.GITHUB_REF_NAME }}",
               "testingHarnessBranch": "${{ env.GATEWAY_BRANCH }}"
             }
           job_timeout: "3600"
