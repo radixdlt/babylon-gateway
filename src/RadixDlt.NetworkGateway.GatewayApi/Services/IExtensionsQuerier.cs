@@ -62,34 +62,21 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+// <copyright file="IExtensionsQuerier.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.Abstractions;
+using System.Threading;
+using System.Threading.Tasks;
 
-[Table("resource_owners")]
-internal abstract class ResourceOwners
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+
+public interface IExtensionsQuerier
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-}
-
-internal class FungibleResourceOwners : ResourceOwners
-{
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
-}
-
-internal class NonFungibleResourceOwners : ResourceOwners
-{
-    [Column("total_count")]
-    public long TotalCount { get; set; }
+    Task<GatewayApiSdk.Model.ResourceOwnersResponse> ResourceOwners(
+        EntityAddress resourceAddress,
+        int offset,
+        int limit,
+        CancellationToken token = default);
 }

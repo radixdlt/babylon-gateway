@@ -18,6 +18,7 @@ Release built: _not released yet_
 - Added support for two-way linked dApps in the `/state/entity/details` endpoint.
   - Brand-new `two_way_linked_*` properties on the `details` property of Resources, Accounts, Packages and other global components.
   - See https://docs.radixdlt.com/docs/metadata-for-verification#metadata-standards-for-verification-of-onledger-entities for detailed specification.
+- Added new endpoint `/extensions/resource-owners/page` which returns information about all owners of the queried resource.
 
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
@@ -25,6 +26,7 @@ Release built: _not released yet_
 - Added `non_fungible_data_mutable_fields` to `entities` table. Which contains list of all mutable non fungible data fields for non fungible resource entities.
 - New `ledger_transaction_markers` type with the `event_global_emitter` discriminator. It represents the global emitter for each event.
 - Added new `unverified_standard_metadata_*` tables. They hold **some** of the metadata entries using db-friendly (normalized) model. See https://docs.radixdlt.com/docs/metadata-standards 
+- Added new `resource_owners` table. It keeps information about all owners of each fungible and non fungible resource.
 
 ## 1.6.3
 Release built: 06.08.2024

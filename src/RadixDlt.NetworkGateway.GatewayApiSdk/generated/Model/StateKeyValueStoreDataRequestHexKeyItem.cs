@@ -84,42 +84,42 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersCollectionNonFungibleResourceItem
+    /// StateKeyValueStoreDataRequestHexKeyItem
     /// </summary>
-    [DataContract(Name = "ResourceOwnersCollectionNonFungibleResourceItem")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionFungibleResourceItem), "FungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionNonFungibleResourceItem), "NonFungibleResource")]
-    public partial class ResourceOwnersCollectionNonFungibleResourceItem : ResourceOwnersCollectionItem, IEquatable<ResourceOwnersCollectionNonFungibleResourceItem>
+    [DataContract(Name = "StateKeyValueStoreDataRequestHexKeyItem")]
+    public partial class StateKeyValueStoreDataRequestHexKeyItem : IEquatable<StateKeyValueStoreDataRequestHexKeyItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionNonFungibleResourceItem" /> class.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestHexKeyItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceOwnersCollectionNonFungibleResourceItem() { }
+        protected StateKeyValueStoreDataRequestHexKeyItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionNonFungibleResourceItem" /> class.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestHexKeyItem" /> class.
         /// </summary>
-        /// <param name="nonFungibleIdsCount">nonFungibleIdsCount (required).</param>
-        /// <param name="type">type (required) (default to ResourceOwnersResourceType.NonFungibleResource).</param>
-        /// <param name="ownerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public ResourceOwnersCollectionNonFungibleResourceItem(long nonFungibleIdsCount = default(long), ResourceOwnersResourceType type = ResourceOwnersResourceType.NonFungibleResource, string ownerAddress = default(string)) : base(type, ownerAddress)
+        /// <param name="keyHex">Hex-encoded binary blob. (required).</param>
+        public StateKeyValueStoreDataRequestHexKeyItem(string keyHex = default(string))
         {
-            this.NonFungibleIdsCount = nonFungibleIdsCount;
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
+            {
+                throw new ArgumentNullException("keyHex is a required property for StateKeyValueStoreDataRequestHexKeyItem and cannot be null");
+            }
+            this.KeyHex = keyHex;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIdsCount
+        /// Hex-encoded binary blob.
         /// </summary>
-        [DataMember(Name = "non_fungible_ids_count", IsRequired = true, EmitDefaultValue = true)]
-        public long NonFungibleIdsCount { get; set; }
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,9 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersCollectionNonFungibleResourceItem {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NonFungibleIdsCount: ").Append(NonFungibleIdsCount).Append("\n");
+            sb.Append("class StateKeyValueStoreDataRequestHexKeyItem {\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -139,7 +138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -151,24 +150,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceOwnersCollectionNonFungibleResourceItem);
+            return this.Equals(input as StateKeyValueStoreDataRequestHexKeyItem);
         }
 
         /// <summary>
-        /// Returns true if ResourceOwnersCollectionNonFungibleResourceItem instances are equal
+        /// Returns true if StateKeyValueStoreDataRequestHexKeyItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceOwnersCollectionNonFungibleResourceItem to be compared</param>
+        /// <param name="input">Instance of StateKeyValueStoreDataRequestHexKeyItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersCollectionNonFungibleResourceItem input)
+        public bool Equals(StateKeyValueStoreDataRequestHexKeyItem input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.NonFungibleIdsCount == input.NonFungibleIdsCount ||
-                    this.NonFungibleIdsCount.Equals(input.NonFungibleIdsCount)
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
                 );
         }
 
@@ -180,8 +180,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.NonFungibleIdsCount.GetHashCode();
+                int hashCode = 41;
+                if (this.KeyHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                }
                 return hashCode;
             }
         }

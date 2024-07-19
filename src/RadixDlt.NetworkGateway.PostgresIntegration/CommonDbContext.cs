@@ -174,6 +174,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<UnverifiedStandardMetadataEntryHistory> UnverifiedStandardMetadataEntryHistory => Set<UnverifiedStandardMetadataEntryHistory>();
 
+    public DbSet<ResourceOwners> ResourceOwners => Set<ResourceOwners>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -630,5 +632,33 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<UnverifiedStandardMetadataEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.Discriminator, e.FromStateVersion });
+
+        // TODO PP:
+        // best if we could have it in separate schema/dbcontext.
+        // it doesn't follow historical browse and might be easily split into separate.
+        // Same applies to pending transactions.
+        modelBuilder
+            .Entity<ResourceOwners>()
+            .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
+            .HasValue<FungibleResourceOwners>(ResourceType.Fungible)
+            .HasValue<NonFungibleResourceOwners>(ResourceType.NonFungible);
+
+        // TODO PP:
+        // do we need all these indexes?
+        // what order of fields? entityid, resource or reverse?
+        modelBuilder
+            .Entity<ResourceOwners>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId })
+            .IsUnique();
+
+        modelBuilder
+            .Entity<FungibleResourceOwners>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.Balance })
+            .HasFilter("discriminator = 'fungible'");
+
+        modelBuilder
+            .Entity<NonFungibleResourceOwners>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.TotalCount })
+            .HasFilter("discriminator = 'non_fungible'");
     }
 }
