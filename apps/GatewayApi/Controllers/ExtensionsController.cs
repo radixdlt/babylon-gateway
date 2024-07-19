@@ -62,34 +62,21 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace GatewayApi.Controllers;
 
-[Table("resource_owners")]
-internal abstract class ResourceOwners
+[ApiController]
+[Route("extensions")]
+public class ExtensionsController(IExtensionsHandler extensionsHandler) : ControllerBase
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-}
-
-internal class FungibleResourceOwners : ResourceOwners
-{
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
-}
-
-internal class NonFungibleResourceOwners : ResourceOwners
-{
-    [Column("total_count")]
-    public long TotalCount { get; set; }
+    [HttpPost("resource-owners/page")]
+    public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwnersPage(GatewayModel.ResourceOwnersRequest request, CancellationToken token)
+    {
+        return await extensionsHandler.ResourceOwners(request, token);
+    }
 }

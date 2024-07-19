@@ -755,6 +755,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "resource_owners",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    discriminator = table.Column<ResourceType>(type: "resource_type", nullable: false),
+                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
+                    total_count = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resource_owners", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "schema_entry_aggregate_history",
                 columns: table => new
                 {
@@ -1239,6 +1256,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_resource_owners_entity_id_resource_entity_id",
+                table: "resource_owners",
+                columns: new[] { "entity_id", "resource_entity_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_resource_owners_entity_id_resource_entity_id_balance",
+                table: "resource_owners",
+                columns: new[] { "entity_id", "resource_entity_id", "balance" },
+                filter: "discriminator = 'fungible'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_resource_owners_entity_id_resource_entity_id_total_count",
+                table: "resource_owners",
+                columns: new[] { "entity_id", "resource_entity_id", "total_count" },
+                filter: "discriminator = 'non_fungible'");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_schema_entry_aggregate_history_entity_id_from_state_version",
                 table: "schema_entry_aggregate_history",
                 columns: new[] { "entity_id", "from_state_version" });
@@ -1401,6 +1436,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "resource_entity_supply_history");
+
+            migrationBuilder.DropTable(
+                name: "resource_owners");
 
             migrationBuilder.DropTable(
                 name: "schema_entry_aggregate_history");

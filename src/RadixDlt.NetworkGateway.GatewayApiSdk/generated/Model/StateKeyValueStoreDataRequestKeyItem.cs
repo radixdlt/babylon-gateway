@@ -86,38 +86,89 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
+using System.Reflection;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
     /// Provide either `key_hex` or `key_json`. If both are provided, `key_hex` is used and `key_json` is ignored.
     /// </summary>
+    [JsonConverter(typeof(StateKeyValueStoreDataRequestKeyItemJsonConverter))]
     [DataContract(Name = "StateKeyValueStoreDataRequestKeyItem")]
-    public partial class StateKeyValueStoreDataRequestKeyItem : IEquatable<StateKeyValueStoreDataRequestKeyItem>
+    public partial class StateKeyValueStoreDataRequestKeyItem : AbstractOpenAPISchema, IEquatable<StateKeyValueStoreDataRequestKeyItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class
+        /// with the <see cref="StateKeyValueStoreDataRequestJsonKeyItem" /> class
         /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob..</param>
-        /// <param name="keyJson">keyJson.</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
+        /// <param name="actualInstance">An instance of StateKeyValueStoreDataRequestJsonKeyItem.</param>
+        public StateKeyValueStoreDataRequestKeyItem(StateKeyValueStoreDataRequestJsonKeyItem actualInstance)
         {
-            this.KeyHex = keyHex;
-            this.KeyJson = keyJson;
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class
+        /// with the <see cref="StateKeyValueStoreDataRequestHexKeyItem" /> class
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
+        /// <param name="actualInstance">An instance of StateKeyValueStoreDataRequestHexKeyItem.</param>
+        public StateKeyValueStoreDataRequestKeyItem(StateKeyValueStoreDataRequestHexKeyItem actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+
+        private Object _actualInstance;
 
         /// <summary>
-        /// Gets or Sets KeyJson
+        /// Gets or Sets ActualInstance
         /// </summary>
-        [DataMember(Name = "key_json", EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValue KeyJson { get; set; }
+        public override Object ActualInstance
+        {
+            get
+            {
+                return _actualInstance;
+            }
+            set
+            {
+                if (value.GetType() == typeof(StateKeyValueStoreDataRequestHexKeyItem))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(StateKeyValueStoreDataRequestJsonKeyItem))
+                {
+                    this._actualInstance = value;
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid instance found. Must be the following types: StateKeyValueStoreDataRequestHexKeyItem, StateKeyValueStoreDataRequestJsonKeyItem");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get the actual instance of `StateKeyValueStoreDataRequestJsonKeyItem`. If the actual instance is not `StateKeyValueStoreDataRequestJsonKeyItem`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of StateKeyValueStoreDataRequestJsonKeyItem</returns>
+        public StateKeyValueStoreDataRequestJsonKeyItem GetStateKeyValueStoreDataRequestJsonKeyItem()
+        {
+            return (StateKeyValueStoreDataRequestJsonKeyItem)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `StateKeyValueStoreDataRequestHexKeyItem`. If the actual instance is not `StateKeyValueStoreDataRequestHexKeyItem`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of StateKeyValueStoreDataRequestHexKeyItem</returns>
+        public StateKeyValueStoreDataRequestHexKeyItem GetStateKeyValueStoreDataRequestHexKeyItem()
+        {
+            return (StateKeyValueStoreDataRequestHexKeyItem)this.ActualInstance;
+        }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -125,10 +176,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("class StateKeyValueStoreDataRequestKeyItem {\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
-            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
+            sb.Append("  ActualInstance: ").Append(this.ActualInstance).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -137,9 +187,78 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+            return JsonConvert.SerializeObject(this.ActualInstance, StateKeyValueStoreDataRequestKeyItem.SerializerSettings);
+        }
+
+        /// <summary>
+        /// Converts the JSON string into an instance of StateKeyValueStoreDataRequestKeyItem
+        /// </summary>
+        /// <param name="jsonString">JSON string</param>
+        /// <returns>An instance of StateKeyValueStoreDataRequestKeyItem</returns>
+        public static StateKeyValueStoreDataRequestKeyItem FromJson(string jsonString)
+        {
+            StateKeyValueStoreDataRequestKeyItem newStateKeyValueStoreDataRequestKeyItem = null;
+
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                return newStateKeyValueStoreDataRequestKeyItem;
+            }
+            int match = 0;
+            List<string> matchedTypes = new List<string>();
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(StateKeyValueStoreDataRequestHexKeyItem).GetProperty("AdditionalProperties") == null)
+                {
+                    newStateKeyValueStoreDataRequestKeyItem = new StateKeyValueStoreDataRequestKeyItem(JsonConvert.DeserializeObject<StateKeyValueStoreDataRequestHexKeyItem>(jsonString, StateKeyValueStoreDataRequestKeyItem.SerializerSettings));
+                }
+                else
+                {
+                    newStateKeyValueStoreDataRequestKeyItem = new StateKeyValueStoreDataRequestKeyItem(JsonConvert.DeserializeObject<StateKeyValueStoreDataRequestHexKeyItem>(jsonString, StateKeyValueStoreDataRequestKeyItem.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("StateKeyValueStoreDataRequestHexKeyItem");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into StateKeyValueStoreDataRequestHexKeyItem: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(StateKeyValueStoreDataRequestJsonKeyItem).GetProperty("AdditionalProperties") == null)
+                {
+                    newStateKeyValueStoreDataRequestKeyItem = new StateKeyValueStoreDataRequestKeyItem(JsonConvert.DeserializeObject<StateKeyValueStoreDataRequestJsonKeyItem>(jsonString, StateKeyValueStoreDataRequestKeyItem.SerializerSettings));
+                }
+                else
+                {
+                    newStateKeyValueStoreDataRequestKeyItem = new StateKeyValueStoreDataRequestKeyItem(JsonConvert.DeserializeObject<StateKeyValueStoreDataRequestJsonKeyItem>(jsonString, StateKeyValueStoreDataRequestKeyItem.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("StateKeyValueStoreDataRequestJsonKeyItem");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into StateKeyValueStoreDataRequestJsonKeyItem: {1}", jsonString, exception.ToString()));
+            }
+
+            if (match == 0)
+            {
+                throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
+            }
+            else if (match > 1)
+            {
+                throw new InvalidDataException("The JSON string `" + jsonString + "` incorrectly matches more than one schema (should be exactly one match): " + matchedTypes);
+            }
+
+            // deserialization is considered successful at this point if no exception has been thrown.
+            return newStateKeyValueStoreDataRequestKeyItem;
         }
 
         /// <summary>
@@ -160,20 +279,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool Equals(StateKeyValueStoreDataRequestKeyItem input)
         {
             if (input == null)
-            {
                 return false;
-            }
-            return 
-                (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
-                ) && 
-                (
-                    this.KeyJson == input.KeyJson ||
-                    (this.KeyJson != null &&
-                    this.KeyJson.Equals(input.KeyJson))
-                );
+
+            return this.ActualInstance.Equals(input.ActualInstance);
         }
 
         /// <summary>
@@ -185,18 +293,56 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.KeyHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
-                }
-                if (this.KeyJson != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
-                }
+                if (this.ActualInstance != null)
+                    hashCode = hashCode * 59 + this.ActualInstance.GetHashCode();
                 return hashCode;
             }
         }
 
+    }
+
+    /// <summary>
+    /// Custom JSON converter for StateKeyValueStoreDataRequestKeyItem
+    /// </summary>
+    public class StateKeyValueStoreDataRequestKeyItemJsonConverter : JsonConverter
+    {
+        /// <summary>
+        /// To write the JSON string
+        /// </summary>
+        /// <param name="writer">JSON writer</param>
+        /// <param name="value">Object to be converted into a JSON string</param>
+        /// <param name="serializer">JSON Serializer</param>
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            writer.WriteRawValue((string)(typeof(StateKeyValueStoreDataRequestKeyItem).GetMethod("ToJson").Invoke(value, null)));
+        }
+
+        /// <summary>
+        /// To convert a JSON string into an object
+        /// </summary>
+        /// <param name="reader">JSON reader</param>
+        /// <param name="objectType">Object type</param>
+        /// <param name="existingValue">Existing value</param>
+        /// <param name="serializer">JSON Serializer</param>
+        /// <returns>The object converted from the JSON string</returns>
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            if(reader.TokenType != JsonToken.Null)
+            {
+                return StateKeyValueStoreDataRequestKeyItem.FromJson(JObject.Load(reader).ToString(Formatting.None));
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Check if the object can be converted
+        /// </summary>
+        /// <param name="objectType">Object type</param>
+        /// <returns>True if the object can be converted</returns>
+        public override bool CanConvert(Type objectType)
+        {
+            return false;
+        }
     }
 
 }

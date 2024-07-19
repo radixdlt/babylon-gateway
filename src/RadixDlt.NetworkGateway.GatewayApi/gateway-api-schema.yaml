@@ -59,6 +59,7 @@ x-tagGroups:
       - Stream
       - State
       - Statistics
+      - Extensions
 tags:
   - name: SubAPIs
     x-displayName: Sub-APIs
@@ -70,6 +71,7 @@ tags:
       - **Stream** (`/transaction/*`) - For reading committed transactions.
       - **State** (`/state/*`) - For reading the current or past ledger state of the network.
       - **Statistics** (`/statistics/*`) - For calculating particular statistics against the current or past ledger state of the network.
+      - **Extensions** (`/Extensions/*`) - For additional endpoints that do not fit into other categories. They do not support historical browsing.
   - name: Concepts
     x-displayName: Concepts
     x-traitTag: true # Don't display endpoints under this tag
@@ -1195,6 +1197,9 @@ tags:
   - name: Statistics
     x-displayName: Statistics Endpoints
     description: Calculate particular statistics based on current or historic ledger state.
+  - name: Extensions
+    x-displayName: Extensions Endpoints
+    description: Additional endpoints that do not fit into other categories.
 
 paths:
   "/status/gateway-status":
@@ -1900,14 +1905,14 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /statistics/page/resource-owners/:
+  /extensions/resource-owners/page:
     post:
       operationId: ResourceOwnersPage
       summary: Get Resource Owners Page
       description: |
         Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending.
       tags:
-        - Statistics
+        - Extensions
       requestBody:
         required: true
         content:
@@ -1916,7 +1921,7 @@ paths:
               $ref: "#/components/schemas/ResourceOwnersRequest"
       responses:
         "200":
-          description: Validators Uptime
+          description: Resource owners
           content:
             application/json:
               schema:
@@ -3150,7 +3155,7 @@ components:
             items:
               type: array
               items:
-                 $ref: "#/components/schemas/ResourceOwnersCollectionItem"
+                $ref: "#/components/schemas/ResourceOwnersCollectionItem"
 
     ResourceOwnersResourceType:
       type: string
@@ -3611,7 +3616,7 @@ components:
               $ref: "#/components/schemas/TransactionAccountDepositPreValidationAuthorizedDepositorBadge"
           example:
             account_address: "<account-address>"
-            resource_addresses: ["<resource-address>"]
+            resource_addresses: [ "<resource-address>" ]
 
     AccountDepositPreValidationResponse:
       allOf:
@@ -4840,11 +4845,18 @@ components:
     StateKeyValueStoreDataRequestKeyItem:
       description: Provide either `key_hex` or `key_json`. If both are provided, `key_hex` is used and `key_json` is ignored.
       type: object
+      required:
+        - key_json
+      properties:
+        key_json:
+          $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
+    StateKeyValueStoreDataRequestHexKeyItem:
+      type: object
+      required:
+        - key_hex
       properties:
         key_hex:
           $ref: "#/components/schemas/HexString"
-        key_json:
-          $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
     StateKeyValueStoreDataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -4978,11 +4990,11 @@ components:
 
     ResourceOwnersRequest:
       allOf:
-      - $ref: "#/components/schemas/CursorLimitMixin"
-      - type: object
-        properties:
-          resource_address:
-            $ref: "#/components/schemas/Address"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
 
     ResourceOwnersResponse:
       allOf:

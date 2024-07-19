@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,34 +62,33 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-[Table("resource_owners")]
-internal abstract class ResourceOwners
+internal class DefaultExtensionsHandler : IExtensionsHandler
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    private readonly IExtensionsQuerier _extensionsQuerier;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
+    public DefaultExtensionsHandler(IExtensionsQuerier extensionsQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    {
+        _extensionsQuerier = extensionsQuerier;
+        _endpointConfiguration = endpointConfiguration;
+    }
 
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-}
-
-internal class FungibleResourceOwners : ResourceOwners
-{
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
-}
-
-internal class NonFungibleResourceOwners : ResourceOwners
-{
-    [Column("total_count")]
-    public long TotalCount { get; set; }
+    public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(GatewayModel.ResourceOwnersRequest request, CancellationToken token)
+    {
+        return await _extensionsQuerier.ResourceOwners(
+            (EntityAddress)request.ResourceAddress,
+            GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
+            token);
+    }
 }

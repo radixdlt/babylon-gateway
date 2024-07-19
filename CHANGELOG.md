@@ -21,15 +21,17 @@ Release built: _not released yet_
 - Added support for the Native Resource Details in the `/state/entity/details` endpoint, returned when the `native_resource_details` opt-in is enabled. 
   - Brand-new `native_resource_details` property on the `details` property.
   - Includes **unit** redemption value for the Validator LSU token and the unit tokens of various Pools. 
+- Added new endpoint `/extensions/resource-owners/page` which returns information about all owners of the queried resource.
 
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
 - Replaced per-epoch validator emissions (`validator_emission_statistics` table) with their cumulative statistics (`validator_cumulative_emission_history` table).
 - Added `non_fungible_data_mutable_fields` to `entities` table. Which contains list of all mutable non fungible data fields for non fungible resource entities.
 - New `ledger_transaction_markers` type with the `event_global_emitter` discriminator. It represents the global emitter for each event.
-- Added new `unverified_standard_metadata_*` tables. They hold **some** of the metadata entries using db-friendly (normalized) model. See https://docs.radixdlt.com/docs/metadata-standards
+- Added new `unverified_standard_metadata_*` tables. They hold **some** of the metadata entries using db-friendly (normalized) model. See https://docs.radixdlt.com/docs/metadata-standards 
 - Extended list of supported entity correlations in the `entities` table.
 - Renamed values of the `entity_relationship` enum type. 
+- Added new `resource_owners` table. It keeps information about all owners of each fungible and non fungible resource.
 
 ## 1.6.3
 Release built: 06.08.2024

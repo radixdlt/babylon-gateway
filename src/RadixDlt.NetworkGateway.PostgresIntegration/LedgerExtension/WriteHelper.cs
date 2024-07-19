@@ -735,6 +735,67 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyResourceOwners(ICollection<ResourceOwners> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+
+        await using var createTempTableCommand = _connection.CreateCommand();
+        createTempTableCommand.CommandText = @"
+CREATE TEMP TABLE tmp_resource_owners
+(LIKE resource_owners INCLUDING DEFAULTS)
+ON COMMIT DROP";
+
+        await createTempTableCommand.ExecuteNonQueryAsync(token);
+
+        await using var writer =
+            await _connection.BeginBinaryImportAsync(
+                "COPY tmp_resource_owners (id, entity_id, resource_entity_id, discriminator, balance, total_count) FROM STDIN (FORMAT BINARY)",
+                token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
+
+            if (e is FungibleResourceOwners fe)
+            {
+                await writer.WriteAsync(fe.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                await writer.WriteNullAsync(token);
+            }
+            else if (e is NonFungibleResourceOwners nfe)
+            {
+                await writer.WriteNullAsync(token);
+                await writer.WriteAsync(nfe.TotalCount, NpgsqlDbType.Bigint, token);
+            }
+        }
+
+        await writer.CompleteAsync(token);
+        await writer.DisposeAsync();
+
+        await using var copyFromTempTablecommand = _connection.CreateCommand();
+        copyFromTempTablecommand.CommandText = @"
+INSERT INTO resource_owners
+SELECT *
+FROM tmp_resource_owners
+ON CONFLICT (entity_id, resource_entity_id) DO UPDATE SET
+ balance = EXCLUDED.balance,
+ total_count = EXCLUDED.total_count;";
+
+        await copyFromTempTablecommand.ExecuteNonQueryAsync(token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyResourceOwners), Stopwatch.GetElapsedTime(sw), entities.Count));
+
+        return entities.Count;
+    }
+
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
         var sw = Stopwatch.GetTimestamp();
@@ -782,7 +843,8 @@ SELECT
     setval('account_authorized_depositor_entry_history_id_seq', @accountAuthorizedDepositorEntryHistorySequence),
     setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence),
     setval('unverified_standard_metadata_aggregate_history_id_seq', @unverifiedStandardMetadataAggregateHistorySequence),
-    setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence)
+    setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence),
+    setval('resource_owners_id_seq', @resourceOwnersSequence)
 ",
             parameters: new
             {
@@ -827,6 +889,7 @@ SELECT
                 accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
                 unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
                 unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
+                resourceOwnersSequence = sequences.ResourceOwnersSequence,
             },
             cancellationToken: token);
 

@@ -88,69 +88,69 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface IStatisticsApiSync : IApiAccessor
+    public interface IExtensionsApiSync : IApiAccessor
     {
         #region Synchronous Operations
         /// <summary>
-        /// Get Validators Uptime
+        /// Get Resource Owners Page
         /// </summary>
         /// <remarks>
-        /// Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
+        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="validatorsUptimeRequest"></param>
-        /// <returns>ValidatorsUptimeResponse</returns>
-        ValidatorsUptimeResponse ValidatorsUptime(ValidatorsUptimeRequest validatorsUptimeRequest);
+        /// <param name="resourceOwnersRequest"></param>
+        /// <returns>ResourceOwnersResponse</returns>
+        ResourceOwnersResponse ResourceOwnersPage(ResourceOwnersRequest resourceOwnersRequest);
 
         /// <summary>
-        /// Get Validators Uptime
+        /// Get Resource Owners Page
         /// </summary>
         /// <remarks>
-        /// Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
+        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="validatorsUptimeRequest"></param>
-        /// <returns>ApiResponse of ValidatorsUptimeResponse</returns>
-        ApiResponse<ValidatorsUptimeResponse> ValidatorsUptimeWithHttpInfo(ValidatorsUptimeRequest validatorsUptimeRequest);
+        /// <param name="resourceOwnersRequest"></param>
+        /// <returns>ApiResponse of ResourceOwnersResponse</returns>
+        ApiResponse<ResourceOwnersResponse> ResourceOwnersPageWithHttpInfo(ResourceOwnersRequest resourceOwnersRequest);
         #endregion Synchronous Operations
     }
 
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface IStatisticsApiAsync : IApiAccessor
+    public interface IExtensionsApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
         /// <summary>
-        /// Get Validators Uptime
+        /// Get Resource Owners Page
         /// </summary>
         /// <remarks>
-        /// Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
+        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="validatorsUptimeRequest"></param>
+        /// <param name="resourceOwnersRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ValidatorsUptimeResponse</returns>
-        System.Threading.Tasks.Task<ValidatorsUptimeResponse> ValidatorsUptimeAsync(ValidatorsUptimeRequest validatorsUptimeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ResourceOwnersResponse</returns>
+        System.Threading.Tasks.Task<ResourceOwnersResponse> ResourceOwnersPageAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Validators Uptime
+        /// Get Resource Owners Page
         /// </summary>
         /// <remarks>
-        /// Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
+        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="validatorsUptimeRequest"></param>
+        /// <param name="resourceOwnersRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (ValidatorsUptimeResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<ValidatorsUptimeResponse>> ValidatorsUptimeWithHttpInfoAsync(ValidatorsUptimeRequest validatorsUptimeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (ResourceOwnersResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<ResourceOwnersResponse>> ResourceOwnersPageWithHttpInfoAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface IStatisticsApi : IStatisticsApiSync, IStatisticsApiAsync
+    public interface IExtensionsApi : IExtensionsApiSync, IExtensionsApiAsync
     {
 
     }
@@ -158,29 +158,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public partial class StatisticsApi : IDisposable, IStatisticsApi
+    public partial class ExtensionsApi : IDisposable, IExtensionsApi
     {
         private RadixDlt.NetworkGateway.GatewayApiSdk.Client.ExceptionFactory _exceptionFactory = (name, response) => null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatisticsApi"/> class.
+        /// Initializes a new instance of the <see cref="ExtensionsApi"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <returns></returns>
-        public StatisticsApi() : this((string)null)
+        public ExtensionsApi() : this((string)null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatisticsApi"/> class.
+        /// Initializes a new instance of the <see cref="ExtensionsApi"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="basePath">The target service's base path in URL format.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <returns></returns>
-        public StatisticsApi(string basePath)
+        public ExtensionsApi(string basePath)
         {
             this.Configuration = RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration.MergeConfigurations(
                 RadixDlt.NetworkGateway.GatewayApiSdk.Client.GlobalConfiguration.Instance,
@@ -193,14 +193,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatisticsApi"/> class using Configuration object.
+        /// Initializes a new instance of the <see cref="ExtensionsApi"/> class using Configuration object.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="configuration">An instance of Configuration.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public StatisticsApi(RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration configuration)
+        public ExtensionsApi(RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration configuration)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
 
@@ -215,7 +215,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatisticsApi"/> class.
+        /// Initializes a new instance of the <see cref="ExtensionsApi"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="handler">An optional instance of HttpClientHandler that is used by HttpClient.</param>
@@ -225,12 +225,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public StatisticsApi(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
+        public ExtensionsApi(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatisticsApi"/> class.
+        /// Initializes a new instance of the <see cref="ExtensionsApi"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="basePath">The target service's base path in URL format.</param>
@@ -242,7 +242,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public StatisticsApi(HttpClient client, string basePath, HttpClientHandler handler = null)
+        public ExtensionsApi(HttpClient client, string basePath, HttpClientHandler handler = null)
         {
             if (client == null) throw new ArgumentNullException("client");
 
@@ -257,7 +257,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatisticsApi"/> class using Configuration object.
+        /// Initializes a new instance of the <see cref="ExtensionsApi"/> class using Configuration object.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="configuration">An instance of Configuration.</param>
@@ -268,7 +268,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public StatisticsApi(HttpClient client, RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration configuration, HttpClientHandler handler = null)
+        public ExtensionsApi(HttpClient client, RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration configuration, HttpClientHandler handler = null)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
             if (client == null) throw new ArgumentNullException("client");
@@ -284,14 +284,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatisticsApi"/> class
+        /// Initializes a new instance of the <see cref="ExtensionsApi"/> class
         /// using a Configuration object and client instance.
         /// </summary>
         /// <param name="client">The client interface for synchronous API access.</param>
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>
         /// <param name="configuration">The configuration object.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public StatisticsApi(RadixDlt.NetworkGateway.GatewayApiSdk.Client.ISynchronousClient client, RadixDlt.NetworkGateway.GatewayApiSdk.Client.IAsynchronousClient asyncClient, RadixDlt.NetworkGateway.GatewayApiSdk.Client.IReadableConfiguration configuration)
+        public ExtensionsApi(RadixDlt.NetworkGateway.GatewayApiSdk.Client.ISynchronousClient client, RadixDlt.NetworkGateway.GatewayApiSdk.Client.IAsynchronousClient asyncClient, RadixDlt.NetworkGateway.GatewayApiSdk.Client.IReadableConfiguration configuration)
         {
             if (client == null) throw new ArgumentNullException("client");
             if (asyncClient == null) throw new ArgumentNullException("asyncClient");
@@ -358,28 +358,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Validators Uptime Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
+        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="validatorsUptimeRequest"></param>
-        /// <returns>ValidatorsUptimeResponse</returns>
-        public ValidatorsUptimeResponse ValidatorsUptime(ValidatorsUptimeRequest validatorsUptimeRequest)
+        /// <param name="resourceOwnersRequest"></param>
+        /// <returns>ResourceOwnersResponse</returns>
+        public ResourceOwnersResponse ResourceOwnersPage(ResourceOwnersRequest resourceOwnersRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ValidatorsUptimeResponse> localVarResponse = ValidatorsUptimeWithHttpInfo(validatorsUptimeRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse> localVarResponse = ResourceOwnersPageWithHttpInfo(resourceOwnersRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Validators Uptime Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
+        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="validatorsUptimeRequest"></param>
-        /// <returns>ApiResponse of ValidatorsUptimeResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ValidatorsUptimeResponse> ValidatorsUptimeWithHttpInfo(ValidatorsUptimeRequest validatorsUptimeRequest)
+        /// <param name="resourceOwnersRequest"></param>
+        /// <returns>ApiResponse of ResourceOwnersResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse> ResourceOwnersPageWithHttpInfo(ResourceOwnersRequest resourceOwnersRequest)
         {
-            // verify the required parameter 'validatorsUptimeRequest' is set
-            if (validatorsUptimeRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'validatorsUptimeRequest' when calling StatisticsApi->ValidatorsUptime");
+            // verify the required parameter 'resourceOwnersRequest' is set
+            if (resourceOwnersRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'resourceOwnersRequest' when calling ExtensionsApi->ResourceOwnersPage");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -398,15 +398,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = validatorsUptimeRequest;
+            localVarRequestOptions.Data = resourceOwnersRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<ValidatorsUptimeResponse>("/statistics/validators/uptime", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<ResourceOwnersResponse>("/extensions/resource-owners/page", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("ValidatorsUptime", localVarResponse);
+                Exception _exception = this.ExceptionFactory("ResourceOwnersPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -414,30 +414,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Validators Uptime Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
+        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="validatorsUptimeRequest"></param>
+        /// <param name="resourceOwnersRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ValidatorsUptimeResponse</returns>
-        public async System.Threading.Tasks.Task<ValidatorsUptimeResponse> ValidatorsUptimeAsync(ValidatorsUptimeRequest validatorsUptimeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ResourceOwnersResponse</returns>
+        public async System.Threading.Tasks.Task<ResourceOwnersResponse> ResourceOwnersPageAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ValidatorsUptimeResponse> localVarResponse = await ValidatorsUptimeWithHttpInfoAsync(validatorsUptimeRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse> localVarResponse = await ResourceOwnersPageWithHttpInfoAsync(resourceOwnersRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Validators Uptime Returns validators uptime data for time range limited by &#x60;from_state_version&#x60; and &#x60;at_state_version&#x60;. 
+        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="validatorsUptimeRequest"></param>
+        /// <param name="resourceOwnersRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (ValidatorsUptimeResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ValidatorsUptimeResponse>> ValidatorsUptimeWithHttpInfoAsync(ValidatorsUptimeRequest validatorsUptimeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (ResourceOwnersResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse>> ResourceOwnersPageWithHttpInfoAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'validatorsUptimeRequest' is set
-            if (validatorsUptimeRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'validatorsUptimeRequest' when calling StatisticsApi->ValidatorsUptime");
+            // verify the required parameter 'resourceOwnersRequest' is set
+            if (resourceOwnersRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'resourceOwnersRequest' when calling ExtensionsApi->ResourceOwnersPage");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -458,16 +458,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = validatorsUptimeRequest;
+            localVarRequestOptions.Data = resourceOwnersRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<ValidatorsUptimeResponse>("/statistics/validators/uptime", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<ResourceOwnersResponse>("/extensions/resource-owners/page", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("ValidatorsUptime", localVarResponse);
+                Exception _exception = this.ExceptionFactory("ResourceOwnersPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

@@ -64,7 +64,6 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -73,32 +72,11 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("statistics")]
-public class StatisticsController : ControllerBase
+public class StatisticsController(IValidatorHandler validatorHandler) : ControllerBase
 {
-    private readonly IValidatorHandler _validatorHandler;
-
-    public StatisticsController(IValidatorHandler validatorHandler)
-    {
-        _validatorHandler = validatorHandler;
-    }
-
     [HttpPost("validators/uptime")]
     public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptime(GatewayModel.ValidatorsUptimeRequest request, CancellationToken token)
     {
-        return await _validatorHandler.Uptime(request, token);
-    }
-
-    [HttpPost("page/resource-owners")]
-    public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwnersPage(GatewayModel.ResourceOwnersRequest request, CancellationToken token)
-    {
-        await Task.Yield();
-        return new GatewayModel.ResourceOwnersResponse(
-            new GatewayModel.ResourceOwnersCollection(
-                200,
-                null,
-                new List<GatewayModel.ResourceOwnersCollectionItem>
-                {
-                    new GatewayModel.ResourceOwnersCollectionFungibleResourceItem("100", GatewayModel.ResourceOwnersResourceType.FungibleResource, "lol-address"),
-                }));
+        return await validatorHandler.Uptime(request, token);
     }
 }

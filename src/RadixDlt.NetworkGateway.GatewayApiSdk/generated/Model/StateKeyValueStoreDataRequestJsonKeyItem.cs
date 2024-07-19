@@ -84,42 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersCollectionNonFungibleResourceItem
+    /// StateKeyValueStoreDataRequestJsonKeyItem
     /// </summary>
-    [DataContract(Name = "ResourceOwnersCollectionNonFungibleResourceItem")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionFungibleResourceItem), "FungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionNonFungibleResourceItem), "NonFungibleResource")]
-    public partial class ResourceOwnersCollectionNonFungibleResourceItem : ResourceOwnersCollectionItem, IEquatable<ResourceOwnersCollectionNonFungibleResourceItem>
+    [DataContract(Name = "StateKeyValueStoreDataRequestJsonKeyItem")]
+    public partial class StateKeyValueStoreDataRequestJsonKeyItem : IEquatable<StateKeyValueStoreDataRequestJsonKeyItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionNonFungibleResourceItem" /> class.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestJsonKeyItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceOwnersCollectionNonFungibleResourceItem() { }
+        protected StateKeyValueStoreDataRequestJsonKeyItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionNonFungibleResourceItem" /> class.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestJsonKeyItem" /> class.
         /// </summary>
-        /// <param name="nonFungibleIdsCount">nonFungibleIdsCount (required).</param>
-        /// <param name="type">type (required) (default to ResourceOwnersResourceType.NonFungibleResource).</param>
-        /// <param name="ownerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public ResourceOwnersCollectionNonFungibleResourceItem(long nonFungibleIdsCount = default(long), ResourceOwnersResourceType type = ResourceOwnersResourceType.NonFungibleResource, string ownerAddress = default(string)) : base(type, ownerAddress)
+        /// <param name="keyJson">keyJson (required).</param>
+        public StateKeyValueStoreDataRequestJsonKeyItem(ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
         {
-            this.NonFungibleIdsCount = nonFungibleIdsCount;
+            // to ensure "keyJson" is required (not null)
+            if (keyJson == null)
+            {
+                throw new ArgumentNullException("keyJson is a required property for StateKeyValueStoreDataRequestJsonKeyItem and cannot be null");
+            }
+            this.KeyJson = keyJson;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIdsCount
+        /// Gets or Sets KeyJson
         /// </summary>
-        [DataMember(Name = "non_fungible_ids_count", IsRequired = true, EmitDefaultValue = true)]
-        public long NonFungibleIdsCount { get; set; }
+        [DataMember(Name = "key_json", IsRequired = true, EmitDefaultValue = true)]
+        public ProgrammaticScryptoSborValue KeyJson { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,9 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersCollectionNonFungibleResourceItem {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NonFungibleIdsCount: ").Append(NonFungibleIdsCount).Append("\n");
+            sb.Append("class StateKeyValueStoreDataRequestJsonKeyItem {\n");
+            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -139,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -151,24 +149,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceOwnersCollectionNonFungibleResourceItem);
+            return this.Equals(input as StateKeyValueStoreDataRequestJsonKeyItem);
         }
 
         /// <summary>
-        /// Returns true if ResourceOwnersCollectionNonFungibleResourceItem instances are equal
+        /// Returns true if StateKeyValueStoreDataRequestJsonKeyItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceOwnersCollectionNonFungibleResourceItem to be compared</param>
+        /// <param name="input">Instance of StateKeyValueStoreDataRequestJsonKeyItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersCollectionNonFungibleResourceItem input)
+        public bool Equals(StateKeyValueStoreDataRequestJsonKeyItem input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.NonFungibleIdsCount == input.NonFungibleIdsCount ||
-                    this.NonFungibleIdsCount.Equals(input.NonFungibleIdsCount)
+                    this.KeyJson == input.KeyJson ||
+                    (this.KeyJson != null &&
+                    this.KeyJson.Equals(input.KeyJson))
                 );
         }
 
@@ -180,8 +179,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.NonFungibleIdsCount.GetHashCode();
+                int hashCode = 41;
+                if (this.KeyJson != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
+                }
                 return hashCode;
             }
         }
