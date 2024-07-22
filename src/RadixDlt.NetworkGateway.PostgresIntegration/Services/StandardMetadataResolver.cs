@@ -273,8 +273,7 @@ SELECT
     source_address AS EntityAddress,
     coalesce(target_value, target_entity_address) AS TargetValue,
     validation_result AS ValidationResult
-FROM resolved
-WHERE @includeInvalid OR validation_result IN (@validationOnLedgerSucceeded, @validationOnLedgerAppCheck, @validationOffLedgerAppCheck);",
+FROM resolved",
 #pragma warning restore SA1118
             new
             {
@@ -285,7 +284,6 @@ WHERE @includeInvalid OR validation_result IN (@validationOnLedgerSucceeded, @va
                 validationOffLedgerAppCheck = StandardMetadataConstants.ValidationOffLedgerAppCheck,
                 stateVersion = ledgerState.StateVersion,
                 entityIds = entityIds,
-                includeInvalid = !resolveValidOnly,
             },
             token);
 
@@ -301,6 +299,11 @@ WHERE @includeInvalid OR validation_result IN (@validationOnLedgerSucceeded, @va
             var resolved = await ResolveTwoWayLink(pv, validateOnLedgerOnly, partiallyValidatedEntries, innerToken);
 
             if (resolved == null)
+            {
+                return;
+            }
+
+            if (resolveValidOnly && !resolved.IsValid)
             {
                 return;
             }
