@@ -104,15 +104,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionPreviewRequest" /> class.
         /// </summary>
         /// <param name="manifest">A text-representation of a transaction manifest (required).</param>
-        /// <param name="blobsHex">An array of hex-encoded blob data (optional).</param>
-        /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid (required).</param>
-        /// <param name="endEpochExclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid (required).</param>
+        /// <param name="blobsHex">An array of hex-encoded blob data, if referenced by the manifest..</param>
+        /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If omitted, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified).  (required).</param>
+        /// <param name="endEpochExclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid. If omitted, a maximum epoch (relative to the &#x60;start_epoch_inclusive&#x60;) will be used.  (required).</param>
         /// <param name="notaryPublicKey">notaryPublicKey.</param>
-        /// <param name="notaryIsSignatory">Whether the notary should count as a signatory (optional, default false).</param>
-        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
-        /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, used to ensure the transaction intent is unique. (required).</param>
+        /// <param name="notaryIsSignatory">Whether the notary should count as a signatory (defaults to &#x60;false&#x60;)..</param>
+        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to a 1% fee.  (required).</param>
+        /// <param name="nonce">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent).  (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
-        /// <param name="message">This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. .</param>
+        /// <param name="message">An optional transaction message. Only affects the costing. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="flags">flags (required).</param>
         public TransactionPreviewRequest(string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), Object message = default(Object), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
@@ -152,23 +152,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Manifest { get; set; }
 
         /// <summary>
-        /// An array of hex-encoded blob data (optional)
+        /// An array of hex-encoded blob data, if referenced by the manifest.
         /// </summary>
-        /// <value>An array of hex-encoded blob data (optional)</value>
+        /// <value>An array of hex-encoded blob data, if referenced by the manifest.</value>
         [DataMember(Name = "blobs_hex", EmitDefaultValue = true)]
         public List<string> BlobsHex { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If omitted, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified). 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If omitted, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified). </value>
         [DataMember(Name = "start_epoch_inclusive", IsRequired = true, EmitDefaultValue = true)]
         public long StartEpochInclusive { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid. If omitted, a maximum epoch (relative to the &#x60;start_epoch_inclusive&#x60;) will be used. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid. If omitted, a maximum epoch (relative to the &#x60;start_epoch_inclusive&#x60;) will be used. </value>
         [DataMember(Name = "end_epoch_exclusive", IsRequired = true, EmitDefaultValue = true)]
         public long EndEpochExclusive { get; set; }
 
@@ -179,23 +179,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public PublicKey NotaryPublicKey { get; set; }
 
         /// <summary>
-        /// Whether the notary should count as a signatory (optional, default false)
+        /// Whether the notary should count as a signatory (defaults to &#x60;false&#x60;).
         /// </summary>
-        /// <value>Whether the notary should count as a signatory (optional, default false)</value>
+        /// <value>Whether the notary should count as a signatory (defaults to &#x60;false&#x60;).</value>
         [DataMember(Name = "notary_is_signatory", EmitDefaultValue = true)]
         public bool NotaryIsSignatory { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
+        /// An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to a 1% fee. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to a 1% fee. </value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
         public int TipPercentage { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, used to ensure the transaction intent is unique.
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent). 
         /// </summary>
-        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, used to ensure the transaction intent is unique.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent). </value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
         public long Nonce { get; set; }
 
@@ -207,9 +207,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<PublicKey> SignerPublicKeys { get; set; }
 
         /// <summary>
-        /// This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. 
+        /// An optional transaction message. Only affects the costing. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. 
         /// </summary>
-        /// <value>This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. </value>
+        /// <value>An optional transaction message. Only affects the costing. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. </value>
         [DataMember(Name = "message", EmitDefaultValue = true)]
         public Object Message { get; set; }
 

@@ -84,8 +84,6 @@ public readonly record struct EntityAddress
 
     public bool IsResource => _address.StartsWith("resource_");
 
-    public bool IsLocker => _address.StartsWith("locker_");
-
     public static implicit operator string(EntityAddress ra) => ra._address;
 
     public static explicit operator EntityAddress(string text) => new(text);

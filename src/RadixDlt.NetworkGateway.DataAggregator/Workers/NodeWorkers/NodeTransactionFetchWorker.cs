@@ -69,7 +69,6 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.Abstractions.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;

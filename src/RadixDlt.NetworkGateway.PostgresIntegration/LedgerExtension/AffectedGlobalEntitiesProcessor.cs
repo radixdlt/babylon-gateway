@@ -62,68 +62,69 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+// <copyright file="AffectedGlobalEntitiesProcessor.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using RadixDlt.NetworkGateway.Abstractions.Workers;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
-using System;
+using RadixDlt.NetworkGateway.Abstractions.Network;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-/// <summary>
-/// Responsible for reading the config, and ensuring workers are running for each node.
-/// </summary>
-public sealed class NodeConfigurationMonitorWorker : BaseGlobalWorker
+internal class AffectedGlobalEntitiesProcessor
 {
-    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(1000),
-            TimeSpan.FromMilliseconds(3000));
+    private readonly long[] _excludedEntityIds;
+    private readonly ProcessorContext _context;
+    private readonly Dictionary<long, HashSet<long>> _affectedGlobalEntities = new();
 
-    private readonly ILogger<NodeConfigurationMonitorWorker> _logger;
-    private readonly INodeWorkersRunnerRegistry _nodeWorkersRunnerRegistry;
-    private readonly IOptionsMonitor<NetworkOptions> _networkOptions;
-
-    public NodeConfigurationMonitorWorker(
-        ILogger<NodeConfigurationMonitorWorker> logger,
-        INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry,
-        IOptionsMonitor<NetworkOptions> networkOptions,
-        IEnumerable<IGlobalWorkerObserver> observers,
-        IClock clock)
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers, clock)
+    public AffectedGlobalEntitiesProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
     {
-        _logger = logger;
-        _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;
-        _networkOptions = networkOptions;
+        _context = context;
+        _excludedEntityIds = new[]
+        {
+            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
+            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.TransactionTracker).DatabaseId,
+        };
     }
 
-    protected override async Task DoWork(CancellationToken cancellationToken)
+    public void VisitUpsert(ReferencedEntity referencedEntity, long stateVersion)
     {
-        await HandleNodeConfiguration(cancellationToken);
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
     }
 
-    protected override async Task OnStoppedSuccessfully()
+    public void VisitDelete(ReferencedEntity referencedEntity, long stateVersion)
     {
-        _logger.LogInformation("Service execution has stopped - now instructing all node workers to stop");
-
-        using var cancellationTokenSource = new CancellationTokenSource();
-        cancellationTokenSource.CancelAfter(TimeSpan.FromMilliseconds(1000));
-        await _nodeWorkersRunnerRegistry.StopAllWorkers(cancellationTokenSource.Token);
-
-        _logger.LogInformation("All node workers have been stopped");
-
-        await base.OnStoppedSuccessfully();
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
     }
 
-    private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
+    public HashSet<long> GetAllAffectedGlobalEntities(long stateVersion)
     {
-        var enabledNodes = _networkOptions.CurrentValue.CoreApiNodes.GetEnabledNodes();
+        return _affectedGlobalEntities.TryGetValue(stateVersion, out var hashSet) ? hashSet : new HashSet<long>();
+    }
 
-        await _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, stoppingToken);
+    public IEnumerable<AffectedGlobalEntityTransactionMarker> CreateTransactionMarkers()
+    {
+        foreach (var stateVersionAffectedEntities in _affectedGlobalEntities)
+        {
+            foreach (var entityId in stateVersionAffectedEntities.Value)
+            {
+                if (!_excludedEntityIds.Contains(entityId))
+                {
+                    yield return new AffectedGlobalEntityTransactionMarker
+                    {
+                        Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                        EntityId = entityId,
+                        StateVersion = stateVersionAffectedEntities.Key,
+                    };
+                }
+            }
+        }
     }
 }

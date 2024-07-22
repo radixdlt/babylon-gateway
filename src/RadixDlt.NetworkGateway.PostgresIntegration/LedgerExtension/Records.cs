@@ -62,12 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 

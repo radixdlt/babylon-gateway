@@ -65,7 +65,6 @@
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 

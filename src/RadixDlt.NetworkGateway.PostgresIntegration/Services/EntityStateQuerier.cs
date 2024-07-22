@@ -156,7 +156,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
         var resolvedTwoWayLinks = optIns.DappTwoWayLinks
-            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).Resolve(entities, true, true, ledgerState, token)
+            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, true, ledgerState, token)
             : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
 
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
@@ -221,6 +221,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
                         nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel(),
+                        nonFungibleDataMutableFields: nfrme.NonFungibleDataMutableFields,
                         twoWayLinkedDapps: nonFungibleTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: nonFungibleTwoWayLinkedDapps) : null);
                     break;
 
@@ -314,16 +315,19 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     GatewayModel.TwoWayLinkedDappOnLedgerDetails? twoWayLinkedDappOnLedgerDetails = null;
                     var nonAccountTwoWayLinkedDapp = twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress;
 
-                    if (ce is GlobalAccountEntity && twoWayLinks?.OfType<DappAccountMarkerResolvedTwoWayLink>().Any() == true)
+                    if (ce is GlobalAccountEntity)
                     {
-                        var accountTwoWayLinkedDapps = twoWayLinks.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
-                        var accountTwoWayLinkedEntities = twoWayLinks.OfType<DappClaimedEntityResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
-                        var accountTwoWayLinkedLocker = twoWayLinks.OfType<DappAccountLockerResolvedTwoWayLink>().FirstOrDefault()?.LockerAddress;
+                        var accountTwoWayLinkedDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var accountTwoWayLinkedEntities = twoWayLinks?.OfType<DappClaimedEntityResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var accountTwoWayLinkedLocker = twoWayLinks?.OfType<DappAccountLockerResolvedTwoWayLink>().FirstOrDefault()?.LockerAddress;
 
-                        twoWayLinkedDappOnLedgerDetails = new GatewayModel.TwoWayLinkedDappOnLedgerDetails(
-                            dapps: accountTwoWayLinkedDapps.Any() ? new GatewayModel.TwoWayLinkedDappsCollection(items: accountTwoWayLinkedDapps) : null,
-                            entities: accountTwoWayLinkedEntities.Any() ? new GatewayModel.TwoWayLinkedEntitiesCollection(items: accountTwoWayLinkedEntities) : null,
-                            primaryLocker: accountTwoWayLinkedLocker);
+                        if (accountTwoWayLinkedDapps?.Any() == true || accountTwoWayLinkedEntities?.Any() == true || accountTwoWayLinkedLocker != null)
+                        {
+                            twoWayLinkedDappOnLedgerDetails = new GatewayModel.TwoWayLinkedDappOnLedgerDetails(
+                                dapps: accountTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: accountTwoWayLinkedDapps) : null,
+                                entities: accountTwoWayLinkedEntities?.Any() == true ? new GatewayModel.TwoWayLinkedEntitiesCollection(items: accountTwoWayLinkedEntities) : null,
+                                primaryLocker: accountTwoWayLinkedLocker);
+                        }
                     }
 
                     stateHistory.TryGetValue(ce.Id, out var state);

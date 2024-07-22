@@ -62,68 +62,74 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using RadixDlt.NetworkGateway.Abstractions.Workers;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.Abstractions.Network;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-/// <summary>
-/// Responsible for reading the config, and ensuring workers are running for each node.
-/// </summary>
-public sealed class NodeConfigurationMonitorWorker : BaseGlobalWorker
+internal class GlobalEventEmitterProcessor
 {
-    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(1000),
-            TimeSpan.FromMilliseconds(3000));
+    private readonly long[] _excludedEntityIds;
+    private readonly ProcessorContext _context;
+    private readonly ReferencedEntityDictionary _referencedEntities;
+    private readonly Dictionary<long, HashSet<long>> _globalEventEmitters = new();
 
-    private readonly ILogger<NodeConfigurationMonitorWorker> _logger;
-    private readonly INodeWorkersRunnerRegistry _nodeWorkersRunnerRegistry;
-    private readonly IOptionsMonitor<NetworkOptions> _networkOptions;
-
-    public NodeConfigurationMonitorWorker(
-        ILogger<NodeConfigurationMonitorWorker> logger,
-        INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry,
-        IOptionsMonitor<NetworkOptions> networkOptions,
-        IEnumerable<IGlobalWorkerObserver> observers,
-        IClock clock)
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers, clock)
+    public GlobalEventEmitterProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
     {
-        _logger = logger;
-        _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;
-        _networkOptions = networkOptions;
+        _context = context;
+        _referencedEntities = referencedEntities;
+        _excludedEntityIds = new[]
+        {
+            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
+            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.Xrd).DatabaseId,
+        };
     }
 
-    protected override async Task DoWork(CancellationToken cancellationToken)
+    public void VisitEvent(CoreModel.Event @event, long stateVersion)
     {
-        await HandleNodeConfiguration(cancellationToken);
+        switch (@event.Type.Emitter)
+        {
+            case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
+                var methodEventEmitterEntity = _referencedEntities.Get((EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress);
+                var globalEventEmitterEntityId = methodEventEmitterEntity.GlobalEventEmitterEntityId;
+
+                if (!_excludedEntityIds.Contains(globalEventEmitterEntityId))
+                {
+                    _globalEventEmitters
+                        .GetOrAdd(stateVersion, _ => new HashSet<long>())
+                        .Add(globalEventEmitterEntityId);
+                }
+
+                break;
+            case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
+                var functionEventEmitterEntity = _referencedEntities.Get((EntityAddress)functionEventEmitterIdentifier.PackageAddress);
+                _globalEventEmitters
+                    .GetOrAdd(stateVersion, _ => new HashSet<long>())
+                    .Add(functionEventEmitterEntity.GlobalEventEmitterEntityId);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException($"Unexpected event emitter type {@event.Type.Emitter.GetType()}");
+        }
     }
 
-    protected override async Task OnStoppedSuccessfully()
+    public IEnumerable<EventGlobalEmitterTransactionMarker> CreateTransactionMarkers()
     {
-        _logger.LogInformation("Service execution has stopped - now instructing all node workers to stop");
-
-        using var cancellationTokenSource = new CancellationTokenSource();
-        cancellationTokenSource.CancelAfter(TimeSpan.FromMilliseconds(1000));
-        await _nodeWorkersRunnerRegistry.StopAllWorkers(cancellationTokenSource.Token);
-
-        _logger.LogInformation("All node workers have been stopped");
-
-        await base.OnStoppedSuccessfully();
-    }
-
-    private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
-    {
-        var enabledNodes = _networkOptions.CurrentValue.CoreApiNodes.GetEnabledNodes();
-
-        await _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, stoppingToken);
+        foreach (var stateVersionAffectedEntities in _globalEventEmitters)
+        {
+            foreach (var entityId in stateVersionAffectedEntities.Value)
+            {
+                yield return new EventGlobalEmitterTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    EntityId = entityId,
+                    StateVersion = stateVersionAffectedEntities.Key,
+                };
+            }
+        }
     }
 }

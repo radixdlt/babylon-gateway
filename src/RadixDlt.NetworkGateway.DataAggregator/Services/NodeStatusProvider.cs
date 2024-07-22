@@ -64,7 +64,6 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;

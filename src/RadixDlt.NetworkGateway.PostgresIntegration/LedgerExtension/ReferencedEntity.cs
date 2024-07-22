@@ -102,6 +102,8 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
 
     public long AffectedGlobalEntityId => IsGlobal ? DatabaseId : DatabaseGlobalAncestorId;
 
+    public long GlobalEventEmitterEntityId => IsGlobal ? DatabaseId : DatabaseGlobalAncestorId;
+
     public bool CanBeOwnerAncestor => Type is not CoreModel.EntityType.InternalKeyValueStore;
 
     [MemberNotNullWhen(true, nameof(ImmediateParentReference))]

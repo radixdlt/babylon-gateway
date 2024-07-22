@@ -117,6 +117,8 @@ public class TransactionStreamPageRequestSearchCriteria
 
     public HashSet<EntityAddress> AffectedGlobalEntities { get; set; } = new();
 
+    public HashSet<EntityAddress> EventGlobalEmitters { get; set; } = new();
+
     public HashSet<EntityAddress> AccountsWithoutManifestOwnerMethodCalls { get; set; } = new();
 
     public HashSet<EntityAddress> AccountsWithManifestOwnerMethodCalls { get; set; } = new();

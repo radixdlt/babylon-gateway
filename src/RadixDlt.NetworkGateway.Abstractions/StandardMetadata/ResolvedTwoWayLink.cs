@@ -72,9 +72,6 @@ public abstract record ResolvedTwoWayLink(string? InvalidReason)
     public bool IsValid => InvalidReason == null;
 }
 
-// This is more of a marker rather actual two-way link
-public sealed record DappAccountMarkerResolvedTwoWayLink(string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
-
 public sealed record DappClaimedEntityResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
 
 public sealed record DappClaimedWebsiteResolvedTwoWayLink(Uri Origin, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);

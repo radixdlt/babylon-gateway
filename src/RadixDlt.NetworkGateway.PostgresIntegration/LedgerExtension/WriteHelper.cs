@@ -133,7 +133,7 @@ internal class WriteHelper : IWriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entity_relationships, correlated_entity_ids, discriminator, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type) FROM STDIN (FORMAT BINARY)",
+            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entity_relationships, correlated_entity_ids, discriminator, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, non_fungible_data_mutable_fields) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var e in entities)
@@ -179,9 +179,11 @@ internal class WriteHelper : IWriteHelper
             if (e is GlobalNonFungibleResourceEntity nfrme)
             {
                 await writer.WriteAsync(nfrme.NonFungibleIdType, "non_fungible_id_type", token);
+                await writer.WriteAsync(nfrme.NonFungibleDataMutableFields, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
             }
             else
             {
+                await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
             }
         }
@@ -339,6 +341,16 @@ internal class WriteHelper : IWriteHelper
                 case AffectedGlobalEntityTransactionMarker oltm:
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(oltm.EntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case EventGlobalEmitterTransactionMarker egetm:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(egetm.EntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
