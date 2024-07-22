@@ -115,7 +115,7 @@ WITH
         FROM variables var
         INNER JOIN LATERAL (
             SELECT *
-            FROM unverified_two_way_link_aggregate_history
+            FROM unverified_standard_metadata_aggregate_history
             WHERE entity_id = var.entity_id AND from_state_version <= @stateVersion
             ORDER BY from_state_version DESC
             LIMIT 1
@@ -125,7 +125,7 @@ WITH
         SELECT eh.from_state_version, eh.entity_id, eh.is_deleted, eh.is_locked, eh.discriminator, UNNEST(eh.entity_ids) AS target_entity_id, UNNEST(eh.values) AS target_value
         FROM aggregate_history ah
         INNER JOIN LATERAL UNNEST(ah.entry_ids) AS entry_id ON TRUE
-        INNER JOIN unverified_two_way_link_entry_history eh ON eh.id = entry_id
+        INNER JOIN unverified_standard_metadata_entry_history eh ON eh.id = entry_id
     ),
     candidates AS (
         SELECT
@@ -147,7 +147,7 @@ WITH
         LEFT JOIN entities target_entity ON target_entity.id = entry.target_entity_id
         LEFT JOIN LATERAL (
             SELECT is_deleted = FALSE AND @dappAccountTypeDappDefinition = ANY(values) AS valid
-            FROM unverified_two_way_link_entry_history
+            FROM unverified_standard_metadata_entry_history
             WHERE
                 entity_id = source_entity.id
               AND discriminator = 'dapp_account_type'
@@ -157,7 +157,7 @@ WITH
         ) dapp_marker_check ON source_entity.discriminator = 'global_account_component'
         LEFT JOIN LATERAL (
             SELECT is_deleted = FALSE AND @dappAccountTypeDappDefinition = ANY(values) AS valid
-            FROM unverified_two_way_link_entry_history
+            FROM unverified_standard_metadata_entry_history
             WHERE
                 entity_id = entry.target_entity_id
               AND discriminator = 'dapp_account_type'
@@ -167,7 +167,7 @@ WITH
         ) target_dapp_marker_check ON entry.target_entity_id IS NOT NULL
         LEFT JOIN LATERAL (
             SELECT is_deleted = FALSE AND source_entity.id = ANY(entity_ids) AS valid
-            FROM unverified_two_way_link_entry_history
+            FROM unverified_standard_metadata_entry_history
             WHERE
                 entity_id = entry.target_entity_id
               AND discriminator = CASE

@@ -146,7 +146,7 @@ internal class SequencesHolder
 
     public long PackageCodeAggregateHistorySequence { get; set; }
 
-    public long UnverifiedTwoWayLinkAggregateHistorySequence { get; set; }
+    public long UnverifiedStandardMetadataAggregateHistorySequence { get; set; }
 
-    public long UnverifiedTwoWayLinkEntryHistorySequence { get; set; }
+    public long UnverifiedStandardMetadataEntryHistorySequence { get; set; }
 }

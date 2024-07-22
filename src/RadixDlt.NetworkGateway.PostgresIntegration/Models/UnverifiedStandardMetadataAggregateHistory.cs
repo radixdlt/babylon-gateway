@@ -68,8 +68,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("unverified_two_way_link_aggregate_history")]
-internal class UnverifiedTwoWayLinkAggregateHistory : IAggregateHolder
+[Table("unverified_standard_metadata_aggregate_history")]
+internal class UnverifiedStandardMetadataAggregateHistory : IAggregateHolder
 {
     [Key]
     [Column("id")]

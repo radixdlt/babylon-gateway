@@ -77,20 +77,20 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct UnverifiedTwoWayLinkEntryDbLookup(long EntityId, StandardMetadataKey Type);
+internal record struct UnverifiedStandardMetadataEntryDbLookup(long EntityId, StandardMetadataKey Type);
 
-internal class TwoWayLinkProcessor
+internal class StandardMetadataProcessor
 {
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
 
-    private Dictionary<long, UnverifiedTwoWayLinkAggregateHistory> _mostRecentAggregates = new();
-    private Dictionary<UnverifiedTwoWayLinkEntryDbLookup, UnverifiedTwoWayLinkEntryHistory> _mostRecentEntries = new();
+    private Dictionary<long, UnverifiedStandardMetadataAggregateHistory> _mostRecentAggregates = new();
+    private Dictionary<UnverifiedStandardMetadataEntryDbLookup, UnverifiedStandardMetadataEntryHistory> _mostRecentEntries = new();
 
-    private List<UnverifiedTwoWayLinkAggregateHistory> _aggregatesToAdd = new();
-    private List<UnverifiedTwoWayLinkEntryHistory> _entriesToAdd = new();
+    private List<UnverifiedStandardMetadataAggregateHistory> _aggregatesToAdd = new();
+    private List<UnverifiedStandardMetadataEntryHistory> _entriesToAdd = new();
 
-    public TwoWayLinkProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
+    public StandardMetadataProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
     {
         _context = context;
         _referencedEntities = referencedEntities;
@@ -126,9 +126,9 @@ internal class TwoWayLinkProcessor
         {
             if (key == StandardMetadataConstants.DappAccountType && TryParseValue<GatewayModel.MetadataStringValue>(out var accountType))
             {
-                _entriesToAdd.Add(new DappAccountTypeUnverifiedTwoWayLinkEntryHistory
+                _entriesToAdd.Add(new DappAccountTypeUnverifiedStandardMetadataEntryHistory
                 {
-                    Id = _context.Sequences.UnverifiedTwoWayLinkEntryHistorySequence++,
+                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
                     FromStateVersion = stateVersion,
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
@@ -138,9 +138,9 @@ internal class TwoWayLinkProcessor
             }
             else if (key == StandardMetadataConstants.DappClaimedWebsites && TryParseValue<GatewayModel.MetadataOriginArrayValue>(out var claimedWebsites))
             {
-                _entriesToAdd.Add(new DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory
+                _entriesToAdd.Add(new DappClaimedWebsitesUnverifiedStandardMetadataEntryHistory
                 {
-                    Id = _context.Sequences.UnverifiedTwoWayLinkEntryHistorySequence++,
+                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
                     FromStateVersion = stateVersion,
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
@@ -150,9 +150,9 @@ internal class TwoWayLinkProcessor
             }
             else if (key == StandardMetadataConstants.DappClaimedEntities && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var claimedEntities))
             {
-                _entriesToAdd.Add(new DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory
+                _entriesToAdd.Add(new DappClaimedEntitiesUnverifiedStandardMetadataEntryHistory
                 {
-                    Id = _context.Sequences.UnverifiedTwoWayLinkEntryHistorySequence++,
+                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
                     FromStateVersion = stateVersion,
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
@@ -162,9 +162,9 @@ internal class TwoWayLinkProcessor
             }
             else if (key == StandardMetadataConstants.DappDefinitions && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var dappDefinitions))
             {
-                _entriesToAdd.Add(new DappDefinitionsUnverifiedTwoWayLinkEntryHistory
+                _entriesToAdd.Add(new DappDefinitionsUnverifiedStandardMetadataEntryHistory
                 {
-                    Id = _context.Sequences.UnverifiedTwoWayLinkEntryHistorySequence++,
+                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
                     FromStateVersion = stateVersion,
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
@@ -174,9 +174,9 @@ internal class TwoWayLinkProcessor
             }
             else if (key == StandardMetadataConstants.DappAccountLocker && TryParseValue<GatewayModel.MetadataGlobalAddressValue>(out var dappAccountLocker))
             {
-                _entriesToAdd.Add(new DappAccountLockerUnverifiedTwoWayLinkEntryHistory
+                _entriesToAdd.Add(new DappAccountLockerUnverifiedStandardMetadataEntryHistory
                 {
-                    Id = _context.Sequences.UnverifiedTwoWayLinkEntryHistorySequence++,
+                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
                     FromStateVersion = stateVersion,
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
@@ -189,9 +189,9 @@ internal class TwoWayLinkProcessor
         {
             if (key == StandardMetadataConstants.DappDefinitions && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var dappDefinitions))
             {
-                _entriesToAdd.Add(new DappDefinitionsUnverifiedTwoWayLinkEntryHistory
+                _entriesToAdd.Add(new DappDefinitionsUnverifiedStandardMetadataEntryHistory
                 {
-                    Id = _context.Sequences.UnverifiedTwoWayLinkEntryHistorySequence++,
+                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
                     FromStateVersion = stateVersion,
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
@@ -204,9 +204,9 @@ internal class TwoWayLinkProcessor
         {
             if (key == StandardMetadataConstants.DappDefinition && TryParseValue<GatewayModel.MetadataGlobalAddressValue>(out var dappDefinition))
             {
-                _entriesToAdd.Add(new DappDefinitionUnverifiedTwoWayLinkEntryHistory
+                _entriesToAdd.Add(new DappDefinitionUnverifiedStandardMetadataEntryHistory
                 {
-                    Id = _context.Sequences.UnverifiedTwoWayLinkEntryHistorySequence++,
+                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
                     FromStateVersion = stateVersion,
                     EntityId = referencedEntity.DatabaseId,
                     IsDeleted = metadataEntry.Value == null,
@@ -227,15 +227,15 @@ internal class TwoWayLinkProcessor
     {
         foreach (var entry in _entriesToAdd)
         {
-            var lookup = new UnverifiedTwoWayLinkEntryDbLookup(entry.EntityId, _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(entry.GetType()));
+            var lookup = new UnverifiedStandardMetadataEntryDbLookup(entry.EntityId, _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(entry.GetType()));
 
-            UnverifiedTwoWayLinkAggregateHistory aggregate;
+            UnverifiedStandardMetadataAggregateHistory aggregate;
 
             if (!_mostRecentAggregates.TryGetValue(lookup.EntityId, out var previousAggregate) || previousAggregate.FromStateVersion != entry.FromStateVersion)
             {
-                aggregate = new UnverifiedTwoWayLinkAggregateHistory
+                aggregate = new UnverifiedStandardMetadataAggregateHistory
                 {
-                    Id = _context.Sequences.UnverifiedTwoWayLinkAggregateHistorySequence++,
+                    Id = _context.Sequences.UnverifiedStandardMetadataAggregateHistorySequence++,
                     FromStateVersion = entry.FromStateVersion,
                     EntityId = lookup.EntityId,
                     EntryIds = new List<long>(),
@@ -277,24 +277,24 @@ internal class TwoWayLinkProcessor
     {
         var rowsInserted = 0;
 
-        rowsInserted += await CopyUnverifiedTwoWayLinkEntryHistory();
-        rowsInserted += await CopyUnverifiedTwoWayLinkAggregateHistory();
+        rowsInserted += await CopyUnverifiedStandardMetadataEntryHistory();
+        rowsInserted += await CopyUnverifiedStandardMetadataAggregateHistory();
 
         return rowsInserted;
     }
 
-    private async Task<IDictionary<UnverifiedTwoWayLinkEntryDbLookup, UnverifiedTwoWayLinkEntryHistory>> MostRecentEntryHistory()
+    private async Task<IDictionary<UnverifiedStandardMetadataEntryDbLookup, UnverifiedStandardMetadataEntryHistory>> MostRecentEntryHistory()
     {
         var lookupSet = _entriesToAdd
-            .Select(e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(e.GetType())))
+            .Select(e => new UnverifiedStandardMetadataEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(e.GetType())))
             .ToHashSet();
 
         if (!lookupSet.Unzip(x => x.EntityId, x => x.Type, out var entityIds, out var discriminators))
         {
-            return ImmutableDictionary<UnverifiedTwoWayLinkEntryDbLookup, UnverifiedTwoWayLinkEntryHistory>.Empty;
+            return ImmutableDictionary<UnverifiedStandardMetadataEntryDbLookup, UnverifiedStandardMetadataEntryHistory>.Empty;
         }
 
-        return await _context.ReadHelper.LoadDependencies<UnverifiedTwoWayLinkEntryDbLookup, UnverifiedTwoWayLinkEntryHistory>(
+        return await _context.ReadHelper.LoadDependencies<UnverifiedStandardMetadataEntryDbLookup, UnverifiedStandardMetadataEntryHistory>(
             @$"
 WITH variables (entity_id, discriminator) AS (
     SELECT UNNEST({entityIds}), UNNEST({discriminators})
@@ -303,24 +303,24 @@ SELECT eh.*
 FROM variables var
 INNER JOIN LATERAL (
     SELECT *
-    FROM unverified_two_way_link_entry_history
+    FROM unverified_standard_metadata_entry_history
     WHERE entity_id = var.entity_id AND discriminator = var.discriminator
     ORDER BY from_state_version DESC
     LIMIT 1
 ) eh ON true;",
-            e => new UnverifiedTwoWayLinkEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(e.GetType())));
+            e => new UnverifiedStandardMetadataEntryDbLookup(e.EntityId, _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(e.GetType())));
     }
 
-    private async Task<IDictionary<long, UnverifiedTwoWayLinkAggregateHistory>> MostRecentAggregateHistory()
+    private async Task<IDictionary<long, UnverifiedStandardMetadataAggregateHistory>> MostRecentAggregateHistory()
     {
         var entityIds = _entriesToAdd.Select(x => x.EntityId).ToHashSet().ToList();
 
         if (!entityIds.Any())
         {
-            return ImmutableDictionary<long, UnverifiedTwoWayLinkAggregateHistory>.Empty;
+            return ImmutableDictionary<long, UnverifiedStandardMetadataAggregateHistory>.Empty;
         }
 
-        return await _context.ReadHelper.LoadDependencies<long, UnverifiedTwoWayLinkAggregateHistory>(
+        return await _context.ReadHelper.LoadDependencies<long, UnverifiedStandardMetadataAggregateHistory>(
             @$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
@@ -329,7 +329,7 @@ SELECT ah.*
 FROM variables var
 INNER JOIN LATERAL (
     SELECT *
-    FROM unverified_two_way_link_aggregate_history
+    FROM unverified_standard_metadata_aggregate_history
     WHERE entity_id = var.entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
@@ -337,9 +337,9 @@ INNER JOIN LATERAL (
             e => e.EntityId);
     }
 
-    private Task<int> CopyUnverifiedTwoWayLinkEntryHistory() => _context.WriteHelper.Copy(
+    private Task<int> CopyUnverifiedStandardMetadataEntryHistory() => _context.WriteHelper.Copy(
         _entriesToAdd,
-        "COPY unverified_two_way_link_entry_history (id, from_state_version, entity_id, is_deleted, is_locked, discriminator, values, entity_ids) FROM STDIN (FORMAT BINARY)",
+        "COPY unverified_standard_metadata_entry_history (id, from_state_version, entity_id, is_deleted, is_locked, discriminator, values, entity_ids) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             var discriminator = _context.WriteHelper.GetDiscriminator<StandardMetadataKey>(e.GetType());
@@ -353,11 +353,11 @@ INNER JOIN LATERAL (
 
             switch (e)
             {
-                case StringBasedUnverifiedTwoWayLinkEntryHistory stringBased:
+                case StringBasedUnverifiedStandardMetadataEntryHistory stringBased:
                     await writer.WriteAsync(stringBased.Values, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
                     break;
-                case EntityBasedUnverifiedTwoWayLinkEntryHistory entityBased:
+                case EntityBasedUnverifiedStandardMetadataEntryHistory entityBased:
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(entityBased.EntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
                     break;
@@ -366,9 +366,9 @@ INNER JOIN LATERAL (
             }
         });
 
-    private Task<int> CopyUnverifiedTwoWayLinkAggregateHistory() => _context.WriteHelper.Copy(
+    private Task<int> CopyUnverifiedStandardMetadataAggregateHistory() => _context.WriteHelper.Copy(
         _aggregatesToAdd,
-        "COPY unverified_two_way_link_aggregate_history (id, from_state_version, entity_id, entry_ids) FROM STDIN (FORMAT BINARY)",
+        "COPY unverified_standard_metadata_aggregate_history (id, from_state_version, entity_id, entry_ids) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);

@@ -822,7 +822,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "unverified_two_way_link_aggregate_history",
+                name: "unverified_standard_metadata_aggregate_history",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -833,11 +833,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_unverified_two_way_link_aggregate_history", x => x.id);
+                    table.PrimaryKey("PK_unverified_standard_metadata_aggregate_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "unverified_two_way_link_entry_history",
+                name: "unverified_standard_metadata_entry_history",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -852,7 +852,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_unverified_two_way_link_entry_history", x => x.id);
+                    table.PrimaryKey("PK_unverified_standard_metadata_entry_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1274,13 +1274,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_unverified_two_way_link_aggregate_history_entity_id_from_st~",
-                table: "unverified_two_way_link_aggregate_history",
+                name: "IX_unverified_standard_metadata_aggregate_history_entity_id_fr~",
+                table: "unverified_standard_metadata_aggregate_history",
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_unverified_two_way_link_entry_history_entity_id_discriminat~",
-                table: "unverified_two_way_link_entry_history",
+                name: "IX_unverified_standard_metadata_entry_history_entity_id_discri~",
+                table: "unverified_standard_metadata_entry_history",
                 columns: new[] { "entity_id", "discriminator", "from_state_version" });
 
             migrationBuilder.CreateIndex(
@@ -1435,10 +1435,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "state_history");
 
             migrationBuilder.DropTable(
-                name: "unverified_two_way_link_aggregate_history");
+                name: "unverified_standard_metadata_aggregate_history");
 
             migrationBuilder.DropTable(
-                name: "unverified_two_way_link_entry_history");
+                name: "unverified_standard_metadata_entry_history");
 
             migrationBuilder.DropTable(
                 name: "validator_active_set_history");

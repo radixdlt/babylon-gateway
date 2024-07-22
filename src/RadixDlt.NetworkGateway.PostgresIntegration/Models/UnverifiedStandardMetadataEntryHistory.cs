@@ -72,8 +72,8 @@ using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("unverified_two_way_link_entry_history")]
-internal abstract class UnverifiedTwoWayLinkEntryHistory
+[Table("unverified_standard_metadata_entry_history")]
+internal abstract class UnverifiedStandardMetadataEntryHistory
 {
     [Key]
     [Column("id")]
@@ -97,7 +97,7 @@ internal abstract class UnverifiedTwoWayLinkEntryHistory
     public abstract IEnumerable<long> ReferencedEntityIds();
 }
 
-internal abstract class StringBasedUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
+internal abstract class StringBasedUnverifiedStandardMetadataEntryHistory : UnverifiedStandardMetadataEntryHistory, IAggregateHolder
 {
     [Column("values")]
     public string[]? Values { get; set; }
@@ -122,7 +122,7 @@ internal abstract class StringBasedUnverifiedTwoWayLinkEntryHistory : Unverified
     }
 }
 
-internal abstract class EntityBasedUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
+internal abstract class EntityBasedUnverifiedStandardMetadataEntryHistory : UnverifiedStandardMetadataEntryHistory, IAggregateHolder
 {
     [Column("entity_ids")]
     public long[]? EntityIds { get; set; }
@@ -147,7 +147,7 @@ internal abstract class EntityBasedUnverifiedTwoWayLinkEntryHistory : Unverified
     }
 }
 
-internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : StringBasedUnverifiedTwoWayLinkEntryHistory
+internal class DappAccountTypeUnverifiedStandardMetadataEntryHistory : StringBasedUnverifiedStandardMetadataEntryHistory
 {
     [NotMapped]
     public string? Value
@@ -157,7 +157,7 @@ internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : StringBasedUnve
     }
 }
 
-internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : StringBasedUnverifiedTwoWayLinkEntryHistory
+internal class DappClaimedWebsitesUnverifiedStandardMetadataEntryHistory : StringBasedUnverifiedStandardMetadataEntryHistory
 {
     [NotMapped]
     public string[]? ClaimedWebsites
@@ -167,7 +167,7 @@ internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : StringBased
     }
 }
 
-internal class DappDefinitionUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
+internal class DappDefinitionUnverifiedStandardMetadataEntryHistory : EntityBasedUnverifiedStandardMetadataEntryHistory
 {
     [NotMapped]
     public long? DappDefinitionEntityId
@@ -177,7 +177,7 @@ internal class DappDefinitionUnverifiedTwoWayLinkEntryHistory : EntityBasedUnver
     }
 }
 
-internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
+internal class DappDefinitionsUnverifiedStandardMetadataEntryHistory : EntityBasedUnverifiedStandardMetadataEntryHistory
 {
     [NotMapped]
     public long[]? DappDefinitionEntityIds
@@ -187,7 +187,7 @@ internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : EntityBasedUnve
     }
 }
 
-internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
+internal class DappClaimedEntitiesUnverifiedStandardMetadataEntryHistory : EntityBasedUnverifiedStandardMetadataEntryHistory
 {
     [NotMapped]
     public long[]? ClaimedEntityIds
@@ -197,7 +197,7 @@ internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : EntityBased
     }
 }
 
-internal class DappAccountLockerUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
+internal class DappAccountLockerUnverifiedStandardMetadataEntryHistory : EntityBasedUnverifiedStandardMetadataEntryHistory
 {
     [NotMapped]
     public long? AccountLockerEntityId

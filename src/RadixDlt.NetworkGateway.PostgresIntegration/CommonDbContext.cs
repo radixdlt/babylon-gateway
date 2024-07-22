@@ -172,9 +172,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountAuthorizedDepositorAggregateHistory> AccountAuthorizedDepositorAggregateHistory => Set<AccountAuthorizedDepositorAggregateHistory>();
 
-    public DbSet<UnverifiedTwoWayLinkAggregateHistory> UnverifiedTwoWayLinkAggregateHistory => Set<UnverifiedTwoWayLinkAggregateHistory>();
+    public DbSet<UnverifiedStandardMetadataAggregateHistory> UnverifiedStandardMetadataAggregateHistory => Set<UnverifiedStandardMetadataAggregateHistory>();
 
-    public DbSet<UnverifiedTwoWayLinkEntryHistory> UnverifiedTwoWayLinkEntryHistory => Set<UnverifiedTwoWayLinkEntryHistory>();
+    public DbSet<UnverifiedStandardMetadataEntryHistory> UnverifiedStandardMetadataEntryHistory => Set<UnverifiedStandardMetadataEntryHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -620,21 +620,21 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
 
         modelBuilder
-            .Entity<UnverifiedTwoWayLinkAggregateHistory>()
+            .Entity<UnverifiedStandardMetadataAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<UnverifiedTwoWayLinkEntryHistory>()
+            .Entity<UnverifiedStandardMetadataEntryHistory>()
             .HasDiscriminator(e => e.Discriminator)
-            .HasValue<DappAccountTypeUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappAccountType)
-            .HasValue<DappDefinitionUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappDefinition)
-            .HasValue<DappDefinitionsUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappDefinitions)
-            .HasValue<DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappClaimedEntities)
-            .HasValue<DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappClaimedWebsites)
-            .HasValue<DappAccountLockerUnverifiedTwoWayLinkEntryHistory>(StandardMetadataKey.DappAccountLocker);
+            .HasValue<DappAccountTypeUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappAccountType)
+            .HasValue<DappDefinitionUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappDefinition)
+            .HasValue<DappDefinitionsUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappDefinitions)
+            .HasValue<DappClaimedEntitiesUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappClaimedEntities)
+            .HasValue<DappClaimedWebsitesUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappClaimedWebsites)
+            .HasValue<DappAccountLockerUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappAccountLocker);
 
         modelBuilder
-            .Entity<UnverifiedTwoWayLinkEntryHistory>()
+            .Entity<UnverifiedStandardMetadataEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.Discriminator, e.FromStateVersion });
     }
 }

@@ -813,8 +813,8 @@ SELECT
     setval('package_code_aggregate_history_id_seq', @packageCodeAggregateHistorySequence),
     setval('account_authorized_depositor_entry_history_id_seq', @accountAuthorizedDepositorEntryHistorySequence),
     setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence),
-    setval('unverified_two_way_link_aggregate_history_id_seq', @unverifiedTwoWayLinkAggregateHistorySequence),
-    setval('unverified_two_way_link_entry_history_id_seq', @unverifiedTwoWayLinkEntryHistorySequence)
+    setval('unverified_standard_metadata_aggregate_history_id_seq', @unverifiedStandardMetadataAggregateHistorySequence),
+    setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence)
 ",
             parameters: new
             {
@@ -858,8 +858,8 @@ SELECT
                 packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
                 accountAuthorizedDepositorEntryHistorySequence = sequences.AccountAuthorizedDepositorEntryHistorySequence,
                 accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
-                unverifiedTwoWayLinkAggregateHistorySequence = sequences.UnverifiedTwoWayLinkAggregateHistorySequence,
-                unverifiedTwoWayLinkEntryHistorySequence = sequences.UnverifiedTwoWayLinkEntryHistorySequence,
+                unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
+                unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
             },
             cancellationToken: token);
 

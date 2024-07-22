@@ -1676,7 +1676,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkAggregateHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedStandardMetadataAggregateHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1702,10 +1702,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("EntityId", "FromStateVersion");
 
-                    b.ToTable("unverified_two_way_link_aggregate_history");
+                    b.ToTable("unverified_standard_metadata_aggregate_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedStandardMetadataEntryHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1738,7 +1738,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("EntityId", "Discriminator", "FromStateVersion");
 
-                    b.ToTable("unverified_two_way_link_entry_history");
+                    b.ToTable("unverified_standard_metadata_entry_history");
 
                     b.HasDiscriminator<StandardMetadataKey>("Discriminator");
 
@@ -2683,86 +2683,86 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(StateType.Sbor);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappAccountLockerUnverifiedTwoWayLinkEntryHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappAccountLockerUnverifiedStandardMetadataEntryHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedStandardMetadataEntryHistory");
 
                     b.Property<long[]>("EntityIds")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint[]")
                         .HasColumnName("entity_ids");
 
-                    b.ToTable("unverified_two_way_link_entry_history");
+                    b.ToTable("unverified_standard_metadata_entry_history");
 
                     b.HasDiscriminator().HasValue(StandardMetadataKey.DappAccountLocker);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappAccountTypeUnverifiedTwoWayLinkEntryHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappAccountTypeUnverifiedStandardMetadataEntryHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedStandardMetadataEntryHistory");
 
                     b.Property<string[]>("Values")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text[]")
                         .HasColumnName("values");
 
-                    b.ToTable("unverified_two_way_link_entry_history");
+                    b.ToTable("unverified_standard_metadata_entry_history");
 
                     b.HasDiscriminator().HasValue(StandardMetadataKey.DappAccountType);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappClaimedEntitiesUnverifiedStandardMetadataEntryHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedStandardMetadataEntryHistory");
 
                     b.Property<long[]>("EntityIds")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint[]")
                         .HasColumnName("entity_ids");
 
-                    b.ToTable("unverified_two_way_link_entry_history");
+                    b.ToTable("unverified_standard_metadata_entry_history");
 
                     b.HasDiscriminator().HasValue(StandardMetadataKey.DappClaimedEntities);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappClaimedWebsitesUnverifiedStandardMetadataEntryHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedStandardMetadataEntryHistory");
 
                     b.Property<string[]>("Values")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text[]")
                         .HasColumnName("values");
 
-                    b.ToTable("unverified_two_way_link_entry_history");
+                    b.ToTable("unverified_standard_metadata_entry_history");
 
                     b.HasDiscriminator().HasValue(StandardMetadataKey.DappClaimedWebsites);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappDefinitionUnverifiedTwoWayLinkEntryHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappDefinitionUnverifiedStandardMetadataEntryHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedStandardMetadataEntryHistory");
 
                     b.Property<long[]>("EntityIds")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint[]")
                         .HasColumnName("entity_ids");
 
-                    b.ToTable("unverified_two_way_link_entry_history");
+                    b.ToTable("unverified_standard_metadata_entry_history");
 
                     b.HasDiscriminator().HasValue(StandardMetadataKey.DappDefinition);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappDefinitionsUnverifiedTwoWayLinkEntryHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.DappDefinitionsUnverifiedStandardMetadataEntryHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedTwoWayLinkEntryHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.UnverifiedStandardMetadataEntryHistory");
 
                     b.Property<long[]>("EntityIds")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint[]")
                         .HasColumnName("entity_ids");
 
-                    b.ToTable("unverified_two_way_link_entry_history");
+                    b.ToTable("unverified_standard_metadata_entry_history");
 
                     b.HasDiscriminator().HasValue(StandardMetadataKey.DappDefinitions);
                 });

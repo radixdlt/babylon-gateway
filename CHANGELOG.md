@@ -17,12 +17,12 @@ Release built: _not released yet_
   - Brand-new `two_way_linked_*` properties on the `details` property of Resources, Accounts, Packages and other global components.
   - See https://docs.radixdlt.com/docs/metadata-for-verification#metadata-standards-for-verification-of-onledger-entities for detailed specification.
 
-
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
 - Replaced per-epoch validator emissions (`validator_emission_statistics` table) with their cumulative statistics (`validator_cumulative_emission_history` table).
 - Added `non_fungible_data_mutable_fields` to `entities` table. Which contains list of all mutable non fungible data fields for non fungible resource entities.
 - New `ledger_transaction_markers` type with the `event_global_emitter` discriminator. It represents the global emitter for each event.
+- Added new `unverified_standard_metadata_*` tables.
 
 ## 1.6.1
 Release built: 21.05.2024
