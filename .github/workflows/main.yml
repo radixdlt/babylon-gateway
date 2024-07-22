@@ -388,6 +388,8 @@ jobs:
       - name: Export branch name in github's environment
         run: |
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+          echo "GITHUB_REF_NAME=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" >> $GITHUB_ENV
       - name: Process ci.env
         run: |
           export $(grep -v '^#' ./deployment/ci.env | xargs)
