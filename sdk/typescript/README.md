@@ -40,6 +40,76 @@ const gatewayApi = GatewayApiClient.initialize({
 const { status, transaction, stream, state } = gatewayApi
 ```
 
+## Connecting to a secured gateway using authorization header
+
+This example shows how to add an authorization header to a request, in order to make requests to a secured Gateway requiring basic auth, a JWT or a Bearer Token.
+
+To work with this set-up you will need to:
+* Ensure your `basePath` is set up to connect to the correct host and port, on which Gateway API is exposed.
+* Set the `Authorization` header on your request, configured with your basic auth credentials for the Gateway API.
+*  If the Gateway server doesn't provide a valid HTTPs certificate, you will need to work around that. In the `agent` / `dispatcher` configuration, include the self-signed certificate by using the `ca` parameter, or if you understand the implications and have precautions against MITM, use `rejectUnauthorized: false` with the https agent.
+
+### With `node-fetch`
+
+```typescript
+import https from "node:https";
+import fetch from "node-fetch"
+import { GatewayApiClient, RadixNetwork } from '@radixdlt/babylon-gateway-api-sdk'
+
+const basicAuthUsername = "????";
+const basicAuthPassword = "????"; // From your gateway set-up - provide this securely to your application
+
+const gatewayApiClient = GatewayApiClient.initialize({
+  networkId: RadixNetwork.Mainnet,
+  applicationName: 'Your dApp Name',
+  applicationVersion: '1.0.0',
+  fetchApi: fetch,
+  applicationDappDefinitionAddress: 'account_rdx12y4l35lh2543nfa9pyyzvsh64ssu0dv6fq20gg8suslwmjvkylejgj',
+  agent: new https.Agent({
+    keepAlive: true,
+      // If the Gateway presents an invalid certificate, you can work around it here.
+      // e.g. by using the `ca` parameter to provide a custom certificate,
+      // or using `rejectUnauthorized: false` to ignore the certificate check 
+      // - as long you have taken precautions to prevent a man in the middle attack.
+      // rejectUnauthorized: false,
+  }),
+  headers: {
+      "Authorization": `Basic ${Buffer.from(`${basicAuthUsername}:${basicAuthPassword}`).toString("base64")}`
+  }
+});
+```
+
+### With native Node.JS `fetch`
+
+If wanting to customise the certificate settings on the request, you will need install `undici` (as per [this comment](https://github.com/nodejs/undici/issues/1489#issuecomment-1543856261)):
+
+```typescript
+import { Agent } from 'undici';
+import { GatewayApiClient, RadixNetwork } from '@radixdlt/babylon-gateway-api-sdk'
+
+const basicAuthUsername = "????";
+const basicAuthPassword = "????"; // From your gateway set-up - provide this securely to your application
+
+const gatewayApiClient = GatewayApiClient.initialize({
+  networkId: RadixNetwork.Mainnet,
+  applicationName: 'Your dApp Name',
+  applicationVersion: '1.0.0',
+  applicationDappDefinitionAddress: 'account_rdx12y4l35lh2543nfa9pyyzvsh64ssu0dv6fq20gg8suslwmjvkylejgj',
+  dispatcher: new Agent({
+      connect: {
+          // If the Gateway presents an invalid certificate, you can work around it here.
+          // e.g. by using the `ca` parameter to provide a custom certificate,
+          // or using `rejectUnauthorized: false` to ignore the certificate check 
+          // - as long you have taken precautions to prevent a man in the middle attack.
+          // rejectUnauthorized: false,
+      },
+  }),
+  headers: {
+      "Authorization": `Basic ${Buffer.from(`${basicAuthUsername}:${basicAuthPassword}`).toString("base64")}`
+  }
+});
+```
+
 ## High Level APIs
 
 High Level APIs will grow over time as we start encountering repeating patterns when dealing with low level APIs. They are supposed to help with most commonly performed tasks and standardize ways of working with Gateway API and Typescript.
