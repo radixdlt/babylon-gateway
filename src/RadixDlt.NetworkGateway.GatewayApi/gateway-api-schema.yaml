@@ -3912,6 +3912,7 @@ components:
           component_royalty_vault_balance: true
           package_royalty_vault_balance: true
           non_fungible_include_nfids: true
+          dapp_two_way_links: true
           explicit_metadata:
             - name
             - description

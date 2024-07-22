@@ -100,7 +100,7 @@ internal partial class EntityStateQuerier
             return null;
         }
 
-        var correlatedAddresses = await GetCorrelatedEntityAddresses(new[] { package }, packageBlueprintHistory, null, ledgerState, token);
+        var correlatedAddresses = await GetCorrelatedEntityAddresses(new[] { package }, packageBlueprintHistory, ledgerState, token);
         var totalCount = packageBlueprints.FirstOrDefault()?.TotalCount ?? 0;
 
         return new GatewayModel.StatePackageBlueprintPageResponse(

@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using System;
 using System.Collections.Generic;
@@ -96,8 +95,6 @@ internal abstract class UnverifiedTwoWayLinkEntryHistory
     public StandardMetadataKey Discriminator { get; set; }
 
     public abstract IEnumerable<long> ReferencedEntityIds();
-
-    public abstract UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities);
 }
 
 internal abstract class StringBasedUnverifiedTwoWayLinkEntryHistory : UnverifiedTwoWayLinkEntryHistory, IAggregateHolder
@@ -158,18 +155,6 @@ internal class DappAccountTypeUnverifiedTwoWayLinkEntryHistory : StringBasedUnve
         get => Values?.FirstOrDefault();
         set => Values = value == null ? null : new[] { value };
     }
-
-    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
-    {
-        EnsureMappable();
-
-        return new DappAccountTypeUnverifiedTwoWayLink
-        {
-            FromStateVersion = FromStateVersion,
-            EntityAddress = correlatedEntities[EntityId],
-            Value = Values.First(),
-        };
-    }
 }
 
 internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : StringBasedUnverifiedTwoWayLinkEntryHistory
@@ -179,18 +164,6 @@ internal class DappClaimedWebsitesUnverifiedTwoWayLinkEntryHistory : StringBased
     {
         get => Values;
         set => Values = value;
-    }
-
-    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
-    {
-        EnsureMappable();
-
-        return new DappClaimedWebsitesUnverifiedTwoWayLink
-        {
-            FromStateVersion = FromStateVersion,
-            EntityAddress = correlatedEntities[EntityId],
-            ClaimedWebsites = Values.Select(x => new Uri(x)).ToList(),
-        };
     }
 }
 
@@ -202,18 +175,6 @@ internal class DappDefinitionUnverifiedTwoWayLinkEntryHistory : EntityBasedUnver
         get => EntityIds?.FirstOrDefault();
         set => EntityIds = !value.HasValue ? null : new[] { value.Value };
     }
-
-    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
-    {
-        EnsureMappable();
-
-        return new DappDefinitionUnverifiedTwoWayLink
-        {
-            FromStateVersion = FromStateVersion,
-            EntityAddress = correlatedEntities[EntityId],
-            DappDefinition = correlatedEntities[EntityIds.First()],
-        };
-    }
 }
 
 internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
@@ -223,18 +184,6 @@ internal class DappDefinitionsUnverifiedTwoWayLinkEntryHistory : EntityBasedUnve
     {
         get => EntityIds;
         set => EntityIds = value;
-    }
-
-    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
-    {
-        EnsureMappable();
-
-        return new DappDefinitionsUnverifiedTwoWayLink
-        {
-            FromStateVersion = FromStateVersion,
-            EntityAddress = correlatedEntities[EntityId],
-            DappDefinitions = EntityIds.Select(x => correlatedEntities[x]).ToList(),
-        };
     }
 }
 
@@ -246,18 +195,6 @@ internal class DappClaimedEntitiesUnverifiedTwoWayLinkEntryHistory : EntityBased
         get => EntityIds;
         set => EntityIds = value;
     }
-
-    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
-    {
-        EnsureMappable();
-
-        return new DappClaimedEntitiesUnverifiedTwoWayLink
-        {
-            FromStateVersion = FromStateVersion,
-            EntityAddress = correlatedEntities[EntityId],
-            ClaimedEntities = EntityIds.Select(x => correlatedEntities[x]).ToList(),
-        };
-    }
 }
 
 internal class DappAccountLockerUnverifiedTwoWayLinkEntryHistory : EntityBasedUnverifiedTwoWayLinkEntryHistory
@@ -267,17 +204,5 @@ internal class DappAccountLockerUnverifiedTwoWayLinkEntryHistory : EntityBasedUn
     {
         get => EntityIds?.FirstOrDefault();
         set => EntityIds = !value.HasValue ? null : new[] { value.Value };
-    }
-
-    public override UnverifiedTwoWayLink MapToDomain(IDictionary<long, EntityAddress> correlatedEntities)
-    {
-        EnsureMappable();
-
-        return new DappAccountLockerUnverifiedTwoWayLink
-        {
-            FromStateVersion = FromStateVersion,
-            EntityAddress = correlatedEntities[EntityId],
-            LockerAddress = correlatedEntities[EntityIds.First()],
-        };
     }
 }

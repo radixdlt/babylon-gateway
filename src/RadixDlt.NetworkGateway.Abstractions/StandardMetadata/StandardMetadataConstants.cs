@@ -74,4 +74,11 @@ public static class StandardMetadataConstants
     public const string DappAccountLocker = "account_locker";
 
     public const string DappAccountTypeDappDefinition = "dapp definition";
+
+    public const string ValidationUnknown = "unknown";
+    public const string ValidationOnLedgerSucceeded = "on-ok";
+    public const string ValidationOnLedgerAppCheck = "on-app-check";
+    public const string ValidationOffLedgerAppCheck = "off-app-check";
+
+    public const string RadixWellKnownPath = "/.well-known/radix.json";
 }
