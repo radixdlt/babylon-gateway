@@ -24,7 +24,7 @@ The Network Gateway services can be configured in line with the [configuration i
 - `GatewayApi__Endpoint__StateEntityDetailsPageSize` (type: `int`, default value: `20`) - maximum number of addresses that can be passed to `/state/entity/details` endpoint.
 - `GatewayApi__Endpoint__TransactionAccountDepositPreValidationMaxResourceItems` (type: `int`, default value: `20`) - maximum number of resources that can be passed to `/transaction/account-deposit-pre-validation` endpoint.
 - `GatewayApi__Endpoint__ExplicitMetadataMaxItems` (type: `int`, default value: `20`) - maximum number of metadata keys that can be passed as explicit metadata parameter.
-- `GatewayApi__Endpoint__TransactionStreamMaxFilterCount` type: `int`, default value: `10`) - maximum number of filters that can be applied to `/stream/transactions` endpoint. For details on how each filter is counted please visit the documentation https://radix-babylon-gateway-api.redoc.ly/
+- `GatewayApi__Endpoint__TransactionStreamMaxFilterCount` (type: `int`, default value: `10`) - maximum number of filters that can be applied to `/stream/transactions` endpoint. For details on how each filter is counted please visit the documentation https://radix-babylon-gateway-api.redoc.ly/
 
 - `GatewayApi__Endpoint__ValidatorsPageSize` (type: `int`, default value: `1000`) - fixed page size for `/state/validators/list` endpoint.
 - `GatewayApi__Endpoint__ValidatorsUptimePageSize` (type: `int`, default value: `200`) -  fixed page size for `/statistics/validators/uptime` endpoint.
@@ -33,9 +33,9 @@ The Network Gateway services can be configured in line with the [configuration i
 
 #### Ledger Lag
 - `GatewayApi__AcceptableLedgerLag__PreventReadRequestsIfDbLedgerIsBehind` (type: `bool`, default value: `true`) - controls if API will return a response if observed ledger state by the gateway is behind.
-- `GatewayApi__AcceptableLedgerLag__ReadRequestAcceptableDbLedgerLagSeconds` (type: `int`, default value: `30` TODO: We actually have 3 different values, 1 in appsettings.json, .cs file and appsettings.production.json) - allowed difference between observed ledger state and actual one.
+- `GatewayApi__AcceptableLedgerLag__ReadRequestAcceptableDbLedgerLagSeconds` (type: `int`, default value: `30` ) - allowed difference between observed ledger state and actual one.
 - `GatewayApi__AcceptableLedgerLag__PreventConstructionRequestsIfDbLedgerIsBehind` (type: `bool`, default value: `true`) - controls if `/transaction/construction` will return response if observed ledger state by the gateway is behind.
-- `GatewayApi__AcceptableLedgerLag__ConstructionRequestsAcceptableDbLedgerLagSeconds` (type: `int`, default value: `30` TODO: We actually have 3 different values, 1 in appsettings.json, .cs file and appsettings.production.json) - allowed difference between observed ledger state and actual one for `/transaction/construction` endpoint.
+- `GatewayApi__AcceptableLedgerLag__ConstructionRequestsAcceptableDbLedgerLagSeconds` (type: `int`, default value: `30`) - allowed difference between observed ledger state and actual one for `/transaction/construction` endpoint.
 
 #### CoreAPI Integration
 - `GatewayApi__CoreApiIntegration__SubmitTransactionNodeRequestTimeoutMilliseconds` (type: `int`, default value: `4000`) - timeout after which transaction submission will be canceled.
@@ -91,7 +91,7 @@ The Network Gateway services can be configured in line with the [configuration i
 
 #### LedgerConfirmation
 `DataAggregator__LedgerConfirmation__MaxCommitBatchSize` (type: `int`, default value: `1000`) - maximum number of transactions to commit/process.
-`DataAggregator__LedgerConfirmation__MinCommitBatchSize` (type: `int`, default value: `1`) - minimal number of transactions to commit. If there are fewer transactions DataAggregator will wait for more before processing them.
+`DataAggregator__LedgerConfirmation__MinCommitBatchSize` (type: `int`, default value: `1`) - minimal number of transactions to commit. If there are fewer transactions, DataAggregator will wait for more before processing them.
 `DataAggregator__LedgerConfirmation__LargeBatchSizeToAddDelay` (type: `int`, default value: `500`) - batch size to be considered large.
 `DataAggregator__LedgerConfirmation__DelayBetweenLargeBatchesMilliseconds` (type: `int`, default value: `0`) - milliseconds of delay to add between large batches.
 `DataAggregator__LedgerConfirmation__MaxTransactionPipelineSizePerNode` (type: `int`, default value: `3000`) - maximum number of transactions to be prefetched from CoreAPI and held in memory before processing by Data Aggregator.
