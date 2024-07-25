@@ -81,7 +81,11 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
+<<<<<<<< HEAD:src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20240806143403_InitialCreate.Designer.cs
     [Migration("20240806143403_InitialCreate")]
+========
+    [Migration("20240802054301_InitialCreate")]
+>>>>>>>> 6ddec670 (Added native resource details):src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20240802054301_InitialCreate.Designer.cs
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -95,7 +99,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_default_deposit_rule", new[] { "accept", "reject", "allow_existing" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_resource_preference_rule", new[] { "allowed", "disallowed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "authorized_depositor_badge_type", new[] { "resource", "non_fungible" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_relationship", new[] { "component_package", "validator_stake_vault", "validator_pending_xrd_withdraw_vault", "validator_locked_owner_stake_unit_vault", "validator_pending_owner_stake_unit_unlock_vault", "vault_resource", "vault_royalty", "vault_resource_pool", "account_locker_locker", "account_locker_account", "resource_pool_unit", "resource_pool_resource" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_relationship", new[] { "component_package", "validator_stake_vault", "validator_pending_xrd_withdraw_vault", "validator_locked_owner_stake_unit_vault", "validator_pending_owner_stake_unit_unlock_vault", "validator_stake_unit_validator", "vault_resource", "vault_royalty", "vault_resource_pool", "account_locker_locker", "account_locker_account", "resource_pool_resource", "resource_pool_resource_vault", "resource_pool_unit", "resource_pool_unit_resource_pool" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity", "global_one_resource_pool", "global_two_resource_pool", "global_multi_resource_pool", "global_transaction_tracker", "global_account_locker" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });

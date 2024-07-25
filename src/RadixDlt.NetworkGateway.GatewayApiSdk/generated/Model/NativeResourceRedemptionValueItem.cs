@@ -90,101 +90,45 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponseFungibleResourceDetailsAllOf
+    /// NativeResourceRedemptionValueItem
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponseFungibleResourceDetails_allOf")]
-    public partial class StateEntityDetailsResponseFungibleResourceDetailsAllOf : IEquatable<StateEntityDetailsResponseFungibleResourceDetailsAllOf>
+    [DataContract(Name = "NativeResourceRedemptionValueItem")]
+    public partial class NativeResourceRedemptionValueItem : IEquatable<NativeResourceRedemptionValueItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseFungibleResourceDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceRedemptionValueItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponseFungibleResourceDetailsAllOf() { }
+        protected NativeResourceRedemptionValueItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseFungibleResourceDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceRedemptionValueItem" /> class.
         /// </summary>
-        /// <param name="roleAssignments">roleAssignments (required).</param>
-        /// <param name="divisibility">divisibility (required).</param>
-        /// <param name="totalSupply">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="totalBurned">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="twoWayLinkedDapps">twoWayLinkedDapps.</param>
-        /// <param name="nativeResourceDetails">nativeResourceDetails.</param>
-        public StateEntityDetailsResponseFungibleResourceDetailsAllOf(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), TwoWayLinkedDappsCollection twoWayLinkedDapps = default(TwoWayLinkedDappsCollection), NativeResourceDetails nativeResourceDetails = default(NativeResourceDetails))
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource..</param>
+        public NativeResourceRedemptionValueItem(string resourceAddress = default(string), string amount = default(string))
         {
-            // to ensure "roleAssignments" is required (not null)
-            if (roleAssignments == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("roleAssignments is a required property for StateEntityDetailsResponseFungibleResourceDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for NativeResourceRedemptionValueItem and cannot be null");
             }
-            this.RoleAssignments = roleAssignments;
-            this.Divisibility = divisibility;
-            // to ensure "totalSupply" is required (not null)
-            if (totalSupply == null)
-            {
-                throw new ArgumentNullException("totalSupply is a required property for StateEntityDetailsResponseFungibleResourceDetailsAllOf and cannot be null");
-            }
-            this.TotalSupply = totalSupply;
-            // to ensure "totalMinted" is required (not null)
-            if (totalMinted == null)
-            {
-                throw new ArgumentNullException("totalMinted is a required property for StateEntityDetailsResponseFungibleResourceDetailsAllOf and cannot be null");
-            }
-            this.TotalMinted = totalMinted;
-            // to ensure "totalBurned" is required (not null)
-            if (totalBurned == null)
-            {
-                throw new ArgumentNullException("totalBurned is a required property for StateEntityDetailsResponseFungibleResourceDetailsAllOf and cannot be null");
-            }
-            this.TotalBurned = totalBurned;
-            this.TwoWayLinkedDapps = twoWayLinkedDapps;
-            this.NativeResourceDetails = nativeResourceDetails;
+            this.ResourceAddress = resourceAddress;
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// Gets or Sets RoleAssignments
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "role_assignments", IsRequired = true, EmitDefaultValue = true)]
-        public ComponentEntityRoleAssignments RoleAssignments { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Divisibility
-        /// </summary>
-        [DataMember(Name = "divisibility", IsRequired = true, EmitDefaultValue = true)]
-        public int Divisibility { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
         /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalSupply { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "total_minted", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalMinted { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "total_burned", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalBurned { get; set; }
-
-        /// <summary>
-        /// Gets or Sets TwoWayLinkedDapps
-        /// </summary>
-        [DataMember(Name = "two_way_linked_dapps", EmitDefaultValue = true)]
-        public TwoWayLinkedDappsCollection TwoWayLinkedDapps { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NativeResourceDetails
-        /// </summary>
-        [DataMember(Name = "native_resource_details", EmitDefaultValue = true)]
-        public NativeResourceDetails NativeResourceDetails { get; set; }
+        [DataMember(Name = "amount", EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -193,14 +137,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponseFungibleResourceDetailsAllOf {\n");
-            sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
-            sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
-            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
-            sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
-            sb.Append("  TotalBurned: ").Append(TotalBurned).Append("\n");
-            sb.Append("  TwoWayLinkedDapps: ").Append(TwoWayLinkedDapps).Append("\n");
-            sb.Append("  NativeResourceDetails: ").Append(NativeResourceDetails).Append("\n");
+            sb.Append("class NativeResourceRedemptionValueItem {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -221,15 +160,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponseFungibleResourceDetailsAllOf);
+            return this.Equals(input as NativeResourceRedemptionValueItem);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponseFungibleResourceDetailsAllOf instances are equal
+        /// Returns true if NativeResourceRedemptionValueItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponseFungibleResourceDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of NativeResourceRedemptionValueItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponseFungibleResourceDetailsAllOf input)
+        public bool Equals(NativeResourceRedemptionValueItem input)
         {
             if (input == null)
             {
@@ -237,38 +176,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.RoleAssignments == input.RoleAssignments ||
-                    (this.RoleAssignments != null &&
-                    this.RoleAssignments.Equals(input.RoleAssignments))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.Divisibility == input.Divisibility ||
-                    this.Divisibility.Equals(input.Divisibility)
-                ) && 
-                (
-                    this.TotalSupply == input.TotalSupply ||
-                    (this.TotalSupply != null &&
-                    this.TotalSupply.Equals(input.TotalSupply))
-                ) && 
-                (
-                    this.TotalMinted == input.TotalMinted ||
-                    (this.TotalMinted != null &&
-                    this.TotalMinted.Equals(input.TotalMinted))
-                ) && 
-                (
-                    this.TotalBurned == input.TotalBurned ||
-                    (this.TotalBurned != null &&
-                    this.TotalBurned.Equals(input.TotalBurned))
-                ) && 
-                (
-                    this.TwoWayLinkedDapps == input.TwoWayLinkedDapps ||
-                    (this.TwoWayLinkedDapps != null &&
-                    this.TwoWayLinkedDapps.Equals(input.TwoWayLinkedDapps))
-                ) && 
-                (
-                    this.NativeResourceDetails == input.NativeResourceDetails ||
-                    (this.NativeResourceDetails != null &&
-                    this.NativeResourceDetails.Equals(input.NativeResourceDetails))
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -281,30 +196,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.RoleAssignments != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoleAssignments.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
-                if (this.TotalSupply != null)
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
-                }
-                if (this.TotalMinted != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalMinted.GetHashCode();
-                }
-                if (this.TotalBurned != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalBurned.GetHashCode();
-                }
-                if (this.TwoWayLinkedDapps != null)
-                {
-                    hashCode = (hashCode * 59) + this.TwoWayLinkedDapps.GetHashCode();
-                }
-                if (this.NativeResourceDetails != null)
-                {
-                    hashCode = (hashCode * 59) + this.NativeResourceDetails.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }

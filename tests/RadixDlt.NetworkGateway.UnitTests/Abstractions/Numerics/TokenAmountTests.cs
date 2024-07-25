@@ -214,4 +214,22 @@ public class TokenAmountTests
     {
         tokenAmount.IsNaN().Should().Be(expectedIsNaN);
     }
+
+    [Fact]
+    public void Abc()
+    {
+        var one = TokenAmount.OneFullUnit;
+        var totalSupply = TokenAmount.FromSubUnitsString("141421356237309504881");
+        var resourceBalance = TokenAmount.FromSubUnitsString("100000000000000000000");
+
+        var div = resourceBalance / totalSupply;
+        var mul = one * div;
+
+        var divString = div.GetSubUnits().ToString();
+        var mulString = mul.GetSubUnits().ToString();
+
+        // TODO fix me
+        dsadasdsa
+        "a".Should().Be("a");
+    }
 }
