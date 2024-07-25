@@ -66,7 +66,6 @@ using System;
 
 namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 
-// TODO use TwoWayLinkError rather string? for error
 public abstract record ResolvedTwoWayLink(string? InvalidReason)
 {
     public bool IsValid => InvalidReason == null;
