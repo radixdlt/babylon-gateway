@@ -116,7 +116,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="totalBurned">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="nonFungibleDataMutableFields">nonFungibleDataMutableFields (required).</param>
         /// <param name="twoWayLinkedDapps">twoWayLinkedDapps.</param>
-        public StateEntityDetailsResponseNonFungibleResourceDetailsAllOf(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), List<string> nonFungibleDataMutableFields = default(List<string>), TwoWayLinkedDappsCollection twoWayLinkedDapps = default(TwoWayLinkedDappsCollection))
+        /// <param name="nativeResourceDetails">nativeResourceDetails.</param>
+        public StateEntityDetailsResponseNonFungibleResourceDetailsAllOf(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), List<string> nonFungibleDataMutableFields = default(List<string>), TwoWayLinkedDappsCollection twoWayLinkedDapps = default(TwoWayLinkedDappsCollection), NativeResourceDetails nativeResourceDetails = default(NativeResourceDetails))
         {
             // to ensure "roleAssignments" is required (not null)
             if (roleAssignments == null)
@@ -150,6 +151,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.NonFungibleDataMutableFields = nonFungibleDataMutableFields;
             this.TwoWayLinkedDapps = twoWayLinkedDapps;
+            this.NativeResourceDetails = nativeResourceDetails;
         }
 
         /// <summary>
@@ -192,6 +194,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TwoWayLinkedDappsCollection TwoWayLinkedDapps { get; set; }
 
         /// <summary>
+        /// Gets or Sets NativeResourceDetails
+        /// </summary>
+        [DataMember(Name = "native_resource_details", EmitDefaultValue = true)]
+        public NativeResourceDetails NativeResourceDetails { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -206,6 +214,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  TotalBurned: ").Append(TotalBurned).Append("\n");
             sb.Append("  NonFungibleDataMutableFields: ").Append(NonFungibleDataMutableFields).Append("\n");
             sb.Append("  TwoWayLinkedDapps: ").Append(TwoWayLinkedDapps).Append("\n");
+            sb.Append("  NativeResourceDetails: ").Append(NativeResourceDetails).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -275,6 +284,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TwoWayLinkedDapps == input.TwoWayLinkedDapps ||
                     (this.TwoWayLinkedDapps != null &&
                     this.TwoWayLinkedDapps.Equals(input.TwoWayLinkedDapps))
+                ) && 
+                (
+                    this.NativeResourceDetails == input.NativeResourceDetails ||
+                    (this.NativeResourceDetails != null &&
+                    this.NativeResourceDetails.Equals(input.NativeResourceDetails))
                 );
         }
 
@@ -311,6 +325,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.TwoWayLinkedDapps != null)
                 {
                     hashCode = (hashCode * 59) + this.TwoWayLinkedDapps.GetHashCode();
+                }
+                if (this.NativeResourceDetails != null)
+                {
+                    hashCode = (hashCode * 59) + this.NativeResourceDetails.GetHashCode();
                 }
                 return hashCode;
             }

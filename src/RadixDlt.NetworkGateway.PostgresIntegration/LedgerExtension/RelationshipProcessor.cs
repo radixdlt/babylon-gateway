@@ -115,6 +115,11 @@ internal class RelationshipProcessor
                 e.AddCorrelation(EntityRelationship.ValidatorPendingXrdWithdrawVault, _referencedEntities.Get((EntityAddress)validator.Value.PendingXrdWithdrawVault.EntityAddress).DatabaseId);
                 e.AddCorrelation(EntityRelationship.ValidatorLockedOwnerStakeUnitVault, _referencedEntities.Get((EntityAddress)validator.Value.LockedOwnerStakeUnitVault.EntityAddress).DatabaseId);
                 e.AddCorrelation(EntityRelationship.ValidatorPendingOwnerStakeUnitUnlockVault, _referencedEntities.Get((EntityAddress)validator.Value.PendingOwnerStakeUnitUnlockVault.EntityAddress).DatabaseId);
+
+                _referencedEntities.Get((EntityAddress)validator.Value.StakeUnitResourceAddress).PostResolveConfigureLow((ResourceEntity ue) =>
+                {
+                    ue.AddCorrelation(EntityRelationship.ValidatorStakeUnitValidator, e.Id);
+                });
             });
         }
 
@@ -122,12 +127,20 @@ internal class RelationshipProcessor
         {
             referencedEntity.PostResolveConfigureLow((GlobalOneResourcePoolEntity e) =>
             {
-                e.AddCorrelation(EntityRelationship.ResourcePoolUnit, _referencedEntities.Get((EntityAddress)oneResourcePool.Value.PoolUnitResourceAddress).DatabaseId);
+                var poolUnitResourceEntity = _referencedEntities.Get((EntityAddress)oneResourcePool.Value.PoolUnitResourceAddress);
+
+                e.AddCorrelation(EntityRelationship.ResourcePoolUnit, poolUnitResourceEntity.DatabaseId);
+
+                _referencedEntities.GetByDatabaseId(poolUnitResourceEntity.DatabaseId).PostResolveConfigureLow((ResourceEntity ue) =>
+                {
+                    ue.AddCorrelation(EntityRelationship.ResourcePoolUnitResourcePool, e.Id);
+                });
 
                 var vault = oneResourcePool.Value.Vault;
 
                 _referencedEntities.Get((EntityAddress)vault.EntityAddress).PostResolveConfigureLow((VaultEntity ve) =>
                 {
+                    e.AddCorrelation(EntityRelationship.ResourcePoolResourceVault, ve.Id);
                     ve.AddCorrelation(EntityRelationship.VaultResourcePool, referencedEntity.DatabaseId);
 
                     // as OneResourcePool substates do not expose Resource we need to rely on Vault's correlation to the Resource,
@@ -141,7 +154,14 @@ internal class RelationshipProcessor
         {
             referencedEntity.PostResolveConfigure((GlobalTwoResourcePoolEntity e) =>
             {
-                e.AddCorrelation(EntityRelationship.ResourcePoolUnit, _referencedEntities.Get((EntityAddress)twoResourcePool.Value.PoolUnitResourceAddress).DatabaseId);
+                var poolUnitResourceEntity = _referencedEntities.Get((EntityAddress)twoResourcePool.Value.PoolUnitResourceAddress);
+
+                e.AddCorrelation(EntityRelationship.ResourcePoolUnit, poolUnitResourceEntity.DatabaseId);
+
+                _referencedEntities.GetByDatabaseId(poolUnitResourceEntity.DatabaseId).PostResolveConfigureLow((ResourceEntity ue) =>
+                {
+                    ue.AddCorrelation(EntityRelationship.ResourcePoolUnitResourcePool, e.Id);
+                });
 
                 foreach (var poolVault in twoResourcePool.Value.Vaults)
                 {
@@ -149,24 +169,33 @@ internal class RelationshipProcessor
 
                     _referencedEntities.Get((EntityAddress)poolVault.Vault.EntityAddress).PostResolveConfigureLow((VaultEntity ve) =>
                     {
+                        e.AddCorrelation(EntityRelationship.ResourcePoolResourceVault, ve.Id);
                         ve.AddCorrelation(EntityRelationship.VaultResourcePool, referencedEntity.DatabaseId);
                     });
                 }
             });
         }
 
-        if (substateData is CoreModel.MultiResourcePoolFieldStateSubstate multiResourcePoolFieldStateSubstate)
+        if (substateData is CoreModel.MultiResourcePoolFieldStateSubstate multiResourcePool)
         {
             referencedEntity.PostResolveConfigure((GlobalMultiResourcePoolEntity e) =>
             {
-                e.AddCorrelation(EntityRelationship.ResourcePoolUnit, _referencedEntities.Get((EntityAddress)multiResourcePoolFieldStateSubstate.Value.PoolUnitResourceAddress).DatabaseId);
+                var poolUnitResourceEntity = _referencedEntities.Get((EntityAddress)multiResourcePool.Value.PoolUnitResourceAddress);
 
-                foreach (var poolVault in multiResourcePoolFieldStateSubstate.Value.Vaults)
+                e.AddCorrelation(EntityRelationship.ResourcePoolUnit, poolUnitResourceEntity.DatabaseId);
+
+                _referencedEntities.GetByDatabaseId(poolUnitResourceEntity.DatabaseId).PostResolveConfigureLow((ResourceEntity ue) =>
                 {
-                    e.AddCorrelation(EntityRelationship.ResourcePoolResource, _referencedEntities.Get((EntityAddress)poolVault.ResourceAddress).DatabaseId);
+                    ue.AddCorrelation(EntityRelationship.ResourcePoolUnitResourcePool, e.Id);
+                });
 
-                    _referencedEntities.Get((EntityAddress)poolVault.Vault.EntityAddress).PostResolveConfigureLow((VaultEntity ve) =>
+                foreach (var vault in multiResourcePool.Value.Vaults)
+                {
+                    e.AddCorrelation(EntityRelationship.ResourcePoolResource, _referencedEntities.Get((EntityAddress)vault.ResourceAddress).DatabaseId);
+
+                    _referencedEntities.Get((EntityAddress)vault.Vault.EntityAddress).PostResolveConfigureLow((VaultEntity ve) =>
                     {
+                        e.AddCorrelation(EntityRelationship.ResourcePoolResourceVault, ve.Id);
                         ve.AddCorrelation(EntityRelationship.VaultResourcePool, referencedEntity.DatabaseId);
                     });
                 }
