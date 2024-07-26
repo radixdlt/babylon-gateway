@@ -5604,9 +5604,7 @@ components:
             - fields
           properties:
             variant_id:
-              type: integer
-              minimum: 0
-              maximum: 255
+              type: string
             variant_name:
               type: string
             fields:
@@ -5635,7 +5633,6 @@ components:
         - type: object
           required:
             - element_kind
-            - elements
             - hex
           properties:
             element_kind:
@@ -5694,7 +5691,7 @@ components:
             - value
           properties:
             value:
-              type: string
+              $ref: "#/components/schemas/Address"
     ProgrammaticScryptoSborValueOwn:
       allOf:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
@@ -5703,7 +5700,7 @@ components:
             - value
           properties:
             value:
-              type: string
+              $ref: "#/components/schemas/Address"
     ProgrammaticScryptoSborValueDecimal:
       allOf:
         - $ref: "#/components/schemas/ProgrammaticScryptoSborValue"

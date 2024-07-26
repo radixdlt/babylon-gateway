@@ -84,89 +84,42 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ProgrammaticScryptoSborValueEnum
+    /// ProgrammaticScryptoSborValueReferenceAllOf
     /// </summary>
-    [DataContract(Name = "ProgrammaticScryptoSborValueEnum")]
-    [JsonConverter(typeof(JsonSubtypes), "kind")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueArray), "Array")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBool), "Bool")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueBytes), "Bytes")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueDecimal), "Decimal")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueEnum), "Enum")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI128), "I128")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI16), "I16")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI32), "I32")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI64), "I64")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueI8), "I8")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueMap), "Map")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueNonFungibleLocalId), "NonFungibleLocalId")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueOwn), "Own")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValuePreciseDecimal), "PreciseDecimal")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueReference), "Reference")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueString), "String")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueTuple), "Tuple")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU128), "U128")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU16), "U16")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU32), "U32")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "U64")]
-    [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU8), "U8")]
-    public partial class ProgrammaticScryptoSborValueEnum : ProgrammaticScryptoSborValue, IEquatable<ProgrammaticScryptoSborValueEnum>
+    [DataContract(Name = "ProgrammaticScryptoSborValueReference_allOf")]
+    public partial class ProgrammaticScryptoSborValueReferenceAllOf : IEquatable<ProgrammaticScryptoSborValueReferenceAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueEnum" /> class.
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueReferenceAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ProgrammaticScryptoSborValueEnum() { }
+        protected ProgrammaticScryptoSborValueReferenceAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueEnum" /> class.
+        /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueReferenceAllOf" /> class.
         /// </summary>
-        /// <param name="variantId">variantId (required).</param>
-        /// <param name="variantName">variantName.</param>
-        /// <param name="fields">fields (required).</param>
-        /// <param name="kind">kind (required) (default to ProgrammaticScryptoSborValueKind.Enum).</param>
-        /// <param name="typeName">The name of the type of this value. This is only output when a schema is present and the type has a name. This property is ignored when the value is used as an input to the API. .</param>
-        /// <param name="fieldName">The name of the field which hosts this value. This property is only included if this value is a child of a &#x60;Tuple&#x60; or &#x60;Enum&#x60; with named fields. This property is ignored when the value is used as an input to the API. .</param>
-        public ProgrammaticScryptoSborValueEnum(string variantId = default(string), string variantName = default(string), List<ProgrammaticScryptoSborValue> fields = default(List<ProgrammaticScryptoSborValue>), ProgrammaticScryptoSborValueKind kind = ProgrammaticScryptoSborValueKind.Enum, string typeName = default(string), string fieldName = default(string)) : base(kind, typeName, fieldName)
+        /// <param name="value">Bech32m-encoded human readable version of the address. (required).</param>
+        public ProgrammaticScryptoSborValueReferenceAllOf(string value = default(string))
         {
-            // to ensure "variantId" is required (not null)
-            if (variantId == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("variantId is a required property for ProgrammaticScryptoSborValueEnum and cannot be null");
+                throw new ArgumentNullException("value is a required property for ProgrammaticScryptoSborValueReferenceAllOf and cannot be null");
             }
-            this.VariantId = variantId;
-            // to ensure "fields" is required (not null)
-            if (fields == null)
-            {
-                throw new ArgumentNullException("fields is a required property for ProgrammaticScryptoSborValueEnum and cannot be null");
-            }
-            this.Fields = fields;
-            this.VariantName = variantName;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets VariantId
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "variant_id", IsRequired = true, EmitDefaultValue = true)]
-        public string VariantId { get; set; }
-
-        /// <summary>
-        /// Gets or Sets VariantName
-        /// </summary>
-        [DataMember(Name = "variant_name", EmitDefaultValue = true)]
-        public string VariantName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Fields
-        /// </summary>
-        [DataMember(Name = "fields", IsRequired = true, EmitDefaultValue = true)]
-        public List<ProgrammaticScryptoSborValue> Fields { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public string Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -175,11 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ProgrammaticScryptoSborValueEnum {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  VariantId: ").Append(VariantId).Append("\n");
-            sb.Append("  VariantName: ").Append(VariantName).Append("\n");
-            sb.Append("  Fields: ").Append(Fields).Append("\n");
+            sb.Append("class ProgrammaticScryptoSborValueReferenceAllOf {\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,7 +138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -200,36 +150,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ProgrammaticScryptoSborValueEnum);
+            return this.Equals(input as ProgrammaticScryptoSborValueReferenceAllOf);
         }
 
         /// <summary>
-        /// Returns true if ProgrammaticScryptoSborValueEnum instances are equal
+        /// Returns true if ProgrammaticScryptoSborValueReferenceAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ProgrammaticScryptoSborValueEnum to be compared</param>
+        /// <param name="input">Instance of ProgrammaticScryptoSborValueReferenceAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ProgrammaticScryptoSborValueEnum input)
+        public bool Equals(ProgrammaticScryptoSborValueReferenceAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.VariantId == input.VariantId ||
-                    (this.VariantId != null &&
-                    this.VariantId.Equals(input.VariantId))
-                ) && base.Equals(input) && 
-                (
-                    this.VariantName == input.VariantName ||
-                    (this.VariantName != null &&
-                    this.VariantName.Equals(input.VariantName))
-                ) && base.Equals(input) && 
-                (
-                    this.Fields == input.Fields ||
-                    this.Fields != null &&
-                    input.Fields != null &&
-                    this.Fields.SequenceEqual(input.Fields)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -241,18 +180,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.VariantId != null)
+                int hashCode = 41;
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.VariantId.GetHashCode();
-                }
-                if (this.VariantName != null)
-                {
-                    hashCode = (hashCode * 59) + this.VariantName.GetHashCode();
-                }
-                if (this.Fields != null)
-                {
-                    hashCode = (hashCode * 59) + this.Fields.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

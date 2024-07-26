@@ -1,10 +1,10 @@
 ## 1.7.0
 Release built: _not released yet_
 
-- Optimized `/statistics/validators/uptime` endpoint processing time.
-
-### Breaking Changes
-- `/stream/transactions` no longer indexes `affected_global_entities` for the transaction tracker and the consensus manager entity types.
+> [!CAUTION]
+> **Breaking Changes:**
+> - `/stream/transactions` no longer indexes `affected_global_entities` for the transaction tracker and the consensus manager entity types.
+> - Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
 
 ### Bug fixes
 - Properly indexes manifest classes. Some transactions might have been previously misclassified as `Transfer` and `AccountDepositSettingsUpdate`, i.e. empty transactions with only `lock_fee` instruction.
@@ -13,6 +13,8 @@ Release built: _not released yet_
 - Added support for the missing `message` and `flags.disable_auth_checks` properties in the `/transaction/preview` endpoint request.
 - Added list of mutable non fungible data fields `non_fungible_data_mutable_fields` returned from `/state/entity/details` endpoint.
 - New `event_global_emitters_filter` filter added to `/stream/transactions` endpoint. It allows filtering transactions by the global ancestor of an event emitter. For events emitted by a global entity it is going to be that entity, for internal entities it is going to be a global ancestor.
+- Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
+- Optimized `/statistics/validators/uptime` endpoint processing time.
 
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
