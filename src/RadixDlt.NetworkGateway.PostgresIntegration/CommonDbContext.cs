@@ -123,6 +123,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
+    public DbSet<NonFungibleVaultEntryDefinition> NonFungibleVaultEntryDefinition => Set<NonFungibleVaultEntryDefinition>();
+
     public DbSet<ResourceEntitySupplyHistory> ResourceEntitySupplyHistory => Set<ResourceEntitySupplyHistory>();
 
     public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
@@ -388,6 +390,14 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key });
 
         modelBuilder
+            .Entity<NonFungibleVaultEntryDefinition>()
+            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<NonFungibleVaultEntryDefinition>()
+            .HasIndex(e => new { e.VaultEntityId, e.NonFungibleIdDefinitionId });
+
+        modelBuilder
             .Entity<NonFungibleIdData>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
 
@@ -527,7 +537,12 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<NonFungibleIdLocationHistory>()
-            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
+            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion }, "IX_non_fungible_id_location_history_lookup");
+
+        modelBuilder
+            .Entity<NonFungibleIdLocationHistory>()
+            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion }, "IX_non_fungible_id_location_history_lookup_non_deleted")
+            .HasFilter("is_deleted = FALSE");
 
         modelBuilder
             .Entity<StateHistory>()

@@ -63,7 +63,6 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -101,13 +100,11 @@ internal class EntityFungibleVaultHistory : EntityVaultHistory
     public bool IsRoyaltyVault { get; set; }
 }
 
-internal class EntityNonFungibleVaultHistory : EntityVaultHistory, IAggregateHolder
+internal class EntityNonFungibleVaultHistory : EntityVaultHistory
 {
-    [Column("non_fungible_ids")]
-    public List<long> NonFungibleIds { get; set; }
+    [Column("total_count_including_deleted")]
+    public long TotalCountIncludingDeleted { get; set; }
 
-    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
-    {
-        yield return (nameof(NonFungibleIds), NonFungibleIds.Count);
-    }
+    [Column("total_count_excluding_deleted")]
+    public long TotalCountExcludingDeleted { get; set; }
 }
