@@ -288,40 +288,6 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
-    {
-        if (!nonFungibleIdStoreChanges.Any())
-        {
-            return new Dictionary<long, NonFungibleIdStoreHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var ids = nonFungibleIdStoreChanges.Select(x => x.ReferencedResource.DatabaseId).Distinct().ToList();
-
-        var result = await _dbContext
-            .NonFungibleIdStoreHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id) AS (
-    SELECT UNNEST({ids})
-)
-SELECT emh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM non_fungible_id_store_history
-    WHERE non_fungible_resource_entity_id = variables.entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.NonFungibleResourceEntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentNonFungibleIdStoreHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
     public async Task<Dictionary<long, ResourceEntitySupplyHistory>> MostRecentResourceEntitySupplyHistoryFor(List<ResourceSupplyChange> resourceSupplyChanges, CancellationToken token)
     {
         if (!resourceSupplyChanges.Any())
@@ -382,14 +348,14 @@ WHERE id IN(
         return result;
     }
 
-    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
+    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdDefinition>> ExistingNonFungibleIdDefinitionFor(
         List<NonFungibleIdChange> nonFungibleIdStoreChanges,
         List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
         CancellationToken token)
     {
         if (!nonFungibleIdStoreChanges.Any() && !nonFungibleVaultSnapshots.Any())
         {
-            return new Dictionary<NonFungibleIdLookup, NonFungibleIdData>();
+            return new Dictionary<NonFungibleIdLookup, NonFungibleIdDefinition>();
         }
 
         var sw = Stopwatch.GetTimestamp();
@@ -414,16 +380,16 @@ WHERE id IN(
         }
 
         var result = await _dbContext
-            .NonFungibleIdData
+            .NonFungibleIdDefinition
             .FromSqlInterpolated(@$"
-SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_fungible_id) IN (
+SELECT * FROM non_fungible_id_definition WHERE (non_fungible_resource_entity_id, non_fungible_id) IN (
     SELECT UNNEST({resourceEntityIds}), UNNEST({nonFungibleIds})
 )")
             .AsNoTracking()
             .AnnotateMetricName()
             .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceEntityId, e.NonFungibleId), token);
 
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingNonFungibleIdDataFor), Stopwatch.GetElapsedTime(sw), result.Count));
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingNonFungibleIdDefinitionFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }
@@ -454,9 +420,8 @@ SELECT
     nextval('component_method_royalty_entry_history_id_seq') AS ComponentMethodRoyaltyEntryHistorySequence,
     nextval('component_method_royalty_aggregate_history_id_seq') AS ComponentMethodRoyaltyAggregateHistorySequence,
     nextval('resource_entity_supply_history_id_seq') AS ResourceEntitySupplyHistorySequence,
-    nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
+    nextval('non_fungible_id_definition_id_seq') AS NonFungibleIdDefinitionSequence,
     nextval('non_fungible_id_data_history_id_seq') AS NonFungibleIdDataHistorySequence,
-    nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
     nextval('non_fungible_id_location_history_id_seq') AS NonFungibleIdLocationHistorySequence,
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence,

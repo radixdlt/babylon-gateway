@@ -572,7 +572,7 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyNonFungibleIdData(ICollection<NonFungibleIdData> entities, CancellationToken token)
+    public async Task<int> CopyNonFungibleIdData(ICollection<NonFungibleIdDefinition> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
@@ -582,7 +582,7 @@ internal class WriteHelper : IWriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY non_fungible_id_data (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync("COPY non_fungible_id_definition (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -612,7 +612,7 @@ internal class WriteHelper : IWriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY non_fungible_id_data_history (id, from_state_version, non_fungible_id_data_id, data, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)",
+                "COPY non_fungible_id_data_history (id, from_state_version, non_fungible_id_definition_id, data, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)",
                 token);
 
         foreach (var e in entities)
@@ -621,7 +621,7 @@ internal class WriteHelper : IWriteHelper
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.NonFungibleIdDefinitionId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Data, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
@@ -630,37 +630,6 @@ internal class WriteHelper : IWriteHelper
         await writer.CompleteAsync(token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdDataHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyNonFungibleIdStoreHistory(ICollection<NonFungibleIdStoreHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY non_fungible_id_store_history (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id_data_ids) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleIdDataIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdStoreHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
 
         return entities.Count;
     }
@@ -675,7 +644,7 @@ internal class WriteHelper : IWriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY non_fungible_id_location_history (id, from_state_version, non_fungible_id_data_id, vault_entity_id) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync("COPY non_fungible_id_location_history (id, from_state_version, non_fungible_id_definition_id, vault_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -793,9 +762,8 @@ SELECT
     setval('component_method_royalty_entry_history_id_seq', @componentMethodRoyaltyEntryHistorySequence),
     setval('component_method_royalty_aggregate_history_id_seq', @componentMethodRoyaltyAggregateHistorySequence),
     setval('resource_entity_supply_history_id_seq', @resourceEntitySupplyHistorySequence),
-    setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
+    setval('non_fungible_id_definition_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
-    setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
     setval('non_fungible_id_location_history_id_seq', @nonFungibleIdLocationHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
@@ -836,9 +804,8 @@ SELECT
                 componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
                 componentMethodRoyaltyAggregateHistorySequence = sequences.ComponentMethodRoyaltyAggregateHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
-                nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
+                nonFungibleIdDataSequence = sequences.NonFungibleIdDefinitionSequence,
                 nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
-                nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
                 nonFungibleIdLocationHistorySequence = sequences.NonFungibleIdLocationHistorySequence,
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,

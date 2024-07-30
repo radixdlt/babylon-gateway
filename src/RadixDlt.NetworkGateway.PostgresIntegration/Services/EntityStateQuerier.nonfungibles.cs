@@ -336,7 +336,7 @@ ORDER BY vah.ord;
             commandText: @"
 SELECT nfid.non_fungible_id AS NonFungibleId, final.total_count AS NonFungibleIdsTotalCount
 FROM (
-    SELECT a.val AS non_fungible_id_data_id, cardinality(non_fungible_ids) AS total_count, a.ord AS ord
+    SELECT a.val AS non_fungible_id_definition_id, cardinality(non_fungible_ids) AS total_count, a.ord AS ord
     FROM entity_vault_history
     LEFT JOIN LATERAL UNNEST(non_fungible_ids[@startIndex:@endIndex]) WITH ORDINALITY a(val,ord) ON true
     WHERE id = (
@@ -347,7 +347,7 @@ FROM (
         LIMIT 1
     )
 ) final
-INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
+INNER JOIN non_fungible_id_definition nfid ON nfid.id = final.non_fungible_id_definition_id
 order by ord
 ",
             parameters: new
@@ -428,7 +428,7 @@ SELECT
     un.resource_entity_id as ResourceEntityId,
     un.vault_entity_id as VaultEntityId
 FROM unnested_nfids un
-INNER JOIN non_fungible_id_data nfid ON nfid.id = un.unnested_non_fungible_id
+INNER JOIN non_fungible_id_definition nfid ON nfid.id = un.unnested_non_fungible_id
 ",
             parameters: new
             {
@@ -619,7 +619,7 @@ INNER JOIN LATERAL(
     ORDER BY from_state_version DESC
     LIMIT 1
 ) evh ON true
-LEFT JOIN non_fungible_id_data nfid ON nfid.id = ANY(evh.non_fungible_ids[@startIndex:@endIndex])
+LEFT JOIN non_fungible_id_definition nfid ON nfid.id = ANY(evh.non_fungible_ids[@startIndex:@endIndex])
 GROUP BY VaultEntityId, NonFungibleIdsCount, LastUpdatedAtStateVersion",
             parameters: new
             {

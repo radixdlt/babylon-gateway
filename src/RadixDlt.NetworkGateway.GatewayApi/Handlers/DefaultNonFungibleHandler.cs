@@ -89,14 +89,12 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        var cursor = GatewayModel.OffsetCursor.FromCursorString(request.Cursor);
-        var pageRequest = new IEntityStateQuerier.PageRequest(
-            Address: (EntityAddress)request.ResourceAddress,
-            Offset: cursor?.Offset ?? 0,
-            Limit: _endpointConfiguration.Value.ResolveNonFungibleIdsPageSize(request.LimitPerPage)
-        );
-
-        return await _entityStateQuerier.NonFungibleIds(pageRequest, ledgerState, token);
+        return await _entityStateQuerier.NonFungibleIds(
+            nonFungibleResourceAddress: (EntityAddress)request.ResourceAddress,
+            ledgerState: ledgerState,
+            cursor: GatewayModel.IdBoundaryCoursor.FromCursorString(request.Cursor),
+            pageSize: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
+            token);
     }
 
     public async Task<GatewayModel.StateNonFungibleDataResponse> Data(GatewayModel.StateNonFungibleDataRequest request, CancellationToken token = default)

@@ -5,6 +5,7 @@ Release built: _not released yet_
 > **Breaking Changes:**
 > - `/stream/transactions` no longer indexes `affected_global_entities` for the transaction tracker and the consensus manager entity types.
 > - Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
+> - Changed ordering of the collection returned by the `/state/non-fungible/ids` endpoint. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending.
 
 ### Bug fixes
 - Properly indexes manifest classes. Some transactions might have been previously misclassified as `Transfer` and `AccountDepositSettingsUpdate`, i.e. empty transactions with only `lock_fee` instruction.
@@ -21,6 +22,8 @@ Release built: _not released yet_
 - Replaced per-epoch validator emissions (`validator_emission_statistics` table) with their cumulative statistics (`validator_cumulative_emission_history` table).
 - Added `non_fungible_data_mutable_fields` to `entities` table. Which contains list of all mutable non fungible data fields for non fungible resource entities.
 - New `ledger_transaction_markers` type with the `event_global_emitter` discriminator. It represents the global emitter for each event.
+- Removed `non_fungible_id_store_history` aggregate table. Queries for non fungible ids follow similar strategy as key value store and utilizes `_definition` and `_history` tables to return data.
+- Renamed `non_fungible_id_data` table to `non_fungible_id_definition`.
 
 ## 1.6.1
 Release built: 21.05.2024
@@ -45,7 +48,7 @@ Release built: 09.05.2024
 
 > [!CAUTION]
 > **Breaking Changes:**
-> - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending.
+> - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending.
 > - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
 > - Renamed `state.recovery_role_recovery_attempt` property from `timed_recovery_allowed_after` to `allow_timed_recovery_after` returned from `/state/entity/details` when querying for access controller.
 
