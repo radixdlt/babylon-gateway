@@ -78,8 +78,8 @@ internal class NonFungibleIdDataHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("non_fungible_id_data_id")]
-    public long NonFungibleIdDataId { get; set; }
+    [Column("non_fungible_id_definition_id")]
+    public long NonFungibleIdDefinitionId { get; set; }
 
     [Column("data")]
     public byte[]? Data { get; set; }

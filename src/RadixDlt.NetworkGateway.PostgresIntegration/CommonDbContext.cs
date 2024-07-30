@@ -125,11 +125,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ResourceEntitySupplyHistory> ResourceEntitySupplyHistory => Set<ResourceEntitySupplyHistory>();
 
-    public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
+    public DbSet<NonFungibleIdDefinition> NonFungibleIdDefinition => Set<NonFungibleIdDefinition>();
 
     public DbSet<NonFungibleIdDataHistory> NonFungibleIdDataHistory => Set<NonFungibleIdDataHistory>();
-
-    public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
     public DbSet<NonFungibleIdLocationHistory> NonFungibleIdLocationHistory => Set<NonFungibleIdLocationHistory>();
 
@@ -382,11 +380,11 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key });
 
         modelBuilder
-            .Entity<NonFungibleIdData>()
+            .Entity<NonFungibleIdDefinition>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<NonFungibleIdData>()
+            .Entity<NonFungibleIdDefinition>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion })
             .IsUnique();
 
@@ -513,11 +511,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<NonFungibleIdDataHistory>()
-            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<NonFungibleIdStoreHistory>()
-            .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.NonFungibleIdDefinitionId, e.FromStateVersion });
 
         modelBuilder
             .Entity<NonFungibleIdLocationHistory>()

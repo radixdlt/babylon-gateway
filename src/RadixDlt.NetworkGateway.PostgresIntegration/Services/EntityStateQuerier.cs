@@ -112,6 +112,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
     private record RoyaltyVaultBalanceViewModel(long RoyaltyVaultEntityId, string Balance, long OwnerEntityId, long LastUpdatedAtStateVersion);
 
+    private record NonFungibleIdsViewModel(long Id, long FromStateVersion, string NonFungibleId);
+
     private record struct ExplicitMetadataLookup(long EntityId, string MetadataKey);
 
     private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
@@ -582,53 +584,67 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     }
 
     public async Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(
-        IEntityStateQuerier.PageRequest request,
+        EntityAddress nonFungibleResourceAddress,
         GatewayModel.LedgerState ledgerState,
+        GatewayModel.IdBoundaryCoursor? cursor,
+        int pageSize,
         CancellationToken token = default)
     {
-        var entity = await GetEntity<GlobalNonFungibleResourceEntity>(request.Address, ledgerState, token);
+        var entity = await GetEntity<GlobalNonFungibleResourceEntity>(nonFungibleResourceAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
-WITH most_recent_non_fungible_id_store_history_slice (non_fungible_id_data_ids, non_fungible_ids_total_count) AS (
-    SELECT non_fungible_id_data_ids[@startIndex:@endIndex], cardinality(non_fungible_id_data_ids)
-    FROM non_fungible_id_store_history
-    WHERE from_state_version <= @stateVersion AND non_fungible_resource_entity_id = @entityId
+SELECT
+    d.id AS Id,
+    d.from_state_version AS FromStateVersion,
+    d.non_fungible_id AS NonFungibleId
+FROM non_fungible_id_definition d
+INNER JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_data_history
+    WHERE non_fungible_id_definition_id = d.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
-)
-SELECT nfid.non_fungible_id AS NonFungibleId, hs.non_fungible_ids_total_count AS NonFungibleIdsTotalCount
-FROM most_recent_non_fungible_id_store_history_slice hs
-INNER JOIN non_fungible_id_data nfid ON nfid.id = ANY(hs.non_fungible_id_data_ids)
-ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
-",
+    ) h ON TRUE
+WHERE
+    d.non_fungible_resource_entity_id = @nonFungibleResourceEntityId
+  AND (d.from_state_version, d.id) <= (@cursorStateVersion, @cursorId)
+  AND d.from_state_version <= @stateVersion
+  AND h.is_deleted = false
+ORDER BY d.from_state_version DESC, d.id DESC
+LIMIT @limit
+;",
             parameters: new
             {
+                nonFungibleResourceEntityId = entity.Id,
                 stateVersion = ledgerState.StateVersion,
-                entityId = entity.Id,
-                startIndex = request.Offset + 1,
-                endIndex = request.Offset + request.Limit,
+                cursorStateVersion = cursor?.StateVersionBoundary ?? long.MaxValue,
+                cursorId = cursor?.IdBoundary ?? long.MaxValue,
+                limit = pageSize + 1,
             },
             cancellationToken: token);
 
-        long totalCount = 0;
+        var entriesAndOneMore = (await _dapperWrapper.QueryAsync<NonFungibleIdsViewModel>(_dbContext.Database.GetDbConnection(), cd))
+            .ToList();
 
-        var items = (await _dapperWrapper.QueryAsync<NonFungibleIdViewModel>(_dbContext.Database.GetDbConnection(), cd))
-            .ToList()
-            .Select(vm =>
-            {
-                totalCount = vm.NonFungibleIdsTotalCount;
+        var nextCursor = entriesAndOneMore.Count == pageSize + 1
+            ? new GatewayModel.IdBoundaryCoursor(entriesAndOneMore.Last().FromStateVersion, entriesAndOneMore.Last().Id).ToCursorString()
+            : null;
 
-                return vm.NonFungibleId;
-            })
+        var supplyHistory = await _dbContext.ResourceEntitySupplyHistory.FirstOrDefaultAsync(x => x.ResourceEntityId == entity.Id, token);
+        long totalCount = supplyHistory != null ? long.Parse(supplyHistory.TotalSupply.ToString()) : 0;
+
+        var items = entriesAndOneMore
+            .Take(pageSize)
+            .Select(vm => vm.NonFungibleId)
             .ToList();
 
         return new GatewayModel.StateNonFungibleIdsResponse(
             ledgerState: ledgerState,
-            resourceAddress: request.Address.ToString(),
+            resourceAddress: nonFungibleResourceAddress,
             nonFungibleIds: new GatewayModel.NonFungibleIdsCollection(
                 totalCount: totalCount,
-                nextCursor: CursorGenerator.GenerateOffsetCursor(request.Offset, request.Limit, totalCount),
+                nextCursor: nextCursor,
                 items: items));
     }
 
@@ -669,11 +685,11 @@ ORDER BY nfsh.from_state_version DESC",
         var cd = new CommandDefinition(
             commandText: @"
 SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, md.data AS Data, md.from_state_version AS DataLastUpdatedAtStateVersion
-FROM non_fungible_id_data nfid
+FROM non_fungible_id_definition nfid
 LEFT JOIN LATERAL (
     SELECT data, is_deleted, from_state_version
     FROM non_fungible_id_data_history nfiddh
-    WHERE nfiddh.non_fungible_id_data_id = nfid.id AND nfiddh.from_state_version <= @stateVersion
+    WHERE nfiddh.non_fungible_id_definition_id = nfid.id AND nfiddh.from_state_version <= @stateVersion
     ORDER BY nfiddh.from_state_version DESC
     LIMIT 1
 ) md ON TRUE
@@ -738,7 +754,7 @@ SELECT
 FROM variables var
 INNER JOIN LATERAL (
     SELECT *
-    FROM non_fungible_id_data
+    FROM non_fungible_id_definition
     WHERE non_fungible_resource_entity_id = @resourceEntityId AND non_fungible_id = var.non_fungible_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
@@ -746,14 +762,14 @@ INNER JOIN LATERAL (
 INNER JOIN LATERAL (
     SELECT is_deleted, from_state_version
     FROM non_fungible_id_data_history
-    WHERE non_fungible_id_data_id = nfid.id AND from_state_version <= @stateVersion
+    WHERE non_fungible_id_definition_id = nfid.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) md ON TRUE
 INNER JOIN LATERAL (
     SELECT *
     FROM non_fungible_id_location_history
-    WHERE non_fungible_id_data_id = nfid.id AND from_state_version <= @stateVersion
+    WHERE non_fungible_id_definition_id = nfid.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) lh ON TRUE
