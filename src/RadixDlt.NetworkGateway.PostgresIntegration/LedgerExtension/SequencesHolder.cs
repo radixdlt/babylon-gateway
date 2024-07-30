@@ -118,6 +118,8 @@ internal class SequencesHolder
 
     public long NonFungibleIdLocationHistorySequence { get; set; }
 
+    public long NonFungibleVaultEntryDefinitionSequence { get; set; }
+
     public long ValidatorPublicKeyHistorySequence { get; set; }
 
     public long ValidatorActiveSetHistorySequence { get; set; }

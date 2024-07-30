@@ -1133,13 +1133,15 @@ UPDATE pending_transactions
         {
             var sw = Stopwatch.StartNew();
 
+            var nonFungibleVaultSnapshots = vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList();
             var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(vaultSnapshots, token);
             var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(vaultChanges, token);
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(vaultSnapshots, token);
             var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
-            var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
-            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
+            var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(nonFungibleVaultSnapshots, token);
+            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultSnapshots, token);
+            var existingNonFungibleVaultEntryDefinitions = await readHelper.ExistingNonFungibleVaultEntryFor(nonFungibleVaultSnapshots, existingNonFungibleIdData.Values, token);
 
             await entityMetadataProcessor.LoadDependencies();
             await entitySchemaProcessor.LoadDependencies();
@@ -1163,6 +1165,7 @@ UPDATE pending_transactions
             var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
             var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
+            var nonFungibleVaultEntryDefinitionsToAdd = new List<NonFungibleVaultEntryDefinition>();
 
             entityMetadataProcessor.ProcessChanges();
             entitySchemaProcessor.ProcessChanges();
@@ -1182,16 +1185,14 @@ UPDATE pending_transactions
 
             foreach (var e in nonFungibleIdChanges)
             {
-                var nonFungibleIdData = existingNonFungibleIdData.GetOrAdd(
-                    new NonFungibleIdLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId),
-                    _ =>
+                var nonFungibleIdData = existingNonFungibleIdData.GetOrAdd(new NonFungibleIdLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId), lookup =>
                 {
                     var ret = new NonFungibleIdData
                     {
                         Id = sequences.NonFungibleIdDataSequence++,
                         FromStateVersion = e.StateVersion,
-                        NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
-                        NonFungibleId = e.NonFungibleId,
+                        NonFungibleResourceEntityId = lookup.ResourceEntityId,
+                        NonFungibleId = lookup.NonFungibleId,
                     };
 
                     nonFungibleIdDataToAdd.Add(ret);
@@ -1199,9 +1200,7 @@ UPDATE pending_transactions
                     return ret;
                 });
 
-                var nonFungibleIdStore = nonFungibleIdStoreHistoryToAdd.GetOrAdd(
-                    new NonFungibleStoreLookup(e.ReferencedResource.DatabaseId, e.StateVersion),
-                    _ =>
+                var nonFungibleIdStore = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedResource.DatabaseId, e.StateVersion), _ =>
                 {
                     IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleIdStoreHistory.TryGetValue(e.ReferencedResource.DatabaseId, out var value)
                         ? value.NonFungibleIdDataIds
@@ -1220,8 +1219,7 @@ UPDATE pending_transactions
                     return ret;
                 });
 
-                nonFungibleIdsMutableDataHistoryToAdd.Add(
-                    new NonFungibleIdDataHistory
+                nonFungibleIdsMutableDataHistoryToAdd.Add(new NonFungibleIdDataHistory
                 {
                     Id = sequences.NonFungibleIdDataHistorySequence++,
                     FromStateVersion = e.StateVersion,
@@ -1354,7 +1352,8 @@ UPDATE pending_transactions
                                 GlobalEntityId = nfe.ReferencedVault.DatabaseGlobalAncestorId,
                                 ResourceEntityId = nfe.ReferencedResource.DatabaseId,
                                 VaultEntityId = nfe.ReferencedVault.DatabaseId,
-                                NonFungibleIds = new List<long>(previous?.NonFungibleIds.ToArray() ?? Array.Empty<long>()),
+                                TotalCountIncludingDeleted = previous?.TotalCountIncludingDeleted ?? 0,
+                                TotalCountExcludingDeleted = previous?.TotalCountExcludingDeleted ?? 0,
                             };
 
                             vaultHistoryToAdd.Add(vaultHistory);
@@ -1369,21 +1368,47 @@ UPDATE pending_transactions
 
                         if (nfe.IsWithdrawal)
                         {
-                            vaultHistory.NonFungibleIds.Remove(nonFungibleIdDataId);
-                        }
-                        else
-                        {
-                            vaultHistory.NonFungibleIds.Add(nonFungibleIdDataId);
+                            vaultHistory.TotalCountExcludingDeleted -= 1;
 
-                            nonFungibleIdLocationHistoryToAdd.Add(
-                                new NonFungibleIdLocationHistory
+                            nonFungibleIdLocationHistoryToAdd.Add(new NonFungibleIdLocationHistory
                             {
                                 Id = sequences.NonFungibleIdLocationHistorySequence++,
                                 FromStateVersion = nfe.StateVersion,
                                 NonFungibleIdDataId = nonFungibleIdDataId,
                                 VaultEntityId = nfe.ReferencedVault.DatabaseId,
+                                IsDeleted = true,
                             });
                         }
+                        else
+                        {
+                            vaultHistory.TotalCountExcludingDeleted += 1;
+
+                            nonFungibleIdLocationHistoryToAdd.Add(new NonFungibleIdLocationHistory
+                            {
+                                Id = sequences.NonFungibleIdLocationHistorySequence++,
+                                FromStateVersion = nfe.StateVersion,
+                                NonFungibleIdDataId = nonFungibleIdDataId,
+                                VaultEntityId = nfe.ReferencedVault.DatabaseId,
+                                IsDeleted = false,
+                            });
+                        }
+
+                        existingNonFungibleVaultEntryDefinitions.GetOrAdd(new NonFungibleVaultEntryLookup(nfe.ReferencedVault.DatabaseId, nonFungibleIdDataId), lookup =>
+                        {
+                            vaultHistory.TotalCountIncludingDeleted += 1;
+
+                            var ret = new NonFungibleVaultEntryDefinition
+                            {
+                                Id = sequences.NonFungibleVaultEntryDefinitionSequence++,
+                                FromStateVersion = nfe.StateVersion,
+                                VaultEntityId = lookup.VaultEntityId,
+                                NonFungibleIdDefinitionId = lookup.NonFungibleIdDefinitionId,
+                            };
+
+                            nonFungibleVaultEntryDefinitionsToAdd.Add(ret);
+
+                            return ret;
+                        });
 
                         break;
                     }
@@ -1519,6 +1544,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleVaultEntryDefinition(nonFungibleVaultEntryDefinitionsToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);

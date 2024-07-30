@@ -428,6 +428,35 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_f
         return result;
     }
 
+    public async Task<Dictionary<NonFungibleVaultEntryLookup, NonFungibleVaultEntryDefinition>> ExistingNonFungibleVaultEntryFor(
+        ICollection<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
+        ICollection<NonFungibleIdData> existingNonFungibleIdData,
+        CancellationToken token)
+    {
+        if (!nonFungibleVaultSnapshots.Any() || !existingNonFungibleIdData.Any())
+        {
+            return new Dictionary<NonFungibleVaultEntryLookup, NonFungibleVaultEntryDefinition>();
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+        var vaultIds = nonFungibleVaultSnapshots.Select(x => x.ReferencedVault.DatabaseId).ToHashSet().ToList();
+        var nonFungibleIdDataIds = existingNonFungibleIdData.Select(x => x.Id).ToHashSet().ToList();
+
+        var result = await _dbContext
+            .NonFungibleVaultEntryDefinition
+            .FromSqlInterpolated(@$"
+SELECT * FROM non_fungible_vault_entry_definition WHERE (vault_entity_id, non_fungible_id_definition_id) IN (
+    SELECT * FROM UNNEST({vaultIds}) as vault_entity_id CROSS JOIN UNNEST({nonFungibleIdDataIds}) as non_fungible_id_definition_id
+);")
+            .AsNoTracking()
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => new NonFungibleVaultEntryLookup(e.VaultEntityId, e.NonFungibleIdDefinitionId), token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingNonFungibleVaultEntryFor), Stopwatch.GetElapsedTime(sw), result.Count));
+
+        return result;
+    }
+
     public async Task<SequencesHolder> LoadSequences(CancellationToken token)
     {
         var sw = Stopwatch.GetTimestamp();
@@ -458,6 +487,7 @@ SELECT
     nextval('non_fungible_id_data_history_id_seq') AS NonFungibleIdDataHistorySequence,
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
     nextval('non_fungible_id_location_history_id_seq') AS NonFungibleIdLocationHistorySequence,
+    nextval('non_fungible_vault_entry_definition_id_seq') AS NonFungibleVaultEntryDefinitionSequence,
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence,
     nextval('ledger_transaction_markers_id_seq') AS LedgerTransactionMarkerSequence,
