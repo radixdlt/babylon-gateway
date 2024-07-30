@@ -127,7 +127,7 @@ public interface IEntityStateQuerier
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
 
-    Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(EntityAddress nonFungibleResourceAddress, GatewayModel.LedgerState ledgerState, GatewayModel.IdBoundaryCoursor? cursor, int pageSize, CancellationToken token = default);
 
     Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(
         EntityAddress resourceAddress,

@@ -81,7 +81,7 @@ public interface IKeyValueStoreQuerier
     Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
         EntityAddress keyValueStoreAddress,
         GatewayModel.LedgerState ledgerState,
-        GatewayModel.StateKeyValueStoreKeysCursor? cursor,
+        GatewayModel.IdBoundaryCoursor? cursor,
         int pageSize,
         CancellationToken token = default);
 }

@@ -91,13 +91,11 @@ internal interface IReadHelper
 
     Task<Dictionary<long, EntityNonFungibleVaultHistory>> MostRecentEntityNonFungibleVaultHistory(List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots, CancellationToken token);
 
-    Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token);
-
     Task<Dictionary<long, ResourceEntitySupplyHistory>> MostRecentResourceEntitySupplyHistoryFor(List<ResourceSupplyChange> resourceSupplyChanges, CancellationToken token);
 
     Task<Dictionary<EntityAddress, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token);
 
-    Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
+    Task<Dictionary<NonFungibleIdLookup, NonFungibleIdDefinition>> ExistingNonFungibleIdDefinitionFor(
         List<NonFungibleIdChange> nonFungibleIdStoreChanges,
         List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
         CancellationToken token);
