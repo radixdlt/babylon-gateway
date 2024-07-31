@@ -12,73 +12,61 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
+import {
+    ResourceOwnersCollectionFungibleResourceItem,
+    instanceOfResourceOwnersCollectionFungibleResourceItem,
+    ResourceOwnersCollectionFungibleResourceItemFromJSON,
+    ResourceOwnersCollectionFungibleResourceItemFromJSONTyped,
+    ResourceOwnersCollectionFungibleResourceItemToJSON,
+} from './ResourceOwnersCollectionFungibleResourceItem';
+import {
+    ResourceOwnersCollectionNonFungibleResourceItem,
+    instanceOfResourceOwnersCollectionNonFungibleResourceItem,
+    ResourceOwnersCollectionNonFungibleResourceItemFromJSON,
+    ResourceOwnersCollectionNonFungibleResourceItemFromJSONTyped,
+    ResourceOwnersCollectionNonFungibleResourceItemToJSON,
+} from './ResourceOwnersCollectionNonFungibleResourceItem';
+
 /**
+ * @type ResourceOwnersCollectionItem
  * 
  * @export
- * @interface ProgrammaticScryptoSborValueOwnAllOf
  */
-export interface ProgrammaticScryptoSborValueOwnAllOf {
-    /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueOwnAllOf
-     */
-    value: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueOwnAllOf
-     */
-    kind?: ProgrammaticScryptoSborValueOwnAllOfKindEnum;
+export type ResourceOwnersCollectionItem = { type: 'FungibleResource' } & ResourceOwnersCollectionFungibleResourceItem | { type: 'NonFungibleResource' } & ResourceOwnersCollectionNonFungibleResourceItem;
+
+export function ResourceOwnersCollectionItemFromJSON(json: any): ResourceOwnersCollectionItem {
+    return ResourceOwnersCollectionItemFromJSONTyped(json, false);
 }
 
-
-/**
- * @export
- */
-export const ProgrammaticScryptoSborValueOwnAllOfKindEnum = {
-    Own: 'Own'
-} as const;
-export type ProgrammaticScryptoSborValueOwnAllOfKindEnum = typeof ProgrammaticScryptoSborValueOwnAllOfKindEnum[keyof typeof ProgrammaticScryptoSborValueOwnAllOfKindEnum];
-
-
-/**
- * Check if a given object implements the ProgrammaticScryptoSborValueOwnAllOf interface.
- */
-export function instanceOfProgrammaticScryptoSborValueOwnAllOf(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "value" in value;
-
-    return isInstance;
-}
-
-export function ProgrammaticScryptoSborValueOwnAllOfFromJSON(json: any): ProgrammaticScryptoSborValueOwnAllOf {
-    return ProgrammaticScryptoSborValueOwnAllOfFromJSONTyped(json, false);
-}
-
-export function ProgrammaticScryptoSborValueOwnAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ProgrammaticScryptoSborValueOwnAllOf {
+export function ResourceOwnersCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResourceOwnersCollectionItem {
     if ((json === undefined) || (json === null)) {
         return json;
     }
-    return {
-        
-        'value': json['value'],
-        'kind': !exists(json, 'kind') ? undefined : json['kind'],
-    };
+    switch (json['type']) {
+        case 'FungibleResource':
+            return {...ResourceOwnersCollectionFungibleResourceItemFromJSONTyped(json, true), type: 'FungibleResource'};
+        case 'NonFungibleResource':
+            return {...ResourceOwnersCollectionNonFungibleResourceItemFromJSONTyped(json, true), type: 'NonFungibleResource'};
+        default:
+            throw new Error(`No variant of ResourceOwnersCollectionItem exists with 'type=${json['type']}'`);
+    }
 }
 
-export function ProgrammaticScryptoSborValueOwnAllOfToJSON(value?: ProgrammaticScryptoSborValueOwnAllOf | null): any {
+export function ResourceOwnersCollectionItemToJSON(value?: ResourceOwnersCollectionItem | null): any {
     if (value === undefined) {
         return undefined;
     }
     if (value === null) {
         return null;
     }
-    return {
-        
-        'value': value.value,
-        'kind': value.kind,
-    };
+    switch (value['type']) {
+        case 'FungibleResource':
+            return ResourceOwnersCollectionFungibleResourceItemToJSON(value);
+        case 'NonFungibleResource':
+            return ResourceOwnersCollectionNonFungibleResourceItemToJSON(value);
+        default:
+            throw new Error(`No variant of ResourceOwnersCollectionItem exists with 'type=${value['type']}'`);
+    }
+
 }
 

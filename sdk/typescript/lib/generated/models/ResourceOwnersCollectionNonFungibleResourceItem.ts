@@ -13,84 +13,71 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { ProgrammaticScryptoSborValue } from './ProgrammaticScryptoSborValue';
-import {
-    ProgrammaticScryptoSborValueFromJSON,
-    ProgrammaticScryptoSborValueFromJSONTyped,
-    ProgrammaticScryptoSborValueToJSON,
-} from './ProgrammaticScryptoSborValue';
-
 /**
  * 
  * @export
- * @interface ProgrammaticScryptoSborValueEnumAllOf
+ * @interface ResourceOwnersCollectionNonFungibleResourceItem
  */
-export interface ProgrammaticScryptoSborValueEnumAllOf {
+export interface ResourceOwnersCollectionNonFungibleResourceItem {
     /**
      * 
      * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
+     * @memberof ResourceOwnersCollectionNonFungibleResourceItem
      */
-    variant_id: string;
+    type: ResourceOwnersCollectionNonFungibleResourceItemTypeEnum;
     /**
-     * 
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
+     * @memberof ResourceOwnersCollectionNonFungibleResourceItem
      */
-    variant_name?: string;
+    owner_address: string;
     /**
      * 
-     * @type {Array<ProgrammaticScryptoSborValue>}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
+     * @type {number}
+     * @memberof ResourceOwnersCollectionNonFungibleResourceItem
      */
-    fields: Array<ProgrammaticScryptoSborValue>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    kind?: ProgrammaticScryptoSborValueEnumAllOfKindEnum;
+    non_fungible_ids_count: number;
 }
 
 
 /**
  * @export
  */
-export const ProgrammaticScryptoSborValueEnumAllOfKindEnum = {
-    Enum: 'Enum'
+export const ResourceOwnersCollectionNonFungibleResourceItemTypeEnum = {
+    NonFungibleResource: 'NonFungibleResource'
 } as const;
-export type ProgrammaticScryptoSborValueEnumAllOfKindEnum = typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum[keyof typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum];
+export type ResourceOwnersCollectionNonFungibleResourceItemTypeEnum = typeof ResourceOwnersCollectionNonFungibleResourceItemTypeEnum[keyof typeof ResourceOwnersCollectionNonFungibleResourceItemTypeEnum];
 
 
 /**
- * Check if a given object implements the ProgrammaticScryptoSborValueEnumAllOf interface.
+ * Check if a given object implements the ResourceOwnersCollectionNonFungibleResourceItem interface.
  */
-export function instanceOfProgrammaticScryptoSborValueEnumAllOf(value: object): boolean {
+export function instanceOfResourceOwnersCollectionNonFungibleResourceItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "variant_id" in value;
-    isInstance = isInstance && "fields" in value;
+    isInstance = isInstance && "type" in value;
+    isInstance = isInstance && "owner_address" in value;
+    isInstance = isInstance && "non_fungible_ids_count" in value;
 
     return isInstance;
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSON(json: any): ProgrammaticScryptoSborValueEnumAllOf {
-    return ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json, false);
+export function ResourceOwnersCollectionNonFungibleResourceItemFromJSON(json: any): ResourceOwnersCollectionNonFungibleResourceItem {
+    return ResourceOwnersCollectionNonFungibleResourceItemFromJSONTyped(json, false);
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ProgrammaticScryptoSborValueEnumAllOf {
+export function ResourceOwnersCollectionNonFungibleResourceItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResourceOwnersCollectionNonFungibleResourceItem {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'variant_id': json['variant_id'],
-        'variant_name': !exists(json, 'variant_name') ? undefined : json['variant_name'],
-        'fields': ((json['fields'] as Array<any>).map(ProgrammaticScryptoSborValueFromJSON)),
-        'kind': !exists(json, 'kind') ? undefined : json['kind'],
+        'type': json['type'],
+        'owner_address': json['owner_address'],
+        'non_fungible_ids_count': json['non_fungible_ids_count'],
     };
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: ProgrammaticScryptoSborValueEnumAllOf | null): any {
+export function ResourceOwnersCollectionNonFungibleResourceItemToJSON(value?: ResourceOwnersCollectionNonFungibleResourceItem | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -99,10 +86,9 @@ export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: Programmatic
     }
     return {
         
-        'variant_id': value.variant_id,
-        'variant_name': value.variant_name,
-        'fields': ((value.fields as Array<any>).map(ProgrammaticScryptoSborValueToJSON)),
-        'kind': value.kind,
+        'type': value.type,
+        'owner_address': value.owner_address,
+        'non_fungible_ids_count': value.non_fungible_ids_count,
     };
 }
 

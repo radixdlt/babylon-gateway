@@ -23,74 +23,42 @@ import {
 /**
  * 
  * @export
- * @interface ProgrammaticScryptoSborValueEnumAllOf
+ * @interface StateKeyValueStoreDataRequestJsonKeyItem
  */
-export interface ProgrammaticScryptoSborValueEnumAllOf {
+export interface StateKeyValueStoreDataRequestJsonKeyItem {
     /**
      * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
+     * @type {ProgrammaticScryptoSborValue}
+     * @memberof StateKeyValueStoreDataRequestJsonKeyItem
      */
-    variant_id: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    variant_name?: string;
-    /**
-     * 
-     * @type {Array<ProgrammaticScryptoSborValue>}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    fields: Array<ProgrammaticScryptoSborValue>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    kind?: ProgrammaticScryptoSborValueEnumAllOfKindEnum;
+    key_json: ProgrammaticScryptoSborValue;
 }
 
-
 /**
- * @export
+ * Check if a given object implements the StateKeyValueStoreDataRequestJsonKeyItem interface.
  */
-export const ProgrammaticScryptoSborValueEnumAllOfKindEnum = {
-    Enum: 'Enum'
-} as const;
-export type ProgrammaticScryptoSborValueEnumAllOfKindEnum = typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum[keyof typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum];
-
-
-/**
- * Check if a given object implements the ProgrammaticScryptoSborValueEnumAllOf interface.
- */
-export function instanceOfProgrammaticScryptoSborValueEnumAllOf(value: object): boolean {
+export function instanceOfStateKeyValueStoreDataRequestJsonKeyItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "variant_id" in value;
-    isInstance = isInstance && "fields" in value;
+    isInstance = isInstance && "key_json" in value;
 
     return isInstance;
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSON(json: any): ProgrammaticScryptoSborValueEnumAllOf {
-    return ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json, false);
+export function StateKeyValueStoreDataRequestJsonKeyItemFromJSON(json: any): StateKeyValueStoreDataRequestJsonKeyItem {
+    return StateKeyValueStoreDataRequestJsonKeyItemFromJSONTyped(json, false);
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ProgrammaticScryptoSborValueEnumAllOf {
+export function StateKeyValueStoreDataRequestJsonKeyItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateKeyValueStoreDataRequestJsonKeyItem {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'variant_id': json['variant_id'],
-        'variant_name': !exists(json, 'variant_name') ? undefined : json['variant_name'],
-        'fields': ((json['fields'] as Array<any>).map(ProgrammaticScryptoSborValueFromJSON)),
-        'kind': !exists(json, 'kind') ? undefined : json['kind'],
+        'key_json': ProgrammaticScryptoSborValueFromJSON(json['key_json']),
     };
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: ProgrammaticScryptoSborValueEnumAllOf | null): any {
+export function StateKeyValueStoreDataRequestJsonKeyItemToJSON(value?: StateKeyValueStoreDataRequestJsonKeyItem | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -99,10 +67,7 @@ export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: Programmatic
     }
     return {
         
-        'variant_id': value.variant_id,
-        'variant_name': value.variant_name,
-        'fields': ((value.fields as Array<any>).map(ProgrammaticScryptoSborValueToJSON)),
-        'kind': value.kind,
+        'key_json': ProgrammaticScryptoSborValueToJSON(value.key_json),
     };
 }
 
