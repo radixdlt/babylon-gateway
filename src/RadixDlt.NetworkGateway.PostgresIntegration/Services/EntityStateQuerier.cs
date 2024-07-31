@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -154,6 +155,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var packageSchemaHistory = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
+        var resolvedTwoWayLinks = optIns.DappTwoWayLinks
+            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, true, ledgerState, token)
+            : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
+
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
@@ -183,21 +188,28 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         {
             GatewayModel.StateEntityDetailsResponseItemDetails? details = null;
 
+            resolvedTwoWayLinks.TryGetValue(entity.Address, out var twoWayLinks);
+
             switch (entity)
             {
                 case GlobalFungibleResourceEntity frme:
                     var fungibleResourceSupplyData = resourcesSupplyData[frme.Id];
+                    var fungibleTwoWayLinkedDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+
                     details = new GatewayModel.StateEntityDetailsResponseFungibleResourceDetails(
                         roleAssignments: roleAssignmentsHistory[frme.Id],
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
-                        divisibility: frme.Divisibility);
+                        divisibility: frme.Divisibility,
+                        twoWayLinkedDapps: fungibleTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: fungibleTwoWayLinkedDapps) : null);
 
                     break;
 
                 case GlobalNonFungibleResourceEntity nfrme:
                     var nonFungibleResourceSupplyData = resourcesSupplyData[nfrme.Id];
+                    var nonFungibleTwoWayLinkedDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+
                     if (nonFungibleResourceSupplyData == null)
                     {
                         throw new ArgumentException($"Resource supply data for fungible resource with database id:{nfrme.Id} not found.");
@@ -209,8 +221,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
                         nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel(),
-                        nonFungibleDataMutableFields: nfrme.NonFungibleDataMutableFields
-                        );
+                        nonFungibleDataMutableFields: nfrme.NonFungibleDataMutableFields,
+                        twoWayLinkedDapps: nonFungibleTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: nonFungibleTwoWayLinkedDapps) : null);
                     break;
 
                 case GlobalPackageEntity pe:
@@ -254,7 +266,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null,
                         blueprints: new GatewayModel.PackageBlueprintCollection(blueprintTotalCount, blueprintCursor, blueprintItems),
                         schemas: new GatewayModel.EntitySchemaCollection(schemaTotalCount, schemaCursor, schemaItems),
-                        roleAssignments: roleAssignmentsHistory[pe.Id]);
+                        roleAssignments: roleAssignmentsHistory[pe.Id],
+                        twoWayLinkedDappAddress: twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress);
                     break;
 
                 case VirtualIdentityEntity:
@@ -299,6 +312,23 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
                 case ComponentEntity ce:
                     ComponentMethodRoyaltyEntryHistory[]? componentRoyaltyConfig = null;
+                    GatewayModel.TwoWayLinkedDappOnLedgerDetails? twoWayLinkedDappOnLedgerDetails = null;
+                    var nonAccountTwoWayLinkedDapp = twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress;
+
+                    if (ce is GlobalAccountEntity)
+                    {
+                        var accountTwoWayLinkedDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var accountTwoWayLinkedEntities = twoWayLinks?.OfType<DappClaimedEntityResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var accountTwoWayLinkedLocker = twoWayLinks?.OfType<DappAccountLockerResolvedTwoWayLink>().FirstOrDefault()?.LockerAddress;
+
+                        if (accountTwoWayLinkedDapps?.Any() == true || accountTwoWayLinkedEntities?.Any() == true || accountTwoWayLinkedLocker != null)
+                        {
+                            twoWayLinkedDappOnLedgerDetails = new GatewayModel.TwoWayLinkedDappOnLedgerDetails(
+                                dapps: accountTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: accountTwoWayLinkedDapps) : null,
+                                entities: accountTwoWayLinkedEntities?.Any() == true ? new GatewayModel.TwoWayLinkedEntitiesCollection(items: accountTwoWayLinkedEntities) : null,
+                                primaryLocker: accountTwoWayLinkedLocker);
+                        }
+                    }
 
                     stateHistory.TryGetValue(ce.Id, out var state);
                     roleAssignmentsHistory.TryGetValue(ce.Id, out var roleAssignments);
@@ -312,8 +342,9 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         state: state != null ? new JRaw(state) : null,
                         roleAssignments: roleAssignments,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null,
-                        royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null
-                    );
+                        royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null,
+                        twoWayLinkedDappAddress: nonAccountTwoWayLinkedDapp,
+                        twoWayLinkedDappDetails: twoWayLinkedDappOnLedgerDetails);
                     break;
             }
 
@@ -1441,6 +1472,8 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
 
         foreach (var entity in entities)
         {
+            lookup.Add(entity.Id);
+
             if (entity.HasParent)
             {
                 lookup.Add(entity.ParentAncestorId.Value);

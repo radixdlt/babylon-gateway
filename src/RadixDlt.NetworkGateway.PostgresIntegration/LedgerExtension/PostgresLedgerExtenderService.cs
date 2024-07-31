@@ -259,6 +259,7 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdatePendingTransactions), sw.Elapsed, null));
         }
 
+        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, networkConfiguration, token);
         var relationshipProcessor = new RelationshipProcessor(referencedEntities);
 
         // step: scan for any referenced entities
@@ -741,13 +742,12 @@ UPDATE pending_transactions
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
 
-        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, token);
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
         var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
-        var entitySchemaProcessor = new EntitySchemaProcessor(processorContext, networkConfiguration.Id);
+        var entitySchemaProcessor = new EntitySchemaProcessor(processorContext);
         var componentMethodRoyaltyProcessor = new ComponentMethodRoyaltyProcessor(processorContext);
         var entityRoleAssignmentProcessor = new EntityRoleAssignmentProcessor(processorContext);
-        var packageCodeProcessor = new PackageCodeProcessor(processorContext, networkConfiguration.Id);
+        var packageCodeProcessor = new PackageCodeProcessor(processorContext);
         var packageBlueprintProcessor = new PackageBlueprintProcessor(processorContext, referencedEntities);
         var accountAuthorizedDepositorsProcessor = new AccountAuthorizedDepositorsProcessor(processorContext, referencedEntities);
         var accountResourcePreferenceRulesProcessor = new AccountResourcePreferenceRulesProcessor(processorContext, referencedEntities);
@@ -755,9 +755,10 @@ UPDATE pending_transactions
         var keyValueStoreProcessor = new KeyValueStoreProcessor(processorContext);
         var validatorProcessor = new ValidatorProcessor(processorContext, referencedEntities);
         var validatorEmissionProcessor = new ValidatorEmissionProcessor(processorContext);
-        var accountLockerProcessor = new AccountLockerProcessor(processorContext, referencedEntities, networkConfiguration.Id);
+        var accountLockerProcessor = new AccountLockerProcessor(processorContext, referencedEntities);
         var globalEventEmitterProcessor = new GlobalEventEmitterProcessor(processorContext, referencedEntities, networkConfiguration);
         var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
+        var standardMetadataProcessor = new StandardMetadataProcessor(processorContext, referencedEntities);
 
         // step: scan all substates & events to figure out changes
         {
@@ -918,6 +919,7 @@ UPDATE pending_transactions
                         validatorProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, passingEpoch);
                         accountLockerProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         affectedGlobalEntitiesProcessor.VisitUpsert(referencedEntity, stateVersion);
+                        standardMetadataProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -1153,6 +1155,7 @@ UPDATE pending_transactions
             await accountAuthorizedDepositorsProcessor.LoadDependencies();
             await accountResourcePreferenceRulesProcessor.LoadDependencies();
             await accountLockerProcessor.LoadDependencies();
+            await standardMetadataProcessor.LoadDependencies();
 
             dbReadDuration += sw.Elapsed;
 
@@ -1179,6 +1182,7 @@ UPDATE pending_transactions
             accountLockerProcessor.ProcessChanges();
             ledgerTransactionMarkersToAdd.AddRange(globalEventEmitterProcessor.CreateTransactionMarkers());
             ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntitiesProcessor.CreateTransactionMarkers());
+            standardMetadataProcessor.ProcessChanges();
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1537,6 +1541,7 @@ UPDATE pending_transactions
             rowsInserted += await validatorProcessor.SaveEntities();
             rowsInserted += await validatorEmissionProcessor.SaveEntities();
             rowsInserted += await accountLockerProcessor.SaveEntities();
+            rowsInserted += await standardMetadataProcessor.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);
 

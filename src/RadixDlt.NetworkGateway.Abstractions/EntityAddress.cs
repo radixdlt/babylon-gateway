@@ -76,9 +76,13 @@ public readonly record struct EntityAddress
         _address = address;
     }
 
+    public bool IsGlobal => !IsInternal;
+
     public bool IsInternal => _address.StartsWith("internal_");
 
-    public bool IsGlobal => !IsInternal;
+    public bool IsAccount => _address.StartsWith("account_");
+
+    public bool IsResource => _address.StartsWith("resource_");
 
     public static implicit operator string(EntityAddress ra) => ra._address;
 

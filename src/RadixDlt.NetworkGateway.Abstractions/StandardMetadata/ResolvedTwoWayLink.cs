@@ -62,9 +62,21 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using System.Threading;
+using System;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 
-internal record ProcessorContext(SequencesHolder Sequences, IReadHelper ReadHelper, IWriteHelper WriteHelper, NetworkConfiguration NetworkConfiguration, CancellationToken Token);
+public abstract record ResolvedTwoWayLink(string? InvalidReason)
+{
+    public bool IsValid => InvalidReason == null;
+}
+
+public sealed record DappClaimedEntityResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+
+public sealed record DappClaimedWebsiteResolvedTwoWayLink(Uri Origin, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+
+public sealed record DappDefinitionResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+
+public sealed record DappDefinitionsResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+
+public sealed record DappAccountLockerResolvedTwoWayLink(EntityAddress LockerAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);

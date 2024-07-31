@@ -62,9 +62,14 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using System.Threading;
+namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-
-internal record ProcessorContext(SequencesHolder Sequences, IReadHelper ReadHelper, IWriteHelper WriteHelper, NetworkConfiguration NetworkConfiguration, CancellationToken Token);
+public enum StandardMetadataKey
+{
+    DappAccountType,
+    DappDefinition,
+    DappDefinitions,
+    DappClaimedWebsites,
+    DappClaimedEntities,
+    DappAccountLocker,
+}

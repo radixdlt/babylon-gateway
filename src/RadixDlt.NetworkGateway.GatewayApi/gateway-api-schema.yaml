@@ -2281,6 +2281,56 @@ components:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
 
+    TwoWayLinkedDappsCollection:
+      description: A collection of two-way linked (resolved & verified) dApps linked to the entity defining this collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/TwoWayLinkedDappsCollectionItem"
+    TwoWayLinkedDappsCollectionItem:
+      type: object
+      required:
+        - dapp_address
+      properties:
+        dapp_address:
+          $ref: "#/components/schemas/Address"
+
+    TwoWayLinkedEntitiesCollection:
+      description: A collection of two-way linked (resolved & verified) entities linked to the entity defining this collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/TwoWayLinkedEntitiesCollectionItem"
+    TwoWayLinkedEntitiesCollectionItem:
+      type: object
+      required:
+        - entity_address
+      properties:
+        entity_address:
+          $ref: "#/components/schemas/Address"
+
+    TwoWayLinkedDappOnLedgerDetails:
+      type: object
+      properties:
+        dapps:
+          $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
+        entities:
+          $ref: "#/components/schemas/TwoWayLinkedEntitiesCollection"
+        primary_locker:
+          $ref: "#/components/schemas/Address"
+
     AccountLockerVaultCollection:
       description: Account Locker Account Resources Collection
       allOf:
@@ -3917,6 +3967,7 @@ components:
           component_royalty_vault_balance: true
           package_royalty_vault_balance: true
           non_fungible_include_nfids: true
+          dapp_two_way_links: true
           explicit_metadata:
             - name
             - description
@@ -3949,6 +4000,10 @@ components:
           type: array
           items:
             type: string
+        dapp_two_way_links:
+          description: if set to `true`, on-ledger dApp two-way links (resolved & verified) are returned. See https://docs.radixdlt.com/docs/metadata-for-verification for more details.
+          type: boolean
+          default: false
     StateEntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -4037,6 +4092,8 @@ components:
               $ref: "#/components/schemas/BigDecimal"
             total_burned:
               $ref: "#/components/schemas/BigDecimal"
+            two_way_linked_dapps:
+              $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
     StateEntityDetailsResponseNonFungibleResourceDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -4063,6 +4120,8 @@ components:
               type: array
               items:
                 type: string
+            two_way_linked_dapps:
+              $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
     StateEntityDetailsResponseFungibleVaultDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -4121,6 +4180,9 @@ components:
               $ref: "#/components/schemas/EntitySchemaCollection"
             role_assignments:
               $ref: "#/components/schemas/ComponentEntityRoleAssignments"
+            two_way_linked_dapp_address:
+              description: Two-way linked (resolved & verified) dApp address, if any.
+              $ref: "#/components/schemas/Address"
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -4148,6 +4210,12 @@ components:
               $ref: "#/components/schemas/BigDecimal"
             royalty_config:
               $ref: "#/components/schemas/ComponentRoyaltyConfig"
+            two_way_linked_dapp_address:
+              description: Two-way linked (resolved & verified) dApp address, if any. Applicable to non-Account dApp components only.
+              $ref: "#/components/schemas/Address"
+            two_way_linked_dapp_details:
+              description: Two-way linked (resolved & verified) dApp details. Applicable to dApp definition accounts only and limited to on-ledger information only.
+              $ref: "#/components/schemas/TwoWayLinkedDappOnLedgerDetails"
 
     StateAccountResourcePreferencesPageRequest:
       allOf:

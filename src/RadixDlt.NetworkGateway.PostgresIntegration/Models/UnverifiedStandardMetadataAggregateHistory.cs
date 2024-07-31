@@ -62,9 +62,30 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using System.Threading;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal record ProcessorContext(SequencesHolder Sequences, IReadHelper ReadHelper, IWriteHelper WriteHelper, NetworkConfiguration NetworkConfiguration, CancellationToken Token);
+[Table("unverified_standard_metadata_aggregate_history")]
+internal class UnverifiedStandardMetadataAggregateHistory : IAggregateHolder
+{
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("entry_ids")]
+    public List<long> EntryIds { get; set; }
+
+    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
+    {
+        yield return (nameof(EntryIds), EntryIds.Count);
+    }
+}

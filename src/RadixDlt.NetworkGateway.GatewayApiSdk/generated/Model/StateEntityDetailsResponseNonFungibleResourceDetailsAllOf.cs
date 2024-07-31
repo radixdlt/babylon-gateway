@@ -115,7 +115,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalBurned">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="nonFungibleDataMutableFields">nonFungibleDataMutableFields (required).</param>
-        public StateEntityDetailsResponseNonFungibleResourceDetailsAllOf(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), List<string> nonFungibleDataMutableFields = default(List<string>))
+        /// <param name="twoWayLinkedDapps">twoWayLinkedDapps.</param>
+        public StateEntityDetailsResponseNonFungibleResourceDetailsAllOf(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), List<string> nonFungibleDataMutableFields = default(List<string>), TwoWayLinkedDappsCollection twoWayLinkedDapps = default(TwoWayLinkedDappsCollection))
         {
             // to ensure "roleAssignments" is required (not null)
             if (roleAssignments == null)
@@ -148,6 +149,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("nonFungibleDataMutableFields is a required property for StateEntityDetailsResponseNonFungibleResourceDetailsAllOf and cannot be null");
             }
             this.NonFungibleDataMutableFields = nonFungibleDataMutableFields;
+            this.TwoWayLinkedDapps = twoWayLinkedDapps;
         }
 
         /// <summary>
@@ -184,6 +186,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<string> NonFungibleDataMutableFields { get; set; }
 
         /// <summary>
+        /// Gets or Sets TwoWayLinkedDapps
+        /// </summary>
+        [DataMember(Name = "two_way_linked_dapps", EmitDefaultValue = true)]
+        public TwoWayLinkedDappsCollection TwoWayLinkedDapps { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -197,6 +205,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
             sb.Append("  TotalBurned: ").Append(TotalBurned).Append("\n");
             sb.Append("  NonFungibleDataMutableFields: ").Append(NonFungibleDataMutableFields).Append("\n");
+            sb.Append("  TwoWayLinkedDapps: ").Append(TwoWayLinkedDapps).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -261,6 +270,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.NonFungibleDataMutableFields != null &&
                     input.NonFungibleDataMutableFields != null &&
                     this.NonFungibleDataMutableFields.SequenceEqual(input.NonFungibleDataMutableFields)
+                ) && 
+                (
+                    this.TwoWayLinkedDapps == input.TwoWayLinkedDapps ||
+                    (this.TwoWayLinkedDapps != null &&
+                    this.TwoWayLinkedDapps.Equals(input.TwoWayLinkedDapps))
                 );
         }
 
@@ -293,6 +307,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.NonFungibleDataMutableFields != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleDataMutableFields.GetHashCode();
+                }
+                if (this.TwoWayLinkedDapps != null)
+                {
+                    hashCode = (hashCode * 59) + this.TwoWayLinkedDapps.GetHashCode();
                 }
                 return hashCode;
             }

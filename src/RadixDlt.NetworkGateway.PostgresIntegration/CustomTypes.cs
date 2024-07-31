@@ -65,6 +65,7 @@
 using Dapper;
 using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
@@ -120,6 +121,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<SborTypeKind>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<AuthorizedDepositorBadgeType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<StandardMetadataKey>();
 #pragma warning restore CS0618
 
         _configured = true;

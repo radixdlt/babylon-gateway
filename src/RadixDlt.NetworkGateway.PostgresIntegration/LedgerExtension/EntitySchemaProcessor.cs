@@ -76,6 +76,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal record struct SchemaDefinitionEntryDbLookup(long EntityId, ValueBytes SchemaHash);
+
 internal record struct SchemaChangePointerLookup(long EntityId, long StateVersion);
 
 internal record SchemaChangePointer
@@ -88,7 +89,6 @@ internal record SchemaChangePointer
 internal class EntitySchemaProcessor
 {
     private readonly ProcessorContext _context;
-    private readonly byte _networkId;
 
     private readonly ChangeTracker<SchemaChangePointerLookup, SchemaChangePointer> _changes = new();
 
@@ -98,10 +98,9 @@ internal class EntitySchemaProcessor
     private readonly List<SchemaEntryAggregateHistory> _aggregatesToAdd = new();
     private readonly List<SchemaEntryDefinition> _definitionsToAdd = new();
 
-    public EntitySchemaProcessor(ProcessorContext context, byte networkId)
+    public EntitySchemaProcessor(ProcessorContext context)
     {
         _context = context;
-        _networkId = networkId;
     }
 
     public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
@@ -120,7 +119,7 @@ internal class EntitySchemaProcessor
         if (substateId.SubstateType == CoreModel.SubstateType.SchemaEntry)
         {
             var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
-            var schemaHash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _networkId);
+            var schemaHash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _context.NetworkConfiguration.Id);
 
             _changes
                 .GetOrAdd(new SchemaChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new SchemaChangePointer())

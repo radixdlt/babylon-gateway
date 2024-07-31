@@ -812,7 +812,9 @@ SELECT
     setval('package_blueprint_aggregate_history_id_seq', @packageBlueprintAggregateHistorySequence),
     setval('package_code_aggregate_history_id_seq', @packageCodeAggregateHistorySequence),
     setval('account_authorized_depositor_entry_history_id_seq', @accountAuthorizedDepositorEntryHistorySequence),
-    setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence)
+    setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence),
+    setval('unverified_standard_metadata_aggregate_history_id_seq', @unverifiedStandardMetadataAggregateHistorySequence),
+    setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence)
 ",
             parameters: new
             {
@@ -856,6 +858,8 @@ SELECT
                 packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
                 accountAuthorizedDepositorEntryHistorySequence = sequences.AccountAuthorizedDepositorEntryHistorySequence,
                 accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
+                unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
+                unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
             },
             cancellationToken: token);
 

@@ -62,9 +62,23 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using System.Threading;
+namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+public static class StandardMetadataConstants
+{
+    public const string DappAccountType = "account_type";
+    public const string DappDefinition = "dapp_definition";
+    public const string DappDefinitions = "dapp_definitions";
+    public const string DappClaimedWebsites = "claimed_websites";
+    public const string DappClaimedEntities = "claimed_entities";
+    public const string DappAccountLocker = "account_locker";
 
-internal record ProcessorContext(SequencesHolder Sequences, IReadHelper ReadHelper, IWriteHelper WriteHelper, NetworkConfiguration NetworkConfiguration, CancellationToken Token);
+    public const string DappAccountTypeDappDefinition = "dapp definition";
+
+    public const string ValidationUnknown = "unknown";
+    public const string ValidationOnLedgerSucceeded = "on-ok";
+    public const string ValidationOnLedgerAppCheck = "on-app-check";
+    public const string ValidationOffLedgerAppCheck = "off-app-check";
+
+    public const string RadixWellKnownPath = "/.well-known/radix.json";
+}

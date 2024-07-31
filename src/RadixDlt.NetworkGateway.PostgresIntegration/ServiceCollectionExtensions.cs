@@ -69,6 +69,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -120,6 +121,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<SborTypeKind>();
                 dataSourceBuilder.MapEnum<StateType>();
                 dataSourceBuilder.MapEnum<AuthorizedDepositorBadgeType>();
+                dataSourceBuilder.MapEnum<StandardMetadataKey>();
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },

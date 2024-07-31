@@ -85,7 +85,6 @@ internal class AccountLockerProcessor
 
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
-    private readonly byte _networkId;
 
     private readonly HashSet<ObservedTouch> _observedTouchHistory = new();
     private readonly List<ObservedVault> _observedVaultDefinitions = new();
@@ -95,11 +94,10 @@ internal class AccountLockerProcessor
     private readonly List<AccountLockerEntryResourceVaultDefinition> _resourceVaultDefinitionsToAdd = new();
     private readonly List<AccountLockerEntryTouchHistory> _touchHistoryToAdd = new();
 
-    public AccountLockerProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, byte networkId)
+    public AccountLockerProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
     {
         _context = context;
         _referencedEntities = referencedEntities;
-        _networkId = networkId;
     }
 
     public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
@@ -125,8 +123,8 @@ internal class AccountLockerProcessor
 
             if (kvse.TryGetAccountLockerEntryDbLookup(out var lookup))
             {
-                var sborKey = ScryptoSborUtils.DataToProgrammaticJson(keyValueStoreEntry.Key.KeyData.GetDataBytes(), _networkId);
-                var sborValue = ScryptoSborUtils.DataToProgrammaticJson(keyValueStoreEntry.Value.Data.StructData.GetDataBytes(), _networkId);
+                var sborKey = ScryptoSborUtils.DataToProgrammaticJson(keyValueStoreEntry.Key.KeyData.GetDataBytes(), _context.NetworkConfiguration.Id);
+                var sborValue = ScryptoSborUtils.DataToProgrammaticJson(keyValueStoreEntry.Value.Data.StructData.GetDataBytes(), _context.NetworkConfiguration.Id);
 
                 if (sborKey is not GatewayModel.ProgrammaticScryptoSborValueReference resource)
                 {

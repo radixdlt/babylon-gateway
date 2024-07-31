@@ -62,12 +62,13 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable
@@ -101,6 +102,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible")
                 .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
+                .Annotation("Npgsql:Enum:standard_metadata_key", "dapp_account_type,dapp_definition,dapp_definitions,dapp_claimed_websites,dapp_claimed_entities,dapp_account_locker")
                 .Annotation("Npgsql:Enum:state_type", "json,sbor");
 
             migrationBuilder.CreateTable(
@@ -820,6 +822,40 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "unverified_standard_metadata_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_unverified_standard_metadata_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "unverified_standard_metadata_entry_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    is_locked = table.Column<bool>(type: "boolean", nullable: false),
+                    discriminator = table.Column<StandardMetadataKey>(type: "standard_metadata_key", nullable: false),
+                    entity_ids = table.Column<long[]>(type: "bigint[]", nullable: true),
+                    values = table.Column<string[]>(type: "text[]", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_unverified_standard_metadata_entry_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_cumulative_emission_history",
                 columns: table => new
                 {
@@ -1238,6 +1274,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_unverified_standard_metadata_aggregate_history_entity_id_fr~",
+                table: "unverified_standard_metadata_aggregate_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_unverified_standard_metadata_entry_history_entity_id_discri~",
+                table: "unverified_standard_metadata_entry_history",
+                columns: new[] { "entity_id", "discriminator", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_active_set_history_epoch",
                 table: "validator_active_set_history",
                 column: "epoch");
@@ -1387,6 +1433,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "state_history");
+
+            migrationBuilder.DropTable(
+                name: "unverified_standard_metadata_aggregate_history");
+
+            migrationBuilder.DropTable(
+                name: "unverified_standard_metadata_entry_history");
 
             migrationBuilder.DropTable(
                 name: "validator_active_set_history");

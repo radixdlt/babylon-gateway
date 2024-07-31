@@ -145,4 +145,8 @@ internal class SequencesHolder
     public long PackageBlueprintAggregateHistorySequence { get; set; }
 
     public long PackageCodeAggregateHistorySequence { get; set; }
+
+    public long UnverifiedStandardMetadataAggregateHistorySequence { get; set; }
+
+    public long UnverifiedStandardMetadataEntryHistorySequence { get; set; }
 }

@@ -210,6 +210,15 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
         return typedDbEntity;
     }
 
+    /// <summary>
+    /// Define custom ToString to avoid infinitely recursive ToString calls, and calls to the database, etc.
+    /// </summary>
+    /// <returns>The string representation of the type for debugging.</returns>
+    public override string ToString()
+    {
+        return $"{nameof(ReferencedEntity)} {{ {nameof(Address)}: {Address}, {nameof(IsGlobal)}: {IsGlobal}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
+    }
+
     private Entity GetDatabaseEntityInternal()
     {
         var de = _databaseEntity ?? throw new InvalidOperationException($"Database entity not loaded yet for {this}.");
@@ -236,14 +245,5 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
         {
             action.Invoke(GetDatabaseEntity<T>());
         });
-    }
-
-    /// <summary>
-    /// Define custom ToString to avoid infinitely recursive ToString calls, and calls to the database, etc.
-    /// </summary>
-    /// <returns>The string representation of the type for debugging.</returns>
-    public override string ToString()
-    {
-        return $"{nameof(ReferencedEntity)} {{ {nameof(Address)}: {Address}, {nameof(IsGlobal)}: {IsGlobal}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
     }
 }
