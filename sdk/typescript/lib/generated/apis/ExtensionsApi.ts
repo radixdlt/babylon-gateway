@@ -12,73 +12,64 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
+
+import * as runtime from '../runtime';
+import type {
+  ErrorResponse,
+  ResourceOwnersRequest,
+  ResourceOwnersResponse,
+} from '../models';
+import {
+    ErrorResponseFromJSON,
+    ErrorResponseToJSON,
+    ResourceOwnersRequestFromJSON,
+    ResourceOwnersRequestToJSON,
+    ResourceOwnersResponseFromJSON,
+    ResourceOwnersResponseToJSON,
+} from '../models';
+
+export interface ResourceOwnersPageRequest {
+    resourceOwnersRequest: ResourceOwnersRequest;
+}
+
 /**
  * 
- * @export
- * @interface ProgrammaticScryptoSborValueOwnAllOf
  */
-export interface ProgrammaticScryptoSborValueOwnAllOf {
+export class ExtensionsApi extends runtime.BaseAPI {
+
     /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueOwnAllOf
+     * Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+     * Get Resource Owners Page
      */
-    value: string;
+    async resourceOwnersPageRaw(requestParameters: ResourceOwnersPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResourceOwnersResponse>> {
+        if (requestParameters.resourceOwnersRequest === null || requestParameters.resourceOwnersRequest === undefined) {
+            throw new runtime.RequiredError('resourceOwnersRequest','Required parameter requestParameters.resourceOwnersRequest was null or undefined when calling resourceOwnersPage.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/extensions/resource-owners/page`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ResourceOwnersRequestToJSON(requestParameters.resourceOwnersRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResourceOwnersResponseFromJSON(jsonValue));
+    }
+
     /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueOwnAllOf
+     * Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending. 
+     * Get Resource Owners Page
      */
-    kind?: ProgrammaticScryptoSborValueOwnAllOfKindEnum;
-}
-
-
-/**
- * @export
- */
-export const ProgrammaticScryptoSborValueOwnAllOfKindEnum = {
-    Own: 'Own'
-} as const;
-export type ProgrammaticScryptoSborValueOwnAllOfKindEnum = typeof ProgrammaticScryptoSborValueOwnAllOfKindEnum[keyof typeof ProgrammaticScryptoSborValueOwnAllOfKindEnum];
-
-
-/**
- * Check if a given object implements the ProgrammaticScryptoSborValueOwnAllOf interface.
- */
-export function instanceOfProgrammaticScryptoSborValueOwnAllOf(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "value" in value;
-
-    return isInstance;
-}
-
-export function ProgrammaticScryptoSborValueOwnAllOfFromJSON(json: any): ProgrammaticScryptoSborValueOwnAllOf {
-    return ProgrammaticScryptoSborValueOwnAllOfFromJSONTyped(json, false);
-}
-
-export function ProgrammaticScryptoSborValueOwnAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ProgrammaticScryptoSborValueOwnAllOf {
-    if ((json === undefined) || (json === null)) {
-        return json;
+    async resourceOwnersPage(requestParameters: ResourceOwnersPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResourceOwnersResponse> {
+        const response = await this.resourceOwnersPageRaw(requestParameters, initOverrides);
+        return await response.value();
     }
-    return {
-        
-        'value': json['value'],
-        'kind': !exists(json, 'kind') ? undefined : json['kind'],
-    };
-}
 
-export function ProgrammaticScryptoSborValueOwnAllOfToJSON(value?: ProgrammaticScryptoSborValueOwnAllOf | null): any {
-    if (value === undefined) {
-        return undefined;
-    }
-    if (value === null) {
-        return null;
-    }
-    return {
-        
-        'value': value.value,
-        'kind': value.kind,
-    };
 }
-

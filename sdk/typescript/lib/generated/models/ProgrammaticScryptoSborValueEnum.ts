@@ -52,10 +52,10 @@ This property is ignored when the value is used as an input to the API.
     field_name?: string | null;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof ProgrammaticScryptoSborValueEnum
      */
-    variant_id: number;
+    variant_id: string;
     /**
      * 
      * @type {string}

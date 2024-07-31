@@ -12,73 +12,27 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
+
 /**
  * 
  * @export
- * @interface ProgrammaticScryptoSborValueOwnAllOf
  */
-export interface ProgrammaticScryptoSborValueOwnAllOf {
-    /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueOwnAllOf
-     */
-    value: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueOwnAllOf
-     */
-    kind?: ProgrammaticScryptoSborValueOwnAllOfKindEnum;
-}
-
-
-/**
- * @export
- */
-export const ProgrammaticScryptoSborValueOwnAllOfKindEnum = {
-    Own: 'Own'
+export const ResourceOwnersResourceType = {
+    FungibleResource: 'FungibleResource',
+    NonFungibleResource: 'NonFungibleResource'
 } as const;
-export type ProgrammaticScryptoSborValueOwnAllOfKindEnum = typeof ProgrammaticScryptoSborValueOwnAllOfKindEnum[keyof typeof ProgrammaticScryptoSborValueOwnAllOfKindEnum];
+export type ResourceOwnersResourceType = typeof ResourceOwnersResourceType[keyof typeof ResourceOwnersResourceType];
 
 
-/**
- * Check if a given object implements the ProgrammaticScryptoSborValueOwnAllOf interface.
- */
-export function instanceOfProgrammaticScryptoSborValueOwnAllOf(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "value" in value;
-
-    return isInstance;
+export function ResourceOwnersResourceTypeFromJSON(json: any): ResourceOwnersResourceType {
+    return ResourceOwnersResourceTypeFromJSONTyped(json, false);
 }
 
-export function ProgrammaticScryptoSborValueOwnAllOfFromJSON(json: any): ProgrammaticScryptoSborValueOwnAllOf {
-    return ProgrammaticScryptoSborValueOwnAllOfFromJSONTyped(json, false);
+export function ResourceOwnersResourceTypeFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResourceOwnersResourceType {
+    return json as ResourceOwnersResourceType;
 }
 
-export function ProgrammaticScryptoSborValueOwnAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ProgrammaticScryptoSborValueOwnAllOf {
-    if ((json === undefined) || (json === null)) {
-        return json;
-    }
-    return {
-        
-        'value': json['value'],
-        'kind': !exists(json, 'kind') ? undefined : json['kind'],
-    };
-}
-
-export function ProgrammaticScryptoSborValueOwnAllOfToJSON(value?: ProgrammaticScryptoSborValueOwnAllOf | null): any {
-    if (value === undefined) {
-        return undefined;
-    }
-    if (value === null) {
-        return null;
-    }
-    return {
-        
-        'value': value.value,
-        'kind': value.kind,
-    };
+export function ResourceOwnersResourceTypeToJSON(value?: ResourceOwnersResourceType | null): any {
+    return value as any;
 }
 

@@ -13,84 +13,52 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { ProgrammaticScryptoSborValue } from './ProgrammaticScryptoSborValue';
+import type { ResourceOwnersCollection } from './ResourceOwnersCollection';
 import {
-    ProgrammaticScryptoSborValueFromJSON,
-    ProgrammaticScryptoSborValueFromJSONTyped,
-    ProgrammaticScryptoSborValueToJSON,
-} from './ProgrammaticScryptoSborValue';
+    ResourceOwnersCollectionFromJSON,
+    ResourceOwnersCollectionFromJSONTyped,
+    ResourceOwnersCollectionToJSON,
+} from './ResourceOwnersCollection';
 
 /**
  * 
  * @export
- * @interface ProgrammaticScryptoSborValueEnumAllOf
+ * @interface ResourceOwnersResponse
  */
-export interface ProgrammaticScryptoSborValueEnumAllOf {
+export interface ResourceOwnersResponse {
     /**
      * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
+     * @type {ResourceOwnersCollection}
+     * @memberof ResourceOwnersResponse
      */
-    variant_id: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    variant_name?: string;
-    /**
-     * 
-     * @type {Array<ProgrammaticScryptoSborValue>}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    fields: Array<ProgrammaticScryptoSborValue>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    kind?: ProgrammaticScryptoSborValueEnumAllOfKindEnum;
+    owners: ResourceOwnersCollection;
 }
 
-
 /**
- * @export
+ * Check if a given object implements the ResourceOwnersResponse interface.
  */
-export const ProgrammaticScryptoSborValueEnumAllOfKindEnum = {
-    Enum: 'Enum'
-} as const;
-export type ProgrammaticScryptoSborValueEnumAllOfKindEnum = typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum[keyof typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum];
-
-
-/**
- * Check if a given object implements the ProgrammaticScryptoSborValueEnumAllOf interface.
- */
-export function instanceOfProgrammaticScryptoSborValueEnumAllOf(value: object): boolean {
+export function instanceOfResourceOwnersResponse(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "variant_id" in value;
-    isInstance = isInstance && "fields" in value;
+    isInstance = isInstance && "owners" in value;
 
     return isInstance;
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSON(json: any): ProgrammaticScryptoSborValueEnumAllOf {
-    return ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json, false);
+export function ResourceOwnersResponseFromJSON(json: any): ResourceOwnersResponse {
+    return ResourceOwnersResponseFromJSONTyped(json, false);
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ProgrammaticScryptoSborValueEnumAllOf {
+export function ResourceOwnersResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResourceOwnersResponse {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'variant_id': json['variant_id'],
-        'variant_name': !exists(json, 'variant_name') ? undefined : json['variant_name'],
-        'fields': ((json['fields'] as Array<any>).map(ProgrammaticScryptoSborValueFromJSON)),
-        'kind': !exists(json, 'kind') ? undefined : json['kind'],
+        'owners': ResourceOwnersCollectionFromJSON(json['owners']),
     };
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: ProgrammaticScryptoSborValueEnumAllOf | null): any {
+export function ResourceOwnersResponseToJSON(value?: ResourceOwnersResponse | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -99,10 +67,7 @@ export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: Programmatic
     }
     return {
         
-        'variant_id': value.variant_id,
-        'variant_name': value.variant_name,
-        'fields': ((value.fields as Array<any>).map(ProgrammaticScryptoSborValueToJSON)),
-        'kind': value.kind,
+        'owners': ResourceOwnersCollectionToJSON(value.owners),
     };
 }
 

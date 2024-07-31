@@ -1,4 +1,5 @@
 .openapi-generator-ignore
+apis/ExtensionsApi.ts
 apis/StateApi.ts
 apis/StatisticsApi.ts
 apis/StatusApi.ts
@@ -255,6 +256,19 @@ models/PublicKeyHashEddsaEd25519AllOf.ts
 models/PublicKeyHashType.ts
 models/PublicKeyType.ts
 models/ResourceAggregationLevel.ts
+models/ResourceOwnersCollection.ts
+models/ResourceOwnersCollectionAllOf.ts
+models/ResourceOwnersCollectionFungibleResourceItem.ts
+models/ResourceOwnersCollectionFungibleResourceItemAllOf.ts
+models/ResourceOwnersCollectionItem.ts
+models/ResourceOwnersCollectionItemBase.ts
+models/ResourceOwnersCollectionNonFungibleResourceItem.ts
+models/ResourceOwnersCollectionNonFungibleResourceItemAllOf.ts
+models/ResourceOwnersRequest.ts
+models/ResourceOwnersRequestAllOf.ts
+models/ResourceOwnersResourceType.ts
+models/ResourceOwnersResponse.ts
+models/ResourceOwnersResponseAllOf.ts
 models/ResultSetCursorMixin.ts
 models/RoleAssignmentResolution.ts
 models/RoleKey.ts
@@ -320,6 +334,8 @@ models/StateEntitySchemaPageRequest.ts
 models/StateEntitySchemaPageResponse.ts
 models/StateKeyValueStoreDataRequest.ts
 models/StateKeyValueStoreDataRequestAllOf.ts
+models/StateKeyValueStoreDataRequestHexKeyItem.ts
+models/StateKeyValueStoreDataRequestJsonKeyItem.ts
 models/StateKeyValueStoreDataRequestKeyItem.ts
 models/StateKeyValueStoreDataResponse.ts
 models/StateKeyValueStoreDataResponseAllOf.ts
