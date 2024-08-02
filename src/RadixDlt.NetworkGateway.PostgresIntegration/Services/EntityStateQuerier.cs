@@ -631,8 +631,8 @@ LIMIT @limit
             ? new GatewayModel.IdBoundaryCoursor(entriesAndOneMore.Last().FromStateVersion, entriesAndOneMore.Last().Id).ToCursorString()
             : null;
 
-        var supplyHistory = await _dbContext.ResourceEntitySupplyHistory.FirstOrDefaultAsync(x => x.ResourceEntityId == entity.Id, token);
-        long totalCount = supplyHistory != null ? long.Parse(supplyHistory.TotalSupply.ToString()) : 0;
+        var resourceSupplyData = await GetResourceSupplyData(entity.Id, ledgerState, token);
+        long totalCount = long.Parse(resourceSupplyData.TotalSupply.ToString());
 
         var items = entriesAndOneMore
             .Take(pageSize)
@@ -1271,6 +1271,12 @@ order by ah.ord
         }
 
         return new GatewayModel.FungibleResourcesCollection(totalCount, CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount), items);
+    }
+
+    private async Task<ResourceEntitySupplyHistory> GetResourceSupplyData(long entityId, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        var response = await GetResourcesSupplyData(new[] { entityId }, ledgerState, token);
+        return response[entityId];
     }
 
     private async Task<Dictionary<long, ResourceEntitySupplyHistory>> GetResourcesSupplyData(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
