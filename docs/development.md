@@ -3,7 +3,7 @@
 ## Pre-requisites
 
 The following are pre-requisites:
-* We use [dotnet 7](https://dotnet.microsoft.com/download/dotnet/7.0) - ensure `dotnet --version` returns at least 7.x
+* We use [dotnet 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) - ensure `dotnet --version` returns at least 7.x
 * Install docker
 
 Whilst any IDE supporting dotnet core can be used for development, we would recommend Jetbrains Rider.
@@ -14,7 +14,7 @@ In development, configuration comes from a few places, with items lower down the
 
 * `apps/[X]/appsettings.json`
 * `apps/[X]/appsettings.Development.json`
-* `apps/[X]/appsettings.PersonalOverrides.json` (under .gitignore)
+* `apps/[X]/appsettings.overrides.json` (under .gitignore)
 * Environment variables
 
 By default, the configuration is set up to point to a full node's Core API running locally at http://localhost:3333, but you may wish to use non-local Core API, to have a synced-up system to read from, and to avoid hammering your computer too much! (see sections below).
@@ -23,7 +23,7 @@ If you wish to easily spin up a local Core API, follow the instructions in [the 
 
 ### Custom development configuration
 
-As referenced above, the `appsettings.PersonalOverrides.json` files can be used to (eg) override configuration locally without risking updating source control. The schema for this file is the same as the main `appsettings.json` and `appsettings.Development.json`. Some example use cases include:
+As referenced above, the `appsettings.overrides.json` files can be used to (eg) override configuration locally without risking updating source control. The schema for this file is the same as the main `appsettings.json` and `appsettings.Development.json`. Some example use cases include:
 
 * Changing the `NetworkName` so it matches the core nodes you're connected to
 * Connecting to a non-local Core Node (typically by adjusting `DisableCoreApiHttpsCertificateChecks`, and the `CoreApiAddress`, `CoreApiAuthorizationHeader` fields under the first configured node in `CoreApiNodes`)
@@ -48,15 +48,21 @@ You'll need to run a version 1.1.0 or higher in order for the node to have the C
 
 Run following tasks:
 
-* `Postgres` (this runs `docker-compose up`)
-* `Database Migrations with Wipe Database` (this runs database migrations)
+* `./deployment/run-only-network-gateway-resources.sh` from the command line to start the PostgreSQL DB container.
+* `Migrations (Wipe)` (this runs database migrations)
 
 And then, depending on what you're working on, you can run one or both of these. Note that the `Data Aggregator` needs to have run successfully at least once to start the ledger, for the `Gateway API` to be able to connect.
 
 * `Data Aggregator`
-* `Gateway API`
+* `Gateway Api`
 
-You can use the `Database Migrations with Wipe Database` task if you ever need to clear the database. (Say, because the DB ledger got corrupted; or you wish to change which network you're connected to)
+You can use the `Migrations (Wipe)` task if you ever need to clear the database. (Say, because the DB ledger got corrupted; or you wish to change which network you're connected to)
+
+### Configuring the dev DB as a Data Source
+
+To get checking and auto-complete on your SQL, you may wish to configure a Data Source in Rider.
+
+To do this, add a PostgreSQL Database connection with query string: `jdbc:postgresql://localhost:5432/radixdlt_ledger?logServerErrorDetail=true&password=db_dev_password&user=db_dev_superuser`
 
 ## Developing using the command line
 
@@ -66,7 +72,7 @@ Run the following in separate terminals:
 
 ```bash
 # Spin up PostgreSQL first
-docker-compose up
+./deployment/run-only-network-gateway-resources.sh
 ```
 
 ```bash
