@@ -114,7 +114,9 @@ For more information, see the [Tests project](../../src/Tests).
 
 ## Reformatting
 
-Run `dotnet format` to fix whitespace and other formatting issues across all files. Rider runs this as you save each file, so this likely won't be needed regularly.
+Run `./generation/ensure-license-headers.sh` when adding new files to ensure they get license headers. This also runs `dotnet format`.
+
+You can also run `dotnet format` manually to fix whitespace and other formatting issues across all files. Rider runs this as you save each file, so this likely won't be needed regularly.
 
 ## Code Generation - Migrations, Open API specs etc
 
