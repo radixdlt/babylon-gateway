@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NativeResourceValidatorClaimNFTValue
+    /// NativeResourceValidatorClaimNftValue
     /// </summary>
-    [DataContract(Name = "NativeResourceValidatorClaimNFTValue")]
+    [DataContract(Name = "NativeResourceValidatorClaimNftValue")]
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceAccessControllerRecoveryBadgeValue), "AccessControllerRecoveryBadge")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceAccountOwnerBadgeValue), "AccountOwnerBadge")]
@@ -107,28 +107,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(NativeResourceSecp256k1SignatureResourceValue), "Secp256k1SignatureResource")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceSystemExecutionResourceValue), "SystemExecutionResource")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceTwoResourcePoolUnitValue), "TwoResourcePoolUnit")]
-    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorClaimNFTValue), "ValidatorClaimNFT")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorClaimNftValue), "ValidatorClaimNft")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorLiquidStakeUnitValue), "ValidatorLiquidStakeUnit")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorOwnerBadgeValue), "ValidatorOwnerBadge")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceXrdValue), "Xrd")]
-    public partial class NativeResourceValidatorClaimNFTValue : NativeResourceDetails, IEquatable<NativeResourceValidatorClaimNFTValue>
+    public partial class NativeResourceValidatorClaimNftValue : NativeResourceDetails, IEquatable<NativeResourceValidatorClaimNftValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNFTValue" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNftValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NativeResourceValidatorClaimNFTValue() { }
+        protected NativeResourceValidatorClaimNftValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNFTValue" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNftValue" /> class.
         /// </summary>
         /// <param name="validatorAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="kind">kind (required) (default to NativeResourceKind.ValidatorClaimNFT).</param>
-        public NativeResourceValidatorClaimNFTValue(string validatorAddress = default(string), NativeResourceKind kind = NativeResourceKind.ValidatorClaimNFT) : base(kind)
+        /// <param name="kind">kind (required) (default to NativeResourceKind.ValidatorClaimNft).</param>
+        public NativeResourceValidatorClaimNftValue(string validatorAddress = default(string), NativeResourceKind kind = NativeResourceKind.ValidatorClaimNft) : base(kind)
         {
             // to ensure "validatorAddress" is required (not null)
             if (validatorAddress == null)
             {
-                throw new ArgumentNullException("validatorAddress is a required property for NativeResourceValidatorClaimNFTValue and cannot be null");
+                throw new ArgumentNullException("validatorAddress is a required property for NativeResourceValidatorClaimNftValue and cannot be null");
             }
             this.ValidatorAddress = validatorAddress;
         }
@@ -147,7 +147,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NativeResourceValidatorClaimNFTValue {\n");
+            sb.Append("class NativeResourceValidatorClaimNftValue {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  ValidatorAddress: ").Append(ValidatorAddress).Append("\n");
             sb.Append("}\n");
@@ -170,15 +170,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NativeResourceValidatorClaimNFTValue);
+            return this.Equals(input as NativeResourceValidatorClaimNftValue);
         }
 
         /// <summary>
-        /// Returns true if NativeResourceValidatorClaimNFTValue instances are equal
+        /// Returns true if NativeResourceValidatorClaimNftValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of NativeResourceValidatorClaimNFTValue to be compared</param>
+        /// <param name="input">Instance of NativeResourceValidatorClaimNftValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NativeResourceValidatorClaimNFTValue input)
+        public bool Equals(NativeResourceValidatorClaimNftValue input)
         {
             if (input == null)
             {

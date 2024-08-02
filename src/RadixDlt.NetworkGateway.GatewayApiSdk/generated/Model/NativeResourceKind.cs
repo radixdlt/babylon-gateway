@@ -162,10 +162,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         ValidatorLiquidStakeUnit = 11,
 
         /// <summary>
-        /// Enum ValidatorClaimNFT for value: ValidatorClaimNFT
+        /// Enum ValidatorClaimNft for value: ValidatorClaimNft
         /// </summary>
-        [EnumMember(Value = "ValidatorClaimNFT")]
-        ValidatorClaimNFT = 12,
+        [EnumMember(Value = "ValidatorClaimNft")]
+        ValidatorClaimNft = 12,
 
         /// <summary>
         /// Enum OneResourcePoolUnit for value: OneResourcePoolUnit

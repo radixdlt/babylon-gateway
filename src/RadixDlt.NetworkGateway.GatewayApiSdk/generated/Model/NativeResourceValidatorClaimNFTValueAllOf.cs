@@ -90,26 +90,26 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NativeResourceValidatorClaimNFTValueAllOf
+    /// NativeResourceValidatorClaimNftValueAllOf
     /// </summary>
-    [DataContract(Name = "NativeResourceValidatorClaimNFTValue_allOf")]
-    public partial class NativeResourceValidatorClaimNFTValueAllOf : IEquatable<NativeResourceValidatorClaimNFTValueAllOf>
+    [DataContract(Name = "NativeResourceValidatorClaimNftValue_allOf")]
+    public partial class NativeResourceValidatorClaimNftValueAllOf : IEquatable<NativeResourceValidatorClaimNftValueAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNFTValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNftValueAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NativeResourceValidatorClaimNFTValueAllOf() { }
+        protected NativeResourceValidatorClaimNftValueAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNFTValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNftValueAllOf" /> class.
         /// </summary>
         /// <param name="validatorAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public NativeResourceValidatorClaimNFTValueAllOf(string validatorAddress = default(string))
+        public NativeResourceValidatorClaimNftValueAllOf(string validatorAddress = default(string))
         {
             // to ensure "validatorAddress" is required (not null)
             if (validatorAddress == null)
             {
-                throw new ArgumentNullException("validatorAddress is a required property for NativeResourceValidatorClaimNFTValueAllOf and cannot be null");
+                throw new ArgumentNullException("validatorAddress is a required property for NativeResourceValidatorClaimNftValueAllOf and cannot be null");
             }
             this.ValidatorAddress = validatorAddress;
         }
@@ -128,7 +128,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NativeResourceValidatorClaimNFTValueAllOf {\n");
+            sb.Append("class NativeResourceValidatorClaimNftValueAllOf {\n");
             sb.Append("  ValidatorAddress: ").Append(ValidatorAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -150,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NativeResourceValidatorClaimNFTValueAllOf);
+            return this.Equals(input as NativeResourceValidatorClaimNftValueAllOf);
         }
 
         /// <summary>
-        /// Returns true if NativeResourceValidatorClaimNFTValueAllOf instances are equal
+        /// Returns true if NativeResourceValidatorClaimNftValueAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NativeResourceValidatorClaimNFTValueAllOf to be compared</param>
+        /// <param name="input">Instance of NativeResourceValidatorClaimNftValueAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NativeResourceValidatorClaimNFTValueAllOf input)
+        public bool Equals(NativeResourceValidatorClaimNftValueAllOf input)
         {
             if (input == null)
             {

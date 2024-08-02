@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(NativeResourceSecp256k1SignatureResourceValue), "Secp256k1SignatureResource")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceSystemExecutionResourceValue), "SystemExecutionResource")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceTwoResourcePoolUnitValue), "TwoResourcePoolUnit")]
-    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorClaimNFTValue), "ValidatorClaimNFT")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorClaimNftValue), "ValidatorClaimNft")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorLiquidStakeUnitValue), "ValidatorLiquidStakeUnit")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorOwnerBadgeValue), "ValidatorOwnerBadge")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceXrdValue), "Xrd")]
@@ -123,7 +123,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="poolAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="redemptionResourceCount">redemptionResourceCount (required).</param>
-        /// <param name="unitRedemptionValue">unitRedemptionValue.</param>
+        /// <param name="unitRedemptionValue">unitRedemptionValue (required).</param>
         /// <param name="kind">kind (required) (default to NativeResourceKind.OneResourcePoolUnit).</param>
         public NativeResourceOneResourcePoolUnitValue(string poolAddress = default(string), int redemptionResourceCount = default(int), List<NativeResourceRedemptionValueItem> unitRedemptionValue = default(List<NativeResourceRedemptionValueItem>), NativeResourceKind kind = NativeResourceKind.OneResourcePoolUnit) : base(kind)
         {
@@ -134,6 +134,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.PoolAddress = poolAddress;
             this.RedemptionResourceCount = redemptionResourceCount;
+            // to ensure "unitRedemptionValue" is required (not null)
+            if (unitRedemptionValue == null)
+            {
+                throw new ArgumentNullException("unitRedemptionValue is a required property for NativeResourceOneResourcePoolUnitValue and cannot be null");
+            }
             this.UnitRedemptionValue = unitRedemptionValue;
         }
 
@@ -153,7 +158,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets UnitRedemptionValue
         /// </summary>
-        [DataMember(Name = "unit_redemption_value", EmitDefaultValue = true)]
+        [DataMember(Name = "unit_redemption_value", IsRequired = true, EmitDefaultValue = true)]
         public List<NativeResourceRedemptionValueItem> UnitRedemptionValue { get; set; }
 
         /// <summary>

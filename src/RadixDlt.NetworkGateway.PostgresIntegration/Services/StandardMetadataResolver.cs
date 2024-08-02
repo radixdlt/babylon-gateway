@@ -104,7 +104,6 @@ internal class StandardMetadataResolver
             return ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
         }
 
-#pragma warning disable SA1118
         var partiallyValidatedEntries = await _dapperWrapper.ToList<PartiallyValidatedTwoWayLink>(
             _dbContext,
             @"
@@ -274,7 +273,6 @@ SELECT
     coalesce(target_value, target_entity_address) AS TargetValue,
     validation_result AS ValidationResult
 FROM resolved",
-#pragma warning restore SA1118
             new
             {
                 dappAccountTypeDappDefinition = StandardMetadataConstants.DappAccountTypeDappDefinition,
