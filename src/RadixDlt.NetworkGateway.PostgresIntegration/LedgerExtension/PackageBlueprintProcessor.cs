@@ -313,7 +313,7 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.Name, NpgsqlDbType.Text, token);
             await writer.WriteAsync(e.Version, NpgsqlDbType.Text, token);
             await writer.WriteAsync(e.Definition, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(e.DependantEntityIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.DependantEntityIds?.ToArray().DaTrim(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.AuthTemplate, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(e.AuthTemplateIsLocked, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.RoyaltyConfig, NpgsqlDbType.Jsonb, token);
@@ -328,6 +328,6 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.PackageBlueprintIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.PackageBlueprintIds.ToArray().DaTrim(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         });
 }

@@ -70,6 +70,7 @@ using Newtonsoft.Json;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
 
 namespace DataAggregator;
@@ -122,6 +123,8 @@ public class DataAggregatorStartup
             });
 
         StartMetricServer(logger);
+
+        AggregatorTrimExtensions.Logger = logger;
     }
 
     private void StartMetricServer(ILogger logger)

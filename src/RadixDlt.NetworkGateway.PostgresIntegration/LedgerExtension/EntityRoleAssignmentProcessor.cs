@@ -312,6 +312,6 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.OwnerRoleId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntryIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntryIds.ToArray().DaTrim(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         });
 }
