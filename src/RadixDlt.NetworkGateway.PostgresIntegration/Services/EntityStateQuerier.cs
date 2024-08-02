@@ -610,7 +610,6 @@ WHERE
     d.non_fungible_resource_entity_id = @nonFungibleResourceEntityId
   AND (d.from_state_version, d.id) <= (@cursorStateVersion, @cursorId)
   AND d.from_state_version <= @stateVersion
-  AND h.is_deleted = false
 ORDER BY d.from_state_version DESC, d.id DESC
 LIMIT @limit
 ;",
@@ -632,7 +631,7 @@ LIMIT @limit
             : null;
 
         var resourceSupplyData = await GetResourceSupplyData(entity.Id, ledgerState, token);
-        long totalCount = long.Parse(resourceSupplyData.TotalSupply.ToString());
+        long totalCount = long.Parse(resourceSupplyData.TotalMinted.ToString());
 
         var items = entriesAndOneMore
             .Take(pageSize)
