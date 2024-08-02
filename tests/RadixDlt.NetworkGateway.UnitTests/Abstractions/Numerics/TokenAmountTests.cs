@@ -66,6 +66,7 @@ using FluentAssertions;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Numerics;
 using Xunit;
 
@@ -215,21 +216,30 @@ public class TokenAmountTests
         tokenAmount.IsNaN().Should().Be(expectedIsNaN);
     }
 
-    [Fact]
-    public void Abc()
+    [Theory]
+    [InlineData("1", "1", "1")]
+    [InlineData("100", "10", "10")]
+    [InlineData("32", "4", "8")]
+    [InlineData("5000000000", "0.2", "25000000000")]
+    [InlineData("5000000000", "0.00005", "100000000000000")]
+    public void Divide_ExactValue(string dividend, string divisor, string expected)
     {
-        var one = TokenAmount.OneFullUnit;
-        var totalSupply = TokenAmount.FromSubUnitsString("141421356237309504881");
-        var resourceBalance = TokenAmount.FromSubUnitsString("100000000000000000000");
+        var result = TokenAmount.FromDecimalString(dividend) / TokenAmount.FromDecimalString(divisor);
 
-        var div = resourceBalance / totalSupply;
-        var mul = one * div;
+        result.ToString().Should().Be(expected);
+    }
 
-        var divString = div.GetSubUnits().ToString();
-        var mulString = mul.GetSubUnits().ToString();
+    [Theory]
+    [InlineData("141", "100", "1.410")]
+    [InlineData("100", "141", "0.709")]
+    [InlineData("100", "33", "3.030")]
+    [InlineData("50000000000", "0.123456789", "405000003685")]
+    public void Divide_ApproximateValue(string dividend, string divisor, string expected)
+    {
+        var result = TokenAmount.FromDecimalString(dividend) / TokenAmount.FromDecimalString(divisor);
+        var resultAsNumber = decimal.Parse(result.ToString(), NumberFormatInfo.InvariantInfo);
+        var expectedAsNumber = decimal.Parse(expected, NumberFormatInfo.InvariantInfo);
 
-        // TODO fix me
-        dsadasdsa
-        "a".Should().Be("a");
+        resultAsNumber.Should().BeApproximately(expectedAsNumber, 100);
     }
 }

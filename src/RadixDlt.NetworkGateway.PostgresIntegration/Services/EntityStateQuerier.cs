@@ -1593,9 +1593,7 @@ WHERE x.owner_correlated_entity_relationship = 'resource_pool_resource_vault' OR
 
             if (entry.UnitTotalSupply > TokenAmount.Zero)
             {
-                // amount = (TokenAmount.OneFullUnit / entry.UnitTotalSupply) * TokenAmount.FromSubUnitsString();
-                // var a = BigInteger.Parse(row.Amount).DivideAndReturnDouble(BigInteger.Parse(row.UnitTotalSupply));
-                // amount = TokenAmount.FromSubUnits(a);
+                amount = TokenAmount.FromSubUnitsString(row.Amount) / entry.UnitTotalSupply;
             }
 
             entry.Items.Add(new UnitRedemptionValue((EntityAddress)row.ResourceAddress, amount));
@@ -1603,9 +1601,6 @@ WHERE x.owner_correlated_entity_relationship = 'resource_pool_resource_vault' OR
 
         return result;
     }
-
-    // RB: 100000000000000000000
-    // TS: 141421356237309504881
 
     // todo naive implementation only
     private async Task<IDictionary<EntityAddress, GatewayModel.NativeResourceDetails>> GetNativeResourceDetails(ICollection<Entity> entities, GatewayModel.LedgerState ledgerState, CancellationToken token)

@@ -289,20 +289,8 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
 
         var doublePrecisionDividendSubUnits = dividend._subUnits * _divisor;
         var divisorSubUnits = divisor._subUnits;
-        var doublePrecisionResult = doublePrecisionDividendSubUnits / divisorSubUnits;
 
-        var decimalIndexFromEnd = DecimalPrecision;
-        var digitCount = CountDigits(doublePrecisionResult);
-
-        while (decimalIndexFromEnd > 0 && (doublePrecisionResult % 10) == 0)
-        {
-            decimalIndexFromEnd--;
-            doublePrecisionResult /= 10;
-            digitCount--;
-        }
-
-        // TODO this is wrong! we must
-        return FromSubUnits(doublePrecisionResult);
+        return FromSubUnits(doublePrecisionDividendSubUnits / divisorSubUnits);
     }
 
     // Is there a faster approach that works with BigIntegers?
