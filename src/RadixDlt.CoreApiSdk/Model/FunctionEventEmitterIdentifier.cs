@@ -70,6 +70,6 @@ public partial class FunctionEventEmitterIdentifier
 {
     public override IEnumerable<string> GetEntityAddresses()
     {
-        yield return this.PackageAddress;
+        yield return PackageAddress;
     }
 }

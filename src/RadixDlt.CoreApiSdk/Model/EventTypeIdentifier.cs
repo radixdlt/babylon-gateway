@@ -72,7 +72,7 @@ public partial class EventTypeIdentifier : IEntityAddressPointer
     {
         yield return TypeReference.FullTypeId.EntityAddress;
 
-        foreach (var address in this.Emitter.GetEntityAddresses())
+        foreach (var address in Emitter.GetEntityAddresses())
         {
             yield return address;
         }

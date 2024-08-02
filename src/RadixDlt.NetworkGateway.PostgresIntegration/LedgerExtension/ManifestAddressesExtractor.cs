@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -159,18 +159,18 @@ internal static class ManifestAddressesExtractor
                 switch (proof)
                 {
                     case ToolkitModel.ResourceSpecifier.Amount fungibleProof:
-                    {
-                        var resourceAddress = (EntityAddress)fungibleProof.resourceAddress.AddressString();
-                        mapped.Add(new PresentedProof(accountAddress, resourceAddress));
-                        break;
-                    }
+                        {
+                            var resourceAddress = (EntityAddress)fungibleProof.resourceAddress.AddressString();
+                            mapped.Add(new PresentedProof(accountAddress, resourceAddress));
+                            break;
+                        }
 
                     case ToolkitModel.ResourceSpecifier.Ids nonFungibleProof:
-                    {
-                        var resourceAddress = (EntityAddress)nonFungibleProof.resourceAddress.AddressString();
-                        mapped.Add(new PresentedProof(accountAddress, resourceAddress));
-                        break;
-                    }
+                        {
+                            var resourceAddress = (EntityAddress)nonFungibleProof.resourceAddress.AddressString();
+                            mapped.Add(new PresentedProof(accountAddress, resourceAddress));
+                            break;
+                        }
 
                     default:
                         throw new UnreachableException($"Unexpected proof type {proof.GetType()}");

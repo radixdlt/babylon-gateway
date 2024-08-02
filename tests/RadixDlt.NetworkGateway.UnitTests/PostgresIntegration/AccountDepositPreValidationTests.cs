@@ -147,5 +147,5 @@ public class AccountDepositPreValidationTests
         // Assert.
         result.AllowsTryDepositBatch.Should().BeTrue();
         result.ResourceSpecificBehaviour.Should().BeEquivalentTo(expectedResourceSpecificBehaviour);
-  }
+    }
 }
