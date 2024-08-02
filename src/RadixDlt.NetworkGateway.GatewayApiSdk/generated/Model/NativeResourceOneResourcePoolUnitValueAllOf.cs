@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="poolAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="redemptionResourceCount">redemptionResourceCount (required).</param>
-        /// <param name="unitRedemptionValue">unitRedemptionValue.</param>
+        /// <param name="unitRedemptionValue">unitRedemptionValue (required).</param>
         public NativeResourceOneResourcePoolUnitValueAllOf(string poolAddress = default(string), int redemptionResourceCount = default(int), List<NativeResourceRedemptionValueItem> unitRedemptionValue = default(List<NativeResourceRedemptionValueItem>))
         {
             // to ensure "poolAddress" is required (not null)
@@ -115,6 +115,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.PoolAddress = poolAddress;
             this.RedemptionResourceCount = redemptionResourceCount;
+            // to ensure "unitRedemptionValue" is required (not null)
+            if (unitRedemptionValue == null)
+            {
+                throw new ArgumentNullException("unitRedemptionValue is a required property for NativeResourceOneResourcePoolUnitValueAllOf and cannot be null");
+            }
             this.UnitRedemptionValue = unitRedemptionValue;
         }
 
@@ -134,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets UnitRedemptionValue
         /// </summary>
-        [DataMember(Name = "unit_redemption_value", EmitDefaultValue = true)]
+        [DataMember(Name = "unit_redemption_value", IsRequired = true, EmitDefaultValue = true)]
         public List<NativeResourceRedemptionValueItem> UnitRedemptionValue { get; set; }
 
         /// <summary>

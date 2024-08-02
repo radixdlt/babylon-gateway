@@ -75,7 +75,6 @@ using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
@@ -83,7 +82,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -140,6 +138,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     {
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
         var packagePageSize = _endpointConfiguration.Value.DefaultHeavyCollectionsPageSize;
+        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
 
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
@@ -162,6 +161,9 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var resolvedTwoWayLinks = optIns.DappTwoWayLinks
             ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, true, ledgerState, token)
             : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
+        var resolvedNativeResourceDetails = optIns.NativeResourceDetails
+            ? await new NativeResourceDetailsResolver(_dbContext, _dapperWrapper, networkConfiguration).GetNativeResourceDetails(entities, ledgerState, token)
+            : ImmutableDictionary<EntityAddress, GatewayModel.NativeResourceDetails>.Empty;
 
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
 
@@ -186,8 +188,6 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             ? await GetExplicitMetadata(entities.Select(e => e.Id).Concat(resourceAddressToEntityId.Values).ToArray(), optIns.ExplicitMetadata.ToArray(), ledgerState, token)
             : null;
 
-        var nativeRes = await GetNativeResourceDetails(entities, ledgerState, token);
-
         var items = new List<GatewayModel.StateEntityDetailsResponseItem>();
 
         foreach (var entity in entities)
@@ -195,7 +195,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             GatewayModel.StateEntityDetailsResponseItemDetails? details = null;
 
             resolvedTwoWayLinks.TryGetValue(entity.Address, out var twoWayLinks);
-            nativeRes.TryGetValue(entity.Address, out var nativeResourceDetails);
+            resolvedNativeResourceDetails.TryGetValue(entity.Address, out var nativeResourceDetails);
 
             switch (entity)
             {
@@ -1489,161 +1489,6 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
                 .ToListAsync(token))
             .GroupBy(b => b.EntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
-    }
-
-    private async Task<GatewayModel.NativeResourceDetails?> GetNativeResourceDetails_Static(EntityAddress entityAddress)
-    {
-        // TODO make "static" behind ValueTask-based factory
-        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration();
-        var wka = networkConfiguration.WellKnownAddresses;
-        var map = new Dictionary<string, GatewayModel.NativeResourceDetails>
-        {
-            [wka.Xrd] = new GatewayModel.NativeResourceXrdValue(),
-            [wka.PackageOwnerBadge] = new GatewayModel.NativeResourcePackageOwnerBadgeValue(),
-            [wka.AccountOwnerBadge] = new GatewayModel.NativeResourceAccountOwnerBadgeValue(),
-            [wka.IdentityOwnerBadge] = new GatewayModel.NativeResourceIdentityOwnerBadgeValue(),
-            [wka.ValidatorOwnerBadge] = new GatewayModel.NativeResourceValidatorOwnerBadgeValue(),
-            [wka.Secp256k1SignatureVirtualBadge] = new GatewayModel.NativeResourceSecp256k1SignatureResourceValue(),
-            [wka.Ed25519SignatureVirtualBadge] = new GatewayModel.NativeResourceEd25519SignatureResourceValue(),
-            [wka.GlobalCallerVirtualBadge] = new GatewayModel.NativeResourceGlobalCallerResourceValue(),
-            [wka.PackageOfDirectCallerVirtualBadge] = new GatewayModel.NativeResourcePackageOfDirectCallerResourceValue(),
-            // TODO is it even valid?
-            [wka.SystemTransactionBadge] = new GatewayModel.NativeResourceSystemExecutionResourceValue(),
-        };
-
-        map.TryGetValue(entityAddress, out var result);
-
-        return result;
-    }
-
-    private record struct XxxOutput(EntityType OwningEntityType, EntityAddress OwningEntityAddress, TokenAmount UnitTotalSupply, ICollection<UnitRedemptionValue> Items);
-
-    private record struct UnitRedemptionValue(EntityAddress ResourceAddress, TokenAmount? Amount);
-
-    private record XxxRes(EntityType OwningEntityType, string OwningEntityAddress, string UnitAddress, string UnitTotalSupply, string ResourceAddress, string Amount);
-
-    private async Task<IDictionary<EntityAddress, XxxOutput>> Redemption_InnerImpl(ICollection<EntityAddress> fungibleResourceAddresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        var addresses = fungibleResourceAddresses.ToHashSet().Select(x => x.ToString()).ToList();
-
-        if (addresses.Count == 0)
-        {
-            return ImmutableDictionary<EntityAddress, XxxOutput>.Empty;
-        }
-
-        // TODO use this new wrapper when merged!
-        // TODO pagin (1:21) is hardcoded
-
-        var cd = new CommandDefinition(
-            commandText: @"WITH
-unit_resources AS (
-    SELECT
-        e.address AS unit_address,
-        s.total_supply AS unit_total_supply,
-        e.correlated_entity_ids[coalesce(array_position(e.correlated_entity_relationships, 'resource_pool_unit_resource_pool'), array_position(e.correlated_entity_relationships, 'validator_stake_unit_validator'))] AS unit_owner_id
-    FROM entities e
-    INNER JOIN LATERAL (
-        SELECT total_supply
-        FROM resource_entity_supply_history
-        WHERE from_state_version <= @stateVersion AND resource_entity_id = e.id
-        ORDER BY from_state_version DESC
-        LIMIT 1
-    ) s ON TRUE
-    WHERE
-        e.from_state_version <= @stateVersion
-      AND e.address = ANY(@addresses)
-      AND ('resource_pool_unit_resource_pool' = ANY(e.correlated_entity_relationships) OR 'validator_stake_unit_validator' = ANY(e.correlated_entity_relationships))
-),
-unit_resource_with_owner_correlations AS (
-    SELECT ur.*, oe.discriminator AS owner_discriminator, oe.address AS owner_address, unnest(oe.correlated_entity_relationships) as owner_correlated_entity_relationship, unnest(oe.correlated_entity_ids) AS owner_correlated_entity_id
-    FROM unit_resources ur
-    INNER JOIN entities oe ON oe.id = ur.unit_owner_id
-)
-SELECT
-    x.owner_discriminator AS OwningEntityType,
-    x.owner_address AS OwningEntityAddress,
-    x.unit_address AS UnitAddress,
-    CAST(x.unit_total_supply AS TEXT) AS UnitTotalSupply,
-    re.address AS ResourceAddress,
-    CAST(vault.balance AS TEXT) AS Amount
-FROM unit_resource_with_owner_correlations x
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_vault_history
-    WHERE from_state_version <= @stateVersion AND vault_entity_id = x.owner_correlated_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) vault ON TRUE
-INNER JOIN entities re ON re.id = vault.resource_entity_id
-WHERE x.owner_correlated_entity_relationship = 'resource_pool_resource_vault' OR x.owner_correlated_entity_relationship = 'validator_stake_vault';",
-            parameters: new
-            {
-                addresses = addresses,
-                stateVersion = ledgerState.StateVersion,
-            },
-            cancellationToken: token);
-
-        var result = new Dictionary<EntityAddress, XxxOutput>();
-
-        foreach (var row in await _dapperWrapper.QueryAsync<XxxRes>(_dbContext.Database.GetDbConnection(), cd))
-        {
-            var entry = result.GetOrAdd((EntityAddress)row.UnitAddress, _ => new XxxOutput(row.OwningEntityType, (EntityAddress)row.OwningEntityAddress, TokenAmount.FromSubUnitsString(row.UnitTotalSupply), new List<UnitRedemptionValue>()));
-
-            TokenAmount? amount = null;
-
-            if (entry.UnitTotalSupply > TokenAmount.Zero)
-            {
-                amount = TokenAmount.FromSubUnitsString(row.Amount) / entry.UnitTotalSupply;
-            }
-
-            entry.Items.Add(new UnitRedemptionValue((EntityAddress)row.ResourceAddress, amount));
-        }
-
-        return result;
-    }
-
-    // todo naive implementation only
-    private async Task<IDictionary<EntityAddress, GatewayModel.NativeResourceDetails>> GetNativeResourceDetails(ICollection<Entity> entities, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        var resp = new Dictionary<EntityAddress, GatewayModel.NativeResourceDetails>();
-        var xxx = await Redemption_InnerImpl(entities.Select(e => e.Address).ToList(), ledgerState, token);
-
-        foreach (var entity in entities)
-        {
-            GatewayModel.NativeResourceDetails? found = null;
-
-            var staticCandidate = await GetNativeResourceDetails_Static(entity.Address);
-
-            if (staticCandidate != null)
-            {
-                found = staticCandidate;
-            }
-            else if (xxx.TryGetValue(entity.Address, out var u))
-            {
-                // weird spec requirement
-                const int MaxToReturn = 20;
-
-                var itemsCount = u.Items.Count;
-                var items = u.Items.Select(x => new GatewayModel.NativeResourceRedemptionValueItem(x.ResourceAddress, x.Amount?.ToString())).ToList();
-                var x = items.Count > MaxToReturn ? new List<GatewayModel.NativeResourceRedemptionValueItem>() : items;
-
-                found = u.OwningEntityType switch
-                {
-                    EntityType.GlobalValidator => new GatewayModel.NativeResourceValidatorLiquidStakeUnitValue(u.OwningEntityAddress, itemsCount, x),
-                    EntityType.GlobalOneResourcePool => new GatewayModel.NativeResourceOneResourcePoolUnitValue(u.OwningEntityAddress, itemsCount, x),
-                    EntityType.GlobalTwoResourcePool => new GatewayModel.NativeResourceTwoResourcePoolUnitValue(u.OwningEntityAddress, itemsCount, x),
-                    EntityType.GlobalMultiResourcePool => new GatewayModel.NativeResourceMultiResourcePoolUnitValue(u.OwningEntityAddress, itemsCount, x),
-                    _ => throw new ArgumentOutOfRangeException(nameof(u.OwningEntityType), u.OwningEntityType, null),
-                };
-            }
-
-            if (found != null)
-            {
-                resp[entity.Address] = found;
-            }
-        }
-
-        return resp;
     }
 
     private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(

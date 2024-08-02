@@ -295,6 +295,7 @@ dotnet_diagnostic.SA1649.severity = none # SA1649FileNameMustMatchTypeName - it 
 # > Inherited from other projects
 dotnet_diagnostic.SA0001.severity = none # SA0001XmlCommentAnalysisDisabled
 dotnet_diagnostic.SA1101.severity = none # SA1101PrefixLocalCallsWithThis
+dotnet_diagnostic.SA1118.severity = none # SA1118ParameterMustNotSpanMultipleLines - SQL queries
 dotnet_diagnostic.SA1124.severity = none # SA1124DoNotUseRegions
 dotnet_diagnostic.SA1129.severity = none # SA1129DoNotUseDefaultValueTypeConstructor - does not comply with the use of HashCode
 dotnet_diagnostic.SA1201.severity = none # SA1201ElementsMustAppearInTheCorrectOrder
