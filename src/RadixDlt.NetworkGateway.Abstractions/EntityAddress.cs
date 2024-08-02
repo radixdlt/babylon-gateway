@@ -78,6 +78,9 @@ public readonly record struct EntityAddress
 
     public bool IsGlobal => !IsInternal;
 
+    // See https://radixdlt.atlassian.net/wiki/spaces/S/pages/3045556302/REP-71+-+Address+Formats+and+Vanity+Addresses
+    public bool IsNonFungibleResource => _address.Contains("1ng") || _address.Contains("1nf") || _address.Contains("1n2") || _address.Contains("1nt");
+
     public bool IsInternal => _address.StartsWith("internal_");
 
     public bool IsAccount => _address.StartsWith("account_");
