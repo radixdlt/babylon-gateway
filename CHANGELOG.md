@@ -1,14 +1,8 @@
 ## 1.6.2
-Release built: _not released yet_
-
-> [!CAUTION]
-> **Breaking Changes:**
-> - Changed ordering of the collection returned by the `/state/non-fungible/ids` endpoint. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending.
-
+Release built: 05.08.2024
 
 ### Database changes
-
-- Removed `non_fungible_id_store_history` aggregate table. Queries for non fungible ids follow similar strategy as key value store and utilizes `_definition` and `_history` tables to return data.
+- Removed the large `non_fungible_id_store_history` aggregate table. Queries for non fungible ids follow a similar strategy as key value stores and utilize `_definition` and `_history` tables to return data. Total supply and total minted/burned can be queried from the `resource_entity_supply_history` table.
 - Renamed `non_fungible_id_data` table to `non_fungible_id_definition`.
 
 ## 1.6.1
