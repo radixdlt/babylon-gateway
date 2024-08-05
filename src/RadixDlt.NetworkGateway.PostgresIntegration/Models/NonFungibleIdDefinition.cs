@@ -62,14 +62,13 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("non_fungible_id_store_history")]
-internal class NonFungibleIdStoreHistory : IAggregateHolder
+[Table("non_fungible_id_definition")]
+internal class NonFungibleIdDefinition
 {
     [Key]
     [Column("id")]
@@ -81,11 +80,6 @@ internal class NonFungibleIdStoreHistory : IAggregateHolder
     [Column("non_fungible_resource_entity_id")]
     public long NonFungibleResourceEntityId { get; set; }
 
-    [Column("non_fungible_id_data_ids")]
-    public List<long> NonFungibleIdDataIds { get; set; }
-
-    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
-    {
-        yield return (nameof(NonFungibleIdDataIds), NonFungibleIdDataIds.Count);
-    }
+    [Column("non_fungible_id")]
+    public string NonFungibleId { get; set; }
 }

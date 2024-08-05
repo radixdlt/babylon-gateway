@@ -1,3 +1,10 @@
+## 1.6.2
+Release built: 05.08.2024
+
+### Database changes
+- Removed the large `non_fungible_id_store_history` aggregate table. Queries for non fungible ids follow a similar strategy as key value stores and utilize `_definition` and `_history` tables to return data. Total supply and total minted/burned can be queried from the `resource_entity_supply_history` table.
+- Renamed `non_fungible_id_data` table to `non_fungible_id_definition`.
+
 ## 1.6.1
 Release built: 21.05.2024
 
@@ -21,7 +28,7 @@ Release built: 09.05.2024
 
 > [!CAUTION]
 > **Breaking Changes:**
-> - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer orderer by their last modification state version but rather by their first appearance on the network, descending.
+> - Changed ordering of the collection returned by the `/state/key-value-store/keys` endpoint. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending.
 > - Property `total_count` of the `/state/key-value-store/keys` endpoint is no longer provided.
 > - Renamed `state.recovery_role_recovery_attempt` property from `timed_recovery_allowed_after` to `allow_timed_recovery_after` returned from `/state/entity/details` when querying for access controller.
 

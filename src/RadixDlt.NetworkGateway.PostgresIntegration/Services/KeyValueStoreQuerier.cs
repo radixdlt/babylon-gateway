@@ -100,7 +100,7 @@ internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
     public async Task<GatewayApiSdk.Model.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
         EntityAddress keyValueStoreAddress,
         GatewayApiSdk.Model.LedgerState ledgerState,
-        GatewayModel.StateKeyValueStoreKeysCursor? cursor,
+        GatewayModel.IdBoundaryCoursor? cursor,
         int pageSize,
         CancellationToken token = default)
     {
@@ -153,7 +153,7 @@ LIMIT @limit
             .ToList();
 
         var nextCursor = entriesAndOneMore.Count == pageSize + 1
-            ? new GatewayModel.StateKeyValueStoreKeysCursor(entriesAndOneMore.Last().FromStateVersion, entriesAndOneMore.Last().Id).ToCursorString()
+            ? new GatewayModel.IdBoundaryCoursor(entriesAndOneMore.Last().FromStateVersion, entriesAndOneMore.Last().Id).ToCursorString()
             : null;
 
         return new GatewayApiSdk.Model.StateKeyValueStoreKeysResponse(
