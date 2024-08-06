@@ -605,20 +605,20 @@ INNER JOIN LATERAL (
     WHERE non_fungible_id_definition_id = d.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
-    ) h ON TRUE
+) h ON TRUE
 WHERE
     d.non_fungible_resource_entity_id = @nonFungibleResourceEntityId
-  AND (d.from_state_version, d.id) <= (@cursorStateVersion, @cursorId)
+  AND (d.from_state_version, d.id) >= (@cursorStateVersion, @cursorId)
   AND d.from_state_version <= @stateVersion
-ORDER BY d.from_state_version DESC, d.id DESC
+ORDER BY d.from_state_version ASC, d.id ASC
 LIMIT @limit
 ;",
             parameters: new
             {
                 nonFungibleResourceEntityId = entity.Id,
                 stateVersion = ledgerState.StateVersion,
-                cursorStateVersion = cursor?.StateVersionBoundary ?? long.MaxValue,
-                cursorId = cursor?.IdBoundary ?? long.MaxValue,
+                cursorStateVersion = cursor?.StateVersionBoundary ?? 1,
+                cursorId = cursor?.IdBoundary ?? 1,
                 limit = pageSize + 1,
             },
             cancellationToken: token);

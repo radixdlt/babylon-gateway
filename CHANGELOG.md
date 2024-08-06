@@ -1,5 +1,5 @@
-## 1.6.2
-Release built: 05.08.2024
+## 1.6.3
+Release built: 06.08.2024
 
 ### Database changes
 - Removed the large `non_fungible_id_store_history` aggregate table. Queries for non fungible ids follow a similar strategy as key value stores and utilize `_definition` and `_history` tables to return data. Total supply and total minted/burned can be queried from the `resource_entity_supply_history` table.
