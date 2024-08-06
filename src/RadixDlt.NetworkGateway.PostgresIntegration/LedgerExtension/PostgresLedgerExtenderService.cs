@@ -1138,10 +1138,9 @@ UPDATE pending_transactions
             var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(vaultSnapshots, token);
             var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(vaultChanges, token);
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(vaultSnapshots, token);
-            var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
             var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
-            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
+            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDefinitionFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
 
             await entityMetadataProcessor.LoadDependencies();
             await entitySchemaProcessor.LoadDependencies();
@@ -1162,8 +1161,7 @@ UPDATE pending_transactions
             var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
             var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
             var entityResourceVaultAggregateHistoryCandidates = new List<EntityResourceVaultAggregateHistory>();
-            var nonFungibleIdStoreHistoryToAdd = new Dictionary<NonFungibleStoreLookup, NonFungibleIdStoreHistory>();
-            var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
+            var nonFungibleIdDefinitionToAdd = new List<NonFungibleIdDefinition>();
             var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
 
@@ -1190,36 +1188,15 @@ UPDATE pending_transactions
                     new NonFungibleIdLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId),
                     _ =>
                 {
-                    var ret = new NonFungibleIdData
+                    var ret = new NonFungibleIdDefinition
                     {
-                        Id = sequences.NonFungibleIdDataSequence++,
+                        Id = sequences.NonFungibleIdDefinitionSequence++,
                         FromStateVersion = e.StateVersion,
                         NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
                         NonFungibleId = e.NonFungibleId,
                     };
 
-                    nonFungibleIdDataToAdd.Add(ret);
-
-                    return ret;
-                });
-
-                var nonFungibleIdStore = nonFungibleIdStoreHistoryToAdd.GetOrAdd(
-                    new NonFungibleStoreLookup(e.ReferencedResource.DatabaseId, e.StateVersion),
-                    _ =>
-                {
-                    IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleIdStoreHistory.TryGetValue(e.ReferencedResource.DatabaseId, out var value)
-                        ? value.NonFungibleIdDataIds
-                        : Array.Empty<long>();
-
-                    var ret = new NonFungibleIdStoreHistory
-                    {
-                        Id = sequences.NonFungibleIdStoreHistorySequence++,
-                        FromStateVersion = e.StateVersion,
-                        NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
-                        NonFungibleIdDataIds = new List<long>(previousNonFungibleIdDataIds),
-                    };
-
-                    mostRecentNonFungibleIdStoreHistory[e.ReferencedResource.DatabaseId] = ret;
+                    nonFungibleIdDefinitionToAdd.Add(ret);
 
                     return ret;
                 });
@@ -1229,16 +1206,11 @@ UPDATE pending_transactions
                 {
                     Id = sequences.NonFungibleIdDataHistorySequence++,
                     FromStateVersion = e.StateVersion,
-                    NonFungibleIdDataId = nonFungibleIdData.Id,
+                    NonFungibleIdDefinitionId = nonFungibleIdData.Id,
                     Data = e.MutableData,
                     IsDeleted = e.IsDeleted,
                     IsLocked = e.IsLocked,
                 });
-
-                if (!nonFungibleIdStore.NonFungibleIdDataIds.Contains(nonFungibleIdData.Id))
-                {
-                    nonFungibleIdStore.NonFungibleIdDataIds.Add(nonFungibleIdData.Id);
-                }
             }
 
             void AggregateEntityResourceUsingSubstates(
@@ -1519,9 +1491,8 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityVaultHistory(vaultHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdData(nonFungibleIdDataToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdDefinition(nonFungibleIdDefinitionToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);

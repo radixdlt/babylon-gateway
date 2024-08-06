@@ -110,11 +110,9 @@ internal class SequencesHolder
 
     public long ResourceEntitySupplyHistorySequence { get; set; }
 
-    public long NonFungibleIdDataSequence { get; set; }
+    public long NonFungibleIdDefinitionSequence { get; set; }
 
     public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
 
     public long NonFungibleIdLocationHistorySequence { get; set; }
 

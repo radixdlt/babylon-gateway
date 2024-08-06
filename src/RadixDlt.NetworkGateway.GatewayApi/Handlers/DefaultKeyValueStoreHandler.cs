@@ -104,7 +104,7 @@ internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
         return await _keyValueStoreQuerier.KeyValueStoreKeys(
             (EntityAddress)request.KeyValueStoreAddress,
             ledgerState,
-            GatewayModel.StateKeyValueStoreKeysCursor.FromCursorString(request.Cursor),
+            GatewayModel.IdBoundaryCoursor.FromCursorString(request.Cursor),
             _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
             token);
     }

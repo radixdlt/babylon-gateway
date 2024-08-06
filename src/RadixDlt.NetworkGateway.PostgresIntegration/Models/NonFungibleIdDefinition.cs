@@ -62,58 +62,24 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Configuration;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public sealed record TransactionAssertionsOptions
+[Table("non_fungible_id_definition")]
+internal class NonFungibleIdDefinition
 {
-    /// <summary>
-    /// Due to changes of parsing certain Core API responses by the Open API library between before/after the 1.1.1
-    /// release, we disable this matching check by default. This can be re-enabled if re-syncing from scratch.
-    /// </summary>
-    [ConfigurationKeyName("AssertDownedSubstatesMatchDownFromCoreApi")]
-    public bool AssertDownedSubstatesMatchDownFromCoreApi { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    /// <summary>
-    /// Some releases of the Gateway API have included tracking of new substates.
-    /// This configuration option allows Gateway runners to upgrade late to these releases without breaking.
-    /// Specifically, this option allows substates to be DOWN'd without having seen the substate previously been UP'd.
-    /// Use the value "" to override this default configuration to not permit any inaccurate substate history.
-    ///
-    /// Note - we use a comma separated string instead of a list as it can be overriden better.
-    /// DotNet configuration of enumerables only supports merging which we don't want... (and empty arrays count as
-    /// "null") - see also https://github.com/dotnet/runtime/issues/36384.
-    /// </summary>
-    [ConfigurationKeyName("SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated")]
-    public string SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated { get; set; } = "ValidatorSystemMetadataSubstate";
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    private IReadOnlyList<string>? _cachedSubstateTypesWhichAreAllowedToHaveIncompleteHistory;
+    [Column("non_fungible_resource_entity_id")]
+    public long NonFungibleResourceEntityId { get; set; }
 
-    // This gets cached when called for the first time
-    public IReadOnlyList<string> SubstateTypesWhichAreAllowedToHaveIncompleteHistory =>
-        _cachedSubstateTypesWhichAreAllowedToHaveIncompleteHistory ??=
-            SplitCommaSeparatedList(SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated);
-
-    private IReadOnlyList<string> SplitCommaSeparatedList(string list)
-    {
-        return list
-            .Split(",")
-            .Select(s => s.Trim())
-            .Where(s => !string.IsNullOrEmpty(s))
-            .ToImmutableList();
-    }
-}
-
-internal class TransactionAssertionsOptionsValidator : AbstractOptionsValidator<TransactionAssertionsOptions>
-{
-    public TransactionAssertionsOptionsValidator()
-    {
-        RuleFor(x => x.SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated).NotNull();
-    }
+    [Column("non_fungible_id")]
+    public string NonFungibleId { get; set; }
 }
