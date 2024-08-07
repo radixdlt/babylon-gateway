@@ -70,7 +70,6 @@ using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -96,136 +95,145 @@ internal class NativeResourceDetailsResolver
 
     public async Task<IDictionary<EntityAddress, GatewayModel.NativeResourceDetails>> GetNativeResourceDetails(ICollection<Entity> entities, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
-        var res = new Dictionary<EntityAddress, GatewayModel.NativeResourceDetails>(entities.Count);
-
-        var dbLookup = new List<EntityAddress>();
+        var result = new Dictionary<EntityAddress, GatewayModel.NativeResourceDetails>(entities.Count);
+        var missingEntities = new List<EntityAddress>();
 
         foreach (var entity in entities)
         {
-            if (TryGetWellKnownNativeResourceDetails(entity.Address, out var nativeResourceDetails))
+            if (TryGetWellKnown(entity.Address, out var nativeResourceDetails))
             {
-                res[entity.Address] = nativeResourceDetails;
+                result[entity.Address] = nativeResourceDetails;
             }
             else
             {
-                dbLookup.Add(entity.Address);
+                missingEntities.Add(entity.Address);
             }
         }
 
-        if (dbLookup.Any())
+        if (missingEntities.Any())
         {
-            var xxx = await Redemption_InnerImpl(dbLookup, ledgerState, token);
-
-            foreach (var (ea, val) in xxx)
-            {
-                // weird spec requirement
-                const int MaxToReturn = 20;
-
-                var itemsCount = val.Items.Count;
-                var items = val.Items.Select(x => new GatewayModel.NativeResourceRedemptionValueItem(x.ResourceAddress, x.Amount?.ToString())).ToList();
-                var x = items.Count > MaxToReturn ? new List<GatewayModel.NativeResourceRedemptionValueItem>() : items;
-
-                res[ea] = val.OwningEntityType switch
-                {
-                    EntityType.GlobalValidator => new GatewayModel.NativeResourceValidatorLiquidStakeUnitValue(val.OwningEntityAddress, itemsCount, x),
-                    EntityType.GlobalOneResourcePool => new GatewayModel.NativeResourceOneResourcePoolUnitValue(val.OwningEntityAddress, itemsCount, x),
-                    EntityType.GlobalTwoResourcePool => new GatewayModel.NativeResourceTwoResourcePoolUnitValue(val.OwningEntityAddress, itemsCount, x),
-                    EntityType.GlobalMultiResourcePool => new GatewayModel.NativeResourceMultiResourcePoolUnitValue(val.OwningEntityAddress, itemsCount, x),
-                    _ => throw new ArgumentOutOfRangeException(nameof(val.OwningEntityType), val.OwningEntityType, null),
-                };
-            }
-        }
-
-        return res;
-    }
-
-    private record struct XxxOutput(EntityType OwningEntityType, EntityAddress OwningEntityAddress, TokenAmount UnitTotalSupply, ICollection<UnitRedemptionValue> Items);
-
-    private record struct UnitRedemptionValue(EntityAddress ResourceAddress, TokenAmount? Amount);
-
-    private record XxxRes(EntityType OwningEntityType, string OwningEntityAddress, string UnitAddress, string UnitTotalSupply, string ResourceAddress, string Amount);
-
-    private async Task<IDictionary<EntityAddress, XxxOutput>> Redemption_InnerImpl(ICollection<EntityAddress> fungibleResourceAddresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        var addresses = fungibleResourceAddresses.ToHashSet().Select(x => x.ToString()).ToList();
-
-        if (addresses.Count == 0)
-        {
-            return ImmutableDictionary<EntityAddress, XxxOutput>.Empty;
-        }
-
-        var res = await _dapperWrapper.ToList<XxxRes>(
-            _dbContext,
-            @"WITH
-unit_resources AS (
-    SELECT
-        e.address AS unit_address,
-        s.total_supply AS unit_total_supply,
-        e.correlated_entity_ids[coalesce(array_position(e.correlated_entity_relationships, 'resource_pool_unit_resource_pool'), array_position(e.correlated_entity_relationships, 'validator_stake_unit_validator'))] AS unit_owner_id
-    FROM entities e
-    INNER JOIN LATERAL (
-        SELECT total_supply
-        FROM resource_entity_supply_history
-        WHERE from_state_version <= @stateVersion AND resource_entity_id = e.id
-        ORDER BY from_state_version DESC
-        LIMIT 1
-    ) s ON TRUE
-    WHERE
-        e.from_state_version <= @stateVersion
-      AND e.address = ANY(@addresses)
-      AND ('resource_pool_unit_resource_pool' = ANY(e.correlated_entity_relationships) OR 'validator_stake_unit_validator' = ANY(e.correlated_entity_relationships))
-),
-unit_resource_with_owner_correlations AS (
-    SELECT ur.*, oe.discriminator AS owner_discriminator, oe.address AS owner_address, unnest(oe.correlated_entity_relationships) as owner_correlated_entity_relationship, unnest(oe.correlated_entity_ids) AS owner_correlated_entity_id
-    FROM unit_resources ur
-    INNER JOIN entities oe ON oe.id = ur.unit_owner_id
-)
-SELECT
-    x.owner_discriminator AS OwningEntityType,
-    x.owner_address AS OwningEntityAddress,
-    x.unit_address AS UnitAddress,
-    CAST(x.unit_total_supply AS TEXT) AS UnitTotalSupply,
-    re.address AS ResourceAddress,
-    CAST(vault.balance AS TEXT) AS Amount
-FROM unit_resource_with_owner_correlations x
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_vault_history
-    WHERE from_state_version <= @stateVersion AND vault_entity_id = x.owner_correlated_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) vault ON TRUE
-INNER JOIN entities re ON re.id = vault.resource_entity_id
-WHERE x.owner_correlated_entity_relationship = 'resource_pool_resource_vault' OR x.owner_correlated_entity_relationship = 'validator_stake_vault';",
-            new
-            {
-                addresses = addresses,
-                stateVersion = ledgerState.StateVersion,
-            },
-            token);
-
-        var result = new Dictionary<EntityAddress, XxxOutput>();
-
-        foreach (var row in res)
-        {
-            var entry = result.GetOrAdd((EntityAddress)row.UnitAddress, _ => new XxxOutput(row.OwningEntityType, (EntityAddress)row.OwningEntityAddress, TokenAmount.FromSubUnitsString(row.UnitTotalSupply), new List<UnitRedemptionValue>()));
-
-            TokenAmount? amount = null;
-
-            if (entry.UnitTotalSupply > TokenAmount.Zero)
-            {
-                amount = TokenAmount.FromSubUnitsString(row.Amount) / entry.UnitTotalSupply;
-            }
-
-            entry.Items.Add(new UnitRedemptionValue((EntityAddress)row.ResourceAddress, amount));
+            result.AddRange(await GetFromDatabase(missingEntities, ledgerState, token));
         }
 
         return result;
     }
 
-    private bool TryGetWellKnownNativeResourceDetails(EntityAddress entityAddress, [NotNullWhen(true)] out GatewayModel.NativeResourceDetails? result)
+    private record struct DbRow(EntityRelationship BaseRelationship, string BaseEntityAddress, string? BaseTotalSupply, EntityType RootEntityType, string RootEntityAddress, string? ResourceEntityAddress, string? ResourceBalance);
+
+    private async Task<IDictionary<EntityAddress, GatewayModel.NativeResourceDetails>> GetFromDatabase(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
-        // might get executed multiple times but it doesn't really matter
+        var rows = await _dapperWrapper.ToList<DbRow>(
+            _dbContext,
+            @"WITH
+variables AS (
+    SELECT
+        @stateVersion AS state_version,
+        @addresses AS addresses
+),
+base_entities AS (
+    SELECT
+        e.address AS base_address,
+        s.total_supply AS base_total_supply,
+        unnest(e.correlated_entity_relationships) AS base_correlated_entity_relationship,
+        unnest(e.correlated_entity_ids) AS base_correlated_entity_id
+    FROM variables var, entities e
+    LEFT JOIN LATERAL (
+        SELECT total_supply
+        FROM resource_entity_supply_history
+        WHERE from_state_version <= var.state_version AND resource_entity_id = e.id
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) s ON TRUE
+    WHERE
+        e.from_state_version <= var.state_version
+      AND e.address = ANY(var.addresses)
+      AND e.correlated_entity_relationships && '{resource_pool_unit_resource_pool, validator_stake_unit_validator, validator_claim_token_validator, access_controller_recovery_badge_access_controller}'::entity_relationship[]
+),
+base_with_root AS (
+    SELECT
+        base.*,
+        root.discriminator AS root_discriminator,
+        root.address AS root_address,
+        unnest(root.correlated_entity_relationships) as root_correlated_entity_relationship,
+        unnest(root.correlated_entity_ids) AS root_correlated_entity_id
+    FROM base_entities base
+    INNER JOIN entities root ON root.id = base.base_correlated_entity_id
+    WHERE base.base_correlated_entity_relationship = ANY('{resource_pool_unit_resource_pool, validator_stake_unit_validator, validator_claim_token_validator, access_controller_recovery_badge_access_controller}'::entity_relationship[])
+)
+SELECT
+    bwr.base_correlated_entity_relationship AS BaseRelationship,
+    bwr.base_address AS BaseEntityAddress,
+    CAST(bwr.base_total_supply AS TEXT) AS BaseTotalSupply,
+    bwr.root_discriminator AS RootEntityType,
+    bwr.root_address AS RootEntityAddress,
+    re.address AS ResourceEntityAddress,
+    CAST(vault.balance AS TEXT) AS ResourceBalance
+FROM variables var, base_with_root bwr
+LEFT JOIN LATERAL (
+    SELECT *
+    FROM entity_vault_history
+    WHERE from_state_version <= var.state_version AND vault_entity_id = bwr.root_correlated_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) vault ON TRUE
+LEFT JOIN entities re ON re.id = vault.resource_entity_id
+WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_resource_vault, validator_stake_vault, access_controller_recovery_badge}'::entity_relationship[]);",
+            new
+            {
+                addresses = addresses.Select(e => (string)e).ToList(),
+                stateVersion = ledgerState.StateVersion,
+            },
+            token);
+
+        return rows.GroupBy(r => (EntityAddress)r.BaseEntityAddress).ToDictionary(g => g.Key, grouping =>
+        {
+            var rootEntityType = grouping.First().RootEntityType;
+            var rootEntityAddress = grouping.First().RootEntityAddress;
+            var baseRelationship = grouping.First().BaseRelationship;
+
+            if (rootEntityType == EntityType.GlobalAccessController)
+            {
+                return new GatewayModel.NativeResourceAccessControllerRecoveryBadgeValue(rootEntityAddress);
+            }
+
+            if (rootEntityType == EntityType.GlobalValidator && baseRelationship == EntityRelationship.ValidatorClaimTokenValidator)
+            {
+                return new GatewayModel.NativeResourceValidatorClaimNftValue(rootEntityAddress);
+            }
+
+            var baseTotalSupply = TokenAmount.FromSubUnitsString(grouping.First().BaseTotalSupply ?? throw new InvalidOperationException($"BaseTotalSupply cannot be empty on {grouping.Key}"));
+            var redemptionValues = new List<GatewayModel.NativeResourceRedemptionValueItem>();
+
+            foreach (var entry in grouping)
+            {
+                var resourceAddress = entry.ResourceEntityAddress ?? throw new InvalidOperationException($"ResourceEntityAddress cannot be empty on {grouping.Key}");
+                TokenAmount? amount = null;
+
+                if (baseTotalSupply > TokenAmount.Zero)
+                {
+                    var resourceBalance = entry.ResourceBalance ?? throw new InvalidOperationException($"ResourceBalance cannot be empty on {grouping.Key}");
+                    amount = TokenAmount.FromSubUnitsString(resourceBalance) / baseTotalSupply;
+                }
+
+                redemptionValues.Add(new GatewayModel.NativeResourceRedemptionValueItem(resourceAddress, amount?.ToString()));
+            }
+
+            GatewayModel.NativeResourceDetails result = rootEntityType switch
+            {
+                EntityType.GlobalValidator => new GatewayModel.NativeResourceValidatorLiquidStakeUnitValue(rootEntityAddress, redemptionValues.Count, redemptionValues),
+                EntityType.GlobalOneResourcePool => new GatewayModel.NativeResourceOneResourcePoolUnitValue(rootEntityAddress, redemptionValues.Count, redemptionValues),
+                EntityType.GlobalTwoResourcePool => new GatewayModel.NativeResourceTwoResourcePoolUnitValue(rootEntityAddress, redemptionValues.Count, redemptionValues),
+                EntityType.GlobalMultiResourcePool => new GatewayModel.NativeResourceMultiResourcePoolUnitValue(rootEntityAddress, redemptionValues.Count, redemptionValues),
+                _ => throw new ArgumentOutOfRangeException(nameof(rootEntityType), rootEntityType, null),
+            };
+
+            return result;
+        });
+    }
+
+    private bool TryGetWellKnown(EntityAddress entityAddress, [NotNullWhen(true)] out GatewayModel.NativeResourceDetails? result)
+    {
+        // might get executed multiple times, but it doesn't really matter
         if (_wellKnownStaticCache == null)
         {
             var wka = _networkConfiguration.WellKnownAddresses;

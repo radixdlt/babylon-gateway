@@ -72,6 +72,7 @@ public enum EntityRelationship
     ValidatorLockedOwnerStakeUnitVault,
     ValidatorPendingOwnerStakeUnitUnlockVault,
     ValidatorStakeUnitValidator,
+    ValidatorClaimTokenValidator,
     VaultResource,
     VaultRoyalty,
     VaultResourcePool,
@@ -97,4 +98,14 @@ public enum EntityRelationship
     /// A Resource Pool Unit Resource to a Resource Pool relationship.
     /// </summary>
     ResourcePoolUnitResourcePool,
+
+    /// <summary>
+    /// An Access Controller to a Recovery Badge relationship.
+    /// </summary>
+    AccessControllerRecoveryBadge,
+
+    /// <summary>
+    /// An Access Controller Recovery Badge back to an Access Controller relationship.
+    /// </summary>
+    AccessControllerRecoveryBadgeAccessController,
 }

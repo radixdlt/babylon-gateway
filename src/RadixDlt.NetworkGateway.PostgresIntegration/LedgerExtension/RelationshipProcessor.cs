@@ -116,9 +116,29 @@ internal class RelationshipProcessor
                 e.AddCorrelation(EntityRelationship.ValidatorLockedOwnerStakeUnitVault, _referencedEntities.Get((EntityAddress)validator.Value.LockedOwnerStakeUnitVault.EntityAddress).DatabaseId);
                 e.AddCorrelation(EntityRelationship.ValidatorPendingOwnerStakeUnitUnlockVault, _referencedEntities.Get((EntityAddress)validator.Value.PendingOwnerStakeUnitUnlockVault.EntityAddress).DatabaseId);
 
+                _referencedEntities.Get((EntityAddress)validator.Value.ClaimTokenResourceAddress).PostResolveConfigureLow((ResourceEntity cte) =>
+                {
+                    cte.AddCorrelation(EntityRelationship.ValidatorClaimTokenValidator, e.Id);
+                });
+
                 _referencedEntities.Get((EntityAddress)validator.Value.StakeUnitResourceAddress).PostResolveConfigureLow((ResourceEntity ue) =>
                 {
                     ue.AddCorrelation(EntityRelationship.ValidatorStakeUnitValidator, e.Id);
+                });
+            });
+        }
+
+        if (substateData is CoreModel.AccessControllerFieldStateSubstate accessController)
+        {
+            var recoveryBadge = (EntityAddress)accessController.Value.RecoveryBadgeResourceAddress;
+
+            referencedEntity.PostResolveConfigure((GlobalAccessControllerEntity ac) =>
+            {
+                ac.AddCorrelation(EntityRelationship.AccessControllerRecoveryBadge, _referencedEntities.Get(recoveryBadge).DatabaseId);
+
+                _referencedEntities.Get(recoveryBadge).PostResolveConfigureLow((GlobalNonFungibleResourceEntity nf) =>
+                {
+                    nf.AddCorrelation(EntityRelationship.AccessControllerRecoveryBadgeAccessController, ac.Id);
                 });
             });
         }

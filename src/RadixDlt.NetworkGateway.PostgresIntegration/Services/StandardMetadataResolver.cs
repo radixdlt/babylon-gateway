@@ -255,8 +255,9 @@ WITH
                 WHEN 'dapp_account_locker' THEN
                     CASE FALSE
                         WHEN source_discriminator = 'global_account_component' THEN 'account expected'
-                        WHEN target_entity_discriminator = 'global_account_locker' THEN 'target locker expected'
+                        WHEN dapp_marker_check_valid = TRUE THEN 'dapp marker invalid'
                         WHEN target_entity_check_valid = TRUE THEN 'target link broken'
+                        WHEN target_entity_discriminator = 'global_account_locker' THEN 'target locker expected'
                         ELSE @validationOnLedgerAppCheck
                     END
                 WHEN 'dapp_claimed_websites' THEN
@@ -321,22 +322,27 @@ FROM resolved",
 
         if (entry.Discriminator == StandardMetadataKey.DappClaimedWebsites)
         {
-            if (entry.ValidationResult != StandardMetadataConstants.ValidationOffLedgerAppCheck)
+            if (entry.ValidationResult == StandardMetadataConstants.ValidationOffLedgerAppCheck)
             {
-                throw CreateException(entry, "expected off-ledger app-check validation result");
+                return await ResolveDappClaimedWebsite((EntityAddress)entry.EntityAddress, entry.TargetValue, validateOnLedgerOnly, token);
             }
 
-            return await ResolveDappClaimedWebsite((EntityAddress)entry.EntityAddress, entry.TargetValue, validateOnLedgerOnly, token);
+            if (!Uri.TryCreate(entry.TargetValue, UriKind.Absolute, out var uri))
+            {
+                uri = new Uri("http://example.com");
+            }
+
+            return new DappClaimedWebsiteResolvedTwoWayLink(uri, "expected off-ledger app-check validation result, got: " + entry.ValidationResult);
         }
 
         if (entry.Discriminator == StandardMetadataKey.DappAccountLocker)
         {
-            if (entry.ValidationResult != StandardMetadataConstants.ValidationOnLedgerAppCheck)
+            if (entry.ValidationResult == StandardMetadataConstants.ValidationOnLedgerAppCheck)
             {
-                throw CreateException(entry, "expected on-ledger app-check validation result");
+                return ResolveDappAccountLocker((EntityAddress)entry.EntityAddress, (EntityAddress)entry.TargetValue, allEntries);
             }
 
-            return ResolveDappAccountLocker((EntityAddress)entry.EntityAddress, (EntityAddress)entry.TargetValue, allEntries);
+            return new DappAccountLockerResolvedTwoWayLink((EntityAddress)entry.TargetValue, "expected on-ledger app-check validation result, got: " + entry.ValidationResult);
         }
 
         var invalidReason = entry.ValidationResult == StandardMetadataConstants.ValidationOnLedgerSucceeded ? null : entry.ValidationResult;
@@ -389,7 +395,7 @@ FROM resolved",
     {
         var valid = allEntries.Any(x => x.EntityAddress == entityAddress && x.Discriminator == StandardMetadataKey.DappClaimedEntities && x.TargetValue == lockerAddress);
 
-        return new DappAccountLockerResolvedTwoWayLink(entityAddress, valid ? null : "claimed_entities entry with the locker address missing");
+        return new DappAccountLockerResolvedTwoWayLink(lockerAddress, valid ? null : "claimed_entities entry with the locker address missing");
     }
 
     private Exception CreateException(PartiallyValidatedTwoWayLink entry, string details)
