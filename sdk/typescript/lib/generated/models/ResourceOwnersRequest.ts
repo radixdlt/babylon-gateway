@@ -13,84 +13,58 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { ProgrammaticScryptoSborValue } from './ProgrammaticScryptoSborValue';
-import {
-    ProgrammaticScryptoSborValueFromJSON,
-    ProgrammaticScryptoSborValueFromJSONTyped,
-    ProgrammaticScryptoSborValueToJSON,
-} from './ProgrammaticScryptoSborValue';
-
 /**
  * 
  * @export
- * @interface ProgrammaticScryptoSborValueEnumAllOf
+ * @interface ResourceOwnersRequest
  */
-export interface ProgrammaticScryptoSborValueEnumAllOf {
+export interface ResourceOwnersRequest {
     /**
-     * 
+     * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
+     * @memberof ResourceOwnersRequest
      */
-    variant_id: string;
+    cursor?: string | null;
     /**
-     * 
+     * The page size requested.
+     * @type {number}
+     * @memberof ResourceOwnersRequest
+     */
+    limit_per_page?: number | null;
+    /**
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
+     * @memberof ResourceOwnersRequest
      */
-    variant_name?: string;
-    /**
-     * 
-     * @type {Array<ProgrammaticScryptoSborValue>}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    fields: Array<ProgrammaticScryptoSborValue>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    kind?: ProgrammaticScryptoSborValueEnumAllOfKindEnum;
+    resource_address?: string;
 }
 
-
 /**
- * @export
+ * Check if a given object implements the ResourceOwnersRequest interface.
  */
-export const ProgrammaticScryptoSborValueEnumAllOfKindEnum = {
-    Enum: 'Enum'
-} as const;
-export type ProgrammaticScryptoSborValueEnumAllOfKindEnum = typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum[keyof typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum];
-
-
-/**
- * Check if a given object implements the ProgrammaticScryptoSborValueEnumAllOf interface.
- */
-export function instanceOfProgrammaticScryptoSborValueEnumAllOf(value: object): boolean {
+export function instanceOfResourceOwnersRequest(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "variant_id" in value;
-    isInstance = isInstance && "fields" in value;
 
     return isInstance;
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSON(json: any): ProgrammaticScryptoSborValueEnumAllOf {
-    return ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json, false);
+export function ResourceOwnersRequestFromJSON(json: any): ResourceOwnersRequest {
+    return ResourceOwnersRequestFromJSONTyped(json, false);
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ProgrammaticScryptoSborValueEnumAllOf {
+export function ResourceOwnersRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResourceOwnersRequest {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'variant_id': json['variant_id'],
-        'variant_name': !exists(json, 'variant_name') ? undefined : json['variant_name'],
-        'fields': ((json['fields'] as Array<any>).map(ProgrammaticScryptoSborValueFromJSON)),
-        'kind': !exists(json, 'kind') ? undefined : json['kind'],
+        'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
+        'limit_per_page': !exists(json, 'limit_per_page') ? undefined : json['limit_per_page'],
+        'resource_address': !exists(json, 'resource_address') ? undefined : json['resource_address'],
     };
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: ProgrammaticScryptoSborValueEnumAllOf | null): any {
+export function ResourceOwnersRequestToJSON(value?: ResourceOwnersRequest | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -99,10 +73,9 @@ export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: Programmatic
     }
     return {
         
-        'variant_id': value.variant_id,
-        'variant_name': value.variant_name,
-        'fields': ((value.fields as Array<any>).map(ProgrammaticScryptoSborValueToJSON)),
-        'kind': value.kind,
+        'cursor': value.cursor,
+        'limit_per_page': value.limit_per_page,
+        'resource_address': value.resource_address,
     };
 }
 

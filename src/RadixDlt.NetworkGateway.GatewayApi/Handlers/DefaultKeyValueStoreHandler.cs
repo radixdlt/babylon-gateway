@@ -123,15 +123,15 @@ internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
         {
             byte[]? rawBytes = null;
 
-            if (item.KeyHex != null)
+            if (item.ActualInstance is GatewayModel.StateKeyValueStoreDataRequestHexKeyItem hexKeyItem)
             {
-                rawBytes = item.KeyHex.ConvertFromHex();
+                rawBytes = hexKeyItem.KeyHex.ConvertFromHex();
             }
-            else if (item.KeyJson != null)
+            else if (item.ActualInstance is GatewayModel.StateKeyValueStoreDataRequestJsonKeyItem jsonKeyItem)
             {
                 try
                 {
-                    var rawJson = item.KeyJson.ToJson();
+                    var rawJson = jsonKeyItem.KeyJson.ToJson();
 
                     if (rawJson != null)
                     {

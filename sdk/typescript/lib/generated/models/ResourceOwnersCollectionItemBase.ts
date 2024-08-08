@@ -13,84 +13,60 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { ProgrammaticScryptoSborValue } from './ProgrammaticScryptoSborValue';
+import type { ResourceOwnersResourceType } from './ResourceOwnersResourceType';
 import {
-    ProgrammaticScryptoSborValueFromJSON,
-    ProgrammaticScryptoSborValueFromJSONTyped,
-    ProgrammaticScryptoSborValueToJSON,
-} from './ProgrammaticScryptoSborValue';
+    ResourceOwnersResourceTypeFromJSON,
+    ResourceOwnersResourceTypeFromJSONTyped,
+    ResourceOwnersResourceTypeToJSON,
+} from './ResourceOwnersResourceType';
 
 /**
  * 
  * @export
- * @interface ProgrammaticScryptoSborValueEnumAllOf
+ * @interface ResourceOwnersCollectionItemBase
  */
-export interface ProgrammaticScryptoSborValueEnumAllOf {
+export interface ResourceOwnersCollectionItemBase {
     /**
      * 
+     * @type {ResourceOwnersResourceType}
+     * @memberof ResourceOwnersCollectionItemBase
+     */
+    type: ResourceOwnersResourceType;
+    /**
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
+     * @memberof ResourceOwnersCollectionItemBase
      */
-    variant_id: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    variant_name?: string;
-    /**
-     * 
-     * @type {Array<ProgrammaticScryptoSborValue>}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    fields: Array<ProgrammaticScryptoSborValue>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ProgrammaticScryptoSborValueEnumAllOf
-     */
-    kind?: ProgrammaticScryptoSborValueEnumAllOfKindEnum;
+    owner_address: string;
 }
 
-
 /**
- * @export
+ * Check if a given object implements the ResourceOwnersCollectionItemBase interface.
  */
-export const ProgrammaticScryptoSborValueEnumAllOfKindEnum = {
-    Enum: 'Enum'
-} as const;
-export type ProgrammaticScryptoSborValueEnumAllOfKindEnum = typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum[keyof typeof ProgrammaticScryptoSborValueEnumAllOfKindEnum];
-
-
-/**
- * Check if a given object implements the ProgrammaticScryptoSborValueEnumAllOf interface.
- */
-export function instanceOfProgrammaticScryptoSborValueEnumAllOf(value: object): boolean {
+export function instanceOfResourceOwnersCollectionItemBase(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "variant_id" in value;
-    isInstance = isInstance && "fields" in value;
+    isInstance = isInstance && "type" in value;
+    isInstance = isInstance && "owner_address" in value;
 
     return isInstance;
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSON(json: any): ProgrammaticScryptoSborValueEnumAllOf {
-    return ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json, false);
+export function ResourceOwnersCollectionItemBaseFromJSON(json: any): ResourceOwnersCollectionItemBase {
+    return ResourceOwnersCollectionItemBaseFromJSONTyped(json, false);
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ProgrammaticScryptoSborValueEnumAllOf {
+export function ResourceOwnersCollectionItemBaseFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResourceOwnersCollectionItemBase {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'variant_id': json['variant_id'],
-        'variant_name': !exists(json, 'variant_name') ? undefined : json['variant_name'],
-        'fields': ((json['fields'] as Array<any>).map(ProgrammaticScryptoSborValueFromJSON)),
-        'kind': !exists(json, 'kind') ? undefined : json['kind'],
+        'type': ResourceOwnersResourceTypeFromJSON(json['type']),
+        'owner_address': json['owner_address'],
     };
 }
 
-export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: ProgrammaticScryptoSborValueEnumAllOf | null): any {
+export function ResourceOwnersCollectionItemBaseToJSON(value?: ResourceOwnersCollectionItemBase | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -99,10 +75,8 @@ export function ProgrammaticScryptoSborValueEnumAllOfToJSON(value?: Programmatic
     }
     return {
         
-        'variant_id': value.variant_id,
-        'variant_name': value.variant_name,
-        'fields': ((value.fields as Array<any>).map(ProgrammaticScryptoSborValueToJSON)),
-        'kind': value.kind,
+        'type': ResourceOwnersResourceTypeToJSON(value.type),
+        'owner_address': value.owner_address,
     };
 }
 

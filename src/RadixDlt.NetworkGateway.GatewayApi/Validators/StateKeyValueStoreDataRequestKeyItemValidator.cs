@@ -71,10 +71,26 @@ internal class StateKeyValueStoreDataRequestKeyItemValidator : AbstractValidator
 {
     public StateKeyValueStoreDataRequestKeyItemValidator()
     {
-        RuleFor(x => x.KeyHex)
-            .Hex();
+        RuleFor(x => x.ActualInstance).SetInheritanceValidator(x =>
+        {
+            x.Add(new StateKeyValueStoreDataRequestJsonKeyItemValidator());
+            x.Add(new StateKeyValueStoreDataRequestHexKeyItemValidator());
+        });
+    }
+}
 
-        RuleFor(x => x)
-            .Must(x => x.KeyHex != null || x.KeyJson != null).WithMessage("Either key_hex or key_json must be not empty.");
+internal class StateKeyValueStoreDataRequestJsonKeyItemValidator : AbstractValidator<GatewayModel.StateKeyValueStoreDataRequestJsonKeyItem>
+{
+    public StateKeyValueStoreDataRequestJsonKeyItemValidator()
+    {
+        RuleFor(x => x.KeyJson).NotEmpty();
+    }
+}
+
+internal class StateKeyValueStoreDataRequestHexKeyItemValidator : AbstractValidator<GatewayModel.StateKeyValueStoreDataRequestHexKeyItem>
+{
+    public StateKeyValueStoreDataRequestHexKeyItemValidator()
+    {
+        RuleFor(x => x.KeyHex).NotEmpty().Hex();
     }
 }

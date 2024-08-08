@@ -44,7 +44,7 @@ This property is ignored when the value is used as an input to the API.
      */
     field_name?: string | null;
     /**
-     * 
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof ProgrammaticScryptoSborValueReference
      */

@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,91 +62,33 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+
+internal class DefaultExtensionsHandler : IExtensionsHandler
 {
-    public long AccountLockerEntryDefinitionSequence { get; set; }
+    private readonly IExtensionsQuerier _extensionsQuerier;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
-    public long AccountLockerEntryResourceVaultDefinitionSequence { get; set; }
+    public DefaultExtensionsHandler(IExtensionsQuerier extensionsQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    {
+        _extensionsQuerier = extensionsQuerier;
+        _endpointConfiguration = endpointConfiguration;
+    }
 
-    public long AccountLockerEntryTouchHistorySequence { get; set; }
-
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
-
-    public long AccountResourcePreferenceRuleEntryHistorySequence { get; set; }
-
-    public long AccountResourcePreferenceRuleAggregateHistorySequence { get; set; }
-
-    public long AccountAuthorizedDepositorEntryHistorySequence { get; set; }
-
-    public long AccountAuthorizedDepositorAggregateHistorySequence { get; set; }
-
-    public long StateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyAggregateHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDefinitionSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdLocationHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long SchemaEntryDefinitionSequence { get; set; }
-
-    public long SchemaEntryAggregateHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryDefinitionSequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorCumulativeEmissionHistorySequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
-
-    public long PackageBlueprintAggregateHistorySequence { get; set; }
-
-    public long PackageCodeAggregateHistorySequence { get; set; }
-
-    public long UnverifiedStandardMetadataAggregateHistorySequence { get; set; }
-
-    public long UnverifiedStandardMetadataEntryHistorySequence { get; set; }
-
-    public long ResourceOwnersSequence { get; set; }
+    public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(GatewayModel.ResourceOwnersRequest request, CancellationToken token)
+    {
+        return await _extensionsQuerier.ResourceOwners(
+            (EntityAddress)request.ResourceAddress,
+            GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
+            token);
+    }
 }

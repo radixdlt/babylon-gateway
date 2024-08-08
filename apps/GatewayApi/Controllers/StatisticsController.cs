@@ -72,18 +72,11 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("statistics")]
-public class StatisticsController : ControllerBase
+public class StatisticsController(IValidatorHandler validatorHandler) : ControllerBase
 {
-    private readonly IValidatorHandler _validatorHandler;
-
-    public StatisticsController(IValidatorHandler validatorHandler)
-    {
-        _validatorHandler = validatorHandler;
-    }
-
     [HttpPost("validators/uptime")]
     public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptime(GatewayModel.ValidatorsUptimeRequest request, CancellationToken token)
     {
-        return await _validatorHandler.Uptime(request, token);
+        return await validatorHandler.Uptime(request, token);
     }
 }
