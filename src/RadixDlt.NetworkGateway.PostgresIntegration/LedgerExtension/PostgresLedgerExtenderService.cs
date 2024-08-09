@@ -1438,40 +1438,31 @@ UPDATE pending_transactions
                 }
             }
 
-            var resourceOwnersToAdd = entityResourceAggregatedVaultsHistoryToAdd
-                .GroupBy(
-                    x => new { x.EntityId, x.ResourceEntityId },
-                    (key, group) => new
-                    {
-                        key,
-                        newestEntry = group.MaxBy(x => x.FromStateVersion),
-                    }
-                )
-                .Select(
-                    x =>
-                    {
-                        ResourceOwners result = x.newestEntry switch
-                        {
-                            EntityFungibleResourceAggregatedVaultsHistory fungible => new FungibleResourceOwners
-                            {
-                                Id = sequences.ResourceOwnersSequence++,
-                                EntityId = fungible.EntityId,
-                                ResourceEntityId = fungible.ResourceEntityId,
-                                Balance = fungible.Balance,
-                            },
-                            EntityNonFungibleResourceAggregatedVaultsHistory nonFungible => new NonFungibleResourceOwners
-                            {
-                                Id = sequences.ResourceOwnersSequence++,
-                                EntityId = nonFungible.EntityId,
-                                ResourceEntityId = nonFungible.ResourceEntityId,
-                                TotalCount = nonFungible.TotalCount,
-                            },
-                            _ => throw new ArgumentOutOfRangeException(nameof(x.newestEntry), x.newestEntry, null),
-                        };
+            var resourceOwnersToAdd = new Dictionary<(long EntityId, long ResourceEntityId), ResourceOwners>();
 
-                        return result;
-                    })
-                .ToList();
+            foreach (var x in entityResourceAggregatedVaultsHistoryToAdd)
+            {
+                TokenAmount balance = x switch
+                {
+                    EntityFungibleResourceAggregatedVaultsHistory fungibleResourceAggregatedVaultsHistory =>
+                        fungibleResourceAggregatedVaultsHistory.Balance,
+                    EntityNonFungibleResourceAggregatedVaultsHistory nonFungibleResourceAggregatedVaultsHistory =>
+                        TokenAmount.FromDecimalString(nonFungibleResourceAggregatedVaultsHistory.TotalCount.ToString()),
+                    _ => throw new ArgumentOutOfRangeException(nameof(x), x, null),
+                };
+
+                resourceOwnersToAdd.AddOrUpdate(
+                    (x.EntityId, x.ResourceEntityId),
+                    _ => new ResourceOwners
+                    {
+                        Id = sequences.ResourceOwnersSequence++,
+                        EntityId = x.EntityId,
+                        ResourceEntityId = x.ResourceEntityId,
+                        Balance = balance,
+                    },
+                    existing => existing.Balance = balance
+                );
+            }
 
             var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges
                 .GroupBy(x => new { x.ResourceEntityId, x.StateVersion })
@@ -1532,7 +1523,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyResourceOwners(resourceOwnersToAdd, token);
+            rowsInserted += await writeHelper.CopyResourceOwners(resourceOwnersToAdd.Select(x => x.Value).ToList(), token);
 
             rowsInserted += await entityStateProcessor.SaveEntities();
             rowsInserted += await entityMetadataProcessor.SaveEntities();

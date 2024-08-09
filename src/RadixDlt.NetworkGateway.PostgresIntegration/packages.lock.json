@@ -669,7 +669,8 @@
         "dependencies": {
           "JsonSubTypes": "[2.0.1, )",
           "Newtonsoft.Json": "[13.0.3, )",
-          "Polly": "[8.3.0, )"
+          "Polly": "[8.3.0, )",
+          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )"
         }
       },
       "FluentValidation": {

@@ -76,10 +76,12 @@ internal class DefaultExtensionsHandler(IExtensionsQuerier extensionsQuerier, IO
 {
     public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(GatewayModel.ResourceOwnersRequest request, CancellationToken token)
     {
+        var cursor = GatewayModel.ResourceOwnersCursor.FromCursorString(request.Cursor);
+
         return await extensionsQuerier.ResourceOwners(
             (EntityAddress)request.ResourceAddress,
-            GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
             endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
+            cursor,
             token);
     }
 }

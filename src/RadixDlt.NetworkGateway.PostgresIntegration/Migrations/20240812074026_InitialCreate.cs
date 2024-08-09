@@ -762,9 +762,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    discriminator = table.Column<ResourceType>(type: "resource_type", nullable: false),
-                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
-                    total_count = table.Column<long>(type: "bigint", nullable: true)
+                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1264,14 +1262,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_resource_owners_entity_id_resource_entity_id_balance",
                 table: "resource_owners",
-                columns: new[] { "entity_id", "resource_entity_id", "balance" },
-                filter: "discriminator = 'fungible'");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_resource_owners_entity_id_resource_entity_id_total_count",
-                table: "resource_owners",
-                columns: new[] { "entity_id", "resource_entity_id", "total_count" },
-                filter: "discriminator = 'non_fungible'");
+                columns: new[] { "entity_id", "resource_entity_id", "balance" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_schema_entry_aggregate_history_entity_id_from_state_version",

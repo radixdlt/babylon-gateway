@@ -62,131 +62,26 @@
  * permissions under this License.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal static class Extensions
+[DataContract]
+public sealed record ResourceOwnersCursor(long? IdBoundary, string BalanceBoundary)
 {
-    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
-        where TKey : notnull
+    [DataMember(Name = "id", EmitDefaultValue = false)]
+    public long? IdBoundary { get; set; } = IdBoundary;
+
+    [DataMember(Name = "b", EmitDefaultValue = false)]
+    public string BalanceBoundary { get; set; } = BalanceBoundary;
+
+    public static ResourceOwnersCursor FromCursorString(string cursorString)
     {
-        ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
-        ArgumentNullException.ThrowIfNull(key, nameof(key));
-        ArgumentNullException.ThrowIfNull(factory, nameof(factory));
-
-        if (dictionary.TryGetValue(key, out var existingValue))
-        {
-            return existingValue;
-        }
-
-        var value = factory(key);
-
-        dictionary[key] = value;
-
-        return value;
+        return Serializations.FromBase64JsonOrDefault<ResourceOwnersCursor>(cursorString);
     }
 
-    public static TVal AddOrUpdate<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> newElementFactory, Action<TVal> updateFactory)
-        where TKey : notnull
+    public string ToCursorString()
     {
-        ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
-        ArgumentNullException.ThrowIfNull(key, nameof(key));
-        ArgumentNullException.ThrowIfNull(newElementFactory, nameof(newElementFactory));
-        ArgumentNullException.ThrowIfNull(updateFactory, nameof(updateFactory));
-
-        if (dictionary.TryGetValue(key, out var existingValue))
-        {
-            updateFactory(existingValue);
-            return existingValue;
-        }
-
-        var value = newElementFactory(key);
-
-        dictionary[key] = value;
-
-        return value;
-    }
-
-    public static void AddRange<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, IDictionary<TKey, TVal> other)
-    {
-        ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
-        ArgumentNullException.ThrowIfNull(other, nameof(other));
-
-        foreach (var (key, value) in other)
-        {
-            dictionary.Add(key, value);
-        }
-    }
-
-    public static bool Unzip<TIn, TOut1, TOut2>(
-        this ICollection<TIn> input,
-        Func<TIn, TOut1> out1Selector,
-        Func<TIn, TOut2> out2Selector,
-        [NotNullWhen(true)] out List<TOut1>? out1,
-        [NotNullWhen(true)] out List<TOut2>? out2)
-    {
-        ArgumentNullException.ThrowIfNull(input, nameof(input));
-        ArgumentNullException.ThrowIfNull(out1Selector, nameof(out1Selector));
-        ArgumentNullException.ThrowIfNull(out2Selector, nameof(out2Selector));
-
-        out1 = default;
-        out2 = default;
-
-        if (!input.Any())
-        {
-            return false;
-        }
-
-        out1 = new List<TOut1>(input.Count);
-        out2 = new List<TOut2>(input.Count);
-
-        foreach (var e in input)
-        {
-            out1.Add(out1Selector(e));
-            out2.Add(out2Selector(e));
-        }
-
-        return true;
-    }
-
-    public static bool Unzip<TIn, TOut1, TOut2, TOut3>(
-        this ICollection<TIn> input,
-        Func<TIn, TOut1> out1Selector,
-        Func<TIn, TOut2> out2Selector,
-        Func<TIn, TOut3> out3Selector,
-        [NotNullWhen(true)] out List<TOut1>? out1,
-        [NotNullWhen(true)] out List<TOut2>? out2,
-        [NotNullWhen(true)] out List<TOut3>? out3)
-    {
-        ArgumentNullException.ThrowIfNull(input, nameof(input));
-        ArgumentNullException.ThrowIfNull(out1Selector, nameof(out1Selector));
-        ArgumentNullException.ThrowIfNull(out2Selector, nameof(out2Selector));
-        ArgumentNullException.ThrowIfNull(out3Selector, nameof(out3Selector));
-
-        out1 = default;
-        out2 = default;
-        out3 = default;
-
-        if (!input.Any())
-        {
-            return false;
-        }
-
-        out1 = new List<TOut1>(input.Count);
-        out2 = new List<TOut2>(input.Count);
-        out3 = new List<TOut3>(input.Count);
-
-        foreach (var e in input)
-        {
-            out1.Add(out1Selector(e));
-            out2.Add(out2Selector(e));
-            out3.Add(out3Selector(e));
-        }
-
-        return true;
+        return Serializations.AsBase64Json(this);
     }
 }

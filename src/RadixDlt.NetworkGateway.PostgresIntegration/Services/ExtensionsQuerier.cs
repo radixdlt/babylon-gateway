@@ -66,9 +66,10 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -81,9 +82,7 @@ internal class ExtensionsQuerier : IExtensionsQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IDapperWrapper _dapperWrapper;
 
-    private record FungibleResourceOwnersViewModel(EntityAddress EntityAddress, string Balance);
-
-    private record NonFungibleResourceOwnersViewModel(EntityAddress EntityAddress, long TotalCount);
+    private record ResourceOwnersViewModel(long Id, EntityAddress EntityAddress, string Balance);
 
     public ExtensionsQuerier(ReadOnlyDbContext dbContext, IDapperWrapper dapperWrapper)
     {
@@ -93,8 +92,8 @@ internal class ExtensionsQuerier : IExtensionsQuerier
 
     public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(
         EntityAddress resourceAddress,
-        int offset,
         int limit,
+        GatewayModel.ResourceOwnersCursor? cursor,
         CancellationToken token = default)
     {
         var resourceEntity = await _dbContext
@@ -102,35 +101,47 @@ internal class ExtensionsQuerier : IExtensionsQuerier
             .AnnotateMetricName()
             .FirstOrDefaultAsync(e => e.Address == resourceAddress, token);
 
-        switch (resourceEntity)
+        if (resourceEntity == null)
         {
-            case GlobalFungibleResourceEntity:
-            {
-                var totalCount = await _dbContext.ResourceOwners.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
+            throw new EntityNotFoundException(resourceAddress.ToString());
+        }
 
-                var cd = new CommandDefinition(
-                    commandText: @"
+        var totalCount = await _dbContext.ResourceOwners.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
+
+        var cd = new CommandDefinition(
+            commandText: @"
 SELECT
+    ro.id as Id,
     e.address AS EntityAddress,
     CAST(ro.balance AS text) AS Balance
 FROM resource_owners ro
 INNER JOIN entities e
 ON ro.entity_id = e.id
-WHERE resource_entity_id = @resourceEntityId
-ORDER BY ro.balance DESC
-LIMIT @limit
-OFFSET @offset",
-                    parameters: new
-                    {
-                        resourceEntityId = resourceEntity.Id,
-                        offset = offset,
-                        limit = limit,
-                    },
-                    cancellationToken: token);
+WHERE ro.resource_entity_id = @resourceEntityId
+  AND (@balanceBoundary is null OR ((ro.balance, ro.id) < (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)))
+ORDER BY (ro.balance, ro.entity_id) DESC
+LIMIT @limit",
+            parameters: new
+            {
+                resourceEntityId = resourceEntity.Id,
+                balanceBoundary = cursor?.BalanceBoundary,
+                idBoundary = cursor?.IdBoundary ?? long.MaxValue,
+                limit = limit,
+            },
+            cancellationToken: token);
 
-                var fungibleResult = await _dapperWrapper.QueryAsync<FungibleResourceOwnersViewModel>(_dbContext.Database.GetDbConnection(), cd);
+        var result = (await _dapperWrapper.QueryAsync<ResourceOwnersViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
 
-                var casted = fungibleResult
+        var lastElement = result.LastOrDefault();
+        var nextCursor = lastElement != null
+            ? new GatewayModel.ResourceOwnersCursor(lastElement.Id, TokenAmount.FromDecimalString(lastElement.Balance).ToString()).ToCursorString()
+            : null;
+
+        switch (resourceEntity)
+        {
+            case GlobalFungibleResourceEntity:
+            {
+                var castedResult = result
                     .Select(
                         x => (GatewayModel.ResourceOwnersCollectionItem)new GatewayModel.ResourceOwnersCollectionFungibleResourceItem(
                             amount: TokenAmount.FromSubUnitsString(x.Balance).ToString(),
@@ -138,48 +149,24 @@ OFFSET @offset",
                     )
                     .ToList();
 
-                var nextCursor = CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount);
-                return new GatewayModel.ResourceOwnersResponse(new GatewayModel.ResourceOwnersCollection(totalCount, nextCursor, casted));
+                return new GatewayModel.ResourceOwnersResponse(new GatewayModel.ResourceOwnersCollection(totalCount, nextCursor, castedResult));
             }
 
             case GlobalNonFungibleResourceEntity:
             {
-                var totalCount = await _dbContext.ResourceOwners.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
-
-                var cd = new CommandDefinition(
-                    commandText: @"
-SELECT
-    e.address AS EntityAddress,
-    ro.total_count as TotalCount
-FROM resource_owners ro
-INNER JOIN entities e
-ON ro.entity_id = e.id
-WHERE resource_entity_id = @resourceEntityId
-ORDER BY total_count DESC
-LIMIT @limit
-OFFSET @offset",
-                    parameters: new
-                    {
-                        resourceEntityId = resourceEntity.Id,
-                        offset = offset,
-                        limit = limit,
-                    },
-                    cancellationToken: token);
-
-                var nonFungibleResult = (await _dapperWrapper.QueryAsync<NonFungibleResourceOwnersViewModel>(_dbContext.Database.GetDbConnection(), cd))
+                var castedResult = result
                     .Select(
                         x => (GatewayModel.ResourceOwnersCollectionItem)new GatewayModel.ResourceOwnersCollectionNonFungibleResourceItem(
-                            nonFungibleIdsCount: x.TotalCount,
+                            nonFungibleIdsCount: long.Parse(TokenAmount.FromSubUnitsString(x.Balance).ToString()),
                             ownerAddress: x.EntityAddress)
                     )
                     .ToList();
 
-                var nextCursor = CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount);
-                return new GatewayModel.ResourceOwnersResponse(new GatewayModel.ResourceOwnersCollection(totalCount, nextCursor, nonFungibleResult));
+                return new GatewayModel.ResourceOwnersResponse(new GatewayModel.ResourceOwnersCollection(totalCount, nextCursor, castedResult));
             }
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(resourceEntity), resourceEntity, null);
+                throw new UnreachableException($"Either fungible or non fungible resource expected. But {resourceEntity.GetType()} found.");
         }
     }
 }

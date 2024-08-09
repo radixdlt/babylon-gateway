@@ -77,7 +77,7 @@ public interface IExtensionsQuerier
 {
     Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(
         EntityAddress resourceAddress,
-        int offset,
         int limit,
+        GatewayModel.ResourceOwnersCursor? cursor,
         CancellationToken token = default);
 }

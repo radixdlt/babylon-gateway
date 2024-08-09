@@ -754,7 +754,7 @@ ON COMMIT DROP";
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY tmp_resource_owners (id, entity_id, resource_entity_id, discriminator, balance, total_count) FROM STDIN (FORMAT BINARY)",
+                "COPY tmp_resource_owners (id, entity_id, resource_entity_id, balance) FROM STDIN (FORMAT BINARY)",
                 token);
 
         foreach (var e in entities)
@@ -763,18 +763,7 @@ ON COMMIT DROP";
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-
-            if (e is FungibleResourceOwners fe)
-            {
-                await writer.WriteAsync(fe.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                await writer.WriteNullAsync(token);
-            }
-            else if (e is NonFungibleResourceOwners nfe)
-            {
-                await writer.WriteNullAsync(token);
-                await writer.WriteAsync(nfe.TotalCount, NpgsqlDbType.Bigint, token);
-            }
+            await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
         }
 
         await writer.CompleteAsync(token);
@@ -786,8 +775,7 @@ INSERT INTO resource_owners
 SELECT *
 FROM tmp_resource_owners
 ON CONFLICT (entity_id, resource_entity_id) DO UPDATE SET
- balance = EXCLUDED.balance,
- total_count = EXCLUDED.total_count;";
+ balance = EXCLUDED.balance;";
 
         await copyFromTempTablecommand.ExecuteNonQueryAsync(token);
 

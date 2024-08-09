@@ -1910,7 +1910,9 @@ paths:
       operationId: ResourceOwnersPage
       summary: Get Resource Owners Page
       description: |
-        Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number Of Items (non fungibles) descending.
+        Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending.
+        This endpoint operates only at current state version, it is not possible to browse historical data.
+        Because of that it is not possible to offer stable pagination as data constantly changes. Values might change which might result in gaps or some entries being returned twice.
       tags:
         - Extensions
       requestBody:

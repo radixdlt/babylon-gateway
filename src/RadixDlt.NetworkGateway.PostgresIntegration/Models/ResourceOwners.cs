@@ -69,7 +69,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("resource_owners")]
-internal abstract class ResourceOwners
+internal class ResourceOwners
 {
     [Key]
     [Column("id")]
@@ -80,16 +80,7 @@ internal abstract class ResourceOwners
 
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
-}
 
-internal class FungibleResourceOwners : ResourceOwners
-{
     [Column("balance")]
     public TokenAmount Balance { get; set; }
-}
-
-internal class NonFungibleResourceOwners : ResourceOwners
-{
-    [Column("total_count")]
-    public long TotalCount { get; set; }
 }
