@@ -64,10 +64,11 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface IExtensionsHandler
 {
-    Task<GatewayApiSdk.Model.ResourceOwnersResponse> ResourceOwners(GatewayApiSdk.Model.ResourceOwnersRequest request, CancellationToken token);
+    Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(GatewayModel.ResourceOwnersRequest request, CancellationToken token);
 }

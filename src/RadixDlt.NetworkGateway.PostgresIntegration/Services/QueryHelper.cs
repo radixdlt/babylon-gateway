@@ -70,12 +70,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal static class QueryHelper
 {
-    internal static async Task<Dictionary<EntityAddress, long>> ResolveEntityIds(ReadOnlyDbContext dbContext, List<EntityAddress> addresses, GatewayApiSdk.Model.LedgerState ledgerState, CancellationToken token)
+    internal static async Task<Dictionary<EntityAddress, long>> ResolveEntityIds(ReadOnlyDbContext dbContext, List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var entities = await dbContext
             .Entities
@@ -86,7 +87,7 @@ internal static class QueryHelper
         return entities;
     }
 
-    internal static async Task<TEntity> GetEntity<TEntity>(ReadOnlyDbContext dbContext, EntityAddress address, GatewayApiSdk.Model.LedgerState ledgerState, CancellationToken token)
+    internal static async Task<TEntity> GetEntity<TEntity>(ReadOnlyDbContext dbContext, EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
         where TEntity : Entity
     {
         var entity = await dbContext

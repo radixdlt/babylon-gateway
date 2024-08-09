@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal interface IRoleAssignmentsMapper
 {
-    Dictionary<long, GatewayApiSdk.Model.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
+    Dictionary<long, GatewayModel.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
         ICollection<ComponentEntity> componentEntities,
         Dictionary<BlueprintDefinitionIdentifier, CoreApiModel.AuthConfig> blueprintAuthConfigs,
         ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
@@ -119,7 +119,7 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
             var assignedNativeModuleKeys = nativeModulesKeys.Where(x => entity.AssignedModuleIds.Contains(x.Key.ModuleId));
             var allModulesKeys = mainModuleKeys.Concat(assignedNativeModuleKeys).ToList();
 
-            return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
+            return new GatewayModel.ComponentEntityRoleAssignments(
                 new JRaw(ownerRole),
                 GetEntries(entity.Id, allModulesKeys, roleAssignments)
             );

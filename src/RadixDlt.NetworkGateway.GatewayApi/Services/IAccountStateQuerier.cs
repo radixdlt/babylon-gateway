@@ -65,21 +65,22 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IAccountStateQuerier
 {
-    Task<GatewayApiSdk.Model.StateAccountResourcePreferencesPageResponse> AccountResourcePreferences(
+    Task<GatewayModel.StateAccountResourcePreferencesPageResponse> AccountResourcePreferences(
         EntityAddress accountAddress,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         int offset,
         int limit,
         CancellationToken token = default);
 
-    Task<GatewayApiSdk.Model.StateAccountAuthorizedDepositorsPageResponse> AccountAuthorizedDepositors(
+    Task<GatewayModel.StateAccountAuthorizedDepositorsPageResponse> AccountAuthorizedDepositors(
         EntityAddress accountAddress,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         int offset,
         int limit,
         CancellationToken token = default);

@@ -69,12 +69,13 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IExtensionsQuerier
 {
-    Task<GatewayApiSdk.Model.ResourceOwnersResponse> ResourceOwners(
+    Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(
         EntityAddress resourceAddress,
         int offset,
         int limit,

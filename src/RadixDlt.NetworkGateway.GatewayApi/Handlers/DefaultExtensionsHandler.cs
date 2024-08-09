@@ -72,23 +72,14 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-internal class DefaultExtensionsHandler : IExtensionsHandler
+internal class DefaultExtensionsHandler(IExtensionsQuerier extensionsQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
 {
-    private readonly IExtensionsQuerier _extensionsQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
-
-    public DefaultExtensionsHandler(IExtensionsQuerier extensionsQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration)
-    {
-        _extensionsQuerier = extensionsQuerier;
-        _endpointConfiguration = endpointConfiguration;
-    }
-
     public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(GatewayModel.ResourceOwnersRequest request, CancellationToken token)
     {
-        return await _extensionsQuerier.ResourceOwners(
+        return await extensionsQuerier.ResourceOwners(
             (EntityAddress)request.ResourceAddress,
             GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
+            endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
             token);
     }
 }

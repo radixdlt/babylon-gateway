@@ -65,17 +65,18 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IDepositPreValidationQuerier
 {
-    Task<GatewayApiSdk.Model.AccountDepositPreValidationDecidingFactors> AccountTryDepositPreValidation(
+    Task<GatewayModel.AccountDepositPreValidationDecidingFactors> AccountTryDepositPreValidation(
         EntityAddress accountAddress,
         EntityAddress[] resourceAddresses,
         EntityAddress? badgeResourceAddress,
         string? nonFungibleBadgeNfid,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         CancellationToken token = default
     );
 }

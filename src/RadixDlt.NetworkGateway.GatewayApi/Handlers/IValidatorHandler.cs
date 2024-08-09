@@ -64,10 +64,11 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface IValidatorHandler
 {
-    Task<GatewayApiSdk.Model.ValidatorsUptimeResponse> Uptime(GatewayApiSdk.Model.ValidatorsUptimeRequest request, CancellationToken token);
+    Task<GatewayModel.ValidatorsUptimeResponse> Uptime(GatewayModel.ValidatorsUptimeRequest request, CancellationToken token);
 }
