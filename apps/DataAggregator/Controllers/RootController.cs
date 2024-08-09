@@ -88,6 +88,7 @@ public class RootController : ControllerBase
             docs = "https://docs.radixdlt.com",
             repo = "https://github.com/radixdlt/babylon-gateway",
             ledger_commit_health = healthReport,
-        }) { StatusCode = healthReport.IsHealthy ? 200 : 500 };
+        })
+        { StatusCode = healthReport.IsHealthy ? 200 : 500 };
     }
 }

@@ -250,43 +250,43 @@ internal class DefaultTransactionHandler : ITransactionHandler
             switch (decidingFactorItem.ResourcePreferenceRule)
             {
                 case GatewayModel.AccountResourcePreferenceRule.Allowed:
-                {
-                    var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
-                    resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                    break;
-                }
+                    {
+                        var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
+                        resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                        break;
+                    }
 
                 case GatewayModel.AccountResourcePreferenceRule.Disallowed:
-                {
-                    var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
-                    resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                    break;
-                }
+                    {
+                        var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
+                        resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                        break;
+                    }
 
                 case null:
                     switch (decidingFactors.DefaultDepositRule)
                     {
                         case GatewayModel.AccountDefaultDepositRule.Reject:
-                        {
-                            var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
-                            resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                            break;
-                        }
+                            {
+                                var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
+                                resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                                break;
+                            }
 
                         case GatewayModel.AccountDefaultDepositRule.Accept:
-                        {
-                            var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
-                            resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                            break;
-                        }
+                            {
+                                var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
+                                resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                                break;
+                            }
 
                         case GatewayModel.AccountDefaultDepositRule.AllowExisting:
-                        {
-                            var allowsTryDeposit = decidingFactorItem.IsXrd || decidingFactorItem.VaultExists;
-                            var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, allowsTryDeposit);
-                            resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                            break;
-                        }
+                            {
+                                var allowsTryDeposit = decidingFactorItem.IsXrd || decidingFactorItem.VaultExists;
+                                var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, allowsTryDeposit);
+                                resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                                break;
+                            }
 
                         default:
                             throw new ArgumentOutOfRangeException($"Unexpected value of {decidingFactors.DefaultDepositRule}");

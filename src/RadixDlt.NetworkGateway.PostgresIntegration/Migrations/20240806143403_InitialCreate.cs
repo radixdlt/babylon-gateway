@@ -62,14 +62,14 @@
  * permissions under this License.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
+using System.Collections.Generic;
+using System.Numerics;
 
 #nullable disable
 
