@@ -4845,18 +4845,11 @@ components:
     StateKeyValueStoreDataRequestKeyItem:
       description: Provide either `key_hex` or `key_json`. If both are provided, `key_hex` is used and `key_json` is ignored.
       type: object
-      required:
-        - key_json
-      properties:
-        key_json:
-          $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
-    StateKeyValueStoreDataRequestHexKeyItem:
-      type: object
-      required:
-        - key_hex
       properties:
         key_hex:
           $ref: "#/components/schemas/HexString"
+        key_json:
+          $ref: "#/components/schemas/ProgrammaticScryptoSborValue"
     StateKeyValueStoreDataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
