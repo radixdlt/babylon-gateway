@@ -3,7 +3,7 @@
 ## Pre-requisites
 
 The following are pre-requisites:
-* We use [dotnet 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) - ensure `dotnet --version` returns at least 7.x
+* We use [dotnet 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) - ensure `dotnet --version` returns at least `8.x`
 * Install docker
 
 Whilst any IDE supporting dotnet core can be used for development, we would recommend Jetbrains Rider.
