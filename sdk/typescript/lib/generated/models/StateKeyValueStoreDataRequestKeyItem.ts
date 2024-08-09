@@ -12,27 +12,42 @@
  * Do not edit the class manually.
  */
 
+import { exists, mapValues } from '../runtime';
+import type { ProgrammaticScryptoSborValue } from './ProgrammaticScryptoSborValue';
 import {
-    StateKeyValueStoreDataRequestHexKeyItem,
-    instanceOfStateKeyValueStoreDataRequestHexKeyItem,
-    StateKeyValueStoreDataRequestHexKeyItemFromJSON,
-    StateKeyValueStoreDataRequestHexKeyItemFromJSONTyped,
-    StateKeyValueStoreDataRequestHexKeyItemToJSON,
-} from './StateKeyValueStoreDataRequestHexKeyItem';
-import {
-    StateKeyValueStoreDataRequestJsonKeyItem,
-    instanceOfStateKeyValueStoreDataRequestJsonKeyItem,
-    StateKeyValueStoreDataRequestJsonKeyItemFromJSON,
-    StateKeyValueStoreDataRequestJsonKeyItemFromJSONTyped,
-    StateKeyValueStoreDataRequestJsonKeyItemToJSON,
-} from './StateKeyValueStoreDataRequestJsonKeyItem';
+    ProgrammaticScryptoSborValueFromJSON,
+    ProgrammaticScryptoSborValueFromJSONTyped,
+    ProgrammaticScryptoSborValueToJSON,
+} from './ProgrammaticScryptoSborValue';
 
 /**
- * @type StateKeyValueStoreDataRequestKeyItem
  * 
  * @export
+ * @interface StateKeyValueStoreDataRequestKeyItem
  */
-export type StateKeyValueStoreDataRequestKeyItem = StateKeyValueStoreDataRequestHexKeyItem | StateKeyValueStoreDataRequestJsonKeyItem;
+export interface StateKeyValueStoreDataRequestKeyItem {
+    /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof StateKeyValueStoreDataRequestKeyItem
+     */
+    key_hex?: string;
+    /**
+     * 
+     * @type {ProgrammaticScryptoSborValue}
+     * @memberof StateKeyValueStoreDataRequestKeyItem
+     */
+    key_json?: ProgrammaticScryptoSborValue;
+}
+
+/**
+ * Check if a given object implements the StateKeyValueStoreDataRequestKeyItem interface.
+ */
+export function instanceOfStateKeyValueStoreDataRequestKeyItem(value: object): boolean {
+    let isInstance = true;
+
+    return isInstance;
+}
 
 export function StateKeyValueStoreDataRequestKeyItemFromJSON(json: any): StateKeyValueStoreDataRequestKeyItem {
     return StateKeyValueStoreDataRequestKeyItemFromJSONTyped(json, false);
@@ -42,7 +57,11 @@ export function StateKeyValueStoreDataRequestKeyItemFromJSONTyped(json: any, ign
     if ((json === undefined) || (json === null)) {
         return json;
     }
-    return { ...StateKeyValueStoreDataRequestHexKeyItemFromJSONTyped(json, true), ...StateKeyValueStoreDataRequestJsonKeyItemFromJSONTyped(json, true) };
+    return {
+        
+        'key_hex': !exists(json, 'key_hex') ? undefined : json['key_hex'],
+        'key_json': !exists(json, 'key_json') ? undefined : ProgrammaticScryptoSborValueFromJSON(json['key_json']),
+    };
 }
 
 export function StateKeyValueStoreDataRequestKeyItemToJSON(value?: StateKeyValueStoreDataRequestKeyItem | null): any {
@@ -52,14 +71,10 @@ export function StateKeyValueStoreDataRequestKeyItemToJSON(value?: StateKeyValue
     if (value === null) {
         return null;
     }
-
-    if (instanceOfStateKeyValueStoreDataRequestHexKeyItem(value)) {
-        return StateKeyValueStoreDataRequestHexKeyItemToJSON(value as StateKeyValueStoreDataRequestHexKeyItem);
-    }
-    if (instanceOfStateKeyValueStoreDataRequestJsonKeyItem(value)) {
-        return StateKeyValueStoreDataRequestJsonKeyItemToJSON(value as StateKeyValueStoreDataRequestJsonKeyItem);
-    }
-
-    return {};
+    return {
+        
+        'key_hex': value.key_hex,
+        'key_json': ProgrammaticScryptoSborValueToJSON(value.key_json),
+    };
 }
 
