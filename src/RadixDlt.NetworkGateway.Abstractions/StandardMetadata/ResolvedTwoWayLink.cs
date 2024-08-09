@@ -66,17 +66,14 @@ using System;
 
 namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 
-public abstract record ResolvedTwoWayLink(string? InvalidReason)
-{
-    public bool IsValid => InvalidReason == null;
-}
+public abstract record ResolvedTwoWayLink;
 
-public sealed record DappClaimedEntityResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+public sealed record DappClaimedEntityResolvedTwoWayLink(EntityAddress EntityAddress) : ResolvedTwoWayLink;
 
-public sealed record DappClaimedWebsiteResolvedTwoWayLink(Uri Origin, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+public sealed record DappClaimedWebsiteResolvedTwoWayLink(Uri Origin) : ResolvedTwoWayLink;
 
-public sealed record DappDefinitionResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+public sealed record DappDefinitionResolvedTwoWayLink(EntityAddress EntityAddress) : ResolvedTwoWayLink;
 
-public sealed record DappDefinitionsResolvedTwoWayLink(EntityAddress EntityAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+public sealed record DappDefinitionsResolvedTwoWayLink(EntityAddress EntityAddress) : ResolvedTwoWayLink;
 
-public sealed record DappAccountLockerResolvedTwoWayLink(EntityAddress LockerAddress, string? InvalidReason) : ResolvedTwoWayLink(InvalidReason);
+public sealed record DappAccountLockerResolvedTwoWayLink(EntityAddress LockerAddress) : ResolvedTwoWayLink;

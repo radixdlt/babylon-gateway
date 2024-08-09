@@ -159,7 +159,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
         var resolvedTwoWayLinks = optIns.DappTwoWayLinks
-            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, true, ledgerState, token)
+            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, ledgerState, token)
             : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
         var resolvedNativeResourceDetails = optIns.NativeResourceDetails
             ? await new NativeResourceDetailsResolver(_dbContext, _dapperWrapper, networkConfiguration).GetNativeResourceDetails(entities, ledgerState, token)
