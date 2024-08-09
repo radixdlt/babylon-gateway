@@ -71,11 +71,41 @@ public enum EntityRelationship
     ValidatorPendingXrdWithdrawVault,
     ValidatorLockedOwnerStakeUnitVault,
     ValidatorPendingOwnerStakeUnitUnlockVault,
+    ValidatorStakeUnitValidator,
+    ValidatorClaimTokenValidator,
     VaultResource,
     VaultRoyalty,
     VaultResourcePool,
     AccountLockerLocker,
     AccountLockerAccount,
-    ResourcePoolUnit,
+
+    /// <summary>
+    /// A Resource Pool to a Resource relationship.
+    /// </summary>
     ResourcePoolResource,
+
+    /// <summary>
+    /// A Resource Pool to a Resource Vault relationship.
+    /// </summary>
+    ResourcePoolResourceVault,
+
+    /// <summary>
+    /// A Resource Pool to a Resource Pool Unit Resource relationship.
+    /// </summary>
+    ResourcePoolUnit,
+
+    /// <summary>
+    /// A Resource Pool Unit Resource to a Resource Pool relationship.
+    /// </summary>
+    ResourcePoolUnitResourcePool,
+
+    /// <summary>
+    /// An Access Controller to a Recovery Badge relationship.
+    /// </summary>
+    AccessControllerRecoveryBadge,
+
+    /// <summary>
+    /// An Access Controller Recovery Badge back to an Access Controller relationship.
+    /// </summary>
+    AccessControllerRecoveryBadgeAccessController,
 }

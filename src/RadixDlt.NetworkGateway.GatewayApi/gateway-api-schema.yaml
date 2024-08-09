@@ -3968,6 +3968,7 @@ components:
           package_royalty_vault_balance: true
           non_fungible_include_nfids: true
           dapp_two_way_links: true
+          native_resource_details: true
           explicit_metadata:
             - name
             - description
@@ -4002,6 +4003,10 @@ components:
             type: string
         dapp_two_way_links:
           description: if set to `true`, on-ledger dApp two-way links (resolved & verified) are returned. See https://docs.radixdlt.com/docs/metadata-for-verification for more details.
+          type: boolean
+          default: false
+        native_resource_details:
+          description: if set to `true`, additional details for the Network native resources are returned.
           type: boolean
           default: false
     StateEntityDetailsResponse:
@@ -4094,6 +4099,8 @@ components:
               $ref: "#/components/schemas/BigDecimal"
             two_way_linked_dapps:
               $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
+            native_resource_details:
+              $ref: "#/components/schemas/NativeResourceDetails"
     StateEntityDetailsResponseNonFungibleResourceDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -4122,6 +4129,8 @@ components:
                 type: string
             two_way_linked_dapps:
               $ref: "#/components/schemas/TwoWayLinkedDappsCollection"
+            native_resource_details:
+              $ref: "#/components/schemas/NativeResourceDetails"
     StateEntityDetailsResponseFungibleVaultDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -4216,6 +4225,8 @@ components:
             two_way_linked_dapp_details:
               description: Two-way linked (resolved & verified) dApp details. Applicable to dApp definition accounts only and limited to on-ledger information only.
               $ref: "#/components/schemas/TwoWayLinkedDappOnLedgerDetails"
+            native_resource_details:
+              $ref: "#/components/schemas/NativeResourceDetails"
 
     StateAccountResourcePreferencesPageRequest:
       allOf:
@@ -5016,6 +5027,188 @@ components:
           type: array
           items:
             type: string
+
+    #
+    # Native Resources
+    #
+
+    NativeResourceUnitRedemptionValue:
+      type: array
+      items:
+        $ref: "#/components/schemas/NativeResourceRedemptionValueItem"
+    NativeResourceRedemptionValueItem:
+      type: object
+      required:
+        - resource_address
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        amount:
+          $ref: "#/components/schemas/BigDecimal"
+
+    NativeResourceKind:
+      type: string
+      enum:
+        - Xrd
+        - PackageOwnerBadge
+        - AccountOwnerBadge
+        - IdentityOwnerBadge
+        - ValidatorOwnerBadge
+        - Secp256k1SignatureResource
+        - Ed25519SignatureResource
+        - GlobalCallerResource
+        - PackageOfDirectCallerResource
+        - SystemExecutionResource
+        - ValidatorLiquidStakeUnit
+        - ValidatorClaimNft
+        - OneResourcePoolUnit
+        - TwoResourcePoolUnit
+        - MultiResourcePoolUnit
+        - AccessControllerRecoveryBadge
+    NativeResourceDetails:
+      type: object
+      discriminator:
+        propertyName: kind
+        mapping:
+          Xrd: "#/components/schemas/NativeResourceXrdValue"
+          PackageOwnerBadge: "#/components/schemas/NativeResourcePackageOwnerBadgeValue"
+          AccountOwnerBadge: "#/components/schemas/NativeResourceAccountOwnerBadgeValue"
+          IdentityOwnerBadge: "#/components/schemas/NativeResourceIdentityOwnerBadgeValue"
+          ValidatorOwnerBadge: "#/components/schemas/NativeResourceValidatorOwnerBadgeValue"
+          Secp256k1SignatureResource: "#/components/schemas/NativeResourceSecp256k1SignatureResourceValue"
+          Ed25519SignatureResource: "#/components/schemas/NativeResourceEd25519SignatureResourceValue"
+          GlobalCallerResource: "#/components/schemas/NativeResourceGlobalCallerResourceValue"
+          PackageOfDirectCallerResource: "#/components/schemas/NativeResourcePackageOfDirectCallerResourceValue"
+          SystemExecutionResource: "#/components/schemas/NativeResourceSystemExecutionResourceValue"
+          ValidatorLiquidStakeUnit: "#/components/schemas/NativeResourceValidatorLiquidStakeUnitValue"
+          ValidatorClaimNft: "#/components/schemas/NativeResourceValidatorClaimNftValue"
+          OneResourcePoolUnit: "#/components/schemas/NativeResourceOneResourcePoolUnitValue"
+          TwoResourcePoolUnit: "#/components/schemas/NativeResourceTwoResourcePoolUnitValue"
+          MultiResourcePoolUnit: "#/components/schemas/NativeResourceMultiResourcePoolUnitValue"
+          AccessControllerRecoveryBadge: "#/components/schemas/NativeResourceAccessControllerRecoveryBadgeValue"
+      required:
+        - kind
+      properties:
+        kind:
+          $ref: "#/components/schemas/NativeResourceKind"
+    NativeResourceXrdValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourcePackageOwnerBadgeValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourceAccountOwnerBadgeValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourceIdentityOwnerBadgeValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourceValidatorOwnerBadgeValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourceSecp256k1SignatureResourceValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourceEd25519SignatureResourceValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourceGlobalCallerResourceValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourcePackageOfDirectCallerResourceValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourceSystemExecutionResourceValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+    NativeResourceValidatorLiquidStakeUnitValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+          required:
+            - validator_address
+            - redemption_resource_count
+            - unit_redemption_value
+          properties:
+            validator_address:
+              $ref: "#/components/schemas/Address"
+            redemption_resource_count:
+              type: integer
+            unit_redemption_value:
+              $ref: "#/components/schemas/NativeResourceUnitRedemptionValue"
+    NativeResourceValidatorClaimNftValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+          required:
+            - validator_address
+          properties:
+            validator_address:
+              $ref: "#/components/schemas/Address"
+    NativeResourceOneResourcePoolUnitValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+          required:
+            - pool_address
+            - redemption_resource_count
+            - unit_redemption_value
+          properties:
+            pool_address:
+              $ref: "#/components/schemas/Address"
+            redemption_resource_count:
+              type: integer
+            unit_redemption_value:
+              $ref: "#/components/schemas/NativeResourceUnitRedemptionValue"
+    NativeResourceTwoResourcePoolUnitValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+          required:
+            - pool_address
+            - redemption_resource_count
+            - unit_redemption_value
+          properties:
+            pool_address:
+              $ref: "#/components/schemas/Address"
+            redemption_resource_count:
+              type: integer
+            unit_redemption_value:
+              $ref: "#/components/schemas/NativeResourceUnitRedemptionValue"
+    NativeResourceMultiResourcePoolUnitValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+          required:
+            - pool_address
+            - redemption_resource_count
+            - unit_redemption_value
+          properties:
+            pool_address:
+              $ref: "#/components/schemas/Address"
+            redemption_resource_count:
+              type: integer
+            unit_redemption_value:
+              $ref: "#/components/schemas/NativeResourceUnitRedemptionValue"
+    NativeResourceAccessControllerRecoveryBadgeValue:
+      allOf:
+        - $ref: "#/components/schemas/NativeResourceDetails"
+        - type: object
+          required:
+            - access_controller_address
+          properties:
+            access_controller_address:
+              $ref: "#/components/schemas/Address"
 
     #
     # Metadata Typed Value
