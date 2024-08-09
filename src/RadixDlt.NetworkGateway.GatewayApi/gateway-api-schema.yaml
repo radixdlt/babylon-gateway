@@ -4745,6 +4745,7 @@ components:
                 - kind: "U32"
                   value: "1"
     StateKeyValueStoreDataRequestKeyItem:
+      description: Provide either `key_hex` or `key_json`. If both are provided, `key_hex` is used and `key_json` is ignored.
       type: object
       properties:
         key_hex:
