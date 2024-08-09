@@ -233,28 +233,28 @@ internal class AccountAuthorizedDepositorsProcessor
         switch (accountAuthorizedDepositorEntrySubstate.Key.Badge)
         {
             case CoreModel.ResourceAuthorizedDepositorBadge resourceBadge:
-            {
-                var resourceEntityId = _referencedEntityDictionary.Get((EntityAddress)resourceBadge.ResourceAddress).DatabaseId;
+                {
+                    var resourceEntityId = _referencedEntityDictionary.Get((EntityAddress)resourceBadge.ResourceAddress).DatabaseId;
 
-                entryLookup = new AccountAuthorizedDepositorsDbLookup(
-                    AccountEntityId: lookup.AccountEntityId,
-                    ResourceEntityId: resourceEntityId,
-                    NonFungibleId: null
-                );
-                break;
-            }
+                    entryLookup = new AccountAuthorizedDepositorsDbLookup(
+                        AccountEntityId: lookup.AccountEntityId,
+                        ResourceEntityId: resourceEntityId,
+                        NonFungibleId: null
+                    );
+                    break;
+                }
 
             case CoreModel.NonFungibleAuthorizedDepositorBadge nonFungibleBadge:
-            {
-                var resourceEntityId = _referencedEntityDictionary.Get((EntityAddress)nonFungibleBadge.NonFungibleGlobalId.ResourceAddress).DatabaseId;
+                {
+                    var resourceEntityId = _referencedEntityDictionary.Get((EntityAddress)nonFungibleBadge.NonFungibleGlobalId.ResourceAddress).DatabaseId;
 
-                entryLookup = new AccountAuthorizedDepositorsDbLookup(
-                    AccountEntityId: lookup.AccountEntityId,
-                    ResourceEntityId: resourceEntityId,
-                    NonFungibleId: nonFungibleBadge.NonFungibleGlobalId.LocalId.SimpleRep
-                );
-                break;
-            }
+                    entryLookup = new AccountAuthorizedDepositorsDbLookup(
+                        AccountEntityId: lookup.AccountEntityId,
+                        ResourceEntityId: resourceEntityId,
+                        NonFungibleId: nonFungibleBadge.NonFungibleGlobalId.LocalId.SimpleRep
+                    );
+                    break;
+                }
 
             default:
                 throw new UnreachableException(

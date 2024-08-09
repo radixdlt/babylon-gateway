@@ -151,7 +151,7 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
                     remoteGenericSubstitution.ResolvedFullTypeId.EntityAddress,
                     remoteGenericSubstitution.ResolvedFullTypeId.LocalTypeId.Id,
                     remoteGenericSubstitution.ResolvedFullTypeId.LocalTypeId.Kind),
-            _ => throw new UnreachableException($"Unexpected type of generic substitution {genericSubstitution.GetType()}")
+            _ => throw new UnreachableException($"Unexpected type of generic substitution {genericSubstitution.GetType()}"),
         };
     }
 }

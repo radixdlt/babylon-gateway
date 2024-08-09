@@ -129,7 +129,7 @@ internal sealed class ExceptionHandlingMiddleware
     {
         switch (exception)
         {
-            case BadHttpRequestException badHttpRequestException :
+            case BadHttpRequestException badHttpRequestException:
                 _logger.LogWarning(exception, "Bad http request. [RequestTrace={TraceId}]", traceId);
                 return new GenericBadRequestException("Bad http request", badHttpRequestException.Message);
 

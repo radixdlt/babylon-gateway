@@ -67,7 +67,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public interface IPendingTransactionResubmissionServiceObserver: ITransactionSubmitterObserver
+public interface IPendingTransactionResubmissionServiceObserver : ITransactionSubmitterObserver
 {
     ValueTask ObserveResubmissionQueueSize(int totalTransactionsNeedingResubmission);
 

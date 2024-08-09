@@ -67,7 +67,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface ISubmissionTrackingServiceObserver: ITransactionSubmitterObserver
+public interface ISubmissionTrackingServiceObserver : ITransactionSubmitterObserver
 {
     ValueTask OnSubmissionTrackedInDatabase(bool isDuplicate);
 }
