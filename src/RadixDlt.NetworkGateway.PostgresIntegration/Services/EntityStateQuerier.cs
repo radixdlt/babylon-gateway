@@ -345,7 +345,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     var componentRoyaltyVaultBalance = royaltyVaultsBalances?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
-                        packageAddress: correlatedAddresses[ce.GetPackageId()],
+                        packageAddress: correlatedAddresses[ce.GetInstantiatingPackageId()],
                         blueprintName: ce.BlueprintName,
                         blueprintVersion: ce.BlueprintVersion,
                         state: state != null ? new JRaw(state) : null,
@@ -1510,7 +1510,7 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
                 lookup.Add(entity.GlobalAncestorId.Value);
             }
 
-            if (entity.TryGetCorrelation(EntityRelationship.ComponentPackage, out var packageCorrelation))
+            if (entity.TryGetCorrelation(EntityRelationship.ComponentToInstantiatingPackage, out var packageCorrelation))
             {
                 lookup.Add(packageCorrelation.EntityId);
             }

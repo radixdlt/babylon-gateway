@@ -29,6 +29,7 @@ Release built: _not released yet_
 - New `ledger_transaction_markers` type with the `event_global_emitter` discriminator. It represents the global emitter for each event.
 - Added new `unverified_standard_metadata_*` tables. They hold **some** of the metadata entries using db-friendly (normalized) model. See https://docs.radixdlt.com/docs/metadata-standards
 - Extended list of supported entity correlations in the `entities` table.
+- Renamed values of the `entity_relationship` enum type. 
 
 ## 1.6.3
 Release built: 06.08.2024

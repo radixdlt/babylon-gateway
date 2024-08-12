@@ -147,7 +147,7 @@ base_entities AS (
     WHERE
         e.from_state_version <= var.state_version
       AND e.address = ANY(var.addresses)
-      AND e.correlated_entity_relationships && '{resource_pool_unit_resource_pool, validator_stake_unit_validator, validator_claim_token_validator, access_controller_recovery_badge_access_controller}'::entity_relationship[]
+      AND e.correlated_entity_relationships && '{unit_vault_of_resource_pool, stake_vault_of_validator, claim_token_of_validator, recovery_badge_of_access_controller}'::entity_relationship[]
 ),
 base_with_root AS (
     SELECT
@@ -158,7 +158,7 @@ base_with_root AS (
         unnest(root.correlated_entity_ids) AS root_correlated_entity_id
     FROM base_entities base
     INNER JOIN entities root ON root.id = base.base_correlated_entity_id
-    WHERE base.base_correlated_entity_relationship = ANY('{resource_pool_unit_resource_pool, validator_stake_unit_validator, validator_claim_token_validator, access_controller_recovery_badge_access_controller}'::entity_relationship[])
+    WHERE base.base_correlated_entity_relationship = ANY('{unit_vault_of_resource_pool, stake_vault_of_validator, claim_token_of_validator, recovery_badge_of_access_controller}'::entity_relationship[])
 )
 SELECT
     bwr.base_correlated_entity_relationship AS BaseRelationship,
@@ -177,7 +177,7 @@ LEFT JOIN LATERAL (
     LIMIT 1
 ) vault ON TRUE
 LEFT JOIN entities re ON re.id = vault.resource_entity_id
-WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_resource_vault, validator_stake_vault, access_controller_recovery_badge}'::entity_relationship[]);",
+WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_to_resource_vault, validator_to_stake_vault, access_controller_to_recovery_badge}'::entity_relationship[]);",
             new
             {
                 addresses = addresses.Select(e => (string)e).ToList(),
@@ -196,7 +196,7 @@ WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_resource_vau
                 return new GatewayModel.NativeResourceAccessControllerRecoveryBadgeValue(rootEntityAddress);
             }
 
-            if (rootEntityType == EntityType.GlobalValidator && baseRelationship == EntityRelationship.ValidatorClaimTokenValidator)
+            if (rootEntityType == EntityType.GlobalValidator && baseRelationship == EntityRelationship.ClaimTokenOfValidator)
             {
                 return new GatewayModel.NativeResourceValidatorClaimNftValue(rootEntityAddress);
             }
