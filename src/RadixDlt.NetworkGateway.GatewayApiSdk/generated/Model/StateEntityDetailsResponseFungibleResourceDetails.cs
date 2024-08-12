@@ -117,8 +117,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalBurned">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="twoWayLinkedDapps">twoWayLinkedDapps.</param>
+        /// <param name="nativeResourceDetails">nativeResourceDetails.</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.FungibleResource).</param>
-        public StateEntityDetailsResponseFungibleResourceDetails(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), TwoWayLinkedDappsCollection twoWayLinkedDapps = default(TwoWayLinkedDappsCollection), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.FungibleResource) : base(type)
+        public StateEntityDetailsResponseFungibleResourceDetails(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), TwoWayLinkedDappsCollection twoWayLinkedDapps = default(TwoWayLinkedDappsCollection), NativeResourceDetails nativeResourceDetails = default(NativeResourceDetails), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.FungibleResource) : base(type)
         {
             // to ensure "roleAssignments" is required (not null)
             if (roleAssignments == null)
@@ -146,6 +147,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.TotalBurned = totalBurned;
             this.TwoWayLinkedDapps = twoWayLinkedDapps;
+            this.NativeResourceDetails = nativeResourceDetails;
         }
 
         /// <summary>
@@ -188,6 +190,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TwoWayLinkedDappsCollection TwoWayLinkedDapps { get; set; }
 
         /// <summary>
+        /// Gets or Sets NativeResourceDetails
+        /// </summary>
+        [DataMember(Name = "native_resource_details", EmitDefaultValue = true)]
+        public NativeResourceDetails NativeResourceDetails { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -202,6 +210,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
             sb.Append("  TotalBurned: ").Append(TotalBurned).Append("\n");
             sb.Append("  TwoWayLinkedDapps: ").Append(TwoWayLinkedDapps).Append("\n");
+            sb.Append("  NativeResourceDetails: ").Append(NativeResourceDetails).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -265,6 +274,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TwoWayLinkedDapps == input.TwoWayLinkedDapps ||
                     (this.TwoWayLinkedDapps != null &&
                     this.TwoWayLinkedDapps.Equals(input.TwoWayLinkedDapps))
+                ) && base.Equals(input) && 
+                (
+                    this.NativeResourceDetails == input.NativeResourceDetails ||
+                    (this.NativeResourceDetails != null &&
+                    this.NativeResourceDetails.Equals(input.NativeResourceDetails))
                 );
         }
 
@@ -297,6 +311,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.TwoWayLinkedDapps != null)
                 {
                     hashCode = (hashCode * 59) + this.TwoWayLinkedDapps.GetHashCode();
+                }
+                if (this.NativeResourceDetails != null)
+                {
+                    hashCode = (hashCode * 59) + this.NativeResourceDetails.GetHashCode();
                 }
                 return hashCode;
             }

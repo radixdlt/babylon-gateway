@@ -70,6 +70,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,7 +80,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class StandardMetadataResolver
 {
-    private record PartiallyValidatedTwoWayLink(long FromStateVersion, StandardMetadataKey Discriminator, bool IsLocked, string EntityAddress, string TargetValue, string ValidationResult);
+    private record struct PartiallyValidatedTwoWayLink(long FromStateVersion, StandardMetadataKey Discriminator, bool IsLocked, string EntityAddress, string TargetValue, string ValidationResult);
+
+    private record struct ValidatedTwoWayLink(PartiallyValidatedTwoWayLink Link, ResolvedTwoWayLink? ResolvedTwoWayLink, string? ValidationError)
+    {
+        public bool IsSuccessfullyResolved([NotNullWhen(true)] out ResolvedTwoWayLink? resolved)
+        {
+            resolved = null;
+
+            if (ValidationError == null && ResolvedTwoWayLink != null)
+            {
+                resolved = ResolvedTwoWayLink;
+
+                return true;
+            }
+
+            return false;
+        }
+    }
 
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IDapperWrapper _dapperWrapper;
@@ -92,7 +110,6 @@ internal class StandardMetadataResolver
 
     public async Task<IDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>> ResolveTwoWayLinks(
         ICollection<Entity> entities,
-        bool resolveValidOnly,
         bool validateOnLedgerOnly,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
@@ -104,7 +121,6 @@ internal class StandardMetadataResolver
             return ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
         }
 
-#pragma warning disable SA1118
         var partiallyValidatedEntries = await _dapperWrapper.ToList<PartiallyValidatedTwoWayLink>(
             _dbContext,
             @"
@@ -256,8 +272,9 @@ WITH
                 WHEN 'dapp_account_locker' THEN
                     CASE FALSE
                         WHEN source_discriminator = 'global_account_component' THEN 'account expected'
-                        WHEN target_entity_discriminator = 'global_account_locker' THEN 'target locker expected'
+                        WHEN dapp_marker_check_valid = TRUE THEN 'dapp marker invalid'
                         WHEN target_entity_check_valid = TRUE THEN 'target link broken'
+                        WHEN target_entity_discriminator = 'global_account_locker' THEN 'target locker expected'
                         ELSE @validationOnLedgerAppCheck
                     END
                 WHEN 'dapp_claimed_websites' THEN
@@ -274,7 +291,6 @@ SELECT
     coalesce(target_value, target_entity_address) AS TargetValue,
     validation_result AS ValidationResult
 FROM resolved",
-#pragma warning restore SA1118
             new
             {
                 dappAccountTypeDappDefinition = StandardMetadataConstants.DappAccountTypeDappDefinition,
@@ -296,65 +312,71 @@ FROM resolved",
 
         await Parallel.ForEachAsync(partiallyValidatedEntries, options, async (pv, innerToken) =>
         {
-            var resolved = await ResolveTwoWayLink(pv, validateOnLedgerOnly, partiallyValidatedEntries, innerToken);
+            var validated = await ResolveTwoWayLink(pv, validateOnLedgerOnly, partiallyValidatedEntries, innerToken);
 
-            if (resolved == null)
+            if (validated.IsSuccessfullyResolved(out var resolved))
             {
-                return;
+                result.GetOrAdd((EntityAddress)pv.EntityAddress, _ => new ConcurrentQueue<ResolvedTwoWayLink>()).Enqueue(resolved);
             }
-
-            if (resolveValidOnly && !resolved.IsValid)
-            {
-                return;
-            }
-
-            result.GetOrAdd((EntityAddress)pv.EntityAddress, _ => new ConcurrentQueue<ResolvedTwoWayLink>()).Enqueue(resolved);
         });
 
         return result.ToDictionary(e => e.Key, e => (ICollection<ResolvedTwoWayLink>)e.Value.ToList());
     }
 
-    private async ValueTask<ResolvedTwoWayLink?> ResolveTwoWayLink(PartiallyValidatedTwoWayLink entry, bool validateOnLedgerOnly, ICollection<PartiallyValidatedTwoWayLink> allEntries, CancellationToken token)
+    private async ValueTask<ValidatedTwoWayLink> ResolveTwoWayLink(PartiallyValidatedTwoWayLink link, bool validateOnLedgerOnly, ICollection<PartiallyValidatedTwoWayLink> allEntries, CancellationToken token)
     {
-        if (entry.ValidationResult == StandardMetadataConstants.ValidationUnknown)
+        if (link.ValidationResult == StandardMetadataConstants.ValidationUnknown)
         {
-            throw CreateException(entry, "unknown validation result");
+            throw CreateException(link, "unknown validation result");
         }
 
-        if (entry.Discriminator == StandardMetadataKey.DappClaimedWebsites)
+        if (link.Discriminator == StandardMetadataKey.DappClaimedWebsites)
         {
-            if (entry.ValidationResult != StandardMetadataConstants.ValidationOffLedgerAppCheck)
+            if (link.ValidationResult == StandardMetadataConstants.ValidationOffLedgerAppCheck)
             {
-                throw CreateException(entry, "expected off-ledger app-check validation result");
+                return await ResolveDappClaimedWebsite(link, validateOnLedgerOnly, token);
             }
 
-            return await ResolveDappClaimedWebsite((EntityAddress)entry.EntityAddress, entry.TargetValue, validateOnLedgerOnly, token);
+            return new ValidatedTwoWayLink(link, null, "expected off-ledger app-check validation result, got: " + link.ValidationResult);
         }
 
-        if (entry.Discriminator == StandardMetadataKey.DappAccountLocker)
+        if (link.Discriminator == StandardMetadataKey.DappAccountLocker)
         {
-            if (entry.ValidationResult != StandardMetadataConstants.ValidationOnLedgerAppCheck)
+            if (link.ValidationResult == StandardMetadataConstants.ValidationOnLedgerAppCheck)
             {
-                throw CreateException(entry, "expected on-ledger app-check validation result");
+                return ResolveDappAccountLocker(link, allEntries);
             }
 
-            return ResolveDappAccountLocker((EntityAddress)entry.EntityAddress, (EntityAddress)entry.TargetValue, allEntries);
+            return new ValidatedTwoWayLink(link, null, "expected on-ledger app-check validation result, got: " + link.ValidationResult);
         }
 
-        var invalidReason = entry.ValidationResult == StandardMetadataConstants.ValidationOnLedgerSucceeded ? null : entry.ValidationResult;
-
-        return entry.Discriminator switch
+        if (link.ValidationResult != StandardMetadataConstants.ValidationOnLedgerSucceeded)
         {
-            StandardMetadataKey.DappAccountType => null,
-            StandardMetadataKey.DappDefinition => new DappDefinitionResolvedTwoWayLink((EntityAddress)entry.TargetValue, invalidReason),
-            StandardMetadataKey.DappDefinitions => new DappDefinitionsResolvedTwoWayLink((EntityAddress)entry.TargetValue, invalidReason),
-            StandardMetadataKey.DappClaimedEntities => new DappClaimedEntityResolvedTwoWayLink((EntityAddress)entry.TargetValue, invalidReason),
-            _ => throw CreateException(entry, "unsupported entry discriminator"),
+            return new ValidatedTwoWayLink(link, null, link.ValidationResult);
+        }
+
+        if (link.Discriminator == StandardMetadataKey.DappAccountType)
+        {
+            return new ValidatedTwoWayLink(link, null, null);
+        }
+
+        var target = (EntityAddress)link.TargetValue;
+
+        ResolvedTwoWayLink resolved = link.Discriminator switch
+        {
+            StandardMetadataKey.DappDefinition => new DappDefinitionResolvedTwoWayLink(target),
+            StandardMetadataKey.DappDefinitions => new DappDefinitionsResolvedTwoWayLink(target),
+            StandardMetadataKey.DappClaimedEntities => new DappClaimedEntityResolvedTwoWayLink(target),
+            _ => throw CreateException(link, "unsupported entry discriminator"),
         };
+
+        return new ValidatedTwoWayLink(link, resolved, null);
     }
 
-    private async ValueTask<DappClaimedWebsiteResolvedTwoWayLink> ResolveDappClaimedWebsite(EntityAddress entityAddress, string claimedWebsite, bool validateOnLedgerOnly, CancellationToken token)
+    private async ValueTask<ValidatedTwoWayLink> ResolveDappClaimedWebsite(PartiallyValidatedTwoWayLink link, bool validateOnLedgerOnly, CancellationToken token)
     {
+        var claimedWebsite = link.TargetValue;
+
         async Task<string?> Validate()
         {
             if (validateOnLedgerOnly)
@@ -379,19 +401,25 @@ FROM resolved",
 
             await Task.CompletedTask;
 
-            throw new NotImplementedException($"unsupported; URL = {radixJsonUrl}, entity_addr = {entityAddress}");
+            throw new NotImplementedException($"unsupported; URL = {radixJsonUrl}, entity_addr = {link.EntityAddress}");
         }
 
         var invalidReason = await Validate();
 
-        return new DappClaimedWebsiteResolvedTwoWayLink(new Uri(claimedWebsite), invalidReason);
+        return invalidReason == null
+            ? new ValidatedTwoWayLink(link, new DappClaimedWebsiteResolvedTwoWayLink(new Uri(claimedWebsite)), null)
+            : new ValidatedTwoWayLink(link, null, invalidReason);
     }
 
-    private DappAccountLockerResolvedTwoWayLink ResolveDappAccountLocker(EntityAddress entityAddress, EntityAddress lockerAddress, ICollection<PartiallyValidatedTwoWayLink> allEntries)
+    private ValidatedTwoWayLink ResolveDappAccountLocker(PartiallyValidatedTwoWayLink link, ICollection<PartiallyValidatedTwoWayLink> allEntries)
     {
-        var valid = allEntries.Any(x => x.EntityAddress == entityAddress && x.Discriminator == StandardMetadataKey.DappClaimedEntities && x.TargetValue == lockerAddress);
+        var entityAddress = (EntityAddress)link.EntityAddress;
+        var lockerAddress = (EntityAddress)link.TargetValue;
+        var isValid = allEntries.Any(x => x.EntityAddress == entityAddress && x.Discriminator == StandardMetadataKey.DappClaimedEntities && x.TargetValue == lockerAddress);
 
-        return new DappAccountLockerResolvedTwoWayLink(entityAddress, valid ? null : "claimed_entities entry with the locker address missing");
+        return isValid
+            ? new ValidatedTwoWayLink(link, new DappAccountLockerResolvedTwoWayLink(lockerAddress), null)
+            : new ValidatedTwoWayLink(link, null, "claimed_entities entry with the locker address missing");
     }
 
     private Exception CreateException(PartiallyValidatedTwoWayLink entry, string details)

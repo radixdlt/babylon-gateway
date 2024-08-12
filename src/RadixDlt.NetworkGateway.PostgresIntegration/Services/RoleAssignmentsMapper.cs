@@ -107,11 +107,11 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
                 throw new UnreachableException($"No owner role defined for entity: {entity.Address}");
             }
 
-            var authConfigFound = blueprintAuthConfigs.TryGetValue(new BlueprintDefinitionIdentifier(entity.BlueprintName, entity.BlueprintVersion, entity.GetPackageId()), out var authConfig);
+            var authConfigFound = blueprintAuthConfigs.TryGetValue(new BlueprintDefinitionIdentifier(entity.BlueprintName, entity.BlueprintVersion, entity.GetInstantiatingPackageId()), out var authConfig);
 
             if (!authConfigFound)
             {
-                throw new UnreachableException($"blueprint: {entity.BlueprintName} {entity.BlueprintVersion} in package: {entity.GetPackageId()} not found");
+                throw new UnreachableException($"blueprint: {entity.BlueprintName} {entity.BlueprintVersion} in package: {entity.GetInstantiatingPackageId()} not found");
             }
 
             var mainModuleKeys = _roleAssignmentsKeyProvider.ExtractKeysFromBlueprintAuthConfig(authConfig!);

@@ -112,7 +112,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="royaltyConfig">royaltyConfig.</param>
         /// <param name="twoWayLinkedDappAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="twoWayLinkedDappDetails">twoWayLinkedDappDetails.</param>
-        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig), string twoWayLinkedDappAddress = default(string), TwoWayLinkedDappOnLedgerDetails twoWayLinkedDappDetails = default(TwoWayLinkedDappOnLedgerDetails))
+        /// <param name="nativeResourceDetails">nativeResourceDetails.</param>
+        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig), string twoWayLinkedDappAddress = default(string), TwoWayLinkedDappOnLedgerDetails twoWayLinkedDappDetails = default(TwoWayLinkedDappOnLedgerDetails), NativeResourceDetails nativeResourceDetails = default(NativeResourceDetails))
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -133,6 +134,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.RoyaltyConfig = royaltyConfig;
             this.TwoWayLinkedDappAddress = twoWayLinkedDappAddress;
             this.TwoWayLinkedDappDetails = twoWayLinkedDappDetails;
+            this.NativeResourceDetails = nativeResourceDetails;
         }
 
         /// <summary>
@@ -194,6 +196,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TwoWayLinkedDappOnLedgerDetails TwoWayLinkedDappDetails { get; set; }
 
         /// <summary>
+        /// Gets or Sets NativeResourceDetails
+        /// </summary>
+        [DataMember(Name = "native_resource_details", EmitDefaultValue = true)]
+        public NativeResourceDetails NativeResourceDetails { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -210,6 +218,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
             sb.Append("  TwoWayLinkedDappAddress: ").Append(TwoWayLinkedDappAddress).Append("\n");
             sb.Append("  TwoWayLinkedDappDetails: ").Append(TwoWayLinkedDappDetails).Append("\n");
+            sb.Append("  NativeResourceDetails: ").Append(NativeResourceDetails).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -289,6 +298,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TwoWayLinkedDappDetails == input.TwoWayLinkedDappDetails ||
                     (this.TwoWayLinkedDappDetails != null &&
                     this.TwoWayLinkedDappDetails.Equals(input.TwoWayLinkedDappDetails))
+                ) && 
+                (
+                    this.NativeResourceDetails == input.NativeResourceDetails ||
+                    (this.NativeResourceDetails != null &&
+                    this.NativeResourceDetails.Equals(input.NativeResourceDetails))
                 );
         }
 
@@ -336,6 +350,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.TwoWayLinkedDappDetails != null)
                 {
                     hashCode = (hashCode * 59) + this.TwoWayLinkedDappDetails.GetHashCode();
+                }
+                if (this.NativeResourceDetails != null)
+                {
+                    hashCode = (hashCode * 59) + this.NativeResourceDetails.GetHashCode();
                 }
                 return hashCode;
             }

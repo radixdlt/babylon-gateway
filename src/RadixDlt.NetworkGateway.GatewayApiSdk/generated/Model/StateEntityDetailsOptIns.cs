@@ -105,7 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nonFungibleIncludeNfids">if set to &#x60;true&#x60;, first page of non fungible ids are returned for each non fungible resource, with &#x60;next_cursor&#x60; which can be later used at &#x60;/state/entity/page/non-fungible-vault/ids&#x60; endpoint. (default to false).</param>
         /// <param name="explicitMetadata">allows specifying explicitly metadata properties which should be returned in response..</param>
         /// <param name="dappTwoWayLinks">if set to &#x60;true&#x60;, on-ledger dApp two-way links (resolved &amp; verified) are returned. See https://docs.radixdlt.com/docs/metadata-for-verification for more details. (default to false).</param>
-        public StateEntityDetailsOptIns(bool ancestorIdentities = false, bool componentRoyaltyConfig = false, bool componentRoyaltyVaultBalance = false, bool packageRoyaltyVaultBalance = false, bool nonFungibleIncludeNfids = false, List<string> explicitMetadata = default(List<string>), bool dappTwoWayLinks = false)
+        /// <param name="nativeResourceDetails">if set to &#x60;true&#x60;, additional details for the Network native resources are returned. (default to false).</param>
+        public StateEntityDetailsOptIns(bool ancestorIdentities = false, bool componentRoyaltyConfig = false, bool componentRoyaltyVaultBalance = false, bool packageRoyaltyVaultBalance = false, bool nonFungibleIncludeNfids = false, List<string> explicitMetadata = default(List<string>), bool dappTwoWayLinks = false, bool nativeResourceDetails = false)
         {
             this.AncestorIdentities = ancestorIdentities;
             this.ComponentRoyaltyConfig = componentRoyaltyConfig;
@@ -114,6 +115,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.NonFungibleIncludeNfids = nonFungibleIncludeNfids;
             this.ExplicitMetadata = explicitMetadata;
             this.DappTwoWayLinks = dappTwoWayLinks;
+            this.NativeResourceDetails = nativeResourceDetails;
         }
 
         /// <summary>
@@ -166,6 +168,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool DappTwoWayLinks { get; set; }
 
         /// <summary>
+        /// if set to &#x60;true&#x60;, additional details for the Network native resources are returned.
+        /// </summary>
+        /// <value>if set to &#x60;true&#x60;, additional details for the Network native resources are returned.</value>
+        [DataMember(Name = "native_resource_details", EmitDefaultValue = true)]
+        public bool NativeResourceDetails { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -180,6 +189,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  NonFungibleIncludeNfids: ").Append(NonFungibleIncludeNfids).Append("\n");
             sb.Append("  ExplicitMetadata: ").Append(ExplicitMetadata).Append("\n");
             sb.Append("  DappTwoWayLinks: ").Append(DappTwoWayLinks).Append("\n");
+            sb.Append("  NativeResourceDetails: ").Append(NativeResourceDetails).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -244,6 +254,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.DappTwoWayLinks == input.DappTwoWayLinks ||
                     this.DappTwoWayLinks.Equals(input.DappTwoWayLinks)
+                ) && 
+                (
+                    this.NativeResourceDetails == input.NativeResourceDetails ||
+                    this.NativeResourceDetails.Equals(input.NativeResourceDetails)
                 );
         }
 
@@ -266,6 +280,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.ExplicitMetadata.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.DappTwoWayLinks.GetHashCode();
+                hashCode = (hashCode * 59) + this.NativeResourceDetails.GetHashCode();
                 return hashCode;
             }
         }
