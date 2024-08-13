@@ -84,40 +84,47 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Provide either `key_hex` or `key_json`. If both are provided, `key_hex` is used and `key_json` is ignored.
+    /// NativeResourceIdentityOwnerBadgeValue
     /// </summary>
-    [DataContract(Name = "StateKeyValueStoreDataRequestKeyItem")]
-    public partial class StateKeyValueStoreDataRequestKeyItem : IEquatable<StateKeyValueStoreDataRequestKeyItem>
+    [DataContract(Name = "NativeResourceIdentityOwnerBadgeValue")]
+    [JsonConverter(typeof(JsonSubtypes), "kind")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceAccessControllerRecoveryBadgeValue), "AccessControllerRecoveryBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceAccountOwnerBadgeValue), "AccountOwnerBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceEd25519SignatureResourceValue), "Ed25519SignatureResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceGlobalCallerResourceValue), "GlobalCallerResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceIdentityOwnerBadgeValue), "IdentityOwnerBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceMultiResourcePoolUnitValue), "MultiResourcePoolUnit")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceOneResourcePoolUnitValue), "OneResourcePoolUnit")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourcePackageOfDirectCallerResourceValue), "PackageOfDirectCallerResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourcePackageOwnerBadgeValue), "PackageOwnerBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceSecp256k1SignatureResourceValue), "Secp256k1SignatureResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceSystemExecutionResourceValue), "SystemExecutionResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceTwoResourcePoolUnitValue), "TwoResourcePoolUnit")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorClaimNftValue), "ValidatorClaimNft")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorLiquidStakeUnitValue), "ValidatorLiquidStakeUnit")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorOwnerBadgeValue), "ValidatorOwnerBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceXrdValue), "Xrd")]
+    public partial class NativeResourceIdentityOwnerBadgeValue : NativeResourceDetails, IEquatable<NativeResourceIdentityOwnerBadgeValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceIdentityOwnerBadgeValue" /> class.
         /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob..</param>
-        /// <param name="keyJson">keyJson.</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
+        [JsonConstructorAttribute]
+        protected NativeResourceIdentityOwnerBadgeValue() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NativeResourceIdentityOwnerBadgeValue" /> class.
+        /// </summary>
+        /// <param name="kind">kind (required) (default to NativeResourceKind.IdentityOwnerBadge).</param>
+        public NativeResourceIdentityOwnerBadgeValue(NativeResourceKind kind = NativeResourceKind.IdentityOwnerBadge) : base(kind)
         {
-            this.KeyHex = keyHex;
-            this.KeyJson = keyJson;
         }
-
-        /// <summary>
-        /// Hex-encoded binary blob.
-        /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets KeyJson
-        /// </summary>
-        [DataMember(Name = "key_json", EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValue KeyJson { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -126,9 +133,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateKeyValueStoreDataRequestKeyItem {\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
-            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
+            sb.Append("class NativeResourceIdentityOwnerBadgeValue {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -137,7 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,31 +155,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateKeyValueStoreDataRequestKeyItem);
+            return this.Equals(input as NativeResourceIdentityOwnerBadgeValue);
         }
 
         /// <summary>
-        /// Returns true if StateKeyValueStoreDataRequestKeyItem instances are equal
+        /// Returns true if NativeResourceIdentityOwnerBadgeValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateKeyValueStoreDataRequestKeyItem to be compared</param>
+        /// <param name="input">Instance of NativeResourceIdentityOwnerBadgeValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateKeyValueStoreDataRequestKeyItem input)
+        public bool Equals(NativeResourceIdentityOwnerBadgeValue input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
-                (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
-                ) && 
-                (
-                    this.KeyJson == input.KeyJson ||
-                    (this.KeyJson != null &&
-                    this.KeyJson.Equals(input.KeyJson))
-                );
+            return base.Equals(input);
         }
 
         /// <summary>
@@ -184,15 +180,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.KeyHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
-                }
-                if (this.KeyJson != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
-                }
+                int hashCode = base.GetHashCode();
                 return hashCode;
             }
         }

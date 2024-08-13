@@ -84,40 +84,82 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Provide either `key_hex` or `key_json`. If both are provided, `key_hex` is used and `key_json` is ignored.
+    /// NativeResourceOneResourcePoolUnitValue
     /// </summary>
-    [DataContract(Name = "StateKeyValueStoreDataRequestKeyItem")]
-    public partial class StateKeyValueStoreDataRequestKeyItem : IEquatable<StateKeyValueStoreDataRequestKeyItem>
+    [DataContract(Name = "NativeResourceOneResourcePoolUnitValue")]
+    [JsonConverter(typeof(JsonSubtypes), "kind")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceAccessControllerRecoveryBadgeValue), "AccessControllerRecoveryBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceAccountOwnerBadgeValue), "AccountOwnerBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceEd25519SignatureResourceValue), "Ed25519SignatureResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceGlobalCallerResourceValue), "GlobalCallerResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceIdentityOwnerBadgeValue), "IdentityOwnerBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceMultiResourcePoolUnitValue), "MultiResourcePoolUnit")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceOneResourcePoolUnitValue), "OneResourcePoolUnit")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourcePackageOfDirectCallerResourceValue), "PackageOfDirectCallerResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourcePackageOwnerBadgeValue), "PackageOwnerBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceSecp256k1SignatureResourceValue), "Secp256k1SignatureResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceSystemExecutionResourceValue), "SystemExecutionResource")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceTwoResourcePoolUnitValue), "TwoResourcePoolUnit")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorClaimNftValue), "ValidatorClaimNft")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorLiquidStakeUnitValue), "ValidatorLiquidStakeUnit")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorOwnerBadgeValue), "ValidatorOwnerBadge")]
+    [JsonSubtypes.KnownSubType(typeof(NativeResourceXrdValue), "Xrd")]
+    public partial class NativeResourceOneResourcePoolUnitValue : NativeResourceDetails, IEquatable<NativeResourceOneResourcePoolUnitValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceOneResourcePoolUnitValue" /> class.
         /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob..</param>
-        /// <param name="keyJson">keyJson.</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
+        [JsonConstructorAttribute]
+        protected NativeResourceOneResourcePoolUnitValue() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NativeResourceOneResourcePoolUnitValue" /> class.
+        /// </summary>
+        /// <param name="poolAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="redemptionResourceCount">redemptionResourceCount (required).</param>
+        /// <param name="unitRedemptionValue">unitRedemptionValue (required).</param>
+        /// <param name="kind">kind (required) (default to NativeResourceKind.OneResourcePoolUnit).</param>
+        public NativeResourceOneResourcePoolUnitValue(string poolAddress = default(string), int redemptionResourceCount = default(int), List<NativeResourceRedemptionValueItem> unitRedemptionValue = default(List<NativeResourceRedemptionValueItem>), NativeResourceKind kind = NativeResourceKind.OneResourcePoolUnit) : base(kind)
         {
-            this.KeyHex = keyHex;
-            this.KeyJson = keyJson;
+            // to ensure "poolAddress" is required (not null)
+            if (poolAddress == null)
+            {
+                throw new ArgumentNullException("poolAddress is a required property for NativeResourceOneResourcePoolUnitValue and cannot be null");
+            }
+            this.PoolAddress = poolAddress;
+            this.RedemptionResourceCount = redemptionResourceCount;
+            // to ensure "unitRedemptionValue" is required (not null)
+            if (unitRedemptionValue == null)
+            {
+                throw new ArgumentNullException("unitRedemptionValue is a required property for NativeResourceOneResourcePoolUnitValue and cannot be null");
+            }
+            this.UnitRedemptionValue = unitRedemptionValue;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "pool_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PoolAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets KeyJson
+        /// Gets or Sets RedemptionResourceCount
         /// </summary>
-        [DataMember(Name = "key_json", EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValue KeyJson { get; set; }
+        [DataMember(Name = "redemption_resource_count", IsRequired = true, EmitDefaultValue = true)]
+        public int RedemptionResourceCount { get; set; }
+
+        /// <summary>
+        /// Gets or Sets UnitRedemptionValue
+        /// </summary>
+        [DataMember(Name = "unit_redemption_value", IsRequired = true, EmitDefaultValue = true)]
+        public List<NativeResourceRedemptionValueItem> UnitRedemptionValue { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -126,9 +168,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateKeyValueStoreDataRequestKeyItem {\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
-            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
+            sb.Append("class NativeResourceOneResourcePoolUnitValue {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  PoolAddress: ").Append(PoolAddress).Append("\n");
+            sb.Append("  RedemptionResourceCount: ").Append(RedemptionResourceCount).Append("\n");
+            sb.Append("  UnitRedemptionValue: ").Append(UnitRedemptionValue).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -137,7 +181,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,30 +193,35 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateKeyValueStoreDataRequestKeyItem);
+            return this.Equals(input as NativeResourceOneResourcePoolUnitValue);
         }
 
         /// <summary>
-        /// Returns true if StateKeyValueStoreDataRequestKeyItem instances are equal
+        /// Returns true if NativeResourceOneResourcePoolUnitValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateKeyValueStoreDataRequestKeyItem to be compared</param>
+        /// <param name="input">Instance of NativeResourceOneResourcePoolUnitValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateKeyValueStoreDataRequestKeyItem input)
+        public bool Equals(NativeResourceOneResourcePoolUnitValue input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
-                ) && 
+                    this.PoolAddress == input.PoolAddress ||
+                    (this.PoolAddress != null &&
+                    this.PoolAddress.Equals(input.PoolAddress))
+                ) && base.Equals(input) && 
                 (
-                    this.KeyJson == input.KeyJson ||
-                    (this.KeyJson != null &&
-                    this.KeyJson.Equals(input.KeyJson))
+                    this.RedemptionResourceCount == input.RedemptionResourceCount ||
+                    this.RedemptionResourceCount.Equals(input.RedemptionResourceCount)
+                ) && base.Equals(input) && 
+                (
+                    this.UnitRedemptionValue == input.UnitRedemptionValue ||
+                    this.UnitRedemptionValue != null &&
+                    input.UnitRedemptionValue != null &&
+                    this.UnitRedemptionValue.SequenceEqual(input.UnitRedemptionValue)
                 );
         }
 
@@ -184,14 +233,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.KeyHex != null)
+                int hashCode = base.GetHashCode();
+                if (this.PoolAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PoolAddress.GetHashCode();
                 }
-                if (this.KeyJson != null)
+                hashCode = (hashCode * 59) + this.RedemptionResourceCount.GetHashCode();
+                if (this.UnitRedemptionValue != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
+                    hashCode = (hashCode * 59) + this.UnitRedemptionValue.GetHashCode();
                 }
                 return hashCode;
             }

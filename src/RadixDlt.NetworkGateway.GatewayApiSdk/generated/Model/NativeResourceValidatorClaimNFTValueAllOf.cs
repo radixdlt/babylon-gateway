@@ -90,34 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Provide either `key_hex` or `key_json`. If both are provided, `key_hex` is used and `key_json` is ignored.
+    /// NativeResourceValidatorClaimNftValueAllOf
     /// </summary>
-    [DataContract(Name = "StateKeyValueStoreDataRequestKeyItem")]
-    public partial class StateKeyValueStoreDataRequestKeyItem : IEquatable<StateKeyValueStoreDataRequestKeyItem>
+    [DataContract(Name = "NativeResourceValidatorClaimNftValue_allOf")]
+    public partial class NativeResourceValidatorClaimNftValueAllOf : IEquatable<NativeResourceValidatorClaimNftValueAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNftValueAllOf" /> class.
         /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob..</param>
-        /// <param name="keyJson">keyJson.</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
+        [JsonConstructorAttribute]
+        protected NativeResourceValidatorClaimNftValueAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNftValueAllOf" /> class.
+        /// </summary>
+        /// <param name="validatorAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        public NativeResourceValidatorClaimNftValueAllOf(string validatorAddress = default(string))
         {
-            this.KeyHex = keyHex;
-            this.KeyJson = keyJson;
+            // to ensure "validatorAddress" is required (not null)
+            if (validatorAddress == null)
+            {
+                throw new ArgumentNullException("validatorAddress is a required property for NativeResourceValidatorClaimNftValueAllOf and cannot be null");
+            }
+            this.ValidatorAddress = validatorAddress;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets KeyJson
-        /// </summary>
-        [DataMember(Name = "key_json", EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValue KeyJson { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "validator_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ValidatorAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -126,9 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateKeyValueStoreDataRequestKeyItem {\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
-            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
+            sb.Append("class NativeResourceValidatorClaimNftValueAllOf {\n");
+            sb.Append("  ValidatorAddress: ").Append(ValidatorAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateKeyValueStoreDataRequestKeyItem);
+            return this.Equals(input as NativeResourceValidatorClaimNftValueAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateKeyValueStoreDataRequestKeyItem instances are equal
+        /// Returns true if NativeResourceValidatorClaimNftValueAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateKeyValueStoreDataRequestKeyItem to be compared</param>
+        /// <param name="input">Instance of NativeResourceValidatorClaimNftValueAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateKeyValueStoreDataRequestKeyItem input)
+        public bool Equals(NativeResourceValidatorClaimNftValueAllOf input)
         {
             if (input == null)
             {
@@ -165,14 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
-                ) && 
-                (
-                    this.KeyJson == input.KeyJson ||
-                    (this.KeyJson != null &&
-                    this.KeyJson.Equals(input.KeyJson))
+                    this.ValidatorAddress == input.ValidatorAddress ||
+                    (this.ValidatorAddress != null &&
+                    this.ValidatorAddress.Equals(input.ValidatorAddress))
                 );
         }
 
@@ -185,13 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.KeyHex != null)
+                if (this.ValidatorAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
-                }
-                if (this.KeyJson != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValidatorAddress.GetHashCode();
                 }
                 return hashCode;
             }

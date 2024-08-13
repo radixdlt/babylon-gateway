@@ -138,6 +138,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     {
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
         var packagePageSize = _endpointConfiguration.Value.DefaultHeavyCollectionsPageSize;
+        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
 
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
@@ -158,8 +159,11 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
         var resolvedTwoWayLinks = optIns.DappTwoWayLinks
-            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, true, ledgerState, token)
+            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, ledgerState, token)
             : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
+        var resolvedNativeResourceDetails = optIns.NativeResourceDetails
+            ? await new NativeResourceDetailsResolver(_dbContext, _dapperWrapper, networkConfiguration).GetNativeResourceDetails(entities, ledgerState, token)
+            : ImmutableDictionary<EntityAddress, GatewayModel.NativeResourceDetails>.Empty;
 
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
 
@@ -191,6 +195,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             GatewayModel.StateEntityDetailsResponseItemDetails? details = null;
 
             resolvedTwoWayLinks.TryGetValue(entity.Address, out var twoWayLinks);
+            resolvedNativeResourceDetails.TryGetValue(entity.Address, out var nativeResourceDetails);
 
             switch (entity)
             {
@@ -204,7 +209,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
                         divisibility: frme.Divisibility,
-                        twoWayLinkedDapps: fungibleTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: fungibleTwoWayLinkedDapps) : null);
+                        twoWayLinkedDapps: fungibleTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: fungibleTwoWayLinkedDapps) : null,
+                        nativeResourceDetails: nativeResourceDetails);
 
                     break;
 
@@ -224,7 +230,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
                         nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel(),
                         nonFungibleDataMutableFields: nfrme.NonFungibleDataMutableFields,
-                        twoWayLinkedDapps: nonFungibleTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: nonFungibleTwoWayLinkedDapps) : null);
+                        twoWayLinkedDapps: nonFungibleTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: nonFungibleTwoWayLinkedDapps) : null,
+                        nativeResourceDetails: nativeResourceDetails);
                     break;
 
                 case GlobalPackageEntity pe:
@@ -338,7 +345,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     var componentRoyaltyVaultBalance = royaltyVaultsBalances?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
-                        packageAddress: correlatedAddresses[ce.GetPackageId()],
+                        packageAddress: correlatedAddresses[ce.GetInstantiatingPackageId()],
                         blueprintName: ce.BlueprintName,
                         blueprintVersion: ce.BlueprintVersion,
                         state: state != null ? new JRaw(state) : null,
@@ -346,7 +353,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null,
                         royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null,
                         twoWayLinkedDappAddress: nonAccountTwoWayLinkedDapp,
-                        twoWayLinkedDappDetails: twoWayLinkedDappOnLedgerDetails);
+                        twoWayLinkedDappDetails: twoWayLinkedDappOnLedgerDetails,
+                        nativeResourceDetails: nativeResourceDetails);
                     break;
             }
 
@@ -1502,7 +1510,7 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
                 lookup.Add(entity.GlobalAncestorId.Value);
             }
 
-            if (entity.TryGetCorrelation(EntityRelationship.ComponentPackage, out var packageCorrelation))
+            if (entity.TryGetCorrelation(EntityRelationship.ComponentToInstantiatingPackage, out var packageCorrelation))
             {
                 lookup.Add(packageCorrelation.EntityId);
             }

@@ -90,112 +90,106 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Provide either `key_hex` or `key_json`. If both are provided, `key_hex` is used and `key_json` is ignored.
+    /// Defines NativeResourceKind
     /// </summary>
-    [DataContract(Name = "StateKeyValueStoreDataRequestKeyItem")]
-    public partial class StateKeyValueStoreDataRequestKeyItem : IEquatable<StateKeyValueStoreDataRequestKeyItem>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum NativeResourceKind
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
+        /// Enum Xrd for value: Xrd
         /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob..</param>
-        /// <param name="keyJson">keyJson.</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
-        {
-            this.KeyHex = keyHex;
-            this.KeyJson = keyJson;
-        }
+        [EnumMember(Value = "Xrd")]
+        Xrd = 1,
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Enum PackageOwnerBadge for value: PackageOwnerBadge
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
+        [EnumMember(Value = "PackageOwnerBadge")]
+        PackageOwnerBadge = 2,
 
         /// <summary>
-        /// Gets or Sets KeyJson
+        /// Enum AccountOwnerBadge for value: AccountOwnerBadge
         /// </summary>
-        [DataMember(Name = "key_json", EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValue KeyJson { get; set; }
+        [EnumMember(Value = "AccountOwnerBadge")]
+        AccountOwnerBadge = 3,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum IdentityOwnerBadge for value: IdentityOwnerBadge
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class StateKeyValueStoreDataRequestKeyItem {\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
-            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
+        [EnumMember(Value = "IdentityOwnerBadge")]
+        IdentityOwnerBadge = 4,
 
         /// <summary>
-        /// Returns the JSON string presentation of the object
+        /// Enum ValidatorOwnerBadge for value: ValidatorOwnerBadge
         /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
+        [EnumMember(Value = "ValidatorOwnerBadge")]
+        ValidatorOwnerBadge = 5,
 
         /// <summary>
-        /// Returns true if objects are equal
+        /// Enum Secp256k1SignatureResource for value: Secp256k1SignatureResource
         /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as StateKeyValueStoreDataRequestKeyItem);
-        }
+        [EnumMember(Value = "Secp256k1SignatureResource")]
+        Secp256k1SignatureResource = 6,
 
         /// <summary>
-        /// Returns true if StateKeyValueStoreDataRequestKeyItem instances are equal
+        /// Enum Ed25519SignatureResource for value: Ed25519SignatureResource
         /// </summary>
-        /// <param name="input">Instance of StateKeyValueStoreDataRequestKeyItem to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(StateKeyValueStoreDataRequestKeyItem input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
-                ) && 
-                (
-                    this.KeyJson == input.KeyJson ||
-                    (this.KeyJson != null &&
-                    this.KeyJson.Equals(input.KeyJson))
-                );
-        }
+        [EnumMember(Value = "Ed25519SignatureResource")]
+        Ed25519SignatureResource = 7,
 
         /// <summary>
-        /// Gets the hash code
+        /// Enum GlobalCallerResource for value: GlobalCallerResource
         /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                if (this.KeyHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
-                }
-                if (this.KeyJson != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "GlobalCallerResource")]
+        GlobalCallerResource = 8,
+
+        /// <summary>
+        /// Enum PackageOfDirectCallerResource for value: PackageOfDirectCallerResource
+        /// </summary>
+        [EnumMember(Value = "PackageOfDirectCallerResource")]
+        PackageOfDirectCallerResource = 9,
+
+        /// <summary>
+        /// Enum SystemExecutionResource for value: SystemExecutionResource
+        /// </summary>
+        [EnumMember(Value = "SystemExecutionResource")]
+        SystemExecutionResource = 10,
+
+        /// <summary>
+        /// Enum ValidatorLiquidStakeUnit for value: ValidatorLiquidStakeUnit
+        /// </summary>
+        [EnumMember(Value = "ValidatorLiquidStakeUnit")]
+        ValidatorLiquidStakeUnit = 11,
+
+        /// <summary>
+        /// Enum ValidatorClaimNft for value: ValidatorClaimNft
+        /// </summary>
+        [EnumMember(Value = "ValidatorClaimNft")]
+        ValidatorClaimNft = 12,
+
+        /// <summary>
+        /// Enum OneResourcePoolUnit for value: OneResourcePoolUnit
+        /// </summary>
+        [EnumMember(Value = "OneResourcePoolUnit")]
+        OneResourcePoolUnit = 13,
+
+        /// <summary>
+        /// Enum TwoResourcePoolUnit for value: TwoResourcePoolUnit
+        /// </summary>
+        [EnumMember(Value = "TwoResourcePoolUnit")]
+        TwoResourcePoolUnit = 14,
+
+        /// <summary>
+        /// Enum MultiResourcePoolUnit for value: MultiResourcePoolUnit
+        /// </summary>
+        [EnumMember(Value = "MultiResourcePoolUnit")]
+        MultiResourcePoolUnit = 15,
+
+        /// <summary>
+        /// Enum AccessControllerRecoveryBadge for value: AccessControllerRecoveryBadge
+        /// </summary>
+        [EnumMember(Value = "AccessControllerRecoveryBadge")]
+        AccessControllerRecoveryBadge = 16
 
     }
 

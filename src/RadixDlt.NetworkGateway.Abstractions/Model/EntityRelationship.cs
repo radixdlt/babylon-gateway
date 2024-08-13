@@ -66,16 +66,43 @@ namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
 public enum EntityRelationship
 {
-    ComponentPackage,
-    ValidatorStakeVault,
-    ValidatorPendingXrdWithdrawVault,
-    ValidatorLockedOwnerStakeUnitVault,
-    ValidatorPendingOwnerStakeUnitUnlockVault,
-    VaultResource,
-    VaultRoyalty,
-    VaultResourcePool,
-    AccountLockerLocker,
-    AccountLockerAccount,
-    ResourcePoolUnit,
-    ResourcePoolResource,
+    // Components
+
+    ComponentToInstantiatingPackage,
+
+    // Vaults
+
+    VaultToResource,
+
+    RoyaltyVaultOfComponent,
+
+    // Validators
+
+    ValidatorToStakeVault,
+    ValidatorToPendingXrdWithdrawVault,
+    ValidatorToLockedOwnerStakeUnitVault,
+    ValidatorToPendingOwnerStakeUnitUnlockVault,
+
+    StakeVaultOfValidator,
+    ClaimTokenOfValidator,
+
+    // Account Lockers (used on related Vaults and KeyValueStores)
+
+    AccountLockerOfLocker,
+    AccountLockerOfAccount,
+
+    // Resource Pools (used on One-, Two- and Multi-Resource Pools)
+
+    ResourcePoolToUnitResource,
+    ResourcePoolToResource,
+    ResourcePoolToResourceVault,
+
+    UnitVaultOfResourcePool,
+    ResourceVaultOfResourcePool,
+
+    // Access Controllers
+
+    AccessControllerToRecoveryBadge,
+
+    RecoveryBadgeOfAccessController,
 }

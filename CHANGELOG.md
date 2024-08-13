@@ -15,16 +15,21 @@ Release built: _not released yet_
 - New `event_global_emitters_filter` filter added to `/stream/transactions` endpoint. It allows filtering transactions by the global ancestor of an event emitter. For events emitted by a global entity it is going to be that entity, for internal entities it is going to be a global ancestor.
 - Changed `variant_id` of `ProgrammaticScryptoSborValueEnum` from numeric (`type: integer`) to string-encoded numeric (`type: string`) to make it compatible with the rest of the ecosystem.
 - Optimized `/statistics/validators/uptime` endpoint processing time.
-- Added support for two-way linked dApps in the `/state/entity/details` endpoint.
-  - Brand-new `two_way_linked_*` properties on the `details` property of Resources, Accounts, Packages and other global components.
+- Added support for two-way linked dApps in the `/state/entity/details` endpoint, returned when the `dapp_two_way_links` opt-in is enabled.
+  - Brand-new `two_way_linked_*` properties on the `details` property of the Resources, Accounts, Packages and other global entities.
   - See https://docs.radixdlt.com/docs/metadata-for-verification#metadata-standards-for-verification-of-onledger-entities for detailed specification.
+- Added support for the Native Resource Details in the `/state/entity/details` endpoint, returned when the `native_resource_details` opt-in is enabled. 
+  - Brand-new `native_resource_details` property on the `details` property.
+  - Includes **unit** redemption value for the Validator LSU token and the unit tokens of various Pools. 
 
 ### Database changes
 - Replaced relationship-related columns (`*_entity_id`) in the `entities` table with more generic collection implementation using `correlated_entity_*` columns.
 - Replaced per-epoch validator emissions (`validator_emission_statistics` table) with their cumulative statistics (`validator_cumulative_emission_history` table).
 - Added `non_fungible_data_mutable_fields` to `entities` table. Which contains list of all mutable non fungible data fields for non fungible resource entities.
 - New `ledger_transaction_markers` type with the `event_global_emitter` discriminator. It represents the global emitter for each event.
-- Added new `unverified_standard_metadata_*` tables. They hold **some** of the metadata entries using db-friendly (normalized) model. See https://docs.radixdlt.com/docs/metadata-standards 
+- Added new `unverified_standard_metadata_*` tables. They hold **some** of the metadata entries using db-friendly (normalized) model. See https://docs.radixdlt.com/docs/metadata-standards
+- Extended list of supported entity correlations in the `entities` table.
+- Renamed values of the `entity_relationship` enum type. 
 
 ## 1.6.3
 Release built: 06.08.2024

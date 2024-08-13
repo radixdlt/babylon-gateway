@@ -179,18 +179,18 @@ internal abstract class ComponentEntity : Entity
     [Column("assigned_module_ids")]
     public List<ModuleId> AssignedModuleIds { get; set; }
 
-    public long GetPackageId() => GetCorrelation(EntityRelationship.ComponentPackage).EntityId;
+    public long GetInstantiatingPackageId() => GetCorrelation(EntityRelationship.ComponentToInstantiatingPackage).EntityId;
 }
 
 internal class GlobalValidatorEntity : ComponentEntity
 {
-    public long GetStakeVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorStakeVault).EntityId;
+    public long GetStakeVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorToStakeVault).EntityId;
 
-    public long GetPendingXrdWithdrawVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorPendingXrdWithdrawVault).EntityId;
+    public long GetPendingXrdWithdrawVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorToPendingXrdWithdrawVault).EntityId;
 
-    public long GetLockedOwnerStakeUnitVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorLockedOwnerStakeUnitVault).EntityId;
+    public long GetLockedOwnerStakeUnitVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorToLockedOwnerStakeUnitVault).EntityId;
 
-    public long GetPendingOwnerStakeUnitUnlockVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorPendingOwnerStakeUnitUnlockVault).EntityId;
+    public long GetPendingOwnerStakeUnitUnlockVaultEntityId() => GetCorrelation(EntityRelationship.ValidatorToPendingOwnerStakeUnitUnlockVault).EntityId;
 }
 
 internal class GlobalConsensusManager : ComponentEntity
@@ -199,13 +199,13 @@ internal class GlobalConsensusManager : ComponentEntity
 
 internal abstract class VaultEntity : ComponentEntity
 {
-    public long GetResourceEntityId() => GetCorrelation(EntityRelationship.VaultResource).EntityId;
+    public long GetResourceEntityId() => GetCorrelation(EntityRelationship.VaultToResource).EntityId;
 
     public bool TryGetAccountLockerEntryDbLookup(out AccountLockerEntryDbLookup lookup)
     {
         lookup = default;
 
-        if (TryGetCorrelation(EntityRelationship.AccountLockerLocker, out var locker) && TryGetCorrelation(EntityRelationship.AccountLockerAccount, out var account))
+        if (TryGetCorrelation(EntityRelationship.AccountLockerOfLocker, out var locker) && TryGetCorrelation(EntityRelationship.AccountLockerOfAccount, out var account))
         {
             lookup = new AccountLockerEntryDbLookup(locker.EntityId, account.EntityId);
 
@@ -218,7 +218,7 @@ internal abstract class VaultEntity : ComponentEntity
 
 internal class InternalFungibleVaultEntity : VaultEntity
 {
-    public bool IsRoyaltyVault => TryGetCorrelation(EntityRelationship.VaultRoyalty, out _);
+    public bool IsRoyaltyVault => TryGetCorrelation(EntityRelationship.RoyaltyVaultOfComponent, out _);
 }
 
 internal class InternalNonFungibleVaultEntity : VaultEntity
@@ -277,7 +277,7 @@ internal class InternalKeyValueStoreEntity : Entity
     {
         lookup = default;
 
-        if (TryGetCorrelation(EntityRelationship.AccountLockerLocker, out var locker) && TryGetCorrelation(EntityRelationship.AccountLockerAccount, out var account))
+        if (TryGetCorrelation(EntityRelationship.AccountLockerOfLocker, out var locker) && TryGetCorrelation(EntityRelationship.AccountLockerOfAccount, out var account))
         {
             lookup = new AccountLockerEntryDbLookup(locker.EntityId, account.EntityId);
 

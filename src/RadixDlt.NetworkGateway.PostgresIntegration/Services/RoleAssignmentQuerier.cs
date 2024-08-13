@@ -107,7 +107,7 @@ internal class RoleAssignmentQuerier : IRoleAssignmentQuerier
         var componentLookup = componentEntities.Select(x => x.Id).ToHashSet();
         var aggregates = await GetEntityRoleAssignmentsAggregateHistory(componentLookup, ledgerState, token);
 
-        var blueprintLookup = componentEntities.Select(x => new BlueprintDefinitionIdentifier(x.BlueprintName, x.BlueprintVersion, x.GetPackageId())).ToHashSet();
+        var blueprintLookup = componentEntities.Select(x => new BlueprintDefinitionIdentifier(x.BlueprintName, x.BlueprintVersion, x.GetInstantiatingPackageId())).ToHashSet();
         var blueprintDefinitions = await _blueprintProvider.GetBlueprints(blueprintLookup, ledgerState, token);
         var blueprintAuthConfigs = ExtractAuthConfigurationFromBlueprint(blueprintDefinitions);
 
