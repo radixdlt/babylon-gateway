@@ -735,53 +735,94 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyResourceOwners(ICollection<ResourceOwners> entities, CancellationToken token)
+    public async Task<int> CopyResourceOwners(Dictionary<ResourceOwnersLookup, ResourceOwnersChange> changes, CancellationToken token)
     {
-        if (!entities.Any())
+        var entitiesToAdd = changes
+            .Where(x => !x.Value.IsDeleted)
+            .Select(x => x.Value.Entry!)
+            .ToList();
+
+        var entriesToRemove = changes
+            .Where(x => x.Value.IsDeleted)
+            .Select(x => x.Key)
+            .ToList();
+
+        if (!entitiesToAdd.Any() && !entriesToRemove.Any())
         {
             return 0;
         }
 
+        var changesCount = entitiesToAdd.Count + entriesToRemove.Count;
+
         var sw = Stopwatch.GetTimestamp();
 
-        await using var createTempTableCommand = _connection.CreateCommand();
-        createTempTableCommand.CommandText = @"
+        if (entitiesToAdd.Any())
+        {
+            await using var createTempTableCommand = _connection.CreateCommand();
+            createTempTableCommand.CommandText = @"
 CREATE TEMP TABLE tmp_resource_owners
 (LIKE resource_owners INCLUDING DEFAULTS)
 ON COMMIT DROP";
 
-        await createTempTableCommand.ExecuteNonQueryAsync(token);
+            await createTempTableCommand.ExecuteNonQueryAsync(token);
 
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY tmp_resource_owners (id, entity_id, resource_entity_id, balance) FROM STDIN (FORMAT BINARY)",
-                token);
+            await using var writer =
+                await _connection.BeginBinaryImportAsync(
+                    "COPY tmp_resource_owners (id, entity_id, resource_entity_id, balance) FROM STDIN (FORMAT BINARY)",
+                    token);
 
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-        }
+            foreach (var e in entitiesToAdd)
+            {
+                await writer.StartRowAsync(token);
+                await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+                await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+                await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+            }
 
-        await writer.CompleteAsync(token);
-        await writer.DisposeAsync();
+            await writer.CompleteAsync(token);
+            await writer.DisposeAsync();
 
-        await using var copyFromTempTablecommand = _connection.CreateCommand();
-        copyFromTempTablecommand.CommandText = @"
+            await using var copyFromTempTablecommand = _connection.CreateCommand();
+            copyFromTempTablecommand.CommandText = @"
 INSERT INTO resource_owners
 SELECT *
 FROM tmp_resource_owners
 ON CONFLICT (entity_id, resource_entity_id) DO UPDATE SET
  balance = EXCLUDED.balance;";
 
-        await copyFromTempTablecommand.ExecuteNonQueryAsync(token);
+            await copyFromTempTablecommand.ExecuteNonQueryAsync(token);
+        }
 
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyResourceOwners), Stopwatch.GetElapsedTime(sw), entities.Count));
+        if (entriesToRemove.Any())
+        {
+            entriesToRemove
+                .ToHashSet()
+                .Unzip(
+                    x => x.ResourceEntityId,
+                    x => x.EntityId,
+                    out var resourceEntityIds,
+                    out var entityIds);
 
-        return entities.Count;
+            var deleteEntriesCommand = new CommandDefinition(
+                commandText: @"
+WITH variables (resource_entity_id, entity_id) AS (
+    SELECT UNNEST(@resourceEntityIds), UNNEST(@entityIds)
+)
+DELETE FROM resource_owners WHERE (resource_entity_id, entity_id) IN (SELECT resource_entity_id, entity_id FROM variables)",
+                parameters: new
+                {
+                    resourceEntityIds = resourceEntityIds,
+                    entityIds = entityIds,
+                },
+                cancellationToken: token);
+
+            await _connection.ExecuteAsync(deleteEntriesCommand);
+        }
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyResourceOwners), Stopwatch.GetElapsedTime(sw), changesCount));
+
+        return changesCount;
     }
 
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
