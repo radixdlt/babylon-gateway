@@ -783,12 +783,10 @@ SELECT
     setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence),
     setval('unverified_standard_metadata_aggregate_history_id_seq', @unverifiedStandardMetadataAggregateHistorySequence),
     setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence),
-    setval('component_fungible_resource_definition_id_seq', @componentFungibleResourceDefinitionSequence),
-    setval('component_fungible_resource_totals_history_id_seq', @componentFungibleResourceTotalsHistorySequence),
-    setval('component_non_fungible_resource_definition_id_seq', @componentNonFungibleResourceDefinitionSequence),
-    setval('component_non_fungible_resource_totals_history_id_seq', @componentNonFungibleResourceTotalsHistorySequence),
-    setval('component_resource_vault_definition_id_seq', @componentResourceVaultDefinitionSequence),
-    setval('component_resource_vault_totals_history_id_seq', @componentResourceVaultTotalsHistorySequence)
+    setval('entity_resource_definition_id_seq', @entityResourceDefinitionSequence),
+    setval('entity_resource_vault_definition_id_seq', @entityResourceVaultDefinitionSequence),
+    setval('entity_resource_totals_history_id_seq', @entityResourceTotalsHistorySequence),
+    setval('entity_resource_vault_totals_history_id_seq', @entityResourceVaultTotalsHistorySequence)
 ",
             parameters: new
             {
@@ -833,12 +831,10 @@ SELECT
                 accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
                 unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
                 unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
-                componentFungibleResourceDefinitionSequence = sequences.ComponentFungibleResourceDefinitionSequence,
-                componentFungibleResourceTotalsHistorySequence = sequences.ComponentFungibleResourceTotalsHistorySequence,
-                componentNonFungibleResourceDefinitionSequence = sequences.ComponentNonFungibleResourceDefinitionSequence,
-                componentNonFungibleResourceTotalsHistorySequence = sequences.ComponentNonFungibleResourceTotalsHistorySequence,
-                componentResourceVaultDefinitionSequence = sequences.ComponentResourceVaultDefinitionSequence,
-                componentResourceVaultTotalsHistorySequence = sequences.ComponentResourceVaultTotalsHistorySequence,
+                entityResourceDefinitionSequence = sequences.EntityResourceDefinitionSequence,
+                entityResourceVaultDefinitionSequence = sequences.EntityResourceVaultDefinitionSequence,
+                entityResourceTotalsHistorySequence = sequences.EntityResourceTotalsHistorySequence,
+                entityResourceVaultTotalsHistorySequence = sequences.EntityResourceVaultTotalsHistorySequence,
             },
             cancellationToken: token);
 

@@ -67,11 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-// TODO open question: does it make sense to split fungible and non-fungible to separate tables / models if they're identical?
-// TODO we'd have to add discriminator=[non-]fungible for the read queries though and the indices would have to account for it
-
-[Table("component_fungible_resource_definition")]
-internal class ComponentFungibleResourceDefinition
+[Table("entity_resource_vault_definition")]
+internal class EntityResourceVaultDefinition
 {
     [Key]
     [Column("id")]
@@ -80,60 +77,12 @@ internal class ComponentFungibleResourceDefinition
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("component_entity_id")]
-    public long ComponentEntityId { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
-}
 
-[Table("component_fungible_resource_totals_history")]
-internal class ComponentFungibleResourceTotalsHistory
-{
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("component_entity_id")]
-    public long ComponentEntityId { get; set; }
-
-    [Column("total_count")]
-    public long TotalCount { get; set; }
-}
-
-[Table("component_non_fungible_resource_definition")]
-internal class ComponentNonFungibleResourceDefinition
-{
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("component_entity_id")]
-    public long ComponentEntityId { get; set; }
-
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-}
-
-[Table("component_non_fungible_resource_totals_history")]
-internal class ComponentNonFungibleResourceTotalsHistory
-{
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("component_entity_id")]
-    public long ComponentEntityId { get; set; }
-
-    [Column("total_count")]
-    public long TotalCount { get; set; }
+    [Column("vault_entity_id")]
+    public long VaultEntityId { get; set; }
 }

@@ -441,12 +441,10 @@ SELECT
     nextval('account_authorized_depositor_aggregate_history_id_seq') AS AccountAuthorizedDepositorAggregateHistorySequence,
     nextval('unverified_standard_metadata_aggregate_history_id_seq') AS UnverifiedStandardMetadataAggregateHistorySequence,
     nextval('unverified_standard_metadata_entry_history_id_seq') AS UnverifiedStandardMetadataEntryHistorySequence,
-    nextval('component_fungible_resource_definition_id_seq') AS ComponentFungibleResourceDefinitionSequence,
-    nextval('component_fungible_resource_totals_history_id_seq') AS ComponentFungibleResourceTotalsHistorySequence,
-    nextval('component_non_fungible_resource_definition_id_seq') AS ComponentNonFungibleResourceDefinitionSequence,
-    nextval('component_non_fungible_resource_totals_history_id_seq') AS ComponentNonFungibleResourceTotalsHistorySequence,
-    nextval('component_resource_vault_definition_id_seq') AS ComponentResourceVaultDefinitionSequence,
-    nextval('component_resource_vault_totals_history_id_seq') AS ComponentResourceVaultTotalsHistorySequence
+    nextval('entity_resource_definition_id_seq') AS EntityResourceDefinitionSequence,
+    nextval('entity_resource_vault_definition_id_seq') AS EntityResourceVaultDefinitionSequence,
+    nextval('entity_resource_totals_history_id_seq') AS EntityResourceTotalsHistorySequence,
+    nextval('entity_resource_vault_totals_history_id_seq') AS EntityResourceVaultTotalsHistorySequence
 ",
             cancellationToken: token);
 

@@ -174,17 +174,13 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<UnverifiedStandardMetadataEntryHistory> UnverifiedStandardMetadataEntryHistory => Set<UnverifiedStandardMetadataEntryHistory>();
 
-    public DbSet<ComponentFungibleResourceDefinition> ComponentFungibleResourceDefinition => Set<ComponentFungibleResourceDefinition>();
+    public DbSet<EntityResourceDefinition> EntityResourceDefinition => Set<EntityResourceDefinition>();
 
-    public DbSet<ComponentFungibleResourceTotalsHistory> ComponentFungibleResourceTotalsHistory => Set<ComponentFungibleResourceTotalsHistory>();
+    public DbSet<EntityResourceTotalsHistory> EntityResourceTotalsHistory => Set<EntityResourceTotalsHistory>();
 
-    public DbSet<ComponentNonFungibleResourceDefinition> ComponentNonFungibleResourceDefinition => Set<ComponentNonFungibleResourceDefinition>();
+    public DbSet<EntityResourceVaultDefinition> EntityResourceVaultDefinition => Set<EntityResourceVaultDefinition>();
 
-    public DbSet<ComponentNonFungibleResourceTotalsHistory> ComponentNonFungibleResourceTotalsHistory => Set<ComponentNonFungibleResourceTotalsHistory>();
-
-    public DbSet<ComponentResourceVaultDefinition> ComponentResourceVaultDefinition => Set<ComponentResourceVaultDefinition>();
-
-    public DbSet<ComponentResourceVaultTotalsHistory> ComponentResourceVaultTotalsHistory => Set<ComponentResourceVaultTotalsHistory>();
+    public DbSet<EntityResourceVaultTotalsHistory> EntityResourceVaultTotalsHistory => Set<EntityResourceVaultTotalsHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -423,16 +419,22 @@ internal abstract class CommonDbContext : DbContext
             .IsUnique();
 
         modelBuilder
-            .Entity<ComponentFungibleResourceDefinition>()
-            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+            .Entity<EntityResourceDefinition>()
+            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<ComponentNonFungibleResourceDefinition>()
-            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+            .Entity<EntityResourceDefinition>()
+            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.FromStateVersion }, "IX_entity_resource_definition_fungibles")
+            .HasFilter("resource_type = 'fungible'");
 
         modelBuilder
-            .Entity<ComponentResourceVaultDefinition>()
-            .HasIndex(e => new { e.ComponentEntityId, e.ResourceEntityId, e.FromStateVersion });
+            .Entity<EntityResourceDefinition>()
+            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.FromStateVersion }, "IX_entity_resource_definition_non_fungibles")
+            .HasFilter("resource_type = 'non_fungible'");
+
+        modelBuilder
+            .Entity<EntityResourceVaultDefinition>()
+            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.ResourceEntityId, e.FromStateVersion });
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -656,15 +658,11 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.Discriminator, e.FromStateVersion });
 
         modelBuilder
-            .Entity<ComponentFungibleResourceTotalsHistory>()
-            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+            .Entity<EntityResourceTotalsHistory>()
+            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<ComponentNonFungibleResourceTotalsHistory>()
-            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<ComponentResourceVaultTotalsHistory>()
-            .HasIndex(e => new { e.ComponentEntityId, e.ResourceEntityId, e.FromStateVersion });
+            .Entity<EntityResourceVaultTotalsHistory>()
+            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.ResourceEntityId, e.FromStateVersion });
     }
 }
