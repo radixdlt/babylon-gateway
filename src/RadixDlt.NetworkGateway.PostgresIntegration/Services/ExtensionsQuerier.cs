@@ -106,6 +106,11 @@ internal class ExtensionsQuerier : IExtensionsQuerier
             throw new EntityNotFoundException(resourceAddress.ToString());
         }
 
+        if (!resourceEntity.Address.IsResource)
+        {
+            throw new InvalidEntityException(resourceEntity.Address.ToString());
+        }
+
         var totalCount = await _dbContext.ResourceOwners.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
 
         var cd = new CommandDefinition(
@@ -149,7 +154,7 @@ LIMIT @limit",
                     )
                     .ToList();
 
-                return new GatewayModel.ResourceOwnersResponse(new GatewayModel.ResourceOwnersCollection(totalCount, nextCursor, castedResult));
+                return new GatewayModel.ResourceOwnersResponse(totalCount, nextCursor, castedResult);
             }
 
             case GlobalNonFungibleResourceEntity:
@@ -162,7 +167,7 @@ LIMIT @limit",
                     )
                     .ToList();
 
-                return new GatewayModel.ResourceOwnersResponse(new GatewayModel.ResourceOwnersCollection(totalCount, nextCursor, castedResult));
+                return new GatewayModel.ResourceOwnersResponse(totalCount, nextCursor, castedResult);
             }
 
             default:
