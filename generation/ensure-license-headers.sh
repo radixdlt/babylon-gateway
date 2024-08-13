@@ -23,8 +23,3 @@ for f in `find . -name '*.cs'`; do
     echo "$f - License Header prepended"
   fi
 done
-
-echo "Running dotnet format..."
-echo
-
-dotnet format

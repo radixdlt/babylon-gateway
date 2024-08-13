@@ -60,9 +60,15 @@ You can use the `Migrations (Wipe)` task if you ever need to clear the database.
 
 ### Configuring the dev DB as a Data Source
 
-To get checking and auto-complete on your SQL, you may wish to configure a Data Source in Rider.
+To get checking and auto-complete on your SQL, you may wish to configure a Data Source in Rider. Note that currently it often doesn't give any auto-complete for [CTEs](https://www.postgresql.org/docs/current/queries-with.html), and some of our queries are dynamically created, but it's still often useful to inspect data.
 
-To do this, add a PostgreSQL Database connection with query string: `jdbc:postgresql://localhost:5432/radixdlt_ledger?logServerErrorDetail=true&password=db_dev_password&user=db_dev_superuser`
+To do this, add a PostgreSQL Database connection with parameters:
+* Host: `localhost`
+* Port: `5432`
+* Authentication: `User & Password`
+* User: `db_dev_superuser`
+* Password: `db_dev_password`
+* Database: `radixdlt_ledger`
 
 ## Developing using the command line
 
@@ -114,7 +120,7 @@ For more information, see the [Tests project](../../src/Tests).
 
 ## Reformatting
 
-Run `./generation/ensure-license-headers.sh` when adding new files to ensure they get license headers. This also runs `dotnet format`.
+Run `./generation/ensure-license-headers.sh` when adding new files to ensure they get license headers.
 
 You can also run `dotnet format` manually to fix whitespace and other formatting issues across all files. Rider runs this as you save each file, so this likely won't be needed regularly.
 
