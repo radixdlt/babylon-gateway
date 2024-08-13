@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240813145617_InitialCreate")]
+    [Migration("20240813152322_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -646,6 +646,39 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceBalanceHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<BigInteger>("Balance")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance");
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "ResourceEntityId", "FromStateVersion");
+
+                    b.ToTable("entity_resource_balance_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceDefinition", b =>
                 {
                     b.Property<long>("Id")
@@ -805,11 +838,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("ResourceEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("resource_entity_id");
-
-                    b.Property<BigInteger>("TotalBalance")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric")
-                        .HasColumnName("total_balance");
 
                     b.Property<long>("TotalCount")
                         .HasColumnType("bigint")

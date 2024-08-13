@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -86,8 +85,4 @@ internal class EntityResourceVaultTotalsHistory
 
     [Column("total_count")]
     public long TotalCount { get; set; }
-
-    // TODO move to another table
-    [Column("total_balance")]
-    public TokenAmount TotalBalance { get; set; }
 }

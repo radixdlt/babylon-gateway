@@ -361,6 +361,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "entity_resource_balance_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_resource_balance_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "entity_resource_definition",
                 columns: table => new
                 {
@@ -434,8 +450,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_count = table.Column<long>(type: "bigint", nullable: false),
-                    total_balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false)
+                    total_count = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1084,6 +1099,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_entity_resource_balance_history_entity_id_resource_entity_i~",
+                table: "entity_resource_balance_history",
+                columns: new[] { "entity_id", "resource_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_entity_resource_definition_entity_id_from_state_version",
                 table: "entity_resource_definition",
                 columns: new[] { "entity_id", "from_state_version" });
@@ -1439,6 +1459,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "entity_resource_aggregated_vaults_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_resource_balance_history");
 
             migrationBuilder.DropTable(
                 name: "entity_resource_definition");

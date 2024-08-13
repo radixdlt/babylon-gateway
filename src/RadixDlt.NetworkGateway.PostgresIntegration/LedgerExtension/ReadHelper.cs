@@ -444,7 +444,8 @@ SELECT
     nextval('entity_resource_definition_id_seq') AS EntityResourceDefinitionSequence,
     nextval('entity_resource_vault_definition_id_seq') AS EntityResourceVaultDefinitionSequence,
     nextval('entity_resource_totals_history_id_seq') AS EntityResourceTotalsHistorySequence,
-    nextval('entity_resource_vault_totals_history_id_seq') AS EntityResourceVaultTotalsHistorySequence
+    nextval('entity_resource_vault_totals_history_id_seq') AS EntityResourceVaultTotalsHistorySequence,
+    nextval('entity_resource_balance_history_id_seq') AS EntityResourceBalanceHistorySequence
 ",
             cancellationToken: token);
 

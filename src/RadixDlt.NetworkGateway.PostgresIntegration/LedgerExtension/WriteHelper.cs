@@ -786,7 +786,8 @@ SELECT
     setval('entity_resource_definition_id_seq', @entityResourceDefinitionSequence),
     setval('entity_resource_vault_definition_id_seq', @entityResourceVaultDefinitionSequence),
     setval('entity_resource_totals_history_id_seq', @entityResourceTotalsHistorySequence),
-    setval('entity_resource_vault_totals_history_id_seq', @entityResourceVaultTotalsHistorySequence)
+    setval('entity_resource_vault_totals_history_id_seq', @entityResourceVaultTotalsHistorySequence),
+    setval('entity_resource_balance_history_id_seq', @entityResourceBalanceHistorySequence)
 ",
             parameters: new
             {
@@ -835,6 +836,7 @@ SELECT
                 entityResourceVaultDefinitionSequence = sequences.EntityResourceVaultDefinitionSequence,
                 entityResourceTotalsHistorySequence = sequences.EntityResourceTotalsHistorySequence,
                 entityResourceVaultTotalsHistorySequence = sequences.EntityResourceVaultTotalsHistorySequence,
+                entityResourceBalanceHistorySequence = sequences.EntityResourceBalanceHistorySequence,
             },
             cancellationToken: token);
 

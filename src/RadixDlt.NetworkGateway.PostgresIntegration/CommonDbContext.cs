@@ -178,6 +178,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityResourceTotalsHistory> EntityResourceTotalsHistory => Set<EntityResourceTotalsHistory>();
 
+    public DbSet<EntityResourceBalanceHistory> EntityResourceBalanceHistory => Set<EntityResourceBalanceHistory>();
+
     public DbSet<EntityResourceVaultDefinition> EntityResourceVaultDefinition => Set<EntityResourceVaultDefinition>();
 
     public DbSet<EntityResourceVaultTotalsHistory> EntityResourceVaultTotalsHistory => Set<EntityResourceVaultTotalsHistory>();
@@ -420,21 +422,21 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<EntityResourceDefinition>()
-            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<EntityResourceDefinition>()
-            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.FromStateVersion }, "IX_entity_resource_definition_fungibles")
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion }, "IX_entity_resource_definition_fungibles")
             .HasFilter("resource_type = 'fungible'");
 
         modelBuilder
             .Entity<EntityResourceDefinition>()
-            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.FromStateVersion }, "IX_entity_resource_definition_non_fungibles")
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion }, "IX_entity_resource_definition_non_fungibles")
             .HasFilter("resource_type = 'non_fungible'");
 
         modelBuilder
             .Entity<EntityResourceVaultDefinition>()
-            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.ResourceEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -557,7 +559,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<StateHistory>()
-            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<PackageBlueprintHistory>()
@@ -659,10 +661,14 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<EntityResourceTotalsHistory>()
-            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<EntityResourceBalanceHistory>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<EntityResourceVaultTotalsHistory>()
-            .HasIndex(e => new { ComponentEntityId = e.EntityId, e.ResourceEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
     }
 }
