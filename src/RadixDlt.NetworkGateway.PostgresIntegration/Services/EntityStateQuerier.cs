@@ -1430,26 +1430,26 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({schemaEntityIds}), UNNEST({sch
                     result.Add(state.EntityId, jsonStateHistory.JsonState);
                     break;
                 case SborStateHistory sborStateHistory:
-                {
-                    var schemaIdentifier = new SchemaIdentifier((ValueBytes)sborStateHistory.SchemaHash, sborStateHistory.SchemaDefiningEntityId);
-                    var schemaFound = schemas.TryGetValue(schemaIdentifier, out var schemaBytes);
-
-                    if (!schemaFound)
                     {
-                        throw new UnreachableException(
-                            $"schema not found for entity :{sborStateHistory.EntityId} with schema defining entity id: {sborStateHistory.SchemaDefiningEntityId} and schema hash: {sborStateHistory.SchemaHash.ToHex()}");
+                        var schemaIdentifier = new SchemaIdentifier((ValueBytes)sborStateHistory.SchemaHash, sborStateHistory.SchemaDefiningEntityId);
+                        var schemaFound = schemas.TryGetValue(schemaIdentifier, out var schemaBytes);
+
+                        if (!schemaFound)
+                        {
+                            throw new UnreachableException(
+                                $"schema not found for entity :{sborStateHistory.EntityId} with schema defining entity id: {sborStateHistory.SchemaDefiningEntityId} and schema hash: {sborStateHistory.SchemaHash.ToHex()}");
+                        }
+
+                        var jsonState = ScryptoSborUtils.DataToProgrammaticJsonString(
+                            sborStateHistory.SborState,
+                            schemaBytes!,
+                            sborStateHistory.SborTypeKind,
+                            sborStateHistory.TypeIndex,
+                            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id);
+
+                        result.Add(state.EntityId, jsonState);
+                        break;
                     }
-
-                    var jsonState = ScryptoSborUtils.DataToProgrammaticJsonString(
-                        sborStateHistory.SborState,
-                        schemaBytes!,
-                        sborStateHistory.SborTypeKind,
-                        sborStateHistory.TypeIndex,
-                        (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id);
-
-                    result.Add(state.EntityId, jsonState);
-                    break;
-                }
             }
         }
 

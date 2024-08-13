@@ -66,5 +66,4 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 public partial class StateEntitySchemaPageRequest : IPaginableRequest
 {
-
 }
