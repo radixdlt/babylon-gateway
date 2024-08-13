@@ -441,8 +441,8 @@ SELECT
     nextval('account_authorized_depositor_aggregate_history_id_seq') AS AccountAuthorizedDepositorAggregateHistorySequence,
     nextval('unverified_standard_metadata_aggregate_history_id_seq') AS UnverifiedStandardMetadataAggregateHistorySequence,
     nextval('unverified_standard_metadata_entry_history_id_seq') AS UnverifiedStandardMetadataEntryHistorySequence,
-    nextval('entity_resource_definition_id_seq') AS EntityResourceDefinitionSequence,
-    nextval('entity_resource_vault_definition_id_seq') AS EntityResourceVaultDefinitionSequence,
+    nextval('entity_resource_entry_definition_id_seq') AS EntityResourceEntryDefinitionSequence,
+    nextval('entity_resource_vault_entry_definition_id_seq') AS EntityResourceVaultEntryDefinitionSequence,
     nextval('entity_resource_totals_history_id_seq') AS EntityResourceTotalsHistorySequence,
     nextval('entity_resource_vault_totals_history_id_seq') AS EntityResourceVaultTotalsHistorySequence,
     nextval('entity_resource_balance_history_id_seq') AS EntityResourceBalanceHistorySequence

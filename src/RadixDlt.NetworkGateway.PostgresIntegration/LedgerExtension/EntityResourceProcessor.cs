@@ -101,16 +101,16 @@ internal class EntityResourceProcessor
     private readonly ProcessorContext _context;
 
     private readonly List<VaultChange> _observedVaultChanges = new();
-    private readonly Dictionary<ByEntityResourceDbLookup, EntityResourceDefinition> _existingResourceDefinitions = new();
-    private readonly Dictionary<ByEntityResourceVaultDbLookup, EntityResourceVaultDefinition> _existingResourceVaultDefinitions = new();
+    private readonly Dictionary<ByEntityResourceDbLookup, EntityResourceEntryDefinition> _existingResourceDefinitions = new();
     private readonly Dictionary<ByEntityDbLookup, EntityResourceTotalsHistory> _mostRecentResourceTotalsHistory = new();
-    private readonly Dictionary<ByEntityResourceDbLookup, EntityResourceVaultTotalsHistory> _mostRecentResourceVaultTotalsHistory = new();
     private readonly Dictionary<ByEntityResourceDbLookup, EntityResourceBalanceHistory> _mostRecentResourceBalanceHistory = new();
-    private readonly List<EntityResourceDefinition> _resourceDefinitionsToAdd = new();
-    private readonly List<EntityResourceVaultDefinition> _resourceVaultDefinitionsToAdd = new();
+    private readonly Dictionary<ByEntityResourceVaultDbLookup, EntityResourceVaultEntryDefinition> _existingResourceVaultDefinitions = new();
+    private readonly Dictionary<ByEntityResourceDbLookup, EntityResourceVaultTotalsHistory> _mostRecentResourceVaultTotalsHistory = new();
+    private readonly List<EntityResourceEntryDefinition> _resourceEntryDefinitionsToAdd = new();
     private readonly List<EntityResourceTotalsHistory> _resourceTotalsHistoryToAdd = new();
-    private readonly List<EntityResourceVaultTotalsHistory> _resourceVaultTotalsHistoryToAdd = new();
     private readonly List<EntityResourceBalanceHistory> _resourceBalanceHistoryToAdd = new();
+    private readonly List<EntityResourceVaultEntryDefinition> _resourceVaultEntryDefinitionsToAdd = new();
+    private readonly List<EntityResourceVaultTotalsHistory> _resourceVaultTotalsHistoryToAdd = new();
 
     public EntityResourceProcessor(ProcessorContext context)
     {
@@ -147,11 +147,11 @@ internal class EntityResourceProcessor
 
     public async Task LoadDependencies()
     {
-        _existingResourceDefinitions.AddRange(await ExistingEntityResourceDefinition());
-        _existingResourceVaultDefinitions.AddRange(await ExistingEntityResourceVaultDefinition());
+        _existingResourceDefinitions.AddRange(await ExistingEntityResourceEntryDefinitions());
         _mostRecentResourceTotalsHistory.AddRange(await MostRecentEntityResourceTotalsHistory());
-        _mostRecentResourceVaultTotalsHistory.AddRange(await MostRecentEntityResourceVaultTotalsHistory());
         _mostRecentResourceBalanceHistory.AddRange(await MostRecentResourceBalanceHistory());
+        _existingResourceVaultDefinitions.AddRange(await ExistingEntityResourceVaultEntryDefinitions());
+        _mostRecentResourceVaultTotalsHistory.AddRange(await MostRecentEntityResourceVaultTotalsHistory());
     }
 
     public void ProcessChanges()
@@ -169,16 +169,16 @@ internal class EntityResourceProcessor
             {
                 if (!_existingResourceDefinitions.ContainsKey(lookup))
                 {
-                    var definition = new EntityResourceDefinition
+                    var definition = new EntityResourceEntryDefinition
                     {
-                        Id = _context.Sequences.EntityResourceDefinitionSequence++,
+                        Id = _context.Sequences.EntityResourceEntryDefinitionSequence++,
                         FromStateVersion = vaultChange.StateVersion,
                         EntityId = lookup.EntityId,
                         ResourceEntityId = lookup.ResourceEntityId,
                         ResourceType = vaultChange.ResourceType,
                     };
 
-                    _resourceDefinitionsToAdd.Add(definition);
+                    _resourceEntryDefinitionsToAdd.Add(definition);
                     _existingResourceDefinitions[lookup] = definition;
 
                     EntityResourceTotalsHistory totalsHistory;
@@ -213,16 +213,16 @@ internal class EntityResourceProcessor
             {
                 if (!_existingResourceVaultDefinitions.ContainsKey(lookup))
                 {
-                    var definition = new EntityResourceVaultDefinition
+                    var definition = new EntityResourceVaultEntryDefinition
                     {
-                        Id = _context.Sequences.EntityResourceVaultDefinitionSequence++,
+                        Id = _context.Sequences.EntityResourceVaultEntryDefinitionSequence++,
                         FromStateVersion = vaultChange.StateVersion,
                         EntityId = lookup.EntityId,
                         ResourceEntityId = lookup.ResourceEntityId,
                         VaultEntityId = lookup.VaultEntityId,
                     };
 
-                    _resourceVaultDefinitionsToAdd.Add(definition);
+                    _resourceVaultEntryDefinitionsToAdd.Add(definition);
                     _existingResourceVaultDefinitions[lookup] = definition;
 
                     EntityResourceVaultTotalsHistory totalsHistory;
@@ -279,16 +279,16 @@ internal class EntityResourceProcessor
     {
         var rowsInserted = 0;
 
-        rowsInserted += await CopyEntityResourceDefinitions();
-        rowsInserted += await CopyEntityResourceVaultDefinitions();
+        rowsInserted += await CopyEntityResourceEntryDefinitions();
         rowsInserted += await CopyEntityResourceTotalsHistory();
-        rowsInserted += await CopyEntityResourceVaultTotalsHistory();
         rowsInserted += await CopyEntityResourceBalanceHistory();
+        rowsInserted += await CopyEntityResourceVaultEntryDefinitions();
+        rowsInserted += await CopyEntityResourceVaultTotalsHistory();
 
         return rowsInserted;
     }
 
-    private async Task<IDictionary<ByEntityResourceDbLookup, EntityResourceDefinition>> ExistingEntityResourceDefinition()
+    private async Task<IDictionary<ByEntityResourceDbLookup, EntityResourceEntryDefinition>> ExistingEntityResourceEntryDefinitions()
     {
         var observedResourceDefinitions = _observedVaultChanges
             .SelectMany(x => new[] { x.ByGlobalEntityResourceDbLookup(), x.ByOwnerEntityResourceDbLookup() })
@@ -296,40 +296,18 @@ internal class EntityResourceProcessor
 
         if (!observedResourceDefinitions.Unzip(x => x.EntityId, x => x.ResourceEntityId, out var entityIds, out var resourceEntityIds))
         {
-            return ImmutableDictionary<ByEntityResourceDbLookup, EntityResourceDefinition>.Empty;
+            return ImmutableDictionary<ByEntityResourceDbLookup, EntityResourceEntryDefinition>.Empty;
         }
 
-        return await _context.ReadHelper.LoadDependencies<ByEntityResourceDbLookup, EntityResourceDefinition>(
+        return await _context.ReadHelper.LoadDependencies<ByEntityResourceDbLookup, EntityResourceEntryDefinition>(
             @$"
 WITH variables (entity_id, resource_entity_id) AS (
     SELECT unnest({entityIds}), unnest({resourceEntityIds})
 )
 SELECT *
-FROM entity_resource_definition
+FROM entity_resource_entry_definition
 WHERE (entity_id, resource_entity_id) IN (SELECT * FROM variables);",
             e => new ByEntityResourceDbLookup(e.EntityId, e.ResourceEntityId));
-    }
-
-    private async Task<IDictionary<ByEntityResourceVaultDbLookup, EntityResourceVaultDefinition>> ExistingEntityResourceVaultDefinition()
-    {
-        var observedResourceVaultDefinitions = _observedVaultChanges
-            .SelectMany(x => new[] { x.ByGlobalEntityResourceVaultDbLookup(), x.ByOwnerEntityResourceVaultDbLookup() })
-            .ToHashSet();
-
-        if (!observedResourceVaultDefinitions.Unzip(x => x.EntityId, x => x.ResourceEntityId, x => x.VaultEntityId, out var entityIds, out var resourceEntityIds, out var vaultEntityIds))
-        {
-            return ImmutableDictionary<ByEntityResourceVaultDbLookup, EntityResourceVaultDefinition>.Empty;
-        }
-
-        return await _context.ReadHelper.LoadDependencies<ByEntityResourceVaultDbLookup, EntityResourceVaultDefinition>(
-            @$"
-WITH variables (entity_id, resource_entity_id, vault_entity_id) AS (
-    SELECT unnest({entityIds}), unnest({resourceEntityIds}), unnest({vaultEntityIds})
-)
-SELECT *
-FROM entity_resource_vault_definition
-WHERE (entity_id, resource_entity_id, vault_entity_id) IN (SELECT * FROM variables);",
-            e => new ByEntityResourceVaultDbLookup(e.EntityId, e.ResourceEntityId, e.VaultEntityId));
     }
 
     private async Task<IDictionary<ByEntityDbLookup, EntityResourceTotalsHistory>> MostRecentEntityResourceTotalsHistory()
@@ -362,35 +340,6 @@ INNER JOIN LATERAL (
             e => new ByEntityDbLookup(e.EntityId));
     }
 
-    private async Task<IDictionary<ByEntityResourceDbLookup, EntityResourceVaultTotalsHistory>> MostRecentEntityResourceVaultTotalsHistory()
-    {
-        var observedResourceDefinitions = _observedVaultChanges
-            .SelectMany(x => new[] { x.ByGlobalEntityResourceDbLookup(), x.ByOwnerEntityResourceDbLookup() })
-            .ToHashSet()
-            .ToList();
-
-        if (!observedResourceDefinitions.Unzip(x => x.EntityId, x => x.ResourceEntityId, out var entityIds, out var resourceEntityIds))
-        {
-            return ImmutableDictionary<ByEntityResourceDbLookup, EntityResourceVaultTotalsHistory>.Empty;
-        }
-
-        return await _context.ReadHelper.LoadDependencies<ByEntityResourceDbLookup, EntityResourceVaultTotalsHistory>(
-            @$"
-WITH variables (entity_id, resource_entity_id) AS (
-    SELECT unnest({entityIds}), unnest({resourceEntityIds})
-)
-SELECT th.*
-FROM variables var
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_resource_vault_totals_history
-    WHERE entity_id = var.entity_id AND resource_entity_id = var.resource_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) th ON true;",
-            e => new ByEntityResourceDbLookup(e.EntityId, e.ResourceEntityId));
-    }
-
     private async Task<IDictionary<ByEntityResourceDbLookup, EntityResourceBalanceHistory>> MostRecentResourceBalanceHistory()
     {
         var observedResourceDefinitions = _observedVaultChanges
@@ -420,9 +369,60 @@ INNER JOIN LATERAL (
             e => new ByEntityResourceDbLookup(e.EntityId, e.ResourceEntityId));
     }
 
-    private Task<int> CopyEntityResourceDefinitions() => _context.WriteHelper.Copy(
-        _resourceDefinitionsToAdd,
-        "COPY entity_resource_definition (id, from_state_version, entity_id, resource_entity_id, resource_type) FROM STDIN (FORMAT BINARY)",
+    private async Task<IDictionary<ByEntityResourceVaultDbLookup, EntityResourceVaultEntryDefinition>> ExistingEntityResourceVaultEntryDefinitions()
+    {
+        var observedResourceVaultDefinitions = _observedVaultChanges
+            .SelectMany(x => new[] { x.ByGlobalEntityResourceVaultDbLookup(), x.ByOwnerEntityResourceVaultDbLookup() })
+            .ToHashSet();
+
+        if (!observedResourceVaultDefinitions.Unzip(x => x.EntityId, x => x.ResourceEntityId, x => x.VaultEntityId, out var entityIds, out var resourceEntityIds, out var vaultEntityIds))
+        {
+            return ImmutableDictionary<ByEntityResourceVaultDbLookup, EntityResourceVaultEntryDefinition>.Empty;
+        }
+
+        return await _context.ReadHelper.LoadDependencies<ByEntityResourceVaultDbLookup, EntityResourceVaultEntryDefinition>(
+            @$"
+WITH variables (entity_id, resource_entity_id, vault_entity_id) AS (
+    SELECT unnest({entityIds}), unnest({resourceEntityIds}), unnest({vaultEntityIds})
+)
+SELECT *
+FROM entity_resource_vault_entry_definition
+WHERE (entity_id, resource_entity_id, vault_entity_id) IN (SELECT * FROM variables);",
+            e => new ByEntityResourceVaultDbLookup(e.EntityId, e.ResourceEntityId, e.VaultEntityId));
+    }
+
+    private async Task<IDictionary<ByEntityResourceDbLookup, EntityResourceVaultTotalsHistory>> MostRecentEntityResourceVaultTotalsHistory()
+    {
+        var observedResourceDefinitions = _observedVaultChanges
+            .SelectMany(x => new[] { x.ByGlobalEntityResourceDbLookup(), x.ByOwnerEntityResourceDbLookup() })
+            .ToHashSet()
+            .ToList();
+
+        if (!observedResourceDefinitions.Unzip(x => x.EntityId, x => x.ResourceEntityId, out var entityIds, out var resourceEntityIds))
+        {
+            return ImmutableDictionary<ByEntityResourceDbLookup, EntityResourceVaultTotalsHistory>.Empty;
+        }
+
+        return await _context.ReadHelper.LoadDependencies<ByEntityResourceDbLookup, EntityResourceVaultTotalsHistory>(
+            @$"
+WITH variables (entity_id, resource_entity_id) AS (
+    SELECT unnest({entityIds}), unnest({resourceEntityIds})
+)
+SELECT th.*
+FROM variables var
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_resource_vault_totals_history
+    WHERE entity_id = var.entity_id AND resource_entity_id = var.resource_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) th ON true;",
+            e => new ByEntityResourceDbLookup(e.EntityId, e.ResourceEntityId));
+    }
+
+    private Task<int> CopyEntityResourceEntryDefinitions() => _context.WriteHelper.Copy(
+        _resourceEntryDefinitionsToAdd,
+        "COPY entity_resource_entry_definition (id, from_state_version, entity_id, resource_entity_id, resource_type) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -430,18 +430,6 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceType, "resource_type", token);
-        });
-
-    private Task<int> CopyEntityResourceVaultDefinitions() => _context.WriteHelper.Copy(
-        _resourceVaultDefinitionsToAdd,
-        "COPY entity_resource_vault_definition (id, from_state_version, entity_id, resource_entity_id, vault_entity_id) FROM STDIN (FORMAT BINARY)",
-        async (writer, e, token) =>
-        {
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
         });
 
     private Task<int> CopyEntityResourceTotalsHistory() => _context.WriteHelper.Copy(
@@ -467,6 +455,18 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+        });
+
+    private Task<int> CopyEntityResourceVaultEntryDefinitions() => _context.WriteHelper.Copy(
+        _resourceVaultEntryDefinitionsToAdd,
+        "COPY entity_resource_vault_entry_definition (id, from_state_version, entity_id, resource_entity_id, vault_entity_id) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
         });
 
     private Task<int> CopyEntityResourceVaultTotalsHistory() => _context.WriteHelper.Copy(

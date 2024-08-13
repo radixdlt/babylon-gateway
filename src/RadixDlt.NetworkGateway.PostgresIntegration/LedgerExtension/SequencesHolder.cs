@@ -148,9 +148,9 @@ internal class SequencesHolder
 
     public long UnverifiedStandardMetadataEntryHistorySequence { get; set; }
 
-    public long EntityResourceDefinitionSequence { get; set; }
+    public long EntityResourceEntryDefinitionSequence { get; set; }
 
-    public long EntityResourceVaultDefinitionSequence { get; set; }
+    public long EntityResourceVaultEntryDefinitionSequence { get; set; }
 
     public long EntityResourceTotalsHistorySequence { get; set; }
 

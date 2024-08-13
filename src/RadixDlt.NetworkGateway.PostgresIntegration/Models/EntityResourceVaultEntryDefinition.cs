@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_resource_vault_definition")]
-internal class EntityResourceVaultDefinition
+[Table("entity_resource_vault_entry_definition")]
+internal class EntityResourceVaultEntryDefinition
 {
     [Key]
     [Column("id")]

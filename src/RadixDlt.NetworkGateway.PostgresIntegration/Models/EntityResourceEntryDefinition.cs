@@ -68,8 +68,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_resource_definition")]
-internal class EntityResourceDefinition
+[Table("entity_resource_entry_definition")]
+internal class EntityResourceEntryDefinition
 {
     [Key]
     [Column("id")]

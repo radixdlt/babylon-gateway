@@ -174,13 +174,13 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<UnverifiedStandardMetadataEntryHistory> UnverifiedStandardMetadataEntryHistory => Set<UnverifiedStandardMetadataEntryHistory>();
 
-    public DbSet<EntityResourceDefinition> EntityResourceDefinition => Set<EntityResourceDefinition>();
+    public DbSet<EntityResourceEntryDefinition> EntityResourceEntryDefinition => Set<EntityResourceEntryDefinition>();
 
     public DbSet<EntityResourceTotalsHistory> EntityResourceTotalsHistory => Set<EntityResourceTotalsHistory>();
 
     public DbSet<EntityResourceBalanceHistory> EntityResourceBalanceHistory => Set<EntityResourceBalanceHistory>();
 
-    public DbSet<EntityResourceVaultDefinition> EntityResourceVaultDefinition => Set<EntityResourceVaultDefinition>();
+    public DbSet<EntityResourceVaultEntryDefinition> EntityResourceVaultEntryDefinition => Set<EntityResourceVaultEntryDefinition>();
 
     public DbSet<EntityResourceVaultTotalsHistory> EntityResourceVaultTotalsHistory => Set<EntityResourceVaultTotalsHistory>();
 
@@ -421,21 +421,21 @@ internal abstract class CommonDbContext : DbContext
             .IsUnique();
 
         modelBuilder
-            .Entity<EntityResourceDefinition>()
+            .Entity<EntityResourceEntryDefinition>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<EntityResourceDefinition>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion }, "IX_entity_resource_definition_fungibles")
+            .Entity<EntityResourceEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion }, "IX_entity_resource_entry_definition_fungibles")
             .HasFilter("resource_type = 'fungible'");
 
         modelBuilder
-            .Entity<EntityResourceDefinition>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion }, "IX_entity_resource_definition_non_fungibles")
+            .Entity<EntityResourceEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion }, "IX_entity_resource_entry_definition_non_fungibles")
             .HasFilter("resource_type = 'non_fungible'");
 
         modelBuilder
-            .Entity<EntityResourceVaultDefinition>()
+            .Entity<EntityResourceVaultEntryDefinition>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
     }
 

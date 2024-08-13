@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240813152322_InitialCreate")]
+    [Migration("20240813155504_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -679,7 +679,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_resource_balance_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceDefinition", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceEntryDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -708,13 +708,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("EntityId", "FromStateVersion");
 
-                    b.HasIndex(new[] { "EntityId", "FromStateVersion" }, "IX_entity_resource_definition_fungibles")
+                    b.HasIndex(new[] { "EntityId", "FromStateVersion" }, "IX_entity_resource_entry_definition_fungibles")
                         .HasFilter("resource_type = 'fungible'");
 
-                    b.HasIndex(new[] { "EntityId", "FromStateVersion" }, "IX_entity_resource_definition_non_fungibles")
+                    b.HasIndex(new[] { "EntityId", "FromStateVersion" }, "IX_entity_resource_entry_definition_non_fungibles")
                         .HasFilter("resource_type = 'non_fungible'");
 
-                    b.ToTable("entity_resource_definition");
+                    b.ToTable("entity_resource_entry_definition");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceTotalsHistory", b =>
@@ -786,7 +786,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_resource_vault_aggregate_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceVaultDefinition", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceVaultEntryDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -815,7 +815,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("EntityId", "ResourceEntityId", "FromStateVersion");
 
-                    b.ToTable("entity_resource_vault_definition");
+                    b.ToTable("entity_resource_vault_entry_definition");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceVaultTotalsHistory", b =>
