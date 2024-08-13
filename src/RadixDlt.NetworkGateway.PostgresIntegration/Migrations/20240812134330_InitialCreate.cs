@@ -232,6 +232,36 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "component_fungible_resource_definition",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    component_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_fungible_resource_definition", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "component_fungible_resource_totals_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    component_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_count = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_fungible_resource_totals_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "component_method_royalty_aggregate_history",
                 columns: table => new
                 {
@@ -261,6 +291,68 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_component_method_royalty_entry_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "component_non_fungible_resource_definition",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    component_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_non_fungible_resource_definition", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "component_non_fungible_resource_totals_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    component_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_count = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_non_fungible_resource_totals_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "component_resource_vault_definition",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    component_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    vault_entity_id = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_resource_vault_definition", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "component_resource_vault_totals_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    component_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_count = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_resource_vault_totals_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -971,6 +1063,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "account_entity_id", "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_component_fungible_resource_definition_component_entity_id_~",
+                table: "component_fungible_resource_definition",
+                columns: new[] { "component_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_component_fungible_resource_totals_history_component_entity~",
+                table: "component_fungible_resource_totals_history",
+                columns: new[] { "component_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_component_method_royalty_aggregate_history_entity_id_from_s~",
                 table: "component_method_royalty_aggregate_history",
                 columns: new[] { "entity_id", "from_state_version" });
@@ -984,6 +1086,26 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_component_method_royalty_entry_history_entity_id_method_nam~",
                 table: "component_method_royalty_entry_history",
                 columns: new[] { "entity_id", "method_name", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_component_non_fungible_resource_definition_component_entity~",
+                table: "component_non_fungible_resource_definition",
+                columns: new[] { "component_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_component_non_fungible_resource_totals_history_component_en~",
+                table: "component_non_fungible_resource_totals_history",
+                columns: new[] { "component_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_component_resource_vault_definition_component_entity_id_res~",
+                table: "component_resource_vault_definition",
+                columns: new[] { "component_entity_id", "resource_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_component_resource_vault_totals_history_component_entity_id~",
+                table: "component_resource_vault_totals_history",
+                columns: new[] { "component_entity_id", "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_entities_address",
@@ -1322,10 +1444,28 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "account_resource_preference_rule_entry_history");
 
             migrationBuilder.DropTable(
+                name: "component_fungible_resource_definition");
+
+            migrationBuilder.DropTable(
+                name: "component_fungible_resource_totals_history");
+
+            migrationBuilder.DropTable(
                 name: "component_method_royalty_aggregate_history");
 
             migrationBuilder.DropTable(
                 name: "component_method_royalty_entry_history");
+
+            migrationBuilder.DropTable(
+                name: "component_non_fungible_resource_definition");
+
+            migrationBuilder.DropTable(
+                name: "component_non_fungible_resource_totals_history");
+
+            migrationBuilder.DropTable(
+                name: "component_resource_vault_definition");
+
+            migrationBuilder.DropTable(
+                name: "component_resource_vault_totals_history");
 
             migrationBuilder.DropTable(
                 name: "entities");

@@ -174,6 +174,18 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<UnverifiedStandardMetadataEntryHistory> UnverifiedStandardMetadataEntryHistory => Set<UnverifiedStandardMetadataEntryHistory>();
 
+    public DbSet<ComponentFungibleResourceDefinition> ComponentFungibleResourceDefinition => Set<ComponentFungibleResourceDefinition>();
+
+    public DbSet<ComponentFungibleResourceTotalsHistory> ComponentFungibleResourceTotalsHistory => Set<ComponentFungibleResourceTotalsHistory>();
+
+    public DbSet<ComponentNonFungibleResourceDefinition> ComponentNonFungibleResourceDefinition => Set<ComponentNonFungibleResourceDefinition>();
+
+    public DbSet<ComponentNonFungibleResourceTotalsHistory> ComponentNonFungibleResourceTotalsHistory => Set<ComponentNonFungibleResourceTotalsHistory>();
+
+    public DbSet<ComponentResourceVaultDefinition> ComponentResourceVaultDefinition => Set<ComponentResourceVaultDefinition>();
+
+    public DbSet<ComponentResourceVaultTotalsHistory> ComponentResourceVaultTotalsHistory => Set<ComponentResourceVaultTotalsHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -409,6 +421,18 @@ internal abstract class CommonDbContext : DbContext
             .Entity<AccountLockerEntryResourceVaultDefinition>()
             .HasIndex(e => new { e.AccountLockerDefinitionId, e.FromStateVersion })
             .IsUnique();
+
+        modelBuilder
+            .Entity<ComponentFungibleResourceDefinition>()
+            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<ComponentNonFungibleResourceDefinition>()
+            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<ComponentResourceVaultDefinition>()
+            .HasIndex(e => new { e.ComponentEntityId, e.ResourceEntityId, e.FromStateVersion });
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -630,5 +654,17 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<UnverifiedStandardMetadataEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.Discriminator, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<ComponentFungibleResourceTotalsHistory>()
+            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<ComponentNonFungibleResourceTotalsHistory>()
+            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<ComponentResourceVaultTotalsHistory>()
+            .HasIndex(e => new { e.ComponentEntityId, e.ResourceEntityId, e.FromStateVersion });
     }
 }

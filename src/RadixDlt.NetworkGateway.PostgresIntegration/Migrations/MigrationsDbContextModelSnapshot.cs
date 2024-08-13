@@ -360,6 +360,62 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("account_resource_preference_rule_entry_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentFungibleResourceDefinition", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ComponentEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("component_entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComponentEntityId", "FromStateVersion");
+
+                    b.ToTable("component_fungible_resource_definition");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentFungibleResourceTotalsHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ComponentEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("component_entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("TotalCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_count");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComponentEntityId", "FromStateVersion");
+
+                    b.ToTable("component_fungible_resource_totals_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentMethodRoyaltyAggregateHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -426,6 +482,126 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("EntityId", "MethodName", "FromStateVersion");
 
                     b.ToTable("component_method_royalty_entry_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentNonFungibleResourceDefinition", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ComponentEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("component_entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComponentEntityId", "FromStateVersion");
+
+                    b.ToTable("component_non_fungible_resource_definition");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentNonFungibleResourceTotalsHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ComponentEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("component_entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("TotalCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_count");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComponentEntityId", "FromStateVersion");
+
+                    b.ToTable("component_non_fungible_resource_totals_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentResourceVaultDefinition", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ComponentEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("component_entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.Property<long>("VaultEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("vault_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComponentEntityId", "ResourceEntityId", "FromStateVersion");
+
+                    b.ToTable("component_resource_vault_definition");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentResourceVaultTotalsHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ComponentEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("component_entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.Property<long>("TotalCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_count");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComponentEntityId", "ResourceEntityId", "FromStateVersion");
+
+                    b.ToTable("component_resource_vault_totals_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity", b =>

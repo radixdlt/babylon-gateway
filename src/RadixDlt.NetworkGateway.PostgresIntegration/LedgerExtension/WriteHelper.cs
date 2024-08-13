@@ -782,7 +782,13 @@ SELECT
     setval('account_authorized_depositor_entry_history_id_seq', @accountAuthorizedDepositorEntryHistorySequence),
     setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence),
     setval('unverified_standard_metadata_aggregate_history_id_seq', @unverifiedStandardMetadataAggregateHistorySequence),
-    setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence)
+    setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence),
+    setval('component_fungible_resource_definition_id_seq', @componentFungibleResourceDefinitionSequence),
+    setval('component_fungible_resource_totals_history_id_seq', @componentFungibleResourceTotalsHistorySequence),
+    setval('component_non_fungible_resource_definition_id_seq', @componentNonFungibleResourceDefinitionSequence),
+    setval('component_non_fungible_resource_totals_history_id_seq', @componentNonFungibleResourceTotalsHistorySequence),
+    setval('component_resource_vault_definition_id_seq', @componentResourceVaultDefinitionSequence),
+    setval('component_resource_vault_totals_history_id_seq', @componentResourceVaultTotalsHistorySequence)
 ",
             parameters: new
             {
@@ -827,6 +833,12 @@ SELECT
                 accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
                 unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
                 unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
+                componentFungibleResourceDefinitionSequence = sequences.ComponentFungibleResourceDefinitionSequence,
+                componentFungibleResourceTotalsHistorySequence = sequences.ComponentFungibleResourceTotalsHistorySequence,
+                componentNonFungibleResourceDefinitionSequence = sequences.ComponentNonFungibleResourceDefinitionSequence,
+                componentNonFungibleResourceTotalsHistorySequence = sequences.ComponentNonFungibleResourceTotalsHistorySequence,
+                componentResourceVaultDefinitionSequence = sequences.ComponentResourceVaultDefinitionSequence,
+                componentResourceVaultTotalsHistorySequence = sequences.ComponentResourceVaultTotalsHistorySequence,
             },
             cancellationToken: token);
 

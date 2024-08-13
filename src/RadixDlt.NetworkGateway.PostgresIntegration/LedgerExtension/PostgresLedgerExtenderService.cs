@@ -759,6 +759,8 @@ UPDATE pending_transactions
         var globalEventEmitterProcessor = new GlobalEventEmitterProcessor(processorContext, referencedEntities, networkConfiguration);
         var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
         var standardMetadataProcessor = new StandardMetadataProcessor(processorContext, referencedEntities);
+        var componentResourceProcessor = new ComponentResourceProcessor(processorContext, referencedEntities);
+        var componentResourceVaultProcessor = new ComponentResourceVaultProcessor(processorContext, referencedEntities);
 
         // step: scan all substates & events to figure out changes
         {
@@ -920,6 +922,7 @@ UPDATE pending_transactions
                         accountLockerProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         affectedGlobalEntitiesProcessor.VisitUpsert(referencedEntity, stateVersion);
                         standardMetadataProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        componentResourceProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -1155,6 +1158,7 @@ UPDATE pending_transactions
             await accountResourcePreferenceRulesProcessor.LoadDependencies();
             await accountLockerProcessor.LoadDependencies();
             await standardMetadataProcessor.LoadDependencies();
+            await componentResourceProcessor.LoadDependencies();
 
             dbReadDuration += sw.Elapsed;
 
@@ -1181,6 +1185,7 @@ UPDATE pending_transactions
             ledgerTransactionMarkersToAdd.AddRange(globalEventEmitterProcessor.CreateTransactionMarkers());
             ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntitiesProcessor.CreateTransactionMarkers());
             standardMetadataProcessor.ProcessChanges();
+            componentResourceProcessor.ProcessChanges();
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1513,6 +1518,7 @@ UPDATE pending_transactions
             rowsInserted += await validatorEmissionProcessor.SaveEntities();
             rowsInserted += await accountLockerProcessor.SaveEntities();
             rowsInserted += await standardMetadataProcessor.SaveEntities();
+            rowsInserted += await componentResourceProcessor.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);
 
