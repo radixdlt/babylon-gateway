@@ -73,6 +73,8 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
     public const string StringForNaN = "NaN";
 
     public static readonly TokenAmount Zero;
+    public static readonly TokenAmount One;
+    public static readonly TokenAmount MinusOne;
     public static readonly TokenAmount NaN;
     public static readonly TokenAmount MaxValue;
 
@@ -86,6 +88,8 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
 
         MaxValue = new TokenAmount(BigInteger.Pow(2, 192), 0);
         Zero = new TokenAmount(0);
+        One = FromDecimalString("1");
+        MinusOne = FromDecimalString("-1");
         NaN = new TokenAmount(true);
     }
 

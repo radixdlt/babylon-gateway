@@ -63,14 +63,13 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_vault_history")]
-internal abstract class EntityVaultHistory
+[Table("vault_balance_history")]
+internal class VaultBalanceHistory
 {
     [Key]
     [Column("id")]
@@ -79,35 +78,9 @@ internal abstract class EntityVaultHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("owner_entity_id")]
-    public long OwnerEntityId { get; set; }
-
-    [Column("global_entity_id")]
-    public long GlobalEntityId { get; set; }
-
     [Column("vault_entity_id")]
     public long VaultEntityId { get; set; }
 
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-}
-
-internal class EntityFungibleVaultHistory : EntityVaultHistory
-{
     [Column("balance")]
     public TokenAmount Balance { get; set; }
-
-    [Column("is_royalty_vault")]
-    public bool IsRoyaltyVault { get; set; }
-}
-
-internal class EntityNonFungibleVaultHistory : EntityVaultHistory, IAggregateHolder
-{
-    [Column("non_fungible_ids")]
-    public List<long> NonFungibleIds { get; set; }
-
-    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
-    {
-        yield return (nameof(NonFungibleIds), NonFungibleIds.Count);
-    }
 }

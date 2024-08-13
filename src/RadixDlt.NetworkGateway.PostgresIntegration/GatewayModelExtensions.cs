@@ -67,10 +67,13 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -86,6 +89,126 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
+    public static void ToGatewayModel(
+        this EntityResourcesQuery.ResultEntity input,
+        bool aggregatePerVault,
+        Dictionary<long, GatewayModel.EntityMetadataCollection>? explicitMetadata,
+        Dictionary<long, NonFungibleVaultContentsQuery.ResultVault>? nfVaultContents,
+        out GatewayModel.FungibleResourcesCollection fungibles,
+        out GatewayModel.NonFungibleResourcesCollection nonFungibles)
+    {
+        string? fungibleCursor = input.FungibleResourcesNextCursor.ToGatewayModel()?.ToCursorString();
+        var fungibleItems = input.FungibleResources
+            .Select(f =>
+            {
+                GatewayModel.FungibleResourcesCollectionItem val;
+                GatewayModel.EntityMetadataCollection? resourceExplicitMetadata = null;
+
+                explicitMetadata?.TryGetValue(f.ResourceEntityId, out resourceExplicitMetadata);
+
+                if (aggregatePerVault)
+                {
+                    string? vaultCursor = f.VaultsNextCursor.ToGatewayModel()?.ToCursorString();
+                    var vaults = f.Vaults
+                        .Select(v => new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                            vaultAddress: v.VaultEntityAddress,
+                            amount: TokenAmount.FromSubUnitsString(v.VaultBalance).ToString(),
+                            lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion))
+                        .ToList();
+
+                    val = new GatewayModel.FungibleResourcesCollectionItemVaultAggregated(
+                        resourceAddress: f.ResourceEntityAddress,
+                        vaults: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(
+                            totalCount: f.ResourceVaultTotalCount,
+                            nextCursor: vaultCursor,
+                            items: vaults),
+                        explicitMetadata: resourceExplicitMetadata);
+                }
+                else
+                {
+                    val = new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
+                        resourceAddress: f.ResourceEntityAddress,
+                        amount: TokenAmount.FromSubUnitsString(f.ResourceBalance).ToString(),
+                        lastUpdatedAtStateVersion: f.ResourceLastUpdatedAtStateVersion,
+                        explicitMetadata: resourceExplicitMetadata);
+                }
+
+                return val;
+            })
+            .ToList();
+
+        string? nonFungibleCursor = input.NonFungibleResourcesNextCursor.ToGatewayModel()?.ToCursorString();
+        var nonFungibleItems = input.NonFungibleResources
+            .Select(nf =>
+            {
+                GatewayModel.NonFungibleResourcesCollectionItem val;
+                GatewayModel.EntityMetadataCollection? resourceExplicitMetadata = null;
+
+                explicitMetadata?.TryGetValue(nf.ResourceEntityId, out resourceExplicitMetadata);
+
+                if (aggregatePerVault)
+                {
+                    string? vaultCursor = nf.VaultsNextCursor.ToGatewayModel()?.ToCursorString();
+                    var vaults = nf.Vaults
+                        .Select(v =>
+                        {
+                            string? nfidCursor = null;
+                            List<string>? nfids = null;
+
+                            if (nfVaultContents?.TryGetValue(v.VaultEntityId, out var vaultNfids) == true)
+                            {
+                                nfidCursor = vaultNfids.NonFungibleIdsNextCursor.ToGatewayModel()?.ToCursorString();
+                                nfids = vaultNfids.NonFungibleIds.Select(y => y.NonFungibleId).ToList();
+                            }
+
+                            return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                                totalCount: long.Parse(TokenAmount.FromSubUnitsString(v.VaultBalance).ToString()),
+                                nextCursor: nfidCursor,
+                                items: nfids,
+                                vaultAddress: v.VaultEntityAddress,
+                                lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion);
+                        })
+                        .ToList();
+
+                    val = new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated(
+                        resourceAddress: nf.ResourceEntityAddress,
+                        vaults: new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVault(
+                            totalCount: nf.ResourceVaultTotalCount,
+                            nextCursor: vaultCursor,
+                            items: vaults),
+                        explicitMetadata: resourceExplicitMetadata);
+                }
+                else
+                {
+                    val = new GatewayModel.NonFungibleResourcesCollectionItemGloballyAggregated(
+                        resourceAddress: nf.ResourceEntityAddress,
+                        amount: long.Parse(TokenAmount.FromSubUnitsString(nf.ResourceBalance).ToString()),
+                        lastUpdatedAtStateVersion: nf.ResourceLastUpdatedAtStateVersion,
+                        explicitMetadata: resourceExplicitMetadata);
+                }
+
+                return val;
+            })
+            .ToList();
+
+        fungibles = new GatewayModel.FungibleResourcesCollection(input.TotalFungibleResourceCount, fungibleCursor, fungibleItems);
+        nonFungibles = new GatewayModel.NonFungibleResourcesCollection(input.TotalNonFungibleResourceCount, nonFungibleCursor, nonFungibleItems);
+    }
+
+    public static GatewayModel.IdBoundaryCoursor? ToGatewayModel(this StateVersionIdCursor? input)
+    {
+        return input == null
+            ? null
+            : new GatewayModel.IdBoundaryCoursor(input.StateVersion, input.Id);
+    }
+
+    public static StateVersionIdCursor? FromGatewayModel(this GatewayModel.IdBoundaryCoursor? input)
+    {
+        return input == null
+            ? null
+            : new StateVersionIdCursor(input.StateVersionBoundary, input.IdBoundary);
+    }
+
     public static GatewayModel.TwoWayLinkedDappsCollectionItem ToGatewayModel(this DappDefinitionsResolvedTwoWayLink input)
     {
         return new GatewayModel.TwoWayLinkedDappsCollectionItem(input.EntityAddress);

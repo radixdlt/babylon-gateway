@@ -74,10 +74,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal static class DapperWrapperExtensions
 {
-    public static async Task<IList<T>> ToListAsync<T>(this IDapperWrapper dapperWrapper, DbConnection dbConnection, [StringSyntax("postgresql")] string sql, object parameters, CancellationToken token = default)
+    public static CommandDefinition CreateCommandDefinition(this IDapperWrapper _, [StringSyntax("postgresql")] string sql, object parameters, CancellationToken token = default)
     {
-        var commandDefinition = new CommandDefinition(commandText: sql, parameters: parameters, cancellationToken: token);
-
+        return new CommandDefinition(commandText: sql, parameters: parameters, cancellationToken: token);
+    }    public static async Task<IList<T>> ToListAsync<T>(this IDapperWrapper dapperWrapper, DbConnection dbConnection, [StringSyntax("postgresql")] string sql, object parameters, CancellationToken token = default)
+    {
+        var commandDefinition = dapperWrapper.CreateCommandDefinition(sql, parameters, token);
         var result = await dapperWrapper.QueryAsync<T>(dbConnection, commandDefinition);
 
         return result.ToList();

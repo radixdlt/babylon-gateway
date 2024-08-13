@@ -62,24 +62,6 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
-
-[Table("non_fungible_id_location_history")]
-internal class NonFungibleIdLocationHistory
-{
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("non_fungible_id_definition_id")]
-    public long NonFungibleIdDefinitionId { get; set; }
-
-    [Column("vault_entity_id")]
-    public long VaultEntityId { get; set; }
-}
+internal sealed record StateVersionIdCursor(long? StateVersion, long? Id);

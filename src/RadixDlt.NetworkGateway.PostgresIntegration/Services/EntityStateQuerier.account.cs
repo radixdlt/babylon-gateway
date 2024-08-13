@@ -65,6 +65,7 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -81,7 +82,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal partial class EntityStateQuerier
 {
-    private record AccountLockerVaultViewModel(long Id, long FromStateVersion, string ResourceAddress, string VaultAddress, long LastUpdatedAtStateVersion, string? FungibleBalance, int? NonFungibleTotalCount);
+    private record AccountLockerVaultViewModel(long Id, long FromStateVersion, EntityType ResourceDiscriminator, string ResourceAddress, string VaultAddress, long LastUpdatedAtStateVersion, string? Balance);
 
     private record AccountLockerTouchedAtViewModel(long AccountLockerEntityId, long AccountEntityId, long LastUpdatedAt);
 
@@ -105,13 +106,13 @@ internal partial class EntityStateQuerier
 
         var cd = new CommandDefinition(
             commandText: @"
-SELECT d.id AS Id, d.from_state_version AS FromStateVersion, re.address AS ResourceAddress, ve.address AS VaultAddress, vh.from_state_version AS LastUpdatedAtStateVersion, vh.fungible_balance AS FungibleBalance, vh.non_fungible_total_count AS NonFungibleTotalCount
+SELECT d.id AS Id, d.from_state_version AS FromStateVersion, re.discriminator AS ResourceDiscriminator, re.address AS ResourceAddress, ve.address AS VaultAddress, vh.from_state_version AS LastUpdatedAtStateVersion, vh.balance AS Balance
 FROM account_locker_entry_resource_vault_definition d
 INNER JOIN entities re ON re.id = d.resource_entity_id
 INNER JOIN entities ve ON ve.id = d.vault_entity_id
 INNER JOIN LATERAL (
-    SELECT balance::text AS fungible_balance, cardinality(non_fungible_ids) AS non_fungible_total_count, from_state_version
-    FROM entity_vault_history
+    SELECT balance::text AS balance, from_state_version
+    FROM vault_balance_history
     WHERE vault_entity_id = ve.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
@@ -140,18 +141,18 @@ LIMIT @limit;",
             {
                 GatewayModel.AccountLockerVaultCollectionItem result;
 
-                if (k.FungibleBalance != null)
+                if (k.ResourceDiscriminator == EntityType.GlobalFungibleResource && k.Balance != null)
                 {
                     result = new GatewayModel.AccountLockerVaultCollectionItemFungible(
-                        amount: TokenAmount.FromSubUnitsString(k.FungibleBalance).ToString(),
+                        amount: TokenAmount.FromSubUnitsString(k.Balance).ToString(),
                         resourceAddress: k.ResourceAddress,
                         vaultAddress: k.VaultAddress,
                         lastUpdatedAtStateVersion: k.LastUpdatedAtStateVersion);
                 }
-                else if (k.NonFungibleTotalCount.HasValue)
+                else if (k.ResourceDiscriminator == EntityType.GlobalNonFungibleResource && k.Balance != null)
                 {
                     result = new GatewayModel.AccountLockerVaultCollectionItemNonFungible(
-                        totalCount: k.NonFungibleTotalCount.Value,
+                        totalCount: long.Parse(TokenAmount.FromSubUnitsString(k.Balance).ToString()),
                         resourceAddress: k.ResourceAddress,
                         vaultAddress: k.VaultAddress,
                         lastUpdatedAtStateVersion: k.LastUpdatedAtStateVersion);

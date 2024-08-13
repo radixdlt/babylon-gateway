@@ -172,12 +172,13 @@ SELECT
 FROM variables var, base_with_root bwr
 LEFT JOIN LATERAL (
     SELECT *
-    FROM entity_vault_history
+    FROM vault_balance_history
     WHERE from_state_version <= var.state_version AND vault_entity_id = bwr.root_correlated_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) vault ON TRUE
-LEFT JOIN entities re ON re.id = vault.resource_entity_id
+LEFT JOIN entities ve ON ve.id = vault.vault_entity_id
+LEFT JOIN entities re ON re.id = ve.correlated_entity_ids[array_position(ve.correlated_entity_relationships, 'vault_to_resource')]
 WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_to_resource_vault, validator_to_stake_vault, access_controller_to_recovery_badge}'::entity_relationship[]);",
             new
             {

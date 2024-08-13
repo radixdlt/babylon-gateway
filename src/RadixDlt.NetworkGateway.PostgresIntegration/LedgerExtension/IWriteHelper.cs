@@ -84,19 +84,7 @@ internal interface IWriteHelper
 
     Task<int> CopyResourceEntitySupplyHistory(ICollection<ResourceEntitySupplyHistory> entities, CancellationToken token);
 
-    Task<int> CopyEntityResourceAggregatedVaultsHistory(ICollection<EntityResourceAggregatedVaultsHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityResourceAggregateHistory(ICollection<EntityResourceAggregateHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityResourceVaultAggregateHistory(ICollection<EntityResourceVaultAggregateHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityVaultHistory(ICollection<EntityVaultHistory> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleIdDefinition(ICollection<NonFungibleIdDefinition> entities, CancellationToken token);
-
     Task<int> CopyNonFungibleIdDataHistory(ICollection<NonFungibleIdDataHistory> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleIdLocationHistory(List<NonFungibleIdLocationHistory> entities, CancellationToken token);
 
     Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token);
 

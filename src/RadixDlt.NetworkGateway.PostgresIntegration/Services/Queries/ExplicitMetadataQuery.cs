@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;

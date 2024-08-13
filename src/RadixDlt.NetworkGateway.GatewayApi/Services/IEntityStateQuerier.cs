@@ -76,9 +76,11 @@ public interface IEntityStateQuerier
 
     public sealed record MetadataPageRequest(EntityAddress Address, GatewayModel.IdBoundaryCoursor? Cursor, int Limit);
 
+    public sealed record PageRequestByCursor(EntityAddress Address, GatewayModel.IdBoundaryCoursor Cursor, int Limit);
+
     public sealed record AccountLockerPageRequest(AccountLockerAddress AccountLockerAddress, GatewayModel.StateAccountLockerAccountResourcesCursor? Cursor, int Limit);
 
-    public sealed record ResourceVaultsPageRequest(EntityAddress Address, EntityAddress ResourceAddress, int Offset, int Limit);
+    public sealed record ResourceVaultsPageRequest(EntityAddress Address, EntityAddress ResourceAddress, GatewayModel.IdBoundaryCoursor Cursor, int Limit);
 
     Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(
         List<EntityAddress> addresses,
@@ -98,7 +100,7 @@ public interface IEntityStateQuerier
         CancellationToken token = default);
 
     Task<GatewayModel.StateEntityFungiblesPageResponse> EntityFungibleResourcesPage(
-        PageRequest pageRequest,
+        PageRequestByCursor pageRequest,
         bool aggregatePerVault,
         GatewayModel.StateEntityFungiblesPageRequestOptIns optIns,
         GatewayModel.LedgerState ledgerState,
@@ -110,7 +112,7 @@ public interface IEntityStateQuerier
         CancellationToken token = default);
 
     Task<GatewayModel.StateEntityNonFungiblesPageResponse> EntityNonFungibleResourcesPage(
-        PageRequest pageRequest,
+        PageRequestByCursor pageRequest,
         bool aggregatePerVault,
         GatewayModel.StateEntityNonFungiblesPageRequestOptIns optIns,
         GatewayModel.LedgerState ledgerState,
@@ -123,13 +125,18 @@ public interface IEntityStateQuerier
         CancellationToken token = default);
 
     Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(
-        PageRequest request,
+        PageRequestByCursor request,
         EntityAddress resourceAddress,
         EntityAddress vaultAddress,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
 
-    Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(EntityAddress nonFungibleResourceAddress, GatewayModel.LedgerState ledgerState, GatewayModel.IdBoundaryCoursor? cursor, int pageSize, CancellationToken token = default);
+    Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(
+        EntityAddress nonFungibleResourceAddress,
+        GatewayModel.LedgerState ledgerState,
+        GatewayModel.IdBoundaryCoursor? cursor,
+        int pageSize,
+        CancellationToken token = default);
 
     Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(
         EntityAddress resourceAddress,

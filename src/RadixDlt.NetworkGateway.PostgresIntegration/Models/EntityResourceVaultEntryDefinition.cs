@@ -62,19 +62,14 @@
  * permissions under this License.
  */
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_resource_vault_aggregate_history")]
-internal class EntityResourceVaultAggregateHistory : IAggregateHolder
+[Table("entity_resource_vault_entry_definition")]
+internal class EntityResourceVaultEntryDefinition
 {
-    private long[]? _originalVaultEntityIds;
-
     [Key]
     [Column("id")]
     public long Id { get; set; }
@@ -88,81 +83,6 @@ internal class EntityResourceVaultAggregateHistory : IAggregateHolder
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
 
-    /// <summary>
-    /// The aggregate list of all vaults ordered by most recently updated.
-    /// </summary>
-    [Column("vault_entity_ids")]
-    public List<long> VaultEntityIds { get; set; }
-
-    public static EntityResourceVaultAggregateHistory Create(long databaseId, long entityId, long resourceEntityId, long stateVersion)
-    {
-        return CopyOrCreate(databaseId, null, entityId, resourceEntityId, stateVersion);
-    }
-
-    public static EntityResourceVaultAggregateHistory CopyOf(long databaseId, EntityResourceVaultAggregateHistory other, long stateVersion)
-    {
-        return CopyOrCreate(databaseId, other, other.EntityId, other.ResourceEntityId, stateVersion);
-    }
-
-    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
-    {
-        yield return (nameof(VaultEntityIds), VaultEntityIds.Count);
-    }
-
-    /// <summary>
-    /// Attempts to add new or update existing vault unless it already is the most recently modified one.
-    /// </summary>
-    /// <returns>true if added or modified, otherwise false.</returns>
-    public bool TryUpsert(long vaultId)
-    {
-        var currentIndex = VaultEntityIds.IndexOf(vaultId);
-
-        if (currentIndex == 0)
-        {
-            return false;
-        }
-
-        if (currentIndex != -1)
-        {
-            VaultEntityIds.RemoveAt(currentIndex);
-        }
-
-        VaultEntityIds.Insert(0, vaultId);
-
-        return true;
-    }
-
-    public bool ShouldBePersisted()
-    {
-        if (_originalVaultEntityIds == null)
-        {
-            return true;
-        }
-
-        if (!_originalVaultEntityIds.SequenceEqual(VaultEntityIds.ToArray()))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private static EntityResourceVaultAggregateHistory CopyOrCreate(long databaseId, EntityResourceVaultAggregateHistory? other, long entityId, long resourceEntityId, long stateVersion)
-    {
-        var ret = new EntityResourceVaultAggregateHistory
-        {
-            Id = databaseId,
-            FromStateVersion = stateVersion,
-            EntityId = entityId,
-            ResourceEntityId = resourceEntityId,
-            VaultEntityIds = new List<long>(other?.VaultEntityIds.ToArray() ?? Array.Empty<long>()),
-        };
-
-        if (other != null)
-        {
-            ret._originalVaultEntityIds = ret.VaultEntityIds.ToArray();
-        }
-
-        return ret;
-    }
+    [Column("vault_entity_id")]
+    public long VaultEntityId { get; set; }
 }

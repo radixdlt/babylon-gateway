@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("non_fungible_id_location_history")]
-internal class NonFungibleIdLocationHistory
+[Table("entity_resource_vault_totals_history")]
+internal class EntityResourceVaultTotalsHistory
 {
     [Key]
     [Column("id")]
@@ -77,9 +77,12 @@ internal class NonFungibleIdLocationHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("non_fungible_id_definition_id")]
-    public long NonFungibleIdDefinitionId { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    [Column("vault_entity_id")]
-    public long VaultEntityId { get; set; }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("total_count")]
+    public long TotalCount { get; set; }
 }
