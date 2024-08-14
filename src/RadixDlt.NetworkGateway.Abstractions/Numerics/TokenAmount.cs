@@ -154,9 +154,9 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
 
     public static TokenAmount operator -(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits - b._subUnits);
 
-    public static TokenAmount operator *(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits * b._subUnits);
+    public static TokenAmount operator *(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount((a._subUnits * b._subUnits) / _divisor);
 
-    public static TokenAmount operator /(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : Divide(a, b);
+    public static TokenAmount operator /(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN() || b == Zero) ? NaN : new TokenAmount((a._subUnits * _divisor) / b._subUnits);
 
     // ReSharper disable SimplifyConditionalTernaryExpression - As it's clearer as written
 #pragma warning disable IDE0075
@@ -268,18 +268,5 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
     {
         var isNaNComparison = _isNaN.CompareTo(other._isNaN);
         return isNaNComparison != 0 ? isNaNComparison : _subUnits.CompareTo(other._subUnits);
-    }
-
-    private static TokenAmount Divide(TokenAmount dividend, TokenAmount divisor)
-    {
-        if (divisor == Zero)
-        {
-            return NaN;
-        }
-
-        var doublePrecisionDividendSubUnits = dividend._subUnits * _divisor;
-        var divisorSubUnits = divisor._subUnits;
-
-        return new TokenAmount(doublePrecisionDividendSubUnits / divisorSubUnits);
     }
 }

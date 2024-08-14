@@ -19,7 +19,7 @@ Release built: _not released yet_
   - Brand-new `two_way_linked_*` properties on the `details` property of the Resources, Accounts, Packages and other global entities.
   - See https://docs.radixdlt.com/docs/metadata-for-verification#metadata-standards-for-verification-of-onledger-entities for detailed specification.
 - Added support for the Native Resource Details in the `/state/entity/details` endpoint, returned when the `native_resource_details` opt-in is enabled. 
-  - Brand-new `native_resource_details` property on the `details` property.
+  - Introduced a new `native_resource_details` property on the `details` object when looking up fungible or non-fungible resource entities with the entity details endpoint. This property is present when the resource has a special meaning to native blueprints, and gives extra information about the resource. For example, it identifies pool units with their linked pool, and gives the redemption value for a single unit.
   - Includes **unit** redemption value for the Validator LSU token and the unit tokens of various Pools. 
 - Added new endpoint `/extensions/resource-holders/page` which returns information about all holders of the queried resource.
 
