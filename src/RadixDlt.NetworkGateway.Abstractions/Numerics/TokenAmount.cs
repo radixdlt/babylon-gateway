@@ -74,7 +74,6 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
 
     public static readonly TokenAmount Zero;
     public static readonly TokenAmount NaN;
-    public static readonly TokenAmount OneFullUnit;
     public static readonly TokenAmount MaxValue;
 
     private const int DecimalPrecision = 18;
@@ -84,10 +83,10 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
     static TokenAmount()
     {
         _divisor = BigInteger.Pow(10, DecimalPrecision);
+
         MaxValue = new TokenAmount(BigInteger.Pow(2, 192), 0);
         Zero = new TokenAmount(0);
         NaN = new TokenAmount(true);
-        OneFullUnit = new TokenAmount(_divisor);
     }
 
     private readonly BigInteger _subUnits;
@@ -271,41 +270,16 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
         return isNaNComparison != 0 ? isNaNComparison : _subUnits.CompareTo(other._subUnits);
     }
 
-    // Heavily inspired by https://www.codeproject.com/Articles/5366079/BigDecimal-in-Csharp
-    // Licensed under CPOL: https://en.wikipedia.org/wiki/Code_Project_Open_License
-    // Author: Paulo Francisco Zemek. August, 01, 2023.
     private static TokenAmount Divide(TokenAmount dividend, TokenAmount divisor)
     {
         if (divisor == Zero)
         {
-            // This rule might look odd, but when simplifying expressions, x/x (x divided by x) is 1.
-            // So, to keep the rule true, 0 divided by 0 is also 1.
-            if (dividend == Zero)
-            {
-                return OneFullUnit;
-            }
-
-            throw new DivideByZeroException($"{nameof(divisor)} can only be zero if {nameof(dividend)} is zero.");
+            return NaN;
         }
 
         var doublePrecisionDividendSubUnits = dividend._subUnits * _divisor;
         var divisorSubUnits = divisor._subUnits;
 
-        return FromSubUnits(doublePrecisionDividendSubUnits / divisorSubUnits);
-    }
-
-    // Is there a faster approach that works with BigIntegers?
-    // It seems Log10 isn't faster at all.
-    private static int CountDigits(BigInteger value)
-    {
-        int count = 0;
-
-        while (value > 0)
-        {
-            count++;
-            value /= 10;
-        }
-
-        return count;
+        return new TokenAmount(doublePrecisionDividendSubUnits / divisorSubUnits);
     }
 }
