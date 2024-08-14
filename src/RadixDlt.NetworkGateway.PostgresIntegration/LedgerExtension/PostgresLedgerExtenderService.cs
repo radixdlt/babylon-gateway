@@ -1438,7 +1438,7 @@ UPDATE pending_transactions
                 }
             }
 
-            var resourceOwnersToAdd = new Dictionary<ResourceOwnersLookup, ResourceOwnersChange>();
+            var resourceOwnersToAdd = new Dictionary<(long EntityId, long ResourceEntityId), ResourceOwners>();
 
             foreach (var x in entityResourceAggregatedVaultsHistoryToAdd)
             {
@@ -1451,50 +1451,17 @@ UPDATE pending_transactions
                     _ => throw new ArgumentOutOfRangeException(nameof(x), x, null),
                 };
 
-                var isDeleted = balance.IsZero();
-
                 resourceOwnersToAdd.AddOrUpdate(
-                    new ResourceOwnersLookup(x.EntityId, x.ResourceEntityId),
-                    _ =>
+                    (x.EntityId, x.ResourceEntityId),
+                    _ => new ResourceOwners
                     {
-                        if (isDeleted)
-                        {
-                            return new ResourceOwnersChange(IsDeleted: true, null);
-                        }
-
-                        return new ResourceOwnersChange(IsDeleted: false, new ResourceOwners
-                        {
-                            Id = sequences.ResourceOwnersSequence++,
-                            EntityId = x.EntityId,
-                            ResourceEntityId = x.ResourceEntityId,
-                            Balance = balance,
-                        });
+                        Id = sequences.ResourceOwnersSequence++,
+                        EntityId = x.EntityId,
+                        ResourceEntityId = x.ResourceEntityId,
+                        Balance = balance,
                     },
-                    existing =>
-                    {
-                        if (isDeleted)
-                        {
-                            existing.IsDeleted = true;
-                            existing.Entry = null;
-                            return;
-                        }
-
-                        existing.IsDeleted = false;
-
-                        if (existing.Entry != null)
-                        {
-                            existing.Entry.Balance = balance;
-                            return;
-                        }
-
-                        existing.Entry = new ResourceOwners
-                        {
-                            Id = sequences.ResourceOwnersSequence++,
-                            EntityId = x.EntityId,
-                            ResourceEntityId = x.ResourceEntityId,
-                            Balance = balance,
-                        };
-                    });
+                    existing => existing.Balance = balance
+                );
             }
 
             var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges
@@ -1556,7 +1523,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyResourceOwners(resourceOwnersToAdd, token);
+            rowsInserted += await writeHelper.CopyResourceOwners(resourceOwnersToAdd.Select(x => x.Value).ToList(), token);
 
             rowsInserted += await entityStateProcessor.SaveEntities();
             rowsInserted += await entityMetadataProcessor.SaveEntities();

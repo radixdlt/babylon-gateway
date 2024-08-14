@@ -63,8 +63,6 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -107,13 +105,3 @@ internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEnt
 internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
 
 internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
-
-internal record ResourceOwnersChange(bool IsDeleted, ResourceOwners? Entry)
-{
-    public bool IsDeleted { get; set; } = IsDeleted;
-
-    [MemberNotNullWhen(true, nameof(IsDeleted))]
-    public ResourceOwners? Entry { get; set; } = Entry;
-}
-
-internal record ResourceOwnersLookup(long EntityId, long ResourceEntityId);
