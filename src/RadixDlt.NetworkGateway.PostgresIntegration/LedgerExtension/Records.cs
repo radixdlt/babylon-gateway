@@ -105,3 +105,5 @@ internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEnt
 internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
 
 internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
+
+internal record struct ResourceOwnersLookup(long ResourceEntityId, long EntityId);

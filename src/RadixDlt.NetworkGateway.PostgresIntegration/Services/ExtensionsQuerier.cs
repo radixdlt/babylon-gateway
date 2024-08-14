@@ -113,8 +113,9 @@ internal class ExtensionsQuerier : IExtensionsQuerier
 
         var totalCount = await _dbContext.ResourceOwners.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
 
-        var cd = new CommandDefinition(
-            commandText: @"
+        var entriesAndOneMore = await _dapperWrapper.ToList<ResourceOwnersViewModel>(
+            _dbContext,
+            @"
 SELECT
     ro.id as Id,
     e.address AS EntityAddress,
@@ -123,30 +124,31 @@ FROM resource_owners ro
 INNER JOIN entities e
 ON ro.entity_id = e.id
 WHERE ro.resource_entity_id = @resourceEntityId
-  AND (@balanceBoundary is null OR ((ro.balance, ro.id) < (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)))
+  AND (@balanceBoundary is null OR ((ro.balance, ro.id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)))
 ORDER BY (ro.balance, ro.entity_id) DESC
 LIMIT @limit",
-            parameters: new
+            new
             {
                 resourceEntityId = resourceEntity.Id,
                 balanceBoundary = cursor?.BalanceBoundary,
                 idBoundary = cursor?.IdBoundary ?? long.MaxValue,
-                limit = limit,
+                limit = limit + 1,
             },
-            cancellationToken: token);
+            token);
 
-        var result = (await _dapperWrapper.QueryAsync<ResourceOwnersViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
+        var lastElement = entriesAndOneMore.LastOrDefault();
+        var nextPageExists = entriesAndOneMore.Count == limit + 1 && lastElement != null;
 
-        var lastElement = result.LastOrDefault();
-        var nextCursor = lastElement != null
-            ? new GatewayModel.ResourceOwnersCursor(lastElement.Id, TokenAmount.FromDecimalString(lastElement.Balance).ToString()).ToCursorString()
+        var nextCursor = nextPageExists
+            ? new GatewayModel.ResourceOwnersCursor(lastElement!.Id, TokenAmount.FromDecimalString(lastElement.Balance).ToString()).ToCursorString()
             : null;
 
         switch (resourceEntity)
         {
             case GlobalFungibleResourceEntity:
             {
-                var castedResult = result
+                var castedResult = entriesAndOneMore
+                    .Take(limit)
                     .Select(
                         x => (GatewayModel.ResourceOwnersCollectionItem)new GatewayModel.ResourceOwnersCollectionFungibleResourceItem(
                             amount: TokenAmount.FromSubUnitsString(x.Balance).ToString(),
@@ -159,7 +161,8 @@ LIMIT @limit",
 
             case GlobalNonFungibleResourceEntity:
             {
-                var castedResult = result
+                var castedResult = entriesAndOneMore
+                    .Take(limit)
                     .Select(
                         x => (GatewayModel.ResourceOwnersCollectionItem)new GatewayModel.ResourceOwnersCollectionNonFungibleResourceItem(
                             nonFungibleIdsCount: long.Parse(TokenAmount.FromSubUnitsString(x.Balance).ToString()),

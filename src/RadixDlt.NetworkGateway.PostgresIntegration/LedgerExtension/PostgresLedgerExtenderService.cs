@@ -1438,7 +1438,7 @@ UPDATE pending_transactions
                 }
             }
 
-            var resourceOwnersToAdd = new Dictionary<(long EntityId, long ResourceEntityId), ResourceOwners>();
+            var resourceOwnersToAdd = new Dictionary<ResourceOwnersLookup, ResourceOwners>();
 
             foreach (var x in entityResourceAggregatedVaultsHistoryToAdd)
             {
@@ -1452,7 +1452,7 @@ UPDATE pending_transactions
                 };
 
                 resourceOwnersToAdd.AddOrUpdate(
-                    (x.EntityId, x.ResourceEntityId),
+                    new ResourceOwnersLookup(x.EntityId, x.ResourceEntityId),
                     _ => new ResourceOwners
                     {
                         Id = sequences.ResourceOwnersSequence++,
@@ -1523,7 +1523,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyResourceOwners(resourceOwnersToAdd.Select(x => x.Value).ToList(), token);
+            rowsInserted += await writeHelper.CopyResourceOwners(resourceOwnersToAdd.Values, token);
 
             rowsInserted += await entityStateProcessor.SaveEntities();
             rowsInserted += await entityMetadataProcessor.SaveEntities();
