@@ -1456,6 +1456,62 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("non_fungible_schema_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleVaultEntryDefinition", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("NonFungibleIdDefinitionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("non_fungible_id_definition_id");
+
+                    b.Property<long>("VaultEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("vault_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VaultEntityId", "FromStateVersion");
+
+                    b.ToTable("non_fungible_vault_entry_definition");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleVaultEntryHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<long>("NonFungibleVaultEntryDefinitionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("non_fungible_vault_entry_definition_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NonFungibleVaultEntryDefinitionId", "FromStateVersion");
+
+                    b.ToTable("non_fungible_vault_entry_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageBlueprintAggregateHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -1998,6 +2054,35 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("ValidatorEntityId", "KeyType", "Key");
 
                     b.ToTable("validator_public_key_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultBalanceHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<BigInteger>("Balance")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("VaultEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("vault_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VaultEntityId", "FromStateVersion");
+
+                    b.ToTable("vault_balance_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountAuthorizedNonFungibleBadgeDepositorEntryHistory", b =>

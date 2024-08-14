@@ -81,23 +81,23 @@ internal readonly record struct ByEntityResourceDbLookup(long EntityId, long Res
 
 internal readonly record struct ByEntityResourceVaultDbLookup(long EntityId, long ResourceEntityId, long VaultEntityId);
 
-internal readonly record struct VaultChange(ResourceType ResourceType, VaultEntity VaultEntity, TokenAmount Delta, long StateVersion)
-{
-    public ByEntityDbLookup ByGlobalEntityDbLookup() => new(VaultEntity.GlobalAncestorId!.Value);
-
-    public ByEntityDbLookup ByOwnerEntityDbLookup() => new(VaultEntity.OwnerAncestorId!.Value);
-
-    public ByEntityResourceDbLookup ByGlobalEntityResourceDbLookup() => new(VaultEntity.GlobalAncestorId!.Value, VaultEntity.GetResourceEntityId());
-
-    public ByEntityResourceDbLookup ByOwnerEntityResourceDbLookup() => new(VaultEntity.OwnerAncestorId!.Value, VaultEntity.GetResourceEntityId());
-
-    public ByEntityResourceVaultDbLookup ByGlobalEntityResourceVaultDbLookup() => new(VaultEntity.GlobalAncestorId!.Value, VaultEntity.GetResourceEntityId(), VaultEntity.Id);
-
-    public ByEntityResourceVaultDbLookup ByOwnerEntityResourceVaultDbLookup() => new(VaultEntity.OwnerAncestorId!.Value, VaultEntity.GetResourceEntityId(), VaultEntity.Id);
-}
-
 internal class EntityResourceProcessor
 {
+    internal readonly record struct VaultChange(ResourceType ResourceType, VaultEntity VaultEntity, TokenAmount Delta, long StateVersion)
+    {
+        public ByEntityDbLookup ByGlobalEntityDbLookup() => new(VaultEntity.GlobalAncestorId!.Value);
+
+        public ByEntityDbLookup ByOwnerEntityDbLookup() => new(VaultEntity.OwnerAncestorId!.Value);
+
+        public ByEntityResourceDbLookup ByGlobalEntityResourceDbLookup() => new(VaultEntity.GlobalAncestorId!.Value, VaultEntity.GetResourceEntityId());
+
+        public ByEntityResourceDbLookup ByOwnerEntityResourceDbLookup() => new(VaultEntity.OwnerAncestorId!.Value, VaultEntity.GetResourceEntityId());
+
+        public ByEntityResourceVaultDbLookup ByGlobalEntityResourceVaultDbLookup() => new(VaultEntity.GlobalAncestorId!.Value, VaultEntity.GetResourceEntityId(), VaultEntity.Id);
+
+        public ByEntityResourceVaultDbLookup ByOwnerEntityResourceVaultDbLookup() => new(VaultEntity.OwnerAncestorId!.Value, VaultEntity.GetResourceEntityId(), VaultEntity.Id);
+    }
+
     private readonly ProcessorContext _context;
 
     private readonly List<VaultChange> _observedVaultChanges = new();

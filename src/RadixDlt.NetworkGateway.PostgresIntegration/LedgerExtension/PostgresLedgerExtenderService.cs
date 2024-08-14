@@ -760,6 +760,7 @@ UPDATE pending_transactions
         var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
         var standardMetadataProcessor = new StandardMetadataProcessor(processorContext, referencedEntities);
         var entityResourceProcessor = new EntityResourceProcessor(processorContext);
+        var vaultProcessor = new VaultProcessor(processorContext);
 
         // step: scan all substates & events to figure out changes
         {
@@ -922,6 +923,7 @@ UPDATE pending_transactions
                         affectedGlobalEntitiesProcessor.VisitUpsert(referencedEntity, stateVersion);
                         standardMetadataProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         entityResourceProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, substate);
+                        vaultProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, substate);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -940,6 +942,7 @@ UPDATE pending_transactions
                         affectedGlobalEntitiesProcessor.VisitDelete(referencedEntity, stateVersion);
                         packageCodeProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                         entitySchemaProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
+                        vaultProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
@@ -1142,7 +1145,6 @@ UPDATE pending_transactions
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(vaultSnapshots, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
             var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
-            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDefinitionFor(nonFungibleIdChanges, vaultSnapshots.OfType<NonFungibleVaultSnapshot>().ToList(), token);
 
             await entityMetadataProcessor.LoadDependencies();
             await entitySchemaProcessor.LoadDependencies();
@@ -1158,13 +1160,13 @@ UPDATE pending_transactions
             await accountLockerProcessor.LoadDependencies();
             await standardMetadataProcessor.LoadDependencies();
             await entityResourceProcessor.LoadDependencies();
+            await vaultProcessor.LoadDependencies();
 
             dbReadDuration += sw.Elapsed;
 
             var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
             var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
             var entityResourceVaultAggregateHistoryCandidates = new List<EntityResourceVaultAggregateHistory>();
-            var nonFungibleIdDefinitionToAdd = new List<NonFungibleIdDefinition>();
             var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
 
@@ -1185,28 +1187,16 @@ UPDATE pending_transactions
             ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntitiesProcessor.CreateTransactionMarkers());
             standardMetadataProcessor.ProcessChanges();
             entityResourceProcessor.ProcessChanges();
+            vaultProcessor.ProcessChanges();
+
+            // TODO get rid of that once we move to new aggregation model for resource / vaults
+            var existingNonFungibleIdData = vaultProcessor.TempGetExistingNonFungibleIdDefinitions();
 
             foreach (var e in nonFungibleIdChanges)
             {
-                var nonFungibleIdData = existingNonFungibleIdData.GetOrAdd(
-                    new NonFungibleIdLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId),
-                    _ =>
-                {
-                    var ret = new NonFungibleIdDefinition
-                    {
-                        Id = sequences.NonFungibleIdDefinitionSequence++,
-                        FromStateVersion = e.StateVersion,
-                        NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
-                        NonFungibleId = e.NonFungibleId,
-                    };
+                var nonFungibleIdData = existingNonFungibleIdData[new NonFungibleIdDefinitionDbLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId)];
 
-                    nonFungibleIdDefinitionToAdd.Add(ret);
-
-                    return ret;
-                });
-
-                nonFungibleIdsMutableDataHistoryToAdd.Add(
-                    new NonFungibleIdDataHistory
+                nonFungibleIdsMutableDataHistoryToAdd.Add(new NonFungibleIdDataHistory
                 {
                     Id = sequences.NonFungibleIdDataHistorySequence++,
                     FromStateVersion = e.StateVersion,
@@ -1345,7 +1335,7 @@ UPDATE pending_transactions
                             vaultHistory = previous;
                         }
 
-                        var nonFungibleIdDataId = existingNonFungibleIdData[new NonFungibleIdLookup(nfe.ReferencedResource.DatabaseId, nfe.NonFungibleId)].Id;
+                        var nonFungibleIdDataId = existingNonFungibleIdData[new NonFungibleIdDefinitionDbLookup(nfe.ReferencedResource.DatabaseId, nfe.NonFungibleId)].Id;
 
                         if (nfe.IsWithdrawal)
                         {
@@ -1495,7 +1485,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityVaultHistory(vaultHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdDefinition(nonFungibleIdDefinitionToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
@@ -1518,6 +1507,7 @@ UPDATE pending_transactions
             rowsInserted += await accountLockerProcessor.SaveEntities();
             rowsInserted += await standardMetadataProcessor.SaveEntities();
             rowsInserted += await entityResourceProcessor.SaveEntities();
+            rowsInserted += await vaultProcessor.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);
 

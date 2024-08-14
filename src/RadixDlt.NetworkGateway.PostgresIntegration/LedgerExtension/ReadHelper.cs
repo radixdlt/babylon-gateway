@@ -445,7 +445,10 @@ SELECT
     nextval('entity_resource_vault_entry_definition_id_seq') AS EntityResourceVaultEntryDefinitionSequence,
     nextval('entity_resource_totals_history_id_seq') AS EntityResourceTotalsHistorySequence,
     nextval('entity_resource_vault_totals_history_id_seq') AS EntityResourceVaultTotalsHistorySequence,
-    nextval('entity_resource_balance_history_id_seq') AS EntityResourceBalanceHistorySequence
+    nextval('entity_resource_balance_history_id_seq') AS EntityResourceBalanceHistorySequence,
+    nextval('vault_balance_history_id_seq') AS VaultBalanceHistorySequence,
+    nextval('non_fungible_vault_entry_definition_id_seq') AS NonFungibleVaultEntryDefinitionSequence,
+    nextval('non_fungible_vault_entry_history_id_seq') AS NonFungibleVaultEntryHistorySequence
 ",
             cancellationToken: token);
 

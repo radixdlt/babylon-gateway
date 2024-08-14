@@ -718,6 +718,36 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "non_fungible_vault_entry_definition",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    vault_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    non_fungible_id_definition_id = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_non_fungible_vault_entry_definition", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "non_fungible_vault_entry_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    non_fungible_vault_entry_definition_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_non_fungible_vault_entry_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "package_blueprint_aggregate_history",
                 columns: table => new
                 {
@@ -953,6 +983,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_validator_public_key_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "vault_balance_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    vault_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_vault_balance_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1300,6 +1345,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_non_fungible_vault_entry_definition_vault_entity_id_from_st~",
+                table: "non_fungible_vault_entry_definition",
+                columns: new[] { "vault_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_non_fungible_vault_entry_history_non_fungible_vault_entry_d~",
+                table: "non_fungible_vault_entry_history",
+                columns: new[] { "non_fungible_vault_entry_definition_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_package_blueprint_aggregate_history_package_entity_id_from_~",
                 table: "package_blueprint_aggregate_history",
                 columns: new[] { "package_entity_id", "from_state_version" });
@@ -1410,6 +1465,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_validator_public_key_history_validator_entity_id_key_type_k~",
                 table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "key_type", "key" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_vault_balance_history_vault_entity_id_from_state_version",
+                table: "vault_balance_history",
+                columns: new[] { "vault_entity_id", "from_state_version" });
         }
 
         /// <inheritdoc />
@@ -1518,6 +1578,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "non_fungible_schema_history");
 
             migrationBuilder.DropTable(
+                name: "non_fungible_vault_entry_definition");
+
+            migrationBuilder.DropTable(
+                name: "non_fungible_vault_entry_history");
+
+            migrationBuilder.DropTable(
                 name: "package_blueprint_aggregate_history");
 
             migrationBuilder.DropTable(
@@ -1555,6 +1621,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "validator_cumulative_emission_history");
+
+            migrationBuilder.DropTable(
+                name: "vault_balance_history");
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");

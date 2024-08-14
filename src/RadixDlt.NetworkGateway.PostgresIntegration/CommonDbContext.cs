@@ -186,6 +186,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<VaultBalanceHistory> VaultBalanceHistory => Set<VaultBalanceHistory>();
 
+    public DbSet<NonFungibleVaultEntryDefinition> NonFungibleVaultEntryDefinition => Set<NonFungibleVaultEntryDefinition>();
+
+    public DbSet<NonFungibleVaultEntryHistory> NonFungibleVaultEntryHistory => Set<NonFungibleVaultEntryHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -439,6 +443,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<EntityResourceVaultEntryDefinition>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<NonFungibleVaultEntryDefinition>()
+            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -676,5 +684,9 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<VaultBalanceHistory>()
             .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<NonFungibleVaultEntryHistory>()
+            .HasIndex(e => new { e.NonFungibleVaultEntryDefinitionId, e.FromStateVersion });
     }
 }

@@ -73,6 +73,8 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
     public const string StringForNaN = "NaN";
 
     public static readonly TokenAmount Zero;
+    public static readonly TokenAmount One;
+    public static readonly TokenAmount MinusOne;
     public static readonly TokenAmount NaN;
     public static readonly TokenAmount OneFullUnit;
 
@@ -85,6 +87,8 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
         _divisor = BigInteger.Pow(10, DecimalPrecision);
 
         Zero = new TokenAmount(0);
+        One = FromDecimalString("1");
+        MinusOne = FromDecimalString("-1");
         NaN = new TokenAmount(true);
         OneFullUnit = new TokenAmount(_divisor);
     }

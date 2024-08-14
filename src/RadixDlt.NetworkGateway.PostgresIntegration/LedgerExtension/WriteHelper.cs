@@ -572,35 +572,6 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyNonFungibleIdDefinition(ICollection<NonFungibleIdDefinition> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY non_fungible_id_definition (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleId, NpgsqlDbType.Text, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdDefinition), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyNonFungibleIdDataHistory(ICollection<NonFungibleIdDataHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -787,7 +758,10 @@ SELECT
     setval('entity_resource_vault_entry_definition_id_seq', @entityResourceVaultEntryDefinitionSequence),
     setval('entity_resource_totals_history_id_seq', @entityResourceTotalsHistorySequence),
     setval('entity_resource_vault_totals_history_id_seq', @entityResourceVaultTotalsHistorySequence),
-    setval('entity_resource_balance_history_id_seq', @entityResourceBalanceHistorySequence)
+    setval('entity_resource_balance_history_id_seq', @entityResourceBalanceHistorySequence),
+    setval('vault_balance_history_id_seq', @vaultBalanceHistorySequence),
+    setval('non_fungible_vault_entry_definition_id_seq', @nonFungibleVaultEntryDefinitionSequence),
+    setval('non_fungible_vault_entry_history_id_seq', @nonFungibleVaultEntryHistorySequence)
 ",
             parameters: new
             {
@@ -837,6 +811,9 @@ SELECT
                 entityResourceTotalsHistorySequence = sequences.EntityResourceTotalsHistorySequence,
                 entityResourceVaultTotalsHistorySequence = sequences.EntityResourceVaultTotalsHistorySequence,
                 entityResourceBalanceHistorySequence = sequences.EntityResourceBalanceHistorySequence,
+                vaultBalanceHistorySequence = sequences.VaultBalanceHistorySequence,
+                nonFungibleVaultEntryDefinitionSequence = sequences.NonFungibleVaultEntryDefinitionSequence,
+                nonFungibleVaultEntryHistorySequence = sequences.NonFungibleVaultEntryHistorySequence,
             },
             cancellationToken: token);
 

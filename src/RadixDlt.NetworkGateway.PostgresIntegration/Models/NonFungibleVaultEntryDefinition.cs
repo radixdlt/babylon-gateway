@@ -62,14 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("vault_balance_history")]
-internal class VaultBalanceHistory
+[Table("non_fungible_vault_entry_definition")]
+internal class NonFungibleVaultEntryDefinition
 {
     [Key]
     [Column("id")]
@@ -81,6 +80,6 @@ internal class VaultBalanceHistory
     [Column("vault_entity_id")]
     public long VaultEntityId { get; set; }
 
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
+    [Column("non_fungible_id_definition_id")]
+    public long NonFungibleIdDefinitionId { get; set; }
 }

@@ -157,4 +157,10 @@ internal class SequencesHolder
     public long EntityResourceVaultTotalsHistorySequence { get; set; }
 
     public long EntityResourceBalanceHistorySequence { get; set; }
+
+    public long VaultBalanceHistorySequence { get; set; }
+
+    public long NonFungibleVaultEntryDefinitionSequence { get; set; }
+
+    public long NonFungibleVaultEntryHistorySequence { get; set; }
 }
