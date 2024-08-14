@@ -906,7 +906,7 @@ UPDATE pending_transactions
                         }
 
                         entityStateProcessor.VisitUpsert(substate, referencedEntity, stateVersion);
-                        entityMetadataProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        entityMetadataProcessor.VisitUpsert(substate, referencedEntity, stateVersion);
                         entitySchemaProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         componentMethodRoyaltyProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         entityRoleAssignmentProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);

@@ -74,6 +74,8 @@ public interface IEntityStateQuerier
 {
     public sealed record PageRequest(EntityAddress Address, int Offset, int Limit);
 
+    public sealed record MetadataPageRequest(EntityAddress Address, GatewayModel.IdBoundaryCoursor? Cursor, int Limit);
+
     public sealed record AccountLockerPageRequest(AccountLockerAddress AccountLockerAddress, GatewayModel.StateAccountLockerAccountResourcesCursor? Cursor, int Limit);
 
     public sealed record ResourceVaultsPageRequest(EntityAddress Address, EntityAddress ResourceAddress, int Offset, int Limit);
@@ -86,7 +88,7 @@ public interface IEntityStateQuerier
         CancellationToken token = default);
 
     Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(
-        PageRequest request,
+        MetadataPageRequest request,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
 

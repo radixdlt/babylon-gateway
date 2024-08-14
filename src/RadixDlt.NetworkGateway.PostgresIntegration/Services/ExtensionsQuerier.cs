@@ -113,8 +113,8 @@ internal class ExtensionsQuerier : IExtensionsQuerier
 
         var totalCount = await _dbContext.ResourceHolders.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
 
-        var entriesAndOneMore = await _dapperWrapper.ToList<ResourceHoldersViewModel>(
-            _dbContext,
+        var entriesAndOneMore = await _dapperWrapper.ToListAsync<ResourceHoldersViewModel>(
+            _dbContext.Database.GetDbConnection(),
             @"
 SELECT
     ro.id as Id,

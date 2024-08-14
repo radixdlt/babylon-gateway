@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
@@ -121,8 +122,8 @@ internal class StandardMetadataResolver
             return ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
         }
 
-        var partiallyValidatedEntries = await _dapperWrapper.ToList<PartiallyValidatedTwoWayLink>(
-            _dbContext,
+        var partiallyValidatedEntries = await _dapperWrapper.ToListAsync<PartiallyValidatedTwoWayLink>(
+            _dbContext.Database.GetDbConnection(),
             @"
 WITH
     variables (entity_id) AS (SELECT UNNEST(@entityIds)),

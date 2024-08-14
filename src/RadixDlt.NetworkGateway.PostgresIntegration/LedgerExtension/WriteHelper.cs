@@ -644,7 +644,9 @@ internal class WriteHelper : IWriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY non_fungible_id_location_history (id, from_state_version, non_fungible_id_definition_id, vault_entity_id) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync(
+                "COPY non_fungible_id_location_history (id, from_state_version, non_fungible_id_definition_id, vault_entity_id) FROM STDIN (FORMAT BINARY)",
+                token);
 
         foreach (var e in entities)
         {
@@ -801,8 +803,9 @@ SELECT
     setval('account_resource_preference_rule_aggregate_history_id_seq', @accountResourcePreferenceRuleAggregateHistorySequence),
     setval('state_history_id_seq', @stateHistorySequence),
     setval('entities_id_seq', @entitySequence),
-    setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
-    setval('entity_metadata_aggregate_history_id_seq', @entityMetadataAggregateHistorySequence),
+    setval('entity_metadata_entry_history_id_seq', @entityMetadataEntryHistorySequence),
+    setval('entity_metadata_entry_definition_id_seq', @entityMetadataEntryDefinitionSequence),
+    setval('entity_metadata_totals_history_id_seq', @entityMetadataTotalsHistorySequence),
     setval('entity_resource_aggregated_vaults_history_id_seq', @entityResourceAggregatedVaultsHistorySequence),
     setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
     setval('entity_resource_vault_aggregate_history_id_seq', @entityResourceVaultAggregateHistorySequence),
@@ -846,8 +849,9 @@ SELECT
                 accountResourcePreferenceRuleAggregateHistorySequence = sequences.AccountResourcePreferenceRuleAggregateHistorySequence,
                 stateHistorySequence = sequences.StateHistorySequence,
                 entitySequence = sequences.EntitySequence,
-                entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
-                entityMetadataAggregateHistorySequence = sequences.EntityMetadataAggregateHistorySequence,
+                entityMetadataEntryHistorySequence = sequences.EntityMetadataEntryHistorySequence,
+                entityMetadataEntryDefinitionSequence = sequences.EntityMetadataEntryDefinitionSequence,
+                entityMetadataTotalsHistorySequence = sequences.EntityMetadataTotalsHistorySequence,
                 entityResourceAggregatedVaultsHistorySequence = sequences.EntityResourceAggregatedVaultsHistorySequence,
                 entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
                 entityResourceVaultAggregateHistorySequence = sequences.EntityResourceVaultAggregateHistorySequence,
