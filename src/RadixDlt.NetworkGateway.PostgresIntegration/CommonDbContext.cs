@@ -184,6 +184,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityResourceVaultTotalsHistory> EntityResourceVaultTotalsHistory => Set<EntityResourceVaultTotalsHistory>();
 
+    public DbSet<VaultBalanceHistory> VaultBalanceHistory => Set<VaultBalanceHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -670,5 +672,9 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<EntityResourceVaultTotalsHistory>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<VaultBalanceHistory>()
+            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
     }
 }
