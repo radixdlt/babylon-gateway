@@ -124,13 +124,13 @@ FROM resource_owners ro
 INNER JOIN entities e
 ON ro.entity_id = e.id
 WHERE ro.resource_entity_id = @resourceEntityId
-  AND (@balanceBoundary is null OR ((ro.balance, ro.id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)))
+  AND (ro.balance, ro.id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)
 ORDER BY (ro.balance, ro.entity_id) DESC
 LIMIT @limit",
             new
             {
                 resourceEntityId = resourceEntity.Id,
-                balanceBoundary = cursor?.BalanceBoundary,
+                balanceBoundary = cursor?.BalanceBoundary ?? TokenAmount.MaxValue.ToString(),
                 idBoundary = cursor?.IdBoundary ?? long.MaxValue,
                 limit = limit + 1,
             },
