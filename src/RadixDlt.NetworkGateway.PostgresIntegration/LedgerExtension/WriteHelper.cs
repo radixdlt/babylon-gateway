@@ -754,7 +754,7 @@ ON COMMIT DROP";
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY tmp_resource_owners (id, entity_id, resource_entity_id, balance) FROM STDIN (FORMAT BINARY)",
+                "COPY tmp_resource_owners (id, entity_id, resource_entity_id, balance, last_updated_at_state_version) FROM STDIN (FORMAT BINARY)",
                 token);
 
         foreach (var e in entities)
@@ -764,6 +764,7 @@ ON COMMIT DROP";
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+            await writer.WriteAsync(e.LastUpdatedAtStateVersion, NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -775,8 +776,8 @@ MERGE INTO resource_owners ro
 USING tmp_resource_owners tmp
 ON ro.entity_id = tmp.entity_id AND ro.resource_entity_id = tmp.resource_entity_id
 WHEN MATCHED AND tmp.balance = 0 THEN DELETE
-WHEN MATCHED AND tmp.balance != 0 THEN UPDATE SET balance = tmp.balance
-WHEN NOT MATCHED AND tmp.balance != 0 THEN INSERT VALUES(id, entity_id, resource_entity_id, balance);";
+WHEN MATCHED AND tmp.balance != 0 THEN UPDATE SET balance = tmp.balance, last_updated_at_state_version = tmp.last_updated_at_state_version
+WHEN NOT MATCHED AND tmp.balance != 0 THEN INSERT VALUES(id, entity_id, resource_entity_id, balance, last_updated_at_state_version);";
 
         await mergeCommand.ExecuteNonQueryAsync(token);
 

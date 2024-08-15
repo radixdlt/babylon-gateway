@@ -3169,11 +3169,15 @@ components:
       required:
         - type
         - owner_address
+        - last_updated_at_state_version
       properties:
         type:
           $ref: "#/components/schemas/ResourceOwnersResourceType"
         owner_address:
           $ref: "#/components/schemas/Address"
+        last_updated_at_state_version:
+          type: integer
+          format: int64
       discriminator:
         propertyName: type
         mapping:

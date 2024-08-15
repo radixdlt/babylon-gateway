@@ -110,7 +110,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="type">type (required) (default to ResourceOwnersResourceType.FungibleResource).</param>
         /// <param name="ownerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public ResourceOwnersCollectionFungibleResourceItem(string amount = default(string), ResourceOwnersResourceType type = ResourceOwnersResourceType.FungibleResource, string ownerAddress = default(string)) : base(type, ownerAddress)
+        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
+        public ResourceOwnersCollectionFungibleResourceItem(string amount = default(string), ResourceOwnersResourceType type = ResourceOwnersResourceType.FungibleResource, string ownerAddress = default(string), long lastUpdatedAtStateVersion = default(long)) : base(type, ownerAddress, lastUpdatedAtStateVersion)
         {
             // to ensure "amount" is required (not null)
             if (amount == null)

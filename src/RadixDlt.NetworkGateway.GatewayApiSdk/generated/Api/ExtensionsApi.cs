@@ -95,7 +95,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Resource Owners Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at current state version, it is not possible to browse historical data. Because of that it is not possible to offer stable pagination as data constantly changes. Values might change which might result in gaps or some entries being returned twice. 
+        /// Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceOwnersRequest"></param>
@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Resource Owners Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at current state version, it is not possible to browse historical data. Because of that it is not possible to offer stable pagination as data constantly changes. Values might change which might result in gaps or some entries being returned twice. 
+        /// Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceOwnersRequest"></param>
@@ -125,7 +125,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Resource Owners Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at current state version, it is not possible to browse historical data. Because of that it is not possible to offer stable pagination as data constantly changes. Values might change which might result in gaps or some entries being returned twice. 
+        /// Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceOwnersRequest"></param>
@@ -137,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Resource Owners Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at current state version, it is not possible to browse historical data. Because of that it is not possible to offer stable pagination as data constantly changes. Values might change which might result in gaps or some entries being returned twice. 
+        /// Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceOwnersRequest"></param>
@@ -358,7 +358,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at current state version, it is not possible to browse historical data. Because of that it is not possible to offer stable pagination as data constantly changes. Values might change which might result in gaps or some entries being returned twice. 
+        /// Get Resource Owners Page Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceOwnersRequest"></param>
@@ -370,7 +370,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at current state version, it is not possible to browse historical data. Because of that it is not possible to offer stable pagination as data constantly changes. Values might change which might result in gaps or some entries being returned twice. 
+        /// Get Resource Owners Page Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceOwnersRequest"></param>
@@ -414,7 +414,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at current state version, it is not possible to browse historical data. Because of that it is not possible to offer stable pagination as data constantly changes. Values might change which might result in gaps or some entries being returned twice. 
+        /// Get Resource Owners Page Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceOwnersRequest"></param>
@@ -427,7 +427,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Owners Page Returns list of all owners of given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at current state version, it is not possible to browse historical data. Because of that it is not possible to offer stable pagination as data constantly changes. Values might change which might result in gaps or some entries being returned twice. 
+        /// Get Resource Owners Page Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceOwnersRequest"></param>

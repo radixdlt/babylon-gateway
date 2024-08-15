@@ -1459,9 +1459,13 @@ UPDATE pending_transactions
                         EntityId = x.EntityId,
                         ResourceEntityId = x.ResourceEntityId,
                         Balance = balance,
+                        LastUpdatedAtStateVersion = x.FromStateVersion,
                     },
-                    existing => existing.Balance = balance
-                );
+                    existing =>
+                    {
+                        existing.Balance = balance;
+                        existing.LastUpdatedAtStateVersion = x.FromStateVersion;
+                    });
             }
 
             var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges

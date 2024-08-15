@@ -110,7 +110,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nonFungibleIdsCount">nonFungibleIdsCount (required).</param>
         /// <param name="type">type (required) (default to ResourceOwnersResourceType.NonFungibleResource).</param>
         /// <param name="ownerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public ResourceOwnersCollectionNonFungibleResourceItem(long nonFungibleIdsCount = default(long), ResourceOwnersResourceType type = ResourceOwnersResourceType.NonFungibleResource, string ownerAddress = default(string)) : base(type, ownerAddress)
+        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
+        public ResourceOwnersCollectionNonFungibleResourceItem(long nonFungibleIdsCount = default(long), ResourceOwnersResourceType type = ResourceOwnersResourceType.NonFungibleResource, string ownerAddress = default(string), long lastUpdatedAtStateVersion = default(long)) : base(type, ownerAddress, lastUpdatedAtStateVersion)
         {
             this.NonFungibleIdsCount = nonFungibleIdsCount;
         }

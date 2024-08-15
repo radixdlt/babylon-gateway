@@ -117,7 +117,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="type">type (required).</param>
         /// <param name="ownerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public ResourceOwnersCollectionItem(ResourceOwnersResourceType type = default(ResourceOwnersResourceType), string ownerAddress = default(string))
+        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
+        public ResourceOwnersCollectionItem(ResourceOwnersResourceType type = default(ResourceOwnersResourceType), string ownerAddress = default(string), long lastUpdatedAtStateVersion = default(long))
         {
             this.Type = type;
             // to ensure "ownerAddress" is required (not null)
@@ -126,6 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("ownerAddress is a required property for ResourceOwnersCollectionItem and cannot be null");
             }
             this.OwnerAddress = ownerAddress;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
@@ -134,6 +136,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "owner_address", IsRequired = true, EmitDefaultValue = true)]
         public string OwnerAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LastUpdatedAtStateVersion
+        /// </summary>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,6 +153,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class ResourceOwnersCollectionItem {\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("  OwnerAddress: ").Append(OwnerAddress).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,6 +197,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.OwnerAddress == input.OwnerAddress ||
                     (this.OwnerAddress != null &&
                     this.OwnerAddress.Equals(input.OwnerAddress))
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -205,6 +218,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.OwnerAddress.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

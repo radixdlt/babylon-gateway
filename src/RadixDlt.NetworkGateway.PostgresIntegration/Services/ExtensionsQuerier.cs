@@ -82,7 +82,7 @@ internal class ExtensionsQuerier : IExtensionsQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IDapperWrapper _dapperWrapper;
 
-    private record ResourceOwnersViewModel(long Id, EntityAddress EntityAddress, string Balance);
+    private record ResourceOwnersViewModel(long Id, EntityAddress EntityAddress, string Balance, long LastUpdatedAtStateVersion);
 
     public ExtensionsQuerier(ReadOnlyDbContext dbContext, IDapperWrapper dapperWrapper)
     {
@@ -119,7 +119,8 @@ internal class ExtensionsQuerier : IExtensionsQuerier
 SELECT
     ro.id as Id,
     e.address AS EntityAddress,
-    CAST(ro.balance AS text) AS Balance
+    CAST(ro.balance AS text) AS Balance,
+    ro.last_updated_at_state_version AS LastUpdatedAtStateVersion
 FROM resource_owners ro
 INNER JOIN entities e
 ON ro.entity_id = e.id
@@ -152,7 +153,8 @@ LIMIT @limit",
                     .Select(
                         x => (GatewayModel.ResourceOwnersCollectionItem)new GatewayModel.ResourceOwnersCollectionFungibleResourceItem(
                             amount: TokenAmount.FromSubUnitsString(x.Balance).ToString(),
-                            ownerAddress: x.EntityAddress)
+                            ownerAddress: x.EntityAddress,
+                            lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion)
                     )
                     .ToList();
 
@@ -166,7 +168,8 @@ LIMIT @limit",
                     .Select(
                         x => (GatewayModel.ResourceOwnersCollectionItem)new GatewayModel.ResourceOwnersCollectionNonFungibleResourceItem(
                             nonFungibleIdsCount: long.Parse(TokenAmount.FromSubUnitsString(x.Balance).ToString()),
-                            ownerAddress: x.EntityAddress)
+                            ownerAddress: x.EntityAddress,
+                            lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion)
                     )
                     .ToList();
 

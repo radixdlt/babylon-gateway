@@ -62,14 +62,14 @@
  * permissions under this License.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
 
 #nullable disable
 
@@ -762,7 +762,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false)
+                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    last_updated_at_state_version = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {

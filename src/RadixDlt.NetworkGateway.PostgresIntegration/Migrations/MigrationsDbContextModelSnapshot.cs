@@ -1572,6 +1572,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("entity_id");
 
+                    b.Property<long>("LastUpdatedAtStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_updated_at_state_version");
+
                     b.Property<long>("ResourceEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("resource_entity_id");

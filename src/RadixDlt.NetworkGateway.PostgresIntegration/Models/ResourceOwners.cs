@@ -83,4 +83,7 @@ internal class ResourceOwners
 
     [Column("balance")]
     public TokenAmount Balance { get; set; }
+
+    [Column("last_updated_at_state_version")]
+    public long LastUpdatedAtStateVersion { get; set; }
 }
