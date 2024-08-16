@@ -130,9 +130,9 @@ internal class DefaultEntityHandler : IEntityHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
         var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
 
-        var pageRequest = new IEntityStateQuerier.PageRequest(
+        var pageRequest = new IEntityStateQuerier.PageRequest2(
             Address: (EntityAddress)request.Address,
-            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Cursor: GatewayModel.StateVersionIdCursor.FromCursorString(request.Cursor),
             Limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage)
         );
 
@@ -143,10 +143,10 @@ internal class DefaultEntityHandler : IEntityHandler
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        var pageRequest = new IEntityStateQuerier.ResourceVaultsPageRequest(
+        var pageRequest = new IEntityStateQuerier.ResourceVaultsPageRequest2(
             Address: (EntityAddress)request.Address,
             ResourceAddress: (EntityAddress)request.ResourceAddress,
-            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Cursor: GatewayModel.StateVersionIdCursor.FromCursorString(request.Cursor),
             Limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage)
         );
 

@@ -74,7 +74,11 @@ public interface IEntityStateQuerier
 {
     public sealed record PageRequest(EntityAddress Address, int Offset, int Limit);
 
+    public sealed record PageRequest2(EntityAddress Address, GatewayModel.StateVersionIdCursor Cursor, int Limit);
+
     public sealed record AccountLockerPageRequest(AccountLockerAddress AccountLockerAddress, GatewayModel.StateAccountLockerAccountResourcesCursor? Cursor, int Limit);
+
+    public sealed record ResourceVaultsPageRequest2(EntityAddress Address, EntityAddress ResourceAddress, GatewayModel.StateVersionIdCursor Cursor, int Limit);
 
     public sealed record ResourceVaultsPageRequest(EntityAddress Address, EntityAddress ResourceAddress, int Offset, int Limit);
 
@@ -96,14 +100,14 @@ public interface IEntityStateQuerier
         CancellationToken token = default);
 
     Task<GatewayModel.StateEntityFungiblesPageResponse> EntityFungibleResourcesPage(
-        PageRequest pageRequest,
+        PageRequest2 pageRequest,
         bool aggregatePerVault,
         GatewayModel.StateEntityFungiblesPageRequestOptIns optIns,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
 
     Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaults(
-        ResourceVaultsPageRequest request,
+        ResourceVaultsPageRequest2 request,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
 
