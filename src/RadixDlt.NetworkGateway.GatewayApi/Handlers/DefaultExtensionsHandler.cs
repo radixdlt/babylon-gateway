@@ -80,7 +80,7 @@ internal class DefaultExtensionsHandler(IExtensionsQuerier extensionsQuerier, IO
 
         return await extensionsQuerier.ResourceHolders(
             (EntityAddress)request.ResourceAddress,
-            endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
+            endpointConfiguration.Value.ResolveResourceHoldersPageSize(request.LimitPerPage),
             cursor,
             token);
     }

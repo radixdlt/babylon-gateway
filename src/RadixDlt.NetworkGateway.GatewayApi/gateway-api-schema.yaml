@@ -71,7 +71,7 @@ tags:
       - **Stream** (`/transaction/*`) - For reading committed transactions.
       - **State** (`/state/*`) - For reading the current or past ledger state of the network.
       - **Statistics** (`/statistics/*`) - For calculating particular statistics against the current or past ledger state of the network.
-      - **Extensions** (`/Extensions/*`) - For additional endpoints that do not fit into other categories. They do not support historical browsing.
+      - **Extensions** (`/Extensions/*`) - For endpoints that do not fit into other categories, for example, they may not support historic state.
   - name: Concepts
     x-displayName: Concepts
     x-traitTag: true # Don't display endpoints under this tag
@@ -1199,7 +1199,7 @@ tags:
     description: Calculate particular statistics based on current or historic ledger state.
   - name: Extensions
     x-displayName: Extensions Endpoints
-    description: Additional endpoints that do not fit into other categories.
+    description:  Endpoints that do not fit into other categories, for example, those which provide custom aggregation or indexing, or don't support historic state.
 
 paths:
   "/status/gateway-status":
@@ -1910,9 +1910,11 @@ paths:
       operationId: ResourceHoldersPage
       summary: Get Resource Holders Page
       description: |
-        Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending.
-        This endpoint operates only at the current state version, it is not possible to browse historical data.
-        Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice.
+        A paginated endpoint to discover which global entities hold the most of a given resource.
+        More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances).
+        This endpoint operates only at the **current state version**, it is not possible to browse historical data.
+        Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.
+        The default maximum page size is 1000.
       tags:
         - Extensions
       requestBody:
