@@ -4996,6 +4996,9 @@ components:
           properties:
             resource_address:
               $ref: "#/components/schemas/Address"
+      example:
+        limit_per_page: 100
+        resource_address: "<resource-address>"
 
     ResourceHoldersResponse:
       allOf:
