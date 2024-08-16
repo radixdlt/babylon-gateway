@@ -84,43 +84,59 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersCollectionNonFungibleResourceItem
+    /// ResourceHoldersResponse
     /// </summary>
-    [DataContract(Name = "ResourceOwnersCollectionNonFungibleResourceItem")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionFungibleResourceItem), "FungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionNonFungibleResourceItem), "NonFungibleResource")]
-    public partial class ResourceOwnersCollectionNonFungibleResourceItem : ResourceOwnersCollectionItem, IEquatable<ResourceOwnersCollectionNonFungibleResourceItem>
+    [DataContract(Name = "ResourceHoldersResponse")]
+    public partial class ResourceHoldersResponse : IEquatable<ResourceHoldersResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionNonFungibleResourceItem" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceOwnersCollectionNonFungibleResourceItem() { }
+        protected ResourceHoldersResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionNonFungibleResourceItem" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersResponse" /> class.
         /// </summary>
-        /// <param name="nonFungibleIdsCount">nonFungibleIdsCount (required).</param>
-        /// <param name="type">type (required) (default to ResourceOwnersResourceType.NonFungibleResource).</param>
-        /// <param name="ownerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
-        public ResourceOwnersCollectionNonFungibleResourceItem(long nonFungibleIdsCount = default(long), ResourceOwnersResourceType type = ResourceOwnersResourceType.NonFungibleResource, string ownerAddress = default(string), long lastUpdatedAtStateVersion = default(long)) : base(type, ownerAddress, lastUpdatedAtStateVersion)
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
+        /// <param name="items">items (required).</param>
+        public ResourceHoldersResponse(long? totalCount = default(long?), string nextCursor = default(string), List<ResourceHoldersCollectionItem> items = default(List<ResourceHoldersCollectionItem>))
         {
-            this.NonFungibleIdsCount = nonFungibleIdsCount;
+            // to ensure "items" is required (not null)
+            if (items == null)
+            {
+                throw new ArgumentNullException("items is a required property for ResourceHoldersResponse and cannot be null");
+            }
+            this.Items = items;
+            this.TotalCount = totalCount;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIdsCount
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
         /// </summary>
-        [DataMember(Name = "non_fungible_ids_count", IsRequired = true, EmitDefaultValue = true)]
-        public long NonFungibleIdsCount { get; set; }
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
+
+        /// <summary>
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Items
+        /// </summary>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<ResourceHoldersCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,9 +145,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersCollectionNonFungibleResourceItem {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NonFungibleIdsCount: ").Append(NonFungibleIdsCount).Append("\n");
+            sb.Append("class ResourceHoldersResponse {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -140,7 +157,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -152,24 +169,36 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceOwnersCollectionNonFungibleResourceItem);
+            return this.Equals(input as ResourceHoldersResponse);
         }
 
         /// <summary>
-        /// Returns true if ResourceOwnersCollectionNonFungibleResourceItem instances are equal
+        /// Returns true if ResourceHoldersResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceOwnersCollectionNonFungibleResourceItem to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersCollectionNonFungibleResourceItem input)
+        public bool Equals(ResourceHoldersResponse input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.NonFungibleIdsCount == input.NonFungibleIdsCount ||
-                    this.NonFungibleIdsCount.Equals(input.NonFungibleIdsCount)
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
+                ) && 
+                (
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
+                ) && 
+                (
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -181,8 +210,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.NonFungibleIdsCount.GetHashCode();
+                int hashCode = 41;
+                if (this.TotalCount != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                }
+                if (this.NextCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                }
+                if (this.Items != null)
+                {
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                }
                 return hashCode;
             }
         }

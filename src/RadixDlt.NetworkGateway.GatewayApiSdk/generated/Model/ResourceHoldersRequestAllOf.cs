@@ -90,35 +90,26 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersCollectionAllOf
+    /// ResourceHoldersRequestAllOf
     /// </summary>
-    [DataContract(Name = "ResourceOwnersCollection_allOf")]
-    public partial class ResourceOwnersCollectionAllOf : IEquatable<ResourceOwnersCollectionAllOf>
+    [DataContract(Name = "ResourceHoldersRequest_allOf")]
+    public partial class ResourceHoldersRequestAllOf : IEquatable<ResourceHoldersRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersRequestAllOf" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected ResourceOwnersCollectionAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionAllOf" /> class.
-        /// </summary>
-        /// <param name="items">items (required).</param>
-        public ResourceOwnersCollectionAllOf(List<ResourceOwnersCollectionItem> items = default(List<ResourceOwnersCollectionItem>))
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address..</param>
+        public ResourceHoldersRequestAllOf(string resourceAddress = default(string))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
-            {
-                throw new ArgumentNullException("items is a required property for ResourceOwnersCollectionAllOf and cannot be null");
-            }
-            this.Items = items;
+            this.ResourceAddress = resourceAddress;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<ResourceOwnersCollectionItem> Items { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +118,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersCollectionAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class ResourceHoldersRequestAllOf {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +140,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceOwnersCollectionAllOf);
+            return this.Equals(input as ResourceHoldersRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if ResourceOwnersCollectionAllOf instances are equal
+        /// Returns true if ResourceHoldersRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceOwnersCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersCollectionAllOf input)
+        public bool Equals(ResourceHoldersRequestAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +156,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -181,9 +171,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

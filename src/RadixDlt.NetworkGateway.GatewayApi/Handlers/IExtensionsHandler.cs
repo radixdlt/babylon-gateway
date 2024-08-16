@@ -70,5 +70,5 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface IExtensionsHandler
 {
-    Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(GatewayModel.ResourceOwnersRequest request, CancellationToken token);
+    Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token);
 }

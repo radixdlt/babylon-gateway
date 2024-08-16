@@ -90,53 +90,30 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersCollection
+    /// ResourceHoldersCollectionNonFungibleResourceItemAllOf
     /// </summary>
-    [DataContract(Name = "ResourceOwnersCollection")]
-    public partial class ResourceOwnersCollection : IEquatable<ResourceOwnersCollection>
+    [DataContract(Name = "ResourceHoldersCollectionNonFungibleResourceItem_allOf")]
+    public partial class ResourceHoldersCollectionNonFungibleResourceItemAllOf : IEquatable<ResourceHoldersCollectionNonFungibleResourceItemAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollection" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionNonFungibleResourceItemAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceOwnersCollection() { }
+        protected ResourceHoldersCollectionNonFungibleResourceItemAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollection" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionNonFungibleResourceItemAllOf" /> class.
         /// </summary>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
-        /// <param name="items">items (required).</param>
-        public ResourceOwnersCollection(long? totalCount = default(long?), string nextCursor = default(string), List<ResourceOwnersCollectionItem> items = default(List<ResourceOwnersCollectionItem>))
+        /// <param name="nonFungibleIdsCount">nonFungibleIdsCount (required).</param>
+        public ResourceHoldersCollectionNonFungibleResourceItemAllOf(long nonFungibleIdsCount = default(long))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
-            {
-                throw new ArgumentNullException("items is a required property for ResourceOwnersCollection and cannot be null");
-            }
-            this.Items = items;
-            this.TotalCount = totalCount;
-            this.NextCursor = nextCursor;
+            this.NonFungibleIdsCount = nonFungibleIdsCount;
         }
 
         /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// Gets or Sets NonFungibleIdsCount
         /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
-
-        /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Items
-        /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<ResourceOwnersCollectionItem> Items { get; set; }
+        [DataMember(Name = "non_fungible_ids_count", IsRequired = true, EmitDefaultValue = true)]
+        public long NonFungibleIdsCount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +122,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersCollection {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class ResourceHoldersCollectionNonFungibleResourceItemAllOf {\n");
+            sb.Append("  NonFungibleIdsCount: ").Append(NonFungibleIdsCount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +144,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceOwnersCollection);
+            return this.Equals(input as ResourceHoldersCollectionNonFungibleResourceItemAllOf);
         }
 
         /// <summary>
-        /// Returns true if ResourceOwnersCollection instances are equal
+        /// Returns true if ResourceHoldersCollectionNonFungibleResourceItemAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceOwnersCollection to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersCollectionNonFungibleResourceItemAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersCollection input)
+        public bool Equals(ResourceHoldersCollectionNonFungibleResourceItemAllOf input)
         {
             if (input == null)
             {
@@ -185,20 +160,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
-                (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.NonFungibleIdsCount == input.NonFungibleIdsCount ||
+                    this.NonFungibleIdsCount.Equals(input.NonFungibleIdsCount)
                 );
         }
 
@@ -211,18 +174,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
-                if (this.Items != null)
-                {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.NonFungibleIdsCount.GetHashCode();
                 return hashCode;
             }
         }

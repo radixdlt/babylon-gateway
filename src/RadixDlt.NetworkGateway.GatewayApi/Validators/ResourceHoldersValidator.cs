@@ -62,28 +62,23 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[Table("resource_owners")]
-internal class ResourceOwners
+internal class ResourceHoldersRequestValidator : AbstractValidator<GatewayModel.ResourceHoldersRequest>
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public ResourceHoldersRequestValidator(RadixAddressValidator radixAddressValidator)
+    {
+        RuleFor(x => x.ResourceAddress)
+            .NotNull()
+            .SetValidator(radixAddressValidator);
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
+        RuleFor(x => x.Cursor)
+            .Base64();
 
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
-
-    [Column("last_updated_at_state_version")]
-    public long LastUpdatedAtStateVersion { get; set; }
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0);
+    }
 }

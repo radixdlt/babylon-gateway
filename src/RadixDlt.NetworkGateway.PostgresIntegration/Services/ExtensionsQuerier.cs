@@ -82,7 +82,7 @@ internal class ExtensionsQuerier : IExtensionsQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IDapperWrapper _dapperWrapper;
 
-    private record ResourceOwnersViewModel(long Id, EntityAddress EntityAddress, string Balance, long LastUpdatedAtStateVersion);
+    private record ResourceHoldersViewModel(long Id, EntityAddress EntityAddress, string Balance, long LastUpdatedAtStateVersion);
 
     public ExtensionsQuerier(ReadOnlyDbContext dbContext, IDapperWrapper dapperWrapper)
     {
@@ -90,10 +90,10 @@ internal class ExtensionsQuerier : IExtensionsQuerier
         _dapperWrapper = dapperWrapper;
     }
 
-    public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(
+    public async Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(
         EntityAddress resourceAddress,
         int limit,
-        GatewayModel.ResourceOwnersCursor? cursor,
+        GatewayModel.ResourceHoldersCursor? cursor,
         CancellationToken token = default)
     {
         var resourceEntity = await _dbContext
@@ -111,9 +111,9 @@ internal class ExtensionsQuerier : IExtensionsQuerier
             throw new InvalidEntityException(resourceEntity.Address.ToString());
         }
 
-        var totalCount = await _dbContext.ResourceOwners.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
+        var totalCount = await _dbContext.ResourceHolders.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
 
-        var entriesAndOneMore = await _dapperWrapper.ToList<ResourceOwnersViewModel>(
+        var entriesAndOneMore = await _dapperWrapper.ToList<ResourceHoldersViewModel>(
             _dbContext,
             @"
 SELECT
@@ -121,7 +121,7 @@ SELECT
     e.address AS EntityAddress,
     CAST(ro.balance AS text) AS Balance,
     ro.last_updated_at_state_version AS LastUpdatedAtStateVersion
-FROM resource_owners ro
+FROM resource_holders ro
 INNER JOIN entities e
 ON ro.entity_id = e.id
 WHERE ro.resource_entity_id = @resourceEntityId
@@ -141,7 +141,7 @@ LIMIT @limit",
         var nextPageExists = entriesAndOneMore.Count == limit + 1 && lastElement != null;
 
         var nextCursor = nextPageExists
-            ? new GatewayModel.ResourceOwnersCursor(lastElement!.Id, TokenAmount.FromDecimalString(lastElement.Balance).ToString()).ToCursorString()
+            ? new GatewayModel.ResourceHoldersCursor(lastElement!.Id, TokenAmount.FromDecimalString(lastElement.Balance).ToString()).ToCursorString()
             : null;
 
         switch (resourceEntity)
@@ -151,14 +151,14 @@ LIMIT @limit",
                 var castedResult = entriesAndOneMore
                     .Take(limit)
                     .Select(
-                        x => (GatewayModel.ResourceOwnersCollectionItem)new GatewayModel.ResourceOwnersCollectionFungibleResourceItem(
+                        x => (GatewayModel.ResourceHoldersCollectionItem)new GatewayModel.ResourceHoldersCollectionFungibleResourceItem(
                             amount: TokenAmount.FromSubUnitsString(x.Balance).ToString(),
-                            ownerAddress: x.EntityAddress,
+                            holderAddress: x.EntityAddress,
                             lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion)
                     )
                     .ToList();
 
-                return new GatewayModel.ResourceOwnersResponse(totalCount, nextCursor, castedResult);
+                return new GatewayModel.ResourceHoldersResponse(totalCount, nextCursor, castedResult);
             }
 
             case GlobalNonFungibleResourceEntity:
@@ -166,14 +166,14 @@ LIMIT @limit",
                 var castedResult = entriesAndOneMore
                     .Take(limit)
                     .Select(
-                        x => (GatewayModel.ResourceOwnersCollectionItem)new GatewayModel.ResourceOwnersCollectionNonFungibleResourceItem(
+                        x => (GatewayModel.ResourceHoldersCollectionItem)new GatewayModel.ResourceHoldersCollectionNonFungibleResourceItem(
                             nonFungibleIdsCount: long.Parse(TokenAmount.FromSubUnitsString(x.Balance).ToString()),
-                            ownerAddress: x.EntityAddress,
+                            holderAddress: x.EntityAddress,
                             lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion)
                     )
                     .ToList();
 
-                return new GatewayModel.ResourceOwnersResponse(totalCount, nextCursor, castedResult);
+                return new GatewayModel.ResourceHoldersResponse(totalCount, nextCursor, castedResult);
             }
 
             default:

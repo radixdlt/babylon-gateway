@@ -84,49 +84,50 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersCollectionFungibleResourceItem
+    /// ResourceHoldersRequest
     /// </summary>
-    [DataContract(Name = "ResourceOwnersCollectionFungibleResourceItem")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionFungibleResourceItem), "FungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionNonFungibleResourceItem), "NonFungibleResource")]
-    public partial class ResourceOwnersCollectionFungibleResourceItem : ResourceOwnersCollectionItem, IEquatable<ResourceOwnersCollectionFungibleResourceItem>
+    [DataContract(Name = "ResourceHoldersRequest")]
+    public partial class ResourceHoldersRequest : IEquatable<ResourceHoldersRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionFungibleResourceItem" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersRequest" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected ResourceOwnersCollectionFungibleResourceItem() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionFungibleResourceItem" /> class.
-        /// </summary>
-        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="type">type (required) (default to ResourceOwnersResourceType.FungibleResource).</param>
-        /// <param name="ownerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
-        public ResourceOwnersCollectionFungibleResourceItem(string amount = default(string), ResourceOwnersResourceType type = ResourceOwnersResourceType.FungibleResource, string ownerAddress = default(string), long lastUpdatedAtStateVersion = default(long)) : base(type, ownerAddress, lastUpdatedAtStateVersion)
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limitPerPage">The page size requested..</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address..</param>
+        public ResourceHoldersRequest(string cursor = default(string), int? limitPerPage = default(int?), string resourceAddress = default(string))
         {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
-            {
-                throw new ArgumentNullException("amount is a required property for ResourceOwnersCollectionFungibleResourceItem and cannot be null");
-            }
-            this.Amount = amount;
+            this.Cursor = cursor;
+            this.LimitPerPage = limitPerPage;
+            this.ResourceAddress = resourceAddress;
         }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +136,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersCollectionFungibleResourceItem {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("class ResourceHoldersRequest {\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -146,7 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -158,25 +160,35 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceOwnersCollectionFungibleResourceItem);
+            return this.Equals(input as ResourceHoldersRequest);
         }
 
         /// <summary>
-        /// Returns true if ResourceOwnersCollectionFungibleResourceItem instances are equal
+        /// Returns true if ResourceHoldersRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceOwnersCollectionFungibleResourceItem to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersCollectionFungibleResourceItem input)
+        public bool Equals(ResourceHoldersRequest input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
+                ) && 
+                (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -188,10 +200,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Amount != null)
+                int hashCode = 41;
+                if (this.Cursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.LimitPerPage != null)
+                {
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
+                }
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

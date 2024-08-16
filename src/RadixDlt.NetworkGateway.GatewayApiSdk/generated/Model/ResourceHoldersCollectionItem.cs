@@ -84,59 +84,64 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersResponse
+    /// ResourceHoldersCollectionItem
     /// </summary>
-    [DataContract(Name = "ResourceOwnersResponse")]
-    public partial class ResourceOwnersResponse : IEquatable<ResourceOwnersResponse>
+    [DataContract(Name = "ResourceHoldersCollectionItem")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionFungibleResourceItem), "FungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "NonFungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionFungibleResourceItem), "ResourceHoldersCollectionFungibleResourceItem")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "ResourceHoldersCollectionNonFungibleResourceItem")]
+    public partial class ResourceHoldersCollectionItem : IEquatable<ResourceHoldersCollectionItem>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersResponse" /> class.
+        /// Gets or Sets Type
+        /// </summary>
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceHoldersResourceType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceOwnersResponse() { }
+        protected ResourceHoldersCollectionItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersResponse" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionItem" /> class.
         /// </summary>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
-        /// <param name="items">items (required).</param>
-        public ResourceOwnersResponse(long? totalCount = default(long?), string nextCursor = default(string), List<ResourceOwnersCollectionItem> items = default(List<ResourceOwnersCollectionItem>))
+        /// <param name="type">type (required).</param>
+        /// <param name="holderAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
+        public ResourceHoldersCollectionItem(ResourceHoldersResourceType type = default(ResourceHoldersResourceType), string holderAddress = default(string), long lastUpdatedAtStateVersion = default(long))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            this.Type = type;
+            // to ensure "holderAddress" is required (not null)
+            if (holderAddress == null)
             {
-                throw new ArgumentNullException("items is a required property for ResourceOwnersResponse and cannot be null");
+                throw new ArgumentNullException("holderAddress is a required property for ResourceHoldersCollectionItem and cannot be null");
             }
-            this.Items = items;
-            this.TotalCount = totalCount;
-            this.NextCursor = nextCursor;
+            this.HolderAddress = holderAddress;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "holder_address", IsRequired = true, EmitDefaultValue = true)]
+        public string HolderAddress { get; set; }
 
         /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// Gets or Sets LastUpdatedAtStateVersion
         /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Items
-        /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<ResourceOwnersCollectionItem> Items { get; set; }
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +150,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersResponse {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class ResourceHoldersCollectionItem {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  HolderAddress: ").Append(HolderAddress).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +174,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceOwnersResponse);
+            return this.Equals(input as ResourceHoldersCollectionItem);
         }
 
         /// <summary>
-        /// Returns true if ResourceOwnersResponse instances are equal
+        /// Returns true if ResourceHoldersCollectionItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceOwnersResponse to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersCollectionItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersResponse input)
+        public bool Equals(ResourceHoldersCollectionItem input)
         {
             if (input == null)
             {
@@ -185,20 +190,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 ) && 
                 (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
+                    this.HolderAddress == input.HolderAddress ||
+                    (this.HolderAddress != null &&
+                    this.HolderAddress.Equals(input.HolderAddress))
                 ) && 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -211,18 +213,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.HolderAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.HolderAddress.GetHashCode();
                 }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
-                if (this.Items != null)
-                {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

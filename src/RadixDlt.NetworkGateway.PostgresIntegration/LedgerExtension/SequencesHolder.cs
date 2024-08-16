@@ -148,5 +148,5 @@ internal class SequencesHolder
 
     public long UnverifiedStandardMetadataEntryHistorySequence { get; set; }
 
-    public long ResourceOwnersSequence { get; set; }
+    public long ResourceHoldersSequence { get; set; }
 }

@@ -74,9 +74,9 @@ namespace GatewayApi.Controllers;
 [Route("extensions")]
 public class ExtensionsController(IExtensionsHandler extensionsHandler) : ControllerBase
 {
-    [HttpPost("resource-owners/page")]
-    public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwnersPage(GatewayModel.ResourceOwnersRequest request, CancellationToken token)
+    [HttpPost("resource-holders/page")]
+    public async Task<GatewayModel.ResourceHoldersResponse> ResourceHoldersPage(GatewayModel.ResourceHoldersRequest request, CancellationToken token)
     {
-        return await extensionsHandler.ResourceOwners(request, token);
+        return await extensionsHandler.ResourceHolders(request, token);
     }
 }

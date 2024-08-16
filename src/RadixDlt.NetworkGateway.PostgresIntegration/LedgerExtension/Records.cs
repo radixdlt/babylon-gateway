@@ -106,4 +106,4 @@ internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long Sta
 
 internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
 
-internal record struct ResourceOwnersLookup(long ResourceEntityId, long EntityId);
+internal record struct ResourceHoldersLookup(long ResourceEntityId, long EntityId);

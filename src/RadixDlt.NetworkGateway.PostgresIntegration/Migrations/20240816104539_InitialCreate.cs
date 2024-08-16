@@ -755,7 +755,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "resource_owners",
+                name: "resource_holders",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -767,7 +767,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_resource_owners", x => x.id);
+                    table.PrimaryKey("PK_resource_holders", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1255,14 +1255,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_resource_owners_entity_id_resource_entity_id",
-                table: "resource_owners",
+                name: "IX_resource_holders_entity_id_resource_entity_id",
+                table: "resource_holders",
                 columns: new[] { "entity_id", "resource_entity_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_resource_owners_entity_id_resource_entity_id_balance",
-                table: "resource_owners",
+                name: "IX_resource_holders_entity_id_resource_entity_id_balance",
+                table: "resource_holders",
                 columns: new[] { "entity_id", "resource_entity_id", "balance" });
 
             migrationBuilder.CreateIndex(
@@ -1430,7 +1430,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "resource_entity_supply_history");
 
             migrationBuilder.DropTable(
-                name: "resource_owners");
+                name: "resource_holders");
 
             migrationBuilder.DropTable(
                 name: "schema_entry_aggregate_history");

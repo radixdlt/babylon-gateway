@@ -62,23 +62,26 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal class ResourceOwnersRequestValidator : AbstractValidator<GatewayModel.ResourceOwnersRequest>
+[DataContract]
+public sealed record ResourceHoldersCursor(long? IdBoundary, string BalanceBoundary)
 {
-    public ResourceOwnersRequestValidator(RadixAddressValidator radixAddressValidator)
+    [DataMember(Name = "id", EmitDefaultValue = false)]
+    public long? IdBoundary { get; set; } = IdBoundary;
+
+    [DataMember(Name = "b", EmitDefaultValue = false)]
+    public string BalanceBoundary { get; set; } = BalanceBoundary;
+
+    public static ResourceHoldersCursor FromCursorString(string cursorString)
     {
-        RuleFor(x => x.ResourceAddress)
-            .NotNull()
-            .SetValidator(radixAddressValidator);
+        return Serializations.FromBase64JsonOrDefault<ResourceHoldersCursor>(cursorString);
+    }
 
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0);
+    public string ToCursorString()
+    {
+        return Serializations.AsBase64Json(this);
     }
 }

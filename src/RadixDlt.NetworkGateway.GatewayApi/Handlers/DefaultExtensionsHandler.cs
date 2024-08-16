@@ -74,11 +74,11 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 internal class DefaultExtensionsHandler(IExtensionsQuerier extensionsQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
 {
-    public async Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(GatewayModel.ResourceOwnersRequest request, CancellationToken token)
+    public async Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token)
     {
-        var cursor = GatewayModel.ResourceOwnersCursor.FromCursorString(request.Cursor);
+        var cursor = GatewayModel.ResourceHoldersCursor.FromCursorString(request.Cursor);
 
-        return await extensionsQuerier.ResourceOwners(
+        return await extensionsQuerier.ResourceHolders(
             (EntityAddress)request.ResourceAddress,
             endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
             cursor,

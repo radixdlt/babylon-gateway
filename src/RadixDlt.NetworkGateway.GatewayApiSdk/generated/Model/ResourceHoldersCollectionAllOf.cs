@@ -84,64 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersCollectionItem
+    /// ResourceHoldersCollectionAllOf
     /// </summary>
-    [DataContract(Name = "ResourceOwnersCollectionItem")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionFungibleResourceItem), "FungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionNonFungibleResourceItem), "NonFungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionFungibleResourceItem), "ResourceOwnersCollectionFungibleResourceItem")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceOwnersCollectionNonFungibleResourceItem), "ResourceOwnersCollectionNonFungibleResourceItem")]
-    public partial class ResourceOwnersCollectionItem : IEquatable<ResourceOwnersCollectionItem>
+    [DataContract(Name = "ResourceHoldersCollection_allOf")]
+    public partial class ResourceHoldersCollectionAllOf : IEquatable<ResourceHoldersCollectionAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceOwnersResourceType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionItem" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceOwnersCollectionItem() { }
+        protected ResourceHoldersCollectionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionItem" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        /// <param name="ownerAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
-        public ResourceOwnersCollectionItem(ResourceOwnersResourceType type = default(ResourceOwnersResourceType), string ownerAddress = default(string), long lastUpdatedAtStateVersion = default(long))
+        /// <param name="items">items (required).</param>
+        public ResourceHoldersCollectionAllOf(List<ResourceHoldersCollectionItem> items = default(List<ResourceHoldersCollectionItem>))
         {
-            this.Type = type;
-            // to ensure "ownerAddress" is required (not null)
-            if (ownerAddress == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("ownerAddress is a required property for ResourceOwnersCollectionItem and cannot be null");
+                throw new ArgumentNullException("items is a required property for ResourceHoldersCollectionAllOf and cannot be null");
             }
-            this.OwnerAddress = ownerAddress;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.Items = items;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "owner_address", IsRequired = true, EmitDefaultValue = true)]
-        public string OwnerAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets LastUpdatedAtStateVersion
-        /// </summary>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<ResourceHoldersCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersCollectionItem {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
-            sb.Append("  OwnerAddress: ").Append(OwnerAddress).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("class ResourceHoldersCollectionAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceOwnersCollectionItem);
+            return this.Equals(input as ResourceHoldersCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if ResourceOwnersCollectionItem instances are equal
+        /// Returns true if ResourceHoldersCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceOwnersCollectionItem to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersCollectionItem input)
+        public bool Equals(ResourceHoldersCollectionAllOf input)
         {
             if (input == null)
             {
@@ -190,17 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
-                (
-                    this.OwnerAddress == input.OwnerAddress ||
-                    (this.OwnerAddress != null &&
-                    this.OwnerAddress.Equals(input.OwnerAddress))
-                ) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -213,12 +181,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
-                if (this.OwnerAddress != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.OwnerAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

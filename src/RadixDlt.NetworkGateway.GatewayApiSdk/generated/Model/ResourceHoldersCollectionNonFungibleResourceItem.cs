@@ -84,27 +84,34 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersCollectionNonFungibleResourceItemAllOf
+    /// ResourceHoldersCollectionNonFungibleResourceItem
     /// </summary>
-    [DataContract(Name = "ResourceOwnersCollectionNonFungibleResourceItem_allOf")]
-    public partial class ResourceOwnersCollectionNonFungibleResourceItemAllOf : IEquatable<ResourceOwnersCollectionNonFungibleResourceItemAllOf>
+    [DataContract(Name = "ResourceHoldersCollectionNonFungibleResourceItem")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionFungibleResourceItem), "FungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "NonFungibleResource")]
+    public partial class ResourceHoldersCollectionNonFungibleResourceItem : ResourceHoldersCollectionItem, IEquatable<ResourceHoldersCollectionNonFungibleResourceItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionNonFungibleResourceItemAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionNonFungibleResourceItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceOwnersCollectionNonFungibleResourceItemAllOf() { }
+        protected ResourceHoldersCollectionNonFungibleResourceItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersCollectionNonFungibleResourceItemAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionNonFungibleResourceItem" /> class.
         /// </summary>
         /// <param name="nonFungibleIdsCount">nonFungibleIdsCount (required).</param>
-        public ResourceOwnersCollectionNonFungibleResourceItemAllOf(long nonFungibleIdsCount = default(long))
+        /// <param name="type">type (required) (default to ResourceHoldersResourceType.NonFungibleResource).</param>
+        /// <param name="holderAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
+        public ResourceHoldersCollectionNonFungibleResourceItem(long nonFungibleIdsCount = default(long), ResourceHoldersResourceType type = ResourceHoldersResourceType.NonFungibleResource, string holderAddress = default(string), long lastUpdatedAtStateVersion = default(long)) : base(type, holderAddress, lastUpdatedAtStateVersion)
         {
             this.NonFungibleIdsCount = nonFungibleIdsCount;
         }
@@ -122,7 +129,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersCollectionNonFungibleResourceItemAllOf {\n");
+            sb.Append("class ResourceHoldersCollectionNonFungibleResourceItem {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  NonFungibleIdsCount: ").Append(NonFungibleIdsCount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -132,7 +140,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -144,21 +152,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceOwnersCollectionNonFungibleResourceItemAllOf);
+            return this.Equals(input as ResourceHoldersCollectionNonFungibleResourceItem);
         }
 
         /// <summary>
-        /// Returns true if ResourceOwnersCollectionNonFungibleResourceItemAllOf instances are equal
+        /// Returns true if ResourceHoldersCollectionNonFungibleResourceItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceOwnersCollectionNonFungibleResourceItemAllOf to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersCollectionNonFungibleResourceItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersCollectionNonFungibleResourceItemAllOf input)
+        public bool Equals(ResourceHoldersCollectionNonFungibleResourceItem input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
                     this.NonFungibleIdsCount == input.NonFungibleIdsCount ||
                     this.NonFungibleIdsCount.Equals(input.NonFungibleIdsCount)
@@ -173,7 +181,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
+                int hashCode = base.GetHashCode();
                 hashCode = (hashCode * 59) + this.NonFungibleIdsCount.GetHashCode();
                 return hashCode;
             }

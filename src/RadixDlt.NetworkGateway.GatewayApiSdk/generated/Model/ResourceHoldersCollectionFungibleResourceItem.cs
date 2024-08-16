@@ -84,28 +84,118 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines ResourceOwnersResourceType
+    /// ResourceHoldersCollectionFungibleResourceItem
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ResourceOwnersResourceType
+    [DataContract(Name = "ResourceHoldersCollectionFungibleResourceItem")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionFungibleResourceItem), "FungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "NonFungibleResource")]
+    public partial class ResourceHoldersCollectionFungibleResourceItem : ResourceHoldersCollectionItem, IEquatable<ResourceHoldersCollectionFungibleResourceItem>
     {
         /// <summary>
-        /// Enum FungibleResource for value: FungibleResource
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionFungibleResourceItem" /> class.
         /// </summary>
-        [EnumMember(Value = "FungibleResource")]
-        FungibleResource = 1,
+        [JsonConstructorAttribute]
+        protected ResourceHoldersCollectionFungibleResourceItem() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionFungibleResourceItem" /> class.
+        /// </summary>
+        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        /// <param name="type">type (required) (default to ResourceHoldersResourceType.FungibleResource).</param>
+        /// <param name="holderAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
+        public ResourceHoldersCollectionFungibleResourceItem(string amount = default(string), ResourceHoldersResourceType type = ResourceHoldersResourceType.FungibleResource, string holderAddress = default(string), long lastUpdatedAtStateVersion = default(long)) : base(type, holderAddress, lastUpdatedAtStateVersion)
+        {
+            // to ensure "amount" is required (not null)
+            if (amount == null)
+            {
+                throw new ArgumentNullException("amount is a required property for ResourceHoldersCollectionFungibleResourceItem and cannot be null");
+            }
+            this.Amount = amount;
+        }
 
         /// <summary>
-        /// Enum NonFungibleResource for value: NonFungibleResource
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
-        [EnumMember(Value = "NonFungibleResource")]
-        NonFungibleResource = 2
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
+
+        /// <summary>
+        /// Returns the string presentation of the object
+        /// </summary>
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class ResourceHoldersCollectionFungibleResourceItem {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public override string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as ResourceHoldersCollectionFungibleResourceItem);
+        }
+
+        /// <summary>
+        /// Returns true if ResourceHoldersCollectionFungibleResourceItem instances are equal
+        /// </summary>
+        /// <param name="input">Instance of ResourceHoldersCollectionFungibleResourceItem to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(ResourceHoldersCollectionFungibleResourceItem input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return base.Equals(input) && 
+                (
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = base.GetHashCode();
+                if (this.Amount != null)
+                {
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

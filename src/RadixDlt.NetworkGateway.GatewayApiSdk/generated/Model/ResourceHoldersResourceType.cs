@@ -90,132 +90,22 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceOwnersRequest
+    /// Defines ResourceHoldersResourceType
     /// </summary>
-    [DataContract(Name = "ResourceOwnersRequest")]
-    public partial class ResourceOwnersRequest : IEquatable<ResourceOwnersRequest>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum ResourceHoldersResourceType
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceOwnersRequest" /> class.
+        /// Enum FungibleResource for value: FungibleResource
         /// </summary>
-        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limitPerPage">The page size requested..</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address..</param>
-        public ResourceOwnersRequest(string cursor = default(string), int? limitPerPage = default(int?), string resourceAddress = default(string))
-        {
-            this.Cursor = cursor;
-            this.LimitPerPage = limitPerPage;
-            this.ResourceAddress = resourceAddress;
-        }
+        [EnumMember(Value = "FungibleResource")]
+        FungibleResource = 1,
 
         /// <summary>
-        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// Enum NonFungibleResource for value: NonFungibleResource
         /// </summary>
-        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = true)]
-        public string Cursor { get; set; }
-
-        /// <summary>
-        /// The page size requested.
-        /// </summary>
-        /// <value>The page size requested.</value>
-        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
-        public int? LimitPerPage { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "resource_address", EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
-
-        /// <summary>
-        /// Returns the string presentation of the object
-        /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceOwnersRequest {\n");
-            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as ResourceOwnersRequest);
-        }
-
-        /// <summary>
-        /// Returns true if ResourceOwnersRequest instances are equal
-        /// </summary>
-        /// <param name="input">Instance of ResourceOwnersRequest to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(ResourceOwnersRequest input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.Cursor == input.Cursor ||
-                    (this.Cursor != null &&
-                    this.Cursor.Equals(input.Cursor))
-                ) && 
-                (
-                    this.LimitPerPage == input.LimitPerPage ||
-                    (this.LimitPerPage != null &&
-                    this.LimitPerPage.Equals(input.LimitPerPage))
-                ) && 
-                (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                if (this.Cursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
-                }
-                if (this.LimitPerPage != null)
-                {
-                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
-                }
-                if (this.ResourceAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "NonFungibleResource")]
+        NonFungibleResource = 2
 
     }
 

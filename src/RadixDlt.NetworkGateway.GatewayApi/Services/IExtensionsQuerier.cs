@@ -75,9 +75,9 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IExtensionsQuerier
 {
-    Task<GatewayModel.ResourceOwnersResponse> ResourceOwners(
+    Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(
         EntityAddress resourceAddress,
         int limit,
-        GatewayModel.ResourceOwnersCursor? cursor,
+        GatewayModel.ResourceHoldersCursor? cursor,
         CancellationToken token = default);
 }

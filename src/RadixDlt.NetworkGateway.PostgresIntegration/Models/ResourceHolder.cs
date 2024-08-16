@@ -62,26 +62,28 @@
  * permissions under this License.
  */
 
-using System.Runtime.Serialization;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[DataContract]
-public sealed record ResourceOwnersCursor(long? IdBoundary, string BalanceBoundary)
+[Table("resource_holders")]
+internal class ResourceHolder
 {
-    [DataMember(Name = "id", EmitDefaultValue = false)]
-    public long? IdBoundary { get; set; } = IdBoundary;
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    [DataMember(Name = "b", EmitDefaultValue = false)]
-    public string BalanceBoundary { get; set; } = BalanceBoundary;
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    public static ResourceOwnersCursor FromCursorString(string cursorString)
-    {
-        return Serializations.FromBase64JsonOrDefault<ResourceOwnersCursor>(cursorString);
-    }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-    public string ToCursorString()
-    {
-        return Serializations.AsBase64Json(this);
-    }
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
+
+    [Column("last_updated_at_state_version")]
+    public long LastUpdatedAtStateVersion { get; set; }
 }

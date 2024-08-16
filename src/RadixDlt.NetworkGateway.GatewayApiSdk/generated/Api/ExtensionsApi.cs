@@ -92,26 +92,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
-        /// Get Resource Owners Page
+        /// Get Resource Holders Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="resourceOwnersRequest"></param>
-        /// <returns>ResourceOwnersResponse</returns>
-        ResourceOwnersResponse ResourceOwnersPage(ResourceOwnersRequest resourceOwnersRequest);
+        /// <param name="resourceHoldersRequest"></param>
+        /// <returns>ResourceHoldersResponse</returns>
+        ResourceHoldersResponse ResourceHoldersPage(ResourceHoldersRequest resourceHoldersRequest);
 
         /// <summary>
-        /// Get Resource Owners Page
+        /// Get Resource Holders Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="resourceOwnersRequest"></param>
-        /// <returns>ApiResponse of ResourceOwnersResponse</returns>
-        ApiResponse<ResourceOwnersResponse> ResourceOwnersPageWithHttpInfo(ResourceOwnersRequest resourceOwnersRequest);
+        /// <param name="resourceHoldersRequest"></param>
+        /// <returns>ApiResponse of ResourceHoldersResponse</returns>
+        ApiResponse<ResourceHoldersResponse> ResourceHoldersPageWithHttpInfo(ResourceHoldersRequest resourceHoldersRequest);
         #endregion Synchronous Operations
     }
 
@@ -122,28 +122,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Asynchronous Operations
         /// <summary>
-        /// Get Resource Owners Page
+        /// Get Resource Holders Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="resourceOwnersRequest"></param>
+        /// <param name="resourceHoldersRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ResourceOwnersResponse</returns>
-        System.Threading.Tasks.Task<ResourceOwnersResponse> ResourceOwnersPageAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ResourceHoldersResponse</returns>
+        System.Threading.Tasks.Task<ResourceHoldersResponse> ResourceHoldersPageAsync(ResourceHoldersRequest resourceHoldersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Resource Owners Page
+        /// Get Resource Holders Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="resourceOwnersRequest"></param>
+        /// <param name="resourceHoldersRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (ResourceOwnersResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<ResourceOwnersResponse>> ResourceOwnersPageWithHttpInfoAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (ResourceHoldersResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<ResourceHoldersResponse>> ResourceHoldersPageWithHttpInfoAsync(ResourceHoldersRequest resourceHoldersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -358,28 +358,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Owners Page Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Get Resource Holders Page Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="resourceOwnersRequest"></param>
-        /// <returns>ResourceOwnersResponse</returns>
-        public ResourceOwnersResponse ResourceOwnersPage(ResourceOwnersRequest resourceOwnersRequest)
+        /// <param name="resourceHoldersRequest"></param>
+        /// <returns>ResourceHoldersResponse</returns>
+        public ResourceHoldersResponse ResourceHoldersPage(ResourceHoldersRequest resourceHoldersRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse> localVarResponse = ResourceOwnersPageWithHttpInfo(resourceOwnersRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceHoldersResponse> localVarResponse = ResourceHoldersPageWithHttpInfo(resourceHoldersRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Resource Owners Page Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Get Resource Holders Page Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="resourceOwnersRequest"></param>
-        /// <returns>ApiResponse of ResourceOwnersResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse> ResourceOwnersPageWithHttpInfo(ResourceOwnersRequest resourceOwnersRequest)
+        /// <param name="resourceHoldersRequest"></param>
+        /// <returns>ApiResponse of ResourceHoldersResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceHoldersResponse> ResourceHoldersPageWithHttpInfo(ResourceHoldersRequest resourceHoldersRequest)
         {
-            // verify the required parameter 'resourceOwnersRequest' is set
-            if (resourceOwnersRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'resourceOwnersRequest' when calling ExtensionsApi->ResourceOwnersPage");
+            // verify the required parameter 'resourceHoldersRequest' is set
+            if (resourceHoldersRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'resourceHoldersRequest' when calling ExtensionsApi->ResourceHoldersPage");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -398,15 +398,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = resourceOwnersRequest;
+            localVarRequestOptions.Data = resourceHoldersRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<ResourceOwnersResponse>("/extensions/resource-owners/page", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<ResourceHoldersResponse>("/extensions/resource-holders/page", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("ResourceOwnersPage", localVarResponse);
+                Exception _exception = this.ExceptionFactory("ResourceHoldersPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -414,30 +414,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Owners Page Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Get Resource Holders Page Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="resourceOwnersRequest"></param>
+        /// <param name="resourceHoldersRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ResourceOwnersResponse</returns>
-        public async System.Threading.Tasks.Task<ResourceOwnersResponse> ResourceOwnersPageAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ResourceHoldersResponse</returns>
+        public async System.Threading.Tasks.Task<ResourceHoldersResponse> ResourceHoldersPageAsync(ResourceHoldersRequest resourceHoldersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse> localVarResponse = await ResourceOwnersPageWithHttpInfoAsync(resourceOwnersRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceHoldersResponse> localVarResponse = await ResourceHoldersPageWithHttpInfoAsync(resourceHoldersRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Resource Owners Page Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Get Resource Holders Page Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="resourceOwnersRequest"></param>
+        /// <param name="resourceHoldersRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (ResourceOwnersResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceOwnersResponse>> ResourceOwnersPageWithHttpInfoAsync(ResourceOwnersRequest resourceOwnersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (ResourceHoldersResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ResourceHoldersResponse>> ResourceHoldersPageWithHttpInfoAsync(ResourceHoldersRequest resourceHoldersRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'resourceOwnersRequest' is set
-            if (resourceOwnersRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'resourceOwnersRequest' when calling ExtensionsApi->ResourceOwnersPage");
+            // verify the required parameter 'resourceHoldersRequest' is set
+            if (resourceHoldersRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'resourceHoldersRequest' when calling ExtensionsApi->ResourceHoldersPage");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -458,16 +458,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = resourceOwnersRequest;
+            localVarRequestOptions.Data = resourceHoldersRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<ResourceOwnersResponse>("/extensions/resource-owners/page", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<ResourceHoldersResponse>("/extensions/resource-holders/page", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("ResourceOwnersPage", localVarResponse);
+                Exception _exception = this.ExceptionFactory("ResourceHoldersPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

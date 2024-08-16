@@ -1905,12 +1905,12 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /extensions/resource-owners/page:
+  /extensions/resource-holders/page:
     post:
-      operationId: ResourceOwnersPage
-      summary: Get Resource Owners Page
+      operationId: ResourceHoldersPage
+      summary: Get Resource Holders Page
       description: |
-        Returns list of all owners of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending.
+        Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending.
         This endpoint operates only at the current state version, it is not possible to browse historical data.
         Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice.
       tags:
@@ -1920,14 +1920,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ResourceOwnersRequest"
+              $ref: "#/components/schemas/ResourceHoldersRequest"
       responses:
         "200":
-          description: Resource owners
+          description: Resource holders
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResourceOwnersResponse"
+                $ref: "#/components/schemas/ResourceHoldersResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -3147,7 +3147,7 @@ components:
           type: integer
           format: int64
 
-    ResourceOwnersCollection:
+    ResourceHoldersCollection:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
@@ -3157,23 +3157,23 @@ components:
             items:
               type: array
               items:
-                $ref: "#/components/schemas/ResourceOwnersCollectionItem"
+                $ref: "#/components/schemas/ResourceHoldersCollectionItem"
 
-    ResourceOwnersResourceType:
+    ResourceHoldersResourceType:
       type: string
       enum:
         - FungibleResource
         - NonFungibleResource
-    ResourceOwnersCollectionItem:
+    ResourceHoldersCollectionItem:
       type: object
       required:
         - type
-        - owner_address
+        - holder_address
         - last_updated_at_state_version
       properties:
         type:
-          $ref: "#/components/schemas/ResourceOwnersResourceType"
-        owner_address:
+          $ref: "#/components/schemas/ResourceHoldersResourceType"
+        holder_address:
           $ref: "#/components/schemas/Address"
         last_updated_at_state_version:
           type: integer
@@ -3181,13 +3181,13 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          # Must match ResourceOwnersResourceType
-          FungibleResource: "#/components/schemas/ResourceOwnersCollectionFungibleResourceItem"
-          NonFungibleResource: "#/components/schemas/ResourceOwnersCollectionNonFungibleResourceItem"
+          # Must match ResourceHoldersResourceType
+          FungibleResource: "#/components/schemas/ResourceHoldersCollectionFungibleResourceItem"
+          NonFungibleResource: "#/components/schemas/ResourceHoldersCollectionNonFungibleResourceItem"
 
-    ResourceOwnersCollectionFungibleResourceItem:
+    ResourceHoldersCollectionFungibleResourceItem:
       allOf:
-        - $ref: "#/components/schemas/ResourceOwnersCollectionItem"
+        - $ref: "#/components/schemas/ResourceHoldersCollectionItem"
         - type: object
           required:
             - amount
@@ -3196,9 +3196,9 @@ components:
               $ref: "#/components/schemas/BigDecimal"
 
 
-    ResourceOwnersCollectionNonFungibleResourceItem:
+    ResourceHoldersCollectionNonFungibleResourceItem:
       allOf:
-        - $ref: "#/components/schemas/ResourceOwnersCollectionItem"
+        - $ref: "#/components/schemas/ResourceHoldersCollectionItem"
         - type: object
           required:
             - non_fungible_ids_count
@@ -4987,7 +4987,7 @@ components:
             validators:
               $ref: "#/components/schemas/ValidatorUptimeCollection"
 
-    ResourceOwnersRequest:
+    ResourceHoldersRequest:
       allOf:
         - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
@@ -4995,9 +4995,9 @@ components:
             resource_address:
               $ref: "#/components/schemas/Address"
 
-    ResourceOwnersResponse:
+    ResourceHoldersResponse:
       allOf:
-        - $ref: "#/components/schemas/ResourceOwnersCollection"
+        - $ref: "#/components/schemas/ResourceHoldersCollection"
 
 
     #

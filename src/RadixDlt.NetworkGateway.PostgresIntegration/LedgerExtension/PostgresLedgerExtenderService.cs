@@ -1438,7 +1438,7 @@ UPDATE pending_transactions
                 }
             }
 
-            var resourceOwnersToAdd = new Dictionary<ResourceOwnersLookup, ResourceOwners>();
+            var resourceHoldersToAdd = new Dictionary<ResourceHoldersLookup, ResourceHolder>();
 
             foreach (var x in entityResourceAggregatedVaultsHistoryToAdd)
             {
@@ -1451,11 +1451,11 @@ UPDATE pending_transactions
                     _ => throw new ArgumentOutOfRangeException(nameof(x), x, null),
                 };
 
-                resourceOwnersToAdd.AddOrUpdate(
-                    new ResourceOwnersLookup(x.EntityId, x.ResourceEntityId),
-                    _ => new ResourceOwners
+                resourceHoldersToAdd.AddOrUpdate(
+                    new ResourceHoldersLookup(x.EntityId, x.ResourceEntityId),
+                    _ => new ResourceHolder
                     {
-                        Id = sequences.ResourceOwnersSequence++,
+                        Id = sequences.ResourceHoldersSequence++,
                         EntityId = x.EntityId,
                         ResourceEntityId = x.ResourceEntityId,
                         Balance = balance,
@@ -1527,7 +1527,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyResourceOwners(resourceOwnersToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyResourceHolders(resourceHoldersToAdd.Values, token);
 
             rowsInserted += await entityStateProcessor.SaveEntities();
             rowsInserted += await entityMetadataProcessor.SaveEntities();
