@@ -1914,7 +1914,7 @@ paths:
         More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances).
         This endpoint operates only at the **current state version**, it is not possible to browse historical data.
         Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.
-        The default maximum page size is 1000.
+Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter.
       tags:
         - Extensions
       requestBody:
