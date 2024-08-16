@@ -59,6 +59,7 @@ x-tagGroups:
       - Stream
       - State
       - Statistics
+      - Extensions
 tags:
   - name: SubAPIs
     x-displayName: Sub-APIs
@@ -70,6 +71,7 @@ tags:
       - **Stream** (`/transaction/*`) - For reading committed transactions.
       - **State** (`/state/*`) - For reading the current or past ledger state of the network.
       - **Statistics** (`/statistics/*`) - For calculating particular statistics against the current or past ledger state of the network.
+      - **Extensions** (`/Extensions/*`) - For endpoints that do not fit into other categories, for example, they may not support historic state.
   - name: Concepts
     x-displayName: Concepts
     x-traitTag: true # Don't display endpoints under this tag
@@ -1195,6 +1197,9 @@ tags:
   - name: Statistics
     x-displayName: Statistics Endpoints
     description: Calculate particular statistics based on current or historic ledger state.
+  - name: Extensions
+    x-displayName: Extensions Endpoints
+    description:  Endpoints that do not fit into other categories, for example, those which provide custom aggregation or indexing, or don't support historic state.
 
 paths:
   "/status/gateway-status":
@@ -1899,6 +1904,35 @@ paths:
                 $ref: "#/components/schemas/ValidatorsUptimeResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
+
+  /extensions/resource-holders/page:
+    post:
+      operationId: ResourceHoldersPage
+      summary: Get Resource Holders Page
+      description: |
+        A paginated endpoint to discover which global entities hold the most of a given resource.
+        More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances).
+        This endpoint operates only at the **current state version**, it is not possible to browse historical data.
+        Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.
+Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter.
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourceHoldersRequest"
+      responses:
+        "200":
+          description: Resource holders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceHoldersResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
 
 components:
   responses:
@@ -3115,6 +3149,67 @@ components:
           type: integer
           format: int64
 
+    ResourceHoldersCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ResourceHoldersCollectionItem"
+
+    ResourceHoldersResourceType:
+      type: string
+      enum:
+        - FungibleResource
+        - NonFungibleResource
+    ResourceHoldersCollectionItem:
+      type: object
+      required:
+        - type
+        - holder_address
+        - last_updated_at_state_version
+      properties:
+        type:
+          $ref: "#/components/schemas/ResourceHoldersResourceType"
+        holder_address:
+          $ref: "#/components/schemas/Address"
+        last_updated_at_state_version:
+          type: integer
+          format: int64
+      discriminator:
+        propertyName: type
+        mapping:
+          # Must match ResourceHoldersResourceType
+          FungibleResource: "#/components/schemas/ResourceHoldersCollectionFungibleResourceItem"
+          NonFungibleResource: "#/components/schemas/ResourceHoldersCollectionNonFungibleResourceItem"
+
+    ResourceHoldersCollectionFungibleResourceItem:
+      allOf:
+        - $ref: "#/components/schemas/ResourceHoldersCollectionItem"
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              $ref: "#/components/schemas/BigDecimal"
+
+
+    ResourceHoldersCollectionNonFungibleResourceItem:
+      allOf:
+        - $ref: "#/components/schemas/ResourceHoldersCollectionItem"
+        - type: object
+          required:
+            - non_fungible_ids_count
+          properties:
+            non_fungible_ids_count:
+              type: integer
+              format: int64
+
+
     ValidatorCollection:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
@@ -3529,7 +3624,7 @@ components:
               $ref: "#/components/schemas/TransactionAccountDepositPreValidationAuthorizedDepositorBadge"
           example:
             account_address: "<account-address>"
-            resource_addresses: ["<resource-address>"]
+            resource_addresses: [ "<resource-address>" ]
 
     AccountDepositPreValidationResponse:
       allOf:
@@ -4893,6 +4988,22 @@ components:
           properties:
             validators:
               $ref: "#/components/schemas/ValidatorUptimeCollection"
+
+    ResourceHoldersRequest:
+      allOf:
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+      example:
+        limit_per_page: 100
+        resource_address: "<resource-address>"
+
+    ResourceHoldersResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResourceHoldersCollection"
+
 
     #
     # Errors

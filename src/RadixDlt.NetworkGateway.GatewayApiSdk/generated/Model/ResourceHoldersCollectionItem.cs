@@ -84,40 +84,64 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Provide either &#x60;key_hex&#x60; or &#x60;key_json&#x60;. If both are provided, &#x60;key_hex&#x60; is used and &#x60;key_json&#x60; is ignored.
+    /// ResourceHoldersCollectionItem
     /// </summary>
-    [DataContract(Name = "StateKeyValueStoreDataRequestKeyItem")]
-    public partial class StateKeyValueStoreDataRequestKeyItem : IEquatable<StateKeyValueStoreDataRequestKeyItem>
+    [DataContract(Name = "ResourceHoldersCollectionItem")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionFungibleResourceItem), "FungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "NonFungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionFungibleResourceItem), "ResourceHoldersCollectionFungibleResourceItem")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "ResourceHoldersCollectionNonFungibleResourceItem")]
+    public partial class ResourceHoldersCollectionItem : IEquatable<ResourceHoldersCollectionItem>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
+        /// Gets or Sets Type
         /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob..</param>
-        /// <param name="keyJson">keyJson.</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceHoldersResourceType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionItem" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected ResourceHoldersCollectionItem() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionItem" /> class.
+        /// </summary>
+        /// <param name="type">type (required).</param>
+        /// <param name="holderAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
+        public ResourceHoldersCollectionItem(ResourceHoldersResourceType type = default(ResourceHoldersResourceType), string holderAddress = default(string), long lastUpdatedAtStateVersion = default(long))
         {
-            this.KeyHex = keyHex;
-            this.KeyJson = keyJson;
+            this.Type = type;
+            // to ensure "holderAddress" is required (not null)
+            if (holderAddress == null)
+            {
+                throw new ArgumentNullException("holderAddress is a required property for ResourceHoldersCollectionItem and cannot be null");
+            }
+            this.HolderAddress = holderAddress;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "holder_address", IsRequired = true, EmitDefaultValue = true)]
+        public string HolderAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets KeyJson
+        /// Gets or Sets LastUpdatedAtStateVersion
         /// </summary>
-        [DataMember(Name = "key_json", EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValue KeyJson { get; set; }
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -126,9 +150,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateKeyValueStoreDataRequestKeyItem {\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
-            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
+            sb.Append("class ResourceHoldersCollectionItem {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  HolderAddress: ").Append(HolderAddress).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +174,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateKeyValueStoreDataRequestKeyItem);
+            return this.Equals(input as ResourceHoldersCollectionItem);
         }
 
         /// <summary>
-        /// Returns true if StateKeyValueStoreDataRequestKeyItem instances are equal
+        /// Returns true if ResourceHoldersCollectionItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateKeyValueStoreDataRequestKeyItem to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersCollectionItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateKeyValueStoreDataRequestKeyItem input)
+        public bool Equals(ResourceHoldersCollectionItem input)
         {
             if (input == null)
             {
@@ -165,14 +190,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 ) && 
                 (
-                    this.KeyJson == input.KeyJson ||
-                    (this.KeyJson != null &&
-                    this.KeyJson.Equals(input.KeyJson))
+                    this.HolderAddress == input.HolderAddress ||
+                    (this.HolderAddress != null &&
+                    this.HolderAddress.Equals(input.HolderAddress))
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -185,14 +213,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.KeyHex != null)
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.HolderAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.HolderAddress.GetHashCode();
                 }
-                if (this.KeyJson != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

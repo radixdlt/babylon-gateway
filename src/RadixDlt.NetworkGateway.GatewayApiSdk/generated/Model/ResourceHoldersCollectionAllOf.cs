@@ -90,34 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Provide either &#x60;key_hex&#x60; or &#x60;key_json&#x60;. If both are provided, &#x60;key_hex&#x60; is used and &#x60;key_json&#x60; is ignored.
+    /// ResourceHoldersCollectionAllOf
     /// </summary>
-    [DataContract(Name = "StateKeyValueStoreDataRequestKeyItem")]
-    public partial class StateKeyValueStoreDataRequestKeyItem : IEquatable<StateKeyValueStoreDataRequestKeyItem>
+    [DataContract(Name = "ResourceHoldersCollection_allOf")]
+    public partial class ResourceHoldersCollectionAllOf : IEquatable<ResourceHoldersCollectionAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob..</param>
-        /// <param name="keyJson">keyJson.</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
+        [JsonConstructorAttribute]
+        protected ResourceHoldersCollectionAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionAllOf" /> class.
+        /// </summary>
+        /// <param name="items">items (required).</param>
+        public ResourceHoldersCollectionAllOf(List<ResourceHoldersCollectionItem> items = default(List<ResourceHoldersCollectionItem>))
         {
-            this.KeyHex = keyHex;
-            this.KeyJson = keyJson;
+            // to ensure "items" is required (not null)
+            if (items == null)
+            {
+                throw new ArgumentNullException("items is a required property for ResourceHoldersCollectionAllOf and cannot be null");
+            }
+            this.Items = items;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets KeyJson
-        /// </summary>
-        [DataMember(Name = "key_json", EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValue KeyJson { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<ResourceHoldersCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -126,9 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateKeyValueStoreDataRequestKeyItem {\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
-            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
+            sb.Append("class ResourceHoldersCollectionAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateKeyValueStoreDataRequestKeyItem);
+            return this.Equals(input as ResourceHoldersCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateKeyValueStoreDataRequestKeyItem instances are equal
+        /// Returns true if ResourceHoldersCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateKeyValueStoreDataRequestKeyItem to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateKeyValueStoreDataRequestKeyItem input)
+        public bool Equals(ResourceHoldersCollectionAllOf input)
         {
             if (input == null)
             {
@@ -165,14 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
-                ) && 
-                (
-                    this.KeyJson == input.KeyJson ||
-                    (this.KeyJson != null &&
-                    this.KeyJson.Equals(input.KeyJson))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -185,13 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.KeyHex != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
-                }
-                if (this.KeyJson != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

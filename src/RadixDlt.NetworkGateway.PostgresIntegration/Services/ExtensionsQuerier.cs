@@ -62,11 +62,14 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -74,38 +77,107 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal static class QueryHelper
+internal class ExtensionsQuerier : IExtensionsQuerier
 {
-    internal static async Task<Dictionary<EntityAddress, long>> ResolveEntityIds(ReadOnlyDbContext dbContext, List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        var entities = await dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.Address, e => e.Id, token);
+    private readonly ReadOnlyDbContext _dbContext;
+    private readonly IDapperWrapper _dapperWrapper;
 
-        return entities;
+    private record ResourceHoldersViewModel(long Id, EntityAddress EntityAddress, string Balance, long LastUpdatedAtStateVersion);
+
+    public ExtensionsQuerier(ReadOnlyDbContext dbContext, IDapperWrapper dapperWrapper)
+    {
+        _dbContext = dbContext;
+        _dapperWrapper = dapperWrapper;
     }
 
-    internal static async Task<TEntity> GetEntity<TEntity>(ReadOnlyDbContext dbContext, EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
-        where TEntity : Entity
+    public async Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(
+        EntityAddress resourceAddress,
+        int limit,
+        GatewayModel.ResourceHoldersCursor? cursor,
+        CancellationToken token = default)
     {
-        var entity = await dbContext
+        var resourceEntity = await _dbContext
             .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .AnnotateMetricName()
-            .FirstOrDefaultAsync(e => e.Address == address, token);
+            .FirstOrDefaultAsync(e => e.Address == resourceAddress, token);
 
-        if (entity == null)
+        if (resourceEntity == null)
         {
-            throw new EntityNotFoundException(address.ToString());
+            throw new EntityNotFoundException(resourceAddress.ToString());
         }
 
-        if (entity is not TEntity typedEntity)
+        if (!resourceEntity.Address.IsResource)
         {
-            throw new InvalidEntityException(address.ToString());
+            throw new InvalidEntityException(resourceEntity.Address.ToString());
         }
 
-        return typedEntity;
+        var totalCount = await _dbContext.ResourceHolders.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
+
+        var entriesAndOneMore = await _dapperWrapper.ToList<ResourceHoldersViewModel>(
+            _dbContext,
+            @"
+SELECT
+    ro.id as Id,
+    e.address AS EntityAddress,
+    CAST(ro.balance AS text) AS Balance,
+    ro.last_updated_at_state_version AS LastUpdatedAtStateVersion
+FROM resource_holders ro
+INNER JOIN entities e
+ON ro.entity_id = e.id
+WHERE ro.resource_entity_id = @resourceEntityId
+  AND (ro.balance, ro.id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)
+ORDER BY (ro.balance, ro.entity_id) DESC
+LIMIT @limit",
+            new
+            {
+                resourceEntityId = resourceEntity.Id,
+                balanceBoundary = cursor?.BalanceBoundary ?? TokenAmount.MaxValue.ToString(),
+                idBoundary = cursor?.IdBoundary ?? long.MaxValue,
+                limit = limit + 1,
+            },
+            token);
+
+        var lastElement = entriesAndOneMore.LastOrDefault();
+        var nextPageExists = entriesAndOneMore.Count == limit + 1 && lastElement != null;
+
+        var nextCursor = nextPageExists
+            ? new GatewayModel.ResourceHoldersCursor(lastElement!.Id, TokenAmount.FromDecimalString(lastElement.Balance).ToString()).ToCursorString()
+            : null;
+
+        switch (resourceEntity)
+        {
+            case GlobalFungibleResourceEntity:
+            {
+                var castedResult = entriesAndOneMore
+                    .Take(limit)
+                    .Select(
+                        x => (GatewayModel.ResourceHoldersCollectionItem)new GatewayModel.ResourceHoldersCollectionFungibleResourceItem(
+                            amount: TokenAmount.FromSubUnitsString(x.Balance).ToString(),
+                            holderAddress: x.EntityAddress,
+                            lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion)
+                    )
+                    .ToList();
+
+                return new GatewayModel.ResourceHoldersResponse(totalCount, nextCursor, castedResult);
+            }
+
+            case GlobalNonFungibleResourceEntity:
+            {
+                var castedResult = entriesAndOneMore
+                    .Take(limit)
+                    .Select(
+                        x => (GatewayModel.ResourceHoldersCollectionItem)new GatewayModel.ResourceHoldersCollectionNonFungibleResourceItem(
+                            nonFungibleIdsCount: long.Parse(TokenAmount.FromSubUnitsString(x.Balance).ToString()),
+                            holderAddress: x.EntityAddress,
+                            lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion)
+                    )
+                    .ToList();
+
+                return new GatewayModel.ResourceHoldersResponse(totalCount, nextCursor, castedResult);
+            }
+
+            default:
+                throw new UnreachableException($"Either fungible or non fungible resource expected. But {resourceEntity.GetType()} found.");
+        }
     }
 }

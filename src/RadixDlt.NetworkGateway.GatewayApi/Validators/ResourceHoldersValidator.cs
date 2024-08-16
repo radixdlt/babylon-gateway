@@ -62,50 +62,23 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentValidation;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal static class QueryHelper
+internal class ResourceHoldersRequestValidator : AbstractValidator<GatewayModel.ResourceHoldersRequest>
 {
-    internal static async Task<Dictionary<EntityAddress, long>> ResolveEntityIds(ReadOnlyDbContext dbContext, List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    public ResourceHoldersRequestValidator(RadixAddressValidator radixAddressValidator)
     {
-        var entities = await dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.Address, e => e.Id, token);
+        RuleFor(x => x.ResourceAddress)
+            .NotNull()
+            .SetValidator(radixAddressValidator);
 
-        return entities;
-    }
+        RuleFor(x => x.Cursor)
+            .Base64();
 
-    internal static async Task<TEntity> GetEntity<TEntity>(ReadOnlyDbContext dbContext, EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
-        where TEntity : Entity
-    {
-        var entity = await dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .AnnotateMetricName()
-            .FirstOrDefaultAsync(e => e.Address == address, token);
-
-        if (entity == null)
-        {
-            throw new EntityNotFoundException(address.ToString());
-        }
-
-        if (entity is not TEntity typedEntity)
-        {
-            throw new InvalidEntityException(address.ToString());
-        }
-
-        return typedEntity;
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0);
     }
 }

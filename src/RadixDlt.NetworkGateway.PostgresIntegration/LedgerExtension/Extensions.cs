@@ -90,6 +90,27 @@ internal static class Extensions
         return value;
     }
 
+    public static TVal AddOrUpdate<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> newElementFactory, Action<TVal> updateFactory)
+        where TKey : notnull
+    {
+        ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
+        ArgumentNullException.ThrowIfNull(key, nameof(key));
+        ArgumentNullException.ThrowIfNull(newElementFactory, nameof(newElementFactory));
+        ArgumentNullException.ThrowIfNull(updateFactory, nameof(updateFactory));
+
+        if (dictionary.TryGetValue(key, out var existingValue))
+        {
+            updateFactory(existingValue);
+            return existingValue;
+        }
+
+        var value = newElementFactory(key);
+
+        dictionary[key] = value;
+
+        return value;
+    }
+
     public static void AddRange<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, IDictionary<TKey, TVal> other)
     {
         ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));

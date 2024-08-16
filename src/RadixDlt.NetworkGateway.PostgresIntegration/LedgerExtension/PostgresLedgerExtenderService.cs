@@ -1438,6 +1438,36 @@ UPDATE pending_transactions
                 }
             }
 
+            var resourceHoldersToAdd = new Dictionary<ResourceHoldersLookup, ResourceHolder>();
+
+            foreach (var x in entityResourceAggregatedVaultsHistoryToAdd)
+            {
+                TokenAmount balance = x switch
+                {
+                    EntityFungibleResourceAggregatedVaultsHistory fungibleResourceAggregatedVaultsHistory =>
+                        fungibleResourceAggregatedVaultsHistory.Balance,
+                    EntityNonFungibleResourceAggregatedVaultsHistory nonFungibleResourceAggregatedVaultsHistory =>
+                        TokenAmount.FromDecimalString(nonFungibleResourceAggregatedVaultsHistory.TotalCount.ToString()),
+                    _ => throw new ArgumentOutOfRangeException(nameof(x), x, null),
+                };
+
+                resourceHoldersToAdd.AddOrUpdate(
+                    new ResourceHoldersLookup(x.EntityId, x.ResourceEntityId),
+                    _ => new ResourceHolder
+                    {
+                        Id = sequences.ResourceHoldersSequence++,
+                        EntityId = x.EntityId,
+                        ResourceEntityId = x.ResourceEntityId,
+                        Balance = balance,
+                        LastUpdatedAtStateVersion = x.FromStateVersion,
+                    },
+                    existing =>
+                    {
+                        existing.Balance = balance;
+                        existing.LastUpdatedAtStateVersion = x.FromStateVersion;
+                    });
+            }
+
             var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges
                 .GroupBy(x => new { x.ResourceEntityId, x.StateVersion })
                 .Select(
@@ -1497,6 +1527,7 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyResourceHolders(resourceHoldersToAdd.Values, token);
 
             rowsInserted += await entityStateProcessor.SaveEntities();
             rowsInserted += await entityMetadataProcessor.SaveEntities();

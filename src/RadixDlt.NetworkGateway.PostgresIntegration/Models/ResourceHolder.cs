@@ -62,50 +62,28 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal static class QueryHelper
+[Table("resource_holders")]
+internal class ResourceHolder
 {
-    internal static async Task<Dictionary<EntityAddress, long>> ResolveEntityIds(ReadOnlyDbContext dbContext, List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        var entities = await dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.Address, e => e.Id, token);
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-        return entities;
-    }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    internal static async Task<TEntity> GetEntity<TEntity>(ReadOnlyDbContext dbContext, EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
-        where TEntity : Entity
-    {
-        var entity = await dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .AnnotateMetricName()
-            .FirstOrDefaultAsync(e => e.Address == address, token);
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-        if (entity == null)
-        {
-            throw new EntityNotFoundException(address.ToString());
-        }
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
 
-        if (entity is not TEntity typedEntity)
-        {
-            throw new InvalidEntityException(address.ToString());
-        }
-
-        return typedEntity;
-    }
+    [Column("last_updated_at_state_version")]
+    public long LastUpdatedAtStateVersion { get; set; }
 }

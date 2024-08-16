@@ -511,7 +511,7 @@ INNER JOIN non_fungible_id_definition nfid ON nfid.id = un.unnested_non_fungible
         int vaultLimit)
     {
         var resourcesTotalCount = 0;
-        var resources = new Dictionary<EntityAddress, GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregated>();
+        var resources = new Dictionary<EntityAddress, GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated>();
 
         foreach (var vm in input)
         {
@@ -519,12 +519,12 @@ INNER JOIN non_fungible_id_definition nfid ON nfid.id = un.unnested_non_fungible
 
             if (!resources.TryGetValue(vm.ResourceEntityAddress, out var existingRecord))
             {
-                existingRecord = new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregated(
+                existingRecord = new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated(
                     resourceAddress: vm.ResourceEntityAddress,
-                    vaults: new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVault(
+                    vaults: new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVault(
                         totalCount: vm.VaultTotalCount,
                         nextCursor: CursorGenerator.GenerateOffsetCursor(vaultOffset, vaultLimit, vm.VaultTotalCount),
-                        items: new List<GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>()));
+                        items: new List<GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>()));
 
                 resources[vm.ResourceEntityAddress] = existingRecord;
             }
@@ -543,7 +543,7 @@ INNER JOIN non_fungible_id_definition nfid ON nfid.id = un.unnested_non_fungible
                 lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
         }
 
-        var items = resources.Values.Cast<GatewayApiSdk.Model.NonFungibleResourcesCollectionItem>().ToList();
+        var items = resources.Values.Cast<GatewayModel.NonFungibleResourcesCollectionItem>().ToList();
 
         return new GatewayModel.NonFungibleResourcesCollection(resourcesTotalCount, CursorGenerator.GenerateOffsetCursor(resourceOffset, resourceLimit, resourcesTotalCount), items);
     }

@@ -75,6 +75,7 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
     public static readonly TokenAmount Zero;
     public static readonly TokenAmount NaN;
     public static readonly TokenAmount OneFullUnit;
+    public static readonly TokenAmount MaxValue;
 
     private const int DecimalPrecision = 18;
 
@@ -83,7 +84,7 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
     static TokenAmount()
     {
         _divisor = BigInteger.Pow(10, DecimalPrecision);
-
+        MaxValue = new TokenAmount(BigInteger.Pow(2, 192), 0);
         Zero = new TokenAmount(0);
         NaN = new TokenAmount(true);
         OneFullUnit = new TokenAmount(_divisor);

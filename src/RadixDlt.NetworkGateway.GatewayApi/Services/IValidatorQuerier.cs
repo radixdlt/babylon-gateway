@@ -66,14 +66,15 @@ using RadixDlt.NetworkGateway.Abstractions;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IValidatorQuerier
 {
-    Task<GatewayApiSdk.Model.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(
+    Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(
         IList<EntityAddress> validatorAddresses,
-        GatewayApiSdk.Model.LedgerState ledgerState,
-        GatewayApiSdk.Model.LedgerState? fromLedgerState,
+        GatewayModel.LedgerState ledgerState,
+        GatewayModel.LedgerState? fromLedgerState,
         CancellationToken token = default);
 }

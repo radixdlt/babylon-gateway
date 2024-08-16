@@ -72,14 +72,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreApiModel = RadixDlt.CoreApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal interface IRoleAssignmentQuerier
 {
-    Task<Dictionary<long, GatewayApiSdk.Model.ComponentEntityRoleAssignments>> GetRoleAssignmentsHistory(
+    Task<Dictionary<long, GatewayModel.ComponentEntityRoleAssignments>> GetRoleAssignmentsHistory(
         List<ComponentEntity> componentEntities,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
 }
 
@@ -99,9 +100,9 @@ internal class RoleAssignmentQuerier : IRoleAssignmentQuerier
         _blueprintProvider = blueprintProvider;
     }
 
-    public async Task<Dictionary<long, GatewayApiSdk.Model.ComponentEntityRoleAssignments>> GetRoleAssignmentsHistory(
+    public async Task<Dictionary<long, GatewayModel.ComponentEntityRoleAssignments>> GetRoleAssignmentsHistory(
         List<ComponentEntity> componentEntities,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
         var componentLookup = componentEntities.Select(x => x.Id).ToHashSet();
@@ -152,7 +153,7 @@ internal class RoleAssignmentQuerier : IRoleAssignmentQuerier
 
     private async Task<List<EntityRoleAssignmentsAggregateHistory>> GetEntityRoleAssignmentsAggregateHistory(
         IReadOnlyCollection<long> componentIds,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
         if (!componentIds.Any())

@@ -169,7 +169,7 @@ LIMIT @limit;",
             ? new GatewayModel.StateAccountLockerAccountResourcesCursor(vaultsAndOneMore.Last().FromStateVersion, vaultsAndOneMore.Last().Id).ToCursorString()
             : null;
 
-        return new GatewayApiSdk.Model.StateAccountLockerPageVaultsResponse(
+        return new GatewayModel.StateAccountLockerPageVaultsResponse(
             ledgerState: ledgerState,
             lockerAddress: accountLocker.Address,
             accountAddress: account.Address,

@@ -174,6 +174,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<UnverifiedStandardMetadataEntryHistory> UnverifiedStandardMetadataEntryHistory => Set<UnverifiedStandardMetadataEntryHistory>();
 
+    public DbSet<ResourceHolder> ResourceHolders => Set<ResourceHolder>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -630,5 +632,14 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<UnverifiedStandardMetadataEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.Discriminator, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<ResourceHolder>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId })
+            .IsUnique();
+
+        modelBuilder
+            .Entity<ResourceHolder>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.Balance });
     }
 }

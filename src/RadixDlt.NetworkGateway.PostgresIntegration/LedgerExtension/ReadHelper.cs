@@ -440,7 +440,8 @@ SELECT
     nextval('account_authorized_depositor_entry_history_id_seq') AS AccountAuthorizedDepositorEntryHistorySequence,
     nextval('account_authorized_depositor_aggregate_history_id_seq') AS AccountAuthorizedDepositorAggregateHistorySequence,
     nextval('unverified_standard_metadata_aggregate_history_id_seq') AS UnverifiedStandardMetadataAggregateHistorySequence,
-    nextval('unverified_standard_metadata_entry_history_id_seq') AS UnverifiedStandardMetadataEntryHistorySequence
+    nextval('unverified_standard_metadata_entry_history_id_seq') AS UnverifiedStandardMetadataEntryHistorySequence,
+    nextval('resource_holders_id_seq') AS ResourceHoldersSequence
 ",
             cancellationToken: token);
 

@@ -84,40 +84,49 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Provide either &#x60;key_hex&#x60; or &#x60;key_json&#x60;. If both are provided, &#x60;key_hex&#x60; is used and &#x60;key_json&#x60; is ignored.
+    /// ResourceHoldersCollectionFungibleResourceItem
     /// </summary>
-    [DataContract(Name = "StateKeyValueStoreDataRequestKeyItem")]
-    public partial class StateKeyValueStoreDataRequestKeyItem : IEquatable<StateKeyValueStoreDataRequestKeyItem>
+    [DataContract(Name = "ResourceHoldersCollectionFungibleResourceItem")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionFungibleResourceItem), "FungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "NonFungibleResource")]
+    public partial class ResourceHoldersCollectionFungibleResourceItem : ResourceHoldersCollectionItem, IEquatable<ResourceHoldersCollectionFungibleResourceItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionFungibleResourceItem" /> class.
         /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob..</param>
-        /// <param name="keyJson">keyJson.</param>
-        public StateKeyValueStoreDataRequestKeyItem(string keyHex = default(string), ProgrammaticScryptoSborValue keyJson = default(ProgrammaticScryptoSborValue))
+        [JsonConstructorAttribute]
+        protected ResourceHoldersCollectionFungibleResourceItem() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceHoldersCollectionFungibleResourceItem" /> class.
+        /// </summary>
+        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        /// <param name="type">type (required) (default to ResourceHoldersResourceType.FungibleResource).</param>
+        /// <param name="holderAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">lastUpdatedAtStateVersion (required).</param>
+        public ResourceHoldersCollectionFungibleResourceItem(string amount = default(string), ResourceHoldersResourceType type = ResourceHoldersResourceType.FungibleResource, string holderAddress = default(string), long lastUpdatedAtStateVersion = default(long)) : base(type, holderAddress, lastUpdatedAtStateVersion)
         {
-            this.KeyHex = keyHex;
-            this.KeyJson = keyJson;
+            // to ensure "amount" is required (not null)
+            if (amount == null)
+            {
+                throw new ArgumentNullException("amount is a required property for ResourceHoldersCollectionFungibleResourceItem and cannot be null");
+            }
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets KeyJson
-        /// </summary>
-        [DataMember(Name = "key_json", EmitDefaultValue = true)]
-        public ProgrammaticScryptoSborValue KeyJson { get; set; }
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -126,9 +135,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateKeyValueStoreDataRequestKeyItem {\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
-            sb.Append("  KeyJson: ").Append(KeyJson).Append("\n");
+            sb.Append("class ResourceHoldersCollectionFungibleResourceItem {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -137,7 +146,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,30 +158,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateKeyValueStoreDataRequestKeyItem);
+            return this.Equals(input as ResourceHoldersCollectionFungibleResourceItem);
         }
 
         /// <summary>
-        /// Returns true if StateKeyValueStoreDataRequestKeyItem instances are equal
+        /// Returns true if ResourceHoldersCollectionFungibleResourceItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateKeyValueStoreDataRequestKeyItem to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersCollectionFungibleResourceItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateKeyValueStoreDataRequestKeyItem input)
+        public bool Equals(ResourceHoldersCollectionFungibleResourceItem input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
-                ) && 
-                (
-                    this.KeyJson == input.KeyJson ||
-                    (this.KeyJson != null &&
-                    this.KeyJson.Equals(input.KeyJson))
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -184,14 +188,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.KeyHex != null)
+                int hashCode = base.GetHashCode();
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
-                }
-                if (this.KeyJson != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyJson.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }

@@ -62,50 +62,26 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal static class QueryHelper
+[DataContract]
+public sealed record ResourceHoldersCursor(long? IdBoundary, string BalanceBoundary)
 {
-    internal static async Task<Dictionary<EntityAddress, long>> ResolveEntityIds(ReadOnlyDbContext dbContext, List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        var entities = await dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.Address, e => e.Id, token);
+    [DataMember(Name = "id", EmitDefaultValue = false)]
+    public long? IdBoundary { get; set; } = IdBoundary;
 
-        return entities;
+    [DataMember(Name = "b", EmitDefaultValue = false)]
+    public string BalanceBoundary { get; set; } = BalanceBoundary;
+
+    public static ResourceHoldersCursor FromCursorString(string cursorString)
+    {
+        return Serializations.FromBase64JsonOrDefault<ResourceHoldersCursor>(cursorString);
     }
 
-    internal static async Task<TEntity> GetEntity<TEntity>(ReadOnlyDbContext dbContext, EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
-        where TEntity : Entity
+    public string ToCursorString()
     {
-        var entity = await dbContext
-            .Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .AnnotateMetricName()
-            .FirstOrDefaultAsync(e => e.Address == address, token);
-
-        if (entity == null)
-        {
-            throw new EntityNotFoundException(address.ToString());
-        }
-
-        if (entity is not TEntity typedEntity)
-        {
-            throw new InvalidEntityException(address.ToString());
-        }
-
-        return typedEntity;
+        return Serializations.AsBase64Json(this);
     }
 }

@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
@@ -81,7 +82,7 @@ internal class DefaultValidatorHandler : IValidatorHandler
         _validatorQuerier = validatorQuerier;
     }
 
-    public async Task<GatewayApiSdk.Model.ValidatorsUptimeResponse> Uptime(GatewayApiSdk.Model.ValidatorsUptimeRequest request, CancellationToken token)
+    public async Task<GatewayModel.ValidatorsUptimeResponse> Uptime(GatewayModel.ValidatorsUptimeRequest request, CancellationToken token)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
         var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token);
