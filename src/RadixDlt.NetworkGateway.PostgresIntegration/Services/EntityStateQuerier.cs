@@ -76,6 +76,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -167,6 +168,125 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
 
+        var queryConfiguration = new EntityResourcesPageQuery.QueryConfiguration(defaultPageSize, defaultPageSize, aggregatePerVault ? defaultPageSize : 0, ledgerState.StateVersion);
+        var entityResources = await EntityResourcesPageQuery.Execute(_dbContext, _dapperWrapper, componentEntities.Select(e => e.Id).ToArray(), queryConfiguration, token);
+
+        // TODO the above does not support optIns.NonFungibleIncludeNfids by design (use separate query if needed)
+
+        var entityAndResourceIds = entityResources.Values
+            .SelectMany(x => x.Resources.Values.Select(r => r.ResourceEntityId))
+            .Union(entities.Select(e => e.Id))
+            .ToHashSet()
+            .ToArray();
+
+        var explicitMetadata = optIns.ExplicitMetadata?.Any() == true
+            ? await GetExplicitMetadata(entityAndResourceIds, optIns.ExplicitMetadata.ToArray(), ledgerState, token)
+            : null;
+
+        // TODO wrap in .ToGatewayModel()?
+
+        var mappedEntityResources = entityResources.Values.Select(x =>
+        {
+            string? funCursor = null;
+            var fun = x.FungibleResources
+                .TakeWhile((f, idx) => CursorGenerator.TakeWhileStateVersionId(f, idx, queryConfiguration.FungibleResourcesPerEntity, x => new GatewayModel.StateVersionIdCursor(x.ResourceFromStateVersion, x.ResourceEntityId), out funCursor))
+                .Select(f =>
+                {
+                    GatewayModel.FungibleResourcesCollectionItem val;
+                    GatewayModel.EntityMetadataCollection? resourceExplicitMetadata = null;
+
+                    explicitMetadata?.TryGetValue(f.ResourceEntityId, out resourceExplicitMetadata);
+
+                    if (aggregatePerVault)
+                    {
+                        string? vaultCursor = null;
+                        var vaults = f.Vaults.Values
+                            .TakeWhile((v, idx) => CursorGenerator.TakeWhileStateVersionId(v, idx, queryConfiguration.VaultsPerResource, x => new GatewayModel.StateVersionIdCursor(x.VaultFromStateVersion, x.VaultEntityId), out vaultCursor))
+                            .Select(v => new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                                vaultAddress: v.VaultEntityAddress,
+                                amount: TokenAmount.FromSubUnitsString(v.VaultBalance).ToString(),
+                                lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion))
+                            .ToList();
+
+                        val = new GatewayModel.FungibleResourcesCollectionItemVaultAggregated(
+                            resourceAddress: f.ResourceEntityAddress,
+                            vaults: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(
+                                totalCount: f.ResourceVaultTotalCount,
+                                nextCursor: vaultCursor,
+                                items: vaults),
+                            explicitMetadata: resourceExplicitMetadata);
+                    }
+                    else
+                    {
+                        val = new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
+                            resourceAddress: f.ResourceEntityAddress,
+                            amount: TokenAmount.FromSubUnitsString(f.ResourceBalance).ToString(),
+                            lastUpdatedAtStateVersion: f.ResourceLastUpdatedAtStateVersion,
+                            explicitMetadata: resourceExplicitMetadata);
+                    }
+
+                    return val;
+                })
+                .ToList();
+
+            string? nonFunCursor = null;
+            var nonFun = x.NonFungibleResources
+                .TakeWhile((nf, idx) => CursorGenerator.TakeWhileStateVersionId(nf, idx, queryConfiguration.NonFungibleResourcesPerEntity, x => new GatewayModel.StateVersionIdCursor(x.ResourceFromStateVersion, x.ResourceEntityId), out nonFunCursor))
+                .Select(nf =>
+                {
+                    GatewayModel.NonFungibleResourcesCollectionItem val;
+                    GatewayModel.EntityMetadataCollection? resourceExplicitMetadata = null;
+
+                    explicitMetadata?.TryGetValue(nf.ResourceEntityId, out resourceExplicitMetadata);
+
+                    if (aggregatePerVault)
+                    {
+                        string? vaultCursor = null;
+                        var vaults = nf.Vaults.Values
+                            .TakeWhile((v, idx) => CursorGenerator.TakeWhileStateVersionId(v, idx, queryConfiguration.VaultsPerResource, x => new GatewayModel.StateVersionIdCursor(x.VaultFromStateVersion, x.VaultEntityId), out vaultCursor))
+                            .Select(v => new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                                totalCount: long.Parse(TokenAmount.FromSubUnitsString(v.VaultBalance).ToString()),
+                                nextCursor: "tbd", // TODO implement
+                                items: null, // TODO implement
+                                vaultAddress: v.VaultEntityAddress,
+                                lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion))
+                            .ToList();
+
+                        val = new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated(
+                            resourceAddress: nf.ResourceEntityAddress,
+                            vaults: new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVault(
+                                totalCount: nf.ResourceVaultTotalCount,
+                                nextCursor: vaultCursor,
+                                items: vaults),
+                            explicitMetadata: resourceExplicitMetadata);
+                    }
+                    else
+                    {
+                        val = new GatewayModel.NonFungibleResourcesCollectionItemGloballyAggregated(
+                            resourceAddress: nf.ResourceEntityAddress,
+                            amount: long.Parse(TokenAmount.FromSubUnitsString(nf.ResourceBalance).ToString()),
+                            lastUpdatedAtStateVersion: nf.ResourceLastUpdatedAtStateVersion,
+                            explicitMetadata: resourceExplicitMetadata);
+                    }
+
+                    return val;
+                })
+                .ToList();
+
+            return new
+            {
+                EntityId = x.EntityId,
+                Fungibles = new GatewayModel.FungibleResourcesCollection(
+                    totalCount: x.TotalFungibleResourceCount,
+                    nextCursor: funCursor,
+                    items: fun),
+                NonFungibles = new GatewayModel.NonFungibleResourcesCollection(
+                    totalCount: x.TotalNonFungibleResourceCount,
+                    nextCursor: nonFunCursor,
+                    items: nonFun),
+            };
+        }).ToList();
+
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)
         var stateHistory = await GetStateHistory(persistedComponentEntities, ledgerState, token);
@@ -175,17 +295,6 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             : null;
         var componentRoyaltyConfigs = globalPersistedComponentEntities.Any() && optIns.ComponentRoyaltyConfig
             ? await GetComponentRoyaltyConfigs(globalPersistedComponentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
-            : null;
-
-        // fetch [non-]fungible resource collections for all components, even internal ones, for backwards compability
-        var fungibleResources =
-            await EntityFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, 0, defaultPageSize, ledgerState, token);
-        var nonFungibleResources = await EntityNonFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, optIns.NonFungibleIncludeNfids, 0,
-            defaultPageSize, ledgerState, token);
-        var resourceAddressToEntityId = await ResolveResourceEntityIds(fungibleResources.Values, nonFungibleResources.Values, token);
-
-        var explicitMetadata = optIns.ExplicitMetadata?.Any() == true
-            ? await GetExplicitMetadata(entities.Select(e => e.Id).Concat(resourceAddressToEntityId.Values).ToArray(), optIns.ExplicitMetadata.ToArray(), ledgerState, token)
             : null;
 
         var items = new List<GatewayModel.StateEntityDetailsResponseItem>();
@@ -365,26 +474,12 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     globalAddress: correlatedAddresses[entity.GlobalAncestorId.Value])
                 : null;
 
-            var haveFungibles = fungibleResources.TryGetValue(entity.Id, out var fungibles);
-            var haveNonFungibles = nonFungibleResources.TryGetValue(entity.Id, out var nonFungibles);
-
-            if (explicitMetadata != null)
-            {
-                if (haveFungibles && fungibles != null)
-                {
-                    fungibles.Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)c.ResourceAddress]]);
-                }
-
-                if (haveNonFungibles && nonFungibles != null)
-                {
-                    nonFungibles.Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)c.ResourceAddress]]);
-                }
-            }
+            var x = mappedEntityResources.FirstOrDefault(x => x.EntityId == entity.Id);
 
             items.Add(new GatewayModel.StateEntityDetailsResponseItem(
                 address: entity.Address,
-                fungibleResources: haveFungibles ? fungibles : null,
-                nonFungibleResources: haveNonFungibles ? nonFungibles : null,
+                fungibleResources: x?.Fungibles,
+                nonFungibleResources: x?.NonFungibles,
                 ancestorIdentities: ancestorIdentities,
                 metadata: metadata[entity.Id],
                 explicitMetadata: explicitMetadata?[entity.Id],
