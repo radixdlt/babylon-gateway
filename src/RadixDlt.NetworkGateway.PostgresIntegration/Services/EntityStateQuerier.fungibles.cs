@@ -79,82 +79,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal partial class EntityStateQuerier
 {
-    private record NonFungibleVaultViewModel(long VaultEntityId, int NonFungibleIdsCount, long LastUpdatedAtStateVersion, string[] NonFungibleIdsAndOneMore);
+    private record FungibleVaultViewModel(long VaultEntityId, string Balance, long LastUpdatedAtStateVersion);
 
-    private record NonFungibleIdViewModel(string NonFungibleId, int NonFungibleIdsTotalCount);
-
-    private record NonFungibleDataSchemaModel(byte[] Schema, long TypeIndex, SborTypeKind SborTypeKind);
-
-    private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] Data, long DataLastUpdatedAtStateVersion);
-
-    private record NonFungibleIdLocationViewModel(string NonFungibleId, bool IsDeleted, long OwnerVaultId, EntityAddress OwnerVaultAddress, long FromStateVersion);
-
-    private record NonFungibleIdLocationVaultOwnerViewModel(long VaultId, long VaultParentAncestorId, EntityAddress VaultParentAncestorAddress, long VaultGlobalAncestorId, EntityAddress VaultGlobalAncestorAddress);
-
-    private async Task<GatewayModel.NonFungibleIdsCollection> GetNonFungibleIdsSlice(
-        long entityId,
-        long resourceEntityId,
-        long vaultEntityId,
-        int offset,
-        int limit,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token)
+    private async Task<Dictionary<long, FungibleVaultViewModel>> GetFungibleVaultsHistory(List<InternalFungibleVaultEntity> fungibleVaultEntities, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
-        var cd = new CommandDefinition(
-            commandText: @"
-SELECT nfid.non_fungible_id AS NonFungibleId, final.total_count AS NonFungibleIdsTotalCount
-FROM (
-    SELECT a.val AS non_fungible_id_definition_id, cardinality(non_fungible_ids) AS total_count, a.ord AS ord
-    FROM entity_vault_history
-    LEFT JOIN LATERAL UNNEST(non_fungible_ids[@startIndex:@endIndex]) WITH ORDINALITY a(val,ord) ON true
-    WHERE id = (
-        SELECT id
-        FROM entity_vault_history
-        WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND resource_entity_id = @resourceEntityId AND vault_entity_id = @vaultEntityId
-        ORDER BY from_state_version DESC
-        LIMIT 1
-    )
-) final
-INNER JOIN non_fungible_id_definition nfid ON nfid.id = final.non_fungible_id_definition_id
-order by ord
-",
-            parameters: new
-            {
-                stateVersion = ledgerState.StateVersion,
-                entityId = entityId,
-                vaultEntityId = vaultEntityId,
-                resourceEntityId = resourceEntityId,
-                startIndex = offset + 1,
-                endIndex = offset + limit,
-            },
-            cancellationToken: token);
-
-        var totalCount = 0;
-
-        var items = (await _dapperWrapper.QueryAsync<NonFungibleIdViewModel>(_dbContext.Database.GetDbConnection(), cd))
-            .ToList()
-            .Select(vm =>
-            {
-                totalCount = vm.NonFungibleIdsTotalCount;
-
-                return vm.NonFungibleId;
-            })
-            .ToList();
-
-        return new GatewayModel.NonFungibleIdsCollection(totalCount, CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount), items);
-    }
-
-    private async Task<Dictionary<long, NonFungibleVaultViewModel>> GetNonFungibleVaultsHistory(List<InternalNonFungibleVaultEntity> nonFungibleVaultEntities, bool includeNfids, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        if (!nonFungibleVaultEntities.Any())
+        if (!fungibleVaultEntities.Any())
         {
-            return new Dictionary<long, NonFungibleVaultViewModel>();
+            return new Dictionary<long, FungibleVaultViewModel>();
         }
 
         var globalEntityIds = new List<long>();
         var vaultEntityIds = new List<long>();
 
-        foreach (var e in nonFungibleVaultEntities)
+        foreach (var e in fungibleVaultEntities)
         {
             globalEntityIds.Add(e.GlobalAncestorId ?? throw new UnreachableException("Vault entities must have global ancestor"));
             vaultEntityIds.Add(e.Id);
@@ -165,9 +102,8 @@ order by ord
 WITH variables (global_entity_id, vault_entity_id) AS (SELECT UNNEST(@globalEntityIds), UNNEST(@vaultEntityIds))
 SELECT
     evh.vault_entity_id AS VaultEntityId,
-    cardinality(evh.non_fungible_ids) AS NonFungibleIdsCount,
-    evh.from_state_version AS LastUpdatedAtStateVersion,
-    array_agg(nfid.non_fungible_id) AS NonFungibleIdsAndOneMore
+    CAST(evh.balance as text) AS Balance,
+    evh.from_state_version AS LastUpdatedAtStateVersion
 FROM variables
 INNER JOIN LATERAL(
     SELECT *
@@ -175,20 +111,16 @@ INNER JOIN LATERAL(
     WHERE global_entity_id = variables.global_entity_id AND vault_entity_id = variables.vault_entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
-) evh ON true
-LEFT JOIN non_fungible_id_definition nfid ON nfid.id = ANY(evh.non_fungible_ids[@startIndex:@endIndex])
-GROUP BY VaultEntityId, NonFungibleIdsCount, LastUpdatedAtStateVersion",
+) evh ON true",
             parameters: new
             {
                 globalEntityIds = globalEntityIds,
                 vaultEntityIds = vaultEntityIds,
                 stateVersion = ledgerState.StateVersion,
-                startIndex = 1,
-                endIndex = includeNfids ? _endpointConfiguration.Value.DefaultPageSize + 1 : 0,
             },
             cancellationToken: token);
 
-        return (await _dapperWrapper.QueryAsync<NonFungibleVaultViewModel>(_dbContext.Database.GetDbConnection(), cd))
+        return (await _dapperWrapper.QueryAsync<FungibleVaultViewModel>(_dbContext.Database.GetDbConnection(), cd))
             .ToDictionary(e => e.VaultEntityId);
     }
 }

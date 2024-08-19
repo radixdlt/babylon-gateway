@@ -89,6 +89,28 @@ internal class EntityResourcesPageQuery
         return result;
     }
 
+    public static async Task<ResultEntity?> NonFungibleResourcesPage(
+        ReadOnlyDbContext dbContext,
+        IDapperWrapper dapperWrapper,
+        long entityId,
+        ResourcesPageQueryConfiguration pageConfiguration,
+        CancellationToken token = default)
+    {
+        var configuration = new QueryConfiguration(
+            0,
+            pageConfiguration.ResourcesPerEntity,
+            pageConfiguration.VaultsPerResource,
+            pageConfiguration.DescendingOrder,
+            pageConfiguration.Cursor,
+            null,
+            pageConfiguration.AtLedgerState);
+        var results = await ExecuteEntityResourcesPageQuery(dbContext, dapperWrapper, new[] { entityId }, null, configuration, token);
+
+        results.TryGetValue(entityId, out var result);
+
+        return result;
+    }
+
     public static async Task<ResultEntity?> FungibleResourceVaultsPage(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
@@ -100,6 +122,29 @@ internal class EntityResourcesPageQuery
         var configuration = new QueryConfiguration(
             1,
             0,
+            pageConfiguration.VaultsPerResource,
+            pageConfiguration.DescendingOrder,
+            null,
+            pageConfiguration.Cursor,
+            pageConfiguration.AtLedgerState);
+        var results = await ExecuteEntityResourcesPageQuery(dbContext, dapperWrapper, new[] { entityId }, resourceId, configuration, token);
+
+        results.TryGetValue(entityId, out var result);
+
+        return result;
+    }
+
+    public static async Task<ResultEntity?> NonFungibleResourceVaultsPage(
+        ReadOnlyDbContext dbContext,
+        IDapperWrapper dapperWrapper,
+        long entityId,
+        long resourceId,
+        VaultsPageQueryConfiguration pageConfiguration,
+        CancellationToken token = default)
+    {
+        var configuration = new QueryConfiguration(
+            0,
+            1,
             pageConfiguration.VaultsPerResource,
             pageConfiguration.DescendingOrder,
             null,
