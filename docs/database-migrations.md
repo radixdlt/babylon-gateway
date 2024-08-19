@@ -15,9 +15,11 @@ https://hub.docker.com/r/radixdlt/babylon-ng-database-migrations
 To migrate the database you just need to run that image providing a connection string to the database. To do that you need to set an environment variable for the docker container `ConnectionStrings__NetworkGatewayMigrations`.
 
 #### Known issues and limitations
-If you want to use different schema than `public` for your database tables and migration history table, make sure to provide `search_path` parameter to connection string as described here https://www.npgsql.org/doc/api/Npgsql.NpgsqlConnectionStringBuilder.html#Npgsql_NpgsqlConnectionStringBuilder_SearchPath
-Providing it **ONLY** on user level i.e `ALTER user someuser in database mainnet SET search_path TO babylon, public;` is not enough and will result in errors.  
+In the current version of Ngpsql, if using a schema other than `public`, the migrations may fail to execute with an error message such as "__EFMigrationsHistory already exists on dbContext.Database.Migrate();". This is caused by [this underlying issue](https://github.com/npgsql/efcore.pg/issues/2878).
 
+We have implemented a workaround for this, which requires specifying the `SearchPath=schema_name` parameter to the connection string as [described here in the Ngpsql docs](https://www.npgsql.org/doc/api/Npgsql.NpgsqlConnectionStringBuilder.html#Npgsql_NpgsqlConnectionStringBuilder_SearchPath).
+
+Providing the schema **ONLY** at the user level i.e `ALTER user someuser in database mainnet SET search_path TO schema_name, public;` is not enough to activate the work-around and will result in errors.
 ### Idempotent SQL script
 It is a Raw SQL script that has to be executed on the database. It takes care of applying each migration only once and applying only missing migrations.
 
