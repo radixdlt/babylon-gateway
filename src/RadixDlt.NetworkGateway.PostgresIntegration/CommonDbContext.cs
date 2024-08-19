@@ -104,12 +104,6 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<PackageCodeAggregateHistory> PackageCodeAggregateHistory => Set<PackageCodeAggregateHistory>();
 
-    public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
-
-    public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
-
-    public DbSet<EntityResourceAggregatedVaultsHistory> EntityResourceAggregatedVaultsHistory => Set<EntityResourceAggregatedVaultsHistory>();
-
     public DbSet<AccountLockerEntryDefinition> AccountLockerDefinition => Set<AccountLockerEntryDefinition>();
 
     public DbSet<AccountLockerEntryResourceVaultDefinition> AccountLockerEntryResourceVaultDefinition => Set<AccountLockerEntryResourceVaultDefinition>();
@@ -480,24 +474,6 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<PackageCodeAggregateHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityResourceAggregatedVaultsHistory>()
-            .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
-            .HasValue<EntityFungibleResourceAggregatedVaultsHistory>(ResourceType.Fungible)
-            .HasValue<EntityNonFungibleResourceAggregatedVaultsHistory>(ResourceType.NonFungible);
-
-        modelBuilder
-            .Entity<EntityResourceAggregatedVaultsHistory>()
-            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityResourceVaultAggregateHistory>()
-            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<EntityVaultHistory>()

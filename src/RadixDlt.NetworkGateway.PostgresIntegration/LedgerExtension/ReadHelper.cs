@@ -81,22 +81,18 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record NonFungibleMap(EntityAddress ResourceAddress, string SimpleRepresentation, long ResourceEntityId, long NonFungibleIdDataId);
-
 internal class ReadHelper : IReadHelper
 {
     private readonly ReadWriteDbContext _dbContext;
     private readonly NpgsqlConnection _connection;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly CancellationToken _token;
-    private readonly IDapperWrapper _dapperWrapper;
 
-    public ReadHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers, IDapperWrapper dapperWrapper, CancellationToken token = default)
+    public ReadHelper(ReadWriteDbContext dbContext, IEnumerable<ILedgerExtenderServiceObserver> observers, CancellationToken token = default)
     {
         _dbContext = dbContext;
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
         _observers = observers;
-        _dapperWrapper = dapperWrapper;
         _token = token;
     }
 
@@ -114,142 +110,6 @@ internal class ReadHelper : IReadHelper
             .ToDictionaryAsync(keySelector, _token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(stageName, Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<IVaultSnapshot> vaultSnapshots, CancellationToken token)
-    {
-        if (!vaultSnapshots.Any())
-        {
-            return new Dictionary<long, EntityResourceAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = new HashSet<long>();
-
-        foreach (var change in vaultSnapshots)
-        {
-            entityIds.Add(change.ReferencedVault.DatabaseOwnerAncestorId);
-            entityIds.Add(change.ReferencedVault.DatabaseGlobalAncestorId);
-        }
-
-        var ids = entityIds.ToList();
-
-        var result = await _dbContext
-            .EntityResourceAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id) AS (
-    SELECT UNNEST({ids})
-)
-SELECT erah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_resource_aggregate_history
-    WHERE entity_id = variables.entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) erah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.EntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityResourceAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(
-        List<IVaultChange> vaultChanges,
-        CancellationToken token)
-    {
-        if (!vaultChanges.Any())
-        {
-            return new Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var entityIds = new List<long>();
-        var resourceEntityIds = new List<long>();
-
-        foreach (var d in vaultChanges.Select(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId)).ToHashSet())
-        {
-            entityIds.Add(d.EntityId);
-            resourceEntityIds.Add(d.ResourceEntityId);
-        }
-
-        var result = await _dbContext
-            .EntityResourceAggregatedVaultsHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, resource_entity_id) AS (
-    SELECT UNNEST({entityIds}), UNNEST({resourceEntityIds})
-)
-SELECT eravh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_resource_aggregated_vaults_history
-    WHERE entity_id = variables.entity_id AND resource_entity_id = variables.resource_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) eravh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityResourceAggregatedVaultsHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(
-        List<IVaultSnapshot> vaultSnapshots,
-        CancellationToken token)
-    {
-        if (!vaultSnapshots.Any())
-        {
-            return new Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var data = new HashSet<EntityResourceVaultLookup>();
-
-        foreach (var change in vaultSnapshots)
-        {
-            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
-        var entityIds = new List<long>();
-        var resourceEntityIds = new List<long>();
-
-        foreach (var d in data)
-        {
-            entityIds.Add(d.EntityId);
-            resourceEntityIds.Add(d.ResourceEntityId);
-        }
-
-        var result = await _dbContext
-            .EntityResourceVaultAggregateHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, resource_entity_id) AS (
-    SELECT UNNEST({entityIds}), UNNEST({resourceEntityIds})
-)
-SELECT ervah.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_resource_vault_aggregate_history
-    WHERE entity_id = variables.entity_id AND resource_entity_id = variables.resource_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) ervah ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new EntityResourceVaultLookup(e.EntityId, e.ResourceEntityId), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityResourceVaultAggregateHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }
@@ -410,9 +270,6 @@ SELECT
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_metadata_aggregate_history_id_seq') AS EntityMetadataAggregateHistorySequence,
-    nextval('entity_resource_aggregated_vaults_history_id_seq') AS EntityResourceAggregatedVaultsHistorySequence,
-    nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
-    nextval('entity_resource_vault_aggregate_history_id_seq') AS EntityResourceVaultAggregateHistorySequence,
     nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,
     nextval('entity_role_assignments_aggregate_history_id_seq') AS EntityRoleAssignmentsAggregateHistorySequence,
     nextval('entity_role_assignments_entry_history_id_seq') AS EntityRoleAssignmentsEntryHistorySequence,

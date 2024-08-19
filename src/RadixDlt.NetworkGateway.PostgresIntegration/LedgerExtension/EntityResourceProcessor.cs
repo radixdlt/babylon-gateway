@@ -85,6 +85,8 @@ internal class EntityResourceProcessor
 {
     internal readonly record struct VaultChange(ResourceType ResourceType, VaultEntity VaultEntity, TokenAmount Delta, long StateVersion)
     {
+        public bool HasDistinctGlobalAndOwnerEntity() => VaultEntity.GlobalAncestorId!.Value != VaultEntity.OwnerAncestorId!.Value;
+
         public ByEntityDbLookup ByGlobalEntityDbLookup() => new(VaultEntity.GlobalAncestorId!.Value);
 
         public ByEntityDbLookup ByOwnerEntityDbLookup() => new(VaultEntity.OwnerAncestorId!.Value);
@@ -165,112 +167,19 @@ internal class EntityResourceProcessor
                 throw new UnreachableException("Vault entity cannot be global.");
             }
 
-            foreach (var lookup in new[] { vaultChange.ByGlobalEntityResourceDbLookup(), vaultChange.ByOwnerEntityResourceDbLookup() })
+            ProcessEntryDefinition(vaultChange, vaultChange.ByGlobalEntityResourceDbLookup());
+            ProcessTotalsHistory(vaultChange, vaultChange.ByGlobalEntityResourceDbLookup());
+            ProcessVaultEntryDefinition(vaultChange, vaultChange.ByGlobalEntityResourceVaultDbLookup());
+            ProcessVaultTotalsHistory(vaultChange, vaultChange.ByGlobalEntityResourceVaultDbLookup());
+            ProcessBalanceHistory(vaultChange, vaultChange.ByGlobalEntityResourceVaultDbLookup());
+
+            if (vaultChange.HasDistinctGlobalAndOwnerEntity())
             {
-                if (!_existingResourceDefinitions.ContainsKey(lookup))
-                {
-                    var definition = new EntityResourceEntryDefinition
-                    {
-                        Id = _context.Sequences.EntityResourceEntryDefinitionSequence++,
-                        FromStateVersion = vaultChange.StateVersion,
-                        EntityId = lookup.EntityId,
-                        ResourceEntityId = lookup.ResourceEntityId,
-                        ResourceType = vaultChange.ResourceType,
-                    };
-
-                    _resourceEntryDefinitionsToAdd.Add(definition);
-                    _existingResourceDefinitions[lookup] = definition;
-
-                    EntityResourceTotalsHistory totalsHistory;
-
-                    if (!_mostRecentResourceTotalsHistory.TryGetValue(new ByEntityDbLookup(lookup.EntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultChange.StateVersion)
-                    {
-                        totalsHistory = new EntityResourceTotalsHistory
-                        {
-                            Id = _context.Sequences.EntityResourceTotalsHistorySequence++,
-                            FromStateVersion = vaultChange.StateVersion,
-                            EntityId = lookup.EntityId,
-                            TotalCount = previousTotalsHistory?.TotalCount ?? 0,
-                            TotalFungibleCount = previousTotalsHistory?.TotalFungibleCount ?? 0,
-                            TotalNonFungibleCount = previousTotalsHistory?.TotalNonFungibleCount ?? 0,
-                        };
-
-                        _mostRecentResourceTotalsHistory[new ByEntityDbLookup(lookup.EntityId)] = totalsHistory;
-                        _resourceTotalsHistoryToAdd.Add(totalsHistory);
-                    }
-                    else
-                    {
-                        totalsHistory = previousTotalsHistory;
-                    }
-
-                    totalsHistory.TotalCount += 1;
-                    totalsHistory.TotalFungibleCount += vaultChange.ResourceType == ResourceType.Fungible ? 1 : 0;
-                    totalsHistory.TotalNonFungibleCount += vaultChange.ResourceType == ResourceType.NonFungible ? 1 : 0;
-                }
-            }
-
-            foreach (var lookup in new[] { vaultChange.ByGlobalEntityResourceVaultDbLookup(), vaultChange.ByOwnerEntityResourceVaultDbLookup() })
-            {
-                if (!_existingResourceVaultDefinitions.ContainsKey(lookup))
-                {
-                    var definition = new EntityResourceVaultEntryDefinition
-                    {
-                        Id = _context.Sequences.EntityResourceVaultEntryDefinitionSequence++,
-                        FromStateVersion = vaultChange.StateVersion,
-                        EntityId = lookup.EntityId,
-                        ResourceEntityId = lookup.ResourceEntityId,
-                        VaultEntityId = lookup.VaultEntityId,
-                    };
-
-                    _resourceVaultEntryDefinitionsToAdd.Add(definition);
-                    _existingResourceVaultDefinitions[lookup] = definition;
-
-                    EntityResourceVaultTotalsHistory totalsHistory;
-
-                    if (!_mostRecentResourceVaultTotalsHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultChange.StateVersion)
-                    {
-                        totalsHistory = new EntityResourceVaultTotalsHistory
-                        {
-                            Id = _context.Sequences.EntityResourceVaultTotalsHistorySequence++,
-                            FromStateVersion = vaultChange.StateVersion,
-                            EntityId = lookup.EntityId,
-                            ResourceEntityId = lookup.ResourceEntityId,
-                            TotalCount = previousTotalsHistory?.TotalCount ?? 0,
-                        };
-
-                        _mostRecentResourceVaultTotalsHistory[new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId)] = totalsHistory;
-                        _resourceVaultTotalsHistoryToAdd.Add(totalsHistory);
-                    }
-                    else
-                    {
-                        totalsHistory = previousTotalsHistory;
-                    }
-
-                    totalsHistory.TotalCount += 1;
-                }
-
-                EntityResourceBalanceHistory balanceHistory;
-
-                if (!_mostRecentResourceBalanceHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousBalanceHistory) || previousBalanceHistory.FromStateVersion != vaultChange.StateVersion)
-                {
-                    balanceHistory = new EntityResourceBalanceHistory
-                    {
-                        Id = _context.Sequences.EntityResourceBalanceHistorySequence++,
-                        FromStateVersion = vaultChange.StateVersion,
-                        EntityId = lookup.EntityId,
-                        ResourceEntityId = lookup.ResourceEntityId,
-                        Balance = previousBalanceHistory?.Balance ?? TokenAmount.Zero,
-                    };
-
-                    _mostRecentResourceBalanceHistory[new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId)] = balanceHistory;
-                    _resourceBalanceHistoryToAdd.Add(balanceHistory);
-                }
-                else
-                {
-                    balanceHistory = previousBalanceHistory;
-                }
-
-                balanceHistory.Balance += vaultChange.Delta;
+                ProcessEntryDefinition(vaultChange, vaultChange.ByOwnerEntityResourceDbLookup());
+                ProcessTotalsHistory(vaultChange, vaultChange.ByOwnerEntityResourceDbLookup());
+                ProcessVaultEntryDefinition(vaultChange, vaultChange.ByOwnerEntityResourceVaultDbLookup());
+                ProcessVaultTotalsHistory(vaultChange, vaultChange.ByOwnerEntityResourceVaultDbLookup());
+                ProcessBalanceHistory(vaultChange, vaultChange.ByOwnerEntityResourceVaultDbLookup());
             }
         }
     }
@@ -286,6 +195,127 @@ internal class EntityResourceProcessor
         rowsInserted += await CopyEntityResourceVaultTotalsHistory();
 
         return rowsInserted;
+    }
+
+    private void ProcessEntryDefinition(VaultChange vaultChange, ByEntityResourceDbLookup lookup)
+    {
+        if (_existingResourceDefinitions.ContainsKey(lookup))
+        {
+            return;
+        }
+
+        var definition = new EntityResourceEntryDefinition
+        {
+            Id = _context.Sequences.EntityResourceEntryDefinitionSequence++,
+            FromStateVersion = vaultChange.StateVersion,
+            EntityId = lookup.EntityId,
+            ResourceEntityId = lookup.ResourceEntityId,
+            ResourceType = vaultChange.ResourceType,
+        };
+
+        _resourceEntryDefinitionsToAdd.Add(definition);
+        _existingResourceDefinitions[lookup] = definition;
+    }
+
+    private void ProcessTotalsHistory(VaultChange vaultChange, ByEntityResourceDbLookup lookup)
+    {
+        EntityResourceTotalsHistory totalsHistory;
+
+        if (!_mostRecentResourceTotalsHistory.TryGetValue(new ByEntityDbLookup(lookup.EntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultChange.StateVersion)
+        {
+            totalsHistory = new EntityResourceTotalsHistory
+            {
+                Id = _context.Sequences.EntityResourceTotalsHistorySequence++,
+                FromStateVersion = vaultChange.StateVersion,
+                EntityId = lookup.EntityId,
+                TotalCount = previousTotalsHistory?.TotalCount ?? 0,
+                TotalFungibleCount = previousTotalsHistory?.TotalFungibleCount ?? 0,
+                TotalNonFungibleCount = previousTotalsHistory?.TotalNonFungibleCount ?? 0,
+            };
+
+            _mostRecentResourceTotalsHistory[new ByEntityDbLookup(lookup.EntityId)] = totalsHistory;
+            _resourceTotalsHistoryToAdd.Add(totalsHistory);
+        }
+        else
+        {
+            totalsHistory = previousTotalsHistory;
+        }
+
+        totalsHistory.TotalCount += 1;
+        totalsHistory.TotalFungibleCount += vaultChange.ResourceType == ResourceType.Fungible ? 1 : 0;
+        totalsHistory.TotalNonFungibleCount += vaultChange.ResourceType == ResourceType.NonFungible ? 1 : 0;
+    }
+
+    private void ProcessVaultEntryDefinition(VaultChange vaultChange, ByEntityResourceVaultDbLookup lookup)
+    {
+        if (_existingResourceVaultDefinitions.ContainsKey(lookup))
+        {
+            return;
+        }
+
+        var definition = new EntityResourceVaultEntryDefinition
+        {
+            Id = _context.Sequences.EntityResourceVaultEntryDefinitionSequence++,
+            FromStateVersion = vaultChange.StateVersion,
+            EntityId = lookup.EntityId,
+            ResourceEntityId = lookup.ResourceEntityId,
+            VaultEntityId = lookup.VaultEntityId,
+        };
+
+        _resourceVaultEntryDefinitionsToAdd.Add(definition);
+        _existingResourceVaultDefinitions[lookup] = definition;
+    }
+
+    private void ProcessVaultTotalsHistory(VaultChange vaultChange, ByEntityResourceVaultDbLookup lookup)
+    {
+        EntityResourceVaultTotalsHistory totalsHistory;
+
+        if (!_mostRecentResourceVaultTotalsHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultChange.StateVersion)
+        {
+            totalsHistory = new EntityResourceVaultTotalsHistory
+            {
+                Id = _context.Sequences.EntityResourceVaultTotalsHistorySequence++,
+                FromStateVersion = vaultChange.StateVersion,
+                EntityId = lookup.EntityId,
+                ResourceEntityId = lookup.ResourceEntityId,
+                TotalCount = previousTotalsHistory?.TotalCount ?? 0,
+            };
+
+            _mostRecentResourceVaultTotalsHistory[new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId)] = totalsHistory;
+            _resourceVaultTotalsHistoryToAdd.Add(totalsHistory);
+        }
+        else
+        {
+            totalsHistory = previousTotalsHistory;
+        }
+
+        totalsHistory.TotalCount += 1;
+    }
+
+    private void ProcessBalanceHistory(VaultChange vaultChange, ByEntityResourceVaultDbLookup lookup)
+    {
+        EntityResourceBalanceHistory balanceHistory;
+
+        if (!_mostRecentResourceBalanceHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousBalanceHistory) || previousBalanceHistory.FromStateVersion != vaultChange.StateVersion)
+        {
+            balanceHistory = new EntityResourceBalanceHistory
+            {
+                Id = _context.Sequences.EntityResourceBalanceHistorySequence++,
+                FromStateVersion = vaultChange.StateVersion,
+                EntityId = lookup.EntityId,
+                ResourceEntityId = lookup.ResourceEntityId,
+                Balance = previousBalanceHistory?.Balance ?? TokenAmount.Zero,
+            };
+
+            _mostRecentResourceBalanceHistory[new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId)] = balanceHistory;
+            _resourceBalanceHistoryToAdd.Add(balanceHistory);
+        }
+        else
+        {
+            balanceHistory = previousBalanceHistory;
+        }
+
+        balanceHistory.Balance += vaultChange.Delta;
     }
 
     private async Task<IDictionary<ByEntityResourceDbLookup, EntityResourceEntryDefinition>> ExistingEntityResourceEntryDefinitions()
