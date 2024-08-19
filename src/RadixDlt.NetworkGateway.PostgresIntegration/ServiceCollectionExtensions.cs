@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -86,7 +87,25 @@ public static class ServiceCollectionExtensions
             {
                 options.UseNpgsql(
                     serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<MigrationsDbContext>>().NpgsqlDataSource,
-                    o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name));
+                    o =>
+                    {
+                        o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name);
+
+                        // Now we work around https://github.com/npgsql/efcore.pg/issues/2878
+                        // "7.0.11 gives __EFMigrationsHistory already exists on dbContext.Database.Migrate();"
+                        // Which breaks migrations running against non-public default schemas
+                        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                        var connectionString = configuration.GetConnectionString(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName);
+                        var connectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
+                        var searchPaths = connectionStringBuilder.SearchPath?.Split(',');
+                        if (searchPaths is not { Length: > 0 })
+                        {
+                            return;
+                        }
+
+                        var overridenSchema = searchPaths[0];
+                        o.MigrationsHistoryTable(HistoryRepository.DefaultTableName, overridenSchema);
+                    });
             });
     }
 
