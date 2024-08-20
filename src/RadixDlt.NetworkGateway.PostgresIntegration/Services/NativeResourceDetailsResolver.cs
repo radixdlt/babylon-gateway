@@ -147,7 +147,7 @@ base_entities AS (
     WHERE
         e.from_state_version <= var.state_version
       AND e.address = ANY(var.addresses)
-      AND e.correlated_entity_relationships && '{unit_vault_of_resource_pool, stake_vault_of_validator, claim_token_of_validator, recovery_badge_of_access_controller}'::entity_relationship[]
+      AND e.correlated_entity_relationships && '{unit_resource_of_resource_pool, stake_unit_of_validator, claim_token_of_validator, recovery_badge_of_access_controller}'::entity_relationship[]
 ),
 base_with_root AS (
     SELECT
@@ -158,7 +158,7 @@ base_with_root AS (
         unnest(root.correlated_entity_ids) AS root_correlated_entity_id
     FROM base_entities base
     INNER JOIN entities root ON root.id = base.base_correlated_entity_id
-    WHERE base.base_correlated_entity_relationship = ANY('{unit_vault_of_resource_pool, stake_vault_of_validator, claim_token_of_validator, recovery_badge_of_access_controller}'::entity_relationship[])
+    WHERE base.base_correlated_entity_relationship = ANY('{unit_resource_of_resource_pool, stake_unit_of_validator, claim_token_of_validator, recovery_badge_of_access_controller}'::entity_relationship[])
 )
 SELECT
     bwr.base_correlated_entity_relationship AS BaseRelationship,

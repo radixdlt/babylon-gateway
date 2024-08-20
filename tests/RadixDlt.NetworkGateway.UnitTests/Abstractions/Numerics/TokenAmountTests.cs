@@ -207,6 +207,7 @@ public class TokenAmountTests
         new object[] { TokenAmount.FromStringParts(true, "1", "234"), false },
         new object[] { TokenAmount.FromStringParts(false, "1", "-234"), true }, // Invalid call
         new object[] { TokenAmount.FromStringParts(true, "1", "-234"), true }, // Invalid call
+        new object[] { TokenAmount.FromDecimalString("5") / TokenAmount.Zero, true },
     };
 
     [Theory]
@@ -241,5 +242,19 @@ public class TokenAmountTests
         var expectedAsNumber = decimal.Parse(expected, NumberFormatInfo.InvariantInfo);
 
         resultAsNumber.Should().BeApproximately(expectedAsNumber, 100);
+    }
+
+    [Theory]
+    [InlineData("12.5", "2", "25")]
+    [InlineData("2", "5", "10")]
+    [InlineData("2.1", "2", "4.2")]
+    [InlineData("50000000000", "0.123456789", "6172839450")]
+    public void Multiply_ExactValue(string op1, string op2, string expected)
+    {
+        var result = TokenAmount.FromDecimalString(op1) * TokenAmount.FromDecimalString(op2);
+        var resultAsNumber = decimal.Parse(result.ToString(), NumberFormatInfo.InvariantInfo);
+        var expectedAsNumber = decimal.Parse(expected, NumberFormatInfo.InvariantInfo);
+
+        resultAsNumber.Should().Be(expectedAsNumber);
     }
 }

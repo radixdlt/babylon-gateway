@@ -83,7 +83,7 @@ public enum EntityRelationship
     ValidatorToLockedOwnerStakeUnitVault,
     ValidatorToPendingOwnerStakeUnitUnlockVault,
 
-    StakeVaultOfValidator,
+    StakeUnitOfValidator,
     ClaimTokenOfValidator,
 
     // Account Lockers (used on related Vaults and KeyValueStores)
@@ -97,7 +97,7 @@ public enum EntityRelationship
     ResourcePoolToResource,
     ResourcePoolToResourceVault,
 
-    UnitVaultOfResourcePool,
+    UnitResourceOfResourcePool,
     ResourceVaultOfResourcePool,
 
     // Access Controllers
