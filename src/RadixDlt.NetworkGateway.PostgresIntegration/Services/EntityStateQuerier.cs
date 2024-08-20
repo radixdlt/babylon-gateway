@@ -158,7 +158,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var packageCodeHistory = await GetPackageCodeHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var packageSchemaHistory = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
-        var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
+        var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, ledgerState, token);
         var resolvedTwoWayLinks = optIns.DappTwoWayLinks
             ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, ledgerState, token)
             : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
@@ -171,20 +171,33 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var qc = new EntityResourcesPageQuery.DetailsQueryConfiguration(defaultPageSize, defaultPageSize, aggregatePerVault ? defaultPageSize : 0, ledgerState.StateVersion);
         var entityResources = await EntityResourcesPageQuery.Details(_dbContext, _dapperWrapper, componentEntities.Select(e => e.Id).ToArray(), qc, token);
 
-        // TODO the above does not support optIns.NonFungibleIncludeNfids by design (use separate query if needed)
-
+        // top-level entities & all their resources
         var entityAndResourceIds = entityResources.Values
             .SelectMany(x => x.Resources.Values.Select(r => r.ResourceEntityId))
             .Union(entities.Select(e => e.Id))
             .ToHashSet()
             .ToArray();
 
-        var explicitMetadata = optIns.ExplicitMetadata?.Any() == true
+        var explicitMetadataPerEntity = optIns.ExplicitMetadata?.Any() == true
             ? await GetExplicitMetadata(entityAndResourceIds, optIns.ExplicitMetadata.ToArray(), ledgerState, token)
             : null;
 
+        // top-level vaults & all top-level entity owned non-fungible vaults
+        var vaultEntityIds = entityResources.Values
+            .SelectMany(x => x.NonFungibleResources)
+            .SelectMany(r => r.Vaults.Values)
+            .Select(v => v.VaultEntityId)
+            .Union(nonFungibleVaultsHistory.Keys)
+            .ToHashSet()
+            .ToArray();
+
+        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(10, ledgerState.StateVersion);
+        var nonFungibleIdsPerVault = optIns.NonFungibleIncludeNfids && vaultEntityIds.Any()
+            ? await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token)
+            : null;
+
         // TODO wrap in .ToGatewayModel()?
-        var mappedEntityResources = entityResources.Values.Select(x => TmpMapper.Map(x, explicitMetadata, aggregatePerVault, qc.FungibleResourcesPerEntity, qc.NonFungibleResourcesPerEntity, qc.VaultsPerResource)).ToList();
+        var mappedEntityResources = entityResources.Values.Select(x => TmpMapper.Map(x, explicitMetadataPerEntity, aggregatePerVault, optIns.NonFungibleIncludeNfids, qc.FungibleResourcesPerEntity, qc.NonFungibleResourcesPerEntity, qc.VaultsPerResource, nfidQc.NonFungibleIdsPerVault, nonFungibleIdsPerVault)).ToList();
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)
@@ -311,10 +324,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     List<string>? nfItems = null;
                     string? nfNextCursor = null;
 
-                    if (optIns.NonFungibleIncludeNfids && nonFungibleVaultHistory.NonFungibleIdsAndOneMore.Any())
+                    if (optIns.NonFungibleIncludeNfids && nonFungibleIdsPerVault?.TryGetValue(entity.Id, out var nfs) == true)
                     {
-                        nfItems = nonFungibleVaultHistory.NonFungibleIdsAndOneMore.Take(defaultPageSize).ToList();
-                        nfNextCursor = CursorGenerator.GenerateOffsetCursor(0, defaultPageSize, nonFungibleVaultHistory.NonFungibleIdsCount);
+                        nfNextCursor = nfs.NextCursor.ToGatewayModel()?.ToCursorString();
+                        nfItems = nfs.Entries.Select(x => x.NonFungibleId).ToList();
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponseNonFungibleVaultDetails(
@@ -381,7 +394,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                 nonFungibleResources: x?.NonFungibles,
                 ancestorIdentities: ancestorIdentities,
                 metadata: metadata[entity.Id],
-                explicitMetadata: explicitMetadata?[entity.Id],
+                explicitMetadata: explicitMetadataPerEntity?[entity.Id],
                 details: details));
         }
 
@@ -421,7 +434,18 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                 : null;
         }
 
-        var mapped = TmpMapper.Map(entityResources, explicitMetadata, aggregatePerVault, defaultPageSize, 0, defaultPageSize).NonFungibles;
+        var vaultEntityIds = entityResources.NonFungibleResources
+            .SelectMany(r => r.Vaults.Values)
+            .Select(v => v.VaultEntityId)
+            .ToHashSet()
+            .ToArray();
+
+        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(10, ledgerState.StateVersion);
+        var nonFungibleIdsPerVault = optIns.NonFungibleIncludeNfids && vaultEntityIds.Any()
+            ? await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token)
+            : null;
+
+        var mapped = TmpMapper.Map(entityResources, explicitMetadata, aggregatePerVault, optIns.NonFungibleIncludeNfids, defaultPageSize, 0, 10, defaultPageSize, nonFungibleIdsPerVault).NonFungibles;
 
         return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, mapped.TotalCount, mapped.NextCursor, mapped.Items, pageRequest.Address);
     }
@@ -444,25 +468,18 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             throw new Exception("not found");
         }
 
-        // TODO fetch NFIDs if needed
-        // if (optIns.NonFungibleIncludeNfids && vaultEntityIdsToQuery.Any())
-        // {
-        //     var lookup = vaultEntityIdsToQuery.Select(vaultId => new NonFungibleIdOwnerLookup(entity.Id, resourceEntity.Id, vaultId)).ToArray();
-        //
-        //     var nonFungibleIdsAndOneMore = await GetNonFungibleIdsFirstPageAndOneMore(
-        //         lookup.Select(x => x.EntityId).ToArray(),
-        //         lookup.Select(x => x.ResourceEntityId).ToArray(),
-        //         lookup.Select(x => x.VaultEntityId).ToArray(),
-        //         nonFungibleIdsLimit,
-        //         ledgerState,
-        //         token);
-        //
-        //     nonFungibleIdsAndOneMorePerVault = nonFungibleIdsAndOneMore
-        //         .GroupBy(x => x.VaultEntityId)
-        //         .ToDictionary(x => x.Key, x => x.ToList());
-        // }
+        var vaultEntityIds = entityResources.NonFungibleResources
+            .SelectMany(r => r.Vaults.Values)
+            .Select(v => v.VaultEntityId)
+            .ToHashSet()
+            .ToArray();
 
-        var mapped = TmpMapper.Map(entityResources, null, true, 0, 1, defaultPageSize).NonFungibles.Items.First();
+        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(10, ledgerState.StateVersion);
+        var nonFungibleIdsPerVault = optIns.NonFungibleIncludeNfids && vaultEntityIds.Any()
+            ? await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token)
+            : null;
+
+        var mapped = TmpMapper.Map(entityResources, null, true, false, 0, 1, defaultPageSize, 10, nonFungibleIdsPerVault).NonFungibles.Items.First();
         var typed = (GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated)mapped;
         var m = typed.Vaults;
 
@@ -543,7 +560,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                 : null;
         }
 
-        var mapped = TmpMapper.Map(entityResources, explicitMetadata, aggregatePerVault, defaultPageSize, 0, defaultPageSize).Fungibles;
+        var mapped = TmpMapper.Map(entityResources, explicitMetadata, aggregatePerVault, false, defaultPageSize, 0, defaultPageSize, 0, null).Fungibles;
 
         return new GatewayModel.StateEntityFungiblesPageResponse(ledgerState, mapped.TotalCount, mapped.NextCursor, mapped.Items, pageRequest.Address);
     }
@@ -565,7 +582,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             throw new Exception("not found");
         }
 
-        var mapped = TmpMapper.Map(entityResources, null, true, 1, 0, defaultPageSize).Fungibles.Items.First();
+        var mapped = TmpMapper.Map(entityResources, null, true, false, 1, 0, defaultPageSize, 0, null).Fungibles.Items.First();
         var typed = (GatewayModel.FungibleResourcesCollectionItemVaultAggregated)mapped;
         var m = typed.Vaults;
 
@@ -582,9 +599,15 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
         var resourceEntity = await GetEntity<GlobalNonFungibleResourceEntity>(resourceAddress, ledgerState, token);
         var vaultEntity = await GetEntity<VaultEntity>(vaultAddress, ledgerState, token);
-        var nonFungibleIds = await GetNonFungibleIdsSlice(entity.Id, resourceEntity.Id, vaultEntity.Id, request.Offset, request.Limit, ledgerState, token);
 
-        return new GatewayModel.StateEntityNonFungibleIdsPageResponse(ledgerState, nonFungibleIds.TotalCount, nonFungibleIds.NextCursor, nonFungibleIds.Items, entity.Address, resourceEntity.Address);
+        var vaultEntityIds = new[] { vaultEntity.Id };
+
+        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(10, ledgerState.StateVersion);
+        var nonFungibleIdsPerVault = await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token);
+
+        throw new NotSupportedException();
+
+        // return new GatewayModel.StateEntityNonFungibleIdsPageResponse(ledgerState, nonFungibleIds.TotalCount, nonFungibleIds.NextCursor, nonFungibleIds.Items, entity.Address, resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(

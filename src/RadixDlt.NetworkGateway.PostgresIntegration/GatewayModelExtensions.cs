@@ -69,6 +69,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
@@ -86,6 +87,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
+    public static GatewayModel.StateVersionIdCursor? ToGatewayModel(this StateVersionIdCursor? input)
+    {
+        return input == null
+            ? null
+            : new GatewayModel.StateVersionIdCursor(input.StateVersion, input.Id);
+    }
+
+    public static StateVersionIdCursor? FromGatewayModel(this GatewayModel.StateVersionIdCursor? input)
+    {
+        return input == null
+            ? null
+            : new StateVersionIdCursor(input.StateVersion, input.Id);
+    }
+
     public static GatewayModel.TwoWayLinkedDappsCollectionItem ToGatewayModel(this DappDefinitionsResolvedTwoWayLink input)
     {
         return new GatewayModel.TwoWayLinkedDappsCollectionItem(input.EntityAddress);

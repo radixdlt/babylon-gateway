@@ -87,6 +87,14 @@ public interface IDapperWrapper
         string operationName = "",
         [CallerMemberName] string methodName = "");
 
+    Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(
+        IDbConnection connection,
+        CommandDefinition command,
+        Func<TFirst, TSecond, TReturn> map,
+        string splitOn,
+        string operationName = "",
+        [CallerMemberName] string methodName = "");
+
     Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(
         IDbConnection connection,
         CommandDefinition command,
@@ -127,6 +135,17 @@ public class DapperWrapper : IDapperWrapper
         return await Execute(() => connection.QueryAsync<T>(command), command, operationName, methodName);
     }
 
+    public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(
+        IDbConnection connection,
+        CommandDefinition command,
+        Func<TFirst, TSecond, TReturn> map,
+        string splitOn,
+        string operationName = "",
+        [CallerMemberName] string methodName = "")
+    {
+        return await Execute(() => connection.QueryAsync(command, map, splitOn), command, operationName, methodName);
+    }
+
     public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(
         IDbConnection connection,
         CommandDefinition command,
@@ -135,9 +154,7 @@ public class DapperWrapper : IDapperWrapper
         string operationName = "",
         [CallerMemberName] string methodName = "")
     {
-        var t = await Execute(() => connection.QueryAsync(command, map, splitOn), command, operationName, methodName);
-
-        return t;
+        return await Execute(() => connection.QueryAsync(command, map, splitOn), command, operationName, methodName);
     }
 
     public async Task<T?> QueryFirstOrDefaultAsync<T>(

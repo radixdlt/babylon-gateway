@@ -78,13 +78,16 @@ internal static class TmpMapper
         EntityResourcesPageQuery.ResultEntity x,
         Dictionary<long, GatewayModel.EntityMetadataCollection>? explicitMetadata,
         bool aggregatePerVault,
+        bool nonFungibleIncludeNfids,
         int fungibleResourcesPerEntity,
         int nonFungibleResourcesPerEntity,
-        int vaultsPerResource)
+        int vaultsPerResource,
+        int nfidsPerVault,
+        Dictionary<long, NonFungibleVaultContentsQuery.ResultVault>? nonFungibleIdsPerVault)
     {
         string? funCursor = null;
         var fun = x.FungibleResources
-            .TakeWhile((f, idx) => CursorGenerator.TakeWhileStateVersionId(f, idx, fungibleResourcesPerEntity, x => new GatewayModel.StateVersionIdCursor(x.ResourceFromStateVersion, x.ResourceEntityId), out funCursor))
+            .TakeWhile((f, idx) => CursorGenerator.TakeWhileStateVersionId(f, idx, fungibleResourcesPerEntity, y => new GatewayModel.StateVersionIdCursor(y.ResourceFromStateVersion, y.ResourceEntityId), out funCursor))
             .Select(f =>
             {
                 GatewayModel.FungibleResourcesCollectionItem val;
@@ -96,7 +99,7 @@ internal static class TmpMapper
                 {
                     string? vaultCursor = null;
                     var vaults = f.Vaults.Values
-                        .TakeWhile((v, idx) => CursorGenerator.TakeWhileStateVersionId(v, idx, vaultsPerResource, x => new GatewayModel.StateVersionIdCursor(x.VaultFromStateVersion, x.VaultEntityId), out vaultCursor))
+                        .TakeWhile((v, idx) => CursorGenerator.TakeWhileStateVersionId(v, idx, vaultsPerResource, y => new GatewayModel.StateVersionIdCursor(y.VaultFromStateVersion, y.VaultEntityId), out vaultCursor))
                         .Select(v => new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
                             vaultAddress: v.VaultEntityAddress,
                             amount: TokenAmount.FromSubUnitsString(v.VaultBalance).ToString(),
@@ -126,7 +129,7 @@ internal static class TmpMapper
 
         string? nonFunCursor = null;
         var nonFun = x.NonFungibleResources
-            .TakeWhile((nf, idx) => CursorGenerator.TakeWhileStateVersionId(nf, idx, nonFungibleResourcesPerEntity, x => new GatewayModel.StateVersionIdCursor(x.ResourceFromStateVersion, x.ResourceEntityId), out nonFunCursor))
+            .TakeWhile((nf, idx) => CursorGenerator.TakeWhileStateVersionId(nf, idx, nonFungibleResourcesPerEntity, y => new GatewayModel.StateVersionIdCursor(y.ResourceFromStateVersion, y.ResourceEntityId), out nonFunCursor))
             .Select(nf =>
             {
                 GatewayModel.NonFungibleResourcesCollectionItem val;
@@ -138,13 +141,25 @@ internal static class TmpMapper
                 {
                     string? vaultCursor = null;
                     var vaults = nf.Vaults.Values
-                        .TakeWhile((v, idx) => CursorGenerator.TakeWhileStateVersionId(v, idx, vaultsPerResource, x => new GatewayModel.StateVersionIdCursor(x.VaultFromStateVersion, x.VaultEntityId), out vaultCursor))
-                        .Select(v => new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
-                            totalCount: long.Parse(TokenAmount.FromSubUnitsString(v.VaultBalance).ToString()),
-                            nextCursor: "tbd", // TODO implement
-                            items: null, // TODO implement
-                            vaultAddress: v.VaultEntityAddress,
-                            lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion))
+                        .TakeWhile((v, idx) => CursorGenerator.TakeWhileStateVersionId(v, idx, vaultsPerResource, y => new GatewayModel.StateVersionIdCursor(y.VaultFromStateVersion, y.VaultEntityId), out vaultCursor))
+                        .Select(v =>
+                        {
+                            string? nfidCursor = null;
+                            List<string>? nfids = null;
+
+                            if (nonFungibleIncludeNfids && nonFungibleIdsPerVault?.TryGetValue(v.VaultEntityId, out var vaultNfids) == true)
+                            {
+                                nfidCursor = vaultNfids.NextCursor.ToGatewayModel()?.ToCursorString();
+                                nfids = vaultNfids.Entries.Select(y => y.NonFungibleId).ToList();
+                            }
+
+                            return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                                totalCount: long.Parse(TokenAmount.FromSubUnitsString(v.VaultBalance).ToString()),
+                                nextCursor: nfidCursor,
+                                items: nfids,
+                                vaultAddress: v.VaultEntityAddress,
+                                lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion);
+                        })
                         .ToList();
 
                     val = new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated(

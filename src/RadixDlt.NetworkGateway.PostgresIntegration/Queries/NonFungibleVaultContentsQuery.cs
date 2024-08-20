@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,38 +76,118 @@ internal static class NonFungibleVaultContentsQuery
 {
     public record struct QueryConfiguration(int NonFungibleIdsPerVault, long AtLedgerState);
 
-    public static async Task<Dictionary<long, string[]>> Execute(
+    public static async Task<Dictionary<long, ResultVault>> Execute(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
         ICollection<long> vaultIds,
         QueryConfiguration configuration,
         CancellationToken token = default)
     {
-        await Task.CompletedTask;
-// start with:
-//         var cd = dapperWrapper.CreateCommandDefinition(
-//             @"WITH
-// variables AS (
-//     SELECT
-//         unnest(@vaultIds) AS vault_id,
-//         @nonFungibleIdsPerVault AS non_fungible_ids_per_vault,
-//         @atLedgerState AS at_ledger_state
-// ),
-// non_fungible_ids_per_vault AS (
-//
-// )
-// SELECT * FROM non_fungible_ids_per_vault",
-//             new
-//             {
-//                 vaultIds = vaultIds.ToList(),
-//                 nonFungibleIdsPerVault = configuration.NonFungibleIdsPerVault + 1,
-//                 atLedgerState = configuration.AtLedgerState,
-//             },
-//             token);
+        // TODO add support for the cursor (if single vault)
+        // TODO add support for other features
 
-        return vaultIds.ToDictionary(id => id, _ =>
-        {
-            return Enumerable.Range(0, configuration.NonFungibleIdsPerVault + 1).Select(i => $"TBD TBD #{i + 1}").ToArray();
-        });
+        var cd = dapperWrapper.CreateCommandDefinition(
+            @"WITH
+variables AS (
+    SELECT
+        unnest(@vaultEntityIds) AS vault_entity_id,
+        @scanLimit AS scan_limit,
+        @pageLimit AS page_limit,
+        FALSE AS ignore_deleted,
+        TRUE AS include_data,
+        @atLedgerState AS at_ledger_state
+)
+SELECT
+    var.vault_entity_id,
+
+    entries.definition_id,
+    entries.definition_from_state_version,
+    entries.definition_is_last_candidate,
+    entries.non_fungible_id_definition_id, -- TODO is it even needed?
+    entries.last_updated_at_state_version,
+    entries.is_deleted,
+    nf_def.non_fungible_id,
+    nf_data.data
+    -- , nf_data.is_deleted -- TODO how it relates to the entries.is_deleted? is it even needed?
+FROM variables var
+INNER JOIN LATERAL (
+    SELECT
+        ed.from_state_version AS definition_from_state_version,
+        ed.id AS definition_id,
+        ed.is_last_candidate AS definition_is_last_candidate,
+        ed.non_fungible_id_definition_id, -- TODO is it even needed?
+        eh.from_state_version AS last_updated_at_state_version,
+        eh.is_deleted
+    FROM (
+        SELECT
+            *,
+            row_number() over (ORDER BY from_state_version DESC, id DESC) = var.scan_limit AS is_last_candidate
+        FROM non_fungible_vault_entry_definition
+        WHERE vault_entity_id = var.vault_entity_id AND from_state_version <= var.at_ledger_state
+        ORDER BY from_state_version DESC, id DESC
+        LIMIT var.scan_limit
+    ) ed
+    INNER JOIN LATERAL (
+        SELECT
+            *,
+            CASE WHEN var.ignore_deleted THEN NOT is_deleted ELSE TRUE END AS should_be_returned
+        FROM non_fungible_vault_entry_history
+        WHERE non_fungible_vault_entry_definition_id = ed.id AND ed.from_state_version <= var.at_ledger_state
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) eh ON TRUE
+    WHERE ed.is_last_candidate OR eh.should_be_returned
+    ORDER BY ed.from_state_version DESC, ed.id DESC
+    LIMIT var.page_limit
+) entries ON TRUE
+INNER JOIN non_fungible_id_definition nf_def ON nf_def.id = entries.non_fungible_id_definition_id
+LEFT JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_data_history
+    WHERE non_fungible_id_definition_id = nf_def.id AND from_state_version <= var.at_ledger_state
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) nf_data ON var.include_data;",
+            new
+            {
+                vaultEntityIds = vaultIds.ToList(),
+                scanLimit = 5000 + 1,
+                pageLimit = configuration.NonFungibleIdsPerVault + 1,
+                atLedgerState = configuration.AtLedgerState,
+            },
+            token);
+
+        var result = new Dictionary<long, ResultVault>();
+
+        await dapperWrapper.QueryAsync<ResultVault, ResultEntry, ResultVault>(
+            dbContext.Database.GetDbConnection(),
+            cd,
+            (vault, entry) =>
+            {
+                var x = result.GetOrAdd(vault.VaultEntityId, _ => vault);
+
+                if (entry.DefinitionIsLastCandidate || x.Entries.Count >= configuration.NonFungibleIdsPerVault)
+                {
+                    x.NextCursor = new StateVersionIdCursor(entry.DefinitionFromStateVersion, entry.DefinitionId);
+                }
+                else
+                {
+                    x.Entries.Add(entry);
+                }
+
+                return x;
+            },
+            "definition_id");
+
+        return result;
     }
+
+    public record ResultVault(long VaultEntityId)
+    {
+        public StateVersionIdCursor? NextCursor { get; set; }
+
+        public List<ResultEntry> Entries { get; } = new();
+    }
+
+    public record ResultEntry(long DefinitionId, long DefinitionFromStateVersion, bool DefinitionIsLastCandidate, long NonFungibleIdDefinitionId, long LastUpdatedAtStateVersion, bool IsDeleted, string NonFungibleId, byte[]? Data);
 }
