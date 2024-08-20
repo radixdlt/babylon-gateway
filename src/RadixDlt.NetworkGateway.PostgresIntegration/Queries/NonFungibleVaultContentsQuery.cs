@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
 internal static class NonFungibleVaultContentsQuery
 {
-    public record ResultVault(long VaultEntityId)
+    public record ResultVault(long VaultEntityId, string VaultBalance)
     {
         public StateVersionIdCursor? NonFungibleIdsNextCursor { get; set; } // TODO set should throw if already non-null
 
@@ -82,16 +82,19 @@ internal static class NonFungibleVaultContentsQuery
     }
 
     public record ResultNonFungibleId(
-        long DefinitionId,
+        long NonFungibleIdDefinitionId,
         long DefinitionFromStateVersion,
         bool DefinitionIsLastCandidate,
-        long NonFungibleIdDefinitionId,
         long LastUpdatedAtStateVersion,
         bool IsDeleted,
         string NonFungibleId,
         byte[]? Data);
 
-    public record struct QueryConfiguration(int NonFungibleIdsPerVault, long AtLedgerState);
+    public record struct QueryConfiguration(
+        int NonFungibleIdsPerVault,
+        bool DescendingOrder,
+        StateVersionIdCursor? Cursor,
+        long AtLedgerState);
 
     public static async Task<Dictionary<long, ResultVault>> Execute(
         ReadOnlyDbContext dbContext,
@@ -100,9 +103,8 @@ internal static class NonFungibleVaultContentsQuery
         QueryConfiguration configuration,
         CancellationToken token = default)
     {
-        // TODO add support for the cursor (if single vault)
-        // TODO add support for other features
-        // TODO those collections MUST be ordered on C# level and optionally on SQL level!!!
+        // TODO throw if vaultEntityIds.Count > 1 and cursor is used ??
+        // TODO add support for remaining features
 
         var cd = dapperWrapper.CreateCommandDefinition(
             @"WITH
@@ -113,15 +115,17 @@ variables AS (
         @pageLimit AS page_limit,
         FALSE AS ignore_deleted,
         TRUE AS include_data,
+        @descendingOrder AS descending_order,
+        ROW(@vaultCursorStateVersion, @vaultCursorId) AS vault_cursor,
         @atLedgerState AS at_ledger_state
 )
 SELECT
     var.vault_entity_id,
+    CAST(balance.balance AS TEXT) AS vault_balance,
 
-    entries.definition_id,
+    entries.non_fungible_id_definition_id,
     entries.definition_from_state_version,
     entries.definition_is_last_candidate,
-    entries.non_fungible_id_definition_id, -- TODO is it even needed?
     entries.last_updated_at_state_version,
     entries.is_deleted,
     nf_def.non_fungible_id,
@@ -130,10 +134,9 @@ SELECT
 FROM variables var
 INNER JOIN LATERAL (
     SELECT
+        ed.non_fungible_id_definition_id,
         ed.from_state_version AS definition_from_state_version,
-        ed.id AS definition_id,
         ed.is_last_candidate AS definition_is_last_candidate,
-        ed.non_fungible_id_definition_id, -- TODO is it even needed?
         eh.from_state_version AS last_updated_at_state_version,
         eh.is_deleted
     FROM (
@@ -141,8 +144,15 @@ INNER JOIN LATERAL (
             *,
             row_number() over (ORDER BY from_state_version DESC, id DESC) = var.scan_limit AS is_last_candidate
         FROM non_fungible_vault_entry_definition
-        WHERE vault_entity_id = var.vault_entity_id AND from_state_version <= var.at_ledger_state
-        ORDER BY from_state_version DESC, id DESC
+        WHERE
+            vault_entity_id = var.vault_entity_id
+          AND from_state_version <= var.at_ledger_state
+          AND CASE WHEN var.descending_order THEN (from_state_version, non_fungible_id_definition_id) <= var.vault_cursor ELSE (from_state_version, non_fungible_id_definition_id) >= var.vault_cursor END
+        ORDER BY
+            CASE WHEN var.descending_order THEN from_state_version END DESC,
+            CASE WHEN var.descending_order THEN non_fungible_id_definition_id END DESC,
+            CASE WHEN NOT var.descending_order THEN from_state_version END,
+            CASE WHEN NOT var.descending_order THEN non_fungible_id_definition_id END
         LIMIT var.scan_limit
     ) ed
     INNER JOIN LATERAL (
@@ -155,7 +165,11 @@ INNER JOIN LATERAL (
         LIMIT 1
     ) eh ON TRUE
     WHERE ed.is_last_candidate OR eh.should_be_returned
-    ORDER BY ed.from_state_version DESC, ed.id DESC
+    ORDER BY
+        CASE WHEN var.descending_order THEN ed.from_state_version END DESC,
+        CASE WHEN var.descending_order THEN ed.id END DESC,
+        CASE WHEN NOT var.descending_order THEN ed.from_state_version END,
+        CASE WHEN NOT var.descending_order THEN ed.id END
     LIMIT var.page_limit
 ) entries ON TRUE
 INNER JOIN non_fungible_id_definition nf_def ON nf_def.id = entries.non_fungible_id_definition_id
@@ -165,12 +179,27 @@ LEFT JOIN LATERAL (
     WHERE non_fungible_id_definition_id = nf_def.id AND from_state_version <= var.at_ledger_state
     ORDER BY from_state_version DESC
     LIMIT 1
-) nf_data ON var.include_data;",
+) nf_data ON var.include_data
+LEFT JOIN LATERAL (
+    SELECT *
+    FROM vault_balance_history
+    WHERE vault_entity_id = var.vault_entity_id AND from_state_version <= var.at_ledger_state
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) balance ON TRUE
+ORDER BY
+    CASE WHEN var.descending_order THEN entries.definition_from_state_version END DESC,
+    CASE WHEN var.descending_order THEN entries.non_fungible_id_definition_id END DESC,
+    CASE WHEN NOT var.descending_order THEN entries.definition_from_state_version END,
+    CASE WHEN NOT var.descending_order THEN entries.non_fungible_id_definition_id END;",
             new
             {
                 vaultEntityIds = vaultIds.ToList(),
-                scanLimit = 5000 + 1,
+                scanLimit = 5000 + 1, // TODO configurable / use const
                 pageLimit = configuration.NonFungibleIdsPerVault + 1,
+                descendingOrder = configuration.DescendingOrder,
+                vaultCursorStateVersion = configuration.Cursor?.StateVersion ?? (configuration.DescendingOrder ? long.MaxValue : long.MinValue),
+                vaultCursorId = configuration.Cursor?.Id ?? (configuration.DescendingOrder ? long.MaxValue : long.MinValue),
                 atLedgerState = configuration.AtLedgerState,
             },
             token);
@@ -180,22 +209,22 @@ LEFT JOIN LATERAL (
         await dapperWrapper.QueryAsync<ResultVault, ResultNonFungibleId, ResultVault>(
             dbContext.Database.GetDbConnection(),
             cd,
-            (vault, entry) =>
+            (vaultRow, entryRow) =>
             {
-                var x = result.GetOrAdd(vault.VaultEntityId, _ => vault);
+                var vault = result.GetOrAdd(vaultRow.VaultEntityId, _ => vaultRow);
 
-                if (entry.DefinitionIsLastCandidate || x.NonFungibleIds.Count >= configuration.NonFungibleIdsPerVault)
+                if (entryRow.DefinitionIsLastCandidate || vault.NonFungibleIds.Count >= configuration.NonFungibleIdsPerVault)
                 {
-                    x.NonFungibleIdsNextCursor = new StateVersionIdCursor(entry.DefinitionFromStateVersion, entry.DefinitionId);
+                    vault.NonFungibleIdsNextCursor = new StateVersionIdCursor(entryRow.DefinitionFromStateVersion, entryRow.NonFungibleIdDefinitionId);
                 }
                 else
                 {
-                    x.NonFungibleIds.Add(entry);
+                    vault.NonFungibleIds.Add(entryRow);
                 }
 
-                return x;
+                return vault;
             },
-            "definition_id");
+            "non_fungible_id_definition_id");
 
         return result;
     }

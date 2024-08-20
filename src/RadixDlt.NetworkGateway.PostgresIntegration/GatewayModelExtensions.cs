@@ -87,18 +87,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
-    public static GatewayModel.StateVersionIdCursor? ToGatewayModel(this StateVersionIdCursor? input)
+    public static GatewayModel.IdBoundaryCoursor? ToGatewayModel(this StateVersionIdCursor? input)
     {
         return input == null
             ? null
-            : new GatewayModel.StateVersionIdCursor(input.StateVersion, input.Id);
+            : new GatewayModel.IdBoundaryCoursor(input.StateVersion, input.Id);
     }
 
-    public static StateVersionIdCursor? FromGatewayModel(this GatewayModel.StateVersionIdCursor? input)
+    public static StateVersionIdCursor? FromGatewayModel(this GatewayModel.IdBoundaryCoursor? input)
     {
         return input == null
             ? null
-            : new StateVersionIdCursor(input.StateVersion, input.Id);
+            : new StateVersionIdCursor(input.StateVersionBoundary, input.IdBoundary);
     }
 
     public static GatewayModel.TwoWayLinkedDappsCollectionItem ToGatewayModel(this DappDefinitionsResolvedTwoWayLink input)

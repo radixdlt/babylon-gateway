@@ -189,7 +189,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             .Union(entityResources.Values.SelectMany(er => er.NonFungibleResources).SelectMany(r => r.Vaults).Select(v => v.VaultEntityId))
             .ToArray();
 
-        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(10, ledgerState.StateVersion);
+        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(defaultPageSize, true, null, ledgerState.StateVersion);
         var nonFungibleIdsPerVault = optIns.NonFungibleIncludeNfids && vaultEntityIds.Any()
             ? await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token)
             : null;
@@ -409,7 +409,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var entity = await GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
 
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
-        var qc = new EntityResourcesPageQuery.ResourcesPageQueryConfiguration(defaultPageSize, defaultPageSize, true, pageRequest.Cursor, ledgerState.StateVersion);
+        var qc = new EntityResourcesPageQuery.ResourcesPageQueryConfiguration(defaultPageSize, defaultPageSize, true, pageRequest.Cursor.FromGatewayModel(), ledgerState.StateVersion);
         var entityResources = await EntityResourcesPageQuery.NonFungibleResourcesPage(_dbContext, _dapperWrapper, entity.Id, qc, token);
 
         if (entityResources == null)
@@ -438,7 +438,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             .ToHashSet()
             .ToArray();
 
-        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(10, ledgerState.StateVersion);
+        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(defaultPageSize, true, pageRequest.Cursor.FromGatewayModel(), ledgerState.StateVersion);
         var nonFungibleIdsPerVault = optIns.NonFungibleIncludeNfids && vaultEntityIds.Any()
             ? await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token)
             : null;
@@ -458,7 +458,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var resourceEntity = await GetEntity<GlobalNonFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
 
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
-        var qc = new EntityResourcesPageQuery.VaultsPageQueryConfiguration(defaultPageSize, true, request.Cursor, ledgerState.StateVersion);
+        var qc = new EntityResourcesPageQuery.VaultsPageQueryConfiguration(defaultPageSize, true, request.Cursor.FromGatewayModel(), ledgerState.StateVersion);
         var entityResources = await EntityResourcesPageQuery.NonFungibleResourceVaultsPage(_dbContext, _dapperWrapper, entity.Id, resourceEntity.Id, qc, token);
 
         if (entityResources == null)
@@ -472,7 +472,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             .ToHashSet()
             .ToArray();
 
-        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(10, ledgerState.StateVersion);
+        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(defaultPageSize, true, request.Cursor.FromGatewayModel(), ledgerState.StateVersion);
         var nonFungibleIdsPerVault = optIns.NonFungibleIncludeNfids && vaultEntityIds.Any()
             ? await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token)
             : null;
@@ -535,7 +535,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var entity = await GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
 
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
-        var qc = new EntityResourcesPageQuery.ResourcesPageQueryConfiguration(defaultPageSize, defaultPageSize, true, pageRequest.Cursor, ledgerState.StateVersion);
+        var qc = new EntityResourcesPageQuery.ResourcesPageQueryConfiguration(defaultPageSize, defaultPageSize, true, pageRequest.Cursor.FromGatewayModel(), ledgerState.StateVersion);
         var entityResources = await EntityResourcesPageQuery.FungibleResourcesPage(_dbContext, _dapperWrapper, entity.Id, qc, token);
 
         if (entityResources == null)
@@ -572,7 +572,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var resourceEntity = await GetEntity<GlobalFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
 
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
-        var qc = new EntityResourcesPageQuery.VaultsPageQueryConfiguration(defaultPageSize, true, request.Cursor, ledgerState.StateVersion);
+        var qc = new EntityResourcesPageQuery.VaultsPageQueryConfiguration(defaultPageSize, true, request.Cursor.FromGatewayModel(), ledgerState.StateVersion);
         var entityResources = await EntityResourcesPageQuery.FungibleResourceVaultsPage(_dbContext, _dapperWrapper, entity.Id, resourceEntity.Id, qc, token);
 
         if (entityResources == null)
@@ -588,24 +588,36 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     }
 
     public async Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(
-        IEntityStateQuerier.PageRequest request,
+        IEntityStateQuerier.PageRequestByCursor request,
         EntityAddress resourceAddress,
         EntityAddress vaultAddress,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
+        var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
         var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
         var resourceEntity = await GetEntity<GlobalNonFungibleResourceEntity>(resourceAddress, ledgerState, token);
         var vaultEntity = await GetEntity<VaultEntity>(vaultAddress, ledgerState, token);
 
         var vaultEntityIds = new[] { vaultEntity.Id };
 
-        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(10, ledgerState.StateVersion);
+        var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(defaultPageSize, true, request.Cursor.FromGatewayModel(), ledgerState.StateVersion);
         var nonFungibleIdsPerVault = await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token);
 
-        throw new NotSupportedException();
+        if (!nonFungibleIdsPerVault.ContainsKey(vaultEntity.Id))
+        {
+            throw new Exception("not found !?!?!");
+        }
 
-        // return new GatewayModel.StateEntityNonFungibleIdsPageResponse(ledgerState, nonFungibleIds.TotalCount, nonFungibleIds.NextCursor, nonFungibleIds.Items, entity.Address, resourceEntity.Address);
+        var vault = nonFungibleIdsPerVault[vaultEntity.Id];
+
+        return new GatewayModel.StateEntityNonFungibleIdsPageResponse(
+            ledgerState: ledgerState,
+            totalCount: long.Parse(TokenAmount.FromSubUnitsString(vault.VaultBalance).ToString()),
+            nextCursor: vault.NonFungibleIdsNextCursor.ToGatewayModel()?.ToCursorString(),
+            items: vault.NonFungibleIds.Select(x => x.NonFungibleId).ToList(),
+            address: entity.Address,
+            resourceAddress: resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(

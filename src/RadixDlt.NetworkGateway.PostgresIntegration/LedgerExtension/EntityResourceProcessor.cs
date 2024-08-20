@@ -85,8 +85,6 @@ internal class EntityResourceProcessor
 {
     internal readonly record struct VaultChange(ResourceType ResourceType, VaultEntity VaultEntity, TokenAmount Delta, long StateVersion)
     {
-        public bool HasDistinctGlobalAndOwnerEntity() => VaultEntity.GlobalAncestorId!.Value != VaultEntity.OwnerAncestorId!.Value;
-
         public ByEntityDbLookup ByGlobalEntityDbLookup() => new(VaultEntity.GlobalAncestorId!.Value);
 
         public ByEntityDbLookup ByOwnerEntityDbLookup() => new(VaultEntity.OwnerAncestorId!.Value);
@@ -168,17 +166,13 @@ internal class EntityResourceProcessor
             }
 
             ProcessEntryDefinition(vaultChange, vaultChange.ByGlobalEntityResourceDbLookup());
-            ProcessTotalsHistory(vaultChange, vaultChange.ByGlobalEntityResourceDbLookup());
             ProcessVaultEntryDefinition(vaultChange, vaultChange.ByGlobalEntityResourceVaultDbLookup());
-            ProcessVaultTotalsHistory(vaultChange, vaultChange.ByGlobalEntityResourceVaultDbLookup());
             ProcessBalanceHistory(vaultChange, vaultChange.ByGlobalEntityResourceVaultDbLookup());
 
-            if (vaultChange.HasDistinctGlobalAndOwnerEntity())
+            if (vaultEntity.GlobalAncestorId.Value != vaultEntity.OwnerAncestorId.Value)
             {
                 ProcessEntryDefinition(vaultChange, vaultChange.ByOwnerEntityResourceDbLookup());
-                ProcessTotalsHistory(vaultChange, vaultChange.ByOwnerEntityResourceDbLookup());
                 ProcessVaultEntryDefinition(vaultChange, vaultChange.ByOwnerEntityResourceVaultDbLookup());
-                ProcessVaultTotalsHistory(vaultChange, vaultChange.ByOwnerEntityResourceVaultDbLookup());
                 ProcessBalanceHistory(vaultChange, vaultChange.ByOwnerEntityResourceVaultDbLookup());
             }
         }
@@ -215,10 +209,7 @@ internal class EntityResourceProcessor
 
         _resourceEntryDefinitionsToAdd.Add(definition);
         _existingResourceDefinitions[lookup] = definition;
-    }
 
-    private void ProcessTotalsHistory(VaultChange vaultChange, ByEntityResourceDbLookup lookup)
-    {
         EntityResourceTotalsHistory totalsHistory;
 
         if (!_mostRecentResourceTotalsHistory.TryGetValue(new ByEntityDbLookup(lookup.EntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultChange.StateVersion)
@@ -264,10 +255,7 @@ internal class EntityResourceProcessor
 
         _resourceVaultEntryDefinitionsToAdd.Add(definition);
         _existingResourceVaultDefinitions[lookup] = definition;
-    }
 
-    private void ProcessVaultTotalsHistory(VaultChange vaultChange, ByEntityResourceVaultDbLookup lookup)
-    {
         EntityResourceVaultTotalsHistory totalsHistory;
 
         if (!_mostRecentResourceVaultTotalsHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultChange.StateVersion)
