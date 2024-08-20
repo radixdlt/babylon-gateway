@@ -74,6 +74,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
 internal static class NonFungibleVaultContentsQuery
 {
+    public record ResultVault(long VaultEntityId)
+    {
+        public StateVersionIdCursor? NonFungibleIdsNextCursor { get; set; } // TODO set should throw if already non-null
+
+        public List<ResultNonFungibleId> NonFungibleIds { get; } = new();
+    }
+
+    public record ResultNonFungibleId(
+        long DefinitionId,
+        long DefinitionFromStateVersion,
+        bool DefinitionIsLastCandidate,
+        long NonFungibleIdDefinitionId,
+        long LastUpdatedAtStateVersion,
+        bool IsDeleted,
+        string NonFungibleId,
+        byte[]? Data);
+
     public record struct QueryConfiguration(int NonFungibleIdsPerVault, long AtLedgerState);
 
     public static async Task<Dictionary<long, ResultVault>> Execute(
@@ -85,6 +102,7 @@ internal static class NonFungibleVaultContentsQuery
     {
         // TODO add support for the cursor (if single vault)
         // TODO add support for other features
+        // TODO those collections MUST be ordered on C# level and optionally on SQL level!!!
 
         var cd = dapperWrapper.CreateCommandDefinition(
             @"WITH
@@ -159,20 +177,20 @@ LEFT JOIN LATERAL (
 
         var result = new Dictionary<long, ResultVault>();
 
-        await dapperWrapper.QueryAsync<ResultVault, ResultEntry, ResultVault>(
+        await dapperWrapper.QueryAsync<ResultVault, ResultNonFungibleId, ResultVault>(
             dbContext.Database.GetDbConnection(),
             cd,
             (vault, entry) =>
             {
                 var x = result.GetOrAdd(vault.VaultEntityId, _ => vault);
 
-                if (entry.DefinitionIsLastCandidate || x.Entries.Count >= configuration.NonFungibleIdsPerVault)
+                if (entry.DefinitionIsLastCandidate || x.NonFungibleIds.Count >= configuration.NonFungibleIdsPerVault)
                 {
-                    x.NextCursor = new StateVersionIdCursor(entry.DefinitionFromStateVersion, entry.DefinitionId);
+                    x.NonFungibleIdsNextCursor = new StateVersionIdCursor(entry.DefinitionFromStateVersion, entry.DefinitionId);
                 }
                 else
                 {
-                    x.Entries.Add(entry);
+                    x.NonFungibleIds.Add(entry);
                 }
 
                 return x;
@@ -181,13 +199,4 @@ LEFT JOIN LATERAL (
 
         return result;
     }
-
-    public record ResultVault(long VaultEntityId)
-    {
-        public StateVersionIdCursor? NextCursor { get; set; }
-
-        public List<ResultEntry> Entries { get; } = new();
-    }
-
-    public record ResultEntry(long DefinitionId, long DefinitionFromStateVersion, bool DefinitionIsLastCandidate, long NonFungibleIdDefinitionId, long LastUpdatedAtStateVersion, bool IsDeleted, string NonFungibleId, byte[]? Data);
 }

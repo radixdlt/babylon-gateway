@@ -173,7 +173,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
         // top-level entities & all their resources
         var entityAndResourceIds = entityResources.Values
-            .SelectMany(x => x.Resources.Values.Select(r => r.ResourceEntityId))
+            .SelectMany(x => x.InternalResources.Values.Select(r => r.ResourceEntityId))
             .Union(entities.Select(e => e.Id))
             .ToHashSet()
             .ToArray();
@@ -183,12 +183,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             : null;
 
         // top-level vaults & all top-level entity owned non-fungible vaults
-        var vaultEntityIds = entityResources.Values
-            .SelectMany(x => x.NonFungibleResources)
-            .SelectMany(r => r.Vaults.Values)
-            .Select(v => v.VaultEntityId)
-            .Union(nonFungibleVaultsHistory.Keys)
+        var vaultEntityIds = nonFungibleVaultsHistory
+            .Keys
             .ToHashSet()
+            .Union(entityResources.Values.SelectMany(er => er.NonFungibleResources).SelectMany(r => r.Vaults).Select(v => v.VaultEntityId))
             .ToArray();
 
         var nfidQc = new NonFungibleVaultContentsQuery.QueryConfiguration(10, ledgerState.StateVersion);
@@ -197,7 +195,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             : null;
 
         // TODO wrap in .ToGatewayModel()?
-        var mappedEntityResources = entityResources.Values.Select(x => TmpMapper.Map(x, explicitMetadataPerEntity, aggregatePerVault, optIns.NonFungibleIncludeNfids, qc.FungibleResourcesPerEntity, qc.NonFungibleResourcesPerEntity, qc.VaultsPerResource, nfidQc.NonFungibleIdsPerVault, nonFungibleIdsPerVault)).ToList();
+        var mappedEntityResources = entityResources.Values.Select(x => TmpMapper.Map(x, explicitMetadataPerEntity, aggregatePerVault, nonFungibleIdsPerVault)).ToList();
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
         // virtual entities generate those on their own (dynamically generated information)
@@ -326,8 +324,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
                     if (optIns.NonFungibleIncludeNfids && nonFungibleIdsPerVault?.TryGetValue(entity.Id, out var nfs) == true)
                     {
-                        nfNextCursor = nfs.NextCursor.ToGatewayModel()?.ToCursorString();
-                        nfItems = nfs.Entries.Select(x => x.NonFungibleId).ToList();
+                        nfNextCursor = nfs.NonFungibleIdsNextCursor.ToGatewayModel()?.ToCursorString();
+                        nfItems = nfs.NonFungibleIds.Select(x => x.NonFungibleId).ToList();
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponseNonFungibleVaultDetails(
@@ -423,7 +421,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
         if (optIns.ExplicitMetadata?.Any() == true)
         {
-            var entityAndResourceIds = entityResources.Resources.Values
+            var entityAndResourceIds = entityResources.InternalResources.Values
                 .Select(r => r.ResourceEntityId)
                 .Union(new[] { entity.Id })
                 .ToHashSet()
@@ -435,7 +433,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         }
 
         var vaultEntityIds = entityResources.NonFungibleResources
-            .SelectMany(r => r.Vaults.Values)
+            .SelectMany(r => r.Vaults)
             .Select(v => v.VaultEntityId)
             .ToHashSet()
             .ToArray();
@@ -445,7 +443,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             ? await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token)
             : null;
 
-        var mapped = TmpMapper.Map(entityResources, explicitMetadata, aggregatePerVault, optIns.NonFungibleIncludeNfids, defaultPageSize, 0, 10, defaultPageSize, nonFungibleIdsPerVault).NonFungibles;
+        var mapped = TmpMapper.Map(entityResources, explicitMetadata, aggregatePerVault, nonFungibleIdsPerVault).NonFungibles;
 
         return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, mapped.TotalCount, mapped.NextCursor, mapped.Items, pageRequest.Address);
     }
@@ -469,7 +467,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         }
 
         var vaultEntityIds = entityResources.NonFungibleResources
-            .SelectMany(r => r.Vaults.Values)
+            .SelectMany(r => r.Vaults)
             .Select(v => v.VaultEntityId)
             .ToHashSet()
             .ToArray();
@@ -479,7 +477,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             ? await NonFungibleVaultContentsQuery.Execute(_dbContext, _dapperWrapper, vaultEntityIds, nfidQc, token)
             : null;
 
-        var mapped = TmpMapper.Map(entityResources, null, true, false, 0, 1, defaultPageSize, 10, nonFungibleIdsPerVault).NonFungibles.Items.First();
+        var mapped = TmpMapper.Map(entityResources, null, true, nonFungibleIdsPerVault).NonFungibles.Items.First();
         var typed = (GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated)mapped;
         var m = typed.Vaults;
 
@@ -549,7 +547,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
         if (optIns.ExplicitMetadata?.Any() == true)
         {
-            var entityAndResourceIds = entityResources.Resources.Values
+            var entityAndResourceIds = entityResources.InternalResources.Values
                 .Select(r => r.ResourceEntityId)
                 .Union(new[] { entity.Id })
                 .ToHashSet()
@@ -560,7 +558,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                 : null;
         }
 
-        var mapped = TmpMapper.Map(entityResources, explicitMetadata, aggregatePerVault, false, defaultPageSize, 0, defaultPageSize, 0, null).Fungibles;
+        var mapped = TmpMapper.Map(entityResources, explicitMetadata, aggregatePerVault, null).Fungibles;
 
         return new GatewayModel.StateEntityFungiblesPageResponse(ledgerState, mapped.TotalCount, mapped.NextCursor, mapped.Items, pageRequest.Address);
     }
@@ -582,7 +580,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
             throw new Exception("not found");
         }
 
-        var mapped = TmpMapper.Map(entityResources, null, true, false, 1, 0, defaultPageSize, 0, null).Fungibles.Items.First();
+        var mapped = TmpMapper.Map(entityResources, null, true, null).Fungibles.Items.First();
         var typed = (GatewayModel.FungibleResourcesCollectionItemVaultAggregated)mapped;
         var m = typed.Vaults;
 

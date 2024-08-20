@@ -62,26 +62,12 @@
  * permissions under this License.
  */
 
-using System;
-using System.Diagnostics.CodeAnalysis;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 public static class CursorGenerator
 {
-    public static bool TakeWhileStateVersionId<T>(T item, int index, int limit, Func<T, GatewayModel.StateVersionIdCursor> generator, [NotNullWhen(false)] out string? cursor)
-    {
-        if (index < limit)
-        {
-            cursor = null;
-            return true;
-        }
-
-        cursor = generator(item).ToCursorString();
-        return false;
-    }
-
     public static string? GenerateOffsetCursor(int offset, int limit, long totalCount)
     {
         return offset + limit < totalCount

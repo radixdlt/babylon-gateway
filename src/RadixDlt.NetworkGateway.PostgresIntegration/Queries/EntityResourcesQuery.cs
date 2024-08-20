@@ -65,6 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,16 +84,22 @@ internal class EntityResourcesPageQuery
 
     public record ResultEntity(long EntityId, long TotalFungibleResourceCount, long TotalNonFungibleResourceCount)
     {
-        public IList<ResultResource> FungibleResources => Resources.Values.Where(x => x.ResourceType == ResourceType.Fungible).ToList();
+        public StateVersionIdCursor? FungibleResourcesNextCursor { get; set; } // TODO set should throw if already non-null
 
-        public IList<ResultResource> NonFungibleResources => Resources.Values.Where(x => x.ResourceType == ResourceType.NonFungible).ToList();
+        public List<ResultResource> FungibleResources { get; } = new();
 
-        public Dictionary<long, ResultResource> Resources { get; } = new();
+        public StateVersionIdCursor? NonFungibleResourcesNextCursor { get; set; } // TODO set should throw if already non-null
+
+        public List<ResultResource> NonFungibleResources { get; } = new();
+
+        internal Dictionary<long, ResultResource> InternalResources { get; } = new();
     }
 
     public record ResultResource(long ResourceEntityId, EntityAddress ResourceEntityAddress, ResourceType ResourceType, string ResourceBalance, long ResourceFromStateVersion, long ResourceLastUpdatedAtStateVersion, long? ResourceVaultTotalCount)
     {
-        public Dictionary<long, ResultVault> Vaults { get; } = new();
+        public StateVersionIdCursor? VaultsNextCursor { get; set; } // TODO set should throw if already non-null
+
+        public List<ResultVault> Vaults { get; } = new();
     }
 
     public record ResultVault(long VaultEntityId, EntityAddress VaultEntityAddress, string VaultBalance, long VaultFromStateVersion, long VaultLastUpdatedAtStateVersion);
@@ -369,12 +376,45 @@ LEFT JOIN LATERAL (
             cd,
             (entity, resource, vault) =>
             {
-                result.TryAdd(entity.EntityId, entity);
-                result[entity.EntityId].Resources.TryAdd(resource.ResourceEntityId, resource);
+                var re = result.GetOrAdd(entity.EntityId, _ => entity);
+                var rr = re.InternalResources.GetOrAdd(resource.ResourceEntityId, _ =>
+                {
+                    if (resource.ResourceType == ResourceType.Fungible)
+                    {
+                        if (re.FungibleResources.Count >= configuration.FungibleResourcesPerEntity)
+                        {
+                            re.FungibleResourcesNextCursor = new StateVersionIdCursor(resource.ResourceFromStateVersion, resource.ResourceEntityId);
+                        }
+                        else
+                        {
+                            re.FungibleResources.Add(resource);
+                        }
+                    }
+                    else
+                    {
+                        if (re.NonFungibleResources.Count >= configuration.NonFungibleResourcesPerEntity)
+                        {
+                            re.NonFungibleResourcesNextCursor = new StateVersionIdCursor(resource.ResourceFromStateVersion, resource.ResourceEntityId);
+                        }
+                        else
+                        {
+                            re.NonFungibleResources.Add(resource);
+                        }
+                    }
+
+                    return resource;
+                });
 
                 if (vault != null)
                 {
-                    result[entity.EntityId].Resources[resource.ResourceEntityId].Vaults.TryAdd(vault.VaultEntityId, vault);
+                    if (rr.Vaults.Count >= configuration.VaultsPerResource)
+                    {
+                        rr.VaultsNextCursor = new StateVersionIdCursor(vault.VaultFromStateVersion, vault.VaultEntityId);
+                    }
+                    else
+                    {
+                        rr.Vaults.Add(vault);
+                    }
                 }
 
                 return entity;
