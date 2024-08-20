@@ -19,6 +19,18 @@ import {
     ComponentEntityRoleAssignmentsFromJSONTyped,
     ComponentEntityRoleAssignmentsToJSON,
 } from './ComponentEntityRoleAssignments';
+import type { NativeResourceDetails } from './NativeResourceDetails';
+import {
+    NativeResourceDetailsFromJSON,
+    NativeResourceDetailsFromJSONTyped,
+    NativeResourceDetailsToJSON,
+} from './NativeResourceDetails';
+import type { TwoWayLinkedDappsCollection } from './TwoWayLinkedDappsCollection';
+import {
+    TwoWayLinkedDappsCollectionFromJSON,
+    TwoWayLinkedDappsCollectionFromJSONTyped,
+    TwoWayLinkedDappsCollectionToJSON,
+} from './TwoWayLinkedDappsCollection';
 
 /**
  * 
@@ -62,6 +74,18 @@ export interface StateEntityDetailsResponseFungibleResourceDetails {
      * @memberof StateEntityDetailsResponseFungibleResourceDetails
      */
     total_burned: string;
+    /**
+     * 
+     * @type {TwoWayLinkedDappsCollection}
+     * @memberof StateEntityDetailsResponseFungibleResourceDetails
+     */
+    two_way_linked_dapps?: TwoWayLinkedDappsCollection;
+    /**
+     * 
+     * @type {NativeResourceDetails}
+     * @memberof StateEntityDetailsResponseFungibleResourceDetails
+     */
+    native_resource_details?: NativeResourceDetails;
 }
 
 
@@ -105,6 +129,8 @@ export function StateEntityDetailsResponseFungibleResourceDetailsFromJSONTyped(j
         'total_supply': json['total_supply'],
         'total_minted': json['total_minted'],
         'total_burned': json['total_burned'],
+        'two_way_linked_dapps': !exists(json, 'two_way_linked_dapps') ? undefined : TwoWayLinkedDappsCollectionFromJSON(json['two_way_linked_dapps']),
+        'native_resource_details': !exists(json, 'native_resource_details') ? undefined : NativeResourceDetailsFromJSON(json['native_resource_details']),
     };
 }
 
@@ -123,6 +149,8 @@ export function StateEntityDetailsResponseFungibleResourceDetailsToJSON(value?: 
         'total_supply': value.total_supply,
         'total_minted': value.total_minted,
         'total_burned': value.total_burned,
+        'two_way_linked_dapps': TwoWayLinkedDappsCollectionToJSON(value.two_way_linked_dapps),
+        'native_resource_details': NativeResourceDetailsToJSON(value.native_resource_details),
     };
 }
 
