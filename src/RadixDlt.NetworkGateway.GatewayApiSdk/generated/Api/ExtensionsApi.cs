@@ -95,7 +95,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Resource Holders Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceHoldersRequest"></param>
@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Resource Holders Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceHoldersRequest"></param>
@@ -125,7 +125,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Resource Holders Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceHoldersRequest"></param>
@@ -137,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Resource Holders Page
         /// </summary>
         /// <remarks>
-        /// Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceHoldersRequest"></param>
@@ -358,7 +358,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Holders Page Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Get Resource Holders Page A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceHoldersRequest"></param>
@@ -370,7 +370,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Holders Page Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Get Resource Holders Page A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceHoldersRequest"></param>
@@ -414,7 +414,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Holders Page Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Get Resource Holders Page A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceHoldersRequest"></param>
@@ -427,7 +427,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Resource Holders Page Returns list of all holders of a given resource, ordered by Amount (fungibles)/ Number of items (non fungibles) descending. This endpoint operates only at the current state version, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Values might change, which might result in gaps or some entries being returned twice. 
+        /// Get Resource Holders Page A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="resourceHoldersRequest"></param>
