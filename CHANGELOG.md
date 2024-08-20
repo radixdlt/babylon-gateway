@@ -1,3 +1,12 @@
+## 1.8.0
+Release built: _not released yet_
+
+### Bug fixes
+
+### API Changes
+
+### Database changes
+
 ## 1.7.0
 Release built: _not released yet_
 
