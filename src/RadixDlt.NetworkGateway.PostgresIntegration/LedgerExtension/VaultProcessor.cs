@@ -92,6 +92,7 @@ internal class VaultProcessor
     private readonly Dictionary<NonFungibleVaultEntryDefinitionDbLookup, NonFungibleVaultEntryDefinition> _existingNonFungibleVaultEntryDefinitions = new();
     private readonly List<VaultBalanceHistory> _balanceHistoryToAdd = new();
     private readonly List<NonFungibleIdDefinition> _nonFungibleIdDefinitionsToAdd = new();
+    private readonly List<NonFungibleIdLocationHistory> _nonFungibleIdLocationHistoryToAdd = new();
     private readonly List<NonFungibleVaultEntryDefinition> _nonFungibleVaultEntryDefinitionsToAdd = new();
     private readonly List<NonFungibleVaultEntryHistory> _nonFungibleVaultEntryHistoryToAdd = new();
 
@@ -222,6 +223,17 @@ internal class VaultProcessor
                 NonFungibleVaultEntryDefinitionId = nonFungibleVaultEntryDefinition.Id,
                 IsDeleted = !change.IsDeposit,
             });
+
+            if (change.IsDeposit)
+            {
+                _nonFungibleIdLocationHistoryToAdd.Add(new NonFungibleIdLocationHistory
+                {
+                    Id = _context.Sequences.NonFungibleIdLocationHistorySequence++,
+                    FromStateVersion = change.StateVersion,
+                    NonFungibleIdDefinitionId = nonFungibleIdDefinition.Id,
+                    VaultEntityId = nonFungibleVaultEntryDefinition.VaultEntityId,
+                });
+            }
         }
     }
 
@@ -236,8 +248,9 @@ internal class VaultProcessor
 
         rowsInserted += await CopyVaultBalanceHistory();
         rowsInserted += await CopyNonFungibleIdDefinitions();
-        rowsInserted += await CopyNonFungibleVaultEntryDefinitionsToAdd();
-        rowsInserted += await CopyNonFungibleVaultEntryHistoryToAdd();
+        rowsInserted += await CopyNonFungibleIdLocationHistory();
+        rowsInserted += await CopyNonFungibleVaultEntryDefinitions();
+        rowsInserted += await CopyNonFungibleVaultEntryHistory();
 
         return rowsInserted;
     }
@@ -305,6 +318,17 @@ WHERE (vault_entity_id, non_fungible_id_definition_id) IN (SELECT * FROM variabl
             await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
         });
 
+    private Task<int> CopyNonFungibleIdLocationHistory() => _context.WriteHelper.Copy(
+        _nonFungibleIdLocationHistoryToAdd,
+        "COPY non_fungible_id_location_history (id, from_state_version, non_fungible_id_definition_id, vault_entity_id) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.NonFungibleIdDefinitionId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
+        });
+
     private Task<int> CopyNonFungibleIdDefinitions() => _context.WriteHelper.Copy(
         _nonFungibleIdDefinitionsToAdd,
         "COPY non_fungible_id_definition (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id) FROM STDIN (FORMAT BINARY)",
@@ -316,7 +340,7 @@ WHERE (vault_entity_id, non_fungible_id_definition_id) IN (SELECT * FROM variabl
             await writer.WriteAsync(e.NonFungibleId, NpgsqlDbType.Text, token);
         });
 
-    private Task<int> CopyNonFungibleVaultEntryDefinitionsToAdd() => _context.WriteHelper.Copy(
+    private Task<int> CopyNonFungibleVaultEntryDefinitions() => _context.WriteHelper.Copy(
         _nonFungibleVaultEntryDefinitionsToAdd,
         "COPY non_fungible_vault_entry_definition (id, from_state_version, vault_entity_id, non_fungible_id_definition_id) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
@@ -327,7 +351,7 @@ WHERE (vault_entity_id, non_fungible_id_definition_id) IN (SELECT * FROM variabl
             await writer.WriteAsync(e.NonFungibleIdDefinitionId, NpgsqlDbType.Bigint, token);
         });
 
-    private Task<int> CopyNonFungibleVaultEntryHistoryToAdd() => _context.WriteHelper.Copy(
+    private Task<int> CopyNonFungibleVaultEntryHistory() => _context.WriteHelper.Copy(
         _nonFungibleVaultEntryHistoryToAdd,
         "COPY non_fungible_vault_entry_history (id, from_state_version, non_fungible_vault_entry_definition_id, is_deleted) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>

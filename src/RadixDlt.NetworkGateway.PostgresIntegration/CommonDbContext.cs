@@ -507,7 +507,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<NonFungibleIdLocationHistory>()
-            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
+            .HasIndex(e => new { NonFungibleIdDataId = e.NonFungibleIdDefinitionId, e.FromStateVersion });
 
         modelBuilder
             .Entity<StateHistory>()

@@ -78,7 +78,7 @@ internal class NonFungibleIdLocationHistory
     public long FromStateVersion { get; set; }
 
     [Column("non_fungible_id_definition_id")]
-    public long NonFungibleIdDataId { get; set; }
+    public long NonFungibleIdDefinitionId { get; set; }
 
     [Column("vault_entity_id")]
     public long VaultEntityId { get; set; }

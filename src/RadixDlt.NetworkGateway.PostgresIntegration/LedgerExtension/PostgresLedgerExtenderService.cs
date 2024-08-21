@@ -1096,8 +1096,7 @@ UPDATE pending_transactions
 
             dbReadDuration += sw.Elapsed;
 
-            var nonFungibleIdLocationHistoryToAdd = new List<NonFungibleIdLocationHistory>();
-            var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
+            var nonFungibleIdDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
 
             entityMetadataProcessor.ProcessChanges();
             entitySchemaProcessor.ProcessChanges();
@@ -1125,7 +1124,7 @@ UPDATE pending_transactions
             {
                 var nonFungibleIdData = existingNonFungibleIdData[new NonFungibleIdDefinitionDbLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId)];
 
-                nonFungibleIdsMutableDataHistoryToAdd.Add(new NonFungibleIdDataHistory
+                nonFungibleIdDataHistoryToAdd.Add(new NonFungibleIdDataHistory
                 {
                     Id = sequences.NonFungibleIdDataHistorySequence++,
                     FromStateVersion = e.StateVersion,
@@ -1182,9 +1181,8 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
 
