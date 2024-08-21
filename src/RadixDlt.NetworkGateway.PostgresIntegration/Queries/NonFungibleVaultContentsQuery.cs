@@ -97,12 +97,22 @@ internal static class NonFungibleVaultContentsQuery
         StateVersionIdCursor? Cursor,
         long AtLedgerState);
 
-    public static async Task<Dictionary<long, ResultVault>> Execute(
+    public static Task<Dictionary<long, ResultVault>> Execute(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
         ICollection<long> vaultEntityIds,
         QueryConfiguration configuration,
         CancellationToken token = default)
+    {
+        return ExecuteNonFungibleVaultContentsQuery(dbContext, dapperWrapper, vaultEntityIds, configuration, token);
+    }
+
+    private static async Task<Dictionary<long, ResultVault>> ExecuteNonFungibleVaultContentsQuery(
+        ReadOnlyDbContext dbContext,
+        IDapperWrapper dapperWrapper,
+        ICollection<long> vaultEntityIds,
+        QueryConfiguration configuration,
+        CancellationToken token)
     {
         if (vaultEntityIds.Count > 1 && configuration.Cursor != null)
         {

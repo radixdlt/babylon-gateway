@@ -75,7 +75,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
-internal class EntityResourcesPageQuery
+internal class EntityResourcesQuery
 {
     // TODO add support for string -> TokenAmount in Dapper (possibly with no silly CAST AS TEXT in the SQL
     // TODO drop redundant Resource* and Vault* prefixes?
@@ -134,7 +134,7 @@ internal class EntityResourcesPageQuery
             null,
             detailsConfiguration.AtLedgerState);
 
-        return await ExecuteEntityResourcesPageQuery(dbContext, dapperWrapper, entityIds, null, configuration, token);
+        return await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, entityIds, null, configuration, token);
     }
 
     public static async Task<ResultEntity?> FungibleResourcesPage(
@@ -152,7 +152,7 @@ internal class EntityResourcesPageQuery
             pageConfiguration.Cursor,
             null,
             pageConfiguration.AtLedgerState);
-        var results = await ExecuteEntityResourcesPageQuery(dbContext, dapperWrapper, new[] { entityId }, null, configuration, token);
+        var results = await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, null, configuration, token);
 
         results.TryGetValue(entityId, out var result);
 
@@ -174,7 +174,7 @@ internal class EntityResourcesPageQuery
             pageConfiguration.Cursor,
             null,
             pageConfiguration.AtLedgerState);
-        var results = await ExecuteEntityResourcesPageQuery(dbContext, dapperWrapper, new[] { entityId }, null, configuration, token);
+        var results = await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, null, configuration, token);
 
         results.TryGetValue(entityId, out var result);
 
@@ -197,7 +197,7 @@ internal class EntityResourcesPageQuery
             null,
             pageConfiguration.Cursor,
             pageConfiguration.AtLedgerState);
-        var results = await ExecuteEntityResourcesPageQuery(dbContext, dapperWrapper, new[] { entityId }, resourceId, configuration, token);
+        var results = await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, resourceId, configuration, token);
 
         results.TryGetValue(entityId, out var result);
 
@@ -220,24 +220,24 @@ internal class EntityResourcesPageQuery
             null,
             pageConfiguration.Cursor,
             pageConfiguration.AtLedgerState);
-        var results = await ExecuteEntityResourcesPageQuery(dbContext, dapperWrapper, new[] { entityId }, resourceId, configuration, token);
+        var results = await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, resourceId, configuration, token);
 
         results.TryGetValue(entityId, out var result);
 
         return result;
     }
 
-    private static async Task<Dictionary<long, ResultEntity>> ExecuteEntityResourcesPageQuery(
+    private static async Task<Dictionary<long, ResultEntity>> ExecuteEntityResourcesQuery(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
         ICollection<long> entityIds,
         long? resourceEntityId,
         QueryConfiguration configuration,
-        CancellationToken token = default)
+        CancellationToken token)
     {
         if (entityIds.Count > 1 && (resourceEntityId.HasValue || configuration.ResourceCursor != null || configuration.VaultCursor != null))
         {
-            throw new InvalidOperationException("Can't use neither resource filter nor cursors if executing against multiple entities.");
+            throw new InvalidOperationException("Neither resource filter nor cursors can be used if executing against multiple entities.");
         }
 
         var cd = dapperWrapper.CreateCommandDefinition(
