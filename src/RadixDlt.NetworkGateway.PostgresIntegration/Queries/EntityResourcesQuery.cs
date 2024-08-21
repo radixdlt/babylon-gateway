@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -79,7 +80,6 @@ internal class EntityResourcesPageQuery
     // TODO add support for string -> TokenAmount in Dapper (possibly with no silly CAST AS TEXT in the SQL
     // TODO drop redundant Resource* and Vault* prefixes?
     // TODO maybe we should consider stored procedures for those queries and/or their fragments that will repeat?
-    // TODO do not use 18 zeros for NF vault balances!
 
     public record ResultEntity(long EntityId, long TotalFungibleResourceCount, long TotalNonFungibleResourceCount)
     {
@@ -235,7 +235,10 @@ internal class EntityResourcesPageQuery
         QueryConfiguration configuration,
         CancellationToken token = default)
     {
-        // TODO throw if entityIds.Count > 1 and resourceEntityId/cursors are used ??
+        if (entityIds.Count > 1 && (resourceEntityId.HasValue || configuration.ResourceCursor != null || configuration.VaultCursor != null))
+        {
+            throw new InvalidOperationException("Can't use neither resource filter nor cursors if executing against multiple entities.");
+        }
 
         var cd = dapperWrapper.CreateCommandDefinition(
             @"WITH
@@ -254,8 +257,8 @@ variables AS (
 )
 SELECT
     var.entity_id,
-    th.total_fungible_count AS total_fungible_resource_count,
-    th.total_non_fungible_count AS total_non_fungible_resource_count,
+    coalesce(th.total_fungible_count, 0) AS total_fungible_resource_count,
+    coalesce(th.total_non_fungible_count, 0) AS total_non_fungible_resource_count,
 
     ed.resource_entity_id AS resource_entity_id,
     ed.resource_type AS resource_type,
@@ -271,14 +274,14 @@ SELECT
     ed_vault_ed.from_state_version AS vault_from_state_version,
     ed_vault_ed_balance.from_state_version AS vault_last_updated_at_state_version
 FROM variables var
-INNER JOIN LATERAL (
+LEFT JOIN LATERAL (
     SELECT *
     FROM entity_resource_totals_history
     WHERE entity_id = var.entity_id AND from_state_version <= var.at_ledger_state
     ORDER BY from_state_version DESC
     LIMIT 1
 ) th ON TRUE
-INNER JOIN LATERAL (
+LEFT JOIN LATERAL (
     (
         SELECT *
         FROM entity_resource_entry_definition
@@ -313,7 +316,7 @@ INNER JOIN LATERAL (
         LIMIT var.non_fungible_resources_per_entity
     )
 ) ed ON TRUE
-INNER JOIN entities ed_entity ON ed_entity.id = ed.resource_entity_id
+LEFT JOIN entities ed_entity ON ed_entity.id = ed.resource_entity_id
 LEFT JOIN LATERAL (
     SELECT *
     FROM entity_resource_balance_history
@@ -379,12 +382,18 @@ ORDER BY
 
         var result = new Dictionary<long, ResultEntity>();
 
-        await dapperWrapper.QueryAsync<ResultEntity, ResultResource, ResultVault?, ResultEntity>(
+        await dapperWrapper.QueryAsync<ResultEntity, ResultResource?, ResultVault?, ResultEntity>(
             dbContext.Database.GetDbConnection(),
             cd,
             (entityRow, resourceRow, vaultRow) =>
             {
                 var entity = result.GetOrAdd(entityRow.EntityId, _ => entityRow);
+
+                if (resourceRow == null)
+                {
+                    return entityRow;
+                }
+
                 var resource = entity.InternalResources.GetOrAdd(resourceRow.ResourceEntityId, _ =>
                 {
                     if (resourceRow.ResourceType == ResourceType.Fungible)
@@ -413,16 +422,18 @@ ORDER BY
                     return resourceRow;
                 });
 
-                if (vaultRow != null)
+                if (vaultRow == null)
                 {
-                    if (resource.Vaults.Count >= configuration.VaultsPerResource)
-                    {
-                        resource.VaultsNextCursor = new StateVersionIdCursor(vaultRow.VaultFromStateVersion, vaultRow.VaultEntityId);
-                    }
-                    else
-                    {
-                        resource.Vaults.Add(vaultRow);
-                    }
+                    return entityRow;
+                }
+
+                if (resource.Vaults.Count >= configuration.VaultsPerResource)
+                {
+                    resource.VaultsNextCursor = new StateVersionIdCursor(vaultRow.VaultFromStateVersion, vaultRow.VaultEntityId);
+                }
+                else
+                {
+                    resource.Vaults.Add(vaultRow);
                 }
 
                 return entityRow;

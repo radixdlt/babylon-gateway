@@ -114,40 +114,6 @@ internal class ReadHelper : IReadHelper
         return result;
     }
 
-    public async Task<Dictionary<long, EntityNonFungibleVaultHistory>> MostRecentEntityNonFungibleVaultHistory(List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots, CancellationToken token)
-    {
-        if (!nonFungibleVaultSnapshots.Any())
-        {
-            return new Dictionary<long, EntityNonFungibleVaultHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var vaultIds = nonFungibleVaultSnapshots.Select(x => x.ReferencedVault.DatabaseId).ToHashSet().ToList();
-
-        var result = await _dbContext
-            .EntityVaultHistory
-            .FromSqlInterpolated(@$"
-WITH variables (vault_entity_id) AS (
-    SELECT UNNEST({vaultIds})
-)
-SELECT evh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_vault_history
-    WHERE vault_entity_id = variables.vault_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) evh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.VaultEntityId, e => (EntityNonFungibleVaultHistory)e, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentEntityNonFungibleVaultHistory), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
     public async Task<Dictionary<long, ResourceEntitySupplyHistory>> MostRecentResourceEntitySupplyHistoryFor(List<ResourceSupplyChange> resourceSupplyChanges, CancellationToken token)
     {
         if (!resourceSupplyChanges.Any())
@@ -270,7 +236,6 @@ SELECT
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_metadata_aggregate_history_id_seq') AS EntityMetadataAggregateHistorySequence,
-    nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,
     nextval('entity_role_assignments_aggregate_history_id_seq') AS EntityRoleAssignmentsAggregateHistorySequence,
     nextval('entity_role_assignments_entry_history_id_seq') AS EntityRoleAssignmentsEntryHistorySequence,
     nextval('entity_role_assignments_owner_role_history_id_seq') AS EntityRoleAssignmentsOwnerRoleHistorySequence,

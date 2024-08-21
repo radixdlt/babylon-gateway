@@ -732,10 +732,10 @@ UPDATE pending_transactions
 
         var nonFungibleIdChanges = new List<NonFungibleIdChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
-        var vaultHistoryToAdd = new List<EntityVaultHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
 
+        // TODO change them into a collection, ensure they implement common interface, keep in mind that the order may matter!
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
         var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
         var entitySchemaProcessor = new EntitySchemaProcessor(processorContext);
@@ -866,8 +866,8 @@ UPDATE pending_transactions
                         accountLockerProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         affectedGlobalEntitiesProcessor.VisitUpsert(referencedEntity, stateVersion);
                         standardMetadataProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
-                        entityResourceProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, substate);
                         vaultProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, substate);
+                        entityResourceProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, substate);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -877,8 +877,8 @@ UPDATE pending_transactions
 
                         affectedGlobalEntitiesProcessor.VisitDelete(referencedEntity, stateVersion);
                         packageCodeProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
-                        entitySchemaProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                         vaultProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
+                        entitySchemaProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
@@ -1182,7 +1182,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityVaultHistory(vaultHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);

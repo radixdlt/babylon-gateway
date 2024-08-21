@@ -79,8 +79,6 @@ internal interface IReadHelper
         where TKey : notnull
         where TValue : class;
 
-    Task<Dictionary<long, EntityNonFungibleVaultHistory>> MostRecentEntityNonFungibleVaultHistory(List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots, CancellationToken token);
-
     Task<Dictionary<long, ResourceEntitySupplyHistory>> MostRecentResourceEntitySupplyHistoryFor(List<ResourceSupplyChange> resourceSupplyChanges, CancellationToken token);
 
     Task<Dictionary<EntityAddress, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token);

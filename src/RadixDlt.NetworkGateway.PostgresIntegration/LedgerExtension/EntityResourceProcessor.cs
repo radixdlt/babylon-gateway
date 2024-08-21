@@ -83,7 +83,7 @@ internal readonly record struct ByEntityResourceVaultDbLookup(long EntityId, lon
 
 internal class EntityResourceProcessor
 {
-    internal readonly record struct VaultChange(ResourceType ResourceType, VaultEntity VaultEntity, TokenAmount Delta, long StateVersion)
+    internal readonly record struct VaultDelta(ResourceType ResourceType, VaultEntity VaultEntity, TokenAmount Delta, long StateVersion)
     {
         public ByEntityDbLookup ByGlobalEntityDbLookup() => new(VaultEntity.GlobalAncestorId!.Value);
 
@@ -100,7 +100,7 @@ internal class EntityResourceProcessor
 
     private readonly ProcessorContext _context;
 
-    private readonly List<VaultChange> _observedVaultChanges = new();
+    private readonly List<VaultDelta> _observedVaultDeltas = new();
     private readonly Dictionary<ByEntityResourceDbLookup, EntityResourceEntryDefinition> _existingResourceDefinitions = new();
     private readonly Dictionary<ByEntityDbLookup, EntityResourceTotalsHistory> _mostRecentResourceTotalsHistory = new();
     private readonly Dictionary<ByEntityResourceDbLookup, EntityResourceBalanceHistory> _mostRecentResourceBalanceHistory = new();
@@ -129,7 +129,7 @@ internal class EntityResourceProcessor
 
             if (!vaultEntity.IsRoyaltyVault)
             {
-                _observedVaultChanges.Add(new VaultChange(ResourceType.Fungible, vaultEntity, delta, stateVersion));
+                _observedVaultDeltas.Add(new VaultDelta(ResourceType.Fungible, vaultEntity, delta, stateVersion));
             }
         }
 
@@ -141,7 +141,7 @@ internal class EntityResourceProcessor
             var previousAmount = previousAmountRaw == null ? TokenAmount.Zero : TokenAmount.FromDecimalString(previousAmountRaw);
             var delta = amount - previousAmount;
 
-            _observedVaultChanges.Add(new VaultChange(ResourceType.NonFungible, vaultEntity, delta, stateVersion));
+            _observedVaultDeltas.Add(new VaultDelta(ResourceType.NonFungible, vaultEntity, delta, stateVersion));
         }
     }
 
@@ -156,7 +156,7 @@ internal class EntityResourceProcessor
 
     public void ProcessChanges()
     {
-        foreach (var vaultChange in _observedVaultChanges)
+        foreach (var vaultChange in _observedVaultDeltas)
         {
             var vaultEntity = vaultChange.VaultEntity;
 
@@ -191,7 +191,7 @@ internal class EntityResourceProcessor
         return rowsInserted;
     }
 
-    private void ProcessEntryDefinition(VaultChange vaultChange, ByEntityResourceDbLookup lookup)
+    private void ProcessEntryDefinition(VaultDelta vaultDelta, ByEntityResourceDbLookup lookup)
     {
         if (_existingResourceDefinitions.ContainsKey(lookup))
         {
@@ -201,10 +201,10 @@ internal class EntityResourceProcessor
         var definition = new EntityResourceEntryDefinition
         {
             Id = _context.Sequences.EntityResourceEntryDefinitionSequence++,
-            FromStateVersion = vaultChange.StateVersion,
+            FromStateVersion = vaultDelta.StateVersion,
             EntityId = lookup.EntityId,
             ResourceEntityId = lookup.ResourceEntityId,
-            ResourceType = vaultChange.ResourceType,
+            ResourceType = vaultDelta.ResourceType,
         };
 
         _resourceEntryDefinitionsToAdd.Add(definition);
@@ -212,12 +212,12 @@ internal class EntityResourceProcessor
 
         EntityResourceTotalsHistory totalsHistory;
 
-        if (!_mostRecentResourceTotalsHistory.TryGetValue(new ByEntityDbLookup(lookup.EntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultChange.StateVersion)
+        if (!_mostRecentResourceTotalsHistory.TryGetValue(new ByEntityDbLookup(lookup.EntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultDelta.StateVersion)
         {
             totalsHistory = new EntityResourceTotalsHistory
             {
                 Id = _context.Sequences.EntityResourceTotalsHistorySequence++,
-                FromStateVersion = vaultChange.StateVersion,
+                FromStateVersion = vaultDelta.StateVersion,
                 EntityId = lookup.EntityId,
                 TotalCount = previousTotalsHistory?.TotalCount ?? 0,
                 TotalFungibleCount = previousTotalsHistory?.TotalFungibleCount ?? 0,
@@ -233,11 +233,11 @@ internal class EntityResourceProcessor
         }
 
         totalsHistory.TotalCount += 1;
-        totalsHistory.TotalFungibleCount += vaultChange.ResourceType == ResourceType.Fungible ? 1 : 0;
-        totalsHistory.TotalNonFungibleCount += vaultChange.ResourceType == ResourceType.NonFungible ? 1 : 0;
+        totalsHistory.TotalFungibleCount += vaultDelta.ResourceType == ResourceType.Fungible ? 1 : 0;
+        totalsHistory.TotalNonFungibleCount += vaultDelta.ResourceType == ResourceType.NonFungible ? 1 : 0;
     }
 
-    private void ProcessVaultEntryDefinition(VaultChange vaultChange, ByEntityResourceVaultDbLookup lookup)
+    private void ProcessVaultEntryDefinition(VaultDelta vaultDelta, ByEntityResourceVaultDbLookup lookup)
     {
         if (_existingResourceVaultDefinitions.ContainsKey(lookup))
         {
@@ -247,7 +247,7 @@ internal class EntityResourceProcessor
         var definition = new EntityResourceVaultEntryDefinition
         {
             Id = _context.Sequences.EntityResourceVaultEntryDefinitionSequence++,
-            FromStateVersion = vaultChange.StateVersion,
+            FromStateVersion = vaultDelta.StateVersion,
             EntityId = lookup.EntityId,
             ResourceEntityId = lookup.ResourceEntityId,
             VaultEntityId = lookup.VaultEntityId,
@@ -258,12 +258,12 @@ internal class EntityResourceProcessor
 
         EntityResourceVaultTotalsHistory totalsHistory;
 
-        if (!_mostRecentResourceVaultTotalsHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultChange.StateVersion)
+        if (!_mostRecentResourceVaultTotalsHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultDelta.StateVersion)
         {
             totalsHistory = new EntityResourceVaultTotalsHistory
             {
                 Id = _context.Sequences.EntityResourceVaultTotalsHistorySequence++,
-                FromStateVersion = vaultChange.StateVersion,
+                FromStateVersion = vaultDelta.StateVersion,
                 EntityId = lookup.EntityId,
                 ResourceEntityId = lookup.ResourceEntityId,
                 TotalCount = previousTotalsHistory?.TotalCount ?? 0,
@@ -280,16 +280,16 @@ internal class EntityResourceProcessor
         totalsHistory.TotalCount += 1;
     }
 
-    private void ProcessBalanceHistory(VaultChange vaultChange, ByEntityResourceVaultDbLookup lookup)
+    private void ProcessBalanceHistory(VaultDelta vaultDelta, ByEntityResourceVaultDbLookup lookup)
     {
         EntityResourceBalanceHistory balanceHistory;
 
-        if (!_mostRecentResourceBalanceHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousBalanceHistory) || previousBalanceHistory.FromStateVersion != vaultChange.StateVersion)
+        if (!_mostRecentResourceBalanceHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousBalanceHistory) || previousBalanceHistory.FromStateVersion != vaultDelta.StateVersion)
         {
             balanceHistory = new EntityResourceBalanceHistory
             {
                 Id = _context.Sequences.EntityResourceBalanceHistorySequence++,
-                FromStateVersion = vaultChange.StateVersion,
+                FromStateVersion = vaultDelta.StateVersion,
                 EntityId = lookup.EntityId,
                 ResourceEntityId = lookup.ResourceEntityId,
                 Balance = previousBalanceHistory?.Balance ?? TokenAmount.Zero,
@@ -303,12 +303,12 @@ internal class EntityResourceProcessor
             balanceHistory = previousBalanceHistory;
         }
 
-        balanceHistory.Balance += vaultChange.Delta;
+        balanceHistory.Balance += vaultDelta.Delta;
     }
 
     private async Task<IDictionary<ByEntityResourceDbLookup, EntityResourceEntryDefinition>> ExistingEntityResourceEntryDefinitions()
     {
-        var observedResourceDefinitions = _observedVaultChanges
+        var observedResourceDefinitions = _observedVaultDeltas
             .SelectMany(x => new[] { x.ByGlobalEntityResourceDbLookup(), x.ByOwnerEntityResourceDbLookup() })
             .ToHashSet();
 
@@ -330,7 +330,7 @@ WHERE (entity_id, resource_entity_id) IN (SELECT * FROM variables);",
 
     private async Task<IDictionary<ByEntityDbLookup, EntityResourceTotalsHistory>> MostRecentEntityResourceTotalsHistory()
     {
-        var entityIds = _observedVaultChanges
+        var entityIds = _observedVaultDeltas
             .SelectMany(x => new[] { x.ByGlobalEntityDbLookup(), x.ByOwnerEntityDbLookup() })
             .ToHashSet()
             .Select(x => x.EntityId)
@@ -360,7 +360,7 @@ INNER JOIN LATERAL (
 
     private async Task<IDictionary<ByEntityResourceDbLookup, EntityResourceBalanceHistory>> MostRecentResourceBalanceHistory()
     {
-        var observedResourceDefinitions = _observedVaultChanges
+        var observedResourceDefinitions = _observedVaultDeltas
             .SelectMany(x => new[] { x.ByGlobalEntityResourceDbLookup(), x.ByOwnerEntityResourceDbLookup() })
             .ToHashSet()
             .ToList();
@@ -389,7 +389,7 @@ INNER JOIN LATERAL (
 
     private async Task<IDictionary<ByEntityResourceVaultDbLookup, EntityResourceVaultEntryDefinition>> ExistingEntityResourceVaultEntryDefinitions()
     {
-        var observedResourceVaultDefinitions = _observedVaultChanges
+        var observedResourceVaultDefinitions = _observedVaultDeltas
             .SelectMany(x => new[] { x.ByGlobalEntityResourceVaultDbLookup(), x.ByOwnerEntityResourceVaultDbLookup() })
             .ToHashSet();
 
@@ -411,7 +411,7 @@ WHERE (entity_id, resource_entity_id, vault_entity_id) IN (SELECT * FROM variabl
 
     private async Task<IDictionary<ByEntityResourceDbLookup, EntityResourceVaultTotalsHistory>> MostRecentEntityResourceVaultTotalsHistory()
     {
-        var observedResourceDefinitions = _observedVaultChanges
+        var observedResourceDefinitions = _observedVaultDeltas
             .SelectMany(x => new[] { x.ByGlobalEntityResourceDbLookup(), x.ByOwnerEntityResourceDbLookup() })
             .ToHashSet()
             .ToList();

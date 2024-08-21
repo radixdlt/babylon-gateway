@@ -81,8 +81,6 @@ internal record DepositPreValidationResourcePreferenceRulesViewModel(
     long ResourceEntityId,
     AccountResourcePreferenceRule AccountResourcePreferenceRule);
 
-internal record ExistingVaultsViewModel(long ResourceEntityId);
-
 internal class DepositPreValidationQuerier : IDepositPreValidationQuerier
 {
     private readonly IDapperWrapper _dapperWrapper;
@@ -251,27 +249,15 @@ WHERE aadeh.account_entity_id = @accountEntityId AND aadeh.from_state_version <=
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var existingVaultsQuery = new CommandDefinition(
-            commandText: @"
-SELECT DISTINCT(resource_entity_id) AS ResourceEntityId FROM entity_resource_aggregated_vaults_history
-WHERE entity_id = @accountEntityId AND from_state_version <= @stateVersion AND resource_entity_id = ANY(@resourceEntityIds);",
-            parameters: new
-            {
-                accountEntityId = accountEntityId,
-                stateVersion = ledgerState.StateVersion,
-                resourceEntityIds = resourcesDictionary.Select(x => x.Value).ToList(),
-            },
-            cancellationToken: token);
+        var resourceEntityIds = resourcesDictionary.Values.ToList();
 
-        var existingVaultsQueryResult =
-            (await _dapperWrapper.QueryAsync<ExistingVaultsViewModel>(
-                _dbContext.Database.GetDbConnection(),
-                existingVaultsQuery)).ToList();
+        var existingResourceDefinitions = await _dbContext
+            .EntityResourceEntryDefinition
+            .Where(e => e.EntityId == accountEntityId && resourceEntityIds.Contains(e.ResourceEntityId))
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
+            .Select(e => e.ResourceEntityId)
+            .ToListAsync(token);
 
-        return resourcesDictionary
-            .ToDictionary(
-                resource => resource.Key,
-                resource => existingVaultsQueryResult.Any(x => x.ResourceEntityId == resource.Value)
-            );
+        return resourcesDictionary.ToDictionary(resource => resource.Key, resource => existingResourceDefinitions.Contains(resource.Value));
     }
 }

@@ -92,7 +92,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_default_deposit_rule", new[] { "accept", "reject", "allow_existing" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_resource_preference_rule", new[] { "allowed", "disallowed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "authorized_depositor_badge_type", new[] { "resource", "non_fungible" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_relationship", new[] { "component_to_instantiating_package", "vault_to_resource", "royalty_vault_of_component", "validator_to_stake_vault", "validator_to_pending_xrd_withdraw_vault", "validator_to_locked_owner_stake_unit_vault", "validator_to_pending_owner_stake_unit_unlock_vault", "stake_vault_of_validator", "claim_token_of_validator", "account_locker_of_locker", "account_locker_of_account", "resource_pool_to_unit_resource", "resource_pool_to_resource", "resource_pool_to_resource_vault", "unit_vault_of_resource_pool", "resource_vault_of_resource_pool", "access_controller_to_recovery_badge", "recovery_badge_of_access_controller" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_relationship", new[] { "component_to_instantiating_package", "vault_to_resource", "validator_to_stake_vault", "validator_to_pending_xrd_withdraw_vault", "validator_to_locked_owner_stake_unit_vault", "validator_to_pending_owner_stake_unit_unlock_vault", "stake_vault_of_validator", "claim_token_of_validator", "entity_to_royalty_vault", "royalty_vault_of_entity", "account_locker_of_locker", "account_locker_of_account", "resource_pool_to_unit_resource", "resource_pool_to_resource", "resource_pool_to_resource_vault", "unit_vault_of_resource_pool", "resource_vault_of_resource_pool", "access_controller_to_recovery_badge", "recovery_badge_of_access_controller" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity", "global_one_resource_pool", "global_two_resource_pool", "global_multi_resource_pool", "global_transaction_tracker", "global_account_locker" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
@@ -836,61 +836,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("EntityId", "FromStateVersion");
 
                     b.ToTable("entity_role_assignments_owner_role_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityVaultHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long>("GlobalEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("global_entity_id");
-
-                    b.Property<long>("OwnerEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("owner_entity_id");
-
-                    b.Property<long>("ResourceEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("resource_entity_id");
-
-                    b.Property<long>("VaultEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("vault_entity_id");
-
-                    b.Property<ResourceType>("discriminator")
-                        .HasColumnType("resource_type");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GlobalEntityId", "FromStateVersion")
-                        .HasFilter("is_royalty_vault = true");
-
-                    b.HasIndex("OwnerEntityId", "FromStateVersion")
-                        .HasFilter("is_royalty_vault = true");
-
-                    b.HasIndex("VaultEntityId", "FromStateVersion");
-
-                    b.HasIndex("GlobalEntityId", "VaultEntityId", "FromStateVersion");
-
-                    b.HasIndex("Id", "ResourceEntityId", "FromStateVersion");
-
-                    b.HasIndex("OwnerEntityId", "VaultEntityId", "FromStateVersion");
-
-                    b.ToTable("entity_vault_history");
-
-                    b.HasDiscriminator<ResourceType>("discriminator");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntryDefinition", b =>
@@ -2493,38 +2438,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue(EntityType.InternalNonFungibleVault);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleVaultHistory", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityVaultHistory");
-
-                    b.Property<BigInteger>("Balance")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric")
-                        .HasColumnName("balance");
-
-                    b.Property<bool>("IsRoyaltyVault")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_royalty_vault");
-
-                    b.ToTable("entity_vault_history");
-
-                    b.HasDiscriminator().HasValue(ResourceType.Fungible);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleVaultHistory", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityVaultHistory");
-
-                    b.Property<List<long>>("NonFungibleIds")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("non_fungible_ids");
-
-                    b.ToTable("entity_vault_history");
-
-                    b.HasDiscriminator().HasValue(ResourceType.NonFungible);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.FlashLedgerTransaction", b =>

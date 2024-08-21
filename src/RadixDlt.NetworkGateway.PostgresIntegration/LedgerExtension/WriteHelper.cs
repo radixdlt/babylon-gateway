@@ -413,56 +413,6 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityVaultHistory(ICollection<EntityVaultHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY entity_vault_history (id, from_state_version, owner_entity_id, global_entity_id, vault_entity_id, resource_entity_id, discriminator, balance, is_royalty_vault, non_fungible_ids) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.OwnerEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-
-            switch (e)
-            {
-                case EntityFungibleVaultHistory fe:
-                    await writer.WriteAsync(fe.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                    await writer.WriteAsync(fe.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case EntityNonFungibleVaultHistory nfe:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(nfe.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(e), e, null);
-            }
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityVaultHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyNonFungibleIdDataHistory(ICollection<NonFungibleIdDataHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -614,7 +564,6 @@ SELECT
     setval('entities_id_seq', @entitySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
     setval('entity_metadata_aggregate_history_id_seq', @entityMetadataAggregateHistorySequence),
-    setval('entity_vault_history_id_seq', @entityVaultHistorySequence),
     setval('entity_role_assignments_aggregate_history_id_seq', @entityRoleAssignmentsAggregateHistorySequence),
     setval('entity_role_assignments_entry_history_id_seq', @entityRoleAssignmentsEntryHistorySequence),
     setval('entity_role_assignments_owner_role_history_id_seq', @entityRoleAssignmentsOwnerRoleHistorySequence),
@@ -663,7 +612,6 @@ SELECT
                 entitySequence = sequences.EntitySequence,
                 entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
                 entityMetadataAggregateHistorySequence = sequences.EntityMetadataAggregateHistorySequence,
-                entityVaultHistorySequence = sequences.EntityVaultHistorySequence,
                 entityRoleAssignmentsAggregateHistorySequence = sequences.EntityRoleAssignmentsAggregateHistorySequence,
                 entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
                 entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,

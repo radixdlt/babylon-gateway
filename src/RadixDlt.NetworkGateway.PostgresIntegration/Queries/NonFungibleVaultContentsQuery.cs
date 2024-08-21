@@ -65,6 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -99,12 +100,14 @@ internal static class NonFungibleVaultContentsQuery
     public static async Task<Dictionary<long, ResultVault>> Execute(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
-        ICollection<long> vaultIds,
+        ICollection<long> vaultEntityIds,
         QueryConfiguration configuration,
         CancellationToken token = default)
     {
-        // TODO throw if vaultEntityIds.Count > 1 and cursor is used ??
-        // TODO add support for remaining features
+        if (vaultEntityIds.Count > 1 && configuration.Cursor != null)
+        {
+            throw new InvalidOperationException("Can't use cursor if executing against multiple vault entities.");
+        }
 
         var cd = dapperWrapper.CreateCommandDefinition(
             @"WITH
@@ -113,7 +116,7 @@ variables AS (
         unnest(@vaultEntityIds) AS vault_entity_id,
         @scanLimit AS scan_limit,
         @pageLimit AS page_limit,
-        FALSE AS ignore_deleted,
+        TRUE AS ignore_deleted,
         TRUE AS include_data,
         @descendingOrder AS descending_order,
         ROW(@vaultCursorStateVersion, @vaultCursorId) AS vault_cursor,
@@ -194,7 +197,7 @@ ORDER BY
     CASE WHEN NOT var.descending_order THEN entries.non_fungible_id_definition_id END;",
             new
             {
-                vaultEntityIds = vaultIds.ToList(),
+                vaultEntityIds = vaultEntityIds.ToList(),
                 scanLimit = 5000 + 1, // TODO configurable / use const
                 pageLimit = configuration.NonFungibleIdsPerVault + 1,
                 descendingOrder = configuration.DescendingOrder,

@@ -85,9 +85,14 @@ internal class RelationshipProcessor
         {
             _referencedEntities
                 .Get((EntityAddress)rv.EntityAddress)
-                .PostResolveConfigure((InternalFungibleVaultEntity e) =>
+                .PostResolveConfigure((InternalFungibleVaultEntity ve) =>
                 {
-                    e.AddCorrelation(EntityRelationship.RoyaltyVaultOfComponent, referencedEntity.DatabaseId);
+                    ve.AddCorrelation(EntityRelationship.RoyaltyVaultOfEntity, referencedEntity.DatabaseId);
+
+                    referencedEntity.PostResolveConfigureLow((Entity e) =>
+                    {
+                        e.AddCorrelation(EntityRelationship.EntityToRoyaltyVault, ve.Id);
+                    });
                 });
         }
 

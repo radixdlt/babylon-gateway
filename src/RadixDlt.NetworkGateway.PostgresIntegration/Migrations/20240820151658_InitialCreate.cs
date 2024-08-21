@@ -85,7 +85,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:account_default_deposit_rule", "accept,reject,allow_existing")
                 .Annotation("Npgsql:Enum:account_resource_preference_rule", "allowed,disallowed")
                 .Annotation("Npgsql:Enum:authorized_depositor_badge_type", "resource,non_fungible")
-                .Annotation("Npgsql:Enum:entity_relationship", "component_to_instantiating_package,vault_to_resource,royalty_vault_of_component,validator_to_stake_vault,validator_to_pending_xrd_withdraw_vault,validator_to_locked_owner_stake_unit_vault,validator_to_pending_owner_stake_unit_unlock_vault,stake_vault_of_validator,claim_token_of_validator,account_locker_of_locker,account_locker_of_account,resource_pool_to_unit_resource,resource_pool_to_resource,resource_pool_to_resource_vault,unit_vault_of_resource_pool,resource_vault_of_resource_pool,access_controller_to_recovery_badge,recovery_badge_of_access_controller")
+                .Annotation("Npgsql:Enum:entity_relationship", "component_to_instantiating_package,vault_to_resource,validator_to_stake_vault,validator_to_pending_xrd_withdraw_vault,validator_to_locked_owner_stake_unit_vault,validator_to_pending_owner_stake_unit_unlock_vault,stake_vault_of_validator,claim_token_of_validator,entity_to_royalty_vault,royalty_vault_of_entity,account_locker_of_locker,account_locker_of_account,resource_pool_to_unit_resource,resource_pool_to_resource,resource_pool_to_resource_vault,unit_vault_of_resource_pool,resource_vault_of_resource_pool,access_controller_to_recovery_badge,recovery_badge_of_access_controller")
                 .Annotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker,global_account_locker")
                 .Annotation("Npgsql:Enum:ledger_transaction_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
@@ -452,27 +452,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_entity_role_assignments_owner_role_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "entity_vault_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    owner_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    global_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    vault_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    discriminator = table.Column<ResourceType>(type: "resource_type", nullable: false),
-                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
-                    is_royalty_vault = table.Column<bool>(type: "boolean", nullable: true),
-                    non_fungible_ids = table.Column<List<long>>(type: "bigint[]", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_entity_vault_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1134,38 +1113,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_entity_vault_history_global_entity_id_from_state_version",
-                table: "entity_vault_history",
-                columns: new[] { "global_entity_id", "from_state_version" },
-                filter: "is_royalty_vault = true");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_vault_history_global_entity_id_vault_entity_id_from_~",
-                table: "entity_vault_history",
-                columns: new[] { "global_entity_id", "vault_entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_vault_history_id_resource_entity_id_from_state_versi~",
-                table: "entity_vault_history",
-                columns: new[] { "id", "resource_entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_vault_history_owner_entity_id_from_state_version",
-                table: "entity_vault_history",
-                columns: new[] { "owner_entity_id", "from_state_version" },
-                filter: "is_royalty_vault = true");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_vault_history_owner_entity_id_vault_entity_id_from_s~",
-                table: "entity_vault_history",
-                columns: new[] { "owner_entity_id", "vault_entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_vault_history_vault_entity_id_from_state_version",
-                table: "entity_vault_history",
-                columns: new[] { "vault_entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_key_value_store_entry_definition_key_value_store_entity_id_~",
                 table: "key_value_store_entry_definition",
                 columns: new[] { "key_value_store_entity_id", "from_state_version" });
@@ -1470,9 +1417,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "entity_role_assignments_owner_role_history");
-
-            migrationBuilder.DropTable(
-                name: "entity_vault_history");
 
             migrationBuilder.DropTable(
                 name: "key_value_store_entry_definition");

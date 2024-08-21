@@ -74,8 +74,6 @@ public enum EntityRelationship
 
     VaultToResource,
 
-    RoyaltyVaultOfComponent,
-
     // Validators
 
     ValidatorToStakeVault,
@@ -85,6 +83,12 @@ public enum EntityRelationship
 
     StakeVaultOfValidator,
     ClaimTokenOfValidator,
+
+    // Royalties
+
+    EntityToRoyaltyVault,
+
+    RoyaltyVaultOfEntity,
 
     // Account Lockers (used on related Vaults and KeyValueStores)
 

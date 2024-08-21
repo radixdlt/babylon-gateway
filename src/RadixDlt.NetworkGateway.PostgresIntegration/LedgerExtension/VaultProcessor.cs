@@ -73,24 +73,21 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal readonly record struct VaultBalanceHistoryDbLookup(long VaultEntityId);
-
 internal readonly record struct NonFungibleIdDefinitionDbLookup(long NonFungibleResourceEntityId, string NonFungibleId);
 
 internal readonly record struct NonFungibleVaultEntryDefinitionDbLookup(long VaultEntityId, long NonFungibleIdDefinitionId);
 
 internal class VaultProcessor
 {
-    private readonly record struct FungibleVaultSnapshot(VaultEntity VaultEntity, TokenAmount Balance, long StateVersion);
+    private readonly record struct VaultBalanceSnapshot(VaultEntity VaultEntity, TokenAmount Balance, long StateVersion);
 
     private readonly record struct NonFungibleVaultChange(VaultEntity VaultEntity, string NonFungibleLocalId, bool IsDeposit, long StateVersion);
 
     private readonly ProcessorContext _context;
 
-    private readonly List<FungibleVaultSnapshot> _observedFungibleVaultSnapshots = new();
+    private readonly List<VaultBalanceSnapshot> _observedVaultBalanceSnapshots = new();
     private readonly List<NonFungibleVaultChange> _observedNonFungibleVaultChanges = new();
     private readonly Dictionary<NonFungibleIdDefinitionDbLookup, long> _observedNonFungibleDataEntries = new();
-    private readonly Dictionary<VaultBalanceHistoryDbLookup, VaultBalanceHistory> _mostRecentNonFungibleVaultBalanceHistory = new();
     private readonly Dictionary<NonFungibleIdDefinitionDbLookup, NonFungibleIdDefinition> _existingNonFungibleIdDefinitions = new();
     private readonly Dictionary<NonFungibleVaultEntryDefinitionDbLookup, NonFungibleVaultEntryDefinition> _existingNonFungibleVaultEntryDefinitions = new();
     private readonly List<VaultBalanceHistory> _balanceHistoryToAdd = new();
@@ -110,7 +107,22 @@ internal class VaultProcessor
             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
             var amount = TokenAmount.FromDecimalString(fungibleVaultFieldBalanceSubstate.Value.Amount);
 
-            _observedFungibleVaultSnapshots.Add(new FungibleVaultSnapshot(vaultEntity, amount, stateVersion));
+            _observedVaultBalanceSnapshots.Add(new VaultBalanceSnapshot(vaultEntity, amount, stateVersion));
+        }
+
+        if (substateData is CoreModel.NonFungibleVaultFieldBalanceSubstate nonFungibleVaultFieldBalanceSubstate)
+        {
+            var vaultEntity = referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
+            var amount = TokenAmount.FromDecimalString(nonFungibleVaultFieldBalanceSubstate.Value.Amount);
+
+            _observedVaultBalanceSnapshots.Add(new VaultBalanceSnapshot(vaultEntity, amount, stateVersion));
+        }
+
+        if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate)
+        {
+            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substate.SubstateId.SubstateKey).KeyHex);
+
+            _observedNonFungibleDataEntries.TryAdd(new NonFungibleIdDefinitionDbLookup(referencedEntity.DatabaseId, nonFungibleId), stateVersion);
         }
 
         if (substateData is CoreModel.NonFungibleVaultContentsIndexEntrySubstate nonFungibleVaultContentsIndexEntrySubstate)
@@ -119,13 +131,6 @@ internal class VaultProcessor
             var simpleRep = nonFungibleVaultContentsIndexEntrySubstate.Key.NonFungibleLocalId.SimpleRep;
 
             _observedNonFungibleVaultChanges.Add(new NonFungibleVaultChange(vaultEntity, simpleRep, true, stateVersion));
-        }
-
-        if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate)
-        {
-            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substate.SubstateId.SubstateKey).KeyHex);
-
-            _observedNonFungibleDataEntries.TryAdd(new NonFungibleIdDefinitionDbLookup(referencedEntity.DatabaseId, nonFungibleId), stateVersion);
         }
     }
 
@@ -142,14 +147,13 @@ internal class VaultProcessor
 
     public async Task LoadDependencies()
     {
-        _mostRecentNonFungibleVaultBalanceHistory.AddRange(await MostRecentNonFungibleVaultBalanceHistory());
         _existingNonFungibleIdDefinitions.AddRange(await ExistingNonFungibleIdDefinitions());
         _existingNonFungibleVaultEntryDefinitions.AddRange(await ExistingNonFungibleVaultEntryDefinitions());
     }
 
     public void ProcessChanges()
     {
-        _balanceHistoryToAdd.AddRange(_observedFungibleVaultSnapshots.Select(x => new VaultBalanceHistory
+        _balanceHistoryToAdd.AddRange(_observedVaultBalanceSnapshots.Select(x => new VaultBalanceHistory
         {
             Id = _context.Sequences.VaultBalanceHistorySequence++,
             FromStateVersion = x.StateVersion,
@@ -194,28 +198,6 @@ internal class VaultProcessor
                     return definition;
                 });
 
-            VaultBalanceHistory balanceHistory;
-
-            if (!_mostRecentNonFungibleVaultBalanceHistory.TryGetValue(new VaultBalanceHistoryDbLookup(change.VaultEntity.Id), out var previousBalanceHistory) || previousBalanceHistory.FromStateVersion != change.StateVersion)
-            {
-                balanceHistory = new VaultBalanceHistory
-                {
-                    Id = _context.Sequences.VaultBalanceHistorySequence++,
-                    FromStateVersion = change.StateVersion,
-                    VaultEntityId = change.VaultEntity.Id,
-                    Balance = TokenAmount.Zero,
-                };
-
-                _balanceHistoryToAdd.Add(balanceHistory);
-                _mostRecentNonFungibleVaultBalanceHistory[new VaultBalanceHistoryDbLookup(change.VaultEntity.Id)] = balanceHistory;
-            }
-            else
-            {
-                balanceHistory = previousBalanceHistory;
-            }
-
-            balanceHistory.Balance += change.IsDeposit ? TokenAmount.One : TokenAmount.MinusOne;
-
             var nonFungibleVaultEntryDefinition = _existingNonFungibleVaultEntryDefinitions.GetOrAdd(
                 new NonFungibleVaultEntryDefinitionDbLookup(change.VaultEntity.Id, nonFungibleIdDefinition.Id),
                 lookup =>
@@ -258,35 +240,6 @@ internal class VaultProcessor
         rowsInserted += await CopyNonFungibleVaultEntryHistoryToAdd();
 
         return rowsInserted;
-    }
-
-    private async Task<IDictionary<VaultBalanceHistoryDbLookup, VaultBalanceHistory>> MostRecentNonFungibleVaultBalanceHistory()
-    {
-        var vaultEntityIds = _observedNonFungibleVaultChanges
-            .Select(x => x.VaultEntity.Id)
-            .ToHashSet()
-            .ToList();
-
-        if (!vaultEntityIds.Any())
-        {
-            return ImmutableDictionary<VaultBalanceHistoryDbLookup, VaultBalanceHistory>.Empty;
-        }
-
-        return await _context.ReadHelper.LoadDependencies<VaultBalanceHistoryDbLookup, VaultBalanceHistory>(
-            @$"
-WITH variables (vault_entity_id) AS (
-    SELECT unnest({vaultEntityIds})
-)
-SELECT th.*
-FROM variables var
-INNER JOIN LATERAL (
-    SELECT *
-    FROM vault_balance_history
-    WHERE vault_entity_id = var.vault_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) th ON true;",
-            e => new VaultBalanceHistoryDbLookup(e.VaultEntityId));
     }
 
     private async Task<IDictionary<NonFungibleIdDefinitionDbLookup, NonFungibleIdDefinition>> ExistingNonFungibleIdDefinitions()

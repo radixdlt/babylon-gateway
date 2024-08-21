@@ -116,8 +116,6 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountResourcePreferenceRuleAggregateHistory> AccountResourcePreferenceRuleAggregateHistory => Set<AccountResourcePreferenceRuleAggregateHistory>();
 
-    public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
-
     public DbSet<ResourceEntitySupplyHistory> ResourceEntitySupplyHistory => Set<ResourceEntitySupplyHistory>();
 
     public DbSet<NonFungibleIdDefinition> NonFungibleIdDefinition => Set<NonFungibleIdDefinition>();
@@ -474,38 +472,6 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<PackageCodeAggregateHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
-            .HasValue<EntityFungibleVaultHistory>(ResourceType.Fungible)
-            .HasValue<EntityNonFungibleVaultHistory>(ResourceType.NonFungible);
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.OwnerEntityId, e.VaultEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.Id, e.ResourceEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.OwnerEntityId, e.FromStateVersion })
-            .HasFilter("is_royalty_vault = true");
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion })
-            .HasFilter("is_royalty_vault = true");
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<EntityRoleAssignmentsOwnerRoleHistory>()
