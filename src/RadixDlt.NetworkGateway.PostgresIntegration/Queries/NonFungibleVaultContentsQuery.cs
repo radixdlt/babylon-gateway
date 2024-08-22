@@ -83,11 +83,12 @@ internal static class NonFungibleVaultContentsQuery
     }
 
     public record ResultNonFungibleId(
-        long NonFungibleIdDefinitionId,
+        long DefinitionId,
         long DefinitionFromStateVersion,
         bool DefinitionIsLastCandidate,
         long LastUpdatedAtStateVersion,
         bool IsDeleted,
+        long NonFungibleIdDefinitionId,
         string NonFungibleId,
         byte[]? Data);
 
@@ -136,17 +137,19 @@ SELECT
     var.vault_entity_id,
     CAST(balance.balance AS TEXT) AS vault_balance,
 
-    entries.non_fungible_id_definition_id,
+    entries.definition_id,
     entries.definition_from_state_version,
     entries.definition_is_last_candidate,
     entries.last_updated_at_state_version,
     entries.is_deleted,
+    entries.non_fungible_id_definition_id,
     nf_def.non_fungible_id,
     nf_data.data
     -- , nf_data.is_deleted -- TODO how it relates to the entries.is_deleted? is it even needed?
 FROM variables var
 INNER JOIN LATERAL (
     SELECT
+        ed.id AS definition_id,
         ed.non_fungible_id_definition_id,
         ed.from_state_version AS definition_from_state_version,
         ed.is_last_candidate AS definition_is_last_candidate,
@@ -160,7 +163,7 @@ INNER JOIN LATERAL (
         WHERE
             vault_entity_id = var.vault_entity_id
           AND from_state_version <= var.at_ledger_state
-          AND CASE WHEN var.descending_order THEN (from_state_version, non_fungible_id_definition_id) <= var.vault_cursor ELSE (from_state_version, non_fungible_id_definition_id) >= var.vault_cursor END
+          AND CASE WHEN var.descending_order THEN (from_state_version, id) <= var.vault_cursor ELSE (from_state_version, id) >= var.vault_cursor END
         ORDER BY
             CASE WHEN var.descending_order THEN from_state_version END DESC,
             CASE WHEN var.descending_order THEN non_fungible_id_definition_id END DESC,
@@ -228,7 +231,7 @@ ORDER BY
 
                 if (entryRow.DefinitionIsLastCandidate || vault.NonFungibleIds.Count >= configuration.NonFungibleIdsPerVault)
                 {
-                    vault.NonFungibleIdsNextCursor = new StateVersionIdCursor(entryRow.DefinitionFromStateVersion, entryRow.NonFungibleIdDefinitionId);
+                    vault.NonFungibleIdsNextCursor = new StateVersionIdCursor(entryRow.DefinitionFromStateVersion, entryRow.DefinitionId);
                 }
                 else
                 {
@@ -237,7 +240,7 @@ ORDER BY
 
                 return vault;
             },
-            "non_fungible_id_definition_id");
+            "definition_id");
 
         return result;
     }

@@ -94,14 +94,14 @@ internal class EntityResourcesQuery
         internal Dictionary<long, ResultResource> InternalResources { get; } = new();
     }
 
-    public record ResultResource(long ResourceEntityId, ResourceType ResourceType, EntityAddress ResourceEntityAddress, string ResourceBalance, long ResourceFromStateVersion, long ResourceLastUpdatedAtStateVersion, long? ResourceVaultTotalCount)
+    public record ResultResource(long ResourceEntryDefinitionId, long ResourceEntityId, ResourceType ResourceType, EntityAddress ResourceEntityAddress, string ResourceBalance, long ResourceFromStateVersion, long ResourceLastUpdatedAtStateVersion, long? ResourceVaultTotalCount)
     {
         public StateVersionIdCursor? VaultsNextCursor { get; set; } // TODO set should throw if already non-null
 
         public List<ResultVault> Vaults { get; } = new();
     }
 
-    public record ResultVault(long VaultEntityId, EntityAddress VaultEntityAddress, string VaultBalance, long VaultFromStateVersion, long VaultLastUpdatedAtStateVersion);
+    public record ResultVault(long VaultEntryDefinitionId, long VaultEntityId, EntityAddress VaultEntityAddress, string VaultBalance, long VaultFromStateVersion, long VaultLastUpdatedAtStateVersion);
 
     public record struct DetailsQueryConfiguration(int FungibleResourcesPerEntity, int NonFungibleResourcesPerEntity, int VaultsPerResource, long AtLedgerState);
 
@@ -260,6 +260,7 @@ SELECT
     coalesce(th.total_fungible_count, 0) AS total_fungible_resource_count,
     coalesce(th.total_non_fungible_count, 0) AS total_non_fungible_resource_count,
 
+    ed.id AS resource_entry_definition_id,
     ed.resource_entity_id AS resource_entity_id,
     ed.resource_type AS resource_type,
     ed_entity.address AS resource_entity_address,
@@ -268,6 +269,7 @@ SELECT
     ed_balance.from_state_version AS resource_last_updated_at_state_version,
     ed_vault_totals.total_count AS resource_vault_total_count,
 
+    ed_vault_ed.id AS vault_entry_definition_id,
     ed_vault_ed.vault_entity_id AS vault_entity_id,
     ed_vault_ed_entity.address AS vault_entity_address,
     CAST(ed_vault_ed_balance.balance AS TEXT) AS vault_balance,
@@ -290,7 +292,7 @@ LEFT JOIN LATERAL (
           AND resource_type = 'fungible'
           AND from_state_version <= var.at_ledger_state
           AND CASE WHEN var.resource_entity_id IS NOT NULL THEN resource_entity_id = var.resource_entity_id ELSE TRUE END
-          AND CASE WHEN var.descending_order THEN (from_state_version, resource_entity_id) <= var.resource_cursor ELSE (from_state_version, resource_entity_id) >= var.resource_cursor END
+          AND CASE WHEN var.descending_order THEN (from_state_version, id) <= var.resource_cursor ELSE (from_state_version, id) >= var.resource_cursor END
         ORDER BY
             CASE WHEN var.descending_order THEN from_state_version END DESC,
             CASE WHEN var.descending_order THEN resource_entity_id END DESC,
@@ -307,7 +309,7 @@ LEFT JOIN LATERAL (
           AND resource_type = 'non_fungible'
           AND from_state_version <= var.at_ledger_state
           AND CASE WHEN var.resource_entity_id IS NOT NULL THEN resource_entity_id = var.resource_entity_id ELSE TRUE END
-          AND CASE WHEN var.descending_order THEN (from_state_version, resource_entity_id) <= var.resource_cursor ELSE (from_state_version, resource_entity_id) >= var.resource_cursor END
+          AND CASE WHEN var.descending_order THEN (from_state_version, id) <= var.resource_cursor ELSE (from_state_version, id) >= var.resource_cursor END
         ORDER BY
             CASE WHEN var.descending_order THEN from_state_version END DESC,
             CASE WHEN var.descending_order THEN resource_entity_id END DESC,
@@ -338,7 +340,7 @@ LEFT JOIN LATERAL (
         entity_id = var.entity_id
       AND resource_entity_id = ed.resource_entity_id
       AND from_state_version <= var.at_ledger_state
-      AND CASE WHEN var.descending_order THEN (from_state_version, vault_entity_id) <= var.vault_cursor ELSE (from_state_version, vault_entity_id) >= var.vault_cursor END
+      AND CASE WHEN var.descending_order THEN (from_state_version, id) <= var.vault_cursor ELSE (from_state_version, id) >= var.vault_cursor END
     ORDER BY
         CASE WHEN var.descending_order THEN from_state_version END DESC,
         CASE WHEN var.descending_order THEN vault_entity_id END DESC,
@@ -400,7 +402,7 @@ ORDER BY
                     {
                         if (entity.FungibleResources.Count >= configuration.FungibleResourcesPerEntity)
                         {
-                            entity.FungibleResourcesNextCursor = new StateVersionIdCursor(resourceRow.ResourceFromStateVersion, resourceRow.ResourceEntityId);
+                            entity.FungibleResourcesNextCursor = new StateVersionIdCursor(resourceRow.ResourceFromStateVersion, resourceRow.ResourceEntryDefinitionId);
                         }
                         else
                         {
@@ -411,7 +413,7 @@ ORDER BY
                     {
                         if (entity.NonFungibleResources.Count >= configuration.NonFungibleResourcesPerEntity)
                         {
-                            entity.NonFungibleResourcesNextCursor = new StateVersionIdCursor(resourceRow.ResourceFromStateVersion, resourceRow.ResourceEntityId);
+                            entity.NonFungibleResourcesNextCursor = new StateVersionIdCursor(resourceRow.ResourceFromStateVersion, resourceRow.ResourceEntryDefinitionId);
                         }
                         else
                         {
@@ -429,7 +431,7 @@ ORDER BY
 
                 if (resource.Vaults.Count >= configuration.VaultsPerResource)
                 {
-                    resource.VaultsNextCursor = new StateVersionIdCursor(vaultRow.VaultFromStateVersion, vaultRow.VaultEntityId);
+                    resource.VaultsNextCursor = new StateVersionIdCursor(vaultRow.VaultFromStateVersion, vaultRow.VaultEntryDefinitionId);
                 }
                 else
                 {
@@ -438,7 +440,7 @@ ORDER BY
 
                 return entityRow;
             },
-            "resource_entity_id,vault_entity_id");
+            "resource_entry_definition_id,vault_entry_definition_id");
 
         return result;
     }
