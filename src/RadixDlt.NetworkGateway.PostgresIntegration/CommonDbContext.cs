@@ -66,6 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
@@ -78,7 +79,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 /// </summary>
 internal abstract class CommonDbContext : DbContext
 {
-    private const string DiscriminatorColumnName = "discriminator";
+    internal const string DiscriminatorColumnName = "discriminator";
 
     /// <summary>
     /// Gets LedgerTransactions.
@@ -159,7 +160,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
 
-    public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
+    public DbSet<ValidatorCumulativeEmissionHistory> ValidatorCumulativeEmissionHistory => Set<ValidatorCumulativeEmissionHistory>();
 
     public DbSet<NonFungibleSchemaHistory> NonFungibleSchemaHistory => Set<NonFungibleSchemaHistory>();
 
@@ -168,6 +169,12 @@ internal abstract class CommonDbContext : DbContext
     public DbSet<AccountAuthorizedDepositorEntryHistory> AccountAuthorizedDepositorEntryHistory => Set<AccountAuthorizedDepositorEntryHistory>();
 
     public DbSet<AccountAuthorizedDepositorAggregateHistory> AccountAuthorizedDepositorAggregateHistory => Set<AccountAuthorizedDepositorAggregateHistory>();
+
+    public DbSet<UnverifiedStandardMetadataAggregateHistory> UnverifiedStandardMetadataAggregateHistory => Set<UnverifiedStandardMetadataAggregateHistory>();
+
+    public DbSet<UnverifiedStandardMetadataEntryHistory> UnverifiedStandardMetadataEntryHistory => Set<UnverifiedStandardMetadataEntryHistory>();
+
+    public DbSet<ResourceHolder> ResourceHolders => Set<ResourceHolder>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -181,6 +188,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<AccountDefaultDepositRule>();
         modelBuilder.HasPostgresEnum<AccountResourcePreferenceRule>();
         modelBuilder.HasPostgresEnum<EntityType>();
+        modelBuilder.HasPostgresEnum<EntityRelationship>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionManifestClass>();
@@ -198,12 +206,12 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<SborTypeKind>();
         modelBuilder.HasPostgresEnum<StateType>();
         modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
+        modelBuilder.HasPostgresEnum<StandardMetadataKey>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
         HookupDefinitions(modelBuilder);
         HookupHistory(modelBuilder);
-        HookupStatistics(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -263,7 +271,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
             .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress)
             .HasValue<ManifestClassMarker>(LedgerTransactionMarkerType.ManifestClass)
-            .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity);
+            .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity)
+            .HasValue<EventGlobalEmitterTransactionMarker>(LedgerTransactionMarkerType.EventGlobalEmitter);
 
         modelBuilder
             .Entity<LedgerTransactionMarker>()
@@ -288,6 +297,11 @@ internal abstract class CommonDbContext : DbContext
             .Entity<AffectedGlobalEntityTransactionMarker>()
             .HasIndex(e => new { e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'affected_global_entity'");
+
+        modelBuilder
+            .Entity<EventGlobalEmitterTransactionMarker>()
+            .HasIndex(e => new { e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'event_global_emitter'");
 
         modelBuilder
             .Entity<ManifestClassMarker>()
@@ -596,13 +610,36 @@ internal abstract class CommonDbContext : DbContext
             .Entity<AccountAuthorizedResourceBadgeDepositorEntryHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion })
             .HasFilter("discriminator = 'resource'");
-    }
 
-    private static void HookupStatistics(ModelBuilder modelBuilder)
-    {
         modelBuilder
-            .Entity<ValidatorEmissionStatistics>()
-            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber })
-            .IncludeProperties(e => new { e.ProposalsMade, e.ProposalsMissed });
+            .Entity<ValidatorCumulativeEmissionHistory>()
+            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
+
+        modelBuilder
+            .Entity<UnverifiedStandardMetadataAggregateHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<UnverifiedStandardMetadataEntryHistory>()
+            .HasDiscriminator(e => e.Discriminator)
+            .HasValue<DappAccountTypeUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappAccountType)
+            .HasValue<DappDefinitionUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappDefinition)
+            .HasValue<DappDefinitionsUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappDefinitions)
+            .HasValue<DappClaimedEntitiesUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappClaimedEntities)
+            .HasValue<DappClaimedWebsitesUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappClaimedWebsites)
+            .HasValue<DappAccountLockerUnverifiedStandardMetadataEntryHistory>(StandardMetadataKey.DappAccountLocker);
+
+        modelBuilder
+            .Entity<UnverifiedStandardMetadataEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.Discriminator, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<ResourceHolder>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId })
+            .IsUnique();
+
+        modelBuilder
+            .Entity<ResourceHolder>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.Balance });
     }
 }

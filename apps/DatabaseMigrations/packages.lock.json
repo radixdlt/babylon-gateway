@@ -4,11 +4,11 @@
     "net8.0": {
       "StyleCop.Analyzers": {
         "type": "Direct",
-        "requested": "[1.2.0-beta.435, )",
-        "resolved": "1.2.0-beta.435",
-        "contentHash": "TADk7vdGXtfTnYCV7GyleaaRTQjfoSfZXprQrVMm7cSJtJbFc1QIbWPyLvrgrfGdfHbGmUPvaN4ODKNxg2jgPQ==",
+        "requested": "[1.2.0-beta.556, )",
+        "resolved": "1.2.0-beta.556",
+        "contentHash": "llRPgmA1fhC0I0QyFLEcjvtM2239QzKr/tcnbsjArLMJxJlu0AA5G7Fft0OI30pHF3MW63Gf4aSSsjc5m82J1Q==",
         "dependencies": {
-          "StyleCop.Analyzers.Unstable": "1.2.0.435"
+          "StyleCop.Analyzers.Unstable": "1.2.0.556"
         }
       },
       "FluentValidation.DependencyInjectionExtensions": {
@@ -435,8 +435,8 @@
       },
       "StyleCop.Analyzers.Unstable": {
         "type": "Transitive",
-        "resolved": "1.2.0.435",
-        "contentHash": "ouwPWZxbOV3SmCZxIRqHvljkSzkCyi1tDoMzQtDb/bRP8ctASV/iRJr+A2Gdj0QLaLmWnqTWDrH82/iP+X80Lg=="
+        "resolved": "1.2.0.556",
+        "contentHash": "zvn9Mqs/ox/83cpYPignI8hJEM2A93s2HkHs8HYMOAQW0PkampyoErAiIyKxgTLqbbad29HX/shv/6LGSjPJNQ=="
       },
       "System.CodeDom": {
         "type": "Transitive",
@@ -569,13 +569,13 @@
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Nito.AsyncEx.Coordination": "[5.1.2, )",
-          "RadixDlt.CoreApiSdk": "[1.6.0-develop, )"
+          "RadixDlt.CoreApiSdk": "[1.7.0-develop, )"
         }
       },
       "radixdlt.networkgateway.dataaggregator": {
         "type": "Project",
         "dependencies": {
-          "RadixDlt.NetworkGateway.Abstractions": "[1.6.0-develop, )"
+          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )"
         }
       },
       "radixdlt.networkgateway.gatewayapi": {
@@ -583,9 +583,9 @@
         "dependencies": {
           "FluentValidation.AspNetCore": "[11.3.0, )",
           "Microsoft.Extensions.Http.Polly": "[8.0.2, )",
-          "RadixDlt.NetworkGateway.Abstractions": "[1.6.0-develop, )",
-          "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.6.0-develop, )",
-          "RadixDlt.RadixEngineToolkit": "[2.1.0-dev6, )"
+          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )",
+          "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.7.0-develop, )",
+          "RadixDlt.RadixEngineToolkit": "[2.1.0, )"
         }
       },
       "radixdlt.networkgateway.gatewayapisdk": {
@@ -593,7 +593,8 @@
         "dependencies": {
           "JsonSubTypes": "[2.0.1, )",
           "Newtonsoft.Json": "[13.0.3, )",
-          "Polly": "[8.3.0, )"
+          "Polly": "[8.3.0, )",
+          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )"
         }
       },
       "radixdlt.networkgateway.postgresintegration": {
@@ -606,10 +607,10 @@
           "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "[8.0.2, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[8.0.2, )",
-          "RadixDlt.NetworkGateway.Abstractions": "[1.6.0-develop, )",
-          "RadixDlt.NetworkGateway.DataAggregator": "[1.6.0-develop, )",
-          "RadixDlt.NetworkGateway.GatewayApi": "[1.6.0-develop, )",
-          "RadixDlt.RadixEngineToolkit": "[2.1.0-dev6, )"
+          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )",
+          "RadixDlt.NetworkGateway.DataAggregator": "[1.7.0-develop, )",
+          "RadixDlt.NetworkGateway.GatewayApi": "[1.7.0-develop, )",
+          "RadixDlt.RadixEngineToolkit": "[2.1.0, )"
         }
       },
       "Dapper": {
@@ -788,9 +789,9 @@
       },
       "RadixDlt.RadixEngineToolkit": {
         "type": "CentralTransitive",
-        "requested": "[2.1.0-dev6, )",
-        "resolved": "2.1.0-dev6",
-        "contentHash": "aM3Apew+1y/RYwy5KE99KBEkcF1C+3mQBAQxNaZ7+dwpDqEqj1ucDvajm92Y+EshGApdn8Usz1Zmtz88kbif5Q=="
+        "requested": "[2.1.0, )",
+        "resolved": "2.1.0",
+        "contentHash": "+c3+oc6Do0mPO5T1xHKnkzTgXiVPxez6OLWYC+48c3PcOEdUeKxC8u2dxZgSwOuiFItPUkIGQy6uI3+5+D1zcw=="
       }
     }
   }

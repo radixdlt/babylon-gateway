@@ -67,6 +67,7 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
@@ -85,6 +86,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
+    public static GatewayModel.TwoWayLinkedDappsCollectionItem ToGatewayModel(this DappDefinitionsResolvedTwoWayLink input)
+    {
+        return new GatewayModel.TwoWayLinkedDappsCollectionItem(input.EntityAddress);
+    }
+
+    public static GatewayModel.TwoWayLinkedEntitiesCollectionItem ToGatewayModel(this DappClaimedEntityResolvedTwoWayLink input)
+    {
+        return new GatewayModel.TwoWayLinkedEntitiesCollectionItem(input.EntityAddress);
+    }
+
     public static GatewayModel.AccountDefaultDepositRule ToGatewayModel(this AccountDefaultDepositRule input)
     {
         return input switch

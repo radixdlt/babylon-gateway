@@ -68,8 +68,10 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -96,19 +98,6 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     {
         public int TotalCount { get; set; }
     }
-
-    private record ValidatorCurrentStakeViewModel(
-        long ValidatorId,
-        string State,
-        long StateLastUpdatedAtStateVersion,
-        string StakeVaultBalance,
-        long StakeVaultLastUpdatedAtStateVersion,
-        string PendingXrdWithdrawVaultBalance,
-        long PendingXrdWithdrawVaultLastUpdatedAtStateVersion,
-        string LockedOwnerStakeUnitVaultBalance,
-        long LockedOwnerStakeUnitVaultLastUpdatedAtStateVersion,
-        string PendingOwnerStakeUnitUnlockVaultBalance,
-        long PendingOwnerStakeUnitUnlockVaultLastUpdatedAtStateVersion);
 
     private record RoyaltyVaultBalanceViewModel(long RoyaltyVaultEntityId, string Balance, long OwnerEntityId, long LastUpdatedAtStateVersion);
 
@@ -149,6 +138,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     {
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
         var packagePageSize = _endpointConfiguration.Value.DefaultHeavyCollectionsPageSize;
+        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
 
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
@@ -168,6 +158,13 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var packageSchemaHistory = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var fungibleVaultsHistory = await GetFungibleVaultsHistory(fungibleVaultEntities, ledgerState, token);
         var nonFungibleVaultsHistory = await GetNonFungibleVaultsHistory(nonFungibleVaultEntities, optIns.NonFungibleIncludeNfids, ledgerState, token);
+        var resolvedTwoWayLinks = optIns.DappTwoWayLinks
+            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, ledgerState, token)
+            : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
+        var resolvedNativeResourceDetails = optIns.NativeResourceDetails
+            ? await new NativeResourceDetailsResolver(_dbContext, _dapperWrapper, networkConfiguration).GetNativeResourceDetails(entities, ledgerState, token)
+            : ImmutableDictionary<EntityAddress, GatewayModel.NativeResourceDetails>.Empty;
+
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, packageBlueprintHistory, ledgerState, token);
 
         // those collections do NOT support virtual entities, thus they cannot be used outside of entity type specific context (switch statement below and its case blocks)
@@ -197,21 +194,30 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         {
             GatewayModel.StateEntityDetailsResponseItemDetails? details = null;
 
+            resolvedTwoWayLinks.TryGetValue(entity.Address, out var twoWayLinks);
+            resolvedNativeResourceDetails.TryGetValue(entity.Address, out var nativeResourceDetails);
+
             switch (entity)
             {
                 case GlobalFungibleResourceEntity frme:
                     var fungibleResourceSupplyData = resourcesSupplyData[frme.Id];
+                    var fungibleTwoWayLinkedDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+
                     details = new GatewayModel.StateEntityDetailsResponseFungibleResourceDetails(
                         roleAssignments: roleAssignmentsHistory[frme.Id],
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
-                        divisibility: frme.Divisibility);
+                        divisibility: frme.Divisibility,
+                        twoWayLinkedDapps: fungibleTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: fungibleTwoWayLinkedDapps) : null,
+                        nativeResourceDetails: nativeResourceDetails);
 
                     break;
 
                 case GlobalNonFungibleResourceEntity nfrme:
                     var nonFungibleResourceSupplyData = resourcesSupplyData[nfrme.Id];
+                    var nonFungibleTwoWayLinkedDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+
                     if (nonFungibleResourceSupplyData == null)
                     {
                         throw new ArgumentException($"Resource supply data for fungible resource with database id:{nfrme.Id} not found.");
@@ -222,7 +228,10 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         totalSupply: nonFungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
-                        nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel());
+                        nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel(),
+                        nonFungibleDataMutableFields: nfrme.NonFungibleDataMutableFields,
+                        twoWayLinkedDapps: nonFungibleTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: nonFungibleTwoWayLinkedDapps) : null,
+                        nativeResourceDetails: nativeResourceDetails);
                     break;
 
                 case GlobalPackageEntity pe:
@@ -266,7 +275,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null,
                         blueprints: new GatewayModel.PackageBlueprintCollection(blueprintTotalCount, blueprintCursor, blueprintItems),
                         schemas: new GatewayModel.EntitySchemaCollection(schemaTotalCount, schemaCursor, schemaItems),
-                        roleAssignments: roleAssignmentsHistory[pe.Id]);
+                        roleAssignments: roleAssignmentsHistory[pe.Id],
+                        twoWayLinkedDappAddress: twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress);
                     break;
 
                 case VirtualIdentityEntity:
@@ -281,7 +291,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     var fungibleVaultHistory = fungibleVaultsHistory[entity.Id];
 
                     details = new GatewayModel.StateEntityDetailsResponseFungibleVaultDetails(
-                        resourceAddress: correlatedAddresses[ifve.ResourceEntityId],
+                        resourceAddress: correlatedAddresses[ifve.GetResourceEntityId()],
                         balance: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
                             vaultAddress: entity.Address,
                             amount: TokenAmount.FromSubUnitsString(fungibleVaultHistory.Balance).ToString(),
@@ -300,7 +310,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponseNonFungibleVaultDetails(
-                        resourceAddress: correlatedAddresses[infve.ResourceEntityId],
+                        resourceAddress: correlatedAddresses[infve.GetResourceEntityId()],
                         balance: new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
                             totalCount: nonFungibleVaultHistory.NonFungibleIdsCount,
                             nextCursor: nfNextCursor,
@@ -311,6 +321,23 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
 
                 case ComponentEntity ce:
                     ComponentMethodRoyaltyEntryHistory[]? componentRoyaltyConfig = null;
+                    GatewayModel.TwoWayLinkedDappOnLedgerDetails? twoWayLinkedDappOnLedgerDetails = null;
+                    var nonAccountTwoWayLinkedDapp = twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress;
+
+                    if (ce is GlobalAccountEntity)
+                    {
+                        var accountTwoWayLinkedDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var accountTwoWayLinkedEntities = twoWayLinks?.OfType<DappClaimedEntityResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var accountTwoWayLinkedLocker = twoWayLinks?.OfType<DappAccountLockerResolvedTwoWayLink>().FirstOrDefault()?.LockerAddress;
+
+                        if (accountTwoWayLinkedDapps?.Any() == true || accountTwoWayLinkedEntities?.Any() == true || accountTwoWayLinkedLocker != null)
+                        {
+                            twoWayLinkedDappOnLedgerDetails = new GatewayModel.TwoWayLinkedDappOnLedgerDetails(
+                                dapps: accountTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: accountTwoWayLinkedDapps) : null,
+                                entities: accountTwoWayLinkedEntities?.Any() == true ? new GatewayModel.TwoWayLinkedEntitiesCollection(items: accountTwoWayLinkedEntities) : null,
+                                primaryLocker: accountTwoWayLinkedLocker);
+                        }
+                    }
 
                     stateHistory.TryGetValue(ce.Id, out var state);
                     roleAssignmentsHistory.TryGetValue(ce.Id, out var roleAssignments);
@@ -318,14 +345,16 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                     var componentRoyaltyVaultBalance = royaltyVaultsBalances?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
-                        packageAddress: correlatedAddresses[ce.PackageId],
+                        packageAddress: correlatedAddresses[ce.GetInstantiatingPackageId()],
                         blueprintName: ce.BlueprintName,
                         blueprintVersion: ce.BlueprintVersion,
                         state: state != null ? new JRaw(state) : null,
                         roleAssignments: roleAssignments,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null,
-                        royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null
-                    );
+                        royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null,
+                        twoWayLinkedDappAddress: nonAccountTwoWayLinkedDapp,
+                        twoWayLinkedDappDetails: twoWayLinkedDappOnLedgerDetails,
+                        nativeResourceDetails: nativeResourceDetails);
                     break;
             }
 
@@ -868,77 +897,46 @@ WHERE e.id = ANY(@vaultIds)",
             .Take(validatorsPageSize)
             .Aggregate(new List<long>(), (aggregated, validator) =>
             {
-                aggregated.Add(validator.StakeVaultEntityId);
-                aggregated.Add(validator.PendingXrdWithdrawVault);
-                aggregated.Add(validator.LockedOwnerStakeUnitVault);
-                aggregated.Add(validator.PendingOwnerStakeUnitUnlockVault);
+                aggregated.Add(validator.GetStakeVaultEntityId());
+                aggregated.Add(validator.GetPendingXrdWithdrawVaultEntityId());
+                aggregated.Add(validator.GetLockedOwnerStakeUnitVaultEntityId());
+                aggregated.Add(validator.GetPendingOwnerStakeUnitUnlockVaultEntityId());
 
                 return aggregated;
             })
             .ToList();
 
-        var cd = new CommandDefinition(
-            commandText: @"
-WITH variables (validator_entity_id) AS (SELECT UNNEST(@validatorIds))
-SELECT
-    e.id AS ValidatorId,
-    esh.state AS State,
-    esh.from_state_version AS StateLastUpdatedAtStateVersion,
-    CAST(evh.balance AS text) AS StakeVaultBalance,
-    evh.from_state_version AS StakeVaultLastUpdatedAtStateVersion,
-    CAST(pxrwv.balance AS text) AS PendingXrdWithdrawVaultBalance,
-    pxrwv.from_state_version AS PendingXrdWithdrawVaultLastUpdatedAtStateVersion,
-    CAST(losuv.balance AS text) AS LockedOwnerStakeUnitVaultBalance,
-    losuv.from_state_version AS LockedOwnerStakeUnitVaultLastUpdatedAtStateVersion,
-    CAST(posuuv.balance AS text) AS PendingOwnerStakeUnitUnlockVaultBalance,
-    posuuv.from_state_version AS PendingOwnerStakeUnitUnlockVaultLastUpdatedAtStateVersion
-FROM variables
-INNER JOIN entities e ON e.id = variables.validator_entity_id AND from_state_version <= @stateVersion
+        var stateHistory = await _dbContext
+            .StateHistory
+            .FromSqlInterpolated($@"
+WITH variables (validator_entity_id) AS (SELECT UNNEST({validatorIds}))
+SELECT esh.*
+FROM variables v
 INNER JOIN LATERAL (
-    SELECT json_state as state, from_state_version
+    SELECT *
     FROM state_history
-    WHERE entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
+    WHERE entity_id = v.validator_entity_id AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
     LIMIT 1
-) esh ON true
-INNER JOIN LATERAL (
-    SELECT balance, from_state_version
-    FROM entity_vault_history
-    WHERE global_entity_id = e.id AND vault_entity_id = e.stake_vault_entity_id AND from_state_version <= @stateVersion
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) evh ON TRUE
-INNER JOIN LATERAL (
-    SELECT balance, from_state_version
-    FROM entity_vault_history
-    WHERE global_entity_id = e.id AND vault_entity_id = e.pending_xrd_withdraw_vault_entity_id AND from_state_version <= @stateVersion
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) pxrwv ON true
-INNER JOIN LATERAL (
-    SELECT balance, from_state_version
-    FROM entity_vault_history
-    WHERE global_entity_id = e.id AND vault_entity_id = e.locked_owner_stake_unit_vault_entity_id AND from_state_version <= @stateVersion
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) losuv ON true
-INNER JOIN LATERAL (
-    SELECT balance, from_state_version
-    FROM entity_vault_history
-    WHERE global_entity_id = e.id AND vault_entity_id = e.pending_owner_stake_unit_unlock_vault_entity_id AND from_state_version <= @stateVersion
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) posuuv ON true;",
-            parameters: new
-            {
-                validatorIds = validatorIds,
-                stateVersion = ledgerState.StateVersion,
-            },
-            cancellationToken: token);
+) esh ON true")
+            .Cast<JsonStateHistory>()
+            .ToDictionaryAsync(e => e.EntityId, token);
 
-        var validatorsDetails = (await _dapperWrapper.QueryAsync<ValidatorCurrentStakeViewModel>(
-                _dbContext.Database.GetDbConnection(), cd, "GetValidatorDetails")
-            ).ToList();
+        var vaultHistory = await _dbContext
+            .EntityVaultHistory
+            .FromSqlInterpolated($@"
+WITH variables (vault_entity_id) AS (SELECT UNNEST({validatorVaultIds}))
+SELECT evh.*
+FROM variables v
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_vault_history
+    WHERE vault_entity_id = v.vault_entity_id AND from_state_version <= {ledgerState.StateVersion}
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) evh ON true")
+            .Cast<EntityFungibleVaultHistory>()
+            .ToDictionaryAsync(e => e.VaultEntityId, token);
 
         var vaultAddresses = await _dbContext
             .Entities
@@ -966,28 +964,19 @@ INNER JOIN LATERAL (
                         validatorActiveSetHistory.PublicKey.ToGatewayPublicKey());
                 }
 
-                var details = validatorsDetails.Single(x => x.ValidatorId == v.Id);
-                var effectiveFeeFactor = ValidatorEffectiveFeeFactorProvider.ExtractFeeFactorFromValidatorState(details.State, ledgerState.Epoch);
+                var stakeVault = vaultHistory[v.GetStakeVaultEntityId()];
+                var pendingXrdWithdrawVaultVault = vaultHistory[v.GetPendingXrdWithdrawVaultEntityId()];
+                var lockedOwnerStakeUnitVault = vaultHistory[v.GetLockedOwnerStakeUnitVaultEntityId()];
+                var pendingOwnerStakeUnitUnlockVault = vaultHistory[v.GetPendingOwnerStakeUnitUnlockVaultEntityId()];
+                var effectiveFeeFactor = ValidatorEffectiveFeeFactorProvider.ExtractFeeFactorFromValidatorState(stateHistory[v.Id].JsonState, ledgerState.Epoch);
 
                 return new GatewayModel.ValidatorCollectionItem(
                     v.Address,
-                    new GatewayModel.ValidatorVaultItem(
-                        TokenAmount.FromSubUnitsString(details.StakeVaultBalance).ToString(),
-                        details.StakeVaultLastUpdatedAtStateVersion,
-                        vaultAddresses[v.StakeVaultEntityId]),
-                    new GatewayModel.ValidatorVaultItem(
-                        TokenAmount.FromSubUnitsString(details.PendingXrdWithdrawVaultBalance).ToString(),
-                        details.PendingXrdWithdrawVaultLastUpdatedAtStateVersion,
-                        vaultAddresses[v.PendingXrdWithdrawVault]),
-                    new GatewayModel.ValidatorVaultItem(
-                        TokenAmount.FromSubUnitsString(details.LockedOwnerStakeUnitVaultBalance).ToString(),
-                        details.LockedOwnerStakeUnitVaultLastUpdatedAtStateVersion,
-                        vaultAddresses[v.LockedOwnerStakeUnitVault]),
-                    new GatewayModel.ValidatorVaultItem(
-                        TokenAmount.FromSubUnitsString(details.PendingOwnerStakeUnitUnlockVaultBalance).ToString(),
-                        details.PendingOwnerStakeUnitUnlockVaultLastUpdatedAtStateVersion,
-                        vaultAddresses[v.PendingXrdWithdrawVault]),
-                    new JRaw(details.State),
+                    new GatewayModel.ValidatorVaultItem(stakeVault.Balance.ToString(), stakeVault.FromStateVersion, vaultAddresses[stakeVault.VaultEntityId]),
+                    new GatewayModel.ValidatorVaultItem(pendingXrdWithdrawVaultVault.Balance.ToString(), pendingXrdWithdrawVaultVault.FromStateVersion, vaultAddresses[pendingXrdWithdrawVaultVault.VaultEntityId]),
+                    new GatewayModel.ValidatorVaultItem(lockedOwnerStakeUnitVault.Balance.ToString(), lockedOwnerStakeUnitVault.FromStateVersion, vaultAddresses[lockedOwnerStakeUnitVault.VaultEntityId]),
+                    new GatewayModel.ValidatorVaultItem(pendingOwnerStakeUnitUnlockVault.Balance.ToString(), pendingOwnerStakeUnitUnlockVault.FromStateVersion, vaultAddresses[pendingOwnerStakeUnitUnlockVault.VaultEntityId]),
+                    new JRaw(stateHistory[v.Id].JsonState),
                     activeInEpoch,
                     metadataById[v.Id],
                     effectiveFeeFactor
@@ -1441,26 +1430,26 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({schemaEntityIds}), UNNEST({sch
                     result.Add(state.EntityId, jsonStateHistory.JsonState);
                     break;
                 case SborStateHistory sborStateHistory:
-                {
-                    var schemaIdentifier = new SchemaIdentifier((ValueBytes)sborStateHistory.SchemaHash, sborStateHistory.SchemaDefiningEntityId);
-                    var schemaFound = schemas.TryGetValue(schemaIdentifier, out var schemaBytes);
-
-                    if (!schemaFound)
                     {
-                        throw new UnreachableException(
-                            $"schema not found for entity :{sborStateHistory.EntityId} with schema defining entity id: {sborStateHistory.SchemaDefiningEntityId} and schema hash: {sborStateHistory.SchemaHash.ToHex()}");
+                        var schemaIdentifier = new SchemaIdentifier((ValueBytes)sborStateHistory.SchemaHash, sborStateHistory.SchemaDefiningEntityId);
+                        var schemaFound = schemas.TryGetValue(schemaIdentifier, out var schemaBytes);
+
+                        if (!schemaFound)
+                        {
+                            throw new UnreachableException(
+                                $"schema not found for entity :{sborStateHistory.EntityId} with schema defining entity id: {sborStateHistory.SchemaDefiningEntityId} and schema hash: {sborStateHistory.SchemaHash.ToHex()}");
+                        }
+
+                        var jsonState = ScryptoSborUtils.DataToProgrammaticJsonString(
+                            sborStateHistory.SborState,
+                            schemaBytes!,
+                            sborStateHistory.SborTypeKind,
+                            sborStateHistory.TypeIndex,
+                            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id);
+
+                        result.Add(state.EntityId, jsonState);
+                        break;
                     }
-
-                    var jsonState = ScryptoSborUtils.DataToProgrammaticJsonString(
-                        sborStateHistory.SborState,
-                        schemaBytes!,
-                        sborStateHistory.SborTypeKind,
-                        sborStateHistory.TypeIndex,
-                        (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id);
-
-                    result.Add(state.EntityId, jsonState);
-                    break;
-                }
             }
         }
 
@@ -1512,6 +1501,8 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
 
         foreach (var entity in entities)
         {
+            lookup.Add(entity.Id);
+
             if (entity.HasParent)
             {
                 lookup.Add(entity.ParentAncestorId.Value);
@@ -1519,14 +1510,14 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
                 lookup.Add(entity.GlobalAncestorId.Value);
             }
 
-            if (entity is ComponentEntity componentEntity)
+            if (entity.TryGetCorrelation(EntityRelationship.ComponentToInstantiatingPackage, out var packageCorrelation))
             {
-                lookup.Add(componentEntity.PackageId);
+                lookup.Add(packageCorrelation.EntityId);
             }
 
             if (entity is VaultEntity vaultEntity)
             {
-                lookup.Add(vaultEntity.ResourceEntityId);
+                lookup.Add(vaultEntity.GetResourceEntityId());
             }
         }
 

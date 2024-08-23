@@ -68,7 +68,6 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
@@ -97,9 +96,9 @@ internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public async Task<GatewayApiSdk.Model.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
+    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
         EntityAddress keyValueStoreAddress,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         GatewayModel.IdBoundaryCoursor? cursor,
         int pageSize,
         CancellationToken token = default)
@@ -156,7 +155,7 @@ LIMIT @limit
             ? new GatewayModel.IdBoundaryCoursor(entriesAndOneMore.Last().FromStateVersion, entriesAndOneMore.Last().Id).ToCursorString()
             : null;
 
-        return new GatewayApiSdk.Model.StateKeyValueStoreKeysResponse(
+        return new GatewayModel.StateKeyValueStoreKeysResponse(
             ledgerState: ledgerState,
             keyValueStoreAddress: keyValueStoreAddress,
             nextCursor: nextCursor,

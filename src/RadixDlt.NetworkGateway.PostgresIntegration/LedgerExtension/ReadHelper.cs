@@ -78,7 +78,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -336,7 +335,7 @@ INNER JOIN LATERAL (
 SELECT *
 FROM entities
 WHERE id IN(
-    SELECT UNNEST(id || correlated_entities) AS id
+    SELECT DISTINCT UNNEST(id || ancestor_ids || correlated_entity_ids) AS id
     FROM entities
     WHERE address = ANY({addressesToLoad})
 )")
@@ -433,13 +432,16 @@ SELECT
     nextval('schema_entry_aggregate_history_id_seq') AS SchemaEntryAggregateHistorySequence,
     nextval('key_value_store_entry_definition_id_seq') AS KeyValueStoreEntryDefinitionSequence,
     nextval('key_value_store_entry_history_id_seq') AS KeyValueStoreEntryHistorySequence,
-    nextval('validator_emission_statistics_id_seq') AS ValidatorEmissionStatisticsSequence,
+    nextval('validator_cumulative_emission_history_id_seq') AS ValidatorCumulativeEmissionHistorySequence,
     nextval('non_fungible_schema_history_id_seq') AS NonFungibleSchemaHistorySequence,
     nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence,
     nextval('package_blueprint_aggregate_history_id_seq') AS PackageBlueprintAggregateHistorySequence,
     nextval('package_code_aggregate_history_id_seq') AS PackageCodeAggregateHistorySequence,
     nextval('account_authorized_depositor_entry_history_id_seq') AS AccountAuthorizedDepositorEntryHistorySequence,
-    nextval('account_authorized_depositor_aggregate_history_id_seq') AS AccountAuthorizedDepositorAggregateHistorySequence
+    nextval('account_authorized_depositor_aggregate_history_id_seq') AS AccountAuthorizedDepositorAggregateHistorySequence,
+    nextval('unverified_standard_metadata_aggregate_history_id_seq') AS UnverifiedStandardMetadataAggregateHistorySequence,
+    nextval('unverified_standard_metadata_entry_history_id_seq') AS UnverifiedStandardMetadataEntryHistorySequence,
+    nextval('resource_holders_id_seq') AS ResourceHoldersSequence
 ",
             cancellationToken: token);
 

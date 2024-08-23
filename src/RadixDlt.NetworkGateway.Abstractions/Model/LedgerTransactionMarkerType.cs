@@ -71,4 +71,5 @@ public enum LedgerTransactionMarkerType
     ManifestAddress,
     AffectedGlobalEntity,
     ManifestClass,
+    EventGlobalEmitter,
 }

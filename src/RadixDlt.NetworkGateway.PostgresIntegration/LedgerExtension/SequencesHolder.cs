@@ -134,7 +134,7 @@ internal class SequencesHolder
 
     public long KeyValueStoreEntryHistorySequence { get; set; }
 
-    public long ValidatorEmissionStatisticsSequence { get; set; }
+    public long ValidatorCumulativeEmissionHistorySequence { get; set; }
 
     public long NonFungibleSchemaHistorySequence { get; set; }
 
@@ -143,4 +143,10 @@ internal class SequencesHolder
     public long PackageBlueprintAggregateHistorySequence { get; set; }
 
     public long PackageCodeAggregateHistorySequence { get; set; }
+
+    public long UnverifiedStandardMetadataAggregateHistorySequence { get; set; }
+
+    public long UnverifiedStandardMetadataEntryHistorySequence { get; set; }
+
+    public long ResourceHoldersSequence { get; set; }
 }

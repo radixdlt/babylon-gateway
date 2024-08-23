@@ -75,17 +75,16 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
+internal record struct AccountLockerEntryDbLookup(long LockerEntityId, long AccountEntityId);
+
 internal class AccountLockerProcessor
 {
-    private record struct AccountLockerEntryDbLookup(long AccountLockerEntityId, long AccountEntityId);
-
     private record ObservedTouch(long AccountLockerEntityId, long AccountEntityId, long StateVersion);
 
     private record ObservedVault(long AccountLockerEntityId, long AccountEntityId, long StateVersion, EntityAddress ResourceAddress, EntityAddress VaultAddress);
 
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
-    private readonly byte _networkId;
 
     private readonly HashSet<ObservedTouch> _observedTouchHistory = new();
     private readonly List<ObservedVault> _observedVaultDefinitions = new();
@@ -95,11 +94,10 @@ internal class AccountLockerProcessor
     private readonly List<AccountLockerEntryResourceVaultDefinition> _resourceVaultDefinitionsToAdd = new();
     private readonly List<AccountLockerEntryTouchHistory> _touchHistoryToAdd = new();
 
-    public AccountLockerProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, byte networkId)
+    public AccountLockerProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
     {
         _context = context;
         _referencedEntities = referencedEntities;
-        _networkId = networkId;
     }
 
     public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
@@ -123,10 +121,10 @@ internal class AccountLockerProcessor
         {
             var kvse = referencedEntity.GetDatabaseEntity<InternalKeyValueStoreEntity>();
 
-            if (kvse.AccountLockerOfAccountLockerEntityId.HasValue && kvse.AccountLockerOfAccountEntityId.HasValue)
+            if (kvse.TryGetAccountLockerEntryDbLookup(out var lookup))
             {
-                var sborKey = ScryptoSborUtils.DataToProgrammaticJson(keyValueStoreEntry.Key.KeyData.GetDataBytes(), _networkId);
-                var sborValue = ScryptoSborUtils.DataToProgrammaticJson(keyValueStoreEntry.Value.Data.StructData.GetDataBytes(), _networkId);
+                var sborKey = ScryptoSborUtils.DataToProgrammaticJson(keyValueStoreEntry.Key.KeyData.GetDataBytes(), _context.NetworkConfiguration.Id);
+                var sborValue = ScryptoSborUtils.DataToProgrammaticJson(keyValueStoreEntry.Value.Data.StructData.GetDataBytes(), _context.NetworkConfiguration.Id);
 
                 if (sborKey is not GatewayModel.ProgrammaticScryptoSborValueReference resource)
                 {
@@ -140,8 +138,8 @@ internal class AccountLockerProcessor
 
                 // while neither resource address nor vault address have been explicitly loaded from the database based on above SBOR-encoded values during initial ingestion phase
                 // it is believed that their addresses must be mentioned in other transaction structures actually scanned for entity addresses
-                _observedVaultDefinitions.Add(new ObservedVault(kvse.AccountLockerOfAccountLockerEntityId.Value, kvse.AccountLockerOfAccountEntityId.Value, stateVersion, (EntityAddress)resource.Value, (EntityAddress)vault.Value));
-                _observedTouchHistory.Add(new ObservedTouch(kvse.AccountLockerOfAccountLockerEntityId.Value, kvse.AccountLockerOfAccountEntityId.Value, stateVersion));
+                _observedVaultDefinitions.Add(new ObservedVault(lookup.LockerEntityId, lookup.AccountEntityId, stateVersion, (EntityAddress)resource.Value, (EntityAddress)vault.Value));
+                _observedTouchHistory.Add(new ObservedTouch(lookup.LockerEntityId, lookup.AccountEntityId, stateVersion));
             }
         }
 
@@ -149,9 +147,9 @@ internal class AccountLockerProcessor
         {
             var ve = referencedEntity.GetDatabaseEntity<VaultEntity>();
 
-            if (ve.AccountLockerOfAccountLockerEntityId.HasValue && ve.AccountLockerOfAccountEntityId.HasValue)
+            if (ve.TryGetAccountLockerEntryDbLookup(out var lookup))
             {
-                _observedTouchHistory.Add(new ObservedTouch(ve.AccountLockerOfAccountLockerEntityId.Value, ve.AccountLockerOfAccountEntityId.Value, stateVersion));
+                _observedTouchHistory.Add(new ObservedTouch(lookup.LockerEntityId, lookup.AccountEntityId, stateVersion));
             }
         }
     }

@@ -72,21 +72,21 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
 {
     public const string StringForNaN = "NaN";
 
+    public static readonly TokenAmount Zero;
+    public static readonly TokenAmount NaN;
+    public static readonly TokenAmount MaxValue;
+
     private const int DecimalPrecision = 18;
 
     private static readonly BigInteger _divisor;
-
-    public static readonly TokenAmount Zero;
-    public static readonly TokenAmount NaN;
-    public static readonly TokenAmount OneFullUnit;
 
     static TokenAmount()
     {
         _divisor = BigInteger.Pow(10, DecimalPrecision);
 
+        MaxValue = new TokenAmount(BigInteger.Pow(2, 192), 0);
         Zero = new TokenAmount(0);
         NaN = new TokenAmount(true);
-        OneFullUnit = new TokenAmount(_divisor);
     }
 
     private readonly BigInteger _subUnits;
@@ -154,9 +154,9 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
 
     public static TokenAmount operator -(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits - b._subUnits);
 
-    public static TokenAmount operator *(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits * b._subUnits);
+    public static TokenAmount operator *(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount((a._subUnits * b._subUnits) / _divisor);
 
-    public static TokenAmount operator /(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits / b._subUnits);
+    public static TokenAmount operator /(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN() || b == Zero) ? NaN : new TokenAmount((a._subUnits * _divisor) / b._subUnits);
 
     // ReSharper disable SimplifyConditionalTernaryExpression - As it's clearer as written
 #pragma warning disable IDE0075

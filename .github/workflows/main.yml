@@ -388,6 +388,8 @@ jobs:
       - name: Export branch name in github's environment
         run: |
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+          echo "GITHUB_REF_NAME=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" >> $GITHUB_ENV
       - name: Process ci.env
         run: |
           export $(grep -v '^#' ./deployment/ci.env | xargs)
@@ -404,7 +406,9 @@ jobs:
             {
               "RADIXDLT_GATEWAY_DOCKER_TAG": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
               "RADIXDLT_NODE_DOCKER_TAG": "${{ env.FULLNODE_VERSION }}",
-              "RADIXDLT_POSTGRES_APP_VERSION": "${{ env.POSTGRES_VERSION }}"
+              "RADIXDLT_POSTGRES_APP_VERSION": "${{ env.POSTGRES_VERSION }}",
+              "RADIXDLT_GITHUB_TRIGGER" : "${{ env.GITHUB_REPOSITORY }}:${{ env.GITHUB_REF_NAME }}",
+              "testingHarnessBranch": "${{ env.GATEWAY_BRANCH }}"
             }
           job_timeout: "3600"
 
@@ -427,7 +431,7 @@ jobs:
           secret_name: "github-actions/common/sonar-token"
           parse_json: true
       - name: SonarScanner for .NET
-        uses: RDXWorks-actions/sonarscan-dotnet@v2.2.6
+        uses: RDXWorks-actions/sonarscan-dotnet@v2.3.0
         with:
           sonarProjectKey: radixdlt_babylon-gateway
           sonarProjectName: babylon-gateway

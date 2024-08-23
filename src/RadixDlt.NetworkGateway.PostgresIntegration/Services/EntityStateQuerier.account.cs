@@ -70,7 +70,6 @@ using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -96,6 +95,7 @@ internal partial class EntityStateQuerier
         var accountLockerEntryDefinition = await _dbContext
             .AccountLockerDefinition
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
+            .AnnotateMetricName("AccountLockerEntryDefinition")
             .FirstOrDefaultAsync(e => e.AccountLockerEntityId == accountLocker.Id && e.AccountEntityId == account.Id, token);
 
         if (accountLockerEntryDefinition == null)
@@ -132,7 +132,7 @@ LIMIT @limit;",
             },
             cancellationToken: token);
 
-        var vaultsAndOneMore = (await _dapperWrapper.QueryAsync<AccountLockerVaultViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
+        var vaultsAndOneMore = (await _dapperWrapper.QueryAsync<AccountLockerVaultViewModel>(_dbContext.Database.GetDbConnection(), cd, "vaultsAndOneMore")).ToList();
 
         var items = vaultsAndOneMore
             .Take(pageRequest.Limit)
@@ -169,7 +169,7 @@ LIMIT @limit;",
             ? new GatewayModel.StateAccountLockerAccountResourcesCursor(vaultsAndOneMore.Last().FromStateVersion, vaultsAndOneMore.Last().Id).ToCursorString()
             : null;
 
-        return new GatewayApiSdk.Model.StateAccountLockerPageVaultsResponse(
+        return new GatewayModel.StateAccountLockerPageVaultsResponse(
             ledgerState: ledgerState,
             lockerAddress: accountLocker.Address,
             accountAddress: account.Address,

@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -76,15 +75,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class ValidatorQuerier : IValidatorQuerier
 {
-    private record ValidatorUptimeViewModel(long ValidatorEntityId, long? ProposalsMadeSum, long? ProposalsMissedSum, long EpochsActiveIn);
-
     private readonly ReadOnlyDbContext _dbContext;
-    private readonly IDapperWrapper _dapperWrapper;
 
-    public ValidatorQuerier(ReadOnlyDbContext dbContext, IDapperWrapper dapperWrapper)
+    public ValidatorQuerier(ReadOnlyDbContext dbContext)
     {
         _dbContext = dbContext;
-        _dapperWrapper = dapperWrapper;
     }
 
     public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(
@@ -101,26 +96,39 @@ internal class ValidatorQuerier : IValidatorQuerier
             .AnnotateMetricName("GetValidators")
             .ToDictionaryAsync(e => e.Id, e => e.Address, token);
 
-        var cd = new CommandDefinition(
-            commandText: @"
-SELECT
-    validator_entity_id AS ValidatorEntityId,
-    SUM(proposals_made)::bigint AS ProposalsMadeSum,
-    SUM(proposals_missed)::bigint AS ProposalsMissedSum,
-    COUNT(proposals_made) AS EpochsActiveIn
-FROM validator_emission_statistics
-WHERE validator_entity_id = ANY(@validatorEntityIds) AND epoch_number BETWEEN @epochFrom AND @epochTo
-GROUP BY validator_entity_id;",
-            parameters: new
-            {
-                validatorEntityIds = validators.Keys.ToList(),
-                epochTo = ledgerState.Epoch,
-                epochFrom = fromLedgerState?.Epoch ?? 0,
-            },
-            cancellationToken: token);
+        var validatorIds = validators.Keys.ToList();
+        var epochFrom = fromLedgerState?.Epoch ?? 0;
+        var epochTo = ledgerState.Epoch;
 
-        var validatorUptime = (await _dapperWrapper.QueryAsync<ValidatorUptimeViewModel>(_dbContext.Database.GetDbConnection(), cd, "GetValidatorEmissionStatistics"))
-            .ToDictionary(e => e.ValidatorEntityId);
+        var validatorUptime = await _dbContext
+            .ValidatorCumulativeEmissionHistory
+            .FromSqlInterpolated($@"
+WITH variables AS (SELECT UNNEST({validatorIds}) AS validator_entity_id)
+SELECT
+    h.id,
+    h.from_state_version,
+    h.validator_entity_id,
+    h.epoch_number,
+    h.proposals_made - COALESCE(l.proposals_made, 0) AS proposals_made,
+    h.proposals_missed - COALESCE(l.proposals_missed, 0) AS proposals_missed,
+    h.participation_in_active_set - COALESCE(l.participation_in_active_set, 0) AS participation_in_active_set
+FROM variables var
+INNER JOIN LATERAL (
+    SELECT *
+    FROM validator_cumulative_emission_history
+    WHERE validator_entity_id = var.validator_entity_id AND epoch_number <= {epochTo}
+    ORDER BY epoch_number DESC
+    LIMIT 1
+) h ON TRUE
+LEFT JOIN LATERAL (
+    SELECT *
+    FROM validator_cumulative_emission_history
+    WHERE validator_entity_id = var.validator_entity_id AND epoch_number >= {epochFrom} AND epoch_number < h.epoch_number
+    ORDER BY epoch_number
+    LIMIT 1
+) l ON TRUE")
+            .AnnotateMetricName("ValidatorUptime")
+            .ToDictionaryAsync(e => e.ValidatorEntityId, token);
 
         var items = validators
             .Select(v =>
@@ -131,9 +139,9 @@ GROUP BY validator_entity_id;",
 
                 if (validatorUptime.TryGetValue(v.Key, out var uptime))
                 {
-                    proposalsMadeSum = uptime.ProposalsMadeSum;
-                    proposalsMissedSum = uptime.ProposalsMissedSum;
-                    epochsActiveIn = uptime.EpochsActiveIn;
+                    proposalsMadeSum = uptime.ProposalsMade;
+                    proposalsMissedSum = uptime.ProposalsMissed;
+                    epochsActiveIn = uptime.ParticipationInActiveSet;
                 }
 
                 return new GatewayModel.ValidatorUptimeCollectionItem(v.Value, proposalsMadeSum, proposalsMissedSum, epochsActiveIn);

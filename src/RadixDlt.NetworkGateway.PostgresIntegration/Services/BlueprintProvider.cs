@@ -68,6 +68,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -75,7 +76,7 @@ internal interface IBlueprintProvider
 {
     Task<Dictionary<BlueprintDefinitionIdentifier, PackageBlueprintHistory>> GetBlueprints(
         IReadOnlyCollection<BlueprintDefinitionIdentifier> blueprintDefinitions,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         CancellationToken token = default
     );
 }
@@ -91,7 +92,7 @@ internal class BlueprintProvider : IBlueprintProvider
 
     public async Task<Dictionary<BlueprintDefinitionIdentifier, PackageBlueprintHistory>> GetBlueprints(
         IReadOnlyCollection<BlueprintDefinitionIdentifier> blueprintDefinitions,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         CancellationToken token = default
     )
     {

@@ -23,14 +23,14 @@
     <PackageVersion Include="prometheus-net" Version="8.2.1" />
     <PackageVersion Include="prometheus-net.AspNetCore" Version="8.2.1" />
     <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.2.1" />
-    <PackageVersion Include="RadixDlt.RadixEngineToolkit" Version="2.1.0-dev6" />
+    <PackageVersion Include="RadixDlt.RadixEngineToolkit" Version="2.1.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <!-- build time dependencies -->
     <PackageVersion Include="coverlet.collector" Version="6.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageVersion Include="Moq" Version="4.20.70" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.435" />
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="xunit" Version="2.7.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.7" />
   </ItemGroup>

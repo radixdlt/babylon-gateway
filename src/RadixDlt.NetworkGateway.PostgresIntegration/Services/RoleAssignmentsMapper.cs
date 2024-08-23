@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal interface IRoleAssignmentsMapper
 {
-    Dictionary<long, GatewayApiSdk.Model.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
+    Dictionary<long, GatewayModel.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
         ICollection<ComponentEntity> componentEntities,
         Dictionary<BlueprintDefinitionIdentifier, CoreApiModel.AuthConfig> blueprintAuthConfigs,
         ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
@@ -107,11 +107,11 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
                 throw new UnreachableException($"No owner role defined for entity: {entity.Address}");
             }
 
-            var authConfigFound = blueprintAuthConfigs.TryGetValue(new BlueprintDefinitionIdentifier(entity.BlueprintName, entity.BlueprintVersion, entity.PackageId), out var authConfig);
+            var authConfigFound = blueprintAuthConfigs.TryGetValue(new BlueprintDefinitionIdentifier(entity.BlueprintName, entity.BlueprintVersion, entity.GetInstantiatingPackageId()), out var authConfig);
 
             if (!authConfigFound)
             {
-                throw new UnreachableException($"blueprint: {entity.BlueprintName} {entity.BlueprintVersion} in package: {entity.PackageId} not found");
+                throw new UnreachableException($"blueprint: {entity.BlueprintName} {entity.BlueprintVersion} in package: {entity.GetInstantiatingPackageId()} not found");
             }
 
             var mainModuleKeys = _roleAssignmentsKeyProvider.ExtractKeysFromBlueprintAuthConfig(authConfig!);
@@ -119,7 +119,7 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
             var assignedNativeModuleKeys = nativeModulesKeys.Where(x => entity.AssignedModuleIds.Contains(x.Key.ModuleId));
             var allModulesKeys = mainModuleKeys.Concat(assignedNativeModuleKeys).ToList();
 
-            return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
+            return new GatewayModel.ComponentEntityRoleAssignments(
                 new JRaw(ownerRole),
                 GetEntries(entity.Id, allModulesKeys, roleAssignments)
             );

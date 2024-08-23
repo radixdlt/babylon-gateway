@@ -63,9 +63,6 @@
  */
 
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 

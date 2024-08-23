@@ -133,7 +133,7 @@ internal class WriteHelper : IWriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, stake_vault_entity_id, pending_xrd_withdraw_vault_entity_id, locked_owner_stake_unit_vault_entity_id, pending_owner_stake_unit_unlock_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id, account_locker_of_account_locker_entity_id, account_locker_of_account_entity_id) FROM STDIN (FORMAT BINARY)",
+            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entity_relationships, correlated_entity_ids, discriminator, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, non_fungible_data_mutable_fields) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var e in entities)
@@ -150,19 +150,18 @@ internal class WriteHelper : IWriteHelper
             await writer.WriteAsync(e.ParentAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.GlobalAncestorId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.CorrelatedEntities.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Correlations.Select(x => x.Relationship).ToArray(), "entity_relationship[]", token);
+            await writer.WriteAsync(e.Correlations.Select(x => x.EntityId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(discriminator, "entity_type", token);
 
             if (e is ComponentEntity ce)
             {
-                await writer.WriteAsync(ce.PackageId, NpgsqlDbType.Bigint, token);
                 await writer.WriteAsync(ce.BlueprintName, NpgsqlDbType.Text, token);
                 await writer.WriteAsync(ce.BlueprintVersion, NpgsqlDbType.Text, token);
                 await writer.WriteAsync(ce.AssignedModuleIds, "module_id[]", token);
             }
             else
             {
-                await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
@@ -180,52 +179,7 @@ internal class WriteHelper : IWriteHelper
             if (e is GlobalNonFungibleResourceEntity nfrme)
             {
                 await writer.WriteAsync(nfrme.NonFungibleIdType, "non_fungible_id_type", token);
-            }
-            else
-            {
-                await writer.WriteNullAsync(token);
-            }
-
-            if (e is GlobalValidatorEntity validatorEntity)
-            {
-                await writer.WriteAsync(validatorEntity.StakeVaultEntityId, NpgsqlDbType.Bigint, token);
-                await writer.WriteAsync(validatorEntity.PendingXrdWithdrawVault, NpgsqlDbType.Bigint, token);
-                await writer.WriteAsync(validatorEntity.LockedOwnerStakeUnitVault, NpgsqlDbType.Bigint, token);
-                await writer.WriteAsync(validatorEntity.PendingOwnerStakeUnitUnlockVault, NpgsqlDbType.Bigint, token);
-            }
-            else
-            {
-                await writer.WriteNullAsync(token);
-                await writer.WriteNullAsync(token);
-                await writer.WriteNullAsync(token);
-                await writer.WriteNullAsync(token);
-            }
-
-            if (e is InternalFungibleVaultEntity fve)
-            {
-                await writer.WriteAsync(fve.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                await writer.WriteAsync(fve.RoyaltyVaultOfEntityId, NpgsqlDbType.Bigint, token);
-            }
-            else if (e is InternalNonFungibleVaultEntity nfve)
-            {
-                await writer.WriteAsync(nfve.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                await writer.WriteNullAsync(token);
-            }
-            else
-            {
-                await writer.WriteNullAsync(token);
-                await writer.WriteNullAsync(token);
-            }
-
-            if (e is InternalKeyValueStoreEntity kvse)
-            {
-                await writer.WriteAsync(kvse.AccountLockerOfAccountLockerEntityId, token);
-                await writer.WriteAsync(kvse.AccountLockerOfAccountEntityId, token);
-            }
-            else if (e is VaultEntity ve)
-            {
-                await writer.WriteAsync(ve.AccountLockerOfAccountLockerEntityId, token);
-                await writer.WriteAsync(ve.AccountLockerOfAccountEntityId, token);
+                await writer.WriteAsync(nfrme.NonFungibleDataMutableFields, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
             }
             else
             {
@@ -387,6 +341,16 @@ internal class WriteHelper : IWriteHelper
                 case AffectedGlobalEntityTransactionMarker oltm:
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(oltm.EntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case EventGlobalEmitterTransactionMarker egetm:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(egetm.EntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
@@ -608,39 +572,6 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyValidatorEmissionStatistics(ICollection<ValidatorEmissionStatistics> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY validator_emission_statistics (id, from_state_version, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ValidatorEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EpochNumber, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ProposalsMade, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ProposalsMissed, NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyValidatorEmissionStatistics), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyNonFungibleIdDefinition(ICollection<NonFungibleIdDefinition> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -804,6 +735,57 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyResourceHolders(ICollection<ResourceHolder> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        var sw = Stopwatch.GetTimestamp();
+
+        await using var createTempTableCommand = _connection.CreateCommand();
+        createTempTableCommand.CommandText = @"
+CREATE TEMP TABLE tmp_resource_holders
+(LIKE resource_holders INCLUDING DEFAULTS)
+ON COMMIT DROP";
+
+        await createTempTableCommand.ExecuteNonQueryAsync(token);
+
+        await using var writer =
+            await _connection.BeginBinaryImportAsync(
+                "COPY tmp_resource_holders (id, entity_id, resource_entity_id, balance, last_updated_at_state_version) FROM STDIN (FORMAT BINARY)",
+                token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+            await writer.WriteAsync(e.LastUpdatedAtStateVersion, NpgsqlDbType.Bigint, token);
+        }
+
+        await writer.CompleteAsync(token);
+        await writer.DisposeAsync();
+
+        await using var mergeCommand = _connection.CreateCommand();
+        mergeCommand.CommandText = @"
+MERGE INTO resource_holders ro
+USING tmp_resource_holders tmp
+ON ro.entity_id = tmp.entity_id AND ro.resource_entity_id = tmp.resource_entity_id
+WHEN MATCHED AND tmp.balance = 0 THEN DELETE
+WHEN MATCHED AND tmp.balance != 0 THEN UPDATE SET balance = tmp.balance, last_updated_at_state_version = tmp.last_updated_at_state_version
+WHEN NOT MATCHED AND tmp.balance != 0 THEN INSERT VALUES(id, entity_id, resource_entity_id, balance, last_updated_at_state_version);";
+
+        await mergeCommand.ExecuteNonQueryAsync(token);
+
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyResourceHolders), Stopwatch.GetElapsedTime(sw), entities.Count));
+
+        return entities.Count;
+    }
+
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
         var sw = Stopwatch.GetTimestamp();
@@ -843,13 +825,16 @@ SELECT
     setval('schema_entry_aggregate_history_id_seq', @schemaEntryAggregateHistorySequence),
     setval('key_value_store_entry_definition_id_seq', @keyValueStoreEntryDefinitionSequence),
     setval('key_value_store_entry_history_id_seq', @keyValueStoreEntryHistorySequence),
-    setval('validator_emission_statistics_id_seq', @validatorEmissionStatisticsSequence),
+    setval('validator_cumulative_emission_history_id_seq', @validatorCumulativeEmissionHistorySequence),
     setval('non_fungible_schema_history_id_seq', @NonFungibleSchemaHistorySequence),
     setval('key_value_store_schema_history_id_seq', @KeyValueSchemaHistorySequence),
     setval('package_blueprint_aggregate_history_id_seq', @packageBlueprintAggregateHistorySequence),
     setval('package_code_aggregate_history_id_seq', @packageCodeAggregateHistorySequence),
     setval('account_authorized_depositor_entry_history_id_seq', @accountAuthorizedDepositorEntryHistorySequence),
-    setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence)
+    setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence),
+    setval('unverified_standard_metadata_aggregate_history_id_seq', @unverifiedStandardMetadataAggregateHistorySequence),
+    setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence),
+    setval('resource_holders_id_seq', @resourceHoldersSequence)
 ",
             parameters: new
             {
@@ -885,13 +870,16 @@ SELECT
                 schemaEntryAggregateHistorySequence = sequences.SchemaEntryAggregateHistorySequence,
                 keyValueStoreEntryDefinitionSequence = sequences.KeyValueStoreEntryDefinitionSequence,
                 keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
-                validatorEmissionStatisticsSequence = sequences.ValidatorEmissionStatisticsSequence,
+                validatorCumulativeEmissionHistorySequence = sequences.ValidatorCumulativeEmissionHistorySequence,
                 nonFungibleSchemaHistorySequence = sequences.NonFungibleSchemaHistorySequence,
                 keyValueSchemaHistorySequence = sequences.KeyValueSchemaHistorySequence,
                 packageBlueprintAggregateHistorySequence = sequences.PackageBlueprintAggregateHistorySequence,
                 packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
                 accountAuthorizedDepositorEntryHistorySequence = sequences.AccountAuthorizedDepositorEntryHistorySequence,
                 accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
+                unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
+                unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
+                resourceHoldersSequence = sequences.ResourceHoldersSequence,
             },
             cancellationToken: token);
 

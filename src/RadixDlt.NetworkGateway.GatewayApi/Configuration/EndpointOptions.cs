@@ -107,12 +107,15 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("ValidatorsUptimePageSize")]
     public int ValidatorsUptimeMaxPageSize { get; set; } = 200;
 
+    [ConfigurationKeyName("ResourceHoldersMaxPageSize")]
+    public int ResourceHoldersMaxPageSize { get; set; } = 1000;
+
     [ConfigurationKeyName("TransactionStreamMaxFilterCount")]
     public int TransactionStreamMaxFilterCount { get; set; } = 10;
 
     public int ResolvePageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, DefaultPageSize, MaxPageSize);
 
-    public int ResolveNonFungibleIdsPageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, DefaultNonFungibleIdsPageSize, MaxPageSize);
+    public int ResolveResourceHoldersPageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, DefaultPageSize, ResourceHoldersMaxPageSize);
 
     public int ResolveHeavyPageSize(int? requestPageSize) => ResolvePageSize(requestPageSize, DefaultHeavyCollectionsPageSize, MaxHeavyCollectionsPageSize);
 

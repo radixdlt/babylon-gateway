@@ -92,8 +92,6 @@ internal interface IWriteHelper
 
     Task<int> CopyEntityVaultHistory(ICollection<EntityVaultHistory> entities, CancellationToken token);
 
-    Task<int> CopyValidatorEmissionStatistics(ICollection<ValidatorEmissionStatistics> entities, CancellationToken token);
-
     Task<int> CopyNonFungibleIdDefinition(ICollection<NonFungibleIdDefinition> entities, CancellationToken token);
 
     Task<int> CopyNonFungibleIdDataHistory(ICollection<NonFungibleIdDataHistory> entities, CancellationToken token);

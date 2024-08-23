@@ -73,6 +73,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 internal record TransactionReceiptEventLookup(long EntityId, ValueBytes SchemaHash);
+
 internal record TransactionReceiptEvent(string Name, string Emitter, byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
 
 /// <summary>

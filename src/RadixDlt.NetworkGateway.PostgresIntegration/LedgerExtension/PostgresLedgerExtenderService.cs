@@ -165,13 +165,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             .Where(pt => pt.LedgerDetails.PayloadLedgerStatus == PendingTransactionPayloadLedgerStatus.PermanentlyRejected)
             .Select(
                 pt => new
-            {
-                pt.PayloadHash,
-                pt.LedgerDetails.PayloadLedgerStatus,
-                pt.GatewayHandling.FirstSubmittedToGatewayTimestamp,
-                pt.LedgerDetails.LatestRejectionTimestamp,
-                pt.LedgerDetails.LatestRejectionReason,
-            })
+                {
+                    pt.PayloadHash,
+                    pt.LedgerDetails.PayloadLedgerStatus,
+                    pt.GatewayHandling.FirstSubmittedToGatewayTimestamp,
+                    pt.LedgerDetails.LatestRejectionTimestamp,
+                    pt.LedgerDetails.LatestRejectionReason,
+                })
             .AnnotateMetricName()
             .ToListAsync(token);
 
@@ -259,9 +259,16 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdatePendingTransactions), sw.Elapsed, null));
         }
 
+        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, networkConfiguration, token);
+        var relationshipProcessor = new RelationshipProcessor(referencedEntities);
+
         // step: scan for any referenced entities
         {
             var sw = Stopwatch.StartNew();
+
+            referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.TransactionTracker);
+            referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.ConsensusManager);
+            referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.Xrd);
 
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
@@ -279,11 +286,11 @@ UPDATE pending_transactions
                     {
                         ledgerTransactionMarkersToAdd.Add(
                             new OriginLedgerTransactionMarker
-                        {
-                            Id = sequences.LedgerTransactionMarkerSequence++,
-                            StateVersion = stateVersion,
-                            OriginType = LedgerTransactionMarkerOriginType.User,
-                        });
+                            {
+                                Id = sequences.LedgerTransactionMarkerSequence++,
+                                StateVersion = stateVersion,
+                                OriginType = LedgerTransactionMarkerOriginType.User,
+                            });
 
                         var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
                         var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
@@ -311,12 +318,12 @@ UPDATE pending_transactions
 
                             ledgerTransactionMarkersToAdd.Add(
                                 new ManifestClassMarker
-                            {
-                                Id = sequences.LedgerTransactionMarkerSequence++,
-                                StateVersion = stateVersion,
-                                ManifestClass = manifestClass,
-                                IsMostSpecific = i == 0,
-                            });
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    ManifestClass = manifestClass,
+                                    IsMostSpecific = i == 0,
+                                });
                         }
                     }
 
@@ -333,31 +340,31 @@ UPDATE pending_transactions
 
                         referencedEntity.WithTypeHint(
                             newGlobalEntity.EntityType switch
-                        {
-                            CoreModel.EntityType.GlobalPackage => typeof(GlobalPackageEntity),
-                            CoreModel.EntityType.GlobalConsensusManager => typeof(GlobalConsensusManager),
-                            CoreModel.EntityType.GlobalValidator => typeof(GlobalValidatorEntity),
-                            CoreModel.EntityType.GlobalGenericComponent => typeof(GlobalGenericComponentEntity),
-                            CoreModel.EntityType.GlobalAccount => typeof(GlobalAccountEntity),
-                            CoreModel.EntityType.GlobalAccountLocker => typeof(GlobalAccountLockerEntity),
-                            CoreModel.EntityType.GlobalIdentity => typeof(GlobalIdentityEntity),
-                            CoreModel.EntityType.GlobalAccessController => typeof(GlobalAccessControllerEntity),
-                            CoreModel.EntityType.GlobalVirtualSecp256k1Account => typeof(GlobalAccountEntity),
-                            CoreModel.EntityType.GlobalVirtualSecp256k1Identity => typeof(GlobalIdentityEntity),
-                            CoreModel.EntityType.GlobalVirtualEd25519Account => typeof(GlobalAccountEntity),
-                            CoreModel.EntityType.GlobalVirtualEd25519Identity => typeof(GlobalIdentityEntity),
-                            CoreModel.EntityType.GlobalFungibleResource => typeof(GlobalFungibleResourceEntity),
-                            CoreModel.EntityType.InternalFungibleVault => typeof(InternalFungibleVaultEntity),
-                            CoreModel.EntityType.GlobalNonFungibleResource => typeof(GlobalNonFungibleResourceEntity),
-                            CoreModel.EntityType.InternalNonFungibleVault => typeof(InternalNonFungibleVaultEntity),
-                            CoreModel.EntityType.InternalGenericComponent => typeof(InternalGenericComponentEntity),
-                            CoreModel.EntityType.InternalKeyValueStore => typeof(InternalKeyValueStoreEntity),
-                            CoreModel.EntityType.GlobalOneResourcePool => typeof(GlobalOneResourcePoolEntity),
-                            CoreModel.EntityType.GlobalTwoResourcePool => typeof(GlobalTwoResourcePoolEntity),
-                            CoreModel.EntityType.GlobalMultiResourcePool => typeof(GlobalMultiResourcePoolEntity),
-                            CoreModel.EntityType.GlobalTransactionTracker => typeof(GlobalTransactionTrackerEntity),
-                            _ => throw new ArgumentOutOfRangeException(nameof(newGlobalEntity.EntityType), newGlobalEntity.EntityType.ToString()),
-                        });
+                            {
+                                CoreModel.EntityType.GlobalPackage => typeof(GlobalPackageEntity),
+                                CoreModel.EntityType.GlobalConsensusManager => typeof(GlobalConsensusManager),
+                                CoreModel.EntityType.GlobalValidator => typeof(GlobalValidatorEntity),
+                                CoreModel.EntityType.GlobalGenericComponent => typeof(GlobalGenericComponentEntity),
+                                CoreModel.EntityType.GlobalAccount => typeof(GlobalAccountEntity),
+                                CoreModel.EntityType.GlobalAccountLocker => typeof(GlobalAccountLockerEntity),
+                                CoreModel.EntityType.GlobalIdentity => typeof(GlobalIdentityEntity),
+                                CoreModel.EntityType.GlobalAccessController => typeof(GlobalAccessControllerEntity),
+                                CoreModel.EntityType.GlobalVirtualSecp256k1Account => typeof(GlobalAccountEntity),
+                                CoreModel.EntityType.GlobalVirtualSecp256k1Identity => typeof(GlobalIdentityEntity),
+                                CoreModel.EntityType.GlobalVirtualEd25519Account => typeof(GlobalAccountEntity),
+                                CoreModel.EntityType.GlobalVirtualEd25519Identity => typeof(GlobalIdentityEntity),
+                                CoreModel.EntityType.GlobalFungibleResource => typeof(GlobalFungibleResourceEntity),
+                                CoreModel.EntityType.InternalFungibleVault => typeof(InternalFungibleVaultEntity),
+                                CoreModel.EntityType.GlobalNonFungibleResource => typeof(GlobalNonFungibleResourceEntity),
+                                CoreModel.EntityType.InternalNonFungibleVault => typeof(InternalNonFungibleVaultEntity),
+                                CoreModel.EntityType.InternalGenericComponent => typeof(InternalGenericComponentEntity),
+                                CoreModel.EntityType.InternalKeyValueStore => typeof(InternalKeyValueStoreEntity),
+                                CoreModel.EntityType.GlobalOneResourcePool => typeof(GlobalOneResourcePoolEntity),
+                                CoreModel.EntityType.GlobalTwoResourcePool => typeof(GlobalTwoResourcePoolEntity),
+                                CoreModel.EntityType.GlobalMultiResourcePool => typeof(GlobalMultiResourcePoolEntity),
+                                CoreModel.EntityType.GlobalTransactionTracker => typeof(GlobalTransactionTrackerEntity),
+                                _ => throw new ArgumentOutOfRangeException(nameof(newGlobalEntity.EntityType), newGlobalEntity.EntityType.ToString()),
+                            });
                     }
 
                     foreach (var substate in stateUpdates.UpsertedSubstates)
@@ -378,6 +385,7 @@ UPDATE pending_transactions
                                 referencedEntities
                                     .GetOrAdd((EntityAddress)oe.EntityAddress, ea => new ReferencedEntity(ea, oe.EntityType, stateVersion))
                                     .IsImmediateChildOf(referencedEntity);
+
                                 childToParentEntities[(EntityAddress)oe.EntityAddress] = (EntityAddress)substateId.EntityAddress;
                             }
                         }
@@ -387,11 +395,8 @@ UPDATE pending_transactions
                             referencedEntities
                                 .GetOrAdd((EntityAddress)rv.EntityAddress, _ => new ReferencedEntity((EntityAddress)rv.EntityAddress, rv.EntityType, stateVersion))
                                 .IsImmediateChildOf(referencedEntity);
-                            childToParentEntities[(EntityAddress)rv.EntityAddress] = (EntityAddress)substateId.EntityAddress;
 
-                            referencedEntities
-                                .Get((EntityAddress)rv.EntityAddress)
-                                .PostResolveConfigure((InternalFungibleVaultEntity e) => e.RoyaltyVaultOfEntityId = referencedEntity.DatabaseId);
+                            childToParentEntities[(EntityAddress)rv.EntityAddress] = (EntityAddress)substateId.EntityAddress;
                         }
 
                         foreach (var entityAddress in substate.SystemStructure.GetEntityAddresses())
@@ -409,124 +414,59 @@ UPDATE pending_transactions
 
                         if (substateData is CoreModel.FungibleResourceManagerFieldDivisibilitySubstate fungibleResourceManager)
                         {
-                            referencedEntity.PostResolveConfigure((GlobalFungibleResourceEntity e) => e.Divisibility = fungibleResourceManager.Value.Divisibility);
+                            referencedEntity.PostResolveConfigure((GlobalFungibleResourceEntity e) =>
+                            {
+                                e.Divisibility = fungibleResourceManager.Value.Divisibility;
+                            });
+                        }
+
+                        if (substateData is CoreModel.NonFungibleResourceManagerFieldMutableFieldsSubstate mutableFields)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) =>
+                            {
+                                e.NonFungibleDataMutableFields = mutableFields.Value.MutableFields.Select(x => x.Name).ToList();
+                            });
                         }
 
                         if (substateData is CoreModel.NonFungibleResourceManagerFieldIdTypeSubstate nonFungibleResourceManagerFieldIdTypeSubstate)
                         {
-                            referencedEntity.PostResolveConfigure(
-                                (GlobalNonFungibleResourceEntity e) => e.NonFungibleIdType =
-                                nonFungibleResourceManagerFieldIdTypeSubstate.Value.NonFungibleIdType switch
+                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) =>
+                            {
+                                e.NonFungibleIdType = nonFungibleResourceManagerFieldIdTypeSubstate.Value.NonFungibleIdType switch
                                 {
                                     CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
                                     CoreModel.NonFungibleIdType.Integer => NonFungibleIdType.Integer,
                                     CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
                                     CoreModel.NonFungibleIdType.RUID => NonFungibleIdType.RUID,
                                     _ => throw new ArgumentOutOfRangeException(nameof(e.NonFungibleIdType), e.NonFungibleIdType, "Unexpected value of NonFungibleIdType"),
-                                });
+                                };
+                            });
                         }
 
-                        if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
+                        if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate && typeInfoSubstate.Value.Details is CoreModel.ObjectTypeInfoDetails objectDetails)
                         {
-                            switch (typeInfoSubstate.Value.Details)
+                            referencedEntity.PostResolveConfigure((ComponentEntity e) =>
                             {
-                                case CoreModel.ObjectTypeInfoDetails objectDetails:
-                                    referencedEntity.PostResolveConfigure(
-                                        (ComponentEntity e) =>
+                                e.AssignedModuleIds = objectDetails.ModuleVersions
+                                    .Select(x =>
                                     {
-                                        e.AssignedModuleIds = objectDetails
-                                            .ModuleVersions
-                                                .Select(
-                                                    x =>
-                                            {
-                                                return x.Module switch
-                                                {
-                                                    CoreModel.AttachedModuleId.Metadata => ModuleId.Metadata,
-                                                    CoreModel.AttachedModuleId.Royalty => ModuleId.Royalty,
-                                                    CoreModel.AttachedModuleId.RoleAssignment => ModuleId.RoleAssignment,
-                                                    _ => throw new ArgumentOutOfRangeException(nameof(x.Module), x.Module, "Unexpected value of AssignedModule"),
-                                                };
-                                            })
-                                            .OrderBy(x => x)
-                                            .ToList();
-
-                                        e.PackageId = referencedEntities.Get((EntityAddress)objectDetails.BlueprintInfo.PackageAddress).DatabaseId;
-                                        e.BlueprintName = objectDetails.BlueprintInfo.BlueprintName;
-                                        e.BlueprintVersion = objectDetails.BlueprintInfo.BlueprintVersion;
-                                    });
-
-                                    if (objectDetails.BlueprintInfo.BlueprintName is CoreModel.NativeBlueprintNames.FungibleVault or CoreModel.NativeBlueprintNames.NonFungibleVault)
-                                    {
-                                        referencedEntity.PostResolveConfigure(
-                                            (VaultEntity e) =>
+                                        return x.Module switch
                                         {
-                                            e.ResourceEntityId = referencedEntities.Get((EntityAddress)objectDetails.BlueprintInfo.OuterObject).DatabaseId;
-                                        });
-                                    }
+                                            CoreModel.AttachedModuleId.Metadata => ModuleId.Metadata,
+                                            CoreModel.AttachedModuleId.Royalty => ModuleId.Royalty,
+                                            CoreModel.AttachedModuleId.RoleAssignment => ModuleId.RoleAssignment,
+                                            _ => throw new ArgumentOutOfRangeException(nameof(x.Module), x.Module, "Unexpected value of AssignedModule"),
+                                        };
+                                    })
+                                    .OrderBy(x => x)
+                                    .ToList();
 
-                                    break;
-                                case CoreModel.KeyValueStoreTypeInfoDetails:
-                                    break;
-                                default:
-                                    throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Value.Details.Type}' value");
-                            }
-                        }
-
-                        if (substateData is CoreModel.ValidatorFieldStateSubstate validator)
-                        {
-                            referencedEntity.PostResolveConfigure((GlobalValidatorEntity e) =>
-                            {
-                                e.StakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.Value.StakeXrdVault.EntityAddress).DatabaseId;
-                                e.PendingXrdWithdrawVault = referencedEntities.Get((EntityAddress)validator.Value.PendingXrdWithdrawVault.EntityAddress).DatabaseId;
-                                e.LockedOwnerStakeUnitVault = referencedEntities.Get((EntityAddress)validator.Value.LockedOwnerStakeUnitVault.EntityAddress).DatabaseId;
-                                e.PendingOwnerStakeUnitUnlockVault = referencedEntities.Get((EntityAddress)validator.Value.PendingOwnerStakeUnitUnlockVault.EntityAddress).DatabaseId;
+                                e.BlueprintName = objectDetails.BlueprintInfo.BlueprintName;
+                                e.BlueprintVersion = objectDetails.BlueprintInfo.BlueprintVersion;
                             });
                         }
 
-                        // we want to annotate AccountLocker-related KeyValueStores with corresponding AccountLocker+Account pair
-                        if (substateData is CoreModel.AccountLockerAccountClaimsEntrySubstate accountLocker)
-                        {
-                            var account = accountLocker.Key.AccountAddress;
-                            var keyValueStore = accountLocker.Value.ResourceVaults;
-
-                            referencedEntities
-                                .GetOrAdd((EntityAddress)keyValueStore.EntityAddress, ea => new ReferencedEntity(ea, keyValueStore.EntityType, stateVersion))
-                                .PostResolveConfigure((InternalKeyValueStoreEntity e) =>
-                                {
-                                    e.AccountLockerOfAccountLockerEntityId = referencedEntity.DatabaseId;
-                                    e.AccountLockerOfAccountEntityId = referencedEntities.Get((EntityAddress)account).DatabaseId;
-                                });
-                        }
-
-                        // we want to annotate AccountLocker-related Vaults using AccountLocker+Account pair obtained from corresponding KeyValueStore
-                        if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate && referencedEntity.Type is CoreModel.EntityType.InternalFungibleVault or CoreModel.EntityType.InternalNonFungibleVault)
-                        {
-                            referencedEntity.PostResolveConfigure((Entity e) =>
-                            {
-                                if (!e.ParentAncestorId.HasValue)
-                                {
-                                    throw new UnreachableException("Vault cannot exists without a parent entity.");
-                                }
-
-                                var parent = referencedEntities.GetByDatabaseId(e.ParentAncestorId.Value);
-
-                                if (parent.Type == CoreModel.EntityType.InternalKeyValueStore)
-                                {
-                                    var parentKeyValueStore = parent.GetDatabaseEntity<InternalKeyValueStoreEntity>();
-
-                                    if (parentKeyValueStore.AccountLockerOfAccountLockerEntityId.HasValue && parentKeyValueStore.AccountLockerOfAccountEntityId.HasValue)
-                                    {
-                                        // as we're running in the context of PostResolveConfigure with regular priority we must fallback to low priority action
-                                        referencedEntity.PostResolveConfigure(
-                                            (VaultEntity ve) =>
-                                            {
-                                                ve.AccountLockerOfAccountLockerEntityId = parentKeyValueStore.AccountLockerOfAccountLockerEntityId.Value;
-                                                ve.AccountLockerOfAccountEntityId = parentKeyValueStore.AccountLockerOfAccountEntityId.Value;
-                                            }, ReferencedEntity.PostResolvePriority.Low);
-                                    }
-                                }
-                            });
-                        }
+                        relationshipProcessor.ScanUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -631,11 +571,11 @@ UPDATE pending_transactions
                     {
                         ledgerTransactionMarkersToAdd.Add(
                             new OriginLedgerTransactionMarker
-                        {
-                            Id = sequences.LedgerTransactionMarkerSequence++,
-                            StateVersion = stateVersion,
-                            OriginType = LedgerTransactionMarkerOriginType.EpochChange,
-                        });
+                            {
+                                Id = sequences.LedgerTransactionMarkerSequence++,
+                                StateVersion = stateVersion,
+                                OriginType = LedgerTransactionMarkerOriginType.EpochChange,
+                            });
                     }
 
                     lastTransactionSummary = summary;
@@ -670,7 +610,6 @@ UPDATE pending_transactions
                     GlobalAccountLockerEntity => CoreModel.EntityType.GlobalAccountLocker,
                     GlobalIdentityEntity => CoreModel.EntityType.GlobalIdentity,
                     GlobalAccessControllerEntity => CoreModel.EntityType.GlobalAccessController,
-
                     // skipped GlobalVirtualSecp256k1Account, GlobalVirtualSecp256k1Identity, GlobalVirtualEd25519Account and GlobalVirtualEd25519Identity as they are virtual
                     GlobalFungibleResourceEntity => CoreModel.EntityType.GlobalFungibleResource,
                     InternalFungibleVaultEntity => CoreModel.EntityType.InternalFungibleVault,
@@ -781,14 +720,13 @@ UPDATE pending_transactions
                 // we must rely on high priority PostResolveConfigure as other callbacks rely on the entity hierarchy tree
                 referencedEntities
                     .Get(childAddress)
-                    .PostResolveConfigure(
-                        (Entity dbe) =>
-                        {
-                            dbe.AncestorIds = allAncestors;
-                            dbe.ParentAncestorId = parentId.Value;
-                            dbe.OwnerAncestorId = ownerId.Value;
-                            dbe.GlobalAncestorId = globalId.Value;
-                        }, ReferencedEntity.PostResolvePriority.High);
+                    .PostResolveConfigureHigh((Entity dbe) =>
+                    {
+                        dbe.AncestorIds = allAncestors;
+                        dbe.ParentAncestorId = parentId.Value;
+                        dbe.OwnerAncestorId = ownerId.Value;
+                        dbe.GlobalAncestorId = globalId.Value;
+                    });
             }
 
             referencedEntities.InvokePostResolveConfiguration();
@@ -803,22 +741,24 @@ UPDATE pending_transactions
         var vaultHistoryToAdd = new List<EntityVaultHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
-        var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
-        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, token);
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
         var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
-        var entitySchemaProcessor = new EntitySchemaProcessor(processorContext, networkConfiguration.Id);
+        var entitySchemaProcessor = new EntitySchemaProcessor(processorContext);
         var componentMethodRoyaltyProcessor = new ComponentMethodRoyaltyProcessor(processorContext);
         var entityRoleAssignmentProcessor = new EntityRoleAssignmentProcessor(processorContext);
-        var packageCodeProcessor = new PackageCodeProcessor(processorContext, networkConfiguration.Id);
+        var packageCodeProcessor = new PackageCodeProcessor(processorContext);
         var packageBlueprintProcessor = new PackageBlueprintProcessor(processorContext, referencedEntities);
         var accountAuthorizedDepositorsProcessor = new AccountAuthorizedDepositorsProcessor(processorContext, referencedEntities);
         var accountResourcePreferenceRulesProcessor = new AccountResourcePreferenceRulesProcessor(processorContext, referencedEntities);
         var accountDefaultDepositRuleProcessor = new AccountDefaultDepositRuleProcessor(processorContext);
         var keyValueStoreProcessor = new KeyValueStoreProcessor(processorContext);
         var validatorProcessor = new ValidatorProcessor(processorContext, referencedEntities);
-        var accountLockerProcessor = new AccountLockerProcessor(processorContext, referencedEntities, networkConfiguration.Id);
+        var validatorEmissionProcessor = new ValidatorEmissionProcessor(processorContext);
+        var accountLockerProcessor = new AccountLockerProcessor(processorContext, referencedEntities);
+        var globalEventEmitterProcessor = new GlobalEventEmitterProcessor(processorContext, referencedEntities, networkConfiguration);
+        var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
+        var standardMetadataProcessor = new StandardMetadataProcessor(processorContext, referencedEntities);
 
         // step: scan all substates & events to figure out changes
         {
@@ -829,9 +769,7 @@ UPDATE pending_transactions
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
                 var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
-                long? newEpoch = null;
                 long? passingEpoch = null;
-                var affectedGlobalEntities = new HashSet<long>();
 
                 try
                 {
@@ -840,12 +778,11 @@ UPDATE pending_transactions
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
                         var referencedEntity = referencedEntities.Get((EntityAddress)substateId.EntityAddress);
-                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
                         if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleVaultFieldBalanceSubstate)
                         {
                             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
-                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.GetResourceEntityId());
                             var amount = TokenAmount.FromDecimalString(fungibleVaultFieldBalanceSubstate.Value.Amount);
 
                             vaultSnapshots.Add(new FungibleVaultSnapshot(referencedEntity, resourceEntity, amount, stateVersion));
@@ -868,7 +805,7 @@ UPDATE pending_transactions
                         if (substateData is CoreModel.NonFungibleVaultFieldBalanceSubstate nonFungibleVaultFieldBalanceSubstate)
                         {
                             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
-                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.GetResourceEntityId());
                             var amount = long.Parse(nonFungibleVaultFieldBalanceSubstate.Value.Amount, NumberFormatInfo.InvariantInfo);
 
                             var previousAmountRaw = (substate.PreviousValue?.SubstateData as CoreModel.NonFungibleVaultFieldBalanceSubstate)?.Value.Amount;
@@ -886,7 +823,7 @@ UPDATE pending_transactions
                         if (substateData is CoreModel.NonFungibleVaultContentsIndexEntrySubstate nonFungibleVaultContentsIndexEntrySubstate)
                         {
                             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
-                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.GetResourceEntityId());
                             var simpleRep = nonFungibleVaultContentsIndexEntrySubstate.Key.NonFungibleLocalId.SimpleRep;
 
                             vaultSnapshots.Add(new NonFungibleVaultSnapshot(referencedEntity, resourceEntity, simpleRep, false, stateVersion));
@@ -913,8 +850,7 @@ UPDATE pending_transactions
                         {
                             if (consensusManagerFieldStateSubstate.Value.Round == 0)
                             {
-                                newEpoch = consensusManagerFieldStateSubstate.Value.Epoch;
-                                passingEpoch = newEpoch - 1;
+                                passingEpoch = consensusManagerFieldStateSubstate.Value.Epoch - 1;
                             }
                         }
 
@@ -928,15 +864,15 @@ UPDATE pending_transactions
 
                                 nonFungibleSchemaHistoryToAdd.Add(
                                     new NonFungibleSchemaHistory
-                                {
-                                    Id = sequences.NonFungibleSchemaHistorySequence++,
-                                    ResourceEntityId = referencedEntity.DatabaseId,
-                                    SchemaHash = nonFungibleDataSchemaDetails.Value.SchemaHash.ConvertFromHex(),
-                                    SborTypeKind = nonFungibleDataSchemaDetails.Value.SborTypeKind.ToModel(),
-                                    TypeIndex = nonFungibleDataSchemaDetails.Value.TypeIndex,
-                                    SchemaDefiningEntityId = schemaDefiningEntityId,
-                                    FromStateVersion = stateVersion,
-                                });
+                                    {
+                                        Id = sequences.NonFungibleSchemaHistorySequence++,
+                                        ResourceEntityId = referencedEntity.DatabaseId,
+                                        SchemaHash = nonFungibleDataSchemaDetails.Value.SchemaHash.ConvertFromHex(),
+                                        SborTypeKind = nonFungibleDataSchemaDetails.Value.SborTypeKind.ToModel(),
+                                        TypeIndex = nonFungibleDataSchemaDetails.Value.TypeIndex,
+                                        SchemaDefiningEntityId = schemaDefiningEntityId,
+                                        FromStateVersion = stateVersion,
+                                    });
                             }
 
                             if (typeInfoSubstate.Value.Details is CoreModel.KeyValueStoreTypeInfoDetails
@@ -953,19 +889,19 @@ UPDATE pending_transactions
 
                                 keyValueStoreSchemaHistoryToAdd.Add(
                                     new KeyValueStoreSchemaHistory
-                                {
-                                    Id = sequences.KeyValueSchemaHistorySequence++,
-                                    KeyValueStoreEntityId = referencedEntity.DatabaseId,
-                                    KeySchemaDefiningEntityId = keySchemaDefiningEntityId,
-                                    KeySchemaHash = keySchemaDetails.Value.SchemaHash.ConvertFromHex(),
-                                    KeySborTypeKind = keySchemaDetails.Value.SborTypeKind.ToModel(),
-                                    KeyTypeIndex = keySchemaDetails.Value.TypeIndex,
-                                    ValueSchemaDefiningEntityId = valueSchemaDefiningEntityId,
-                                    ValueSchemaHash = valueSchemaDetails.Value.SchemaHash.ConvertFromHex(),
-                                    ValueSborTypeKind = valueSchemaDetails.Value.SborTypeKind.ToModel(),
-                                    ValueTypeIndex = valueSchemaDetails.Value.TypeIndex,
-                                    FromStateVersion = stateVersion,
-                                });
+                                    {
+                                        Id = sequences.KeyValueSchemaHistorySequence++,
+                                        KeyValueStoreEntityId = referencedEntity.DatabaseId,
+                                        KeySchemaDefiningEntityId = keySchemaDefiningEntityId,
+                                        KeySchemaHash = keySchemaDetails.Value.SchemaHash.ConvertFromHex(),
+                                        KeySborTypeKind = keySchemaDetails.Value.SborTypeKind.ToModel(),
+                                        KeyTypeIndex = keySchemaDetails.Value.TypeIndex,
+                                        ValueSchemaDefiningEntityId = valueSchemaDefiningEntityId,
+                                        ValueSchemaHash = valueSchemaDetails.Value.SchemaHash.ConvertFromHex(),
+                                        ValueSborTypeKind = valueSchemaDetails.Value.SborTypeKind.ToModel(),
+                                        ValueTypeIndex = valueSchemaDetails.Value.TypeIndex,
+                                        FromStateVersion = stateVersion,
+                                    });
                             }
                         }
 
@@ -982,29 +918,31 @@ UPDATE pending_transactions
                         keyValueStoreProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         validatorProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, passingEpoch);
                         accountLockerProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        affectedGlobalEntitiesProcessor.VisitUpsert(referencedEntity, stateVersion);
+                        standardMetadataProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                     {
                         var substateId = deletedSubstate.SubstateId;
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
-                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
                         if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
-                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
+                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().GetResourceEntityId());
                             var simpleRep = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex);
 
                             vaultSnapshots.Add(new NonFungibleVaultSnapshot(referencedEntity, resourceEntity, simpleRep, true, stateVersion));
                         }
 
+                        affectedGlobalEntitiesProcessor.VisitDelete(referencedEntity, stateVersion);
                         packageCodeProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                         entitySchemaProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
                     }
 
                     var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
 
-                    transaction.AffectedGlobalEntities = affectedGlobalEntities.ToArray();
+                    transaction.AffectedGlobalEntities = affectedGlobalEntitiesProcessor.GetAllAffectedGlobalEntities(stateVersion).ToArray();
                     transaction.ReceiptEventEmitters = events.Select(e => e.Type.Emitter.ToJson()).ToArray();
                     transaction.ReceiptEventNames = events.Select(e => e.Type.Name).ToArray();
                     transaction.ReceiptEventSbors = events.Select(e => e.Data.GetDataBytes()).ToArray();
@@ -1013,17 +951,10 @@ UPDATE pending_transactions
                     transaction.ReceiptEventTypeIndexes = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Id).ToArray();
                     transaction.ReceiptEventSborTypeKinds = events.Select(e => e.Type.TypeReference.FullTypeId.LocalTypeId.Kind.ToModel()).ToArray();
 
-                    ledgerTransactionMarkersToAdd.AddRange(
-                        affectedGlobalEntities.Select(
-                            affectedEntity => new AffectedGlobalEntityTransactionMarker
-                    {
-                        Id = sequences.LedgerTransactionMarkerSequence++,
-                        EntityId = affectedEntity,
-                        StateVersion = stateVersion,
-                    }));
-
                     foreach (var @event in events)
                     {
+                        globalEventEmitterProcessor.VisitEvent(@event, stateVersion);
+
                         if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter
                             || methodEventEmitter.ObjectModuleId != CoreModel.ModuleId.Main
                             || methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalGenericComponent
@@ -1036,70 +967,59 @@ UPDATE pending_transactions
 
                         using var decodedEvent = EventDecoder.DecodeEvent(@event, networkConfiguration.Id);
 
-                        if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
-                        {
-                            validatorEmissionStatisticsToAdd.Add(
-                                new ValidatorEmissionStatistics
-                            {
-                                Id = sequences.ValidatorEmissionStatisticsSequence++,
-                                FromStateVersion = stateVersion,
-                                ValidatorEntityId = eventEmitterEntity.DatabaseId,
-                                EpochNumber = (long)validatorUptimeEvent.epoch,
-                                ProposalsMade = (long)validatorUptimeEvent.proposalsMade,
-                                ProposalsMissed = (long)validatorUptimeEvent.proposalsMissed,
-                            });
-                        }
-                        else if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
+                        validatorEmissionProcessor.VisitEvent(decodedEvent, eventEmitterEntity, stateVersion);
+
+                        if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
                         {
                             ledgerTransactionMarkersToAdd.Add(
                                 new EventLedgerTransactionMarker
-                            {
-                                Id = sequences.LedgerTransactionMarkerSequence++,
-                                StateVersion = stateVersion,
-                                EventType = LedgerTransactionMarkerEventType.Withdrawal,
-                                EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.AsStr()),
-                            });
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    EventType = LedgerTransactionMarkerEventType.Withdrawal,
+                                    EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
+                                    ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().GetResourceEntityId(),
+                                    Quantity = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.AsStr()),
+                                });
                         }
                         else if (EventDecoder.TryGetFungibleVaultDepositEvent(decodedEvent, out var fungibleVaultDepositEvent))
                         {
                             ledgerTransactionMarkersToAdd.Add(
                                 new EventLedgerTransactionMarker
-                            {
-                                Id = sequences.LedgerTransactionMarkerSequence++,
-                                StateVersion = stateVersion,
-                                EventType = LedgerTransactionMarkerEventType.Deposit,
-                                EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.AsStr()),
-                            });
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    EventType = LedgerTransactionMarkerEventType.Deposit,
+                                    EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
+                                    ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().GetResourceEntityId(),
+                                    Quantity = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.AsStr()),
+                                });
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultWithdrawalEvent(decodedEvent, out var nonFungibleVaultWithdrawalEvent))
                         {
                             ledgerTransactionMarkersToAdd.Add(
                                 new EventLedgerTransactionMarker
-                            {
-                                Id = sequences.LedgerTransactionMarkerSequence++,
-                                StateVersion = stateVersion,
-                                EventType = LedgerTransactionMarkerEventType.Withdrawal,
-                                EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultWithdrawalEvent.Length.ToString()),
-                            });
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    EventType = LedgerTransactionMarkerEventType.Withdrawal,
+                                    EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
+                                    ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().GetResourceEntityId(),
+                                    Quantity = TokenAmount.FromDecimalString(nonFungibleVaultWithdrawalEvent.Length.ToString()),
+                                });
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultDepositEvent(decodedEvent, out var nonFungibleVaultDepositEvent))
                         {
                             ledgerTransactionMarkersToAdd.Add(
                                 new EventLedgerTransactionMarker
-                            {
-                                Id = sequences.LedgerTransactionMarkerSequence++,
-                                StateVersion = stateVersion,
-                                EventType = LedgerTransactionMarkerEventType.Deposit,
-                                EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultDepositEvent.Length.ToString()),
-                            });
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    EventType = LedgerTransactionMarkerEventType.Deposit,
+                                    EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
+                                    ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().GetResourceEntityId(),
+                                    Quantity = TokenAmount.FromDecimalString(nonFungibleVaultDepositEvent.Length.ToString()),
+                                });
                         }
                         else if (EventDecoder.TryGetFungibleResourceMintedEvent(decodedEvent, out var fungibleResourceMintedEvent))
                         {
@@ -1146,12 +1066,12 @@ UPDATE pending_transactions
                             {
                                 ledgerTransactionMarkersToAdd.Add(
                                     new ManifestAddressLedgerTransactionMarker
-                                {
-                                    Id = sequences.LedgerTransactionMarkerSequence++,
-                                    StateVersion = stateVersion,
-                                    OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
-                                    EntityId = re.DatabaseId,
-                                });
+                                    {
+                                        Id = sequences.LedgerTransactionMarkerSequence++,
+                                        StateVersion = stateVersion,
+                                        OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
+                                        EntityId = re.DatabaseId,
+                                    });
                             }
                         }
 
@@ -1161,12 +1081,12 @@ UPDATE pending_transactions
                             {
                                 ledgerTransactionMarkersToAdd.Add(
                                     new ManifestAddressLedgerTransactionMarker
-                                {
-                                    Id = sequences.LedgerTransactionMarkerSequence++,
-                                    StateVersion = stateVersion,
-                                    OperationType = LedgerTransactionMarkerOperationType.AccountOwnerMethodCall,
-                                    EntityId = re.DatabaseId,
-                                });
+                                    {
+                                        Id = sequences.LedgerTransactionMarkerSequence++,
+                                        StateVersion = stateVersion,
+                                        OperationType = LedgerTransactionMarkerOperationType.AccountOwnerMethodCall,
+                                        EntityId = re.DatabaseId,
+                                    });
                             }
                         }
 
@@ -1176,12 +1096,12 @@ UPDATE pending_transactions
                             {
                                 ledgerTransactionMarkersToAdd.Add(
                                     new ManifestAddressLedgerTransactionMarker
-                                {
-                                    Id = sequences.LedgerTransactionMarkerSequence++,
-                                    StateVersion = stateVersion,
-                                    OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
-                                    EntityId = re.DatabaseId,
-                                });
+                                    {
+                                        Id = sequences.LedgerTransactionMarkerSequence++,
+                                        StateVersion = stateVersion,
+                                        OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
+                                        EntityId = re.DatabaseId,
+                                    });
                             }
                         }
 
@@ -1191,12 +1111,12 @@ UPDATE pending_transactions
                             {
                                 ledgerTransactionMarkersToAdd.Add(
                                     new ManifestAddressLedgerTransactionMarker
-                                {
-                                    Id = sequences.LedgerTransactionMarkerSequence++,
-                                    StateVersion = stateVersion,
-                                    OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
-                                    EntityId = re.DatabaseId,
-                                });
+                                    {
+                                        Id = sequences.LedgerTransactionMarkerSequence++,
+                                        StateVersion = stateVersion,
+                                        OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
+                                        EntityId = re.DatabaseId,
+                                    });
                             }
                         }
                     }
@@ -1229,10 +1149,12 @@ UPDATE pending_transactions
             await packageCodeProcessor.LoadDependencies();
             await packageBlueprintProcessor.LoadDependencies();
             await validatorProcessor.LoadDependencies();
+            await validatorEmissionProcessor.LoadDependencies();
             await keyValueStoreProcessor.LoadDependencies();
             await accountAuthorizedDepositorsProcessor.LoadDependencies();
             await accountResourcePreferenceRulesProcessor.LoadDependencies();
             await accountLockerProcessor.LoadDependencies();
+            await standardMetadataProcessor.LoadDependencies();
 
             dbReadDuration += sw.Elapsed;
 
@@ -1254,7 +1176,11 @@ UPDATE pending_transactions
             accountResourcePreferenceRulesProcessor.ProcessChanges();
             keyValueStoreProcessor.ProcessChanges();
             validatorProcessor.ProcessChanges();
+            validatorEmissionProcessor.ProcessChanges();
             accountLockerProcessor.ProcessChanges();
+            ledgerTransactionMarkersToAdd.AddRange(globalEventEmitterProcessor.CreateTransactionMarkers());
+            ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntitiesProcessor.CreateTransactionMarkers());
+            standardMetadataProcessor.ProcessChanges();
 
             foreach (var e in nonFungibleIdChanges)
             {
@@ -1277,14 +1203,14 @@ UPDATE pending_transactions
 
                 nonFungibleIdsMutableDataHistoryToAdd.Add(
                     new NonFungibleIdDataHistory
-                {
-                    Id = sequences.NonFungibleIdDataHistorySequence++,
-                    FromStateVersion = e.StateVersion,
-                    NonFungibleIdDefinitionId = nonFungibleIdData.Id,
-                    Data = e.MutableData,
-                    IsDeleted = e.IsDeleted,
-                    IsLocked = e.IsLocked,
-                });
+                    {
+                        Id = sequences.NonFungibleIdDataHistorySequence++,
+                        FromStateVersion = e.StateVersion,
+                        NonFungibleIdDefinitionId = nonFungibleIdData.Id,
+                        Data = e.MutableData,
+                        IsDeleted = e.IsDeleted,
+                        IsLocked = e.IsLocked,
+                    });
             }
 
             void AggregateEntityResourceUsingSubstates(
@@ -1371,73 +1297,72 @@ UPDATE pending_transactions
                 switch (vaultSnapshot)
                 {
                     case FungibleVaultSnapshot fe:
-                    {
-                        AggregateEntityResourceUsingSubstates(fe.ReferencedVault, fe.ReferencedResource, fe.StateVersion, true);
-
-                        vaultHistoryToAdd.Add(
-                            new EntityFungibleVaultHistory
                         {
-                            Id = sequences.EntityVaultHistorySequence++,
-                            FromStateVersion = fe.StateVersion,
-                            OwnerEntityId = fe.ReferencedVault.DatabaseOwnerAncestorId,
-                            GlobalEntityId = fe.ReferencedVault.DatabaseGlobalAncestorId,
-                            ResourceEntityId = fe.ReferencedResource.DatabaseId,
-                            VaultEntityId = fe.ReferencedVault.DatabaseId,
-                            IsRoyaltyVault = fe.ReferencedVault.GetDatabaseEntity<InternalFungibleVaultEntity>().IsRoyaltyVault,
-                            Balance = fe.Balance,
-                        });
-                        break;
-                    }
+                            AggregateEntityResourceUsingSubstates(fe.ReferencedVault, fe.ReferencedResource, fe.StateVersion, true);
 
-                    case NonFungibleVaultSnapshot nfe:
-                    {
-                        AggregateEntityResourceUsingSubstates(nfe.ReferencedVault, nfe.ReferencedResource, nfe.StateVersion, false);
-
-                        EntityNonFungibleVaultHistory vaultHistory;
-
-                        if (!mostRecentEntityNonFungibleVaultHistory.TryGetValue(nfe.ReferencedVault.DatabaseId, out var previous) || previous.FromStateVersion != nfe.StateVersion)
-                        {
-                            vaultHistory = new EntityNonFungibleVaultHistory
+                            vaultHistoryToAdd.Add(new EntityFungibleVaultHistory
                             {
                                 Id = sequences.EntityVaultHistorySequence++,
-                                FromStateVersion = nfe.StateVersion,
-                                OwnerEntityId = nfe.ReferencedVault.DatabaseOwnerAncestorId,
-                                GlobalEntityId = nfe.ReferencedVault.DatabaseGlobalAncestorId,
-                                ResourceEntityId = nfe.ReferencedResource.DatabaseId,
-                                VaultEntityId = nfe.ReferencedVault.DatabaseId,
-                                NonFungibleIds = new List<long>(previous?.NonFungibleIds.ToArray() ?? Array.Empty<long>()),
-                            };
-
-                            vaultHistoryToAdd.Add(vaultHistory);
-                            mostRecentEntityNonFungibleVaultHistory[nfe.ReferencedVault.DatabaseId] = vaultHistory;
-                        }
-                        else
-                        {
-                            vaultHistory = previous;
-                        }
-
-                        var nonFungibleIdDataId = existingNonFungibleIdData[new NonFungibleIdLookup(nfe.ReferencedResource.DatabaseId, nfe.NonFungibleId)].Id;
-
-                        if (nfe.IsWithdrawal)
-                        {
-                            vaultHistory.NonFungibleIds.Remove(nonFungibleIdDataId);
-                        }
-                        else
-                        {
-                            vaultHistory.NonFungibleIds.Add(nonFungibleIdDataId);
-
-                            nonFungibleIdLocationHistoryToAdd.Add(
-                                new NonFungibleIdLocationHistory
-                            {
-                                Id = sequences.NonFungibleIdLocationHistorySequence++,
-                                FromStateVersion = nfe.StateVersion,
-                                NonFungibleIdDataId = nonFungibleIdDataId,
-                                VaultEntityId = nfe.ReferencedVault.DatabaseId,
+                                FromStateVersion = fe.StateVersion,
+                                OwnerEntityId = fe.ReferencedVault.DatabaseOwnerAncestorId,
+                                GlobalEntityId = fe.ReferencedVault.DatabaseGlobalAncestorId,
+                                ResourceEntityId = fe.ReferencedResource.DatabaseId,
+                                VaultEntityId = fe.ReferencedVault.DatabaseId,
+                                IsRoyaltyVault = fe.ReferencedVault.GetDatabaseEntity<InternalFungibleVaultEntity>().IsRoyaltyVault,
+                                Balance = fe.Balance,
                             });
+                            break;
                         }
 
-                        break;
-                    }
+                    case NonFungibleVaultSnapshot nfe:
+                        {
+                            AggregateEntityResourceUsingSubstates(nfe.ReferencedVault, nfe.ReferencedResource, nfe.StateVersion, false);
+
+                            EntityNonFungibleVaultHistory vaultHistory;
+
+                            if (!mostRecentEntityNonFungibleVaultHistory.TryGetValue(nfe.ReferencedVault.DatabaseId, out var previous) || previous.FromStateVersion != nfe.StateVersion)
+                            {
+                                vaultHistory = new EntityNonFungibleVaultHistory
+                                {
+                                    Id = sequences.EntityVaultHistorySequence++,
+                                    FromStateVersion = nfe.StateVersion,
+                                    OwnerEntityId = nfe.ReferencedVault.DatabaseOwnerAncestorId,
+                                    GlobalEntityId = nfe.ReferencedVault.DatabaseGlobalAncestorId,
+                                    ResourceEntityId = nfe.ReferencedResource.DatabaseId,
+                                    VaultEntityId = nfe.ReferencedVault.DatabaseId,
+                                    NonFungibleIds = new List<long>(previous?.NonFungibleIds.ToArray() ?? Array.Empty<long>()),
+                                };
+
+                                vaultHistoryToAdd.Add(vaultHistory);
+                                mostRecentEntityNonFungibleVaultHistory[nfe.ReferencedVault.DatabaseId] = vaultHistory;
+                            }
+                            else
+                            {
+                                vaultHistory = previous;
+                            }
+
+                            var nonFungibleIdDataId = existingNonFungibleIdData[new NonFungibleIdLookup(nfe.ReferencedResource.DatabaseId, nfe.NonFungibleId)].Id;
+
+                            if (nfe.IsWithdrawal)
+                            {
+                                vaultHistory.NonFungibleIds.Remove(nonFungibleIdDataId);
+                            }
+                            else
+                            {
+                                vaultHistory.NonFungibleIds.Add(nonFungibleIdDataId);
+
+                                nonFungibleIdLocationHistoryToAdd.Add(
+                                    new NonFungibleIdLocationHistory
+                                    {
+                                        Id = sequences.NonFungibleIdLocationHistorySequence++,
+                                        FromStateVersion = nfe.StateVersion,
+                                        NonFungibleIdDataId = nonFungibleIdDataId,
+                                        VaultEntityId = nfe.ReferencedVault.DatabaseId,
+                                    });
+                            }
+
+                            break;
+                        }
 
                     default:
                         throw new ArgumentOutOfRangeException(nameof(vaultSnapshot), vaultSnapshot, null);
@@ -1451,66 +1376,96 @@ UPDATE pending_transactions
                 switch (vaultChange)
                 {
                     case EntityFungibleResourceBalanceChangeEvent fe:
-                    {
-                        EntityFungibleResourceAggregatedVaultsHistory aggregate;
-
-                        if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previous) || previous.FromStateVersion != fe.StateVersion)
                         {
-                            var previousBalance = (previous as EntityFungibleResourceAggregatedVaultsHistory)?.Balance ?? TokenAmount.Zero;
+                            EntityFungibleResourceAggregatedVaultsHistory aggregate;
 
-                            aggregate = new EntityFungibleResourceAggregatedVaultsHistory
+                            if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previous) || previous.FromStateVersion != fe.StateVersion)
                             {
-                                Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
-                                FromStateVersion = fe.StateVersion,
-                                EntityId = fe.EntityId,
-                                ResourceEntityId = fe.ResourceEntityId,
-                                Balance = previousBalance,
-                            };
+                                var previousBalance = (previous as EntityFungibleResourceAggregatedVaultsHistory)?.Balance ?? TokenAmount.Zero;
 
-                            entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
-                            mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
-                        }
-                        else
-                        {
-                            aggregate = (EntityFungibleResourceAggregatedVaultsHistory)previous;
-                        }
+                                aggregate = new EntityFungibleResourceAggregatedVaultsHistory
+                                {
+                                    Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
+                                    FromStateVersion = fe.StateVersion,
+                                    EntityId = fe.EntityId,
+                                    ResourceEntityId = fe.ResourceEntityId,
+                                    Balance = previousBalance,
+                                };
 
-                        aggregate.Balance += fe.Delta;
-                        break;
-                    }
+                                entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
+                                mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
+                            }
+                            else
+                            {
+                                aggregate = (EntityFungibleResourceAggregatedVaultsHistory)previous;
+                            }
+
+                            aggregate.Balance += fe.Delta;
+                            break;
+                        }
 
                     case EntityNonFungibleResourceBalanceChangeEvent nfe:
-                    {
-                        EntityNonFungibleResourceAggregatedVaultsHistory aggregate;
-
-                        if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previous) || previous.FromStateVersion != nfe.StateVersion)
                         {
-                            var previousTotalCount = (previous as EntityNonFungibleResourceAggregatedVaultsHistory)?.TotalCount ?? 0;
+                            EntityNonFungibleResourceAggregatedVaultsHistory aggregate;
 
-                            aggregate = new EntityNonFungibleResourceAggregatedVaultsHistory
+                            if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previous) || previous.FromStateVersion != nfe.StateVersion)
                             {
-                                Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
-                                FromStateVersion = nfe.StateVersion,
-                                EntityId = nfe.EntityId,
-                                ResourceEntityId = nfe.ResourceEntityId,
-                                TotalCount = previousTotalCount,
-                            };
+                                var previousTotalCount = (previous as EntityNonFungibleResourceAggregatedVaultsHistory)?.TotalCount ?? 0;
 
-                            entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
-                            mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
-                        }
-                        else
-                        {
-                            aggregate = (EntityNonFungibleResourceAggregatedVaultsHistory)previous;
-                        }
+                                aggregate = new EntityNonFungibleResourceAggregatedVaultsHistory
+                                {
+                                    Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
+                                    FromStateVersion = nfe.StateVersion,
+                                    EntityId = nfe.EntityId,
+                                    ResourceEntityId = nfe.ResourceEntityId,
+                                    TotalCount = previousTotalCount,
+                                };
 
-                        aggregate.TotalCount += nfe.Delta;
-                        break;
-                    }
+                                entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
+                                mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
+                            }
+                            else
+                            {
+                                aggregate = (EntityNonFungibleResourceAggregatedVaultsHistory)previous;
+                            }
+
+                            aggregate.TotalCount += nfe.Delta;
+                            break;
+                        }
 
                     default:
                         throw new ArgumentOutOfRangeException(nameof(vaultChange), vaultChange, null);
                 }
+            }
+
+            var resourceHoldersToAdd = new Dictionary<ResourceHoldersLookup, ResourceHolder>();
+
+            foreach (var x in entityResourceAggregatedVaultsHistoryToAdd)
+            {
+                TokenAmount balance = x switch
+                {
+                    EntityFungibleResourceAggregatedVaultsHistory fungibleResourceAggregatedVaultsHistory =>
+                        fungibleResourceAggregatedVaultsHistory.Balance,
+                    EntityNonFungibleResourceAggregatedVaultsHistory nonFungibleResourceAggregatedVaultsHistory =>
+                        TokenAmount.FromDecimalString(nonFungibleResourceAggregatedVaultsHistory.TotalCount.ToString()),
+                    _ => throw new ArgumentOutOfRangeException(nameof(x), x, null),
+                };
+
+                resourceHoldersToAdd.AddOrUpdate(
+                    new ResourceHoldersLookup(x.EntityId, x.ResourceEntityId),
+                    _ => new ResourceHolder
+                    {
+                        Id = sequences.ResourceHoldersSequence++,
+                        EntityId = x.EntityId,
+                        ResourceEntityId = x.ResourceEntityId,
+                        Balance = balance,
+                        LastUpdatedAtStateVersion = x.FromStateVersion,
+                    },
+                    existing =>
+                    {
+                        existing.Balance = balance;
+                        existing.LastUpdatedAtStateVersion = x.FromStateVersion;
+                    });
             }
 
             var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges
@@ -1570,9 +1525,9 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdLocationHistory(nonFungibleIdLocationHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyResourceHolders(resourceHoldersToAdd.Values, token);
 
             rowsInserted += await entityStateProcessor.SaveEntities();
             rowsInserted += await entityMetadataProcessor.SaveEntities();
@@ -1586,7 +1541,9 @@ UPDATE pending_transactions
             rowsInserted += await accountResourcePreferenceRulesProcessor.SaveEntities();
             rowsInserted += await keyValueStoreProcessor.SaveEntities();
             rowsInserted += await validatorProcessor.SaveEntities();
+            rowsInserted += await validatorEmissionProcessor.SaveEntities();
             rowsInserted += await accountLockerProcessor.SaveEntities();
+            rowsInserted += await standardMetadataProcessor.SaveEntities();
 
             await writeHelper.UpdateSequences(sequences, token);
 

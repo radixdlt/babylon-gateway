@@ -66,6 +66,7 @@ using FluentAssertions;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Numerics;
 using Xunit;
 
@@ -206,6 +207,7 @@ public class TokenAmountTests
         new object[] { TokenAmount.FromStringParts(true, "1", "234"), false },
         new object[] { TokenAmount.FromStringParts(false, "1", "-234"), true }, // Invalid call
         new object[] { TokenAmount.FromStringParts(true, "1", "-234"), true }, // Invalid call
+        new object[] { TokenAmount.FromDecimalString("5") / TokenAmount.Zero, true },
     };
 
     [Theory]
@@ -213,5 +215,46 @@ public class TokenAmountTests
     public void GivenTokenAmount_IsNaN_ReturnsCorrectly(TokenAmount tokenAmount, bool expectedIsNaN)
     {
         tokenAmount.IsNaN().Should().Be(expectedIsNaN);
+    }
+
+    [Theory]
+    [InlineData("1", "1", "1")]
+    [InlineData("100", "10", "10")]
+    [InlineData("32", "4", "8")]
+    [InlineData("5000000000", "0.2", "25000000000")]
+    [InlineData("5000000000", "0.00005", "100000000000000")]
+    public void Divide_ExactValue(string dividend, string divisor, string expected)
+    {
+        var result = TokenAmount.FromDecimalString(dividend) / TokenAmount.FromDecimalString(divisor);
+
+        result.ToString().Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("141", "100", "1.410")]
+    [InlineData("100", "141", "0.709")]
+    [InlineData("100", "33", "3.030")]
+    [InlineData("50000000000", "0.123456789", "405000003685")]
+    public void Divide_ApproximateValue(string dividend, string divisor, string expected)
+    {
+        var result = TokenAmount.FromDecimalString(dividend) / TokenAmount.FromDecimalString(divisor);
+        var resultAsNumber = decimal.Parse(result.ToString(), NumberFormatInfo.InvariantInfo);
+        var expectedAsNumber = decimal.Parse(expected, NumberFormatInfo.InvariantInfo);
+
+        resultAsNumber.Should().BeApproximately(expectedAsNumber, 100);
+    }
+
+    [Theory]
+    [InlineData("12.5", "2", "25")]
+    [InlineData("2", "5", "10")]
+    [InlineData("2.1", "2", "4.2")]
+    [InlineData("50000000000", "0.123456789", "6172839450")]
+    public void Multiply_ExactValue(string op1, string op2, string expected)
+    {
+        var result = TokenAmount.FromDecimalString(op1) * TokenAmount.FromDecimalString(op2);
+        var resultAsNumber = decimal.Parse(result.ToString(), NumberFormatInfo.InvariantInfo);
+        var expectedAsNumber = decimal.Parse(expected, NumberFormatInfo.InvariantInfo);
+
+        resultAsNumber.Should().Be(expectedAsNumber);
     }
 }

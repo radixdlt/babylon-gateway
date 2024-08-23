@@ -87,6 +87,7 @@ public static class GatewayApiBuilderExtensions
         builder
             .Services
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
+            .AddScoped<IExtensionsQuerier, ExtensionsQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()
             .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
             .AddScoped<IAccountStateQuerier, AccountStateQuerier>()

@@ -70,7 +70,6 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
@@ -108,9 +107,9 @@ internal class AccountStateQuerier : IAccountStateQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<GatewayApiSdk.Model.StateAccountResourcePreferencesPageResponse> AccountResourcePreferences(
+    public async Task<GatewayModel.StateAccountResourcePreferencesPageResponse> AccountResourcePreferences(
         EntityAddress accountAddress,
-        GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayModel.LedgerState ledgerState,
         int offset,
         int limit,
         CancellationToken token = default)
@@ -158,7 +157,7 @@ ORDER BY resource_preference_join.ordinality ASC;",
                     lastUpdatedAtStateVersion: item.FromStateVersion))
             .ToList();
 
-        return new GatewayApiSdk.Model.StateAccountResourcePreferencesPageResponse(
+        return new GatewayModel.StateAccountResourcePreferencesPageResponse(
             ledgerState: ledgerState,
             accountAddress: accountAddress,
             totalCount: totalCount,
@@ -227,7 +226,7 @@ ORDER BY resource_authorized_depositors_join.ordinality ASC;",
                 }))
             .ToList();
 
-        return new GatewayApiSdk.Model.StateAccountAuthorizedDepositorsPageResponse(
+        return new GatewayModel.StateAccountAuthorizedDepositorsPageResponse(
             ledgerState: ledgerState,
             accountAddress: accountAddress,
             totalCount: totalCount,
