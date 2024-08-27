@@ -616,6 +616,10 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
 
         modelBuilder
+            .Entity<ValidatorCumulativeEmissionHistory>()
+            .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });
+
+        modelBuilder
             .Entity<UnverifiedStandardMetadataAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 

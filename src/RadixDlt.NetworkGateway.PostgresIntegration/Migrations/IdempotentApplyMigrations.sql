@@ -1282,3 +1282,22 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240827101440_AddValidatorCumulativeEmissionHistoryIdx') THEN
+    CREATE INDEX "IX_validator_cumulative_emission_history_validator_entity_id_f~" ON validator_cumulative_emission_history (validator_entity_id, from_state_version);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240827101440_AddValidatorCumulativeEmissionHistoryIdx') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20240827101440_AddValidatorCumulativeEmissionHistoryIdx', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+

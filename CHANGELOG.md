@@ -1,3 +1,9 @@
+## 1.7.1
+Release built: _not released yet_
+
+### Database changes
+- Added missing index on `validator_cumulative_emission_history`
+
 ## 1.7.0
 Release built: _not released yet_
 
