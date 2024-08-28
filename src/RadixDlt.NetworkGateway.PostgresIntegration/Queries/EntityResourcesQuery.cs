@@ -83,11 +83,15 @@ internal class EntityResourcesQuery
 
     public record ResultEntity(long EntityId, long TotalFungibleResourceCount, long TotalNonFungibleResourceCount)
     {
-        public StateVersionIdCursor? FungibleResourcesNextCursor { get; set; } // TODO set should throw if already non-null
+        internal StateVersionIdCursor? _fungibleResourcesNextCursor;
+
+        internal StateVersionIdCursor? _nonFungibleResourcesNextCursor;
+
+        public StateVersionIdCursor? FungibleResourcesNextCursor => _fungibleResourcesNextCursor;
 
         public List<ResultResource> FungibleResources { get; } = new();
 
-        public StateVersionIdCursor? NonFungibleResourcesNextCursor { get; set; } // TODO set should throw if already non-null
+        public StateVersionIdCursor? NonFungibleResourcesNextCursor => _nonFungibleResourcesNextCursor;
 
         public List<ResultResource> NonFungibleResources { get; } = new();
 
@@ -96,7 +100,9 @@ internal class EntityResourcesQuery
 
     public record ResultResource(long ResourceEntryDefinitionId, long ResourceEntityId, ResourceType ResourceType, EntityAddress ResourceEntityAddress, string ResourceBalance, long ResourceFromStateVersion, long ResourceLastUpdatedAtStateVersion, long? ResourceVaultTotalCount)
     {
-        public StateVersionIdCursor? VaultsNextCursor { get; set; } // TODO set should throw if already non-null
+        internal StateVersionIdCursor? _vaultsNextCursor;
+
+        public StateVersionIdCursor? VaultsNextCursor => _vaultsNextCursor;
 
         public List<ResultVault> Vaults { get; } = new();
     }
@@ -402,7 +408,7 @@ ORDER BY
                     {
                         if (entity.FungibleResources.Count >= configuration.FungibleResourcesPerEntity)
                         {
-                            entity.FungibleResourcesNextCursor = new StateVersionIdCursor(resourceRow.ResourceFromStateVersion, resourceRow.ResourceEntryDefinitionId);
+                            ObjectUtils.SetOnce(ref entity._fungibleResourcesNextCursor, new StateVersionIdCursor(resourceRow.ResourceFromStateVersion, resourceRow.ResourceEntryDefinitionId));
                         }
                         else
                         {
@@ -413,7 +419,7 @@ ORDER BY
                     {
                         if (entity.NonFungibleResources.Count >= configuration.NonFungibleResourcesPerEntity)
                         {
-                            entity.NonFungibleResourcesNextCursor = new StateVersionIdCursor(resourceRow.ResourceFromStateVersion, resourceRow.ResourceEntryDefinitionId);
+                            ObjectUtils.SetOnce(ref entity._nonFungibleResourcesNextCursor, new StateVersionIdCursor(resourceRow.ResourceFromStateVersion, resourceRow.ResourceEntryDefinitionId));
                         }
                         else
                         {
@@ -431,7 +437,7 @@ ORDER BY
 
                 if (resource.Vaults.Count >= configuration.VaultsPerResource)
                 {
-                    resource.VaultsNextCursor = new StateVersionIdCursor(vaultRow.VaultFromStateVersion, vaultRow.VaultEntryDefinitionId);
+                    ObjectUtils.SetOnce(ref resource._vaultsNextCursor, new StateVersionIdCursor(vaultRow.VaultFromStateVersion, vaultRow.VaultEntryDefinitionId));
                 }
                 else
                 {

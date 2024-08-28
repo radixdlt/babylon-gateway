@@ -1,0 +1,2 @@
+[*.cs]
+dotnet_diagnostic.SA1401.severity = none # SA1401FieldsMustBePrivate - it does not play well with the cursor's SetOnce

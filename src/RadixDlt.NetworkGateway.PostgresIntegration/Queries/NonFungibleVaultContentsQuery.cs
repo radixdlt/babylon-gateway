@@ -77,7 +77,9 @@ internal static class NonFungibleVaultContentsQuery
 {
     public record ResultVault(long VaultEntityId, string VaultBalance)
     {
-        public StateVersionIdCursor? NonFungibleIdsNextCursor { get; set; } // TODO set should throw if already non-null
+        internal StateVersionIdCursor? _nonFungibleIdsNextCursor;
+
+        public StateVersionIdCursor? NonFungibleIdsNextCursor => _nonFungibleIdsNextCursor;
 
         public List<ResultNonFungibleId> NonFungibleIds { get; } = new();
     }
@@ -145,7 +147,6 @@ SELECT
     entries.non_fungible_id_definition_id,
     nf_def.non_fungible_id,
     nf_data.data
-    -- , nf_data.is_deleted -- TODO how it relates to the entries.is_deleted? is it even needed?
 FROM variables var
 INNER JOIN LATERAL (
     SELECT
@@ -231,7 +232,7 @@ ORDER BY
 
                 if (entryRow.DefinitionIsLastCandidate || vault.NonFungibleIds.Count >= configuration.NonFungibleIdsPerVault)
                 {
-                    vault.NonFungibleIdsNextCursor = new StateVersionIdCursor(entryRow.DefinitionFromStateVersion, entryRow.DefinitionId);
+                    ObjectUtils.SetOnce(ref vault._nonFungibleIdsNextCursor, new StateVersionIdCursor(entryRow.DefinitionFromStateVersion, entryRow.DefinitionId));
                 }
                 else
                 {
