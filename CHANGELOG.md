@@ -5,7 +5,7 @@ Release built: _not released yet_
 - Added missing index on `validator_cumulative_emission_history`
 
 ## 1.7.0
-Release built: _not released yet_
+Release built: 23.08.2024
 
 > [!CAUTION]
 > **Breaking Changes:**
