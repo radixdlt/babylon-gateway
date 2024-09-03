@@ -63,7 +63,6 @@
  */
 
 using Dapper;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
