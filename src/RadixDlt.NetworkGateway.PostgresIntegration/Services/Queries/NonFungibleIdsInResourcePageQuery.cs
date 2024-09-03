@@ -182,10 +182,10 @@ entries_per_entity AS (
         INNER JOIN LATERAL (
             SELECT
                 h.from_state_version AS last_updated_state_version,
-                {(queryConfiguration.IncludeValue ? "NULL" : "h.data")} AS value,
+                {(queryConfiguration.IncludeValue ? "h.data" : "NULL")} AS value,
                 h.is_locked,
                 h.is_deleted,
-                {(queryConfiguration.IncludeDeleted ? "TRUE" : "h.is_deleted")} AS filter_out
+                {(queryConfiguration.IncludeDeleted ? "FALSE" : "h.is_deleted")} AS filter_out
             FROM non_fungible_id_data_history h
             WHERE
                 h.non_fungible_id_definition_id = definitions.id
