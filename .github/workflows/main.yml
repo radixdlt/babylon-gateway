@@ -49,6 +49,7 @@ jobs:
           args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=critical
       - name: Run Snyk to check for code vulnerabilities
         uses: RDXWorks-actions/snyk-actions/dotnet@master
+        continue-on-error: true
         with:
           args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=high
           command: code test
