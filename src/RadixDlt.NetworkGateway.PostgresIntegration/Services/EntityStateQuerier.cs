@@ -76,6 +76,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services.Queries;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -100,8 +101,6 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     }
 
     private record RoyaltyVaultBalanceViewModel(long RoyaltyVaultEntityId, string Balance, long OwnerEntityId, long LastUpdatedAtStateVersion);
-
-    private record NonFungibleIdsViewModel(long Id, long FromStateVersion, string NonFungibleId);
 
     private record struct ExplicitMetadataLookup(long EntityId, string MetadataKey);
 
@@ -619,61 +618,34 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         int pageSize,
         CancellationToken token = default)
     {
-        var entity = await GetEntity<GlobalNonFungibleResourceEntity>(nonFungibleResourceAddress, ledgerState, token);
+        if (!nonFungibleResourceAddress.IsNonFungibleResource)
+        {
+            throw new InvalidEntityException(nonFungibleResourceAddress.ToString());
+        }
 
-        var cd = new CommandDefinition(
-            commandText: @"
-SELECT
-    d.id AS Id,
-    d.from_state_version AS FromStateVersion,
-    d.non_fungible_id AS NonFungibleId
-FROM non_fungible_id_definition d
-INNER JOIN LATERAL (
-    SELECT *
-    FROM non_fungible_id_data_history
-    WHERE non_fungible_id_definition_id = d.id AND from_state_version <= @stateVersion
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) h ON TRUE
-WHERE
-    d.non_fungible_resource_entity_id = @nonFungibleResourceEntityId
-  AND (d.from_state_version, d.id) >= (@cursorStateVersion, @cursorId)
-  AND d.from_state_version <= @stateVersion
-ORDER BY d.from_state_version ASC, d.id ASC
-LIMIT @limit
-;",
-            parameters: new
-            {
-                nonFungibleResourceEntityId = entity.Id,
-                stateVersion = ledgerState.StateVersion,
-                cursorStateVersion = cursor?.StateVersionBoundary ?? 1,
-                cursorId = cursor?.IdBoundary ?? 1,
-                limit = pageSize + 1,
-            },
-            cancellationToken: token);
+        var pages = await NonFungibleIdsInResourcePageQuery.ReadPages(
+            _dbContext.Database.GetDbConnection(),
+            _dapperWrapper,
+            ledgerState,
+            new List<EntityAddress> { nonFungibleResourceAddress },
+            new NonFungibleIdsInResourcePageQuery.QueryConfiguration(
+                ExclusiveCursor: cursor,
+                IsAscending: true,
+                IncludeDeleted: true,
+                IncludeValue: false,
+                MaxPageSize: pageSize,
+                MaxDefinitionsToRead: 10000000),
+            token);
 
-        var entriesAndOneMore = (await _dapperWrapper.QueryAsync<NonFungibleIdsViewModel>(_dbContext.Database.GetDbConnection(), cd))
-            .ToList();
-
-        var nextCursor = entriesAndOneMore.Count == pageSize + 1
-            ? new GatewayModel.IdBoundaryCoursor(entriesAndOneMore.Last().FromStateVersion, entriesAndOneMore.Last().Id).ToCursorString()
-            : null;
-
-        var resourceSupplyData = await GetResourceSupplyData(entity.Id, ledgerState, token);
-        long totalCount = long.Parse(resourceSupplyData.TotalMinted.ToString());
-
-        var items = entriesAndOneMore
-            .Take(pageSize)
-            .Select(vm => vm.NonFungibleId)
-            .ToList();
+        if (!pages.TryGetValue(nonFungibleResourceAddress, out var page))
+        {
+            throw new EntityNotFoundException(nonFungibleResourceAddress.ToString());
+        }
 
         return new GatewayModel.StateNonFungibleIdsResponse(
             ledgerState: ledgerState,
             resourceAddress: nonFungibleResourceAddress,
-            nonFungibleIds: new GatewayModel.NonFungibleIdsCollection(
-                totalCount: totalCount,
-                nextCursor: nextCursor,
-                items: items));
+            nonFungibleIds: page.ToNonFungibleIdsCollection());
     }
 
     public async Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(
