@@ -1081,13 +1081,18 @@ INNER JOIN LATERAL (
         return result.ToList();
     }
 
-    private async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> GetMetadataSlices(
+    private async Task<IDictionary<long, GatewayModel.EntityMetadataCollection>> GetMetadataSlices(
         long[] entityIds,
         GatewayModel.IdBoundaryCoursor? cursor,
         int limit,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token)
     {
+        if (!entityIds.Any())
+        {
+            return ImmutableDictionary<long, GatewayModel.EntityMetadataCollection>.Empty;
+        }
+
         return await MetadataPageQuery.ReadPages(
             _dbContext.Database.GetDbConnection(),
             _dapperWrapper,

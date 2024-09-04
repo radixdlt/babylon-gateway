@@ -88,6 +88,7 @@ internal static class CustomTypes
 
         // needed to read int[], bigint[] and text[] columns using Dapper
         SqlMapper.AddTypeHandler(new EntityAddressHandler());
+        SqlMapper.AddTypeHandler(new IdBoundaryCursorHandler());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());

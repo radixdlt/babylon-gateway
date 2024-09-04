@@ -62,11 +62,9 @@
  * permissions under this License.
  */
 
-// <copyright file="MetadataPageQuery.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models.CustomTypes;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
@@ -97,8 +95,7 @@ internal static class MetadataPageQuery
         long LastUpdatedStateVersion,
         bool FilterOut,
         bool IsLastCandidate,
-        long? NextCursorStateVersion,
-        long? NextCursorDefinitionId
+        IdBoundaryCursor? NextCursorExclusive
     );
 
     internal static async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> ReadPages(
@@ -118,7 +115,7 @@ internal static class MetadataPageQuery
             cursorStateVersion = queryConfiguration.Cursor?.StateVersionBoundary ?? 0,
             cursorDefinitionId = queryConfiguration.Cursor?.IdBoundary ?? 0,
             pageLimit = queryConfiguration.MaxPageSize,
-            definitionReadLimit = queryConfiguration.MaxDefinitionsToRead,
+            definitionReadLimit = Math.Floor(queryConfiguration.MaxDefinitionsToRead / (decimal)entityIds.Length),
         };
 
         const string QueryText = @"
@@ -126,41 +123,42 @@ WITH vars AS (
     SELECT
         unnest(@entityIds) AS entity_id,
         CAST(@useCursor AS bool) AS use_cursor,
-        ROW(CAST(@cursorStateVersion AS bigint), CAST(@cursorDefinitionId  AS bigint)) AS start_cursor,
+        ROW(CAST(@cursorStateVersion AS bigint), CAST(@cursorDefinitionId  AS bigint)) AS start_cursor_exclusive,
         CAST(@atLedgerState  AS bigint) AS at_ledger_state
+),
+definitions_with_cursor AS (
+     SELECT
+         d.*,
+         (d.from_state_version, d.id) AS cursor
+     FROM entity_metadata_entry_definition d
 )
 SELECT
     -- entity data
     vars.entity_id,
 
     -- totals
-    entity_totals.total_entries_excluding_deleted AS TotalEntriesExcludingDeleted,
-    entity_totals.total_entries_including_deleted AS TotalEntriesIncludingDeleted,
+    COALESCE(entity_totals.total_entries_excluding_deleted, 0) AS TotalEntriesExcludingDeleted,
+    COALESCE(entity_totals.total_entries_including_deleted, 0) AS TotalEntriesIncludingDeleted,
 
     -- definitions
-    entries_per_entity.definition_id AS DefinitionId,
-    entries_per_entity.key AS Key,
-    entries_per_entity.key_first_seen_state_version AS KeyFirstSeenStateVersion,
+    CASE WHEN COALESCE(filter_out, TRUE) THEN NULL ELSE entries_per_entity.definition_id END AS DefinitionId,
+    CASE WHEN COALESCE(filter_out, TRUE) THEN NULL ELSE entries_per_entity.key END AS Key,
+    CASE WHEN COALESCE(filter_out, TRUE) THEN NULL ELSE entries_per_entity.key_first_seen_state_version END AS KeyFirstSeenStateVersion,
 
     -- history
-    entries_per_entity.value AS Value,
-    entries_per_entity.is_locked AS IsLocked,
-    entries_per_entity.is_deleted AS IsDeleted,
-    entries_per_entity.last_updated_state_version AS LastUpdatedStateVersion,
+    CASE WHEN COALESCE(filter_out, TRUE) THEN NULL ELSE entries_per_entity.value END AS Value,
+    CASE WHEN COALESCE(filter_out, TRUE) THEN NULL ELSE entries_per_entity.is_locked END AS IsLocked,
+    CASE WHEN COALESCE(filter_out, TRUE) THEN NULL ELSE entries_per_entity.is_deleted END AS IsDeleted,
+    CASE WHEN COALESCE(filter_out, TRUE) THEN NULL ELSE entries_per_entity.last_updated_state_version END AS LastUpdatedStateVersion,
 
     -- cursor
-    CASE
-        WHEN (entries_per_entity.is_deleted OR (COALESCE(entries_per_entity.is_last_candidate, TRUE) AND next_cursor_state_version IS NULL))
-            THEN TRUE
-            ELSE FALSE
-        END AS FilterOut,
+    COALESCE(entries_per_entity.filter_out, TRUE) AS FilterOut,
     COALESCE(entries_per_entity.is_last_candidate, TRUE) AS IsLastCandidate,
-    next_cursor_state_version,
-    next_cursor_definition_id
+    next_cursor_exclusive AS NextCursorExclusive
 FROM vars
 
-    -- Totals
-INNER JOIN LATERAL (
+-- Totals
+LEFT JOIN LATERAL (
     SELECT
         t.total_entries_excluding_deleted AS total_entries_excluding_deleted,
         t.total_entries_including_deleted AS total_entries_including_deleted
@@ -178,36 +176,35 @@ LEFT JOIN LATERAL (
         definitions.key_first_seen_state_version,
         definitions.is_last_candidate,
         entries.*,
-        CASE WHEN (ROW_NUMBER() OVER (ORDER BY (definitions.key_first_seen_state_version, definitions.id) DESC)) = @pageLimit OR definitions.is_last_candidate
-             THEN definitions.key_first_seen_state_version
-        END AS next_cursor_state_version,
-        CASE WHEN (ROW_NUMBER() OVER (ORDER BY (definitions.key_first_seen_state_version, definitions.id) DESC)) = @pageLimit OR definitions.is_last_candidate
-            THEN definitions.id
-        END AS next_cursor_definition_id
+        CASE WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = @pageLimit OR definitions.is_last_candidate
+             THEN (definitions.key_first_seen_state_version, definitions.id)
+        END AS next_cursor_exclusive
      FROM (
             SELECT
-                  d.id AS id,
-                  d.key AS key,
+                  d.id,
+                  d.key,
+                  d.cursor,
                   d.from_state_version AS key_first_seen_state_version,
-                  (ROW_NUMBER() OVER (ORDER BY (d.from_state_version, d.id) DESC)) = @definitionReadLimit AS is_last_candidate
-            FROM entity_metadata_entry_definition d
-            WHERE d.entity_id = vars.entity_id AND ((NOT vars.use_cursor) OR (d.from_state_version, d.id) < vars.start_cursor)
-            ORDER BY (d.from_state_version, d.id) DESC
+                  (ROW_NUMBER() OVER (ORDER BY d.cursor DESC)) = @definitionReadLimit AS is_last_candidate
+            FROM definitions_with_cursor d
+            WHERE d.entity_id = vars.entity_id AND ((NOT vars.use_cursor) OR d.cursor < vars.start_cursor_exclusive)
+            ORDER BY d.cursor DESC
             LIMIT @definitionReadLimit
     ) definitions
     INNER JOIN LATERAL (
         SELECT
             h.from_state_version AS last_updated_state_version,
-            h.value AS value,
+            h.value,
             h.is_locked,
-            h.is_deleted
+            h.is_deleted,
+            h.is_deleted AS filter_out
         FROM entity_metadata_entry_history h
         WHERE h.entity_metadata_entry_definition_id = definitions.id AND h.from_state_version <= vars.at_ledger_state
         ORDER BY h.from_state_version DESC
         LIMIT 1
     ) entries ON TRUE
-WHERE entries.is_deleted = FALSE OR definitions.is_last_candidate
-ORDER BY (definitions.key_first_seen_state_version, definitions.id) DESC
+WHERE entries.filter_out = FALSE OR definitions.is_last_candidate
+ORDER BY definitions.cursor DESC
 LIMIT @pageLimit
 ) entries_per_entity ON TRUE
 ;";
@@ -226,11 +223,7 @@ LIMIT @pageLimit
                 {
                     var rows = g.ToList();
                     var totalEntries = rows.First().TotalEntriesExcludingDeleted;
-                    var elementWithCursor = rows.SingleOrDefault(x => x.NextCursorDefinitionId.HasValue && x.NextCursorStateVersion.HasValue);
-
-                    var nextCursor = elementWithCursor != default
-                        ? new GatewayModel.IdBoundaryCoursor(elementWithCursor.NextCursorStateVersion, elementWithCursor.NextCursorDefinitionId).ToCursorString()
-                        : null;
+                    var elementWithCursor = rows.SingleOrDefault(x => x.NextCursorExclusive.HasValue);
 
                     var items = rows
                         .Where(x => !x.FilterOut)
@@ -244,16 +237,18 @@ LIMIT @pageLimit
                             })
                         .ToList();
 
+                    var nextCursor = items.Count < totalEntries && elementWithCursor.NextCursorExclusive != null
+                        ? new GatewayModel.IdBoundaryCoursor(
+                                elementWithCursor.NextCursorExclusive.Value.StateVersion,
+                                elementWithCursor.NextCursorExclusive.Value.Id)
+                            .ToCursorString()
+                        : null;
+
                     return new GatewayModel.EntityMetadataCollection(
                         totalEntries,
                         nextCursor,
                         items);
                 });
-
-        foreach (var missingEntityIds in entityIds.Except(result.Keys.ToArray()))
-        {
-            result[missingEntityIds] = GatewayModel.EntityMetadataCollection.Empty;
-        }
 
         return result;
     }

@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="MetadataPageQuery.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -86,7 +82,8 @@ internal static class ExplicitMetadataQuery
         long KeyFirstSeenStateVersion,
         byte[] Value,
         bool IsLocked,
-        long LastUpdatedStateVersion
+        long LastUpdatedStateVersion,
+        bool FilterOut
     );
 
     internal static async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> Read(
@@ -128,21 +125,22 @@ WITH variables (entity_id, metadata_key) AS (
     SELECT UNNEST(@entityIds), UNNEST(@metadataKeys)
 )
 SELECT
-    entries_with_definitions.entity_id,
+    variables.entity_id as EntityId,
     entries_with_definitions.key,
     entries_with_definitions.KeyFirstSeenStateVersion,
     entries_with_definitions.value,
-    entries_with_definitions.is_locked,
-    entries_with_definitions.LastUpdatedStateVersion
+    entries_with_definitions.is_locked AS IsLocked,
+    entries_with_definitions.LastUpdatedStateVersion,
+    COALESCE(entries_with_definitions.FilterOut, TRUE) AS FilterOut
 FROM variables
-INNER JOIN LATERAL (
+LEFT JOIN LATERAL (
     SELECT
         definition.entity_id,
         definition.key,
         definition.from_state_version AS KeyFirstSeenStateVersion,
         history.value,
         history.is_locked,
-        history.is_deleted,
+        history.is_deleted AS FilterOut,
         history.from_state_version AS LastUpdatedStateVersion
     FROM entity_metadata_entry_definition definition
     INNER JOIN LATERAL (
@@ -154,7 +152,6 @@ INNER JOIN LATERAL (
     ) history on true
     WHERE definition.entity_id = variables.entity_id AND definition.key = variables.metadata_key
  ) entries_with_definitions on TRUE
-WHERE is_deleted = FALSE
 ;";
 
         var queryResult = (await dapperWrapper.ToListAsync<QueryResultRow>(
@@ -170,6 +167,7 @@ WHERE is_deleted = FALSE
                 g =>
                 {
                     var items = g
+                        .Where(x => !x.FilterOut)
                         .Select(
                             x =>
                             {
@@ -182,11 +180,6 @@ WHERE is_deleted = FALSE
 
                     return new GatewayModel.EntityMetadataCollection(items.Count, items: items);
                 });
-
-        foreach (var missingEntityIds in entityIds.Except(result.Keys.ToArray()))
-        {
-            result[missingEntityIds] = GatewayModel.EntityMetadataCollection.Empty;
-        }
 
         return result;
     }
