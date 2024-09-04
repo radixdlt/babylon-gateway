@@ -1,5 +1,12 @@
-## 1.7.1
+## 1.7.2
 Release built: _not released yet_
+
+### API Changes
+- Added `opt_ins` property to `/transaction/preview` request. Currently, there is only one option to use `radix_engine_toolkit_receipt`, it controls whether the preview response will include a Radix Engine Toolkit serializable
+  receipt or not (defaults to `false`).
+
+## 1.7.1
+Release built: 29.08.2024
 
 ### Database changes
 - Added missing index on `validator_cumulative_emission_history`
