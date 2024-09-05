@@ -76,6 +76,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services.Queries;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -102,8 +103,6 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     private record RoyaltyVaultBalanceViewModel(long RoyaltyVaultEntityId, string Balance, long OwnerEntityId, long LastUpdatedAtStateVersion);
 
     private record NonFungibleIdsViewModel(long Id, long FromStateVersion, string NonFungibleId);
-
-    private record struct ExplicitMetadataLookup(long EntityId, string MetadataKey);
 
     private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -150,7 +149,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var globalPersistedComponentEntities = persistedComponentEntities.Where(x => x.IsGlobal).ToList();
 
         // TODO ideally we'd like to run all those in parallel
-        var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, defaultPageSize, ledgerState, token);
+        var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), null, defaultPageSize, ledgerState, token);
         var roleAssignmentsHistory = await _roleAssignmentQuerier.GetRoleAssignmentsHistory(globalPersistedComponentEntities, ledgerState, token);
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
         var packageBlueprintHistory = await GetPackageBlueprintHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
@@ -180,12 +179,25 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         // fetch [non-]fungible resource collections for all components, even internal ones, for backwards compability
         var fungibleResources =
             await EntityFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, 0, defaultPageSize, ledgerState, token);
-        var nonFungibleResources = await EntityNonFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, optIns.NonFungibleIncludeNfids, 0,
-            defaultPageSize, ledgerState, token);
+        var nonFungibleResources = await EntityNonFungibleResourcesPageSlice(
+            componentEntities.Select(e => e.Id).ToArray(),
+            aggregatePerVault,
+            optIns.NonFungibleIncludeNfids,
+            0,
+            defaultPageSize,
+            ledgerState,
+            token);
         var resourceAddressToEntityId = await ResolveResourceEntityIds(fungibleResources.Values, nonFungibleResources.Values, token);
 
         var explicitMetadata = optIns.ExplicitMetadata?.Any() == true
-            ? await GetExplicitMetadata(entities.Select(e => e.Id).Concat(resourceAddressToEntityId.Values).ToArray(), optIns.ExplicitMetadata.ToArray(), ledgerState, token)
+            ? await ExplicitMetadataQuery.Read(
+                _dbContext.Database.GetDbConnection(),
+                _dapperWrapper,
+                entities.Select(e => e.Id).Concat(resourceAddressToEntityId.Values).ToArray(),
+                optIns.ExplicitMetadata.ToArray(),
+                ledgerState,
+                networkConfiguration.Id,
+                token)
             : null;
 
         var items = new List<GatewayModel.StateEntityDetailsResponseItem>();
@@ -381,14 +393,15 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
                 }
             }
 
-            items.Add(new GatewayModel.StateEntityDetailsResponseItem(
-                address: entity.Address,
-                fungibleResources: haveFungibles ? fungibles : null,
-                nonFungibleResources: haveNonFungibles ? nonFungibles : null,
-                ancestorIdentities: ancestorIdentities,
-                metadata: metadata[entity.Id],
-                explicitMetadata: explicitMetadata?[entity.Id],
-                details: details));
+            items.Add(
+                new GatewayModel.StateEntityDetailsResponseItem(
+                    address: entity.Address,
+                    fungibleResources: haveFungibles ? fungibles : null,
+                    nonFungibleResources: haveNonFungibles ? nonFungibles : null,
+                    ancestorIdentities: ancestorIdentities,
+                    metadata: metadata[entity.Id],
+                    explicitMetadata: explicitMetadata?[entity.Id],
+                    details: details));
         }
 
         return new GatewayModel.StateEntityDetailsResponse(ledgerState, items);
@@ -435,15 +448,30 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     {
         var entity = await GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
         var result = (await EntityNonFungibleResourcesPageSlice(
-            new[] { entity.Id }, aggregatePerVault, optIns.NonFungibleIncludeNfids, pageRequest.Offset, pageRequest.Limit, ledgerState, token))[entity.Id];
+            new[] { entity.Id },
+            aggregatePerVault,
+            optIns.NonFungibleIncludeNfids,
+            pageRequest.Offset,
+            pageRequest.Limit,
+            ledgerState,
+            token))[entity.Id];
 
-        if (optIns.ExplicitMetadata?.Any() == true)
+        if (optIns.ExplicitMetadata?.Any() != true)
         {
-            var resourceAddressToEntityId = await ResolveResourceEntityIds(null, new[] { result }, token);
-            var explicitMetadata = await GetExplicitMetadata(resourceAddressToEntityId.Values.ToArray(), optIns.ExplicitMetadata.ToArray(), ledgerState, token);
-
-            result.Items.ForEach(nfr => nfr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)nfr.ResourceAddress]]);
+            return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, result.TotalCount, result.NextCursor, result.Items, pageRequest.Address);
         }
+
+        var resourceAddressToEntityId = await ResolveResourceEntityIds(null, new[] { result }, token);
+        var explicitMetadata = await ExplicitMetadataQuery.Read(
+            _dbContext.Database.GetDbConnection(),
+            _dapperWrapper,
+            resourceAddressToEntityId.Values.ToArray(),
+            optIns.ExplicitMetadata.ToArray(),
+            ledgerState,
+            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id,
+            token);
+
+        result.Items.ForEach(nfr => nfr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)nfr.ResourceAddress]]);
 
         return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, result.TotalCount, result.NextCursor, result.Items, pageRequest.Address);
     }
@@ -480,7 +508,8 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         }
 
         var mapped = nonFungibles
-            .Select(x =>
+            .Select(
+                x =>
                 {
                     List<string>? items = null;
                     string? nextCursor = null;
@@ -518,13 +547,22 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         var entity = await GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
         var result = await EntityFungibleResourcesPageSlice(entity.Id, aggregatePerVault, pageRequest.Offset, pageRequest.Limit, ledgerState, token);
 
-        if (optIns.ExplicitMetadata?.Any() == true)
+        if (optIns.ExplicitMetadata?.Any() != true)
         {
-            var resourceAddressToEntityId = await ResolveResourceEntityIds(new[] { result }, null, token);
-            var explicitMetadata = await GetExplicitMetadata(resourceAddressToEntityId.Values.ToArray(), optIns.ExplicitMetadata.ToArray(), ledgerState, token);
-
-            result.Items.ForEach(fr => fr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)fr.ResourceAddress]]);
+            return new GatewayModel.StateEntityFungiblesPageResponse(ledgerState, result.TotalCount, result.NextCursor, result.Items, pageRequest.Address);
         }
+
+        var resourceAddressToEntityId = await ResolveResourceEntityIds(new[] { result }, null, token);
+        var explicitMetadata = await ExplicitMetadataQuery.Read(
+            _dbContext.Database.GetDbConnection(),
+            _dapperWrapper,
+            resourceAddressToEntityId.Values.ToArray(),
+            optIns.ExplicitMetadata.ToArray(),
+            ledgerState,
+            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id,
+            token);
+
+        result.Items.ForEach(fr => fr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)fr.ResourceAddress]]);
 
         return new GatewayModel.StateEntityFungiblesPageResponse(ledgerState, result.TotalCount, result.NextCursor, result.Items, pageRequest.Address);
     }
@@ -545,7 +583,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
     }
 
     public async Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(
-        IEntityStateQuerier.PageRequest request,
+        IEntityStateQuerier.MetadataPageRequest request,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
@@ -559,7 +597,7 @@ internal partial class EntityStateQuerier : IEntityStateQuerier
         }
         else
         {
-            metadata = (await GetMetadataSlices(new[] { entity.Id }, request.Offset, request.Limit, ledgerState, token))[entity.Id];
+            metadata = (await GetMetadataSlices(new[] { entity.Id }, request.Cursor, request.Limit, ledgerState, token))[entity.Id];
         }
 
         return new GatewayModel.StateEntityMetadataPageResponse(ledgerState, metadata.TotalCount, metadata.NextCursor, metadata.Items, entity.Address);
@@ -702,7 +740,9 @@ ORDER BY nfsh.from_state_version DESC",
             cancellationToken: token);
 
         var nonFungibleDataSchema = await _dapperWrapper.QueryFirstOrDefaultAsync<NonFungibleDataSchemaModel>(
-            _dbContext.Database.GetDbConnection(), nonFungibleDataSchemaQuery, "GetNonFungibleDataSchema"
+            _dbContext.Database.GetDbConnection(),
+            nonFungibleDataSchemaQuery,
+            "GetNonFungibleDataSchema"
         );
 
         if (nonFungibleDataSchema == null)
@@ -742,15 +782,20 @@ ORDER BY nfid.from_state_version DESC
         foreach (var vm in result)
         {
             var programmaticJson = !vm.IsDeleted
-                ? ScryptoSborUtils.DataToProgrammaticJson(vm.Data, nonFungibleDataSchema.Schema,
-                    nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id)
+                ? ScryptoSborUtils.DataToProgrammaticJson(
+                    vm.Data,
+                    nonFungibleDataSchema.Schema,
+                    nonFungibleDataSchema.SborTypeKind,
+                    nonFungibleDataSchema.TypeIndex,
+                    (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id)
                 : null;
 
-            items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
-                nonFungibleId: vm.NonFungibleId,
-                isBurned: vm.IsDeleted,
-                data: !vm.IsDeleted ? new GatewayModel.ScryptoSborValue(vm.Data.ToHex(), programmaticJson) : null,
-                lastUpdatedAtStateVersion: vm.DataLastUpdatedAtStateVersion));
+            items.Add(
+                new GatewayModel.StateNonFungibleDetailsResponseItem(
+                    nonFungibleId: vm.NonFungibleId,
+                    isBurned: vm.IsDeleted,
+                    data: !vm.IsDeleted ? new GatewayModel.ScryptoSborValue(vm.Data.ToHex(), programmaticJson) : null,
+                    lastUpdatedAtStateVersion: vm.DataLastUpdatedAtStateVersion));
         }
 
         return new GatewayModel.StateNonFungibleDataResponse(
@@ -838,14 +883,15 @@ WHERE e.id = ANY(@vaultIds)",
             ledgerState: ledgerState,
             resourceAddress: resourceAddress.ToString(),
             nonFungibleIds: vaultLocationResults
-                .Select(x => new GatewayModel.StateNonFungibleLocationResponseItem(
-                    nonFungibleId: x.NonFungibleId,
-                    owningVaultAddress: !x.IsDeleted ? x.OwnerVaultAddress : null,
-                    owningVaultParentAncestorAddress: !x.IsDeleted ? vaultAncestorResults[x.OwnerVaultId].VaultParentAncestorAddress : null,
-                    owningVaultGlobalAncestorAddress: !x.IsDeleted ? vaultAncestorResults[x.OwnerVaultId].VaultGlobalAncestorAddress : null,
-                    isBurned: x.IsDeleted,
-                    lastUpdatedAtStateVersion: x.FromStateVersion
-                ))
+                .Select(
+                    x => new GatewayModel.StateNonFungibleLocationResponseItem(
+                        nonFungibleId: x.NonFungibleId,
+                        owningVaultAddress: !x.IsDeleted ? x.OwnerVaultAddress : null,
+                        owningVaultParentAncestorAddress: !x.IsDeleted ? vaultAncestorResults[x.OwnerVaultId].VaultParentAncestorAddress : null,
+                        owningVaultGlobalAncestorAddress: !x.IsDeleted ? vaultAncestorResults[x.OwnerVaultId].VaultGlobalAncestorAddress : null,
+                        isBurned: x.IsDeleted,
+                        lastUpdatedAtStateVersion: x.FromStateVersion
+                    ))
                 .ToList());
     }
 
@@ -895,20 +941,23 @@ WHERE e.id = ANY(@vaultIds)",
         var validatorIds = validatorsAndOneMore.Take(validatorsPageSize).Select(e => e.Id).ToArray();
         var validatorVaultIds = validatorsAndOneMore
             .Take(validatorsPageSize)
-            .Aggregate(new List<long>(), (aggregated, validator) =>
-            {
-                aggregated.Add(validator.GetStakeVaultEntityId());
-                aggregated.Add(validator.GetPendingXrdWithdrawVaultEntityId());
-                aggregated.Add(validator.GetLockedOwnerStakeUnitVaultEntityId());
-                aggregated.Add(validator.GetPendingOwnerStakeUnitUnlockVaultEntityId());
+            .Aggregate(
+                new List<long>(),
+                (aggregated, validator) =>
+                {
+                    aggregated.Add(validator.GetStakeVaultEntityId());
+                    aggregated.Add(validator.GetPendingXrdWithdrawVaultEntityId());
+                    aggregated.Add(validator.GetLockedOwnerStakeUnitVaultEntityId());
+                    aggregated.Add(validator.GetPendingOwnerStakeUnitUnlockVaultEntityId());
 
-                return aggregated;
-            })
+                    return aggregated;
+                })
             .ToList();
 
         var stateHistory = await _dbContext
             .StateHistory
-            .FromSqlInterpolated($@"
+            .FromSqlInterpolated(
+                $@"
 WITH variables (validator_entity_id) AS (SELECT UNNEST({validatorIds}))
 SELECT esh.*
 FROM variables v
@@ -924,7 +973,8 @@ INNER JOIN LATERAL (
 
         var vaultHistory = await _dbContext
             .EntityVaultHistory
-            .FromSqlInterpolated($@"
+            .FromSqlInterpolated(
+                $@"
 WITH variables (vault_entity_id) AS (SELECT UNNEST({validatorVaultIds}))
 SELECT evh.*
 FROM variables v
@@ -945,43 +995,53 @@ INNER JOIN LATERAL (
             .AnnotateMetricName("GetVaultAddresses")
             .ToDictionaryAsync(e => e.Id, e => e.Address, token);
 
-        var metadataById = await GetMetadataSlices(validatorIds, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
+        var metadataById = await GetMetadataSlices(validatorIds, null, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
 
         var items = validatorsAndOneMore
             .Take(validatorsPageSize)
-            .Select(v =>
-            {
-                GatewayModel.ValidatorCollectionItemActiveInEpoch? activeInEpoch = null;
-
-                if (activeSetById.TryGetValue(v.Id, out var validatorActiveSetHistory))
+            .Select(
+                v =>
                 {
-                    var stake = validatorActiveSetHistory.Stake.ToString();
-                    var stakePercentage = (validatorActiveSetHistory.Stake * _tokenAmount100 / totalStake).ToString();
+                    GatewayModel.ValidatorCollectionItemActiveInEpoch? activeInEpoch = null;
 
-                    activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(
-                        stake,
-                        double.Parse(stakePercentage, NumberFormatInfo.InvariantInfo),
-                        validatorActiveSetHistory.PublicKey.ToGatewayPublicKey());
-                }
+                    if (activeSetById.TryGetValue(v.Id, out var validatorActiveSetHistory))
+                    {
+                        var stake = validatorActiveSetHistory.Stake.ToString();
+                        var stakePercentage = (validatorActiveSetHistory.Stake * _tokenAmount100 / totalStake).ToString();
 
-                var stakeVault = vaultHistory[v.GetStakeVaultEntityId()];
-                var pendingXrdWithdrawVaultVault = vaultHistory[v.GetPendingXrdWithdrawVaultEntityId()];
-                var lockedOwnerStakeUnitVault = vaultHistory[v.GetLockedOwnerStakeUnitVaultEntityId()];
-                var pendingOwnerStakeUnitUnlockVault = vaultHistory[v.GetPendingOwnerStakeUnitUnlockVaultEntityId()];
-                var effectiveFeeFactor = ValidatorEffectiveFeeFactorProvider.ExtractFeeFactorFromValidatorState(stateHistory[v.Id].JsonState, ledgerState.Epoch);
+                        activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(
+                            stake,
+                            double.Parse(stakePercentage, NumberFormatInfo.InvariantInfo),
+                            validatorActiveSetHistory.PublicKey.ToGatewayPublicKey());
+                    }
 
-                return new GatewayModel.ValidatorCollectionItem(
-                    v.Address,
-                    new GatewayModel.ValidatorVaultItem(stakeVault.Balance.ToString(), stakeVault.FromStateVersion, vaultAddresses[stakeVault.VaultEntityId]),
-                    new GatewayModel.ValidatorVaultItem(pendingXrdWithdrawVaultVault.Balance.ToString(), pendingXrdWithdrawVaultVault.FromStateVersion, vaultAddresses[pendingXrdWithdrawVaultVault.VaultEntityId]),
-                    new GatewayModel.ValidatorVaultItem(lockedOwnerStakeUnitVault.Balance.ToString(), lockedOwnerStakeUnitVault.FromStateVersion, vaultAddresses[lockedOwnerStakeUnitVault.VaultEntityId]),
-                    new GatewayModel.ValidatorVaultItem(pendingOwnerStakeUnitUnlockVault.Balance.ToString(), pendingOwnerStakeUnitUnlockVault.FromStateVersion, vaultAddresses[pendingOwnerStakeUnitUnlockVault.VaultEntityId]),
-                    new JRaw(stateHistory[v.Id].JsonState),
-                    activeInEpoch,
-                    metadataById[v.Id],
-                    effectiveFeeFactor
-                );
-            })
+                    var stakeVault = vaultHistory[v.GetStakeVaultEntityId()];
+                    var pendingXrdWithdrawVaultVault = vaultHistory[v.GetPendingXrdWithdrawVaultEntityId()];
+                    var lockedOwnerStakeUnitVault = vaultHistory[v.GetLockedOwnerStakeUnitVaultEntityId()];
+                    var pendingOwnerStakeUnitUnlockVault = vaultHistory[v.GetPendingOwnerStakeUnitUnlockVaultEntityId()];
+                    var effectiveFeeFactor = ValidatorEffectiveFeeFactorProvider.ExtractFeeFactorFromValidatorState(stateHistory[v.Id].JsonState, ledgerState.Epoch);
+
+                    return new GatewayModel.ValidatorCollectionItem(
+                        v.Address,
+                        new GatewayModel.ValidatorVaultItem(stakeVault.Balance.ToString(), stakeVault.FromStateVersion, vaultAddresses[stakeVault.VaultEntityId]),
+                        new GatewayModel.ValidatorVaultItem(
+                            pendingXrdWithdrawVaultVault.Balance.ToString(),
+                            pendingXrdWithdrawVaultVault.FromStateVersion,
+                            vaultAddresses[pendingXrdWithdrawVaultVault.VaultEntityId]),
+                        new GatewayModel.ValidatorVaultItem(
+                            lockedOwnerStakeUnitVault.Balance.ToString(),
+                            lockedOwnerStakeUnitVault.FromStateVersion,
+                            vaultAddresses[lockedOwnerStakeUnitVault.VaultEntityId]),
+                        new GatewayModel.ValidatorVaultItem(
+                            pendingOwnerStakeUnitUnlockVault.Balance.ToString(),
+                            pendingOwnerStakeUnitUnlockVault.FromStateVersion,
+                            vaultAddresses[pendingOwnerStakeUnitUnlockVault.VaultEntityId]),
+                        new JRaw(stateHistory[v.Id].JsonState),
+                        activeInEpoch,
+                        metadataById[v.Id],
+                        effectiveFeeFactor
+                    );
+                })
             .ToList();
 
         var nextCursor = validatorsAndOneMore.Count == validatorsPageSize + 1
@@ -1021,139 +1081,31 @@ INNER JOIN LATERAL (
         return result.ToList();
     }
 
-    private async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> GetMetadataSlices(
+    private async Task<IDictionary<long, GatewayModel.EntityMetadataCollection>> GetMetadataSlices(
         long[] entityIds,
-        int offset,
+        GatewayModel.IdBoundaryCoursor? cursor,
         int limit,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token)
     {
-        var result = new Dictionary<long, GatewayModel.EntityMetadataCollection>();
+        if (!entityIds.Any())
+        {
+            return ImmutableDictionary<long, GatewayModel.EntityMetadataCollection>.Empty;
+        }
 
-        var cd = new CommandDefinition(
-            commandText: @"
-WITH variables (entity_id) AS (
-    SELECT UNNEST(@entityIds)
-),
-metadata_slices AS (
-    SELECT variables.entity_id, emah.metadata_slice, emah.metadata_total_count
-    FROM variables
-    INNER JOIN LATERAL (
-        SELECT metadata_ids[@startIndex:@endIndex] AS metadata_slice, cardinality(metadata_ids) AS metadata_total_count
-        FROM entity_metadata_aggregate_history
-        WHERE entity_id = variables.entity_id AND from_state_version <= @stateVersion
-        ORDER BY from_state_version DESC
-        LIMIT 1
-    ) emah ON TRUE
-)
-SELECT emh.from_state_version AS FromStateVersion, emh.entity_id AS EntityId, emh.key AS Key, emh.value AS Value, emh.is_locked AS IsLocked, ms.metadata_total_count AS TotalCount
-FROM metadata_slices AS ms
-INNER JOIN LATERAL UNNEST(metadata_slice) WITH ORDINALITY AS metadata_join(id, ordinality) ON TRUE
-INNER JOIN entity_metadata_history emh ON emh.id = metadata_join.id AND emh.is_deleted = FALSE
-ORDER BY metadata_join.ordinality ASC;",
-            parameters: new
+        return await MetadataPageQuery.ReadPages(
+            _dbContext.Database.GetDbConnection(),
+            _dapperWrapper,
+            ledgerState,
+            entityIds,
+            new MetadataPageQuery.QueryConfiguration
             {
-                entityIds = entityIds,
-                stateVersion = ledgerState.StateVersion,
-                startIndex = offset + 1,
-                endIndex = offset + limit,
+                Cursor = cursor,
+                MaxPageSize = limit,
+                MaxDefinitionsToRead = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
             },
-            cancellationToken: token);
-
-        foreach (var vm in await _dapperWrapper.QueryAsync<MetadataViewModel>(_dbContext.Database.GetDbConnection(), cd))
-        {
-            if (!result.ContainsKey(vm.EntityId))
-            {
-                result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, CursorGenerator.GenerateOffsetCursor(offset, limit, vm.TotalCount), new List<GatewayModel.EntityMetadataItem>());
-            }
-
-            var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, networkId);
-            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(vm.Value, networkId);
-            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), programmaticJson, value);
-
-            result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
-        }
-
-        foreach (var missing in entityIds.Except(result.Keys))
-        {
-            result[missing] = GatewayModel.EntityMetadataCollection.Empty;
-        }
-
-        return result;
-    }
-
-    private async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> GetExplicitMetadata(
-        long[] entityIds,
-        string[] metadataKeys,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token)
-    {
-        var lookup = new HashSet<ExplicitMetadataLookup>();
-        var entityIdsParameter = new List<long>();
-        var metadataKeysParameter = new List<string>();
-
-        foreach (var entityId in entityIds)
-        {
-            foreach (var metadataKey in metadataKeys)
-            {
-                lookup.Add(new ExplicitMetadataLookup(entityId, metadataKey));
-            }
-        }
-
-        foreach (var (entityId, metadataKey) in lookup)
-        {
-            entityIdsParameter.Add(entityId);
-            metadataKeysParameter.Add(metadataKey);
-        }
-
-        var metadataHistory = await _dbContext
-            .EntityMetadataHistory
-            .FromSqlInterpolated(@$"
-WITH variables (entity_id, metadata_key) AS (
-    SELECT UNNEST({entityIdsParameter}), UNNEST({metadataKeysParameter})
-)
-SELECT emh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_metadata_history
-    WHERE entity_id = variables.entity_id AND key = variables.metadata_key AND from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emh ON TRUE;")
-            .AnnotateMetricName()
-            .ToListAsync(token);
-
-        var result = new Dictionary<long, GatewayModel.EntityMetadataCollection>();
-
-        foreach (var mh in metadataHistory)
-        {
-            if (mh.IsDeleted)
-            {
-                continue;
-            }
-
-            if (!result.ContainsKey(mh.EntityId))
-            {
-                result[mh.EntityId] = new GatewayModel.EntityMetadataCollection(items: new List<GatewayModel.EntityMetadataItem>());
-            }
-
-            var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, networkId);
-            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(mh.Value, networkId);
-            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), programmaticJson, value);
-
-            result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, entityMetadataItemValue, mh.IsLocked, mh.FromStateVersion));
-            result[mh.EntityId].TotalCount = result[mh.EntityId].TotalCount.HasValue ? result[mh.EntityId].TotalCount + 1 : 1;
-        }
-
-        foreach (var missing in entityIds.Except(result.Keys))
-        {
-            result[missing] = GatewayModel.EntityMetadataCollection.Empty;
-        }
-
-        return result;
+            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id,
+            token);
     }
 
     private async Task<IDictionary<long, SchemaEntryViewModel[]>> GetEntitySchemaHistory(long[] entityIds, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
@@ -1252,10 +1204,11 @@ order by ah.ord
         {
             totalCount = vm.ResourcesTotalCount;
 
-            items.Add(new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
-                resourceAddress: vm.ResourceEntityAddress,
-                amount: TokenAmount.FromSubUnitsString(vm.Balance).ToString(),
-                lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
+            items.Add(
+                new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
+                    resourceAddress: vm.ResourceEntityAddress,
+                    amount: TokenAmount.FromSubUnitsString(vm.Balance).ToString(),
+                    lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
         }
 
         return new GatewayModel.FungibleResourcesCollection(totalCount, CursorGenerator.GenerateOffsetCursor(offset, limit, totalCount), items);
@@ -1276,7 +1229,8 @@ order by ah.ord
 
         var result = await _dbContext
             .ResourceEntitySupplyHistory
-            .FromSqlInterpolated($@"
+            .FromSqlInterpolated(
+                $@"
 WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
 SELECT resh.*
 FROM variables
@@ -1382,7 +1336,8 @@ INNER JOIN LATERAL(
 
         var states = await _dbContext
             .StateHistory
-            .FromSqlInterpolated($@"
+            .FromSqlInterpolated(
+                $@"
 WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
 SELECT esh.*
 FROM variables v
@@ -1411,7 +1366,8 @@ INNER JOIN LATERAL (
 
             schemas = await _dbContext
                 .SchemaEntryDefinition
-                .FromSqlInterpolated($@"
+                .FromSqlInterpolated(
+                    $@"
 SELECT *
 FROM schema_entry_definition
 WHERE (entity_id, schema_hash) IN (SELECT UNNEST({schemaEntityIds}), UNNEST({schemaHashes}))")
@@ -1430,26 +1386,26 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({schemaEntityIds}), UNNEST({sch
                     result.Add(state.EntityId, jsonStateHistory.JsonState);
                     break;
                 case SborStateHistory sborStateHistory:
+                {
+                    var schemaIdentifier = new SchemaIdentifier((ValueBytes)sborStateHistory.SchemaHash, sborStateHistory.SchemaDefiningEntityId);
+                    var schemaFound = schemas.TryGetValue(schemaIdentifier, out var schemaBytes);
+
+                    if (!schemaFound)
                     {
-                        var schemaIdentifier = new SchemaIdentifier((ValueBytes)sborStateHistory.SchemaHash, sborStateHistory.SchemaDefiningEntityId);
-                        var schemaFound = schemas.TryGetValue(schemaIdentifier, out var schemaBytes);
-
-                        if (!schemaFound)
-                        {
-                            throw new UnreachableException(
-                                $"schema not found for entity :{sborStateHistory.EntityId} with schema defining entity id: {sborStateHistory.SchemaDefiningEntityId} and schema hash: {sborStateHistory.SchemaHash.ToHex()}");
-                        }
-
-                        var jsonState = ScryptoSborUtils.DataToProgrammaticJsonString(
-                            sborStateHistory.SborState,
-                            schemaBytes!,
-                            sborStateHistory.SborTypeKind,
-                            sborStateHistory.TypeIndex,
-                            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id);
-
-                        result.Add(state.EntityId, jsonState);
-                        break;
+                        throw new UnreachableException(
+                            $"schema not found for entity :{sborStateHistory.EntityId} with schema defining entity id: {sborStateHistory.SchemaDefiningEntityId} and schema hash: {sborStateHistory.SchemaHash.ToHex()}");
                     }
+
+                    var jsonState = ScryptoSborUtils.DataToProgrammaticJsonString(
+                        sborStateHistory.SborState,
+                        schemaBytes!,
+                        sborStateHistory.SborTypeKind,
+                        sborStateHistory.TypeIndex,
+                        (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id);
+
+                    result.Add(state.EntityId, jsonState);
+                    break;
+                }
             }
         }
 
@@ -1465,7 +1421,8 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({schemaEntityIds}), UNNEST({sch
 
         return (await _dbContext
                 .ComponentEntityMethodRoyaltyEntryHistory
-                .FromSqlInterpolated($@"
+                .FromSqlInterpolated(
+                    $@"
 WITH variables (component_entity_id) AS (
    SELECT UNNEST({componentEntityIds})
 ),

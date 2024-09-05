@@ -77,201 +77,220 @@ internal record struct MetadataEntryDbLookup(long EntityId, string Key);
 
 internal record struct MetadataChangePointerLookup(long EntityId, long StateVersion);
 
+internal record struct MetadataEntry(CoreModel.MetadataModuleEntrySubstate NewValue, CoreModel.MetadataModuleEntrySubstate? PreviousValue);
+
 internal record MetadataChangePointer
 {
-    public List<CoreModel.MetadataModuleEntrySubstate> Entries { get; } = new();
+    public List<MetadataEntry> Entries { get; } = new();
 }
 
 internal class EntityMetadataProcessor
 {
     private readonly ProcessorContext _context;
 
-    private ChangeTracker<MetadataChangePointerLookup, MetadataChangePointer> _changes = new();
+    private readonly Dictionary<MetadataEntryDbLookup, long> _observedEntryDefinitions = new();
+    private readonly Dictionary<MetadataEntryDbLookup, EntityMetadataEntryDefinition> _existingEntryDefinitions = new();
+    private readonly Dictionary<long, EntityMetadataTotalsHistory> _existingTotalsHistory = new();
 
-    private Dictionary<long, EntityMetadataAggregateHistory> _mostRecentAggregates = new();
-    private Dictionary<MetadataEntryDbLookup, EntityMetadataHistory> _mostRecentEntries = new();
+    private readonly Dictionary<MetadataEntryDbLookup, EntityMetadataEntryDefinition> _entryDefinitionsToAdd = new();
+    private readonly List<EntityMetadataEntryHistory> _entryHistoryToAdd = new();
+    private readonly List<EntityMetadataTotalsHistory> _totalsHistoryToAdd = new();
+    private readonly Dictionary<long, EntityMetadataEntryHistory> _mostRecentHistoryEntry = new();
 
-    private List<EntityMetadataAggregateHistory> _aggregatesToAdd = new();
-    private List<EntityMetadataHistory> _entriesToAdd = new();
+    private readonly ChangeTracker<MetadataChangePointerLookup, MetadataChangePointer> _changes = new();
 
     public EntityMetadataProcessor(ProcessorContext context)
     {
         _context = context;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.MetadataModuleEntrySubstate metadataEntry)
         {
-            _changes
-                .GetOrAdd(new MetadataChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new MetadataChangePointer())
-                .Entries.Add(metadataEntry);
+            var lookup = new MetadataChangePointerLookup(referencedEntity.DatabaseId, stateVersion);
+
+            _changes.GetOrAdd(lookup, _ => new MetadataChangePointer())
+                .Entries
+                .Add(new MetadataEntry(metadataEntry, substate.PreviousValue?.SubstateData as CoreModel.MetadataModuleEntrySubstate));
+
+            _observedEntryDefinitions.TryAdd(new MetadataEntryDbLookup(referencedEntity.DatabaseId, metadataEntry.Key.Name), stateVersion);
         }
     }
 
     public async Task LoadDependencies()
     {
-        _mostRecentEntries.AddRange(await MostRecentEntityMetadataHistory());
-        _mostRecentAggregates.AddRange(await MostRecentEntityAggregateMetadataHistory());
+        _existingEntryDefinitions.AddRange(await ExistingMetadataEntryDefinitions());
+        _existingTotalsHistory.AddRange(await ExistingMetadataTotalsHistory());
     }
 
     public void ProcessChanges()
     {
-        foreach (var (lookup, change) in _changes.AsEnumerable())
+        foreach (var lookup in _observedEntryDefinitions.Keys.Except(_existingEntryDefinitions.Keys))
         {
-            EntityMetadataAggregateHistory aggregate;
-
-            if (!_mostRecentAggregates.TryGetValue(lookup.EntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
+            var entryDefinition = new EntityMetadataEntryDefinition
             {
-                aggregate = new EntityMetadataAggregateHistory
-                {
-                    Id = _context.Sequences.EntityMetadataAggregateHistorySequence++,
-                    FromStateVersion = lookup.StateVersion,
-                    EntityId = lookup.EntityId,
-                    MetadataIds = new List<long>(),
-                };
+                Id = _context.Sequences.KeyValueStoreEntryDefinitionSequence++,
+                FromStateVersion = _observedEntryDefinitions[lookup],
+                EntityId = lookup.EntityId,
+                Key = lookup.Key,
+            };
 
-                if (previousAggregate != null)
-                {
-                    aggregate.MetadataIds.AddRange(previousAggregate.MetadataIds);
-                }
+            _entryDefinitionsToAdd[lookup] = entryDefinition;
+            _existingEntryDefinitions[lookup] = entryDefinition;
+        }
 
-                _aggregatesToAdd.Add(aggregate);
-                _mostRecentAggregates[lookup.EntityId] = aggregate;
-            }
-            else
+        foreach (var change in _changes.AsEnumerable())
+        {
+            var totalsExists = _existingTotalsHistory.TryGetValue(change.Key.EntityId, out var previousTotals);
+
+            var newTotals = new EntityMetadataTotalsHistory
             {
-                aggregate = previousAggregate;
-            }
+                Id = _context.Sequences.EntityMetadataTotalsHistorySequence++,
+                FromStateVersion = change.Key.StateVersion,
+                EntityId = change.Key.EntityId,
+                TotalEntriesExcludingDeleted = totalsExists ? previousTotals!.TotalEntriesExcludingDeleted : 0,
+                TotalEntriesIncludingDeleted = totalsExists ? previousTotals!.TotalEntriesIncludingDeleted : 0,
+            };
 
-            foreach (var entry in change.Entries)
+            foreach (var entry in change.Value.Entries)
             {
-                var entryLookup = new MetadataEntryDbLookup(lookup.EntityId, entry.Key.Name);
-                var entryHistory = new EntityMetadataHistory
-                {
-                    Id = _context.Sequences.EntityMetadataHistorySequence++,
-                    FromStateVersion = lookup.StateVersion,
-                    EntityId = lookup.EntityId,
-                    Key = entry.Key.Name,
-                    Value = entry.Value?.DataStruct.StructData.Hex.ConvertFromHex(),
-                    IsDeleted = entry.Value == null,
-                    IsLocked = entry.IsLocked,
-                };
+                var isDeleted = entry.NewValue.Value == null;
+                var newEntry = entry.NewValue;
 
-                _entriesToAdd.Add(entryHistory);
-
-                if (_mostRecentEntries.TryGetValue(entryLookup, out var previousEntry))
-                {
-                    var currentPosition = aggregate.MetadataIds.IndexOf(previousEntry.Id);
-
-                    if (currentPosition != -1)
+                _entryHistoryToAdd.Add(
+                    new EntityMetadataEntryHistory
                     {
-                        aggregate.MetadataIds.RemoveAt(currentPosition);
-                    }
-                }
+                        Id = _context.Sequences.KeyValueStoreEntryHistorySequence++,
+                        FromStateVersion = change.Key.StateVersion,
+                        EntityMetadataEntryDefinitionId = _existingEntryDefinitions[new MetadataEntryDbLookup(change.Key.EntityId, newEntry.Key!.Name)].Id,
+                        Value = isDeleted ? null : newEntry.Value!.DataStruct.StructData.Hex.ConvertFromHex(),
+                        IsDeleted = isDeleted,
+                        IsLocked = newEntry.IsLocked,
+                    });
 
-                if (entry.Value != null)
+                switch (entry)
                 {
-                    aggregate.MetadataIds.Insert(0, entryHistory.Id);
+                    case { PreviousValue: null, NewValue.Value: null }:
+                        newTotals.TotalEntriesIncludingDeleted++;
+                        break;
+                    case { PreviousValue: null, NewValue.Value: not null }:
+                        newTotals.TotalEntriesIncludingDeleted++;
+                        newTotals.TotalEntriesExcludingDeleted++;
+                        break;
+                    case { PreviousValue.Value: not null, NewValue.Value: null }:
+                        newTotals.TotalEntriesExcludingDeleted--;
+                        break;
+                    case { PreviousValue.Value: null, NewValue.Value: not null }:
+                        newTotals.TotalEntriesExcludingDeleted++;
+                        break;
                 }
 
-                _mostRecentEntries[entryLookup] = entryHistory;
+                _existingTotalsHistory[change.Key.EntityId] = newTotals;
             }
+
+            _totalsHistoryToAdd.Add(newTotals);
         }
     }
 
     public async Task<int> SaveEntities()
     {
         var rowsInserted = 0;
-
-        rowsInserted += await CopyEntityMetadataHistory();
-        rowsInserted += await CopyEntityMetadataAggregateHistory();
-
+        rowsInserted += await CopyEntityMetadataEntryHistory();
+        rowsInserted += await CopyEntityMetadataEntryDefinition();
+        rowsInserted += await CopyEntityMetadataTotalsHistory();
         return rowsInserted;
     }
 
-    private async Task<IDictionary<MetadataEntryDbLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistory()
+    private async Task<IDictionary<MetadataEntryDbLookup, EntityMetadataEntryDefinition>> ExistingMetadataEntryDefinitions()
     {
-        var lookupSet = new HashSet<MetadataEntryDbLookup>();
-
-        foreach (var (lookup, change) in _changes.AsEnumerable())
+        if (!_observedEntryDefinitions
+                .Keys
+                .ToHashSet()
+                .Unzip(
+                    x => x.EntityId,
+                    x => x.Key,
+                    out var entityIds,
+                    out var keys))
         {
-            foreach (var entry in change.Entries)
-            {
-                lookupSet.Add(new MetadataEntryDbLookup(lookup.EntityId, entry.Key.Name));
-            }
+            return ImmutableDictionary<MetadataEntryDbLookup, EntityMetadataEntryDefinition>.Empty;
         }
 
-        if (!lookupSet.Unzip(x => x.EntityId, x => x.Key, out var entityIds, out var keys))
-        {
-            return ImmutableDictionary<MetadataEntryDbLookup, EntityMetadataHistory>.Empty;
-        }
-
-        return await _context.ReadHelper.LoadDependencies<MetadataEntryDbLookup, EntityMetadataHistory>(
+        return await _context.ReadHelper.LoadDependencies<MetadataEntryDbLookup, EntityMetadataEntryDefinition>(
             @$"
 WITH variables (entity_id, key) AS (
     SELECT UNNEST({entityIds}), UNNEST({keys})
 )
-SELECT emh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_metadata_history
-    WHERE entity_id = variables.entity_id AND key = variables.key
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emh ON true;",
+SELECT *
+FROM entity_metadata_entry_definition
+WHERE (entity_id, key) IN (SELECT * FROM variables)",
             e => new MetadataEntryDbLookup(e.EntityId, e.Key));
     }
 
-    private async Task<IDictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistory()
+    private async Task<IDictionary<long, EntityMetadataTotalsHistory>> ExistingMetadataTotalsHistory()
     {
-        var entityIds = _changes.Keys.Select(x => x.EntityId).ToHashSet().ToList();
+        var entityIds = _observedEntryDefinitions
+            .Keys
+            .Select(x => x.EntityId)
+            .ToHashSet();
 
-        if (!entityIds.Any())
+        if (entityIds.Count == 0)
         {
-            return ImmutableDictionary<long, EntityMetadataAggregateHistory>.Empty;
+            return ImmutableDictionary<long, EntityMetadataTotalsHistory>.Empty;
         }
 
-        return await _context.ReadHelper.LoadDependencies<long, EntityMetadataAggregateHistory>(
+        return await _context.ReadHelper.LoadDependencies<long, EntityMetadataTotalsHistory>(
             @$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
 )
-SELECT emah.*
+SELECT emth.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_metadata_aggregate_history
+    FROM entity_metadata_totals_history
     WHERE entity_id = variables.entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
-) emah ON true;",
+) emth ON true;",
             e => e.EntityId);
     }
 
-    private Task<int> CopyEntityMetadataHistory() => _context.WriteHelper.Copy(
-        _entriesToAdd,
-        "COPY entity_metadata_history (id, from_state_version, entity_id, key, value, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)",
+    private Task<int> CopyEntityMetadataEntryDefinition() => _context.WriteHelper.Copy(
+        _entryDefinitionsToAdd.Values,
+        "COPY entity_metadata_entry_definition (id, from_state_version, entity_id, key) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Key, NpgsqlDbType.Text, token);
+        });
+
+    private Task<int> CopyEntityMetadataEntryHistory() => _context.WriteHelper.Copy(
+        _entryHistoryToAdd,
+        "COPY entity_metadata_entry_history (id, from_state_version, entity_metadata_entry_definition_id, value, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityMetadataEntryDefinitionId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Value, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         });
 
-    private Task<int> CopyEntityMetadataAggregateHistory() => _context.WriteHelper.Copy(
-        _aggregatesToAdd,
-        "COPY entity_metadata_aggregate_history (id, from_state_version, entity_id, metadata_ids) FROM STDIN (FORMAT BINARY)",
+    private Task<int> CopyEntityMetadataTotalsHistory() => _context.WriteHelper.Copy(
+        _totalsHistoryToAdd,
+        "COPY entity_metadata_totals_history (id, from_state_version, entity_id, total_entries_including_deleted, total_entries_excluding_deleted) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.MetadataIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.TotalEntriesIncludingDeleted, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.TotalEntriesExcludingDeleted, NpgsqlDbType.Bigint, token);
         });
 }

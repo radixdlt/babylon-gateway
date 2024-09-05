@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
@@ -122,8 +123,8 @@ internal class NativeResourceDetailsResolver
 
     private async Task<IDictionary<EntityAddress, GatewayModel.NativeResourceDetails>> GetFromDatabase(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
-        var rows = await _dapperWrapper.ToList<DbRow>(
-            _dbContext,
+        var rows = await _dapperWrapper.ToListAsync<DbRow>(
+            _dbContext.Database.GetDbConnection(),
             @"WITH
 variables AS (
     SELECT

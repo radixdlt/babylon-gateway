@@ -62,14 +62,13 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_metadata_aggregate_history")]
-internal class EntityMetadataAggregateHistory : IAggregateHolder
+[Table("entity_metadata_totals_history")]
+internal class EntityMetadataTotalsHistory
 {
     [Key]
     [Column("id")]
@@ -81,11 +80,9 @@ internal class EntityMetadataAggregateHistory : IAggregateHolder
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("metadata_ids")]
-    public List<long> MetadataIds { get; set; }
+    [Column("total_entries_including_deleted")]
+    public long TotalEntriesIncludingDeleted { get; set; }
 
-    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
-    {
-        yield return (nameof(MetadataIds), MetadataIds.Count);
-    }
+    [Column("total_entries_excluding_deleted")]
+    public long TotalEntriesExcludingDeleted { get; set; }
 }

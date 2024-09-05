@@ -1,12 +1,21 @@
 ## 1.8.0
 Release built: _not released yet_
 
+> [!CAUTION]
+> **Breaking Changes:**
+> - Changed ordering of entity metadata returned from `/state/entity/metadata`, `/state/entity/page/metadata` endpoints. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending.
+
+
 ### Bug fixes
 
 ### API Changes
 
 ### Database changes
-
+- Refactored entity metadata aggregate. Queries for metadata follow a similar strategy as key value stores and utilize `_entry_definition`, `_entry_history`, and `_totals_history` tables to return data
+  - Removed `entity_metadata_aggregate_history` table.
+  - New `entity_metadata_totals_history` table which holds total counts of metadata per entity.
+  - New `entity_metadata_entry_definition` table which holds information about all the metadata keys ever created for a given entity.
+  - Renamed `entity_metadata_history` to `entity_metadata_entry_history`, replaced `entity_id` and `key` columns with `entity_metadata_entry_definition_id`.
 ## 1.7.0
 Release built: _not released yet_
 

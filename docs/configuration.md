@@ -30,6 +30,7 @@ The Network Gateway services can be configured in line with the [configuration i
 - `GatewayApi__Endpoint__ValidatorsUptimePageSize` (type: `int`, default value: `200`) -  fixed page size for `/statistics/validators/uptime` endpoint.
 
 - `GatewayApi__Endpoint__RequestTimeout` - (type: `timespan in string format [d.]hh:mm:ss[.fffffff]`, default value: `10s`) - the amount of time after which request gets canceled and timeout is returned from API.
+- `GatewayApi__Endpoint__MaxDefinitionsLookupLimit` - (type: `int`, default value: `50 000`) - Max number of definitions to scan when searching for non-deleted entries.
 
 #### Ledger Lag
 - `GatewayApi__AcceptableLedgerLag__PreventReadRequestsIfDbLedgerIsBehind` (type: `bool`, default value: `true`) - controls if API will return a response if observed ledger state by the gateway is behind.

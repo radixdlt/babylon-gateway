@@ -64,12 +64,11 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_metadata_history")]
-internal class EntityMetadataHistory
+[Table("entity_metadata_entry_definition")]
+internal class EntityMetadataEntryDefinition
 {
     [Key]
     [Column("id")]
@@ -83,14 +82,4 @@ internal class EntityMetadataHistory
 
     [Column("key")]
     public string Key { get; set; }
-
-    [Column("value")]
-    public byte[]? Value { get; set; }
-
-    [MemberNotNullWhen(false, nameof(Value))]
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
-
-    [Column("is_locked")]
-    public bool IsLocked { get; set; }
 }

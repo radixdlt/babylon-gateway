@@ -96,9 +96,11 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<Entity> Entities => Set<Entity>();
 
-    public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
+    public DbSet<EntityMetadataEntryDefinition> EntityMetadataEntryDefinition => Set<EntityMetadataEntryDefinition>();
 
-    public DbSet<EntityMetadataAggregateHistory> EntityMetadataAggregateHistory => Set<EntityMetadataAggregateHistory>();
+    public DbSet<EntityMetadataEntryHistory> EntityMetadataEntryHistory => Set<EntityMetadataEntryHistory>();
+
+    public DbSet<EntityMetadataTotalsHistory> EntityMetadataTotalHistory => Set<EntityMetadataTotalsHistory>();
 
     public DbSet<PackageBlueprintAggregateHistory> PackageBlueprintAggregateHistory => Set<PackageBlueprintAggregateHistory>();
 
@@ -430,11 +432,19 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<EntityMetadataHistory>()
-            .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
+            .Entity<EntityMetadataEntryHistory>()
+            .HasIndex(e => new { e.EntityMetadataEntryDefinitionId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<EntityMetadataAggregateHistory>()
+            .Entity<EntityMetadataEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<EntityMetadataEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.Key });
+
+        modelBuilder
+            .Entity<EntityMetadataTotalsHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
