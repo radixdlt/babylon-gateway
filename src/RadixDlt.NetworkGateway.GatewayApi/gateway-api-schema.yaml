@@ -3457,7 +3457,6 @@ components:
         - nonce
         - signer_public_keys
         - flags
-        - opt_ins
       properties:
         opt_ins:
           $ref: "#/components/schemas/TransactionPreviewOptIns"

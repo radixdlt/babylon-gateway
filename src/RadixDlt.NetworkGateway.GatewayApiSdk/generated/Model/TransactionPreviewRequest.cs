@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewRequest" /> class.
         /// </summary>
-        /// <param name="optIns">optIns (required).</param>
+        /// <param name="optIns">optIns.</param>
         /// <param name="manifest">A text-representation of a transaction manifest (required).</param>
         /// <param name="blobsHex">An array of hex-encoded blob data, if referenced by the manifest..</param>
         /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If omitted, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified).  (required).</param>
@@ -117,12 +117,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="flags">flags (required).</param>
         public TransactionPreviewRequest(TransactionPreviewOptIns optIns = default(TransactionPreviewOptIns), string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), Object message = default(Object), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
-            // to ensure "optIns" is required (not null)
-            if (optIns == null)
-            {
-                throw new ArgumentNullException("optIns is a required property for TransactionPreviewRequest and cannot be null");
-            }
-            this.OptIns = optIns;
             // to ensure "manifest" is required (not null)
             if (manifest == null)
             {
@@ -145,6 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("flags is a required property for TransactionPreviewRequest and cannot be null");
             }
             this.Flags = flags;
+            this.OptIns = optIns;
             this.BlobsHex = blobsHex;
             this.NotaryPublicKey = notaryPublicKey;
             this.NotaryIsSignatory = notaryIsSignatory;
@@ -154,7 +149,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets OptIns
         /// </summary>
-        [DataMember(Name = "opt_ins", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
         public TransactionPreviewOptIns OptIns { get; set; }
 
         /// <summary>

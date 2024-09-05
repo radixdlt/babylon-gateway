@@ -166,7 +166,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
             signerPublicKeys: request.SignerPublicKeys.Select(MapPublicKey).ToList(),
             message: message,
             flags: coreRequestFlags,
-            options: new CoreModel.TransactionPreviewResponseOptions(request.OptIns.RadixEngineToolkitReceipt));
+            options: new CoreModel.TransactionPreviewResponseOptions(request.OptIns?.RadixEngineToolkitReceipt ?? false));
 
         var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() =>
             _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(coreRequest, token));
