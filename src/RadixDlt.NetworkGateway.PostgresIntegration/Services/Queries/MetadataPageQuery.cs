@@ -177,7 +177,7 @@ LEFT JOIN LATERAL (
         definitions.is_last_candidate,
         entries.*,
         CASE WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = @pageLimit OR definitions.is_last_candidate
-             THEN (definitions.key_first_seen_state_version, definitions.id)
+             THEN definitions.cursor
         END AS next_cursor_exclusive
      FROM (
             SELECT
