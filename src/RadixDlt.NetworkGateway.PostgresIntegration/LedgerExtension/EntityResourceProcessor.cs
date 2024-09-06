@@ -62,14 +62,18 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -83,7 +87,7 @@ internal readonly record struct ByEntityResourceVaultDbLookup(long EntityId, lon
 
 internal class EntityResourceProcessor
 {
-    internal readonly record struct VaultDelta(ResourceType ResourceType, VaultEntity VaultEntity, TokenAmount Delta, long StateVersion)
+    private readonly record struct VaultDelta(ResourceType ResourceType, VaultEntity VaultEntity, TokenAmount Delta, long StateVersion)
     {
         public ByEntityDbLookup ByGlobalEntityDbLookup() => new(VaultEntity.GlobalAncestorId!.Value);
 
@@ -99,6 +103,7 @@ internal class EntityResourceProcessor
     }
 
     private readonly ProcessorContext _context;
+    private readonly CommonDbContext _commonDbContext;
 
     private readonly List<VaultDelta> _observedVaultDeltas = new();
     private readonly Dictionary<ByEntityResourceDbLookup, EntityResourceEntryDefinition> _existingResourceDefinitions = new();
@@ -111,10 +116,12 @@ internal class EntityResourceProcessor
     private readonly List<EntityResourceBalanceHistory> _resourceBalanceHistoryToAdd = new();
     private readonly List<EntityResourceVaultEntryDefinition> _resourceVaultEntryDefinitionsToAdd = new();
     private readonly List<EntityResourceVaultTotalsHistory> _resourceVaultTotalsHistoryToAdd = new();
+    private readonly Dictionary<ResourceHoldersLookup, ResourceHolder> _resourceHoldersToAdd = new();
 
-    public EntityResourceProcessor(ProcessorContext context)
+    public EntityResourceProcessor(ProcessorContext context, CommonDbContext commonDbContext)
     {
         _context = context;
+        _commonDbContext = commonDbContext;
     }
 
     public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion, CoreModel.IUpsertedSubstate substate)
@@ -176,6 +183,26 @@ internal class EntityResourceProcessor
                 ProcessBalanceHistory(vaultChange, vaultChange.ByOwnerEntityResourceVaultDbLookup());
             }
         }
+
+        // TODO PP: that's very dirty. fix that.
+        foreach (var x in _resourceBalanceHistoryToAdd)
+        {
+            _resourceHoldersToAdd.AddOrUpdate(
+                new ResourceHoldersLookup(x.EntityId, x.ResourceEntityId),
+                _ => new ResourceHolder
+                {
+                    Id = _context.Sequences.ResourceHoldersSequence++,
+                    EntityId = x.EntityId,
+                    ResourceEntityId = x.ResourceEntityId,
+                    Balance = x.Balance,
+                    LastUpdatedAtStateVersion = x.FromStateVersion,
+                },
+                existing =>
+                {
+                    existing.Balance = x.Balance;
+                    existing.LastUpdatedAtStateVersion = x.FromStateVersion;
+                });
+        }
     }
 
     public async Task<int> SaveEntities()
@@ -187,6 +214,9 @@ internal class EntityResourceProcessor
         rowsInserted += await CopyEntityResourceBalanceHistory();
         rowsInserted += await CopyEntityResourceVaultEntryDefinitions();
         rowsInserted += await CopyEntityResourceVaultTotalsHistory();
+
+        // TODO PP: what about cancellation token?
+        rowsInserted += await CopyResourceHolders(_resourceHoldersToAdd.Values);
 
         return rowsInserted;
     }
@@ -258,7 +288,8 @@ internal class EntityResourceProcessor
 
         EntityResourceVaultTotalsHistory totalsHistory;
 
-        if (!_mostRecentResourceVaultTotalsHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousTotalsHistory) || previousTotalsHistory.FromStateVersion != vaultDelta.StateVersion)
+        if (!_mostRecentResourceVaultTotalsHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousTotalsHistory) ||
+            previousTotalsHistory.FromStateVersion != vaultDelta.StateVersion)
         {
             totalsHistory = new EntityResourceVaultTotalsHistory
             {
@@ -284,7 +315,8 @@ internal class EntityResourceProcessor
     {
         EntityResourceBalanceHistory balanceHistory;
 
-        if (!_mostRecentResourceBalanceHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousBalanceHistory) || previousBalanceHistory.FromStateVersion != vaultDelta.StateVersion)
+        if (!_mostRecentResourceBalanceHistory.TryGetValue(new ByEntityResourceDbLookup(lookup.EntityId, lookup.ResourceEntityId), out var previousBalanceHistory)
+            || previousBalanceHistory.FromStateVersion != vaultDelta.StateVersion)
         {
             balanceHistory = new EntityResourceBalanceHistory
             {
@@ -498,4 +530,59 @@ INNER JOIN LATERAL (
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.TotalCount, NpgsqlDbType.Bigint, token);
         });
+
+    private async Task<int> CopyResourceHolders(ICollection<ResourceHolder> entities, CancellationToken token = default)
+    {
+        if (!_resourceHoldersToAdd.Any())
+        {
+            return 0;
+        }
+
+        var connection = (NpgsqlConnection)_commonDbContext.Database.GetDbConnection();
+
+        // TODO PP: Fix that.
+        // var sw = Stopwatch.GetTimestamp();
+
+        await using var createTempTableCommand = connection.CreateCommand();
+        createTempTableCommand.CommandText = @"
+CREATE TEMP TABLE tmp_resource_holders
+(LIKE resource_holders INCLUDING DEFAULTS)
+ON COMMIT DROP";
+
+        await createTempTableCommand.ExecuteNonQueryAsync(token);
+
+        await using var writer =
+            await connection.BeginBinaryImportAsync(
+                "COPY tmp_resource_holders (id, entity_id, resource_entity_id, balance, last_updated_at_state_version) FROM STDIN (FORMAT BINARY)",
+                token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+            await writer.WriteAsync(e.LastUpdatedAtStateVersion, NpgsqlDbType.Bigint, token);
+        }
+
+        await writer.CompleteAsync(token);
+        await writer.DisposeAsync();
+
+        await using var mergeCommand = connection.CreateCommand();
+        mergeCommand.CommandText = @"
+MERGE INTO resource_holders ro
+USING tmp_resource_holders tmp
+ON ro.entity_id = tmp.entity_id AND ro.resource_entity_id = tmp.resource_entity_id
+WHEN MATCHED AND tmp.balance = 0 THEN DELETE
+WHEN MATCHED AND tmp.balance != 0 THEN UPDATE SET balance = tmp.balance, last_updated_at_state_version = tmp.last_updated_at_state_version
+WHEN NOT MATCHED AND tmp.balance != 0 THEN INSERT VALUES(id, entity_id, resource_entity_id, balance, last_updated_at_state_version);";
+
+        await mergeCommand.ExecuteNonQueryAsync(token);
+
+        // TODO PP: Fix that.
+        // await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyResourceHolders), Stopwatch.GetElapsedTime(sw), entities.Count));
+
+        return entities.Count;
+    }
 }

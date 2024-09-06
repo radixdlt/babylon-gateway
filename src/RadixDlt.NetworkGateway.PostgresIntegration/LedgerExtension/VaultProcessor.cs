@@ -65,6 +65,7 @@
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;

@@ -103,9 +103,9 @@ internal class DefaultEntityHandler : IEntityHandler
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        var pageRequest = new IEntityStateQuerier.MetadataPageRequest(
+        var pageRequest = new IEntityStateQuerier.PageRequestByCursor(
             Address: (EntityAddress)request.Address,
-            Cursor: !string.IsNullOrEmpty(request.Cursor) ? GatewayModel.IdBoundaryCoursor.FromCursorString(request.Cursor) : null,
+            Cursor: GatewayModel.IdBoundaryCoursor.FromCursorString(request.Cursor),
             Limit: _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage)
         );
 

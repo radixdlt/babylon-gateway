@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
@@ -122,8 +123,7 @@ internal class StandardMetadataResolver
             return ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
         }
 
-        var partiallyValidatedEntries = await _dapperWrapper.ToListAsync<PartiallyValidatedTwoWayLink>(
-            _dbContext.Database.GetDbConnection(),
+        var cd = new CommandDefinition(
             @"
 WITH
     variables (entity_id) AS (SELECT UNNEST(@entityIds)),
@@ -302,7 +302,9 @@ FROM resolved",
                 stateVersion = ledgerState.StateVersion,
                 entityIds = entityIds,
             },
-            token);
+            cancellationToken: token);
+
+        var partiallyValidatedEntries = await _dapperWrapper.ToListAsync<PartiallyValidatedTwoWayLink>(_dbContext.Database.GetDbConnection(), cd);
 
         var result = new ConcurrentDictionary<EntityAddress, ConcurrentQueue<ResolvedTwoWayLink>>();
         var options = new ParallelOptions

@@ -74,9 +74,7 @@ public interface IEntityStateQuerier
 {
     public sealed record PageRequest(EntityAddress Address, int Offset, int Limit);
 
-    public sealed record MetadataPageRequest(EntityAddress Address, GatewayModel.IdBoundaryCoursor? Cursor, int Limit);
-
-    public sealed record PageRequestByCursor(EntityAddress Address, GatewayModel.IdBoundaryCoursor Cursor, int Limit);
+    public sealed record PageRequestByCursor(EntityAddress Address, GatewayModel.IdBoundaryCoursor? Cursor, int Limit);
 
     public sealed record AccountLockerPageRequest(AccountLockerAddress AccountLockerAddress, GatewayModel.StateAccountLockerAccountResourcesCursor? Cursor, int Limit);
 
@@ -90,7 +88,7 @@ public interface IEntityStateQuerier
         CancellationToken token = default);
 
     Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(
-        MetadataPageRequest request,
+        PageRequestByCursor request,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
 
@@ -130,33 +128,4 @@ public interface IEntityStateQuerier
         EntityAddress vaultAddress,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default);
-
-    Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(
-        EntityAddress nonFungibleResourceAddress,
-        GatewayModel.LedgerState ledgerState,
-        GatewayModel.IdBoundaryCoursor? cursor,
-        int pageSize,
-        CancellationToken token = default);
-
-    Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(
-        EntityAddress resourceAddress,
-        IList<string> nonFungibleIds,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default);
-
-    Task<GatewayModel.StateNonFungibleLocationResponse> NonFungibleIdLocation(
-        EntityAddress resourceAddress,
-        IList<string> nonFungibleIds,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default);
-
-    Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.StatePackageBlueprintPageResponse?> PackageBlueprints(PageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.StatePackageCodePageResponse?> PackageCodes(PageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.StateAccountLockerPageVaultsResponse> AccountLockerVaultsPage(AccountLockerPageRequest pageRequest, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.StateAccountLockersTouchedAtResponse> AccountLockersTouchedAt(IList<AccountLockerAddress> accountLockers, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
 }

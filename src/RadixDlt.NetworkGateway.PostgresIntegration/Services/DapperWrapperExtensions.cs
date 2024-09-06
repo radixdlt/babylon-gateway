@@ -65,22 +65,16 @@
 using Dapper;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal static class DapperWrapperExtensions
 {
-    public static CommandDefinition CreateCommandDefinition(this IDapperWrapper _, [StringSyntax("postgresql")] string sql, object parameters, CancellationToken token = default)
+    public static async Task<IList<T>> ToListAsync<T>(this IDapperWrapper dapperWrapper, DbConnection dbConnection, CommandDefinition cd)
     {
-        return new CommandDefinition(commandText: sql, parameters: parameters, cancellationToken: token);
-    }    public static async Task<IList<T>> ToListAsync<T>(this IDapperWrapper dapperWrapper, DbConnection dbConnection, [StringSyntax("postgresql")] string sql, object parameters, CancellationToken token = default)
-    {
-        var commandDefinition = dapperWrapper.CreateCommandDefinition(sql, parameters, token);
-        var result = await dapperWrapper.QueryAsync<T>(dbConnection, commandDefinition);
+        var result = await dapperWrapper.QueryAsync<T>(dbConnection, cd);
 
         return result.ToList();
     }

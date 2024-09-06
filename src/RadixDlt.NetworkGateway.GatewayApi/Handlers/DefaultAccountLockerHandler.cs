@@ -76,16 +76,16 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 internal class DefaultAccountLockerHandler : IAccountLockerHandler
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IEntityStateQuerier _entityStateQuerier;
+    private readonly IAccountLockerQuerier _accountLockerQuerier;
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
     public DefaultAccountLockerHandler(
         ILedgerStateQuerier ledgerStateQuerier,
-        IEntityStateQuerier entityStateQuerier,
+        IAccountLockerQuerier accountLockerQuerier,
         IOptionsSnapshot<EndpointOptions> endpointConfiguration)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
-        _entityStateQuerier = entityStateQuerier;
+        _accountLockerQuerier = accountLockerQuerier;
         _endpointConfiguration = endpointConfiguration;
     }
 
@@ -96,7 +96,7 @@ internal class DefaultAccountLockerHandler : IAccountLockerHandler
         var limit = _endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage);
         var pageRequest = new IEntityStateQuerier.AccountLockerPageRequest(new AccountLockerAddress((EntityAddress)request.LockerAddress, (EntityAddress)request.AccountAddress), cursor, limit);
 
-        return await _entityStateQuerier.AccountLockerVaultsPage(pageRequest, ledgerState, token);
+        return await _accountLockerQuerier.AccountLockerVaultsPage(pageRequest, ledgerState, token);
     }
 
     public async Task<GatewayModel.StateAccountLockersTouchedAtResponse?> TouchedAt(GatewayModel.StateAccountLockersTouchedAtRequest request, CancellationToken token = default)
@@ -106,6 +106,6 @@ internal class DefaultAccountLockerHandler : IAccountLockerHandler
             .Select(l => new AccountLockerAddress((EntityAddress)l.LockerAddress, (EntityAddress)l.AccountAddress))
             .ToList();
 
-        return await _entityStateQuerier.AccountLockersTouchedAt(accountLockers, atLedgerState, token);
+        return await _accountLockerQuerier.AccountLockersTouchedAt(accountLockers, atLedgerState, token);
     }
 }

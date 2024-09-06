@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -123,8 +124,7 @@ internal class NativeResourceDetailsResolver
 
     private async Task<IDictionary<EntityAddress, GatewayModel.NativeResourceDetails>> GetFromDatabase(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
-        var rows = await _dapperWrapper.ToListAsync<DbRow>(
-            _dbContext.Database.GetDbConnection(),
+        var cd = new CommandDefinition(
             @"WITH
 variables AS (
     SELECT
@@ -185,7 +185,10 @@ WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_to_resource_
                 addresses = addresses.Select(e => (string)e).ToList(),
                 stateVersion = ledgerState.StateVersion,
             },
-            token);
+            cancellationToken: token
+        );
+
+        var rows = await _dapperWrapper.ToListAsync<DbRow>(_dbContext.Database.GetDbConnection(), cd);
 
         return rows.GroupBy(r => (EntityAddress)r.BaseEntityAddress).ToDictionary(g => g.Key, grouping =>
         {

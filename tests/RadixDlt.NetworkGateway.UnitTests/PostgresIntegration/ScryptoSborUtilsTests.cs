@@ -64,6 +64,7 @@
 
 using FluentAssertions;
 using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System;
 using System.Collections.Generic;
 using Xunit;

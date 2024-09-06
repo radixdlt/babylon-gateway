@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -514,57 +515,6 @@ internal class WriteHelper : IWriteHelper
         await writer.CompleteAsync(token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyKeyValueStoreSchemaHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyResourceHolders(ICollection<ResourceHolder> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var createTempTableCommand = _connection.CreateCommand();
-        createTempTableCommand.CommandText = @"
-CREATE TEMP TABLE tmp_resource_holders
-(LIKE resource_holders INCLUDING DEFAULTS)
-ON COMMIT DROP";
-
-        await createTempTableCommand.ExecuteNonQueryAsync(token);
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY tmp_resource_holders (id, entity_id, resource_entity_id, balance, last_updated_at_state_version) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(e.LastUpdatedAtStateVersion, NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-        await writer.DisposeAsync();
-
-        await using var mergeCommand = _connection.CreateCommand();
-        mergeCommand.CommandText = @"
-MERGE INTO resource_holders ro
-USING tmp_resource_holders tmp
-ON ro.entity_id = tmp.entity_id AND ro.resource_entity_id = tmp.resource_entity_id
-WHEN MATCHED AND tmp.balance = 0 THEN DELETE
-WHEN MATCHED AND tmp.balance != 0 THEN UPDATE SET balance = tmp.balance, last_updated_at_state_version = tmp.last_updated_at_state_version
-WHEN NOT MATCHED AND tmp.balance != 0 THEN INSERT VALUES(id, entity_id, resource_entity_id, balance, last_updated_at_state_version);";
-
-        await mergeCommand.ExecuteNonQueryAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyResourceHolders), Stopwatch.GetElapsedTime(sw), entities.Count));
 
         return entities.Count;
     }

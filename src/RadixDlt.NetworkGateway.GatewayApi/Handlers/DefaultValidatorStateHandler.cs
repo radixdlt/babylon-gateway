@@ -72,12 +72,12 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 internal class DefaultValidatorStateHandler : IValidatorStateHandler
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IEntityStateQuerier _entityStateQuerier;
+    private readonly IValidatorQuerier _validatorQuerier;
 
-    public DefaultValidatorStateHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
+    public DefaultValidatorStateHandler(ILedgerStateQuerier ledgerStateQuerier, IValidatorQuerier validatorQuerier)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
-        _entityStateQuerier = entityStateQuerier;
+        _validatorQuerier = validatorQuerier;
     }
 
     public async Task<GatewayModel.StateValidatorsListResponse> List(GatewayModel.StateValidatorsListRequest request, CancellationToken token)
@@ -85,6 +85,6 @@ internal class DefaultValidatorStateHandler : IValidatorStateHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
         var cursor = GatewayModel.StateValidatorsListCursor.FromCursorString(request.Cursor);
 
-        return await _entityStateQuerier.StateValidatorsList(cursor, ledgerState, token);
+        return await _validatorQuerier.StateValidatorsList(cursor, ledgerState, token);
     }
 }

@@ -74,6 +74,7 @@ using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -735,7 +736,7 @@ UPDATE pending_transactions
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
 
-        // TODO KL change them into a collection, ensure they implement common interface, keep in mind that the order may matter!
+        // TODO PP KL change them into a collection, ensure they implement common interface, keep in mind that the order may matter!
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
         var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
         var entitySchemaProcessor = new EntitySchemaProcessor(processorContext);
@@ -753,7 +754,7 @@ UPDATE pending_transactions
         var globalEventEmitterProcessor = new GlobalEventEmitterProcessor(processorContext, referencedEntities, networkConfiguration);
         var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
         var standardMetadataProcessor = new StandardMetadataProcessor(processorContext, referencedEntities);
-        var entityResourceProcessor = new EntityResourceProcessor(processorContext);
+        var entityResourceProcessor = new EntityResourceProcessor(processorContext, dbContext);
         var vaultProcessor = new VaultProcessor(processorContext);
 
         // step: scan all substates & events to figure out changes
@@ -1117,7 +1118,7 @@ UPDATE pending_transactions
             entityResourceProcessor.ProcessChanges();
             vaultProcessor.ProcessChanges();
 
-            // TODO KL get rid of that once we move to new aggregation model for resource / vaults
+            // TODO PP KL get rid of that once we move to new aggregation model for resource / vaults
             var existingNonFungibleIdData = vaultProcessor.TempGetExistingNonFungibleIdDefinitions();
 
             foreach (var e in nonFungibleIdChanges)
@@ -1133,36 +1134,6 @@ UPDATE pending_transactions
                     IsDeleted = e.IsDeleted,
                     IsLocked = e.IsLocked,
                 });
-            }
-
-            var resourceHoldersToAdd = new Dictionary<ResourceHoldersLookup, ResourceHolder>();
-
-            foreach (var x in entityResourceAggregatedVaultsHistoryToAdd)
-            {
-                TokenAmount balance = x switch
-                {
-                    EntityFungibleResourceAggregatedVaultsHistory fungibleResourceAggregatedVaultsHistory =>
-                        fungibleResourceAggregatedVaultsHistory.Balance,
-                    EntityNonFungibleResourceAggregatedVaultsHistory nonFungibleResourceAggregatedVaultsHistory =>
-                        TokenAmount.FromDecimalString(nonFungibleResourceAggregatedVaultsHistory.TotalCount.ToString()),
-                    _ => throw new ArgumentOutOfRangeException(nameof(x), x, null),
-                };
-
-                resourceHoldersToAdd.AddOrUpdate(
-                    new ResourceHoldersLookup(x.EntityId, x.ResourceEntityId),
-                    _ => new ResourceHolder
-                    {
-                        Id = sequences.ResourceHoldersSequence++,
-                        EntityId = x.EntityId,
-                        ResourceEntityId = x.ResourceEntityId,
-                        Balance = balance,
-                        LastUpdatedAtStateVersion = x.FromStateVersion,
-                    },
-                    existing =>
-                    {
-                        existing.Balance = balance;
-                        existing.LastUpdatedAtStateVersion = x.FromStateVersion;
-                    });
             }
 
             var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges
@@ -1215,7 +1186,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyResourceHolders(resourceHoldersToAdd.Values, token);
 
             rowsInserted += await entityStateProcessor.SaveEntities();
             rowsInserted += await entityMetadataProcessor.SaveEntities();
