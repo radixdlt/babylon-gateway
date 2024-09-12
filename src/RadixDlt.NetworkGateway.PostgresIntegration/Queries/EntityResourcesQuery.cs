@@ -253,8 +253,6 @@ internal class EntityResourcesQuery
             throw new InvalidOperationException("Neither resource filter nor cursors can be used if executing against multiple entities.");
         }
 
-        // TODO PP: check if we properly filter_out.
-        // TODO PP: do we want 1 query for all different endpoints? or maybe we want separate ones? I'd probably go for separate ones but we can change that later.
         var cd = new CommandDefinition(
             @"
 WITH variables AS (

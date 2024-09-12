@@ -99,7 +99,7 @@ internal static class MetadataPageQuery
         long LastUpdatedStateVersion,
         bool FilterOut,
         bool IsLastCandidate,
-        IdBoundaryCursor? NextCursorExclusive
+        IdBoundaryCursor? NextCursorInclusive
     );
 
     internal static async Task<IDictionary<long, GatewayModel.EntityMetadataCollection>> ReadPages(
@@ -122,7 +122,7 @@ WITH vars AS (
     SELECT
         unnest(@entityIds) AS entity_id,
         CAST(@useCursor AS bool) AS use_cursor,
-        ROW(CAST(@cursorStateVersion AS bigint), CAST(@cursorDefinitionId  AS bigint)) AS start_cursor_exclusive,
+        ROW(CAST(@cursorStateVersion AS bigint), CAST(@cursorDefinitionId  AS bigint)) AS start_cursor_inclusive,
         @atLedgerState AS at_ledger_state,
         @perEntityDefinitionReadLimit AS per_entity_definition_read_limit,
         @perEntityPageLimit as per_entity_page_limit
@@ -155,7 +155,7 @@ SELECT
     -- cursor
     COALESCE(entries_per_entity.filter_out, TRUE) AS FilterOut,
     COALESCE(entries_per_entity.is_last_candidate, TRUE) AS IsLastCandidate,
-    next_cursor_exclusive AS NextCursorExclusive
+    next_cursor_inclusive AS NextCursorInclusive
 FROM vars
 
 -- Totals
@@ -176,14 +176,21 @@ LEFT JOIN LATERAL (
         definitions.key,
         definitions.key_first_seen_state_version,
         definitions.is_last_candidate,
+        definitions.cursor,
         entries.last_updated_state_version,
         entries.value,
         entries.is_locked,
         entries.is_deleted,
-        entries.filter_out,
-        CASE WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit OR definitions.is_last_candidate
-             THEN definitions.cursor
-        END AS next_cursor_exclusive
+        CASE WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit OR entries.filter_out
+            THEN TRUE
+            ELSE FALSE
+        END AS filter_out,
+        CASE
+            WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit
+                THEN definitions.cursor
+            WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) != vars.per_entity_page_limit AND definitions.is_last_candidate
+                THEN ROW(definitions.key_first_seen_state_version, definitions.id - 1)
+        END AS next_cursor_inclusive
      FROM (
             SELECT
                   d.id,
@@ -192,7 +199,7 @@ LEFT JOIN LATERAL (
                   d.from_state_version AS key_first_seen_state_version,
                   (ROW_NUMBER() OVER (ORDER BY d.cursor DESC)) = vars.per_entity_definition_read_limit AS is_last_candidate
             FROM definitions_with_cursor d
-            WHERE d.entity_id = vars.entity_id AND ((NOT vars.use_cursor) OR d.cursor < vars.start_cursor_exclusive)
+            WHERE d.entity_id = vars.entity_id AND ((NOT vars.use_cursor) OR d.cursor <= vars.start_cursor_inclusive)
             ORDER BY d.cursor DESC
             LIMIT vars.per_entity_definition_read_limit
     ) definitions
@@ -212,6 +219,7 @@ WHERE entries.filter_out = FALSE OR definitions.is_last_candidate
 ORDER BY definitions.cursor DESC
 LIMIT vars.per_entity_page_limit
 ) entries_per_entity ON TRUE
+ORDER BY entries_per_entity.cursor DESC
 ;",
             new
             {
@@ -220,7 +228,7 @@ LIMIT vars.per_entity_page_limit
                 atLedgerState = ledgerState.StateVersion,
                 cursorStateVersion = queryConfiguration.Cursor?.StateVersionBoundary ?? 0,
                 cursorDefinitionId = queryConfiguration.Cursor?.IdBoundary ?? 0,
-                perEntityPageLimit = queryConfiguration.PageSize,
+                perEntityPageLimit = queryConfiguration.PageSize + 1,
                 perEntityDefinitionReadLimit = Math.Floor(queryConfiguration.MaxDefinitionsLookupLimit / (decimal)entityIds.Count),
             },
             cancellationToken: token);
@@ -234,7 +242,7 @@ LIMIT vars.per_entity_page_limit
                 {
                     var rows = g.ToList();
                     var totalEntries = rows.First().TotalEntriesExcludingDeleted;
-                    var elementWithCursor = rows.SingleOrDefault(x => x.NextCursorExclusive.HasValue);
+                    var elementWithCursor = rows.SingleOrDefault(x => x.NextCursorInclusive.HasValue);
 
                     var items = rows
                         .Where(x => !x.FilterOut)
@@ -248,11 +256,10 @@ LIMIT vars.per_entity_page_limit
                             })
                         .ToList();
 
-                    // TODO PP: that will work only for first page, for next ones it'll be broken.
-                    var nextCursor = items.Count < totalEntries && elementWithCursor.NextCursorExclusive != null
+                    var nextCursor = elementWithCursor.NextCursorInclusive != null
                         ? new GatewayModel.IdBoundaryCoursor(
-                                elementWithCursor.NextCursorExclusive.Value.StateVersion,
-                                elementWithCursor.NextCursorExclusive.Value.Id)
+                                elementWithCursor.NextCursorInclusive.Value.StateVersion,
+                                elementWithCursor.NextCursorInclusive.Value.Id)
                             .ToCursorString()
                         : null;
 

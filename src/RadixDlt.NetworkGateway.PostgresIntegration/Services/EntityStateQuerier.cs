@@ -651,7 +651,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         var queryConfiguration = new NonFungibleVaultContentsQuery.QueryConfiguration(
             request.Cursor.FromGatewayModel(),
-            defaultPageSize,
+            request.Limit,
             _endpointConfiguration.Value.MaxDefinitionsLookupLimit
             );
 

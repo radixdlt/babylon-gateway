@@ -156,20 +156,25 @@ SELECT
     COALESCE(entries.is_last_candidate, TRUE) AS IsLastCandidate,
     entries.next_cursor_inclusive AS NextCursorInclusive
 FROM vars
-INNER JOIN LATERAL (
+LEFT JOIN LATERAL (
     SELECT
         definitions.id AS definition_id,
         definitions.non_fungible_id_definition_id,
         definitions.from_state_version AS definition_from_state_version,
         definitions.is_last_candidate AS is_last_candidate,
+        definitions.cursor,
         history.from_state_version AS last_updated_state_version,
         history.is_deleted,
-        CASE WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit OR history.filter_out
+        CASE
+            WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit OR history.filter_out
             THEN TRUE
             ELSE FALSE
-        END as filter_out,
-        CASE WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit OR definitions.is_last_candidate
-            THEN definitions.cursor
+        END AS filter_out,
+        CASE
+            WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit
+                THEN definitions.cursor
+            WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) != vars.per_entity_page_limit AND definitions.is_last_candidate
+                THEN ROW(definitions.from_state_version, definitions.id - 1)
         END AS next_cursor_inclusive
     FROM (
         SELECT
@@ -200,7 +205,7 @@ INNER JOIN LATERAL (
     ORDER BY definitions.cursor DESC
     LIMIT vars.per_entity_page_limit
 ) entries ON TRUE
-INNER JOIN non_fungible_id_definition nf_def ON nf_def.id = entries.non_fungible_id_definition_id
+LEFT JOIN non_fungible_id_definition nf_def ON nf_def.id = entries.non_fungible_id_definition_id
 LEFT JOIN LATERAL (
     SELECT *
     FROM non_fungible_id_data_history
@@ -215,6 +220,7 @@ LEFT JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) vault_balance ON TRUE
+ORDER BY entries.cursor DESC
 ;",
             new
             {
