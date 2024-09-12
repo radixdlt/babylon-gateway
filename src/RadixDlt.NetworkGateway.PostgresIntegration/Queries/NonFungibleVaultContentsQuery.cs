@@ -81,7 +81,7 @@ internal static class NonFungibleVaultContentsQuery
 {
     private record QueryResultRow(
         long VaultEntityId,
-        string TotalEntries,
+        TokenAmount TotalEntries,
         long DefinitionId,
         long FirstSeenStateVersion,
         long LastUpdatedStateVersion,
@@ -138,7 +138,7 @@ definitions_with_cursor AS (
 SELECT
     -- Vault data.
     vars.vault_entity_id AS VaultEntityId,
-    CASE WHEN COALESCE(entries.filter_out, TRUE) THEN NULL ELSE CAST(vault_balance.balance AS TEXT) END AS TotalEntries,
+    CAST(vault_balance.balance AS TEXT) AS TotalEntries,
 
     -- Vault content data.
     CASE WHEN COALESCE(entries.filter_out, TRUE) THEN NULL ELSE entries.definition_id END AS DefinitionId,
@@ -231,12 +231,6 @@ ORDER BY entries.cursor DESC
                 atLedgerState = ledgerState.StateVersion,
                 perEntityDefinitionReadLimit = Math.Floor(configuration.MaxDefinitionsLookupLimit / (decimal)vaultEntityIds.Count),
                 perEntityPageLimit = configuration.PageSize + 1,
-                // TODO PP: inclusive or exlusive?
-                // If we'll decide on exclusive we'll have to remove that bit from query.
-                // CASE WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit OR history.filter_out
-                // THEN TRUE
-                // ELSE FALSE
-                // END as filter_out,
             },
             cancellationToken: token);
 
@@ -248,7 +242,7 @@ ORDER BY entries.cursor DESC
                 g =>
                 {
                     var rows = g.ToList();
-                    var totalEntries = long.Parse(TokenAmount.FromSubUnitsString(rows.First().TotalEntries).ToString());
+                    var totalEntries = long.Parse(rows.First().TotalEntries.ToString());
                     var elementWithCursor = rows.SingleOrDefault(x => x.NextCursorInclusive.HasValue);
 
                     var items = rows

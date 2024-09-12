@@ -736,7 +736,6 @@ UPDATE pending_transactions
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
 
-        // TODO PP KL change them into a collection, ensure they implement common interface, keep in mind that the order may matter!
         var entityStateProcessor = new EntityStateProcessor(processorContext, referencedEntities);
         var entityMetadataProcessor = new EntityMetadataProcessor(processorContext);
         var entitySchemaProcessor = new EntitySchemaProcessor(processorContext);

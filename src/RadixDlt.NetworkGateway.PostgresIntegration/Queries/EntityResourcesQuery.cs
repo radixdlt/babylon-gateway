@@ -66,11 +66,13 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Queries.CustomTypes;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -80,9 +82,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 internal class EntityResourcesQuery
 {
     // TODO PP KL add support for string -> TokenAmount in Dapper (possibly with no silly CAST AS TEXT in the SQL
-    // TODO PP KL drop redundant Resource* and Vault* prefixes?
     // TODO PP KL maybe we should consider stored procedures for those queries and/or their fragments that will repeat?
-    // TODO PP Do we want to query N and have exclusive cursor as in metadata or N+1 and inclusive as here?
     // TODO PP we can't return pure model from here because of explicit metadata. Let's move mapping here at least.
 
     public record PerEntityQueryResultRow(long EntityId, long TotalFungibleResourceCount, long TotalNonFungibleResourceCount)
@@ -100,7 +100,7 @@ internal class EntityResourcesQuery
         long ResourceEntityId,
         ResourceType ResourceType,
         EntityAddress ResourceEntityAddress,
-        string ResourceBalance,
+        TokenAmount ResourceBalance,
         long ResourceFirstSeenStateVersion,
         long ResourceLastUpdatedAtStateVersion,
         long? ResourceVaultTotalCount,
@@ -114,7 +114,7 @@ internal class EntityResourcesQuery
         long VaultEntryDefinitionId,
         long VaultEntityId,
         EntityAddress VaultEntityAddress,
-        string VaultBalance,
+        TokenAmount VaultBalance,
         long VaultFirstSeenStateVersion,
         long VaultLastUpdatedAtStateVersion,
         IdBoundaryCursor? VaultNextCursorInclusive,
@@ -134,8 +134,7 @@ internal class EntityResourcesQuery
         IdBoundaryCursor? VaultCursor,
         long AtLedgerState);
 
-    // TODO PP: move all those methods out from query.
-    public static async Task<Dictionary<long, PerEntityQueryResultRow>> Details(
+    public static async Task<IDictionary<long, PerEntityQueryResultRow>> Details(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
         ICollection<long> entityIds,
@@ -240,7 +239,7 @@ internal class EntityResourcesQuery
         return result;
     }
 
-    private static async Task<Dictionary<long, PerEntityQueryResultRow>> ExecuteEntityResourcesQuery(
+    private static async Task<IDictionary<long, PerEntityQueryResultRow>> ExecuteEntityResourcesQuery(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
         ICollection<long> entityIds,
@@ -248,6 +247,11 @@ internal class EntityResourcesQuery
         QueryConfiguration configuration,
         CancellationToken token)
     {
+        if (entityIds.Count == 0)
+        {
+            return ImmutableDictionary<long, PerEntityQueryResultRow>.Empty;
+        }
+
         if (entityIds.Count > 1 && (resourceEntityId.HasValue || configuration.ResourceCursor != null || configuration.VaultCursor != null))
         {
             throw new InvalidOperationException("Neither resource filter nor cursors can be used if executing against multiple entities.");

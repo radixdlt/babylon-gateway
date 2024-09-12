@@ -26,7 +26,7 @@ internal static class NonFungibleResourceQueries
 
     private record NonFungibleIdLocationVaultOwnerViewModel(long VaultId, long VaultParentAncestorId, EntityAddress VaultParentAncestorAddress, long VaultGlobalAncestorId, EntityAddress VaultGlobalAncestorAddress);
 
-    private record NonFungibleIdsQueryResult(long Id, long FromStateVersion, string NonFungibleId, string TotalMinted);
+    private record NonFungibleIdsQueryResult(long Id, long FromStateVersion, string NonFungibleId, TokenAmount TotalMinted);
 
     public static async Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(
         ReadOnlyDbContext dbContext,
@@ -83,7 +83,7 @@ LIMIT @limit
             ? new GatewayModel.IdBoundaryCoursor(entriesAndOneMore.Last().FromStateVersion, entriesAndOneMore.Last().Id).ToCursorString()
             : null;
 
-        long totalCount = entriesAndOneMore.Count != 0 ? long.Parse(TokenAmount.FromSubUnitsString(entriesAndOneMore.First().TotalMinted).ToString()) : 0;
+        long totalCount = entriesAndOneMore.Count != 0 ? long.Parse(entriesAndOneMore.First().TotalMinted.ToString()) : 0;
 
         var items = entriesAndOneMore
             .Take(pageSize)

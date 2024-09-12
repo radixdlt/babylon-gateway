@@ -87,7 +87,7 @@ internal class AccountLockerQuerier : IAccountLockerQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IDapperWrapper _dapperWrapper;
 
-    private record AccountLockerVaultsResultRow(long Id, long FromStateVersion, EntityType ResourceDiscriminator, string ResourceAddress, string VaultAddress, long LastUpdatedAtStateVersion, string? Balance);
+    private record AccountLockerVaultsResultRow(long Id, long FromStateVersion, EntityType ResourceDiscriminator, string ResourceAddress, string VaultAddress, long LastUpdatedAtStateVersion, TokenAmount? Balance);
 
     private record AccountLockerTouchedAtResultRow(long AccountLockerEntityId, long AccountEntityId, long LastUpdatedAt);
 
@@ -156,7 +156,7 @@ LIMIT @limit;",
                 if (k.ResourceDiscriminator == EntityType.GlobalFungibleResource && k.Balance != null)
                 {
                     result = new GatewayModel.AccountLockerVaultCollectionItemFungible(
-                        amount: TokenAmount.FromSubUnitsString(k.Balance).ToString(),
+                        amount: k.Balance.ToString(),
                         resourceAddress: k.ResourceAddress,
                         vaultAddress: k.VaultAddress,
                         lastUpdatedAtStateVersion: k.LastUpdatedAtStateVersion);
@@ -164,7 +164,7 @@ LIMIT @limit;",
                 else if (k.ResourceDiscriminator == EntityType.GlobalNonFungibleResource && k.Balance != null)
                 {
                     result = new GatewayModel.AccountLockerVaultCollectionItemNonFungible(
-                        totalCount: long.Parse(TokenAmount.FromSubUnitsString(k.Balance).ToString()),
+                        totalCount: long.Parse(k.Balance.Value.ToString()),
                         resourceAddress: k.ResourceAddress,
                         vaultAddress: k.VaultAddress,
                         lastUpdatedAtStateVersion: k.LastUpdatedAtStateVersion);

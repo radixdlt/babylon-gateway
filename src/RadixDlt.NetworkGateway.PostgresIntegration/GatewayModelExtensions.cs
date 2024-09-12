@@ -125,7 +125,7 @@ internal static class GatewayModelExtensions
                         .Where(x => !x.VaultFilterOut)
                         .Select(v => new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
                             vaultAddress: v.VaultEntityAddress,
-                            amount: TokenAmount.FromSubUnitsString(v.VaultBalance).ToString(),
+                            amount: v.VaultBalance.ToString(),
                             lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion))
                         .ToList();
 
@@ -141,7 +141,7 @@ internal static class GatewayModelExtensions
                 {
                     val = new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
                         resourceAddress: f.ResourceEntityAddress,
-                        amount: TokenAmount.FromSubUnitsString(f.ResourceBalance).ToString(),
+                        amount: f.ResourceBalance.ToString(),
                         lastUpdatedAtStateVersion: f.ResourceLastUpdatedAtStateVersion,
                         explicitMetadata: resourceExplicitMetadata);
                 }
@@ -182,7 +182,7 @@ internal static class GatewayModelExtensions
                                 }
 
                                 return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
-                                    totalCount: long.Parse(TokenAmount.FromSubUnitsString(v.VaultBalance).ToString()),
+                                    totalCount: long.Parse(v.VaultBalance.ToString()),
                                     nextCursor: nfidCursor,
                                     items: nfids,
                                     vaultAddress: v.VaultEntityAddress,
@@ -202,7 +202,7 @@ internal static class GatewayModelExtensions
                 {
                     val = new GatewayModel.NonFungibleResourcesCollectionItemGloballyAggregated(
                         resourceAddress: nf.ResourceEntityAddress,
-                        amount: long.Parse(TokenAmount.FromSubUnitsString(nf.ResourceBalance).ToString()),
+                        amount: long.Parse(nf.ResourceBalance.ToString()),
                         lastUpdatedAtStateVersion: nf.ResourceLastUpdatedAtStateVersion,
                         explicitMetadata: resourceExplicitMetadata);
                 }

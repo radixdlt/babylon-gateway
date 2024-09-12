@@ -120,7 +120,7 @@ internal class NativeResourceDetailsResolver
         return result;
     }
 
-    private record struct DbRow(EntityRelationship BaseRelationship, string BaseEntityAddress, string? BaseTotalSupply, EntityType RootEntityType, string RootEntityAddress, string? ResourceEntityAddress, string? ResourceBalance);
+    private record struct DbRow(EntityRelationship BaseRelationship, string BaseEntityAddress, TokenAmount? BaseTotalSupply, EntityType RootEntityType, string RootEntityAddress, string? ResourceEntityAddress, string? ResourceBalance);
 
     private async Task<IDictionary<EntityAddress, GatewayModel.NativeResourceDetails>> GetFromDatabase(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
@@ -206,7 +206,7 @@ WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_to_resource_
                 return new GatewayModel.NativeResourceValidatorClaimNftValue(rootEntityAddress);
             }
 
-            var baseTotalSupply = TokenAmount.FromSubUnitsString(grouping.First().BaseTotalSupply ?? throw new InvalidOperationException($"BaseTotalSupply cannot be empty on {grouping.Key}"));
+            var baseTotalSupply = grouping.First().BaseTotalSupply ?? throw new InvalidOperationException($"BaseTotalSupply cannot be empty on {grouping.Key}");
             var redemptionValues = new List<GatewayModel.NativeResourceRedemptionValueItem>();
 
             foreach (var entry in grouping)

@@ -82,7 +82,7 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IDapperWrapper _dapperWrapper;
 
-    private record ResourceHoldersResultRow(long Id, EntityAddress EntityAddress, string Balance, long LastUpdatedAtStateVersion);
+    private record ResourceHoldersResultRow(long Id, EntityAddress EntityAddress, TokenAmount Balance, long LastUpdatedAtStateVersion);
 
     public ResourceHoldersQuerier(ReadOnlyDbContext dbContext, IDapperWrapper dapperWrapper)
     {
@@ -142,7 +142,7 @@ LIMIT @limit",
         var nextPageExists = entriesAndOneMore.Count == limit + 1 && lastElement != null;
 
         var nextCursor = nextPageExists
-            ? new GatewayModel.ResourceHoldersCursor(lastElement!.Id, lastElement.Balance).ToCursorString()
+            ? new GatewayModel.ResourceHoldersCursor(lastElement!.Id, lastElement.Balance.ToSubUnitString()).ToCursorString()
             : null;
 
         switch (resourceEntity)
@@ -153,7 +153,7 @@ LIMIT @limit",
                     .Take(limit)
                     .Select(
                         x => (GatewayModel.ResourceHoldersCollectionItem)new GatewayModel.ResourceHoldersCollectionFungibleResourceItem(
-                            amount: TokenAmount.FromSubUnitsString(x.Balance).ToString(),
+                            amount: x.Balance.ToString(),
                             holderAddress: x.EntityAddress,
                             lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion)
                     )
@@ -168,7 +168,7 @@ LIMIT @limit",
                     .Take(limit)
                     .Select(
                         x => (GatewayModel.ResourceHoldersCollectionItem)new GatewayModel.ResourceHoldersCollectionNonFungibleResourceItem(
-                            nonFungibleIdsCount: long.Parse(TokenAmount.FromSubUnitsString(x.Balance).ToString()),
+                            nonFungibleIdsCount: long.Parse(x.Balance.ToString()),
                             holderAddress: x.EntityAddress,
                             lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion)
                     )
