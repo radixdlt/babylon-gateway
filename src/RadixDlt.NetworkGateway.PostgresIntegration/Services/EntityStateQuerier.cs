@@ -183,7 +183,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entityResourcesConfiguration = new EntityResourcesQuery.DetailsQueryConfiguration(defaultPageSize, defaultPageSize, aggregatePerVault ? defaultPageSize : 0, ledgerState.StateVersion);
         var entityResources = await EntityResourcesQuery.Details(_dbContext, _dapperWrapper, componentEntities.Select(e => e.Id).ToArray(), entityResourcesConfiguration, token);
 
-        // TODO PP KL: just pasted to make it easier to resolve conflicts.
         var allEntitiesToQueryForMetadata = entityResources.Values
             .SelectMany(x => x.AllResources.Values)
             .Select(r => r.ResourceEntityId)

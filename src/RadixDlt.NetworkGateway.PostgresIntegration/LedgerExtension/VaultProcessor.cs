@@ -74,25 +74,28 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal readonly record struct NonFungibleIdDefinitionDbLookup(long NonFungibleResourceEntityId, string NonFungibleId);
-
-internal readonly record struct NonFungibleVaultEntryDefinitionDbLookup(long VaultEntityId, long NonFungibleIdDefinitionId);
-
 internal class VaultProcessor
 {
+    private readonly record struct NonFungibleIdDefinitionDbLookup(long NonFungibleResourceEntityId, string NonFungibleId);
+
+    private readonly record struct NonFungibleVaultEntryDefinitionDbLookup(long VaultEntityId, long NonFungibleIdDefinitionId);
+
     private readonly record struct VaultBalanceSnapshot(VaultEntity VaultEntity, TokenAmount Balance, long StateVersion);
 
     private readonly record struct NonFungibleVaultChange(VaultEntity VaultEntity, string NonFungibleLocalId, bool IsDeposit, long StateVersion);
+
+    private readonly record struct NonFungibleIdChange(bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
 
     private readonly ProcessorContext _context;
 
     private readonly List<VaultBalanceSnapshot> _observedVaultBalanceSnapshots = new();
     private readonly List<NonFungibleVaultChange> _observedNonFungibleVaultChanges = new();
-    private readonly Dictionary<NonFungibleIdDefinitionDbLookup, long> _observedNonFungibleDataEntries = new();
+    private readonly Dictionary<NonFungibleIdDefinitionDbLookup, NonFungibleIdChange> _observedNonFungibleDataEntries = new();
     private readonly Dictionary<NonFungibleIdDefinitionDbLookup, NonFungibleIdDefinition> _existingNonFungibleIdDefinitions = new();
     private readonly Dictionary<NonFungibleVaultEntryDefinitionDbLookup, NonFungibleVaultEntryDefinition> _existingNonFungibleVaultEntryDefinitions = new();
     private readonly List<VaultBalanceHistory> _balanceHistoryToAdd = new();
     private readonly List<NonFungibleIdDefinition> _nonFungibleIdDefinitionsToAdd = new();
+    private readonly List<NonFungibleIdDataHistory> _nonFungibleIdDataHistoryToAdd = new();
     private readonly List<NonFungibleIdLocationHistory> _nonFungibleIdLocationHistoryToAdd = new();
     private readonly List<NonFungibleVaultEntryDefinition> _nonFungibleVaultEntryDefinitionsToAdd = new();
     private readonly List<NonFungibleVaultEntryHistory> _nonFungibleVaultEntryHistoryToAdd = new();
@@ -120,11 +123,17 @@ internal class VaultProcessor
             _observedVaultBalanceSnapshots.Add(new VaultBalanceSnapshot(vaultEntity, amount, stateVersion));
         }
 
-        if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate)
+        if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate nonFungibleResourceManagerDataEntrySubstate)
         {
             var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substate.SubstateId.SubstateKey).KeyHex);
 
-            _observedNonFungibleDataEntries.TryAdd(new NonFungibleIdDefinitionDbLookup(referencedEntity.DatabaseId, nonFungibleId), stateVersion);
+            _observedNonFungibleDataEntries.TryAdd(
+                new NonFungibleIdDefinitionDbLookup(referencedEntity.DatabaseId, nonFungibleId),
+                new NonFungibleIdChange(
+                    nonFungibleResourceManagerDataEntrySubstate.Value == null,
+                    nonFungibleResourceManagerDataEntrySubstate.IsLocked,
+                    nonFungibleResourceManagerDataEntrySubstate.Value?.DataStruct.StructData.GetDataBytes(),
+                    stateVersion));
         }
 
         if (substateData is CoreModel.NonFungibleVaultContentsIndexEntrySubstate nonFungibleVaultContentsIndexEntrySubstate)
@@ -155,30 +164,45 @@ internal class VaultProcessor
 
     public void ProcessChanges()
     {
-        _balanceHistoryToAdd.AddRange(_observedVaultBalanceSnapshots.Select(x => new VaultBalanceHistory
-        {
-            Id = _context.Sequences.VaultBalanceHistorySequence++,
-            FromStateVersion = x.StateVersion,
-            VaultEntityId = x.VaultEntity.Id,
-            Balance = x.Balance,
-        }));
-
-        foreach (var (lookup, stateVersion) in _observedNonFungibleDataEntries)
-        {
-            _existingNonFungibleIdDefinitions.GetOrAdd(lookup, _ =>
-            {
-                var definition = new NonFungibleIdDefinition
+        _balanceHistoryToAdd.AddRange(
+            _observedVaultBalanceSnapshots.Select(
+                x => new VaultBalanceHistory
                 {
-                    Id = _context.Sequences.NonFungibleIdDefinitionSequence++,
-                    FromStateVersion = stateVersion,
-                    NonFungibleResourceEntityId = lookup.NonFungibleResourceEntityId,
-                    NonFungibleId = lookup.NonFungibleId,
-                };
+                    Id = _context.Sequences.VaultBalanceHistorySequence++,
+                    FromStateVersion = x.StateVersion,
+                    VaultEntityId = x.VaultEntity.Id,
+                    Balance = x.Balance,
+                }));
 
-                _nonFungibleIdDefinitionsToAdd.Add(definition);
+        foreach (var (lookup, nonFungibleIdChange) in _observedNonFungibleDataEntries)
+        {
+            var definition = _existingNonFungibleIdDefinitions.GetOrAdd(
+                lookup,
+                _ =>
+                {
+                    var definition = new NonFungibleIdDefinition
+                    {
+                        Id = _context.Sequences.NonFungibleIdDefinitionSequence++,
+                        FromStateVersion = nonFungibleIdChange.StateVersion,
+                        NonFungibleResourceEntityId = lookup.NonFungibleResourceEntityId,
+                        NonFungibleId = lookup.NonFungibleId,
+                    };
 
-                return definition;
-            });
+                    _nonFungibleIdDefinitionsToAdd.Add(definition);
+
+                    return definition;
+                });
+
+            _nonFungibleIdDataHistoryToAdd.Add(
+                new NonFungibleIdDataHistory
+                {
+                    Id = _context.Sequences.NonFungibleIdDataHistorySequence++,
+                    FromStateVersion = nonFungibleIdChange.StateVersion,
+                    NonFungibleIdDefinitionId = definition.Id,
+                    Data = nonFungibleIdChange.MutableData,
+                    IsDeleted = nonFungibleIdChange.IsDeleted,
+                    IsLocked = nonFungibleIdChange.IsLocked,
+                });
         }
 
         foreach (var change in _observedNonFungibleVaultChanges)
@@ -217,30 +241,27 @@ internal class VaultProcessor
                     return definition;
                 });
 
-            _nonFungibleVaultEntryHistoryToAdd.Add(new NonFungibleVaultEntryHistory
-            {
-                Id = _context.Sequences.NonFungibleVaultEntryHistorySequence++,
-                FromStateVersion = change.StateVersion,
-                NonFungibleVaultEntryDefinitionId = nonFungibleVaultEntryDefinition.Id,
-                IsDeleted = !change.IsDeposit,
-            });
+            _nonFungibleVaultEntryHistoryToAdd.Add(
+                new NonFungibleVaultEntryHistory
+                {
+                    Id = _context.Sequences.NonFungibleVaultEntryHistorySequence++,
+                    FromStateVersion = change.StateVersion,
+                    NonFungibleVaultEntryDefinitionId = nonFungibleVaultEntryDefinition.Id,
+                    IsDeleted = !change.IsDeposit,
+                });
 
             if (change.IsDeposit)
             {
-                _nonFungibleIdLocationHistoryToAdd.Add(new NonFungibleIdLocationHistory
-                {
-                    Id = _context.Sequences.NonFungibleIdLocationHistorySequence++,
-                    FromStateVersion = change.StateVersion,
-                    NonFungibleIdDefinitionId = nonFungibleIdDefinition.Id,
-                    VaultEntityId = nonFungibleVaultEntryDefinition.VaultEntityId,
-                });
+                _nonFungibleIdLocationHistoryToAdd.Add(
+                    new NonFungibleIdLocationHistory
+                    {
+                        Id = _context.Sequences.NonFungibleIdLocationHistorySequence++,
+                        FromStateVersion = change.StateVersion,
+                        NonFungibleIdDefinitionId = nonFungibleIdDefinition.Id,
+                        VaultEntityId = nonFungibleVaultEntryDefinition.VaultEntityId,
+                    });
             }
         }
-    }
-
-    public Dictionary<NonFungibleIdDefinitionDbLookup, NonFungibleIdDefinition> TempGetExistingNonFungibleIdDefinitions()
-    {
-        return _existingNonFungibleIdDefinitions;
     }
 
     public async Task<int> SaveEntities()
@@ -249,6 +270,7 @@ internal class VaultProcessor
 
         rowsInserted += await CopyVaultBalanceHistory();
         rowsInserted += await CopyNonFungibleIdDefinitions();
+        rowsInserted += await CopyNonFungibleIdDataHistory();
         rowsInserted += await CopyNonFungibleIdLocationHistory();
         rowsInserted += await CopyNonFungibleVaultEntryDefinitions();
         rowsInserted += await CopyNonFungibleVaultEntryHistory();
@@ -286,7 +308,9 @@ WHERE (non_fungible_resource_entity_id, non_fungible_id) IN (SELECT * FROM varia
 
         foreach (var change in _observedNonFungibleVaultChanges)
         {
-            if (_existingNonFungibleIdDefinitions.TryGetValue(new NonFungibleIdDefinitionDbLookup(change.VaultEntity.GetResourceEntityId(), change.NonFungibleLocalId), out var nonFungibleIdDefinition))
+            if (_existingNonFungibleIdDefinitions.TryGetValue(
+                    new NonFungibleIdDefinitionDbLookup(change.VaultEntity.GetResourceEntityId(), change.NonFungibleLocalId),
+                    out var nonFungibleIdDefinition))
             {
                 lookup.Add(new NonFungibleVaultEntryDefinitionDbLookup(change.VaultEntity.Id, nonFungibleIdDefinition.Id));
             }
@@ -339,6 +363,19 @@ WHERE (vault_entity_id, non_fungible_id_definition_id) IN (SELECT * FROM variabl
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleId, NpgsqlDbType.Text, token);
+        });
+
+    private Task<int> CopyNonFungibleIdDataHistory() => _context.WriteHelper.Copy(
+        _nonFungibleIdDataHistoryToAdd,
+        "COPY non_fungible_id_data_history (id, from_state_version, non_fungible_id_definition_id, data, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.NonFungibleIdDefinitionId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Data, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         });
 
     private Task<int> CopyNonFungibleVaultEntryDefinitions() => _context.WriteHelper.Copy(

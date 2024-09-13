@@ -73,7 +73,7 @@ using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-internal static class CustomTypes
+internal static class CustomTypesRegistrator
 {
     private static bool _configured;
 

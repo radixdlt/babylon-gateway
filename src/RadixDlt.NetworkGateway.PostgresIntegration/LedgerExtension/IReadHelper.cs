@@ -63,12 +63,9 @@
  */
 
 using Microsoft.EntityFrameworkCore.Query;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
@@ -78,15 +75,4 @@ internal interface IReadHelper
     Task<Dictionary<TKey, TValue>> LoadDependencies<TKey, TValue>([NotParameterized] FormattableString sql, Func<TValue, TKey> keySelector, [CallerMemberName] string stageName = "")
         where TKey : notnull
         where TValue : class;
-
-    Task<Dictionary<long, ResourceEntitySupplyHistory>> MostRecentResourceEntitySupplyHistoryFor(List<ResourceSupplyChange> resourceSupplyChanges, CancellationToken token);
-
-    Task<Dictionary<EntityAddress, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token);
-
-    Task<Dictionary<NonFungibleIdLookup, NonFungibleIdDefinition>> ExistingNonFungibleIdDefinitionFor(
-        List<NonFungibleIdChange> nonFungibleIdStoreChanges,
-        List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
-        CancellationToken token);
-
-    Task<SequencesHolder> LoadSequences(CancellationToken token);
 }

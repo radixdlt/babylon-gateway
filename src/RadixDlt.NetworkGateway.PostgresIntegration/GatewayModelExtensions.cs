@@ -67,7 +67,6 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
@@ -94,125 +93,6 @@ internal static class GatewayModelExtensions
         return offset + limit < totalCount
             ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
-    }
-
-    public static void ToGatewayModel(
-        this EntityResourcesQuery.PerEntityQueryResultRow input,
-        bool aggregatePerVault,
-        IDictionary<long, GatewayModel.EntityMetadataCollection>? explicitMetadata,
-        IDictionary<long, GatewayModel.NonFungibleIdsCollection>? nfVaultContents,
-        out GatewayModel.FungibleResourcesCollection fungibles,
-        out GatewayModel.NonFungibleResourcesCollection nonFungibles)
-    {
-        var fungibleResourceNextCursorInclusive = input.FungibleResources.SingleOrDefault(x => x.ResourceNextCursorInclusive.HasValue)?.ResourceNextCursorInclusive;
-        string? fungibleCursor = fungibleResourceNextCursorInclusive.ToGatewayModel()?.ToCursorString();
-
-        var fungibleItems = input.FungibleResources
-            .Where(x => !x.ResourceFilterOut)
-            .Select(
-                f =>
-            {
-                GatewayModel.FungibleResourcesCollectionItem val;
-                GatewayModel.EntityMetadataCollection? resourceExplicitMetadata = null;
-
-                explicitMetadata?.TryGetValue(f.ResourceEntityId, out resourceExplicitMetadata);
-
-                if (aggregatePerVault)
-                {
-                    var vaultNextCursorInclusive = f.Vaults.SingleOrDefault(x => x.VaultNextCursorInclusive.HasValue)?.VaultNextCursorInclusive;
-                    string? vaultCursor = vaultNextCursorInclusive.ToGatewayModel()?.ToCursorString();
-                    var vaults = f.Vaults
-                        .Where(x => !x.VaultFilterOut)
-                        .Select(v => new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
-                            vaultAddress: v.VaultEntityAddress,
-                            amount: v.VaultBalance.ToString(),
-                            lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion))
-                        .ToList();
-
-                    val = new GatewayModel.FungibleResourcesCollectionItemVaultAggregated(
-                        resourceAddress: f.ResourceEntityAddress,
-                        vaults: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(
-                            totalCount: f.ResourceVaultTotalCount,
-                            nextCursor: vaultCursor,
-                            items: vaults),
-                        explicitMetadata: resourceExplicitMetadata);
-                }
-                else
-                {
-                    val = new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
-                        resourceAddress: f.ResourceEntityAddress,
-                        amount: f.ResourceBalance.ToString(),
-                        lastUpdatedAtStateVersion: f.ResourceLastUpdatedAtStateVersion,
-                        explicitMetadata: resourceExplicitMetadata);
-                }
-
-                return val;
-            })
-            .ToList();
-
-        var nonFungibleResourceNextCursorInclusive = input.NonFungibleResources.SingleOrDefault(x => x.ResourceNextCursorInclusive.HasValue)?.ResourceNextCursorInclusive;
-        string? nonFungibleCursor = nonFungibleResourceNextCursorInclusive.ToGatewayModel()?.ToCursorString();
-        var nonFungibleItems = input.NonFungibleResources
-            .Where(x => !x.ResourceFilterOut)
-            .Select(
-                nf =>
-            {
-                GatewayModel.NonFungibleResourcesCollectionItem val;
-                GatewayModel.EntityMetadataCollection? resourceExplicitMetadata = null;
-
-                explicitMetadata?.TryGetValue(nf.ResourceEntityId, out resourceExplicitMetadata);
-
-                if (aggregatePerVault)
-                {
-                    var vaultNextCursorInclusive = nf.Vaults.SingleOrDefault(x => x.VaultNextCursorInclusive.HasValue)?.VaultNextCursorInclusive;
-                    string? vaultCursor = vaultNextCursorInclusive.ToGatewayModel()?.ToCursorString();
-
-                    var vaults = nf.Vaults
-                        .Where(x => !x.VaultFilterOut)
-                        .Select(
-                            v =>
-                            {
-                                string? nfidCursor = null;
-                                List<string>? nfids = null;
-
-                                if (nfVaultContents?.TryGetValue(v.VaultEntityId, out var vaultNfids) == true)
-                                {
-                                    nfidCursor = vaultNfids.NextCursor;
-                                    nfids = vaultNfids.Items;
-                                }
-
-                                return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
-                                    totalCount: long.Parse(v.VaultBalance.ToString()),
-                                    nextCursor: nfidCursor,
-                                    items: nfids,
-                                    vaultAddress: v.VaultEntityAddress,
-                                    lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion);
-                        })
-                        .ToList();
-
-                    val = new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated(
-                        resourceAddress: nf.ResourceEntityAddress,
-                        vaults: new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVault(
-                            totalCount: nf.ResourceVaultTotalCount,
-                            nextCursor: vaultCursor,
-                            items: vaults),
-                        explicitMetadata: resourceExplicitMetadata);
-                }
-                else
-                {
-                    val = new GatewayModel.NonFungibleResourcesCollectionItemGloballyAggregated(
-                        resourceAddress: nf.ResourceEntityAddress,
-                        amount: long.Parse(nf.ResourceBalance.ToString()),
-                        lastUpdatedAtStateVersion: nf.ResourceLastUpdatedAtStateVersion,
-                        explicitMetadata: resourceExplicitMetadata);
-                }
-
-                return val;
-            })
-            .ToList();
-
-        fungibles = new GatewayModel.FungibleResourcesCollection(input.TotalFungibleResourceCount, fungibleCursor, fungibleItems);
-        nonFungibles = new GatewayModel.NonFungibleResourcesCollection(input.TotalNonFungibleResourceCount, nonFungibleCursor, nonFungibleItems);
     }
 
     public static GatewayModel.IdBoundaryCoursor? ToGatewayModel(this IdBoundaryCursor? input)
@@ -447,27 +327,6 @@ internal static class GatewayModelExtensions
             ToolkitModel.PublicKeyHash.Ed25519 ed25519 => new GatewayModel.PublicKeyHashEddsaEd25519(ed25519.value.ToArray().ToHex()),
             _ => throw new UnreachableException($"Didn't expect {publicKeyHash} value"),
         };
-    }
-
-    public static GatewayModel.TransactionBalanceChanges ToGatewayModel(this CoreModel.LtsCommittedTransactionOutcome input)
-    {
-        var fungibleFeeBalanceChanges = new List<GatewayModel.TransactionFungibleFeeBalanceChanges>();
-        var fungibleBalanceChanges = new List<GatewayModel.TransactionFungibleBalanceChanges>();
-
-        foreach (var f in input.FungibleEntityBalanceChanges)
-        {
-            fungibleFeeBalanceChanges.AddRange(f.FeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleFeeBalanceChanges(x.Type.ToGatewayModel(), f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
-            fungibleBalanceChanges.AddRange(f.NonFeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleBalanceChanges(f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
-        }
-
-        var nonFungibleBalanceChanges = input
-            .NonFungibleEntityBalanceChanges
-            .Select(x => new GatewayModel.TransactionNonFungibleBalanceChanges(x.EntityAddress, x.ResourceAddress, x.Added, x.Removed))
-            .ToList();
-
-        return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
     }
 
     public static GatewayModel.TransactionBalanceChanges ToGatewayModel(this CoreModel.CommittedTransactionBalanceChanges input)

@@ -73,7 +73,6 @@ using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System;
 using System.Collections.Generic;
@@ -731,7 +730,6 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted("resolve_and_create_entities", sw.Elapsed, null));
         }
 
-        var nonFungibleIdChanges = new List<NonFungibleIdChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
@@ -753,7 +751,7 @@ UPDATE pending_transactions
         var globalEventEmitterProcessor = new GlobalEventEmitterProcessor(processorContext, referencedEntities, networkConfiguration);
         var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
         var standardMetadataProcessor = new StandardMetadataProcessor(processorContext, referencedEntities);
-        var entityResourceProcessor = new EntityResourceProcessor(processorContext, dbContext);
+        var entityResourceProcessor = new EntityResourceProcessor(processorContext, dbContext, _observers);
         var vaultProcessor = new VaultProcessor(processorContext);
 
         // step: scan all substates & events to figure out changes
@@ -774,23 +772,6 @@ UPDATE pending_transactions
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
                         var referencedEntity = referencedEntities.Get((EntityAddress)substateId.EntityAddress);
-
-                        if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate nonFungibleResourceManagerDataEntrySubstate)
-                        {
-                            var resourceManagerEntityId = substateId.EntityAddress;
-                            var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
-
-                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex);
-
-                            nonFungibleIdChanges.Add(
-                                new NonFungibleIdChange(
-                                resourceManagerEntity,
-                                nonFungibleId,
-                                nonFungibleResourceManagerDataEntrySubstate.Value == null,
-                                nonFungibleResourceManagerDataEntrySubstate.IsLocked,
-                                nonFungibleResourceManagerDataEntrySubstate.Value?.DataStruct.StructData.GetDataBytes(),
-                                stateVersion));
-                        }
 
                         if (substateData is CoreModel.ConsensusManagerFieldStateSubstate consensusManagerFieldStateSubstate)
                         {
@@ -1096,8 +1077,6 @@ UPDATE pending_transactions
 
             dbReadDuration += sw.Elapsed;
 
-            var nonFungibleIdDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
-
             entityMetadataProcessor.ProcessChanges();
             entitySchemaProcessor.ProcessChanges();
             componentMethodRoyaltyProcessor.ProcessChanges();
@@ -1116,24 +1095,6 @@ UPDATE pending_transactions
             standardMetadataProcessor.ProcessChanges();
             entityResourceProcessor.ProcessChanges();
             vaultProcessor.ProcessChanges();
-
-            // TODO PP KL get rid of that once we move to new aggregation model for resource / vaults
-            var existingNonFungibleIdData = vaultProcessor.TempGetExistingNonFungibleIdDefinitions();
-
-            foreach (var e in nonFungibleIdChanges)
-            {
-                var nonFungibleIdData = existingNonFungibleIdData[new NonFungibleIdDefinitionDbLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId)];
-
-                nonFungibleIdDataHistoryToAdd.Add(new NonFungibleIdDataHistory
-                {
-                    Id = sequences.NonFungibleIdDataHistorySequence++,
-                    FromStateVersion = e.StateVersion,
-                    NonFungibleIdDefinitionId = nonFungibleIdData.Id,
-                    Data = e.MutableData,
-                    IsDeleted = e.IsDeleted,
-                    IsLocked = e.IsLocked,
-                });
-            }
 
             var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges
                 .GroupBy(x => new { x.ResourceEntityId, x.StateVersion })
@@ -1182,7 +1143,6 @@ UPDATE pending_transactions
             rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
 

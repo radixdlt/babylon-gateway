@@ -63,7 +63,6 @@
  */
 
 using Npgsql;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;

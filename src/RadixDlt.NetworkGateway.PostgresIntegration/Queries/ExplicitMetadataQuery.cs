@@ -81,6 +81,8 @@ internal static class ExplicitMetadataQuery
 
     private readonly record struct QueryResultRow(
         long EntityId,
+        long TotalEntriesExcludingDeleted,
+        long TotalEntriesIncludingDeleted,
         string Key,
         long KeyFirstSeenStateVersion,
         byte[] Value,
@@ -125,7 +127,14 @@ WITH vars AS (
         @atLedgerState AS at_ledger_state
 )
 SELECT
+    -- entity id
     vars.entity_id as EntityId,
+
+    -- totals
+    COALESCE(entity_totals.total_entries_excluding_deleted, 0) AS TotalEntriesExcludingDeleted,
+    COALESCE(entity_totals.total_entries_including_deleted, 0) AS TotalEntriesIncludingDeleted,
+
+    -- data
     CASE WHEN COALESCE(entries_with_definitions.filter_out, TRUE) THEN NULL ELSE entries_with_definitions.key END,
     CASE WHEN COALESCE(entries_with_definitions.filter_out, TRUE) THEN NULL ELSE entries_with_definitions.KeyFirstSeenStateVersion END,
     CASE WHEN COALESCE(entries_with_definitions.filter_out, TRUE) THEN NULL ELSE entries_with_definitions.value END,
@@ -133,6 +142,19 @@ SELECT
     CASE WHEN COALESCE(entries_with_definitions.filter_out, TRUE) THEN NULL ELSE entries_with_definitions.LastUpdatedStateVersion END,
     COALESCE(entries_with_definitions.filter_out, TRUE) AS FilterOut
 FROM vars
+
+-- Totals
+LEFT JOIN LATERAL (
+    SELECT
+        t.total_entries_excluding_deleted AS total_entries_excluding_deleted,
+        t.total_entries_including_deleted AS total_entries_including_deleted
+    FROM entity_metadata_totals_history t
+    WHERE t.entity_id = vars.entity_id AND t.from_state_version <= vars.at_ledger_state
+    ORDER BY t.from_state_version DESC
+    LIMIT 1
+) entity_totals ON TRUE
+
+-- entries
 LEFT JOIN LATERAL (
     SELECT
         definition.entity_id,
@@ -176,6 +198,8 @@ LEFT JOIN LATERAL (
                 g => g.Key,
                 g =>
                 {
+                    var totalEntries = g.First().TotalEntriesExcludingDeleted;
+
                     var items = g
                         .Where(x => !x.FilterOut)
                         .Select(
@@ -188,7 +212,7 @@ LEFT JOIN LATERAL (
                             })
                         .ToList();
 
-                    return new GatewayModel.EntityMetadataCollection(items.Count, items: items);
+                    return new GatewayModel.EntityMetadataCollection(totalEntries, items: items);
                 });
 
         return result;

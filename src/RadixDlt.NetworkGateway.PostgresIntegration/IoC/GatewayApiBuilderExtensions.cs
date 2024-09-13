@@ -110,7 +110,7 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<IDapperWrapper, DapperWrapper>()
             .AddSingleton<MetricsInterceptor>();
 
-        CustomTypes.EnsureConfigured();
+        CustomTypesRegistrator.EnsureConfigured();
 
         builder
             .Services

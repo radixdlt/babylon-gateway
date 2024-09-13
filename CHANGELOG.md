@@ -21,10 +21,21 @@ Release built: _not released yet_
 >   - `/state/entity/details` (when using `non_fungible_include_nfids` opt-in)
 >   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
 >   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
+> -  Existing non fungible vaults with no items will no longer return `items: null` and will return an empty array `items: []` instead, as we do in all other collections. Affected endpoints:
+>   - `/state/entity/page/non-fungible-vault/ids`
+>   - `/state/entity/details` (when using `non_fungible_include_nfids` opt-in)
+>   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
+>   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
+
 
 ### Bug fixes
+- Fixed `total_count` property returned for `explicit_metadata` collection. It returns now total number of metadata items for given entity. Affected endpoints:
+  - `/state/entity/details` (when using `explicit_metadata` opt-in)
+  - `/state/entity/page/non-fungibles/` (when using `explicit_metadata` opt-in) 
+  - `/state/entity/page/fungibles/` (when using `explicit_metadata` opt-in)
 
 ### API Changes
+
 
 ### Database changes
 - Refactored multiple aggregates. Queries follow a similar strategy as key value stores and utilize `_entry_definition`, `_entry_history`, and `_totals_history` tables to return data

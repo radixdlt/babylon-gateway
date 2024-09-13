@@ -79,7 +79,7 @@ public static class ServiceCollectionExtensions
 {
     public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
     {
-        CustomTypes.EnsureConfigured();
+        CustomTypesRegistrator.EnsureConfigured();
 
         services
             .AddNpgsqlDataSourceHolder<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)

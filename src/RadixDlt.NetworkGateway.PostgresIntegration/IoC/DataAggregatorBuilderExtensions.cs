@@ -96,7 +96,7 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<MetricsInterceptor>()
             .AddSingleton<IDapperWrapper, DapperWrapper>();
 
-        CustomTypes.EnsureConfigured();
+        CustomTypesRegistrator.EnsureConfigured();
 
         builder
             .Services

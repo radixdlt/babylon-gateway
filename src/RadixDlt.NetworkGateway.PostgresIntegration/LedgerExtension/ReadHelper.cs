@@ -70,7 +70,6 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -170,52 +169,6 @@ WHERE id IN(
             .ToDictionaryAsync(e => e.Address, token);
 
         await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingEntitiesFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
-    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdDefinition>> ExistingNonFungibleIdDefinitionFor(
-        List<NonFungibleIdChange> nonFungibleIdStoreChanges,
-        List<NonFungibleVaultSnapshot> nonFungibleVaultSnapshots,
-        CancellationToken token)
-    {
-        if (!nonFungibleIdStoreChanges.Any() && !nonFungibleVaultSnapshots.Any())
-        {
-            return new Dictionary<NonFungibleIdLookup, NonFungibleIdDefinition>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var nonFungibles = new HashSet<NonFungibleIdLookup>();
-        var resourceEntityIds = new List<long>();
-        var nonFungibleIds = new List<string>();
-
-        foreach (var nonFungibleIdChange in nonFungibleIdStoreChanges)
-        {
-            nonFungibles.Add(new NonFungibleIdLookup(nonFungibleIdChange.ReferencedResource.DatabaseId, nonFungibleIdChange.NonFungibleId));
-        }
-
-        foreach (var nonFungibleVaultChange in nonFungibleVaultSnapshots)
-        {
-            nonFungibles.Add(new NonFungibleIdLookup(nonFungibleVaultChange.ReferencedResource.DatabaseId, nonFungibleVaultChange.NonFungibleId));
-        }
-
-        foreach (var nf in nonFungibles)
-        {
-            resourceEntityIds.Add(nf.ResourceEntityId);
-            nonFungibleIds.Add(nf.NonFungibleId);
-        }
-
-        var result = await _dbContext
-            .NonFungibleIdDefinition
-            .FromSqlInterpolated(@$"
-SELECT * FROM non_fungible_id_definition WHERE (non_fungible_resource_entity_id, non_fungible_id) IN (
-    SELECT UNNEST({resourceEntityIds}), UNNEST({nonFungibleIds})
-)")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceEntityId, e.NonFungibleId), token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(ExistingNonFungibleIdDefinitionFor), Stopwatch.GetElapsedTime(sw), result.Count));
 
         return result;
     }

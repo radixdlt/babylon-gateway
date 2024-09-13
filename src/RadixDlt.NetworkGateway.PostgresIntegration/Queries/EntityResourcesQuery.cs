@@ -76,22 +76,19 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
-internal class EntityResourcesQuery
+internal static class EntityResourcesQuery
 {
-    // TODO PP KL add support for string -> TokenAmount in Dapper (possibly with no silly CAST AS TEXT in the SQL
     // TODO PP KL maybe we should consider stored procedures for those queries and/or their fragments that will repeat?
-    // TODO PP we can't return pure model from here because of explicit metadata. Let's move mapping here at least.
-
     public record PerEntityQueryResultRow(long EntityId, long TotalFungibleResourceCount, long TotalNonFungibleResourceCount)
     {
         public List<ResourceResultRow> FungibleResources { get; } = new();
 
         public List<ResourceResultRow> NonFungibleResources { get; } = new();
 
-        // TODO PP: ideally i'd like to get rid of that. it's not used anywhere.
         internal Dictionary<long, ResourceResultRow> AllResources { get; } = new();
     }
 
@@ -237,6 +234,130 @@ internal class EntityResourcesQuery
         results.TryGetValue(entityId, out var result);
 
         return result;
+    }
+
+    public static void ToGatewayModel(
+        this PerEntityQueryResultRow input,
+        bool aggregatePerVault,
+        IDictionary<long, GatewayModel.EntityMetadataCollection>? explicitMetadata,
+        IDictionary<long, GatewayModel.NonFungibleIdsCollection>? nfVaultContents,
+        out GatewayModel.FungibleResourcesCollection fungibles,
+        out GatewayModel.NonFungibleResourcesCollection nonFungibles)
+    {
+        var fungibleResourceNextCursorInclusive = input.FungibleResources.SingleOrDefault(x => x.ResourceNextCursorInclusive.HasValue)?.ResourceNextCursorInclusive;
+        string? fungibleCursor = fungibleResourceNextCursorInclusive.ToGatewayModel()?.ToCursorString();
+
+        var fungibleItems = input
+            .FungibleResources
+            .Where(x => !x.ResourceFilterOut)
+            .Select(
+                f =>
+                {
+                    GatewayModel.FungibleResourcesCollectionItem val;
+                    GatewayModel.EntityMetadataCollection? resourceExplicitMetadata = null;
+
+                    explicitMetadata?.TryGetValue(f.ResourceEntityId, out resourceExplicitMetadata);
+
+                    if (aggregatePerVault)
+                    {
+                        var vaultNextCursorInclusive = f.Vaults.SingleOrDefault(x => x.VaultNextCursorInclusive.HasValue)?.VaultNextCursorInclusive;
+                        string? vaultCursor = vaultNextCursorInclusive.ToGatewayModel()?.ToCursorString();
+                        var vaults = f
+                            .Vaults
+                            .Where(x => !x.VaultFilterOut)
+                            .Select(
+                                v => new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                                    vaultAddress: v.VaultEntityAddress,
+                                    amount: v.VaultBalance.ToString(),
+                                    lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion))
+                            .ToList();
+
+                        val = new GatewayModel.FungibleResourcesCollectionItemVaultAggregated(
+                            resourceAddress: f.ResourceEntityAddress,
+                            vaults: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(
+                                totalCount: f.ResourceVaultTotalCount,
+                                nextCursor: vaultCursor,
+                                items: vaults),
+                            explicitMetadata: resourceExplicitMetadata);
+                    }
+                    else
+                    {
+                        val = new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
+                            resourceAddress: f.ResourceEntityAddress,
+                            amount: f.ResourceBalance.ToString(),
+                            lastUpdatedAtStateVersion: f.ResourceLastUpdatedAtStateVersion,
+                            explicitMetadata: resourceExplicitMetadata);
+                    }
+
+                    return val;
+                })
+            .ToList();
+
+        var nonFungibleResourceNextCursorInclusive = input.NonFungibleResources.SingleOrDefault(x => x.ResourceNextCursorInclusive.HasValue)?.ResourceNextCursorInclusive;
+        string? nonFungibleCursor = nonFungibleResourceNextCursorInclusive.ToGatewayModel()?.ToCursorString();
+        var nonFungibleItems = input
+            .NonFungibleResources
+            .Where(x => !x.ResourceFilterOut)
+            .Select(
+                nf =>
+                {
+                    GatewayModel.NonFungibleResourcesCollectionItem val;
+                    GatewayModel.EntityMetadataCollection? resourceExplicitMetadata = null;
+
+                    explicitMetadata?.TryGetValue(nf.ResourceEntityId, out resourceExplicitMetadata);
+
+                    if (aggregatePerVault)
+                    {
+                        var vaultNextCursorInclusive = nf.Vaults.SingleOrDefault(x => x.VaultNextCursorInclusive.HasValue)?.VaultNextCursorInclusive;
+                        string? vaultCursor = vaultNextCursorInclusive.ToGatewayModel()?.ToCursorString();
+
+                        var vaults = nf
+                            .Vaults
+                            .Where(x => !x.VaultFilterOut)
+                            .Select(
+                                v =>
+                                {
+                                    string? nfidCursor = null;
+                                    List<string>? nfids = null;
+
+                                    if (nfVaultContents?.TryGetValue(v.VaultEntityId, out var vaultNfids) == true)
+                                    {
+                                        nfidCursor = vaultNfids.NextCursor;
+                                        nfids = vaultNfids.Items;
+                                    }
+
+                                    return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                                        totalCount: long.Parse(v.VaultBalance.ToString()),
+                                        nextCursor: nfidCursor,
+                                        items: nfids,
+                                        vaultAddress: v.VaultEntityAddress,
+                                        lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion);
+                                })
+                            .ToList();
+
+                        val = new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated(
+                            resourceAddress: nf.ResourceEntityAddress,
+                            vaults: new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVault(
+                                totalCount: nf.ResourceVaultTotalCount,
+                                nextCursor: vaultCursor,
+                                items: vaults),
+                            explicitMetadata: resourceExplicitMetadata);
+                    }
+                    else
+                    {
+                        val = new GatewayModel.NonFungibleResourcesCollectionItemGloballyAggregated(
+                            resourceAddress: nf.ResourceEntityAddress,
+                            amount: long.Parse(nf.ResourceBalance.ToString()),
+                            lastUpdatedAtStateVersion: nf.ResourceLastUpdatedAtStateVersion,
+                            explicitMetadata: resourceExplicitMetadata);
+                    }
+
+                    return val;
+                })
+            .ToList();
+
+        fungibles = new GatewayModel.FungibleResourcesCollection(input.TotalFungibleResourceCount, fungibleCursor, fungibleItems);
+        nonFungibles = new GatewayModel.NonFungibleResourcesCollection(input.TotalNonFungibleResourceCount, nonFungibleCursor, nonFungibleItems);
     }
 
     private static async Task<IDictionary<long, PerEntityQueryResultRow>> ExecuteEntityResourcesQuery(

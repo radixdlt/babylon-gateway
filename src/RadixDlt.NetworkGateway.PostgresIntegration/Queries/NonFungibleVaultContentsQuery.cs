@@ -79,7 +79,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
 internal static class NonFungibleVaultContentsQuery
 {
-    private record QueryResultRow(
+    public readonly record struct QueryConfiguration(
+        IdBoundaryCursor? Cursor,
+        int PageSize,
+        int MaxDefinitionsLookupLimit
+    );
+
+    private readonly record struct QueryResultRow(
         long VaultEntityId,
         TokenAmount TotalEntries,
         long DefinitionId,
@@ -93,12 +99,6 @@ internal static class NonFungibleVaultContentsQuery
         bool IsLastCandidate,
         IdBoundaryCursor? NextCursorInclusive
     );
-
-    public record struct QueryConfiguration(
-        IdBoundaryCursor? Cursor,
-        int PageSize,
-        int MaxDefinitionsLookupLimit
-        );
 
     public static async Task<IDictionary<long, GatewayModel.NonFungibleIdsCollection>> Execute(
         ReadOnlyDbContext dbContext,
@@ -250,7 +250,7 @@ ORDER BY entries.cursor DESC
                         .Select(x => x.NonFungibleId)
                         .ToList();
 
-                    var nextCursor = elementWithCursor?.NextCursorInclusive != null
+                    var nextCursor = elementWithCursor.NextCursorInclusive != null
                         ? new GatewayModel.IdBoundaryCoursor(
                                 elementWithCursor.NextCursorInclusive.Value.StateVersion,
                                 elementWithCursor.NextCursorInclusive.Value.Id)
