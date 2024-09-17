@@ -165,7 +165,8 @@ internal class TransactionPreviewService : ITransactionPreviewService
             nonce: request.Nonce,
             signerPublicKeys: request.SignerPublicKeys.Select(MapPublicKey).ToList(),
             message: message,
-            flags: coreRequestFlags);
+            flags: coreRequestFlags,
+            options: new CoreModel.TransactionPreviewResponseOptions(request.OptIns?.RadixEngineToolkitReceipt ?? false));
 
         var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() =>
             _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(coreRequest, token));
@@ -176,6 +177,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
 
             return new GatewayModel.TransactionPreviewResponse(
                 encodedReceipt: coreResponse.EncodedReceipt,
+                radixEngineToolkitReceipt: coreResponse.RadixEngineToolkitReceipt,
                 receipt: coreResponse.Receipt,
                 resourceChanges: coreResponse.InstructionResourceChanges.Cast<object>().ToList(),
                 logs: coreResponse.Logs.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
