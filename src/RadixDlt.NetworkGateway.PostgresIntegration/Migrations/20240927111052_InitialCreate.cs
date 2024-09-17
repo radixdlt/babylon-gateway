@@ -1036,8 +1036,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_account_locker_entry_resource_vault_definition_account_lock~",
                 table: "account_locker_entry_resource_vault_definition",
-                columns: new[] { "account_locker_definition_id", "from_state_version" },
-                unique: true);
+                columns: new[] { "account_locker_definition_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_locker_entry_touch_history_account_locker_definitio~",
@@ -1387,6 +1386,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_validator_cumulative_emission_history_validator_entity_id_e~",
                 table: "validator_cumulative_emission_history",
                 columns: new[] { "validator_entity_id", "epoch_number" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_cumulative_emission_history_validator_entity_id_f~",
+                table: "validator_cumulative_emission_history",
+                columns: new[] { "validator_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_validator_public_key_history_validator_entity_id_from_state~",

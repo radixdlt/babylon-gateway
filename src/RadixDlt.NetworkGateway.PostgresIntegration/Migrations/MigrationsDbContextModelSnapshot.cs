@@ -68,8 +68,11 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable
@@ -262,8 +265,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountLockerDefinitionId", "FromStateVersion")
-                        .IsUnique();
+                    b.HasIndex("AccountLockerDefinitionId", "FromStateVersion");
 
                     b.ToTable("account_locker_entry_resource_vault_definition");
                 });
@@ -1912,6 +1914,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ValidatorEntityId", "EpochNumber");
+
+                    b.HasIndex("ValidatorEntityId", "FromStateVersion");
 
                     b.ToTable("validator_cumulative_emission_history");
                 });

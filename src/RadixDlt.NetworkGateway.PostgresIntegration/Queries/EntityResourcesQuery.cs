@@ -82,7 +82,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
 internal static class EntityResourcesQuery
 {
-    // TODO PP KL maybe we should consider stored procedures for those queries and/or their fragments that will repeat?
     public record PerEntityQueryResultRow(long EntityId, long TotalFungibleResourceCount, long TotalNonFungibleResourceCount)
     {
         public List<ResourceResultRow> FungibleResources { get; } = new();

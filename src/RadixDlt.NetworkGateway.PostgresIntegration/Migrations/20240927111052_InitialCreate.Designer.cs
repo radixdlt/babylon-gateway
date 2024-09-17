@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240905131450_InitialCreate")]
+    [Migration("20240927111052_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -268,8 +268,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountLockerDefinitionId", "FromStateVersion")
-                        .IsUnique();
+                    b.HasIndex("AccountLockerDefinitionId", "FromStateVersion");
 
                     b.ToTable("account_locker_entry_resource_vault_definition");
                 });
@@ -1918,6 +1917,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ValidatorEntityId", "EpochNumber");
+
+                    b.HasIndex("ValidatorEntityId", "FromStateVersion");
 
                     b.ToTable("validator_cumulative_emission_history");
                 });
