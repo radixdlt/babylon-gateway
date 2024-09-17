@@ -261,60 +261,6 @@ jobs:
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
 
-  deploy-on-mardunet:
-    runs-on: ubuntu-22.04
-    needs:
-      - docker-gateway-api-private
-      - docker-data-aggregator-private
-      - docker-database-migrations-private
-      - join-gateway-images
-      - join-aggregator-images
-      - join-migrations-images
-      - setup-tags
-    if: github.ref == 'refs/heads/develop'
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: RDXWorks-actions/checkout@main
-      - uses: ./.github/actions/fetch-secrets
-        with:
-          role_name: ${{ secrets.GH_BABYLON_GATEWAY_SECRETS_READ_ACCESS_ROLE }}
-          app_name: "babylon-gateway"
-          step_name: "deploy-on-mardunet"
-          secret_prefix: "CF_GITHUB_WORKER"
-          secret_name: "github-actions/radixdlt/babylon-gateway/cloudflare"
-          parse_json: true
-      - name: Process ci.env
-        run: |
-          export $(grep -v '^#' ./deployment/ci.env | xargs)
-          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
-      - name: Check if ci.env changed
-        id: changed-files
-        uses: RDXWorks-actions/changed-files@main
-        with:
-          files: |
-            deployment/ci.env
-      - name: Trigger deployment event ${{ github.ref }}
-        env:
-          NAMESPACE: "ng-mardunet"
-          EVENT_TYPE: "ng_babylon_mardunet"
-        run: |
-          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
-            --header 'Accept: application/vnd.github.v3+json' \
-            --header 'Authorization: Basic ${{env.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
-            --header 'Content-Type: application/json' \
-            --data-raw '{
-                "event_type": "${{env.EVENT_TYPE}}",
-                "client_payload": {
-                  "namespace_postfix": "${{env.NAMESPACE}}",
-                  "ci_env_changed": "${{steps.changed-files.outputs.any_changed}}",
-                  "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
-                  "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
-                  "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}",
-                  "core_docker_tag": "${{env.FULLNODE_VERSION}}"
-                }
-            }'
 
   deploy-pr:
     runs-on: ubuntu-22.04
