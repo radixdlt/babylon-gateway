@@ -425,6 +425,7 @@ models/TransactionNotFoundError.ts
 models/TransactionNotFoundErrorAllOf.ts
 models/TransactionPayloadGatewayHandlingStatus.ts
 models/TransactionPayloadStatus.ts
+models/TransactionPreviewOptIns.ts
 models/TransactionPreviewRequest.ts
 models/TransactionPreviewRequestFlags.ts
 models/TransactionPreviewResponse.ts

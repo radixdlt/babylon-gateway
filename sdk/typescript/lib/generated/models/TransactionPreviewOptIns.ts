@@ -14,62 +14,46 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * 
+ * A set of flags to configure the response of the transaction preview.
  * @export
- * @interface MetadataDecimalArrayValue
+ * @interface TransactionPreviewOptIns
  */
-export interface MetadataDecimalArrayValue {
+export interface TransactionPreviewOptIns {
     /**
-     * 
-     * @type {string}
-     * @memberof MetadataDecimalArrayValue
+     * This flag controls whether the preview response will include a Radix Engine Toolkit serializable
+receipt or not. If not provided, this defaults to `false` and no toolkit receipt is provided in
+the response.
+
+     * @type {boolean}
+     * @memberof TransactionPreviewOptIns
      */
-    type: MetadataDecimalArrayValueTypeEnum;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof MetadataDecimalArrayValue
-     */
-    values: Array<string>;
+    radix_engine_toolkit_receipt?: boolean;
 }
 
-
 /**
- * @export
+ * Check if a given object implements the TransactionPreviewOptIns interface.
  */
-export const MetadataDecimalArrayValueTypeEnum = {
-    DecimalArray: 'DecimalArray'
-} as const;
-export type MetadataDecimalArrayValueTypeEnum = typeof MetadataDecimalArrayValueTypeEnum[keyof typeof MetadataDecimalArrayValueTypeEnum];
-
-
-/**
- * Check if a given object implements the MetadataDecimalArrayValue interface.
- */
-export function instanceOfMetadataDecimalArrayValue(value: object): boolean {
+export function instanceOfTransactionPreviewOptIns(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "type" in value;
-    isInstance = isInstance && "values" in value;
 
     return isInstance;
 }
 
-export function MetadataDecimalArrayValueFromJSON(json: any): MetadataDecimalArrayValue {
-    return MetadataDecimalArrayValueFromJSONTyped(json, false);
+export function TransactionPreviewOptInsFromJSON(json: any): TransactionPreviewOptIns {
+    return TransactionPreviewOptInsFromJSONTyped(json, false);
 }
 
-export function MetadataDecimalArrayValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataDecimalArrayValue {
+export function TransactionPreviewOptInsFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionPreviewOptIns {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'type': json['type'],
-        'values': json['values'],
+        'radix_engine_toolkit_receipt': !exists(json, 'radix_engine_toolkit_receipt') ? undefined : json['radix_engine_toolkit_receipt'],
     };
 }
 
-export function MetadataDecimalArrayValueToJSON(value?: MetadataDecimalArrayValue | null): any {
+export function TransactionPreviewOptInsToJSON(value?: TransactionPreviewOptIns | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -78,8 +62,7 @@ export function MetadataDecimalArrayValueToJSON(value?: MetadataDecimalArrayValu
     }
     return {
         
-        'type': value.type,
-        'values': value.values,
+        'radix_engine_toolkit_receipt': value.radix_engine_toolkit_receipt,
     };
 }
 

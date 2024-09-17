@@ -418,6 +418,7 @@ export * from './TransactionNotFoundError';
 export * from './TransactionNotFoundErrorAllOf';
 export * from './TransactionPayloadGatewayHandlingStatus';
 export * from './TransactionPayloadStatus';
+export * from './TransactionPreviewOptIns';
 export * from './TransactionPreviewRequest';
 export * from './TransactionPreviewRequestFlags';
 export * from './TransactionPreviewResponse';
