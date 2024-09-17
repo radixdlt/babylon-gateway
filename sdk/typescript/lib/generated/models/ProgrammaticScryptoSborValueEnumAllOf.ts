@@ -28,10 +28,10 @@ import {
 export interface ProgrammaticScryptoSborValueEnumAllOf {
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof ProgrammaticScryptoSborValueEnumAllOf
      */
-    variant_id: number;
+    variant_id: string;
     /**
      * 
      * @type {string}

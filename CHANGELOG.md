@@ -16,8 +16,22 @@ Release built: _not released yet_
   - New `entity_metadata_totals_history` table which holds total counts of metadata per entity.
   - New `entity_metadata_entry_definition` table which holds information about all the metadata keys ever created for a given entity.
   - Renamed `entity_metadata_history` to `entity_metadata_entry_history`, replaced `entity_id` and `key` columns with `entity_metadata_entry_definition_id`.
+
+## 1.7.2
+Release built: 17.09.2024
+
+### API Changes
+- Added `opt_ins` property to `/transaction/preview` request. Currently, there is only one option to use `radix_engine_toolkit_receipt`, it controls whether the preview response will include a Radix Engine Toolkit serializable
+  receipt or not (defaults to `false`).
+
+## 1.7.1
+Release built: 29.08.2024
+
+### Database changes
+- Added missing index on `validator_cumulative_emission_history`
+
 ## 1.7.0
-Release built: _not released yet_
+Release built: 23.08.2024
 
 > [!CAUTION]
 > **Breaking Changes:**

@@ -19,12 +19,24 @@ import {
     ComponentEntityRoleAssignmentsFromJSONTyped,
     ComponentEntityRoleAssignmentsToJSON,
 } from './ComponentEntityRoleAssignments';
+import type { NativeResourceDetails } from './NativeResourceDetails';
+import {
+    NativeResourceDetailsFromJSON,
+    NativeResourceDetailsFromJSONTyped,
+    NativeResourceDetailsToJSON,
+} from './NativeResourceDetails';
 import type { NonFungibleIdType } from './NonFungibleIdType';
 import {
     NonFungibleIdTypeFromJSON,
     NonFungibleIdTypeFromJSONTyped,
     NonFungibleIdTypeToJSON,
 } from './NonFungibleIdType';
+import type { TwoWayLinkedDappsCollection } from './TwoWayLinkedDappsCollection';
+import {
+    TwoWayLinkedDappsCollectionFromJSON,
+    TwoWayLinkedDappsCollectionFromJSONTyped,
+    TwoWayLinkedDappsCollectionToJSON,
+} from './TwoWayLinkedDappsCollection';
 
 /**
  * 
@@ -68,6 +80,18 @@ export interface StateEntityDetailsResponseNonFungibleResourceDetailsAllOf {
      * @memberof StateEntityDetailsResponseNonFungibleResourceDetailsAllOf
      */
     non_fungible_data_mutable_fields: Array<string>;
+    /**
+     * 
+     * @type {TwoWayLinkedDappsCollection}
+     * @memberof StateEntityDetailsResponseNonFungibleResourceDetailsAllOf
+     */
+    two_way_linked_dapps?: TwoWayLinkedDappsCollection;
+    /**
+     * 
+     * @type {NativeResourceDetails}
+     * @memberof StateEntityDetailsResponseNonFungibleResourceDetailsAllOf
+     */
+    native_resource_details?: NativeResourceDetails;
     /**
      * 
      * @type {string}
@@ -117,6 +141,8 @@ export function StateEntityDetailsResponseNonFungibleResourceDetailsAllOfFromJSO
         'total_minted': json['total_minted'],
         'total_burned': json['total_burned'],
         'non_fungible_data_mutable_fields': json['non_fungible_data_mutable_fields'],
+        'two_way_linked_dapps': !exists(json, 'two_way_linked_dapps') ? undefined : TwoWayLinkedDappsCollectionFromJSON(json['two_way_linked_dapps']),
+        'native_resource_details': !exists(json, 'native_resource_details') ? undefined : NativeResourceDetailsFromJSON(json['native_resource_details']),
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -136,6 +162,8 @@ export function StateEntityDetailsResponseNonFungibleResourceDetailsAllOfToJSON(
         'total_minted': value.total_minted,
         'total_burned': value.total_burned,
         'non_fungible_data_mutable_fields': value.non_fungible_data_mutable_fields,
+        'two_way_linked_dapps': TwoWayLinkedDappsCollectionToJSON(value.two_way_linked_dapps),
+        'native_resource_details': NativeResourceDetailsToJSON(value.native_resource_details),
         'type': value.type,
     };
 }

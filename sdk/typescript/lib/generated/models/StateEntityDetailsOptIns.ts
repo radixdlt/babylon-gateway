@@ -55,6 +55,18 @@ export interface StateEntityDetailsOptIns {
      * @memberof StateEntityDetailsOptIns
      */
     explicit_metadata?: Array<string>;
+    /**
+     * if set to `true`, on-ledger dApp two-way links (resolved & verified) are returned. See https://docs.radixdlt.com/docs/metadata-for-verification for more details.
+     * @type {boolean}
+     * @memberof StateEntityDetailsOptIns
+     */
+    dapp_two_way_links?: boolean;
+    /**
+     * if set to `true`, additional details for the Network native resources are returned.
+     * @type {boolean}
+     * @memberof StateEntityDetailsOptIns
+     */
+    native_resource_details?: boolean;
 }
 
 /**
@@ -82,6 +94,8 @@ export function StateEntityDetailsOptInsFromJSONTyped(json: any, ignoreDiscrimin
         'package_royalty_vault_balance': !exists(json, 'package_royalty_vault_balance') ? undefined : json['package_royalty_vault_balance'],
         'non_fungible_include_nfids': !exists(json, 'non_fungible_include_nfids') ? undefined : json['non_fungible_include_nfids'],
         'explicit_metadata': !exists(json, 'explicit_metadata') ? undefined : json['explicit_metadata'],
+        'dapp_two_way_links': !exists(json, 'dapp_two_way_links') ? undefined : json['dapp_two_way_links'],
+        'native_resource_details': !exists(json, 'native_resource_details') ? undefined : json['native_resource_details'],
     };
 }
 
@@ -100,6 +114,8 @@ export function StateEntityDetailsOptInsToJSON(value?: StateEntityDetailsOptIns 
         'package_royalty_vault_balance': value.package_royalty_vault_balance,
         'non_fungible_include_nfids': value.non_fungible_include_nfids,
         'explicit_metadata': value.explicit_metadata,
+        'dapp_two_way_links': value.dapp_two_way_links,
+        'native_resource_details': value.native_resource_details,
     };
 }
 

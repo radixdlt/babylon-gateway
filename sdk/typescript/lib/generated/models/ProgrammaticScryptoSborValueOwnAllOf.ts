@@ -20,7 +20,7 @@ import { exists, mapValues } from '../runtime';
  */
 export interface ProgrammaticScryptoSborValueOwnAllOf {
     /**
-     * 
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof ProgrammaticScryptoSborValueOwnAllOf
      */

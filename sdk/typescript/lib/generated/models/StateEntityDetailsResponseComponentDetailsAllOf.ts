@@ -25,6 +25,18 @@ import {
     ComponentRoyaltyConfigFromJSONTyped,
     ComponentRoyaltyConfigToJSON,
 } from './ComponentRoyaltyConfig';
+import type { NativeResourceDetails } from './NativeResourceDetails';
+import {
+    NativeResourceDetailsFromJSON,
+    NativeResourceDetailsFromJSONTyped,
+    NativeResourceDetailsToJSON,
+} from './NativeResourceDetails';
+import type { TwoWayLinkedDappOnLedgerDetails } from './TwoWayLinkedDappOnLedgerDetails';
+import {
+    TwoWayLinkedDappOnLedgerDetailsFromJSON,
+    TwoWayLinkedDappOnLedgerDetailsFromJSONTyped,
+    TwoWayLinkedDappOnLedgerDetailsToJSON,
+} from './TwoWayLinkedDappOnLedgerDetails';
 
 /**
  * 
@@ -79,6 +91,24 @@ custom JSON model defined in the Core API schema.
      */
     royalty_config?: ComponentRoyaltyConfig;
     /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof StateEntityDetailsResponseComponentDetailsAllOf
+     */
+    two_way_linked_dapp_address?: string;
+    /**
+     * 
+     * @type {TwoWayLinkedDappOnLedgerDetails}
+     * @memberof StateEntityDetailsResponseComponentDetailsAllOf
+     */
+    two_way_linked_dapp_details?: TwoWayLinkedDappOnLedgerDetails;
+    /**
+     * 
+     * @type {NativeResourceDetails}
+     * @memberof StateEntityDetailsResponseComponentDetailsAllOf
+     */
+    native_resource_details?: NativeResourceDetails;
+    /**
      * 
      * @type {string}
      * @memberof StateEntityDetailsResponseComponentDetailsAllOf
@@ -124,6 +154,9 @@ export function StateEntityDetailsResponseComponentDetailsAllOfFromJSONTyped(jso
         'role_assignments': !exists(json, 'role_assignments') ? undefined : ComponentEntityRoleAssignmentsFromJSON(json['role_assignments']),
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
         'royalty_config': !exists(json, 'royalty_config') ? undefined : ComponentRoyaltyConfigFromJSON(json['royalty_config']),
+        'two_way_linked_dapp_address': !exists(json, 'two_way_linked_dapp_address') ? undefined : json['two_way_linked_dapp_address'],
+        'two_way_linked_dapp_details': !exists(json, 'two_way_linked_dapp_details') ? undefined : TwoWayLinkedDappOnLedgerDetailsFromJSON(json['two_way_linked_dapp_details']),
+        'native_resource_details': !exists(json, 'native_resource_details') ? undefined : NativeResourceDetailsFromJSON(json['native_resource_details']),
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -144,6 +177,9 @@ export function StateEntityDetailsResponseComponentDetailsAllOfToJSON(value?: St
         'role_assignments': ComponentEntityRoleAssignmentsToJSON(value.role_assignments),
         'royalty_vault_balance': value.royalty_vault_balance,
         'royalty_config': ComponentRoyaltyConfigToJSON(value.royalty_config),
+        'two_way_linked_dapp_address': value.two_way_linked_dapp_address,
+        'two_way_linked_dapp_details': TwoWayLinkedDappOnLedgerDetailsToJSON(value.two_way_linked_dapp_details),
+        'native_resource_details': NativeResourceDetailsToJSON(value.native_resource_details),
         'type': value.type,
     };
 }

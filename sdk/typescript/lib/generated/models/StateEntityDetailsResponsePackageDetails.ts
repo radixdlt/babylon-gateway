@@ -104,6 +104,12 @@ export interface StateEntityDetailsResponsePackageDetails {
      * @memberof StateEntityDetailsResponsePackageDetails
      */
     role_assignments?: ComponentEntityRoleAssignments;
+    /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof StateEntityDetailsResponsePackageDetails
+     */
+    two_way_linked_dapp_address?: string;
 }
 
 
@@ -149,6 +155,7 @@ export function StateEntityDetailsResponsePackageDetailsFromJSONTyped(json: any,
         'blueprints': !exists(json, 'blueprints') ? undefined : PackageBlueprintCollectionFromJSON(json['blueprints']),
         'schemas': !exists(json, 'schemas') ? undefined : EntitySchemaCollectionFromJSON(json['schemas']),
         'role_assignments': !exists(json, 'role_assignments') ? undefined : ComponentEntityRoleAssignmentsFromJSON(json['role_assignments']),
+        'two_way_linked_dapp_address': !exists(json, 'two_way_linked_dapp_address') ? undefined : json['two_way_linked_dapp_address'],
     };
 }
 
@@ -170,6 +177,7 @@ export function StateEntityDetailsResponsePackageDetailsToJSON(value?: StateEnti
         'blueprints': PackageBlueprintCollectionToJSON(value.blueprints),
         'schemas': EntitySchemaCollectionToJSON(value.schemas),
         'role_assignments': ComponentEntityRoleAssignmentsToJSON(value.role_assignments),
+        'two_way_linked_dapp_address': value.two_way_linked_dapp_address,
     };
 }
 

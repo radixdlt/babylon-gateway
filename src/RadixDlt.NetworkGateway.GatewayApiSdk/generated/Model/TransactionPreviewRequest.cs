@@ -103,6 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewRequest" /> class.
         /// </summary>
+        /// <param name="optIns">optIns.</param>
         /// <param name="manifest">A text-representation of a transaction manifest (required).</param>
         /// <param name="blobsHex">An array of hex-encoded blob data, if referenced by the manifest..</param>
         /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If omitted, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified).  (required).</param>
@@ -114,7 +115,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="message">An optional transaction message. Only affects the costing. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), Object message = default(Object), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(TransactionPreviewOptIns optIns = default(TransactionPreviewOptIns), string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), Object message = default(Object), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "manifest" is required (not null)
             if (manifest == null)
@@ -138,11 +139,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("flags is a required property for TransactionPreviewRequest and cannot be null");
             }
             this.Flags = flags;
+            this.OptIns = optIns;
             this.BlobsHex = blobsHex;
             this.NotaryPublicKey = notaryPublicKey;
             this.NotaryIsSignatory = notaryIsSignatory;
             this.Message = message;
         }
+
+        /// <summary>
+        /// Gets or Sets OptIns
+        /// </summary>
+        [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
+        public TransactionPreviewOptIns OptIns { get; set; }
 
         /// <summary>
         /// A text-representation of a transaction manifest
@@ -227,6 +235,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewRequest {\n");
+            sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
             sb.Append("  BlobsHex: ").Append(BlobsHex).Append("\n");
             sb.Append("  StartEpochInclusive: ").Append(StartEpochInclusive).Append("\n");
@@ -273,6 +282,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 return false;
             }
             return 
+                (
+                    this.OptIns == input.OptIns ||
+                    (this.OptIns != null &&
+                    this.OptIns.Equals(input.OptIns))
+                ) && 
                 (
                     this.Manifest == input.Manifest ||
                     (this.Manifest != null &&
@@ -336,6 +350,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.OptIns != null)
+                {
+                    hashCode = (hashCode * 59) + this.OptIns.GetHashCode();
+                }
                 if (this.Manifest != null)
                 {
                     hashCode = (hashCode * 59) + this.Manifest.GetHashCode();

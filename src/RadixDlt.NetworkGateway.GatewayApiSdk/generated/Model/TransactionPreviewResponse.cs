@@ -104,10 +104,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionPreviewResponse" /> class.
         /// </summary>
         /// <param name="encodedReceipt">Hex-encoded binary blob. (required).</param>
+        /// <param name="radixEngineToolkitReceipt">An optional field which is only provided if the &#x60;request_radix_engine_toolkit_receipt&#x60; flag is set to true when requesting a transaction preview from the API. This receipt is primarily intended for use with the toolkit and may contain information that is already available in the receipt provided in the &#x60;receipt&#x60; field of this response. A typical client of this API is not expected to use this receipt. The primary clients this receipt is intended for is the Radix wallet or any client that needs to perform execution summaries on their transactions. .</param>
         /// <param name="receipt">This type is defined in the Core API as &#x60;TransactionReceipt&#x60;. See the Core API documentation for more details.  (required).</param>
         /// <param name="resourceChanges">resourceChanges (required).</param>
         /// <param name="logs">logs (required).</param>
-        public TransactionPreviewResponse(string encodedReceipt = default(string), Object receipt = default(Object), List<Object> resourceChanges = default(List<Object>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
+        public TransactionPreviewResponse(string encodedReceipt = default(string), Object radixEngineToolkitReceipt = default(Object), Object receipt = default(Object), List<Object> resourceChanges = default(List<Object>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
         {
             // to ensure "encodedReceipt" is required (not null)
             if (encodedReceipt == null)
@@ -133,6 +134,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("logs is a required property for TransactionPreviewResponse and cannot be null");
             }
             this.Logs = logs;
+            this.RadixEngineToolkitReceipt = radixEngineToolkitReceipt;
         }
 
         /// <summary>
@@ -141,6 +143,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Hex-encoded binary blob.</value>
         [DataMember(Name = "encoded_receipt", IsRequired = true, EmitDefaultValue = true)]
         public string EncodedReceipt { get; set; }
+
+        /// <summary>
+        /// An optional field which is only provided if the &#x60;request_radix_engine_toolkit_receipt&#x60; flag is set to true when requesting a transaction preview from the API. This receipt is primarily intended for use with the toolkit and may contain information that is already available in the receipt provided in the &#x60;receipt&#x60; field of this response. A typical client of this API is not expected to use this receipt. The primary clients this receipt is intended for is the Radix wallet or any client that needs to perform execution summaries on their transactions. 
+        /// </summary>
+        /// <value>An optional field which is only provided if the &#x60;request_radix_engine_toolkit_receipt&#x60; flag is set to true when requesting a transaction preview from the API. This receipt is primarily intended for use with the toolkit and may contain information that is already available in the receipt provided in the &#x60;receipt&#x60; field of this response. A typical client of this API is not expected to use this receipt. The primary clients this receipt is intended for is the Radix wallet or any client that needs to perform execution summaries on their transactions. </value>
+        [DataMember(Name = "radix_engine_toolkit_receipt", EmitDefaultValue = true)]
+        public Object RadixEngineToolkitReceipt { get; set; }
 
         /// <summary>
         /// This type is defined in the Core API as &#x60;TransactionReceipt&#x60;. See the Core API documentation for more details. 
@@ -170,6 +179,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewResponse {\n");
             sb.Append("  EncodedReceipt: ").Append(EncodedReceipt).Append("\n");
+            sb.Append("  RadixEngineToolkitReceipt: ").Append(RadixEngineToolkitReceipt).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
             sb.Append("  ResourceChanges: ").Append(ResourceChanges).Append("\n");
             sb.Append("  Logs: ").Append(Logs).Append("\n");
@@ -214,6 +224,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.EncodedReceipt.Equals(input.EncodedReceipt))
                 ) && 
                 (
+                    this.RadixEngineToolkitReceipt == input.RadixEngineToolkitReceipt ||
+                    (this.RadixEngineToolkitReceipt != null &&
+                    this.RadixEngineToolkitReceipt.Equals(input.RadixEngineToolkitReceipt))
+                ) && 
+                (
                     this.Receipt == input.Receipt ||
                     (this.Receipt != null &&
                     this.Receipt.Equals(input.Receipt))
@@ -244,6 +259,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.EncodedReceipt != null)
                 {
                     hashCode = (hashCode * 59) + this.EncodedReceipt.GetHashCode();
+                }
+                if (this.RadixEngineToolkitReceipt != null)
+                {
+                    hashCode = (hashCode * 59) + this.RadixEngineToolkitReceipt.GetHashCode();
                 }
                 if (this.Receipt != null)
                 {

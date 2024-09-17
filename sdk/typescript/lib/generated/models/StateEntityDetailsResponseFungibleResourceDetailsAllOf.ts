@@ -19,6 +19,18 @@ import {
     ComponentEntityRoleAssignmentsFromJSONTyped,
     ComponentEntityRoleAssignmentsToJSON,
 } from './ComponentEntityRoleAssignments';
+import type { NativeResourceDetails } from './NativeResourceDetails';
+import {
+    NativeResourceDetailsFromJSON,
+    NativeResourceDetailsFromJSONTyped,
+    NativeResourceDetailsToJSON,
+} from './NativeResourceDetails';
+import type { TwoWayLinkedDappsCollection } from './TwoWayLinkedDappsCollection';
+import {
+    TwoWayLinkedDappsCollectionFromJSON,
+    TwoWayLinkedDappsCollectionFromJSONTyped,
+    TwoWayLinkedDappsCollectionToJSON,
+} from './TwoWayLinkedDappsCollection';
 
 /**
  * 
@@ -56,6 +68,18 @@ export interface StateEntityDetailsResponseFungibleResourceDetailsAllOf {
      * @memberof StateEntityDetailsResponseFungibleResourceDetailsAllOf
      */
     total_burned: string;
+    /**
+     * 
+     * @type {TwoWayLinkedDappsCollection}
+     * @memberof StateEntityDetailsResponseFungibleResourceDetailsAllOf
+     */
+    two_way_linked_dapps?: TwoWayLinkedDappsCollection;
+    /**
+     * 
+     * @type {NativeResourceDetails}
+     * @memberof StateEntityDetailsResponseFungibleResourceDetailsAllOf
+     */
+    native_resource_details?: NativeResourceDetails;
     /**
      * 
      * @type {string}
@@ -103,6 +127,8 @@ export function StateEntityDetailsResponseFungibleResourceDetailsAllOfFromJSONTy
         'total_supply': json['total_supply'],
         'total_minted': json['total_minted'],
         'total_burned': json['total_burned'],
+        'two_way_linked_dapps': !exists(json, 'two_way_linked_dapps') ? undefined : TwoWayLinkedDappsCollectionFromJSON(json['two_way_linked_dapps']),
+        'native_resource_details': !exists(json, 'native_resource_details') ? undefined : NativeResourceDetailsFromJSON(json['native_resource_details']),
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -121,6 +147,8 @@ export function StateEntityDetailsResponseFungibleResourceDetailsAllOfToJSON(val
         'total_supply': value.total_supply,
         'total_minted': value.total_minted,
         'total_burned': value.total_burned,
+        'two_way_linked_dapps': TwoWayLinkedDappsCollectionToJSON(value.two_way_linked_dapps),
+        'native_resource_details': NativeResourceDetailsToJSON(value.native_resource_details),
         'type': value.type,
     };
 }

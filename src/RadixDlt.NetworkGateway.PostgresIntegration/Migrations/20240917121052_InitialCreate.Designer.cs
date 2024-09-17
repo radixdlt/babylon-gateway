@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240830081152_InitialCreate")]
+    [Migration("20240917121052_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1858,6 +1858,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ValidatorEntityId", "EpochNumber");
+
+                    b.HasIndex("ValidatorEntityId", "FromStateVersion");
 
                     b.ToTable("validator_cumulative_emission_history");
                 });

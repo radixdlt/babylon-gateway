@@ -99,6 +99,12 @@ export interface StateEntityDetailsResponsePackageDetailsAllOf {
      */
     role_assignments?: ComponentEntityRoleAssignments;
     /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof StateEntityDetailsResponsePackageDetailsAllOf
+     */
+    two_way_linked_dapp_address?: string;
+    /**
      * 
      * @type {string}
      * @memberof StateEntityDetailsResponsePackageDetailsAllOf
@@ -147,6 +153,7 @@ export function StateEntityDetailsResponsePackageDetailsAllOfFromJSONTyped(json:
         'blueprints': !exists(json, 'blueprints') ? undefined : PackageBlueprintCollectionFromJSON(json['blueprints']),
         'schemas': !exists(json, 'schemas') ? undefined : EntitySchemaCollectionFromJSON(json['schemas']),
         'role_assignments': !exists(json, 'role_assignments') ? undefined : ComponentEntityRoleAssignmentsFromJSON(json['role_assignments']),
+        'two_way_linked_dapp_address': !exists(json, 'two_way_linked_dapp_address') ? undefined : json['two_way_linked_dapp_address'],
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -168,6 +175,7 @@ export function StateEntityDetailsResponsePackageDetailsAllOfToJSON(value?: Stat
         'blueprints': PackageBlueprintCollectionToJSON(value.blueprints),
         'schemas': EntitySchemaCollectionToJSON(value.schemas),
         'role_assignments': ComponentEntityRoleAssignmentsToJSON(value.role_assignments),
+        'two_way_linked_dapp_address': value.two_way_linked_dapp_address,
         'type': value.type,
     };
 }
