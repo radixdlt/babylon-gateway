@@ -77,7 +77,7 @@ internal record struct MetadataEntryDbLookup(long EntityId, string Key);
 
 internal record struct MetadataChangePointerLookup(long EntityId, long StateVersion);
 
-internal record struct MetadataEntry(CoreModel.MetadataModuleEntrySubstate NewValue, CoreModel.MetadataModuleEntrySubstate? PreviousValue);
+internal record struct MetadataEntry(CoreModel.MetadataModuleEntrySubstate NewSubstate, CoreModel.MetadataModuleEntrySubstate? PreviousSubstate);
 
 internal record MetadataChangePointer
 {
@@ -95,7 +95,6 @@ internal class EntityMetadataProcessor
     private readonly Dictionary<MetadataEntryDbLookup, EntityMetadataEntryDefinition> _entryDefinitionsToAdd = new();
     private readonly List<EntityMetadataEntryHistory> _entryHistoryToAdd = new();
     private readonly List<EntityMetadataTotalsHistory> _totalsHistoryToAdd = new();
-    private readonly Dictionary<long, EntityMetadataEntryHistory> _mostRecentHistoryEntry = new();
 
     private readonly ChangeTracker<MetadataChangePointerLookup, MetadataChangePointer> _changes = new();
 
@@ -157,8 +156,8 @@ internal class EntityMetadataProcessor
 
             foreach (var entry in change.Value.Entries)
             {
-                var isDeleted = entry.NewValue.Value == null;
-                var newEntry = entry.NewValue;
+                var isDeleted = entry.NewSubstate.Value == null;
+                var newEntry = entry.NewSubstate;
 
                 _entryHistoryToAdd.Add(
                     new EntityMetadataEntryHistory
@@ -173,17 +172,17 @@ internal class EntityMetadataProcessor
 
                 switch (entry)
                 {
-                    case { PreviousValue: null, NewValue.Value: null }:
+                    case { PreviousSubstate: null, NewSubstate.Value: null }:
                         newTotals.TotalEntriesIncludingDeleted++;
                         break;
-                    case { PreviousValue: null, NewValue.Value: not null }:
+                    case { PreviousSubstate: null, NewSubstate.Value: not null }:
                         newTotals.TotalEntriesIncludingDeleted++;
                         newTotals.TotalEntriesExcludingDeleted++;
                         break;
-                    case { PreviousValue.Value: not null, NewValue.Value: null }:
+                    case { PreviousSubstate.Value: not null, NewSubstate.Value: null }:
                         newTotals.TotalEntriesExcludingDeleted--;
                         break;
-                    case { PreviousValue.Value: null, NewValue.Value: not null }:
+                    case { PreviousSubstate.Value: null, NewSubstate.Value: not null }:
                         newTotals.TotalEntriesExcludingDeleted++;
                         break;
                 }
