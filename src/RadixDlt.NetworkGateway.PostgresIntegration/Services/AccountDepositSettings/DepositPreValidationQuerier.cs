@@ -76,14 +76,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
-
-internal record DepositPreValidationResourcePreferenceRulesViewModel(
-    long ResourceEntityId,
-    AccountResourcePreferenceRule AccountResourcePreferenceRule);
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services.AccountDepositSettings;
 
 internal class DepositPreValidationQuerier : IDepositPreValidationQuerier
 {
+    private record DepositPreValidationResourcePreferenceRulesViewModel(
+        long ResourceEntityId,
+        AccountResourcePreferenceRule AccountResourcePreferenceRule);
+
     private readonly IDapperWrapper _dapperWrapper;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;

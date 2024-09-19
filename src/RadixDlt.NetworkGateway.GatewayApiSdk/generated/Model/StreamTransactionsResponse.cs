@@ -104,10 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StreamTransactionsResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">The page of user transactions. (required).</param>
-        public StreamTransactionsResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string nextCursor = default(string), List<CommittedTransactionInfo> items = default(List<CommittedTransactionInfo>))
+        public StreamTransactionsResponse(LedgerState ledgerState = default(LedgerState), string nextCursor = default(string), List<CommittedTransactionInfo> items = default(List<CommittedTransactionInfo>))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -121,7 +120,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("items is a required property for StreamTransactionsResponse and cannot be null");
             }
             this.Items = items;
-            this.TotalCount = totalCount;
             this.NextCursor = nextCursor;
         }
 
@@ -130,13 +128,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
         public LedgerState LedgerState { get; set; }
-
-        /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
 
         /// <summary>
         /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
@@ -161,7 +152,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StreamTransactionsResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
@@ -205,11 +195,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
-                ) && 
-                (
                     this.NextCursor == input.NextCursor ||
                     (this.NextCursor != null &&
                     this.NextCursor.Equals(input.NextCursor))
@@ -234,10 +219,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.LedgerState != null)
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
-                }
-                if (this.TotalCount != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 }
                 if (this.NextCursor != null)
                 {

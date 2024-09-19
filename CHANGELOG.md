@@ -27,6 +27,10 @@ Release built: _not released yet_
 >   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
 >   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
 
+
+### Bug fixes
+
+- Added missing `total_count` property to `/state/validators/list` response.
 ### API Changes
 - Restored previously removed `total_count` property to `/state/key-value-store/keys` endpoint.
 
