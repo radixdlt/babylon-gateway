@@ -110,8 +110,25 @@ internal class DepositPreValidationQuerier : IDepositPreValidationQuerier
         CancellationToken token = default
     )
     {
-        var accountEntity = await _entityQuerier.GetNonVirtualEntity<GlobalAccountEntity>(_dbContext, accountAddress, ledgerState, token);
         var xrdResourceAddress = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).WellKnownAddresses.Xrd;
+        var accountEntity = await _entityQuerier.GetEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
+        if (accountEntity is VirtualAccountComponentEntity)
+        {
+            var resourceItems = resourceAddresses
+                .Select(
+                    resourceAddress => new GatewayModel.AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem(
+                        resourceAddress,
+                        false,
+                        resourceAddress == xrdResourceAddress))
+                .ToList();
+
+            return new GatewayModel.AccountDepositPreValidationDecidingFactors(
+                badgeResourceAddress.HasValue ? false : null,
+                AccountDefaultDepositRule.Accept.ToGatewayModel(),
+                resourceItems
+            );
+        }
+
         var addressesToResolve = resourceAddresses.ToList();
         if (badgeResourceAddress.HasValue)
         {
