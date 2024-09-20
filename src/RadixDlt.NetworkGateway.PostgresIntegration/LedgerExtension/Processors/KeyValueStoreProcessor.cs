@@ -73,14 +73,14 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct KeyValueStoreEntryDbLookup(long KeyValueStoreEntityId, ValueBytes Key);
-
-internal record struct KeyValueStoreChangePointerLookup(long KeyValueStoreEntityId, long StateVersion, ValueBytes Key);
-
-internal record KeyValueStoreChangePointer(CoreModel.GenericKeyValueStoreEntrySubstate NewSubstate, CoreModel.GenericKeyValueStoreEntrySubstate? PreviousSubstate);
-
-internal class KeyValueStoreProcessor
+internal class KeyValueStoreProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
+    private record struct KeyValueStoreEntryDbLookup(long KeyValueStoreEntityId, ValueBytes Key);
+
+    private record struct KeyValueStoreChangePointerLookup(long KeyValueStoreEntityId, long StateVersion, ValueBytes Key);
+
+    private record KeyValueStoreChangePointer(CoreModel.GenericKeyValueStoreEntrySubstate NewSubstate, CoreModel.GenericKeyValueStoreEntrySubstate? PreviousSubstate);
+
     private readonly ProcessorContext _context;
 
     private readonly Dictionary<KeyValueStoreEntryDbLookup, long> _observedEntryDefinitions = new();
@@ -91,7 +91,7 @@ internal class KeyValueStoreProcessor
     private readonly List<KeyValueStoreEntryHistory> _entryHistoryToAdd = new();
     private readonly List<KeyValueStoreTotalsHistory> _totalsHistoryToAdd = new();
 
-    private ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changes = new();
+    private readonly ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changes = new();
 
     public KeyValueStoreProcessor(ProcessorContext context)
     {
@@ -112,7 +112,7 @@ internal class KeyValueStoreProcessor
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _existingEntryDefinitions.AddRange(await ExistingKeyValueStoreEntryDefinitions());
         _existingTotalsHistory.AddRange(await ExistingKeyValueStoreTotalsHistory());
@@ -138,15 +138,16 @@ internal class KeyValueStoreProcessor
         {
             var isDeleted = change.Value.NewSubstate.Value == null;
 
-            _entryHistoryToAdd.Add(new KeyValueStoreEntryHistory
-            {
-                Id = _context.Sequences.KeyValueStoreEntryHistorySequence++,
-                FromStateVersion = change.Key.StateVersion,
-                KeyValueStoreEntryDefinitionId = _existingEntryDefinitions[new KeyValueStoreEntryDbLookup(change.Key.KeyValueStoreEntityId, change.Key.Key)].Id,
-                Value = isDeleted ? null : change.Value.NewSubstate.Value!.Data.StructData.GetDataBytes(),
-                IsDeleted = isDeleted,
-                IsLocked = change.Value.NewSubstate.IsLocked,
-            });
+            _entryHistoryToAdd.Add(
+                new KeyValueStoreEntryHistory
+                {
+                    Id = _context.Sequences.KeyValueStoreEntryHistorySequence++,
+                    FromStateVersion = change.Key.StateVersion,
+                    KeyValueStoreEntryDefinitionId = _existingEntryDefinitions[new KeyValueStoreEntryDbLookup(change.Key.KeyValueStoreEntityId, change.Key.Key)].Id,
+                    Value = isDeleted ? null : change.Value.NewSubstate.Value!.Data.StructData.GetDataBytes(),
+                    IsDeleted = isDeleted,
+                    IsLocked = change.Value.NewSubstate.IsLocked,
+                });
 
             var totalsExists = _existingTotalsHistory.TryGetValue(change.Key.KeyValueStoreEntityId, out var previousTotals);
 
@@ -181,7 +182,7 @@ internal class KeyValueStoreProcessor
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

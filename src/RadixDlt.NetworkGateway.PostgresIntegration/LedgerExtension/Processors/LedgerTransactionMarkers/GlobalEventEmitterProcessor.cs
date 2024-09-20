@@ -65,61 +65,70 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal class AffectedGlobalEntitiesProcessor
+internal class GlobalEventEmitterProcessor : ITransactionMarkerProcessor, IEventProcessor
 {
-    private readonly long[] _excludedEntityIds;
     private readonly ProcessorContext _context;
-    private readonly Dictionary<long, HashSet<long>> _affectedGlobalEntities = new();
+    private readonly ReferencedEntityDictionary _referencedEntities;
+    private readonly NetworkConfiguration _networkConfiguration;
+    private readonly Dictionary<long, HashSet<long>> _globalEventEmitters = new();
 
-    public AffectedGlobalEntitiesProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
+    public GlobalEventEmitterProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
     {
         _context = context;
-        _excludedEntityIds = new[]
+        _referencedEntities = referencedEntities;
+        _networkConfiguration = networkConfiguration;
+    }
+
+    public void VisitEvent(CoreModel.Event @event, long stateVersion)
+    {
+        switch (@event.Type.Emitter)
         {
-            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
-            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.TransactionTracker).DatabaseId,
+            case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
+                var methodEventEmitterEntity = _referencedEntities.Get((EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress);
+                var globalEventEmitterEntityId = methodEventEmitterEntity.GlobalEventEmitterEntityId;
+
+                _globalEventEmitters
+                    .GetOrAdd(stateVersion, _ => new HashSet<long>())
+                    .Add(globalEventEmitterEntityId);
+
+                break;
+            case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
+                var functionEventEmitterEntity = _referencedEntities.Get((EntityAddress)functionEventEmitterIdentifier.PackageAddress);
+
+                _globalEventEmitters
+                    .GetOrAdd(stateVersion, _ => new HashSet<long>())
+                    .Add(functionEventEmitterEntity.GlobalEventEmitterEntityId);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException($"Unexpected event emitter type {@event.Type.Emitter.GetType()}");
+        }
+    }
+
+    public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
+    {
+        var excludedEntityIds = new[]
+        {
+            _referencedEntities.Get((EntityAddress)_networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
+            _referencedEntities.Get((EntityAddress)_networkConfiguration.WellKnownAddresses.Xrd).DatabaseId,
         };
-    }
 
-    public void VisitUpsert(ReferencedEntity referencedEntity, long stateVersion)
-    {
-        _affectedGlobalEntities
-            .GetOrAdd(stateVersion, _ => new HashSet<long>())
-            .Add(referencedEntity.AffectedGlobalEntityId);
-    }
-
-    public void VisitDelete(ReferencedEntity referencedEntity, long stateVersion)
-    {
-        _affectedGlobalEntities
-            .GetOrAdd(stateVersion, _ => new HashSet<long>())
-            .Add(referencedEntity.AffectedGlobalEntityId);
-    }
-
-    public HashSet<long> GetAllAffectedGlobalEntities(long stateVersion)
-    {
-        return _affectedGlobalEntities.TryGetValue(stateVersion, out var hashSet) ? hashSet : new HashSet<long>();
-    }
-
-    public IEnumerable<AffectedGlobalEntityTransactionMarker> CreateTransactionMarkers()
-    {
-        foreach (var stateVersionAffectedEntities in _affectedGlobalEntities)
+        foreach (var stateVersionAffectedEntities in _globalEventEmitters.Where(x => !excludedEntityIds.Contains(x.Key)))
         {
             foreach (var entityId in stateVersionAffectedEntities.Value)
             {
-                if (!_excludedEntityIds.Contains(entityId))
+                yield return new EventGlobalEmitterTransactionMarker
                 {
-                    yield return new AffectedGlobalEntityTransactionMarker
-                    {
-                        Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                        EntityId = entityId,
-                        StateVersion = stateVersionAffectedEntities.Key,
-                    };
-                }
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    EntityId = entityId,
+                    StateVersion = stateVersionAffectedEntities.Key,
+                };
             }
         }
     }

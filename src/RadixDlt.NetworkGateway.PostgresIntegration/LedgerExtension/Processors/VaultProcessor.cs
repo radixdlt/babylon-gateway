@@ -74,7 +74,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class VaultProcessor
+internal class VaultProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
     private readonly record struct NonFungibleIdDefinitionDbLookup(long NonFungibleResourceEntityId, string NonFungibleId);
 
@@ -105,8 +105,10 @@ internal class VaultProcessor
         _context = context;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion, CoreModel.IUpsertedSubstate substate)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleVaultFieldBalanceSubstate)
         {
             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
@@ -156,7 +158,7 @@ internal class VaultProcessor
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _existingNonFungibleIdDefinitions.AddRange(await ExistingNonFungibleIdDefinitions());
         _existingNonFungibleVaultEntryDefinitions.AddRange(await ExistingNonFungibleVaultEntryDefinitions());
@@ -264,7 +266,7 @@ internal class VaultProcessor
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

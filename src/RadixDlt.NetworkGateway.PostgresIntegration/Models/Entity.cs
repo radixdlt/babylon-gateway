@@ -65,6 +65,7 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

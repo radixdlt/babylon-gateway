@@ -75,19 +75,19 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-// It's using assumption that only possible badges are resource and non fungible resource badge.
+internal class AccountAuthorizedDepositorsProcessor : IProcessorBase, ISubstateUpsertProcessor
+{
+    // It's using assumption that only possible badges are resource and non fungible resource badge.
 // If in future our model will be expanded and there will be more badge types it'll require rework.
-internal record struct AccountAuthorizedDepositorsDbLookup(long AccountEntityId, long ResourceEntityId, string? NonFungibleId);
+    private record struct AccountAuthorizedDepositorsDbLookup(long AccountEntityId, long ResourceEntityId, string? NonFungibleId);
 
-internal record struct AccountAuthorizedDepositorsChangePointerLookup(long AccountEntityId, long StateVersion);
+    private record struct AccountAuthorizedDepositorsChangePointerLookup(long AccountEntityId, long StateVersion);
 
-internal record AccountAuthorizedDepositorsChangePointer
-{
-    public List<CoreModel.AccountAuthorizedDepositorEntrySubstate> AuthorizedDepositorEntries { get; } = new();
-}
+    private record AccountAuthorizedDepositorsChangePointer
+    {
+        public List<CoreModel.AccountAuthorizedDepositorEntrySubstate> AuthorizedDepositorEntries { get; } = new();
+    }
 
-internal class AccountAuthorizedDepositorsProcessor
-{
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntityDictionary;
 
@@ -107,8 +107,10 @@ internal class AccountAuthorizedDepositorsProcessor
         _referencedEntityDictionary = referencedEntityDictionary;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.AccountAuthorizedDepositorEntrySubstate accountAuthorizedDepositorEntry)
         {
             _changeTracker
@@ -207,13 +209,13 @@ internal class AccountAuthorizedDepositorsProcessor
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _mostRecentEntries.AddRange(await MostRecentAccountAuthorizedDepositorHistory());
         _mostRecentAggregates.AddRange(await MostRecentAccountAuthorizedDepositorAggregateHistory());
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 
@@ -233,28 +235,28 @@ internal class AccountAuthorizedDepositorsProcessor
         switch (accountAuthorizedDepositorEntrySubstate.Key.Badge)
         {
             case CoreModel.ResourceAuthorizedDepositorBadge resourceBadge:
-                {
-                    var resourceEntityId = _referencedEntityDictionary.Get((EntityAddress)resourceBadge.ResourceAddress).DatabaseId;
+            {
+                var resourceEntityId = _referencedEntityDictionary.Get((EntityAddress)resourceBadge.ResourceAddress).DatabaseId;
 
-                    entryLookup = new AccountAuthorizedDepositorsDbLookup(
-                        AccountEntityId: lookup.AccountEntityId,
-                        ResourceEntityId: resourceEntityId,
-                        NonFungibleId: null
-                    );
-                    break;
-                }
+                entryLookup = new AccountAuthorizedDepositorsDbLookup(
+                    AccountEntityId: lookup.AccountEntityId,
+                    ResourceEntityId: resourceEntityId,
+                    NonFungibleId: null
+                );
+                break;
+            }
 
             case CoreModel.NonFungibleAuthorizedDepositorBadge nonFungibleBadge:
-                {
-                    var resourceEntityId = _referencedEntityDictionary.Get((EntityAddress)nonFungibleBadge.NonFungibleGlobalId.ResourceAddress).DatabaseId;
+            {
+                var resourceEntityId = _referencedEntityDictionary.Get((EntityAddress)nonFungibleBadge.NonFungibleGlobalId.ResourceAddress).DatabaseId;
 
-                    entryLookup = new AccountAuthorizedDepositorsDbLookup(
-                        AccountEntityId: lookup.AccountEntityId,
-                        ResourceEntityId: resourceEntityId,
-                        NonFungibleId: nonFungibleBadge.NonFungibleGlobalId.LocalId.SimpleRep
-                    );
-                    break;
-                }
+                entryLookup = new AccountAuthorizedDepositorsDbLookup(
+                    AccountEntityId: lookup.AccountEntityId,
+                    ResourceEntityId: resourceEntityId,
+                    NonFungibleId: nonFungibleBadge.NonFungibleGlobalId.LocalId.SimpleRep
+                );
+                break;
+            }
 
             default:
                 throw new UnreachableException(
@@ -283,7 +285,7 @@ internal class AccountAuthorizedDepositorsProcessor
                 out var entityIds,
                 out var resourceEntityIds,
                 out var nonFungibleIds)
-            )
+           )
         {
             return ImmutableDictionary<AccountAuthorizedDepositorsDbLookup, AccountAuthorizedDepositorEntryHistory>.Empty;
         }

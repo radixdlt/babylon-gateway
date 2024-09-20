@@ -113,40 +113,6 @@ internal class ReadHelper : IReadHelper
         return result;
     }
 
-    public async Task<Dictionary<long, ResourceEntitySupplyHistory>> MostRecentResourceEntitySupplyHistoryFor(List<ResourceSupplyChange> resourceSupplyChanges, CancellationToken token)
-    {
-        if (!resourceSupplyChanges.Any())
-        {
-            return new Dictionary<long, ResourceEntitySupplyHistory>();
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-        var ids = resourceSupplyChanges.Select(c => c.ResourceEntityId).Distinct().ToList();
-
-        var result = await _dbContext
-            .ResourceEntitySupplyHistory
-            .FromSqlInterpolated(@$"
-WITH variables (resource_entity_id) AS (
-    SELECT UNNEST({ids})
-)
-SELECT rmesh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM resource_entity_supply_history
-    WHERE resource_entity_id = variables.resource_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) rmesh ON true;")
-            .AsNoTracking()
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.ResourceEntityId, token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(MostRecentResourceEntitySupplyHistoryFor), Stopwatch.GetElapsedTime(sw), result.Count));
-
-        return result;
-    }
-
     public async Task<Dictionary<EntityAddress, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token)
     {
         var sw = Stopwatch.GetTimestamp();

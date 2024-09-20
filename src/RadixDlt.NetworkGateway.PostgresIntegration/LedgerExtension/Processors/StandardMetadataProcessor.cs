@@ -78,18 +78,18 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct UnverifiedStandardMetadataEntryDbLookup(long EntityId, StandardMetadataKey Type);
-
-internal class StandardMetadataProcessor
+internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
+    private record struct UnverifiedStandardMetadataEntryDbLookup(long EntityId, StandardMetadataKey Type);
+
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
 
-    private Dictionary<long, UnverifiedStandardMetadataAggregateHistory> _mostRecentAggregates = new();
-    private Dictionary<UnverifiedStandardMetadataEntryDbLookup, UnverifiedStandardMetadataEntryHistory> _mostRecentEntries = new();
+    private readonly Dictionary<long, UnverifiedStandardMetadataAggregateHistory> _mostRecentAggregates = new();
+    private readonly Dictionary<UnverifiedStandardMetadataEntryDbLookup, UnverifiedStandardMetadataEntryHistory> _mostRecentEntries = new();
 
-    private List<UnverifiedStandardMetadataAggregateHistory> _aggregatesToAdd = new();
-    private List<UnverifiedStandardMetadataEntryHistory> _entriesToAdd = new();
+    private readonly List<UnverifiedStandardMetadataAggregateHistory> _aggregatesToAdd = new();
+    private readonly List<UnverifiedStandardMetadataEntryHistory> _entriesToAdd = new();
 
     public StandardMetadataProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
     {
@@ -97,8 +97,10 @@ internal class StandardMetadataProcessor
         _referencedEntities = referencedEntities;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is not CoreModel.MetadataModuleEntrySubstate metadataEntry)
         {
             return;
@@ -127,98 +129,105 @@ internal class StandardMetadataProcessor
         {
             if (key == StandardMetadataConstants.DappAccountType && TryParseValue<GatewayModel.MetadataStringValue>(out var accountType))
             {
-                _entriesToAdd.Add(new DappAccountTypeUnverifiedStandardMetadataEntryHistory
-                {
-                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
-                    FromStateVersion = stateVersion,
-                    EntityId = referencedEntity.DatabaseId,
-                    IsDeleted = metadataEntry.Value == null,
-                    IsLocked = substateData.IsLocked,
-                    Value = accountType.Value,
-                });
+                _entriesToAdd.Add(
+                    new DappAccountTypeUnverifiedStandardMetadataEntryHistory
+                    {
+                        Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
+                        FromStateVersion = stateVersion,
+                        EntityId = referencedEntity.DatabaseId,
+                        IsDeleted = metadataEntry.Value == null,
+                        IsLocked = substateData.IsLocked,
+                        Value = accountType.Value,
+                    });
             }
             else if (key == StandardMetadataConstants.DappClaimedWebsites && TryParseValue<GatewayModel.MetadataOriginArrayValue>(out var claimedWebsites))
             {
-                _entriesToAdd.Add(new DappClaimedWebsitesUnverifiedStandardMetadataEntryHistory
-                {
-                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
-                    FromStateVersion = stateVersion,
-                    EntityId = referencedEntity.DatabaseId,
-                    IsDeleted = metadataEntry.Value == null,
-                    IsLocked = substateData.IsLocked,
-                    ClaimedWebsites = claimedWebsites.Values.ToArray(),
-                });
+                _entriesToAdd.Add(
+                    new DappClaimedWebsitesUnverifiedStandardMetadataEntryHistory
+                    {
+                        Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
+                        FromStateVersion = stateVersion,
+                        EntityId = referencedEntity.DatabaseId,
+                        IsDeleted = metadataEntry.Value == null,
+                        IsLocked = substateData.IsLocked,
+                        ClaimedWebsites = claimedWebsites.Values.ToArray(),
+                    });
             }
             else if (key == StandardMetadataConstants.DappClaimedEntities && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var claimedEntities))
             {
-                _entriesToAdd.Add(new DappClaimedEntitiesUnverifiedStandardMetadataEntryHistory
-                {
-                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
-                    FromStateVersion = stateVersion,
-                    EntityId = referencedEntity.DatabaseId,
-                    IsDeleted = metadataEntry.Value == null,
-                    IsLocked = substateData.IsLocked,
-                    ClaimedEntityIds = claimedEntities.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
-                });
+                _entriesToAdd.Add(
+                    new DappClaimedEntitiesUnverifiedStandardMetadataEntryHistory
+                    {
+                        Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
+                        FromStateVersion = stateVersion,
+                        EntityId = referencedEntity.DatabaseId,
+                        IsDeleted = metadataEntry.Value == null,
+                        IsLocked = substateData.IsLocked,
+                        ClaimedEntityIds = claimedEntities.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
+                    });
             }
             else if (key == StandardMetadataConstants.DappDefinitions && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var dappDefinitions))
             {
-                _entriesToAdd.Add(new DappDefinitionsUnverifiedStandardMetadataEntryHistory
-                {
-                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
-                    FromStateVersion = stateVersion,
-                    EntityId = referencedEntity.DatabaseId,
-                    IsDeleted = metadataEntry.Value == null,
-                    IsLocked = substateData.IsLocked,
-                    DappDefinitionEntityIds = dappDefinitions.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
-                });
+                _entriesToAdd.Add(
+                    new DappDefinitionsUnverifiedStandardMetadataEntryHistory
+                    {
+                        Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
+                        FromStateVersion = stateVersion,
+                        EntityId = referencedEntity.DatabaseId,
+                        IsDeleted = metadataEntry.Value == null,
+                        IsLocked = substateData.IsLocked,
+                        DappDefinitionEntityIds = dappDefinitions.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
+                    });
             }
             else if (key == StandardMetadataConstants.DappAccountLocker && TryParseValue<GatewayModel.MetadataGlobalAddressValue>(out var dappAccountLocker))
             {
-                _entriesToAdd.Add(new DappAccountLockerUnverifiedStandardMetadataEntryHistory
-                {
-                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
-                    FromStateVersion = stateVersion,
-                    EntityId = referencedEntity.DatabaseId,
-                    IsDeleted = metadataEntry.Value == null,
-                    IsLocked = substateData.IsLocked,
-                    AccountLockerEntityId = _referencedEntities.Get((EntityAddress)dappAccountLocker.Value).DatabaseId,
-                });
+                _entriesToAdd.Add(
+                    new DappAccountLockerUnverifiedStandardMetadataEntryHistory
+                    {
+                        Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
+                        FromStateVersion = stateVersion,
+                        EntityId = referencedEntity.DatabaseId,
+                        IsDeleted = metadataEntry.Value == null,
+                        IsLocked = substateData.IsLocked,
+                        AccountLockerEntityId = _referencedEntities.Get((EntityAddress)dappAccountLocker.Value).DatabaseId,
+                    });
             }
         }
         else if (referencedEntity.Address.IsResource)
         {
             if (key == StandardMetadataConstants.DappDefinitions && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var dappDefinitions))
             {
-                _entriesToAdd.Add(new DappDefinitionsUnverifiedStandardMetadataEntryHistory
-                {
-                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
-                    FromStateVersion = stateVersion,
-                    EntityId = referencedEntity.DatabaseId,
-                    IsDeleted = metadataEntry.Value == null,
-                    IsLocked = substateData.IsLocked,
-                    DappDefinitionEntityIds = dappDefinitions.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
-                });
+                _entriesToAdd.Add(
+                    new DappDefinitionsUnverifiedStandardMetadataEntryHistory
+                    {
+                        Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
+                        FromStateVersion = stateVersion,
+                        EntityId = referencedEntity.DatabaseId,
+                        IsDeleted = metadataEntry.Value == null,
+                        IsLocked = substateData.IsLocked,
+                        DappDefinitionEntityIds = dappDefinitions.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
+                    });
             }
         }
         else if (referencedEntity.Address.IsGlobal)
         {
             if (key == StandardMetadataConstants.DappDefinition && TryParseValue<GatewayModel.MetadataGlobalAddressValue>(out var dappDefinition))
             {
-                _entriesToAdd.Add(new DappDefinitionUnverifiedStandardMetadataEntryHistory
-                {
-                    Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
-                    FromStateVersion = stateVersion,
-                    EntityId = referencedEntity.DatabaseId,
-                    IsDeleted = metadataEntry.Value == null,
-                    IsLocked = substateData.IsLocked,
-                    DappDefinitionEntityId = _referencedEntities.Get((EntityAddress)dappDefinition.Value).DatabaseId,
-                });
+                _entriesToAdd.Add(
+                    new DappDefinitionUnverifiedStandardMetadataEntryHistory
+                    {
+                        Id = _context.Sequences.UnverifiedStandardMetadataEntryHistorySequence++,
+                        FromStateVersion = stateVersion,
+                        EntityId = referencedEntity.DatabaseId,
+                        IsDeleted = metadataEntry.Value == null,
+                        IsLocked = substateData.IsLocked,
+                        DappDefinitionEntityId = _referencedEntities.Get((EntityAddress)dappDefinition.Value).DatabaseId,
+                    });
             }
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _mostRecentEntries.AddRange(await MostRecentEntryHistory());
         _mostRecentAggregates.AddRange(await MostRecentAggregateHistory());
@@ -274,7 +283,7 @@ internal class StandardMetadataProcessor
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

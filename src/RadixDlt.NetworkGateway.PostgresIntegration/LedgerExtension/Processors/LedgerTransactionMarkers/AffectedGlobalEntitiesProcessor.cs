@@ -62,81 +62,67 @@
  * permissions under this License.
  */
 
-using NpgsqlTypes;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal record struct AccountDefaultDepositRuleChangePointerLookup(long AccountEntityId, long StateVersion);
-
-internal record AccountDefaultDepositRuleChangePointer
-{
-    public List<CoreModel.AccountFieldStateSubstate> AccountFieldStateEntries { get; } = new();
-}
-
-internal class AccountDefaultDepositRuleProcessor
+internal class AffectedGlobalEntitiesProcessor : ITransactionMarkerProcessor, ISubstateUpsertProcessor, ISubstateDeleteProcessor
 {
     private readonly ProcessorContext _context;
-    private readonly ChangeTracker<AccountDefaultDepositRuleChangePointerLookup, AccountDefaultDepositRuleChangePointer> _changeTracker = new();
-    private readonly List<AccountDefaultDepositRuleHistory> _rulesToAdd = new();
+    private readonly ReferencedEntityDictionary _referencedEntities;
+    private readonly NetworkConfiguration _networkConfiguration;
+    private readonly Dictionary<long, HashSet<long>> _affectedGlobalEntities = new();
 
-    public AccountDefaultDepositRuleProcessor(ProcessorContext context)
+    public AffectedGlobalEntitiesProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
     {
         _context = context;
+        _referencedEntities = referencedEntities;
+        _networkConfiguration = networkConfiguration;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
-        if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
-        {
-            _changeTracker
-                .GetOrAdd(
-                    new AccountDefaultDepositRuleChangePointerLookup(referencedEntity.DatabaseId, stateVersion),
-                    _ => new AccountDefaultDepositRuleChangePointer())
-                .AccountFieldStateEntries
-                .Add(accountFieldState);
-        }
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
     }
 
-    public void ProcessChanges()
+    public void VisitDelete(CoreApiSdk.Model.SubstateId substateId, ReferencedEntity referencedEntity, long stateVersion)
     {
-        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
+    }
+
+    public HashSet<long> GetAllAffectedGlobalEntities(long stateVersion)
+    {
+        return _affectedGlobalEntities.TryGetValue(stateVersion, out var hashSet) ? hashSet : new HashSet<long>();
+    }
+
+    public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
+    {
+        var excludedEntityIds = new[]
         {
-            foreach (var accountFieldStateChange in change.AccountFieldStateEntries)
+            _referencedEntities.Get((EntityAddress)_networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
+            _referencedEntities.Get((EntityAddress)_networkConfiguration.WellKnownAddresses.TransactionTracker).DatabaseId,
+        };
+
+        foreach (var stateVersionAffectedEntities in _affectedGlobalEntities)
+        {
+            foreach (var entityId in stateVersionAffectedEntities.Value.Where(entityId => !excludedEntityIds.Contains(entityId)))
             {
-                _rulesToAdd.Add(
-                    new AccountDefaultDepositRuleHistory
-                    {
-                        Id = _context.Sequences.AccountDefaultDepositRuleHistorySequence++,
-                        FromStateVersion = lookup.StateVersion,
-                        AccountEntityId = lookup.AccountEntityId,
-                        DefaultDepositRule = accountFieldStateChange.Value.DefaultDepositRule.ToModel(),
-                    });
+                yield return new AffectedGlobalEntityTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    EntityId = entityId,
+                    StateVersion = stateVersionAffectedEntities.Key,
+                };
             }
         }
     }
-
-    public async Task<int> SaveEntities()
-    {
-        var rowsInserted = 0;
-
-        rowsInserted += await CopyAccountDefaultDepositRuleHistory();
-
-        return rowsInserted;
-    }
-
-    private Task<int> CopyAccountDefaultDepositRuleHistory() => _context.WriteHelper.Copy(
-        _rulesToAdd,
-        "COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)",
-        async (writer, e, token) =>
-        {
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.DefaultDepositRule, "account_default_deposit_rule", token);
-        });
 }

@@ -74,17 +74,17 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct AccountResourcePreferenceRuleDbLookup(long AccountEntityId, long ResourceEntityId);
-
-internal record struct AccountResourcePreferenceRuleChangePointerLookup(long AccountEntityId, long ResourceEntityId, long StateVersion);
-
-internal record AccountResourcePreferenceRuleChangePointer
+internal class AccountResourcePreferenceRulesProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
-    public List<CoreModel.AccountResourcePreferenceEntrySubstate> Entries { get; } = new();
-}
+    private record struct AccountResourcePreferenceRuleDbLookup(long AccountEntityId, long ResourceEntityId);
 
-internal class AccountResourcePreferenceRulesProcessor
-{
+    private record struct AccountResourcePreferenceRuleChangePointerLookup(long AccountEntityId, long ResourceEntityId, long StateVersion);
+
+    private record AccountResourcePreferenceRuleChangePointer
+    {
+        public List<CoreModel.AccountResourcePreferenceEntrySubstate> Entries { get; } = new();
+    }
+
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntityDictionary;
 
@@ -102,8 +102,10 @@ internal class AccountResourcePreferenceRulesProcessor
         _referencedEntityDictionary = referencedEntityDictionary;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.AccountResourcePreferenceEntrySubstate accountResourcePreferenceEntry)
         {
             _changeTracker
@@ -184,13 +186,13 @@ internal class AccountResourcePreferenceRulesProcessor
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _mostRecentEntries.AddRange(await MostRecentAccountResourcePreferenceRuleHistory());
         _mostRecentAggregates.AddRange(await MostRecentAccountResourcePreferenceRuleAggregateHistory());
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

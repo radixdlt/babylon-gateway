@@ -77,25 +77,20 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct ValidatorPublicKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
-
-internal record ValidatorActiveSet(long Epoch, IDictionary<ValidatorPublicKeyLookup, TokenAmount> ValidatorStake, long StateVersion);
-
-internal class ValidatorProcessor
+internal class ValidatorProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
+    private record struct ValidatorPublicKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
+
+    private record ValidatorActiveSet(long Epoch, IDictionary<ValidatorPublicKeyLookup, TokenAmount> ValidatorStake, long StateVersion);
+
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
-
-    private List<ValidatorActiveSet> _changes = new();
-
-    /// <summary>
-    /// A collection of validator public keys by the earliest state version they were observed on.
-    /// </summary>
-    private Dictionary<ValidatorPublicKeyLookup, long> _observedPublicKeys = new();
-    private Dictionary<ValidatorPublicKeyLookup, ValidatorPublicKeyHistory> _existingPublicKeys = new();
-
-    private List<ValidatorPublicKeyHistory> _publicKeysToAdd = new();
-    private List<ValidatorActiveSetHistory> _activeSetsToAdd = new();
+    private readonly Dictionary<long, long> _passingEpochDictionary = new();
+    private readonly List<ValidatorActiveSet> _changes = new();
+    private readonly Dictionary<ValidatorPublicKeyLookup, long> _publicKeyObservedAtStateVersion = new();
+    private readonly Dictionary<ValidatorPublicKeyLookup, ValidatorPublicKeyHistory> _existingPublicKeys = new();
+    private readonly List<ValidatorPublicKeyHistory> _publicKeysToAdd = new();
+    private readonly List<ValidatorActiveSetHistory> _activeSetsToAdd = new();
 
     public ValidatorProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
     {
@@ -103,26 +98,36 @@ internal class ValidatorProcessor
         _referencedEntities = referencedEntities;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion, long? passingEpoch)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
+        if (substateData is CoreModel.ConsensusManagerFieldStateSubstate consensusManagerFieldStateSubstate)
+        {
+            if (consensusManagerFieldStateSubstate.Value.Round == 0)
+            {
+                _passingEpochDictionary.Add(stateVersion, consensusManagerFieldStateSubstate.Value.Epoch - 1);
+            }
+        }
+
         if (substateData is CoreModel.ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate entry)
         {
             var av = entry.Value.ActiveValidator;
             var lookup = new ValidatorPublicKeyLookup(_referencedEntities.Get((EntityAddress)av.Address).DatabaseId, av.Key.KeyType.ToModel(), av.Key.GetKeyBytes());
 
-            _observedPublicKeys.TryAdd(lookup, stateVersion);
+            _publicKeyObservedAtStateVersion.TryAdd(lookup, stateVersion);
         }
 
         if (substateData is CoreModel.ValidatorFieldStateSubstate state)
         {
             var lookup = new ValidatorPublicKeyLookup(referencedEntity.DatabaseId, state.Value.PublicKey.KeyType.ToModel(), state.Value.PublicKey.GetKeyBytes());
 
-            _observedPublicKeys.TryAdd(lookup, stateVersion);
+            _publicKeyObservedAtStateVersion.TryAdd(lookup, stateVersion);
         }
 
         if (substateData is CoreModel.ConsensusManagerFieldCurrentValidatorSetSubstate validatorSet)
         {
-            if (!passingEpoch.HasValue)
+            if (!_passingEpochDictionary.TryGetValue(stateVersion, out var passingEpoch))
             {
                 throw new InvalidOperationException("ConsensusManagerFieldCurrentValidatorSetSubstate can't be processed unless epoch change gets detected");
             }
@@ -133,27 +138,27 @@ internal class ValidatorProcessor
             {
                 var lookup = new ValidatorPublicKeyLookup(_referencedEntities.Get((EntityAddress)v.Address).DatabaseId, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
 
-                _observedPublicKeys.TryAdd(lookup, stateVersion);
+                _publicKeyObservedAtStateVersion.TryAdd(lookup, stateVersion);
                 validatorStake[lookup] = TokenAmount.FromDecimalString(v.Stake);
             }
 
-            _changes.Add(new ValidatorActiveSet(passingEpoch.Value, validatorStake, stateVersion));
+            _changes.Add(new ValidatorActiveSet(passingEpoch, validatorStake, stateVersion));
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _existingPublicKeys.AddRange(await ExistingValidatorPublicKeys());
     }
 
     public void ProcessChanges()
     {
-        foreach (var lookup in _observedPublicKeys.Keys.Except(_existingPublicKeys.Keys))
+        foreach (var lookup in _publicKeyObservedAtStateVersion.Keys.Except(_existingPublicKeys.Keys))
         {
             var publicKey = new ValidatorPublicKeyHistory
             {
                 Id = _context.Sequences.ValidatorPublicKeyHistorySequence++,
-                FromStateVersion = _observedPublicKeys[lookup],
+                FromStateVersion = _publicKeyObservedAtStateVersion[lookup],
                 ValidatorEntityId = lookup.ValidatorEntityId,
                 KeyType = lookup.PublicKeyType,
                 Key = lookup.PublicKey,
@@ -167,19 +172,20 @@ internal class ValidatorProcessor
         {
             foreach (var (lookup, stake) in change.ValidatorStake)
             {
-                _activeSetsToAdd.Add(new ValidatorActiveSetHistory
-                {
-                    Id = _context.Sequences.ValidatorActiveSetHistorySequence++,
-                    FromStateVersion = change.StateVersion,
-                    Epoch = change.Epoch,
-                    ValidatorPublicKeyHistoryId = _existingPublicKeys[lookup].Id,
-                    Stake = stake,
-                });
+                _activeSetsToAdd.Add(
+                    new ValidatorActiveSetHistory
+                    {
+                        Id = _context.Sequences.ValidatorActiveSetHistorySequence++,
+                        FromStateVersion = change.StateVersion,
+                        Epoch = change.Epoch,
+                        ValidatorPublicKeyHistoryId = _existingPublicKeys[lookup].Id,
+                        Stake = stake,
+                    });
             }
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 
@@ -191,7 +197,7 @@ internal class ValidatorProcessor
 
     private async Task<IDictionary<ValidatorPublicKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorPublicKeys()
     {
-        if (!_observedPublicKeys.Keys.ToHashSet().Unzip(x => x.ValidatorEntityId, x => x.PublicKeyType, x => (byte[])x.PublicKey, out var entityIds, out var keyTypes, out var keys))
+        if (!_publicKeyObservedAtStateVersion.Keys.ToHashSet().Unzip(x => x.ValidatorEntityId, x => x.PublicKeyType, x => (byte[])x.PublicKey, out var entityIds, out var keyTypes, out var keys))
         {
             return ImmutableDictionary<ValidatorPublicKeyLookup, ValidatorPublicKeyHistory>.Empty;
         }
