@@ -62,99 +62,88 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using NpgsqlTypes;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.AccountSecurityRules;
 
-internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
+internal class AccountDefaultDepositRuleProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
-    private readonly IDapperWrapper _dapperWrapper;
-    private readonly ReadOnlyDbContext _dbContext;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IEntityQuerier _entityQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
+    private record struct AccountDefaultDepositRuleChangePointerLookup(long AccountEntityId, long StateVersion);
 
-    public KeyValueStoreQuerier(
-        IDapperWrapper dapperWrapper,
-        ReadOnlyDbContext dbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IEntityQuerier entityQuerier,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    private record AccountDefaultDepositRuleChangePointer
     {
-        _dapperWrapper = dapperWrapper;
-        _dbContext = dbContext;
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _entityQuerier = entityQuerier;
-        _endpointConfiguration = endpointConfiguration;
+        public List<CoreModel.AccountFieldStateSubstate> AccountFieldStateEntries { get; } = new();
     }
 
-    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
-        EntityAddress keyValueStoreAddress,
-        GatewayModel.LedgerState ledgerState,
-        GatewayModel.IdBoundaryCoursor? cursor,
-        int pageSize,
-        CancellationToken token = default)
+    private readonly ProcessorContext _context;
+    private readonly ChangeTracker<AccountDefaultDepositRuleChangePointerLookup, AccountDefaultDepositRuleChangePointer> _changeTracker = new();
+    private readonly List<AccountDefaultDepositRuleHistory> _rulesToAdd = new();
+
+    public AccountDefaultDepositRuleProcessor(ProcessorContext context)
     {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        _context = context;
+    }
 
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
+    {
+        var substateData = substate.Value.SubstateData;
 
-        return await KeyValueStoreQueries.KeyValueStoreKeys(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            ledgerState,
-            networkId,
-            new KeyValueStoreQueries.KeyValueStoreKeysQueryConfiguration
+        if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
+        {
+            _changeTracker
+                .GetOrAdd(
+                    new AccountDefaultDepositRuleChangePointerLookup(referencedEntity.DatabaseId, stateVersion),
+                    _ => new AccountDefaultDepositRuleChangePointer())
+                .AccountFieldStateEntries
+                .Add(accountFieldState);
+        }
+    }
+
+    public Task LoadDependenciesAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public void ProcessChanges()
+    {
+        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
+        {
+            foreach (var accountFieldStateChange in change.AccountFieldStateEntries)
             {
-                Cursor = cursor,
-                MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
-                PageSize = pageSize,
-            },
-            token);
+                _rulesToAdd.Add(
+                    new AccountDefaultDepositRuleHistory
+                    {
+                        Id = _context.Sequences.AccountDefaultDepositRuleHistorySequence++,
+                        FromStateVersion = lookup.StateVersion,
+                        AccountEntityId = lookup.AccountEntityId,
+                        DefaultDepositRule = accountFieldStateChange.Value.DefaultDepositRule.ToModel(),
+                    });
+            }
+        }
     }
 
-    public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
-        EntityAddress keyValueStoreAddress,
-        IList<ValueBytes> keys,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
+    public async Task<int> SaveEntitiesAsync()
     {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        var rowsInserted = 0;
 
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
+        rowsInserted += await CopyAccountDefaultDepositRuleHistory();
 
-        return await KeyValueStoreQueries.KeyValueStoreDataMultiLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            keys,
-            networkId,
-            ledgerState,
-            token);
+        return rowsInserted;
     }
+
+    private Task<int> CopyAccountDefaultDepositRuleHistory() => _context.WriteHelper.Copy(
+        _rulesToAdd,
+        "COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.DefaultDepositRule, "account_default_deposit_rule", token);
+        });
 }

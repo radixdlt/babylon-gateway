@@ -72,14 +72,36 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal record TransactionReceiptEventLookup(long EntityId, ValueBytes SchemaHash);
+[Table("ledger_transaction_events")]
+internal class LedgerTransactionEvents
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [Column("state_version")]
+    public long StateVersion { get; set; }
 
-internal record TransactionReceiptEvent(string Name, string Emitter, byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
+    [Column("receipt_event_emitters", TypeName = "jsonb[]")]
+    public string[] ReceiptEventEmitters { get; set; }
 
-/// <summary>
-/// A transaction committed onto the radix ledger.
-/// This table forms a shell, to which other properties are connected.
-/// </summary>
+    [Column("receipt_event_names", TypeName = "text[]")]
+    public string[] ReceiptEventNames { get; set; }
+
+    [Column("receipt_event_sbors")]
+    public byte[][] ReceiptEventSbors { get; set; }
+
+    [Column("receipt_event_schema_entity_ids")]
+    public long[] ReceiptEventSchemaEntityIds { get; set; }
+
+    [Column("receipt_event_schema_hashes")]
+    public byte[][] ReceiptEventSchemaHashes { get; set; }
+
+    [Column("receipt_event_type_indexes")]
+    public long[] ReceiptEventTypeIndexes { get; set; }
+
+    [Column("receipt_event_sbor_type_kinds")]
+    public SborTypeKind[] ReceiptEventSborTypeKinds { get; set; }
+}
+
 [Table("ledger_transactions")]
 internal abstract class LedgerTransaction
 {
@@ -140,7 +162,7 @@ internal abstract class LedgerTransaction
     public string ReceiptFeeSummary { get; set; }
 
     [Column("receipt_state_updates", TypeName = "jsonb")]
-    public string ReceiptStateUpdates { get; set; }
+    public string? ReceiptStateUpdates { get; set; }
 
     [Column("receipt_costing_parameters", TypeName = "jsonb")]
     public string ReceiptCostingParameters { get; set; }
@@ -159,27 +181,6 @@ internal abstract class LedgerTransaction
 
     [Column("receipt_error_message")]
     public string? ReceiptErrorMessage { get; set; }
-
-    [Column("receipt_event_emitters", TypeName = "jsonb[]")]
-    public string[] ReceiptEventEmitters { get; set; }
-
-    [Column("receipt_event_names", TypeName = "text[]")]
-    public string[] ReceiptEventNames { get; set; }
-
-    [Column("receipt_event_sbors")]
-    public byte[][] ReceiptEventSbors { get; set; }
-
-    [Column("receipt_event_schema_entity_ids")]
-    public long[] ReceiptEventSchemaEntityIds { get; set; }
-
-    [Column("receipt_event_schema_hashes")]
-    public byte[][] ReceiptEventSchemaHashes { get; set; }
-
-    [Column("receipt_event_type_indexes")]
-    public long[] ReceiptEventTypeIndexes { get; set; }
-
-    [Column("receipt_event_sbor_type_kinds")]
-    public SborTypeKind[] ReceiptEventSborTypeKinds { get; set; }
 
     [Column("balance_changes", TypeName = "jsonb")]
     public string? BalanceChanges { get; set; }
@@ -256,8 +257,6 @@ internal class TransactionReceipt
     public TransactionReceipt(LedgerTransaction ledgerTransaction)
     {
         _ledgerTransaction = ledgerTransaction;
-
-        Events = new ReceiptEvents(ledgerTransaction);
     }
 
     public string? ErrorMessage => _ledgerTransaction.ReceiptErrorMessage;
@@ -276,63 +275,5 @@ internal class TransactionReceipt
 
     public string CostingParameters => _ledgerTransaction.ReceiptCostingParameters;
 
-    public string StateUpdates => _ledgerTransaction.ReceiptStateUpdates;
-
-    public ReceiptEvents Events { get; }
-}
-
-internal class ReceiptEvents
-{
-    private LedgerTransaction _ledgerTransaction;
-
-    public ReceiptEvents(LedgerTransaction ledgerTransaction)
-    {
-        _ledgerTransaction = ledgerTransaction;
-    }
-
-    public string[] Emitters => _ledgerTransaction.ReceiptEventEmitters;
-
-    public string[] Names => _ledgerTransaction.ReceiptEventNames;
-
-    public byte[][] Sbors => _ledgerTransaction.ReceiptEventSbors;
-
-    public long[] SchemaEntityIds => _ledgerTransaction.ReceiptEventSchemaEntityIds;
-
-    public byte[][] SchemaHashes => _ledgerTransaction.ReceiptEventSchemaHashes;
-
-    public long[] TypeIndexes => _ledgerTransaction.ReceiptEventTypeIndexes;
-
-    public SborTypeKind[] SborTypeKinds => _ledgerTransaction.ReceiptEventSborTypeKinds;
-
-    public List<TransactionReceiptEventLookup> GetEventLookups()
-    {
-        var result = new List<TransactionReceiptEventLookup>();
-
-        for (var i = 0; i < _ledgerTransaction.ReceiptEventSbors.Length; ++i)
-        {
-            result.Add(new TransactionReceiptEventLookup(_ledgerTransaction.ReceiptEventSchemaEntityIds[i], _ledgerTransaction.ReceiptEventSchemaHashes[i]));
-        }
-
-        return result;
-    }
-
-    public List<TransactionReceiptEvent> GetEvents()
-    {
-        var result = new List<TransactionReceiptEvent>();
-
-        for (var i = 0; i < _ledgerTransaction.ReceiptEventSbors.Length; ++i)
-        {
-            var eventData = _ledgerTransaction.ReceiptEventSbors[i];
-            var entityId = _ledgerTransaction.ReceiptEventSchemaEntityIds[i];
-            var schemaHash = _ledgerTransaction.ReceiptEventSchemaHashes[i];
-            var index = _ledgerTransaction.ReceiptEventTypeIndexes[i];
-            var typeKind = _ledgerTransaction.ReceiptEventSborTypeKinds[i];
-            var emitter = _ledgerTransaction.ReceiptEventEmitters[i];
-            var name = _ledgerTransaction.ReceiptEventNames[i];
-
-            result.Add(new TransactionReceiptEvent(name, emitter, eventData, entityId, schemaHash, index, typeKind));
-        }
-
-        return result;
-    }
+    public string? StateUpdates => _ledgerTransaction.ReceiptStateUpdates;
 }

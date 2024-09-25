@@ -94,6 +94,8 @@ internal static class CustomTypesRegistrator
         SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<byte[]>());
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<SborTypeKind>());
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<LedgerTransactionManifestClass>());
 
         SqlMapper.AddTypeHandler(new GenericListHandler<int>());
         SqlMapper.AddTypeHandler(new GenericListHandler<long>());

@@ -62,88 +62,33 @@
  * permissions under this License.
  */
 
-using NpgsqlTypes;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
-internal class AccountDefaultDepositRuleProcessor : IProcessorBase, ISubstateUpsertProcessor
+public sealed class StorageOptions
 {
-    private record struct AccountDefaultDepositRuleChangePointerLookup(long AccountEntityId, long StateVersion);
+    [ConfigurationKeyName("StoreTransactionReceiptEvents")]
+    public LedgerTransactionStorageOption StoreTransactionReceiptEvents { get; set; } = LedgerTransactionStorageOption.StoreForAllTransactions;
 
-    private record AccountDefaultDepositRuleChangePointer
+    [ConfigurationKeyName("StoreReceiptStateUpdates")]
+    public LedgerTransactionStorageOption StoreReceiptStateUpdates { get; set; } = LedgerTransactionStorageOption.StoreForAllTransactions;
+}
+
+public sealed class StorageOptionsValidator : AbstractOptionsValidator<StorageOptions>
+{
+    public StorageOptionsValidator()
     {
-        public List<CoreModel.AccountFieldStateSubstate> AccountFieldStateEntries { get; } = new();
+        RuleFor(x => x.StoreTransactionReceiptEvents).IsInEnum();
+        RuleFor(x => x.StoreReceiptStateUpdates).IsInEnum();
     }
+}
 
-    private readonly ProcessorContext _context;
-    private readonly ChangeTracker<AccountDefaultDepositRuleChangePointerLookup, AccountDefaultDepositRuleChangePointer> _changeTracker = new();
-    private readonly List<AccountDefaultDepositRuleHistory> _rulesToAdd = new();
-
-    public AccountDefaultDepositRuleProcessor(ProcessorContext context)
-    {
-        _context = context;
-    }
-
-    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
-    {
-        var substateData = substate.Value.SubstateData;
-
-        if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
-        {
-            _changeTracker
-                .GetOrAdd(
-                    new AccountDefaultDepositRuleChangePointerLookup(referencedEntity.DatabaseId, stateVersion),
-                    _ => new AccountDefaultDepositRuleChangePointer())
-                .AccountFieldStateEntries
-                .Add(accountFieldState);
-        }
-    }
-
-    public Task LoadDependenciesAsync()
-    {
-        return Task.CompletedTask;
-    }
-
-    public void ProcessChanges()
-    {
-        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
-        {
-            foreach (var accountFieldStateChange in change.AccountFieldStateEntries)
-            {
-                _rulesToAdd.Add(
-                    new AccountDefaultDepositRuleHistory
-                    {
-                        Id = _context.Sequences.AccountDefaultDepositRuleHistorySequence++,
-                        FromStateVersion = lookup.StateVersion,
-                        AccountEntityId = lookup.AccountEntityId,
-                        DefaultDepositRule = accountFieldStateChange.Value.DefaultDepositRule.ToModel(),
-                    });
-            }
-        }
-    }
-
-    public async Task<int> SaveEntitiesAsync()
-    {
-        var rowsInserted = 0;
-
-        rowsInserted += await CopyAccountDefaultDepositRuleHistory();
-
-        return rowsInserted;
-    }
-
-    private Task<int> CopyAccountDefaultDepositRuleHistory() => _context.WriteHelper.Copy(
-        _rulesToAdd,
-        "COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)",
-        async (writer, e, token) =>
-        {
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.DefaultDepositRule, "account_default_deposit_rule", token);
-        });
+public enum LedgerTransactionStorageOption
+{
+    StoreForAllTransactions,
+    StoryOnlyForUserTransactionsAndEpochChanges,
+    StoreOnlyForUserTransactions,
+    DoNotStore,
 }

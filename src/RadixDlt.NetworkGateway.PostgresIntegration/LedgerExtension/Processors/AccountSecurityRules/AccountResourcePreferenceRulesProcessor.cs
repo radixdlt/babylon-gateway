@@ -72,7 +72,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.AccountSecurityRules;
 
 internal class AccountResourcePreferenceRulesProcessor : IProcessorBase, ISubstateUpsertProcessor
 {

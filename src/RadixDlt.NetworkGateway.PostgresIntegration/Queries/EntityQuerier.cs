@@ -68,6 +68,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -80,10 +81,12 @@ internal interface IEntityQuerier
     Task<TEntity> GetEntity<TEntity>(EntityAddress address, GatewayApiSdk.Model.LedgerState ledgerState, CancellationToken token)
         where TEntity : Entity;
 
-    Task<TEntity> GetNonVirtualEntity<TEntity>(ReadOnlyDbContext dbContext, EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    Task<TEntity> GetNonVirtualEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
         where TEntity : Entity;
 
-    Task<Dictionary<EntityAddress, long>> ResolveEntityIds(ReadOnlyDbContext dbContext, List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token);
+    Task<IDictionary<EntityAddress, long>> ResolveEntityIds(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token);
+
+    Task<IDictionary<long, EntityAddress>> ResolveEntityAddresses(List<long> entityIds, CancellationToken token = default);
 
     Task<ICollection<Entity>> GetEntities(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token);
 }
@@ -127,10 +130,10 @@ internal class EntityQuerier : IEntityQuerier
         return typedEntity;
     }
 
-    public async Task<TEntity> GetNonVirtualEntity<TEntity>(ReadOnlyDbContext dbContext, EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    public async Task<TEntity> GetNonVirtualEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
         where TEntity : Entity
     {
-        var entity = await dbContext
+        var entity = await _dbContext
             .Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .AnnotateMetricName()
@@ -149,15 +152,30 @@ internal class EntityQuerier : IEntityQuerier
         return typedEntity;
     }
 
-    public async Task<Dictionary<EntityAddress, long>> ResolveEntityIds(ReadOnlyDbContext dbContext, List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    public async Task<IDictionary<EntityAddress, long>> ResolveEntityIds(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
-        var entities = await dbContext
+        var entities = await _dbContext
             .Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
             .AnnotateMetricName()
             .ToDictionaryAsync(e => e.Address, e => e.Id, token);
 
         return entities;
+    }
+
+    public async Task<IDictionary<long, EntityAddress>> ResolveEntityAddresses(List<long> entityIds, CancellationToken token = default)
+    {
+        if (!entityIds.Any())
+        {
+            return ImmutableDictionary<long, EntityAddress>.Empty;
+        }
+
+        return await _dbContext
+            .Entities
+            .Where(e => entityIds.Contains(e.Id))
+            .Select(e => new { e.Id, e.Address })
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => e.Id, e => e.Address, token);
     }
 
     public async Task<ICollection<Entity>> GetEntities(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)

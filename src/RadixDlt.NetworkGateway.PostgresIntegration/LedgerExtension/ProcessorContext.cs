@@ -62,9 +62,16 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using System.Threading;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record ProcessorContext(SequencesHolder Sequences, IReadHelper ReadHelper, IWriteHelper WriteHelper, NetworkConfiguration NetworkConfiguration, CancellationToken Token);
+internal record ProcessorContext(
+    SequencesHolder Sequences,
+    StorageOptions StorageOptions,
+    IReadHelper ReadHelper,
+    IWriteHelper WriteHelper,
+    NetworkConfiguration NetworkConfiguration,
+    CancellationToken Token);

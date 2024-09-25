@@ -119,9 +119,9 @@ internal class GlobalEventEmitterProcessor : ITransactionMarkerProcessor, IEvent
             _referencedEntities.Get((EntityAddress)_networkConfiguration.WellKnownAddresses.Xrd).DatabaseId,
         };
 
-        foreach (var stateVersionAffectedEntities in _globalEventEmitters.Where(x => !excludedEntityIds.Contains(x.Key)))
+        foreach (var stateVersionAffectedEntities in _globalEventEmitters)
         {
-            foreach (var entityId in stateVersionAffectedEntities.Value)
+            foreach (var entityId in stateVersionAffectedEntities.Value.Where(x => !excludedEntityIds.Contains(x)))
             {
                 yield return new EventGlobalEmitterTransactionMarker
                 {

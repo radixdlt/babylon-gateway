@@ -74,7 +74,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class VaultProcessor : IProcessorBase, ISubstateUpsertProcessor
+internal class VaultProcessor : IProcessorBase, ISubstateUpsertProcessor, ISubstateDeleteProcessor
 {
     private readonly record struct NonFungibleIdDefinitionDbLookup(long NonFungibleResourceEntityId, string NonFungibleId);
 

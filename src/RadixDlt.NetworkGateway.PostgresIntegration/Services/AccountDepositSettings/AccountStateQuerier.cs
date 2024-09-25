@@ -113,7 +113,7 @@ internal class AccountStateQuerier : IAccountStateQuerier
         int limit,
         CancellationToken token = default)
     {
-        var accountEntity = await _entityQuerier.GetNonVirtualEntity<GlobalAccountEntity>(_dbContext, accountAddress, ledgerState, token);
+        var accountEntity = await _entityQuerier.GetNonVirtualEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
@@ -172,7 +172,7 @@ ORDER BY resource_preference_join.ordinality ASC;",
         int limit,
         CancellationToken token = default)
     {
-        var accountEntity = await _entityQuerier.GetNonVirtualEntity<GlobalAccountEntity>(_dbContext, accountAddress, ledgerState, token);
+        var accountEntity = await _entityQuerier.GetNonVirtualEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"

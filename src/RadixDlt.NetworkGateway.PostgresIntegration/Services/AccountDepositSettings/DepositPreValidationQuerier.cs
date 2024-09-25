@@ -110,6 +110,7 @@ internal class DepositPreValidationQuerier : IDepositPreValidationQuerier
         CancellationToken token = default
     )
     {
+        var accountEntity = await _entityQuerier.GetNonVirtualEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
         var xrdResourceAddress = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).WellKnownAddresses.Xrd;
         var accountEntity = await _entityQuerier.GetEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
         if (accountEntity is VirtualAccountComponentEntity)
@@ -135,7 +136,7 @@ internal class DepositPreValidationQuerier : IDepositPreValidationQuerier
             addressesToResolve.Add(badgeResourceAddress.Value);
         }
 
-        var entityAddressToIdDictionary = await _entityQuerier.ResolveEntityIds(_dbContext, addressesToResolve, ledgerState, token);
+        var entityAddressToIdDictionary = await _entityQuerier.ResolveEntityIds(addressesToResolve, ledgerState, token);
         var resourceEntityMap = entityAddressToIdDictionary
             .Where(x => resourceAddresses.Contains(x.Key))
             .ToDictionary();

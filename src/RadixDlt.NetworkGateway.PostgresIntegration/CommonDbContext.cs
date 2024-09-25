@@ -81,14 +81,9 @@ internal abstract class CommonDbContext : DbContext
 {
     internal const string DiscriminatorColumnName = "discriminator";
 
-    /// <summary>
-    /// Gets LedgerTransactions.
-    /// </summary>
-    /// <remarks>
-    /// A LedgerTransaction row contains large blobs, so you must SELECT the fields you need after using this, and not pull down the whole
-    /// ledger transaction row, to avoid possible performance issues.
-    /// </remarks>
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
+
+    public DbSet<LedgerTransactionEvents> LedgerTransactionEvents => Set<LedgerTransactionEvents>();
 
     public DbSet<LedgerTransactionMarker> LedgerTransactionMarkers => Set<LedgerTransactionMarker>();
 

@@ -62,99 +62,85 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Diagnostics;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
+// TODO PP: do we want to move it back to query.
+internal static class TransactionMapper
 {
-    private readonly IDapperWrapper _dapperWrapper;
-    private readonly ReadOnlyDbContext _dbContext;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IEntityQuerier _entityQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
-
-    public KeyValueStoreQuerier(
-        IDapperWrapper dapperWrapper,
-        ReadOnlyDbContext dbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IEntityQuerier entityQuerier,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    internal static GatewayApiSdk.Model.CommittedTransactionInfo ToGatewayModel(
+        this LedgerTransactionQueryResult lt,
+        GatewayApiSdk.Model.TransactionDetailsOptIns optIns,
+        IDictionary<long, EntityAddress> entityIdToAddressMap,
+        List<Event>? events,
+        GatewayApiSdk.Model.TransactionBalanceChanges? transactionBalanceChanges)
     {
-        _dapperWrapper = dapperWrapper;
-        _dbContext = dbContext;
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _entityQuerier = entityQuerier;
-        _endpointConfiguration = endpointConfiguration;
+        string? payloadHash = null;
+        string? intentHash = null;
+        string? rawHex = null;
+        JRaw? message = null;
+        string? manifestInstructions = null;
+        List<GatewayApiSdk.Model.ManifestClass>? manifestClasses = null;
+
+        if (lt.Discriminator == LedgerTransactionType.User)
+        {
+            payloadHash = lt.PayloadHash;
+            intentHash = lt.IntentHash;
+            rawHex = optIns.RawHex ? lt.RawPayload!.ToHex() : null;
+            message = lt.Message != null ? new JRaw(lt.Message) : null;
+            manifestInstructions = optIns.ManifestInstructions ? lt.ManifestInstructions : null;
+            manifestClasses = lt.ManifestClasses.Select(mc => mc.ToGatewayModel()).ToList();
+        }
+
+        var receipt = new GatewayApiSdk.Model.TransactionReceipt
+        {
+            ErrorMessage = lt.ReceiptErrorMessage,
+            Status = MapTransactionStatus(lt.ReceiptStatus),
+            Output = optIns.ReceiptOutput && lt.ReceiptOutput != null ? new JRaw(lt.ReceiptOutput) : null,
+            FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.ReceiptFeeSummary) : null,
+            FeeDestination = optIns.ReceiptFeeDestination && lt.ReceiptFeeDestination != null ? new JRaw(lt.ReceiptFeeDestination) : null,
+            FeeSource = optIns.ReceiptFeeSource && lt.ReceiptFeeSource != null ? new JRaw(lt.ReceiptFeeSource) : null,
+            CostingParameters = optIns.ReceiptCostingParameters ? new JRaw(lt.ReceiptCostingParameters) : null,
+            NextEpoch = lt.ReceiptNextEpoch != null ? new JRaw(lt.ReceiptNextEpoch) : null,
+            StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.ReceiptStateUpdates) : null,
+            Events = optIns.ReceiptEvents ? events?.Select(x => new GatewayApiSdk.Model.EventsItem(x.Name, new JRaw(x.Emitter), x.Data)).ToList() : null,
+        };
+
+        return new GatewayApiSdk.Model.CommittedTransactionInfo(
+            stateVersion: lt.StateVersion,
+            epoch: lt.Epoch,
+            round: lt.RoundInEpoch,
+            roundTimestamp: lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
+            transactionStatus: MapTransactionStatus(lt.ReceiptStatus),
+            affectedGlobalEntities: optIns.AffectedGlobalEntities ? lt.AffectedGlobalEntities.Select(x => entityIdToAddressMap[x].ToString()).ToList() : null,
+            payloadHash: payloadHash,
+            intentHash: intentHash,
+            feePaid: lt.FeePaid.ToString(),
+            confirmedAt: lt.RoundTimestamp,
+            errorMessage: lt.ReceiptErrorMessage,
+            rawHex: rawHex,
+            receipt: receipt,
+            message: message,
+            balanceChanges: optIns.BalanceChanges ? transactionBalanceChanges : null,
+            manifestInstructions: manifestInstructions,
+            manifestClasses: manifestClasses
+        );
     }
 
-    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
-        EntityAddress keyValueStoreAddress,
-        GatewayModel.LedgerState ledgerState,
-        GatewayModel.IdBoundaryCoursor? cursor,
-        int pageSize,
-        CancellationToken token = default)
+    private static GatewayApiSdk.Model.TransactionStatus MapTransactionStatus(this LedgerTransactionStatus status)
     {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreKeys(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            ledgerState,
-            networkId,
-            new KeyValueStoreQueries.KeyValueStoreKeysQueryConfiguration
-            {
-                Cursor = cursor,
-                MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
-                PageSize = pageSize,
-            },
-            token);
-    }
-
-    public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
-        EntityAddress keyValueStoreAddress,
-        IList<ValueBytes> keys,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreDataMultiLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            keys,
-            networkId,
-            ledgerState,
-            token);
+        return status switch
+        {
+            LedgerTransactionStatus.Succeeded => GatewayApiSdk.Model.TransactionStatus.CommittedSuccess,
+            LedgerTransactionStatus.Failed => GatewayApiSdk.Model.TransactionStatus.CommittedFailure,
+            _ => throw new UnreachableException($"Didn't expect {status} value"),
+        };
     }
 }

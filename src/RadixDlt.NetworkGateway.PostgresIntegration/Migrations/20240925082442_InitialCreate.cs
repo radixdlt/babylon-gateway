@@ -540,6 +540,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ledger_transaction_events",
+                columns: table => new
+                {
+                    state_version = table.Column<long>(type: "bigint", nullable: false),
+                    receipt_event_emitters = table.Column<string[]>(type: "jsonb[]", nullable: false),
+                    receipt_event_names = table.Column<string[]>(type: "text[]", nullable: false),
+                    receipt_event_sbors = table.Column<byte[][]>(type: "bytea[]", nullable: false),
+                    receipt_event_schema_entity_ids = table.Column<long[]>(type: "bigint[]", nullable: false),
+                    receipt_event_schema_hashes = table.Column<byte[][]>(type: "bytea[]", nullable: false),
+                    receipt_event_type_indexes = table.Column<long[]>(type: "bigint[]", nullable: false),
+                    receipt_event_sbor_type_kinds = table.Column<SborTypeKind[]>(type: "sbor_type_kind[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ledger_transaction_events", x => x.state_version);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ledger_transaction_markers",
                 columns: table => new
                 {
@@ -578,20 +596,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     normalized_round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     receipt_status = table.Column<LedgerTransactionStatus>(type: "ledger_transaction_status", nullable: false),
                     receipt_fee_summary = table.Column<string>(type: "jsonb", nullable: false),
-                    receipt_state_updates = table.Column<string>(type: "jsonb", nullable: false),
+                    receipt_state_updates = table.Column<string>(type: "jsonb", nullable: true),
                     receipt_costing_parameters = table.Column<string>(type: "jsonb", nullable: false),
                     receipt_fee_source = table.Column<string>(type: "jsonb", nullable: true),
                     receipt_fee_destination = table.Column<string>(type: "jsonb", nullable: true),
                     receipt_next_epoch = table.Column<string>(type: "jsonb", nullable: true),
                     receipt_output = table.Column<string>(type: "jsonb", nullable: true),
                     receipt_error_message = table.Column<string>(type: "text", nullable: true),
-                    receipt_event_emitters = table.Column<string[]>(type: "jsonb[]", nullable: false),
-                    receipt_event_names = table.Column<string[]>(type: "text[]", nullable: false),
-                    receipt_event_sbors = table.Column<byte[][]>(type: "bytea[]", nullable: false),
-                    receipt_event_schema_entity_ids = table.Column<long[]>(type: "bigint[]", nullable: false),
-                    receipt_event_schema_hashes = table.Column<byte[][]>(type: "bytea[]", nullable: false),
-                    receipt_event_type_indexes = table.Column<long[]>(type: "bigint[]", nullable: false),
-                    receipt_event_sbor_type_kinds = table.Column<SborTypeKind[]>(type: "sbor_type_kind[]", nullable: false),
                     balance_changes = table.Column<string>(type: "jsonb", nullable: true),
                     transaction_tree_hash = table.Column<string>(type: "text", nullable: false),
                     receipt_tree_hash = table.Column<string>(type: "text", nullable: false),
@@ -1509,6 +1520,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "key_value_store_totals_history");
+
+            migrationBuilder.DropTable(
+                name: "ledger_transaction_events");
 
             migrationBuilder.DropTable(
                 name: "ledger_transaction_markers");

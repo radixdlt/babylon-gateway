@@ -27,6 +27,13 @@ Release built: _not released yet_
 >   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
 >   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
 
+### What’s new?
+- New configuration options `DataAggregator__Storage__StoreTransactionReceiptEvents`, and `DataAggregator__Storage__StoreReceiptStateUpdates` for data aggregator to configure if transaction's receipt events and receipt state updates should be stored in the database. It is meant to be used by gateway runners who want to reduce their database size. Keep in mind that when disabled `/stream/transactions` and `/stream/transactions` will not return that data.
+    - Possible values:
+        - `StoreForAllTransactions` (default) - will store data for all transactions.
+        - `StoryOnlyForUserTransactionsAndEpochChanges` - will store data for user transactions and transactions that resulted in epoch change.
+        - `StoreOnlyForUserTransactions` - will store data only for user transactions.
+        - `DoNotStore` - will not store any data.
 
 ### Bug fixes
 - Added missing `total_count` property to `/state/validators/list` response.
@@ -57,6 +64,8 @@ Release built: _not released yet_
         - Renamed `entity_vault_history` to `vault_balance_history`. Holds information about vault content (amount of fungibles or count of non fungible ids inside vault) at a given state version.
     - Key value store
         - New `key_value_store_totals_history` table, which holds total count of all keys under a given store at a given state version.
+- Changed `receipt_state_updates` in the `ledger_transactions` table to be nullable.
+- Moved all `receipt_event_*` columns from `ledger_transactions` to separate `ledger_transaction_events` table.
 
 ## 1.7.3
 Release built: 26.09.2024

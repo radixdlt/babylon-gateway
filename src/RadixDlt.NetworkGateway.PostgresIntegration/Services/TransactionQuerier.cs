@@ -62,15 +62,18 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services.PendingTransactions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System;
@@ -84,24 +87,73 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
+// TODO PP: all these can be made private when we combine mapping with query.
+internal record ReceiptEvent(string Name, string Emitter, byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
+
+internal record LedgerTransactionQueryResult(
+    long StateVersion,
+    long Epoch,
+    long RoundInEpoch,
+    TokenAmount FeePaid,
+    long[] AffectedGlobalEntities,
+    DateTime RoundTimestamp,
+    LedgerTransactionStatus ReceiptStatus,
+    string? ReceiptFeeSource,
+    string? ReceiptFeeDestination,
+    string? ReceiptErrorMessage,
+    LedgerTransactionType Discriminator,
+    string PayloadHash,
+    string IntentHash,
+    string? Message,
+    LedgerTransactionManifestClass[] ManifestClasses,
+    byte[]? RawPayload,
+    string? ReceiptCostingParameters,
+    string? ReceiptFeeSummary,
+    string? ReceiptNextEpoch,
+    string? ReceiptOutput,
+    string? ReceiptStateUpdates,
+    string? BalanceChanges,
+    string? ManifestInstructions
+)
+{
+    public List<ReceiptEvent> Events { get; set; } = new();
+}
+
+internal record ReceiptEvents(
+    string[] ReceiptEventEmitters,
+    string[] ReceiptEventNames,
+    byte[][] ReceiptEventSbors,
+    long[] ReceiptEventSchemaEntityIds,
+    byte[][] ReceiptEventSchemaHashes,
+    long[] ReceiptEventTypeIndexes,
+    SborTypeKind[] ReceiptEventSborTypeKinds);
+
+internal record Event(string Name, string Emitter, GatewayModel.ProgrammaticScryptoSborValue Data);
+
 internal class TransactionQuerier : ITransactionQuerier
 {
-    internal record Event(string Name, string Emitter, GatewayModel.ProgrammaticScryptoSborValue Data);
+    private readonly record struct TransactionReceiptEventLookup(long EntityId, ValueBytes SchemaHash);
 
-    private record SchemaLookup(long EntityId, ValueBytes SchemaHash);
+    private readonly record struct SchemaLookup(long EntityId, ValueBytes SchemaHash);
 
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IDapperWrapper _dapperWrapper;
+    private readonly IEntityQuerier _entityQuerier;
 
     public TransactionQuerier(
         ReadOnlyDbContext dbContext,
         ReadWriteDbContext rwDbContext,
-        INetworkConfigurationProvider networkConfigurationProvider)
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IDapperWrapper dapperWrapper,
+        IEntityQuerier entityQuerier)
     {
         _dbContext = dbContext;
         _rwDbContext = rwDbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _dapperWrapper = dapperWrapper;
+        _entityQuerier = entityQuerier;
     }
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
@@ -116,26 +168,28 @@ internal class TransactionQuerier : ITransactionQuerier
             .Concat(request.SearchCriteria.BadgesPresented)
             .Concat(request.SearchCriteria.AffectedGlobalEntities)
             .Concat(request.SearchCriteria.EventGlobalEmitters)
-            .Concat(request.SearchCriteria.Events.SelectMany(e =>
-            {
-                var addresses = new List<EntityAddress>();
+            .Concat(
+                request.SearchCriteria.Events.SelectMany(
+                    e =>
+                    {
+                        var addresses = new List<EntityAddress>();
 
-                if (e.EmitterEntityAddress.HasValue)
-                {
-                    addresses.Add(e.EmitterEntityAddress.Value);
-                }
+                        if (e.EmitterEntityAddress.HasValue)
+                        {
+                            addresses.Add(e.EmitterEntityAddress.Value);
+                        }
 
-                if (e.ResourceAddress.HasValue)
-                {
-                    addresses.Add(e.ResourceAddress.Value);
-                }
+                        if (e.ResourceAddress.HasValue)
+                        {
+                            addresses.Add(e.ResourceAddress.Value);
+                        }
 
-                return addresses;
-            }))
-            .Select(a => (string)a)
+                        return addresses;
+                    }))
+            .Select(a => a)
             .ToList();
 
-        var entityAddressToId = await GetEntityIds(referencedAddresses, token);
+        var entityAddressToId = await _entityQuerier.ResolveEntityIds(referencedAddresses, atLedgerState, token);
 
         var upperStateVersion = request.AscendingOrder
             ? atLedgerState.StateVersion
@@ -454,11 +508,12 @@ internal class TransactionQuerier : ITransactionQuerier
             .LedgerTransactions
             .OfType<UserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion && ult.IntentHash == intentHash)
-            .Select(ult => new CommittedTransactionSummary(
-                ult.StateVersion,
-                ult.PayloadHash,
-                ult.EngineReceipt.Status,
-                ult.EngineReceipt.ErrorMessage))
+            .Select(
+                ult => new CommittedTransactionSummary(
+                    ult.StateVersion,
+                    ult.PayloadHash,
+                    ult.EngineReceipt.Status,
+                    ult.EngineReceipt.ErrorMessage))
             .AnnotateMetricName()
             .FirstOrDefaultAsync(token);
 
@@ -479,75 +534,126 @@ internal class TransactionQuerier : ITransactionQuerier
         return await _rwDbContext
             .PendingTransactions
             .Where(pt => pt.IntentHash == intentHash)
-            .Select(pt =>
-                new PendingTransactionSummary(
-                    pt.PayloadHash,
-                    pt.EndEpochExclusive,
-                    pt.GatewayHandling.ResubmitFromTimestamp,
-                    pt.GatewayHandling.HandlingStatusReason,
-                    pt.LedgerDetails.PayloadLedgerStatus,
-                    pt.LedgerDetails.IntentLedgerStatus,
-                    pt.LedgerDetails.InitialRejectionReason,
-                    pt.LedgerDetails.LatestRejectionReason,
-                    pt.NetworkDetails.LastSubmitErrorTitle
-                )
+            .Select(
+                pt =>
+                    new PendingTransactionSummary(
+                        pt.PayloadHash,
+                        pt.EndEpochExclusive,
+                        pt.GatewayHandling.ResubmitFromTimestamp,
+                        pt.GatewayHandling.HandlingStatusReason,
+                        pt.LedgerDetails.PayloadLedgerStatus,
+                        pt.LedgerDetails.IntentLedgerStatus,
+                        pt.LedgerDetails.InitialRejectionReason,
+                        pt.LedgerDetails.LatestRejectionReason,
+                        pt.NetworkDetails.LastSubmitErrorTitle
+                    )
             )
             .AnnotateMetricName()
             .AsNoTracking()
             .ToListAsync(token);
     }
 
+    // TODO PP: DO we want to move just that query to separate file. I guess so.
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(
         List<long> transactionStateVersions,
         GatewayModel.TransactionDetailsOptIns optIns,
         CancellationToken token)
     {
-        var transactions = await _dbContext
-            .LedgerTransactions
-            .FromSqlInterpolated(@$"
-WITH configuration AS (
+        var cd = new CommandDefinition(
+            @"WITH vars AS (
     SELECT
-        {optIns.RawHex} AS with_raw_payload,
+        @includeRawHex AS with_raw_payload,
         true AS with_receipt_costing_parameters,
         true AS with_receipt_fee_summary,
         true AS with_receipt_next_epoch,
-        {optIns.ReceiptOutput} AS with_receipt_output,
-        {optIns.ReceiptStateChanges} AS with_receipt_state_updates,
-        {optIns.ReceiptEvents} AS with_receipt_events,
-        {optIns.BalanceChanges} AS with_balance_changes,
-        {optIns.ManifestInstructions} AS with_manifest_instructions
+        @includeReceiptOutput AS with_receipt_output,
+        @includeReceiptStateChanges AS with_receipt_state_updates,
+        @includeReceiptEvents AS with_receipt_events,
+        @includeBalanceChanges  AS with_balance_changes,
+        @includeManifestInstructions AS with_manifest_instructions,
+        @transactionStateVersions AS transaction_state_versions
 )
 SELECT
-    state_version, epoch, round_in_epoch, index_in_epoch,
-    index_in_round, fee_paid, tip_paid, affected_global_entities,
-    round_timestamp, created_timestamp, normalized_round_timestamp,
-    receipt_status, receipt_fee_source, receipt_fee_destination, receipt_error_message,
-    transaction_tree_hash, receipt_tree_hash, state_tree_hash,
-    discriminator, payload_hash, intent_hash, signed_intent_hash, message, manifest_classes,
-    CASE WHEN configuration.with_raw_payload THEN raw_payload ELSE ''::bytea END AS raw_payload,
-    CASE WHEN configuration.with_receipt_costing_parameters THEN receipt_costing_parameters ELSE '{{}}'::jsonb END AS receipt_costing_parameters,
-    CASE WHEN configuration.with_receipt_fee_summary THEN receipt_fee_summary ELSE '{{}}'::jsonb END AS receipt_fee_summary,
-    CASE WHEN configuration.with_receipt_next_epoch THEN receipt_next_epoch ELSE '{{}}'::jsonb END AS receipt_next_epoch,
-    CASE WHEN configuration.with_receipt_output THEN receipt_output ELSE '{{}}'::jsonb END AS receipt_output,
-    CASE WHEN configuration.with_receipt_state_updates THEN receipt_state_updates ELSE '{{}}'::jsonb END AS receipt_state_updates,
-    CASE WHEN configuration.with_receipt_events THEN receipt_event_emitters ELSE '{{}}'::jsonb[] END AS receipt_event_emitters,
-    CASE WHEN configuration.with_receipt_events THEN receipt_event_names ELSE '{{}}'::text[] END AS receipt_event_names,
-    CASE WHEN configuration.with_receipt_events THEN receipt_event_sbors ELSE '{{}}'::bytea[] END AS receipt_event_sbors,
-    CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_entity_ids ELSE '{{}}'::bigint[] END AS receipt_event_schema_entity_ids,
-    CASE WHEN configuration.with_receipt_events THEN receipt_event_schema_hashes ELSE '{{}}'::bytea[] END AS receipt_event_schema_hashes,
-    CASE WHEN configuration.with_receipt_events THEN receipt_event_type_indexes ELSE '{{}}'::bigint[] END AS receipt_event_type_indexes,
-    CASE WHEN configuration.with_receipt_events THEN receipt_event_sbor_type_kinds ELSE '{{}}'::sbor_type_kind[] END AS receipt_event_sbor_type_kinds,
-    CASE WHEN configuration.with_balance_changes THEN balance_changes ELSE '{{}}'::jsonb END AS balance_changes,
-    CASE WHEN configuration.with_manifest_instructions THEN manifest_instructions ELSE ''::text END AS manifest_instructions
-FROM ledger_transactions, configuration
-WHERE state_version = ANY({transactionStateVersions})")
-            .AnnotateMetricName("GetTransactions")
-            .ToListAsync(token);
+    lt.state_version,
+    epoch,
+    round_in_epoch,
+    CAST(fee_paid AS TEXT),
+    affected_global_entities,
+    round_timestamp,
+    receipt_status,
+    receipt_fee_source,
+    receipt_fee_destination,
+    receipt_error_message,
+    discriminator,
+    payload_hash,
+    intent_hash,
+    message,
+    manifest_classes,
+    CASE WHEN vars.with_raw_payload THEN raw_payload END AS raw_payload,
+    CASE WHEN vars.with_receipt_costing_parameters THEN receipt_costing_parameters END AS receipt_costing_parameters,
+    CASE WHEN vars.with_receipt_fee_summary THEN receipt_fee_summary END AS receipt_fee_summary,
+    CASE WHEN vars.with_receipt_next_epoch THEN receipt_next_epoch  END AS receipt_next_epoch,
+    CASE WHEN vars.with_receipt_output THEN receipt_output END AS receipt_output,
+    CASE WHEN vars.with_receipt_state_updates THEN receipt_state_updates END AS receipt_state_updates,
+    CASE WHEN vars.with_balance_changes THEN balance_changes END AS balance_changes,
+    CASE WHEN vars.with_manifest_instructions THEN manifest_instructions END AS manifest_instructions,
+    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_emitters END AS ReceiptEventEmitters,
+    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_names END AS ReceiptEventNames,
+    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_sbors END AS ReceiptEventSbors,
+    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_schema_entity_ids END AS ReceiptEventSchemaEntityIds,
+    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_schema_hashes END AS ReceiptEventSchemaHashes,
+    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_type_indexes END AS ReceiptEventTypeIndexes,
+    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_sbor_type_kinds END AS ReceiptEventSborTypeKinds
+FROM vars
+CROSS JOIN ledger_transactions lt
+LEFT JOIN ledger_transaction_events lte ON vars.with_receipt_events AND lte.state_version = lt.state_version
+WHERE lt.state_version = ANY(vars.transaction_state_versions)",
+            new
+            {
+                includeRawHex = optIns.RawHex,
+                includeReceiptOutput = optIns.ReceiptOutput,
+                includeReceiptStateChanges = optIns.ReceiptStateChanges,
+                includeReceiptEvents = optIns.ReceiptEvents,
+                includeBalanceChanges = optIns.BalanceChanges,
+                includeManifestInstructions = optIns.ManifestInstructions,
+                transactionStateVersions = transactionStateVersions,
+            });
 
-        var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToHashSet().ToList(), token);
+        var transactions = (await _dapperWrapper.QueryAsync<LedgerTransactionQueryResult, ReceiptEvents?, LedgerTransactionQueryResult>(
+            _dbContext.Database.GetDbConnection(),
+            cd,
+            (transaction, events) =>
+            {
+                if (events == null)
+                {
+                    return transaction;
+                }
+
+                var mappedEvents = events
+                    .ReceiptEventEmitters
+                    .Select(
+                        (_, i) => new ReceiptEvent(
+                            events.ReceiptEventNames[i],
+                            events.ReceiptEventEmitters[i],
+                            events.ReceiptEventSbors[i],
+                            events.ReceiptEventSchemaEntityIds[i],
+                            events.ReceiptEventSchemaHashes[i],
+                            events.ReceiptEventTypeIndexes[i],
+                            events.ReceiptEventSborTypeKinds[i]))
+                    .ToList();
+
+                transaction.Events = mappedEvents;
+
+                return transaction;
+            },
+            "ReceiptEventEmitters",
+            "GetTransactions")).ToList();
+
+        var entityIdToAddressMap = await _entityQuerier.ResolveEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToHashSet().ToList(), token);
 
         var schemaLookups = transactions
-            .SelectMany(x => x.EngineReceipt.Events.GetEventLookups())
+            .SelectMany(x => x.Events)
+            .Select(x => new TransactionReceiptEventLookup(x.EntityId, x.SchemaHash))
             .ToHashSet();
 
         Dictionary<SchemaLookup, byte[]> schemas = new Dictionary<SchemaLookup, byte[]>();
@@ -559,7 +665,8 @@ WHERE state_version = ANY({transactionStateVersions})")
 
             schemas = await _dbContext
                 .SchemaEntryDefinition
-                .FromSqlInterpolated($@"
+                .FromSqlInterpolated(
+                    $@"
 SELECT *
 FROM schema_entry_definition
 WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHashes}))")
@@ -594,7 +701,7 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
             {
                 List<Event> events = new List<Event>();
 
-                foreach (var @event in transaction.EngineReceipt.Events.GetEvents())
+                foreach (var @event in transaction.Events)
                 {
                     if (!schemas.TryGetValue(new SchemaLookup(@event.EntityId, @event.SchemaHash), out var schema))
                     {
@@ -610,35 +717,5 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
         }
 
         return mappedTransactions;
-    }
-
-    private async Task<Dictionary<string, long>> GetEntityIds(List<string> addresses, CancellationToken token = default)
-    {
-        if (!addresses.Any())
-        {
-            return new Dictionary<string, long>();
-        }
-
-        return await _dbContext
-            .Entities
-            .Where(e => addresses.Contains(e.Address))
-            .Select(e => new { e.Id, e.Address })
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.Address.ToString(), e => e.Id, token);
-    }
-
-    private async Task<Dictionary<long, string>> GetEntityAddresses(List<long> entityIds, CancellationToken token = default)
-    {
-        if (!entityIds.Any())
-        {
-            return new Dictionary<long, string>();
-        }
-
-        return await _dbContext
-            .Entities
-            .Where(e => entityIds.Contains(e.Id))
-            .Select(e => new { e.Id, e.Address })
-            .AnnotateMetricName()
-            .ToDictionaryAsync(e => e.Id, e => e.Address.ToString(), token);
     }
 }

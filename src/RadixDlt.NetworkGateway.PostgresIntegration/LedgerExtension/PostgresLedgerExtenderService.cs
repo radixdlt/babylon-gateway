@@ -64,14 +64,16 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.AccountSecurityRules;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
@@ -95,6 +97,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
     private readonly ITopOfLedgerProvider _topOfLedgerProvider;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly IClock _clock;
+    private readonly IOptionsMonitor<StorageOptions> _storageOptions;
 
     public PostgresLedgerExtenderService(
         ILogger<PostgresLedgerExtenderService> logger,
@@ -102,7 +105,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         INetworkConfigurationProvider networkConfigurationProvider,
         IEnumerable<ILedgerExtenderServiceObserver> observers,
         IClock clock,
-        ITopOfLedgerProvider topOfLedgerProvider)
+        ITopOfLedgerProvider topOfLedgerProvider,
+        IOptionsMonitor<StorageOptions> storageOptions)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
@@ -110,11 +114,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         _observers = observers;
         _clock = clock;
         _topOfLedgerProvider = topOfLedgerProvider;
+        _storageOptions = storageOptions;
     }
 
     public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default)
     {
-        // Create own context for ledger extension unit of work
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
         await using var tx = await dbContext.Database.BeginTransactionAsync(token);
 
@@ -248,8 +252,8 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdatePendingTransactions), sw.Elapsed, null));
         }
 
-        var processorContext = new ProcessorContext(sequences, readHelper, writeHelper, networkConfiguration, token);
-        var relationshipProcessor = new RelationshipProcessor(referencedEntities);
+        var processorContext = new ProcessorContext(sequences, _storageOptions.CurrentValue, readHelper, writeHelper, networkConfiguration, token);
+        var relationshipProcessor = new EntityRelationshipProcessor(referencedEntities);
         var manifestProcessor = new ManifestProcessor(processorContext, referencedEntities, networkConfiguration);
         var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
 
@@ -260,15 +264,6 @@ UPDATE pending_transactions
             referencedEntities,
             writeHelper,
             networkConfiguration);
-
-        var ledgerTransactionProcessor = new LedgerTransactionProcessor(
-            processorContext,
-            _clock,
-            referencedEntities,
-            manifestProcessor,
-            affectedGlobalEntitiesProcessor,
-            writeHelper,
-            ledgerExtension.LatestTransactionSummary);
 
         // step: scan for any referenced entities
         {
@@ -286,6 +281,8 @@ UPDATE pending_transactions
 
                 try
                 {
+                    ledgerTransactionMarkersProcessor.OnTransactionScan(committedTransaction, stateVersion);
+
                     foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                     {
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)newGlobalEntity.EntityAddress, ea => new ReferencedEntity(ea, newGlobalEntity.EntityType, stateVersion));
@@ -419,7 +416,7 @@ UPDATE pending_transactions
                                 });
                         }
 
-                        relationshipProcessor.ScanUpsert(substateData, referencedEntity, stateVersion);
+                        relationshipProcessor.OnUpsertScan(substate, referencedEntity, stateVersion);
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -605,6 +602,15 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted("resolve_and_create_entities", sw.Elapsed, null));
         }
 
+        var ledgerTransactionProcessor = new LedgerTransactionProcessor(
+            processorContext,
+            _clock,
+            referencedEntities,
+            manifestProcessor,
+            affectedGlobalEntitiesProcessor,
+            writeHelper,
+            ledgerExtension.LatestTransactionSummary);
+
         var processors = new List<IProcessorBase>
         {
             ledgerTransactionProcessor,
@@ -640,6 +646,7 @@ UPDATE pending_transactions
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
                 var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
                 ledgerTransactionMarkersProcessor.VisitTransaction(committedTransaction, stateVersion);
+                ledgerTransactionProcessor.VisitTransaction(committedTransaction, stateVersion);
 
                 try
                 {
@@ -738,7 +745,7 @@ UPDATE pending_transactions
         var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
 
         return new ExtendLedgerReport(
-            ledgerTransactionProcessor.GetLastProcessedTransactionSummary(),
+            ledgerTransactionProcessor.GetSummaryOfLastProcessedTransaction(),
             rowsInserted + rowsUpdated,
             dbReadDuration,
             dbWriteDuration,
