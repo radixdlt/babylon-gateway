@@ -46,6 +46,8 @@ export type StateEntityDetailsOptions = {
   nonFungibleIncludeNfids?: false
   packageRoyaltyVaultBalance?: true
   componentRoyaltyVaultBalance?: true
+  dappTwoWayLinks?: true
+  nativeResourceDetails?: true
 }
 
 export type StateEntityDetailsVaultResponseItem = Omit<
@@ -125,6 +127,8 @@ export class State {
             non_fungible_include_nfids:
               options?.nonFungibleIncludeNfids ?? true,
             explicit_metadata: options?.explicitMetadata ?? [],
+            dapp_two_way_links: options?.dappTwoWayLinks ?? false,
+            native_resource_details: options?.nativeResourceDetails ?? false
           },
           at_ledger_state: ledgerState,
         },

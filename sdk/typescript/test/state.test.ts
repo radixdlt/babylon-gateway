@@ -42,6 +42,8 @@ describe('State Subapi', () => {
             package_royalty_vault_balance: false,
             non_fungible_include_nfids: true,
             explicit_metadata: [],
+            dapp_two_way_links: false,
+            native_resource_details: false,
           },
           addresses: ['a'],
           aggregation_level: 'Vault',
@@ -56,6 +58,8 @@ describe('State Subapi', () => {
             package_royalty_vault_balance: false,
             non_fungible_include_nfids: true,
             explicit_metadata: [],
+            dapp_two_way_links: false,
+            native_resource_details: false,
           },
           addresses: ['b'],
           aggregation_level: 'Vault',
@@ -206,7 +210,7 @@ describe('State Subapi', () => {
         [
           'https://just-for-test.com/state/entity/details',
           {
-            body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":true,"explicit_metadata":["name"]},"addresses":["address"],"aggregation_level":"Vault"}',
+            body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":true,"explicit_metadata":["name"],"dapp_two_way_links":false,"native_resource_details":false},"addresses":["address"],"aggregation_level":"Vault"}',
             credentials: undefined,
             headers: expect.anything(),
             method: 'POST',
@@ -273,7 +277,9 @@ describe('State Subapi', () => {
         [
           'https://just-for-test.com/state/entity/details',
           {
-            body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":true,"explicit_metadata":["name"]},"addresses":["address"],"aggregation_level":"Vault"}',
+            agent: undefined,
+            dispatcher: undefined,
+            body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":true,"explicit_metadata":["name"],"dapp_two_way_links":false,"native_resource_details":false},"addresses":["address"],"aggregation_level":"Vault"}',
             credentials: undefined,
             headers: expect.anything(),
             method: 'POST',
@@ -341,7 +347,9 @@ describe('State Subapi', () => {
         [
           'https://just-for-test.com/state/entity/details',
           {
-            body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":false,"explicit_metadata":["name"]},"addresses":["address"],"aggregation_level":"Vault"}',
+            agent: undefined,
+            dispatcher: undefined,
+            body: '{"opt_ins":{"ancestor_identities":false,"component_royalty_vault_balance":false,"package_royalty_vault_balance":false,"non_fungible_include_nfids":false,"explicit_metadata":["name"],"dapp_two_way_links":false,"native_resource_details":false},"addresses":["address"],"aggregation_level":"Vault"}',
             credentials: undefined,
             headers: expect.anything(),
             method: 'POST',
@@ -350,6 +358,8 @@ describe('State Subapi', () => {
         [
           'https://just-for-test.com/state/entity/page/non-fungibles/',
           {
+            agent: undefined,
+            dispatcher: undefined,
             body: '{"at_ledger_state":{"state_version":1},"cursor":"eyJvIjoxMDB9","address":"address","aggregation_level":"Vault","opt_ins":{"non_fungible_include_nfids":false,"explicit_metadata":["name"]}}',
             credentials: undefined,
             headers: expect.anything(),
