@@ -1,3 +1,12 @@
+## 1.7.3
+Release built: 26.09.2024
+
+### What’s new?
+This release fixes Data Aggregator stall on state version: `139553672` on the `mainnet` network.
+
+### Database changes
+- Removed unique constraint from `IX_account_resource_preference_rule_entry_history_account_enti~` index.
+
 ## 1.7.2
 Release built: 17.09.2024
 

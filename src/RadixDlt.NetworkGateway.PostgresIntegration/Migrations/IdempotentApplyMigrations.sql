@@ -1301,3 +1301,29 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240926150449_RemoveUniqueConstrainFromAccountLockerIndex') THEN
+    DROP INDEX "IX_account_locker_entry_resource_vault_definition_account_lock~";
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240926150449_RemoveUniqueConstrainFromAccountLockerIndex') THEN
+    CREATE INDEX "IX_account_locker_entry_resource_vault_definition_account_lock~" ON account_locker_entry_resource_vault_definition (account_locker_definition_id, from_state_version);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20240926150449_RemoveUniqueConstrainFromAccountLockerIndex') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20240926150449_RemoveUniqueConstrainFromAccountLockerIndex', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+
