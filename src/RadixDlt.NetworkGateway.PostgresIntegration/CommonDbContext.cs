@@ -409,8 +409,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<AccountLockerEntryResourceVaultDefinition>()
-            .HasIndex(e => new { e.AccountLockerDefinitionId, e.FromStateVersion })
-            .IsUnique();
+            .HasIndex(e => new { e.AccountLockerDefinitionId, e.FromStateVersion });
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
