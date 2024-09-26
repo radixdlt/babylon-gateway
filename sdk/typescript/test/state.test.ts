@@ -108,7 +108,7 @@ describe('State Subapi', () => {
       ])
     })
 
-    it('should not override exisintg fungible_resources and non_fungible_resources', async () => {
+    it('should not override existing fungible_resources and non_fungible_resources', async () => {
       // Arrange
       const spy = jest.fn().mockImplementation(
         fetchResponseFactory({
@@ -116,11 +116,18 @@ describe('State Subapi', () => {
             {
               address: 'address',
               fungible_resources: {
-                items: [{ aggregation_level: 'Vault' }],
+                items: [
+                  {
+                    aggregation_level: 'Vault',
+                    vaults: {
+                      items: [],
+                    },
+                  },
+                ],
                 total_count: 1,
               },
               non_fungible_resources: {
-                items: [{ aggregation_level: 'Vault' }],
+                items: [{ aggregation_level: 'Vault', vaults: { items: [] } }],
                 total_count: 1,
               },
             },
@@ -146,11 +153,11 @@ describe('State Subapi', () => {
         {
           address: 'address',
           fungible_resources: {
-            items: [{ aggregation_level: 'Vault' }],
+            items: [{ aggregation_level: 'Vault', vaults: { items: [] } }],
             total_count: 1,
           },
           non_fungible_resources: {
-            items: [{ aggregation_level: 'Vault' }],
+            items: [{ aggregation_level: 'Vault', vaults: { items: [] } }],
             total_count: 1,
           },
         },
@@ -166,12 +173,16 @@ describe('State Subapi', () => {
               {
                 address: 'address',
                 fungible_resources: {
-                  items: [{ aggregation_level: 'Vault' }],
+                  items: [
+                    { aggregation_level: 'Vault', vaults: { items: [] } },
+                  ],
                   next_cursor: 'eyJvIjoxMDB9',
                   total_count: 2,
                 },
                 non_fungible_resources: {
-                  items: [{ aggregation_level: 'Vault' }],
+                  items: [
+                    { aggregation_level: 'Vault', vaults: { items: [] } },
+                  ],
                   total_count: 1,
                 },
               },
@@ -237,11 +248,15 @@ describe('State Subapi', () => {
               {
                 address: 'address',
                 fungible_resources: {
-                  items: [{ aggregation_level: 'Vault' }],
+                  items: [
+                    { aggregation_level: 'Vault', vaults: { items: [] } },
+                  ],
                   total_count: 2,
                 },
                 non_fungible_resources: {
-                  items: [{ aggregation_level: 'Vault' }],
+                  items: [
+                    { aggregation_level: 'Vault', vaults: { items: [] } },
+                  ],
                   next_cursor: 'eyJvIjoxMDB9',
                   total_count: 2,
                 },
@@ -306,11 +321,15 @@ describe('State Subapi', () => {
               {
                 address: 'address',
                 fungible_resources: {
-                  items: [{ aggregation_level: 'Vault' }],
+                  items: [
+                    { aggregation_level: 'Vault', vaults: { items: [] } },
+                  ],
                   total_count: 2,
                 },
                 non_fungible_resources: {
-                  items: [{ aggregation_level: 'Vault' }],
+                  items: [
+                    { aggregation_level: 'Vault', vaults: { items: [] } },
+                  ],
                   next_cursor: 'eyJvIjoxMDB9',
                   total_count: 2,
                 },
