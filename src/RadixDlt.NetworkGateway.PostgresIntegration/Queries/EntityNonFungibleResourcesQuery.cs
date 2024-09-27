@@ -80,18 +80,14 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
-internal static class EntityResourcesQuery
+internal static class EntityNonFungibleResourcesQuery
 {
-    public record PerEntityQueryResultRow(long EntityId, long TotalFungibleResourceCount, long TotalNonFungibleResourceCount)
+    public record PerEntityQueryResultRow(long EntityId, long TotalNonFungibleResourceCount)
     {
-        public List<ResourceResultRow> FungibleResources { get; } = new();
-
-        public List<ResourceResultRow> NonFungibleResources { get; } = new();
-
-        internal Dictionary<long, ResourceResultRow> AllResources { get; } = new();
+        public Dictionary<long, ResourcesResultRow> NonFungibleResources { get; } = new();
     }
 
-    public record ResourceResultRow(
+    public record ResourcesResultRow(
         long ResourceEntryDefinitionId,
         long ResourceEntityId,
         ResourceType ResourceType,
@@ -103,7 +99,7 @@ internal static class EntityResourcesQuery
         IdBoundaryCursor? ResourceNextCursorInclusive,
         bool ResourceFilterOut)
     {
-        public List<VaultResultRow> Vaults { get; } = new();
+        public Dictionary<long, VaultResultRow> Vaults { get; } = new();
     }
 
     public record VaultResultRow(
@@ -116,58 +112,37 @@ internal static class EntityResourcesQuery
         IdBoundaryCursor? VaultNextCursorInclusive,
         bool VaultFilterOut);
 
-    public record struct DetailsQueryConfiguration(int FungibleResourcesPerEntity, int NonFungibleResourcesPerEntity, int VaultsPerResource, long AtLedgerState);
+    public record struct DetailsQueryConfiguration(int NonFungibleResourcesPerEntity, int VaultsPerResource, long AtLedgerState);
 
     public record struct ResourcesPageQueryConfiguration(int ResourcesPerEntity, int VaultsPerResource, IdBoundaryCursor? Cursor, long AtLedgerState);
 
     public record struct VaultsPageQueryConfiguration(int VaultsPerResource, IdBoundaryCursor? Cursor, long AtLedgerState);
 
+    public static async Task<IDictionary<long, PerEntityQueryResultRow>> Details(
+        ReadOnlyDbContext dbContext,
+        IDapperWrapper dapperWrapper,
+        long[] entityIds,
+        DetailsQueryConfiguration pageConfiguration,
+        CancellationToken token = default)
+    {
+        var configuration = new QueryConfiguration(
+            pageConfiguration.NonFungibleResourcesPerEntity,
+            pageConfiguration.VaultsPerResource,
+            null,
+            null,
+            pageConfiguration.AtLedgerState);
+
+        var results = await ExecuteEntityNonFungibleResourcesQuery(dbContext, dapperWrapper, entityIds, null, configuration, token);
+
+        return results;
+    }
+
     private record struct QueryConfiguration(
-        int FungibleResourcesPerEntity,
         int NonFungibleResourcesPerEntity,
         int VaultsPerResource,
         IdBoundaryCursor? ResourceCursor,
         IdBoundaryCursor? VaultCursor,
         long AtLedgerState);
-
-    public static async Task<IDictionary<long, PerEntityQueryResultRow>> Details(
-        ReadOnlyDbContext dbContext,
-        IDapperWrapper dapperWrapper,
-        ICollection<long> entityIds,
-        DetailsQueryConfiguration detailsConfiguration,
-        CancellationToken token = default)
-    {
-        var configuration = new QueryConfiguration(
-            detailsConfiguration.FungibleResourcesPerEntity,
-            detailsConfiguration.NonFungibleResourcesPerEntity,
-            detailsConfiguration.VaultsPerResource,
-            null,
-            null,
-            detailsConfiguration.AtLedgerState);
-
-        return await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, entityIds, null, configuration, token);
-    }
-
-    public static async Task<PerEntityQueryResultRow?> FungibleResourcesPage(
-        ReadOnlyDbContext dbContext,
-        IDapperWrapper dapperWrapper,
-        long entityId,
-        ResourcesPageQueryConfiguration pageConfiguration,
-        CancellationToken token = default)
-    {
-        var configuration = new QueryConfiguration(
-            pageConfiguration.ResourcesPerEntity,
-            0,
-            pageConfiguration.VaultsPerResource,
-            pageConfiguration.Cursor,
-            null,
-            pageConfiguration.AtLedgerState);
-        var results = await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, null, configuration, token);
-
-        results.TryGetValue(entityId, out var result);
-
-        return result;
-    }
 
     public static async Task<PerEntityQueryResultRow?> NonFungibleResourcesPage(
         ReadOnlyDbContext dbContext,
@@ -177,36 +152,12 @@ internal static class EntityResourcesQuery
         CancellationToken token = default)
     {
         var configuration = new QueryConfiguration(
-            0,
             pageConfiguration.ResourcesPerEntity,
             pageConfiguration.VaultsPerResource,
             pageConfiguration.Cursor,
             null,
             pageConfiguration.AtLedgerState);
-        var results = await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, null, configuration, token);
-
-        results.TryGetValue(entityId, out var result);
-
-        return result;
-    }
-
-    public static async Task<PerEntityQueryResultRow?> FungibleResourceVaultsPage(
-        ReadOnlyDbContext dbContext,
-        IDapperWrapper dapperWrapper,
-        long entityId,
-        long resourceId,
-        VaultsPageQueryConfiguration pageConfiguration,
-        CancellationToken token = default)
-    {
-        var configuration = new QueryConfiguration(
-            1,
-            0,
-            pageConfiguration.VaultsPerResource,
-            null,
-            pageConfiguration.Cursor,
-            pageConfiguration.AtLedgerState);
-
-        var results = await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, resourceId, configuration, token);
+        var results = await ExecuteEntityNonFungibleResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, null, configuration, token);
 
         results.TryGetValue(entityId, out var result);
 
@@ -222,80 +173,29 @@ internal static class EntityResourcesQuery
         CancellationToken token = default)
     {
         var configuration = new QueryConfiguration(
-            0,
             1,
             pageConfiguration.VaultsPerResource,
             null,
             pageConfiguration.Cursor,
             pageConfiguration.AtLedgerState);
-        var results = await ExecuteEntityResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, resourceId, configuration, token);
+        var results = await ExecuteEntityNonFungibleResourcesQuery(dbContext, dapperWrapper, new[] { entityId }, resourceId, configuration, token);
 
         results.TryGetValue(entityId, out var result);
 
         return result;
     }
 
-    public static void ToGatewayModel(
+    public static GatewayModel.NonFungibleResourcesCollection ToGatewayModel(
         this PerEntityQueryResultRow input,
         bool aggregatePerVault,
         IDictionary<long, GatewayModel.EntityMetadataCollection>? explicitMetadata,
-        IDictionary<long, GatewayModel.NonFungibleIdsCollection>? nfVaultContents,
-        out GatewayModel.FungibleResourcesCollection fungibles,
-        out GatewayModel.NonFungibleResourcesCollection nonFungibles)
+        IDictionary<long, GatewayModel.NonFungibleIdsCollection>? nfVaultContents)
     {
-        var fungibleResourceNextCursorInclusive = input.FungibleResources.SingleOrDefault(x => x.ResourceNextCursorInclusive.HasValue)?.ResourceNextCursorInclusive;
-        string? fungibleCursor = fungibleResourceNextCursorInclusive.ToGatewayModel()?.ToCursorString();
-
-        var fungibleItems = input
-            .FungibleResources
-            .Where(x => !x.ResourceFilterOut)
-            .Select(
-                f =>
-                {
-                    GatewayModel.FungibleResourcesCollectionItem val;
-                    GatewayModel.EntityMetadataCollection? resourceExplicitMetadata = null;
-
-                    explicitMetadata?.TryGetValue(f.ResourceEntityId, out resourceExplicitMetadata);
-
-                    if (aggregatePerVault)
-                    {
-                        var vaultNextCursorInclusive = f.Vaults.SingleOrDefault(x => x.VaultNextCursorInclusive.HasValue)?.VaultNextCursorInclusive;
-                        string? vaultCursor = vaultNextCursorInclusive.ToGatewayModel()?.ToCursorString();
-                        var vaults = f
-                            .Vaults
-                            .Where(x => !x.VaultFilterOut)
-                            .Select(
-                                v => new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
-                                    vaultAddress: v.VaultEntityAddress,
-                                    amount: v.VaultBalance.ToString(),
-                                    lastUpdatedAtStateVersion: v.VaultLastUpdatedAtStateVersion))
-                            .ToList();
-
-                        val = new GatewayModel.FungibleResourcesCollectionItemVaultAggregated(
-                            resourceAddress: f.ResourceEntityAddress,
-                            vaults: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(
-                                totalCount: f.ResourceVaultTotalCount,
-                                nextCursor: vaultCursor,
-                                items: vaults),
-                            explicitMetadata: resourceExplicitMetadata);
-                    }
-                    else
-                    {
-                        val = new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
-                            resourceAddress: f.ResourceEntityAddress,
-                            amount: f.ResourceBalance.ToString(),
-                            lastUpdatedAtStateVersion: f.ResourceLastUpdatedAtStateVersion,
-                            explicitMetadata: resourceExplicitMetadata);
-                    }
-
-                    return val;
-                })
-            .ToList();
-
-        var nonFungibleResourceNextCursorInclusive = input.NonFungibleResources.SingleOrDefault(x => x.ResourceNextCursorInclusive.HasValue)?.ResourceNextCursorInclusive;
+        var nonFungibleResourceNextCursorInclusive = input.NonFungibleResources.Values.SingleOrDefault(x => x.ResourceNextCursorInclusive.HasValue)?.ResourceNextCursorInclusive;
         string? nonFungibleCursor = nonFungibleResourceNextCursorInclusive.ToGatewayModel()?.ToCursorString();
         var nonFungibleItems = input
             .NonFungibleResources
+            .Values
             .Where(x => !x.ResourceFilterOut)
             .Select(
                 nf =>
@@ -307,11 +207,12 @@ internal static class EntityResourcesQuery
 
                     if (aggregatePerVault)
                     {
-                        var vaultNextCursorInclusive = nf.Vaults.SingleOrDefault(x => x.VaultNextCursorInclusive.HasValue)?.VaultNextCursorInclusive;
+                        var vaultNextCursorInclusive = nf.Vaults.Values.SingleOrDefault(x => x.VaultNextCursorInclusive.HasValue)?.VaultNextCursorInclusive;
                         string? vaultCursor = vaultNextCursorInclusive.ToGatewayModel()?.ToCursorString();
 
                         var vaults = nf
                             .Vaults
+                            .Values
                             .Where(x => !x.VaultFilterOut)
                             .Select(
                                 v =>
@@ -355,11 +256,10 @@ internal static class EntityResourcesQuery
                 })
             .ToList();
 
-        fungibles = new GatewayModel.FungibleResourcesCollection(input.TotalFungibleResourceCount, fungibleCursor, fungibleItems);
-        nonFungibles = new GatewayModel.NonFungibleResourcesCollection(input.TotalNonFungibleResourceCount, nonFungibleCursor, nonFungibleItems);
+        return new GatewayModel.NonFungibleResourcesCollection(input.TotalNonFungibleResourceCount, nonFungibleCursor, nonFungibleItems);
     }
 
-    private static async Task<IDictionary<long, PerEntityQueryResultRow>> ExecuteEntityResourcesQuery(
+    private static async Task<IDictionary<long, PerEntityQueryResultRow>> ExecuteEntityNonFungibleResourcesQuery(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
         ICollection<long> entityIds,
@@ -383,7 +283,6 @@ WITH variables AS (
     SELECT
         unnest(@entityIds) AS entity_id,
         @resourceEntityId AS resource_entity_id,
-        @fungibleResourcesPerEntity AS fungible_resources_per_entity,
         @nonFungibleResourcesPerEntity AS non_fungible_resources_per_entity,
         @vaultsPerResource AS vaults_per_resource,
         @useVaultAggregation as use_vault_aggregation,
@@ -410,7 +309,6 @@ SELECT
     var.entity_id as EntityId,
 
     -- totals
-    COALESCE(resource_totals.total_fungible_count, 0) AS TotalFungibleResourceCount,
     COALESCE(resource_totals.total_non_fungible_count, 0) AS TotalNonFungibleResourceCount,
 
     -- resources
@@ -445,43 +343,22 @@ LEFT JOIN LATERAL (
     LIMIT 1
 ) resource_totals ON TRUE
 LEFT JOIN LATERAL (
-    (
-        SELECT
-            d.id,
-            d.resource_entity_id,
-            d.resource_type,
-            d.from_state_version,
-            d.cursor,
-            ROW_NUMBER() OVER (ORDER BY d.cursor DESC) = var.fungible_resources_per_entity as cursor_only_row
-        FROM entity_resource_definitions_with_cursor d
-        WHERE
-            entity_id = var.entity_id
-          AND resource_type = 'fungible'
-          AND from_state_version <= var.at_ledger_state
-          AND CASE WHEN var.resource_entity_id IS NOT NULL THEN resource_entity_id = var.resource_entity_id ELSE TRUE END
-          AND ((NOT var.use_resource_cursor) OR d.cursor <= var.resource_cursor_inclusive)
-        ORDER BY d.cursor DESC
-        LIMIT var.fungible_resources_per_entity
-    )
-    UNION ALL
-    (
-        SELECT
-            d.id,
-            d.resource_entity_id,
-            d.resource_type,
-            d.from_state_version,
-            d.cursor,
-            ROW_NUMBER() OVER (ORDER BY d.cursor DESC) = var.non_fungible_resources_per_entity as cursor_only_row
-        FROM entity_resource_definitions_with_cursor d
-        WHERE
-            entity_id = var.entity_id
-          AND resource_type = 'non_fungible'
-          AND from_state_version <= var.at_ledger_state
-          AND CASE WHEN var.resource_entity_id IS NOT NULL THEN resource_entity_id = var.resource_entity_id ELSE TRUE END
-          AND ((NOT var.use_resource_cursor) OR d.cursor <= var.resource_cursor_inclusive)
-        ORDER BY d.cursor DESC
-        LIMIT var.non_fungible_resources_per_entity
-    )
+    SELECT
+        d.id,
+        d.resource_entity_id,
+        d.resource_type,
+        d.from_state_version,
+        d.cursor,
+        ROW_NUMBER() OVER (ORDER BY d.cursor DESC) = var.non_fungible_resources_per_entity as cursor_only_row
+    FROM entity_resource_definitions_with_cursor d
+    WHERE
+        entity_id = var.entity_id
+      AND resource_type = 'non_fungible'
+      AND from_state_version <= var.at_ledger_state
+      AND CASE WHEN var.resource_entity_id IS NOT NULL THEN resource_entity_id = var.resource_entity_id ELSE TRUE END
+      AND ((NOT var.use_resource_cursor) OR d.cursor <= var.resource_cursor_inclusive)
+    ORDER BY d.cursor DESC
+    LIMIT var.non_fungible_resources_per_entity
 ) definitions ON TRUE
 LEFT JOIN entities resource_entity ON resource_entity.id = definitions.resource_entity_id
 LEFT JOIN LATERAL (
@@ -530,7 +407,6 @@ ORDER BY definitions.cursor DESC, vault_entry_definition.cursor DESC",
             {
                 entityIds = entityIds.ToList(),
                 resourceEntityId = resourceEntityId,
-                fungibleResourcesPerEntity = configuration.FungibleResourcesPerEntity == 0 ? 0 : configuration.FungibleResourcesPerEntity + 1,
                 nonFungibleResourcesPerEntity = configuration.NonFungibleResourcesPerEntity == 0 ? 0 : configuration.NonFungibleResourcesPerEntity + 1,
                 vaultsPerResource = configuration.VaultsPerResource == 0 ? 0 : configuration.VaultsPerResource + 1,
                 useVaultAggregation = configuration.VaultsPerResource > 0,
@@ -546,7 +422,7 @@ ORDER BY definitions.cursor DESC, vault_entry_definition.cursor DESC",
 
         var result = new Dictionary<long, PerEntityQueryResultRow>();
 
-        await dapperWrapper.QueryAsync<PerEntityQueryResultRow, ResourceResultRow?, VaultResultRow?, PerEntityQueryResultRow>(
+        await dapperWrapper.QueryAsync<PerEntityQueryResultRow, ResourcesResultRow?, VaultResultRow?, PerEntityQueryResultRow>(
             dbContext.Database.GetDbConnection(),
             cd,
             (entityRow, resourceRow, vaultRow) =>
@@ -558,28 +434,14 @@ ORDER BY definitions.cursor DESC, vault_entry_definition.cursor DESC",
                     return entityRow;
                 }
 
-                var resource = entity.AllResources.GetOrAdd(
-                    resourceRow.ResourceEntityId,
-                    _ =>
-                    {
-                        if (resourceRow.ResourceType == ResourceType.Fungible)
-                        {
-                            entity.FungibleResources.Add(resourceRow);
-                        }
-                        else
-                        {
-                            entity.NonFungibleResources.Add(resourceRow);
-                        }
-
-                        return resourceRow;
-                    });
+                var resource = entity.NonFungibleResources.GetOrAdd(resourceRow.ResourceEntityId, _ => resourceRow);
 
                 if (vaultRow == null)
                 {
                     return entityRow;
                 }
 
-                resource.Vaults.Add(vaultRow);
+                resource.Vaults.GetOrAdd(vaultRow.VaultEntityId, _ => vaultRow);
 
                 return entityRow;
             },
