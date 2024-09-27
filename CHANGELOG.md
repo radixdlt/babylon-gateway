@@ -17,6 +17,15 @@ Release built: _not released yet_
   - New `entity_metadata_entry_definition` table which holds information about all the metadata keys ever created for a given entity.
   - Renamed `entity_metadata_history` to `entity_metadata_entry_history`, replaced `entity_id` and `key` columns with `entity_metadata_entry_definition_id`.
 
+## 1.7.3
+Release built: 26.09.2024
+
+### What’s new?
+This release fixes Data Aggregator stall on state version: `139553672` on the `mainnet` network.
+
+### Database changes
+- Removed unique constraint from `IX_account_resource_preference_rule_entry_history_account_enti~` index.
+
 ## 1.7.2
 Release built: 17.09.2024
 

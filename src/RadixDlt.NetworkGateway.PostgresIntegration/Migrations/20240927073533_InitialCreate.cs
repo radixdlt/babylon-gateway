@@ -983,8 +983,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_account_locker_entry_resource_vault_definition_account_lock~",
                 table: "account_locker_entry_resource_vault_definition",
-                columns: new[] { "account_locker_definition_id", "from_state_version" },
-                unique: true);
+                columns: new[] { "account_locker_definition_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_locker_entry_touch_history_account_locker_definitio~",

@@ -265,8 +265,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountLockerDefinitionId", "FromStateVersion")
-                        .IsUnique();
+                    b.HasIndex("AccountLockerDefinitionId", "FromStateVersion");
 
                     b.ToTable("account_locker_entry_resource_vault_definition");
                 });
