@@ -81,11 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-<<<<<<<< HEAD:src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20241001130214_InitialCreate.Designer.cs
-    [Migration("20241001130214_InitialCreate")]
-========
-    [Migration("20240925082442_InitialCreate")]
->>>>>>>> a54c65ae (add config parameters to allow reducing ledger transactions table size.):src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20240925082442_InitialCreate.Designer.cs
+    [Migration("20241001131441_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
