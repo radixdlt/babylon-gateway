@@ -87,7 +87,7 @@ internal static class PackageQueries
         public int TotalCount { get; set; }
     }
 
-    public static async Task<IDictionary<long, PackageBlueprintResultRow[]>> GetPackageBlueprintHistory(
+    public static async Task<IDictionary<long, PackageBlueprintResultRow[]>> PackageBlueprintHistoryMultiLookup(
         ReadOnlyDbContext dbContext,
         long[] packageEntityIds,
         int offset,
@@ -135,7 +135,7 @@ ORDER BY blueprint_join.ordinality ASC;",
             .ToDictionary(g => g.Key, g => g.ToArray());
     }
 
-    public static async Task<IDictionary<long, PackageCodeResultRow[]>> GetPackageCodeHistory(
+    public static async Task<IDictionary<long, PackageCodeResultRow[]>> PackageCodeHistoryMultiLookup(
         ReadOnlyDbContext dbContext,
         long[] packageEntityIds,
         int offset,

@@ -78,7 +78,7 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
-internal static class MetadataPageQuery
+internal static class MetadataPagedQuery
 {
     internal readonly record struct QueryConfiguration(
         GatewayModel.IdBoundaryCoursor? Cursor,
@@ -102,7 +102,7 @@ internal static class MetadataPageQuery
         IdBoundaryCursor? NextCursorInclusive
     );
 
-    internal static async Task<IDictionary<long, GatewayModel.EntityMetadataCollection>> ReadPages(
+    internal static async Task<IDictionary<long, GatewayModel.EntityMetadataCollection>> Execute(
         DbConnection dbConnection,
         IDapperWrapper dapperWrapper,
         GatewayModel.LedgerState ledgerState,
@@ -188,7 +188,7 @@ LEFT JOIN LATERAL (
         CASE
             WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit
                 THEN definitions.cursor
-            WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) != vars.per_entity_page_limit AND definitions.is_last_candidate
+            WHEN definitions.is_last_candidate
                 THEN ROW(definitions.key_first_seen_state_version, definitions.id - 1)
         END AS next_cursor_inclusive
      FROM (

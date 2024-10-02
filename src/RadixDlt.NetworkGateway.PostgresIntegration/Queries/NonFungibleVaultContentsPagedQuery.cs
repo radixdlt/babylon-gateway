@@ -77,7 +77,7 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
-internal static class NonFungibleVaultContentsQuery
+internal static class NonFungibleVaultContentsPagedQuery
 {
     public readonly record struct QueryConfiguration(
         IdBoundaryCursor? Cursor,
@@ -165,33 +165,29 @@ LEFT JOIN LATERAL (
         definitions.cursor,
         history.from_state_version AS last_updated_state_version,
         history.is_deleted,
-        CASE
-            WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit OR history.filter_out
-            THEN TRUE
-            ELSE FALSE
-        END AS filter_out,
+        ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC) = vars.per_entity_page_limit OR history.filter_out AS filter_out,
         CASE
             WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit
                 THEN definitions.cursor
-            WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) != vars.per_entity_page_limit AND definitions.is_last_candidate
+            WHEN definitions.is_last_candidate
                 THEN ROW(definitions.from_state_version, definitions.id - 1)
         END AS next_cursor_inclusive
     FROM (
         SELECT
-             id,
-             non_fungible_id_definition_id,
-             from_state_version,
-             cursor,
-             (ROW_NUMBER() OVER (ORDER BY d.cursor DESC)) = vars.per_entity_definition_read_limit AS is_last_candidate
-         FROM definitions_with_cursor d
-         WHERE
-             vault_entity_id = vars.vault_entity_id
-           AND from_state_version <= vars.at_ledger_state
-           AND ((NOT vars.use_cursor) OR d.cursor <= vars.start_cursor_inclusive)
-         ORDER BY d.cursor DESC
-         LIMIT vars.per_entity_definition_read_limit
-        ) definitions
-        INNER JOIN LATERAL (
+            d.id,
+            d.non_fungible_id_definition_id,
+            d.from_state_version,
+            d.cursor,
+            (ROW_NUMBER() OVER (ORDER BY d.cursor DESC)) = vars.per_entity_definition_read_limit AS is_last_candidate
+        FROM definitions_with_cursor d
+        WHERE
+            d.vault_entity_id = vars.vault_entity_id
+            AND d.from_state_version <= vars.at_ledger_state
+            AND ((NOT vars.use_cursor) OR d.cursor <= vars.start_cursor_inclusive)
+        ORDER BY d.cursor DESC
+        LIMIT vars.per_entity_definition_read_limit
+    ) definitions
+    INNER JOIN LATERAL (
         SELECT
             h.from_state_version,
             h.is_deleted,

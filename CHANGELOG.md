@@ -27,13 +27,6 @@ Release built: _not released yet_
 >   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
 >   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
 
-
-### Bug fixes
-- Fixed `total_count` property returned for `explicit_metadata` collection. It returns now total number of metadata items for given entity. Affected endpoints:
-  - `/state/entity/details` (when using `explicit_metadata` opt-in)
-  - `/state/entity/page/non-fungibles/` (when using `explicit_metadata` opt-in) 
-  - `/state/entity/page/fungibles/` (when using `explicit_metadata` opt-in)
-
 ### API Changes
 
 
@@ -46,13 +39,13 @@ Release built: _not released yet_
         - New `entity_metadata_totals_history` table, which holds total counts of metadata per entity.
     - Resource globally aggregated
         - Removed `entity_resource_aggregate_history` table.
-        - New `entity_resource_entry_definition` table, which holds information about resource held by a global entity.
+        - New `entity_resource_entry_definition` table, which holds information about all resources which have ever been held by a given global entity.
         - New `entity_resource_balance_history` table, which holds the sum of globally aggregated resource held by a global entity at a given state version.
         - New `entity_resource_totals_history` table, which holds total count of different resources under a given global entity at a given state version.
     - Resource vault aggregated
         - Removed `entity_resource_aggregated_vaults_history` and `entity_resource_vault_aggregate_history` tables.
-        - New `entity_resource_vault_entry_definition` table, which holds information about vaults held by a global entity.
-        - New `entity_resource_vault_totals_history` table, which holds total count of all vaults under a given global entity at a given state version.
+        - New `entity_resource_vault_entry_definition` table, which holds information about vaults of a given resource held under a given global entity.
+        - New `entity_resource_vault_totals_history` table, which holds total count of all vaults of a given resource held under a given global entity at a given state version.
     - Vault content
         - New `non_fungible_vault_entry_definition` table, which holds information about non fungible held by a given vault.
         - New `non_fungible_vault_entry_history` table which holds history of given non fungible inside vault.

@@ -270,12 +270,12 @@ INNER JOIN LATERAL (
             .AnnotateMetricName("GetVaultAddresses")
             .ToDictionaryAsync(e => e.Id, e => e.Address, token);
 
-        var metadataById = await MetadataPageQuery.ReadPages(
+        var metadataById = await MetadataPagedQuery.Execute(
             _dbContext.Database.GetDbConnection(),
             _dapperWrapper,
             ledgerState,
             validatorIds,
-            new MetadataPageQuery.QueryConfiguration
+            new MetadataPagedQuery.QueryConfiguration
             {
                 Cursor = null,
                 PageSize = _endpointConfiguration.Value.DefaultPageSize,

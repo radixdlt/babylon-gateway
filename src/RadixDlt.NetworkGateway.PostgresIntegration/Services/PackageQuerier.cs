@@ -89,7 +89,7 @@ internal class PackageQuerier : IPackageQuerier
         CancellationToken token = default)
     {
         var package = await _entityQuerier.GetEntity<GlobalPackageEntity>(pageRequest.Address, ledgerState, token);
-        var packageBlueprintHistory = await PackageQueries.GetPackageBlueprintHistory(
+        var packageBlueprintHistory = await PackageQueries.PackageBlueprintHistoryMultiLookup(
             _dbContext,
             new[] { package.Id },
             pageRequest.Offset,
@@ -119,7 +119,7 @@ internal class PackageQuerier : IPackageQuerier
         CancellationToken token = default)
     {
         var package = await _entityQuerier.GetEntity<GlobalPackageEntity>(pageRequest.Address, ledgerState, token);
-        var packageCodeHistory = await PackageQueries.GetPackageCodeHistory(
+        var packageCodeHistory = await PackageQueries.PackageCodeHistoryMultiLookup(
             _dbContext,
             new[] { package.Id },
             pageRequest.Offset,

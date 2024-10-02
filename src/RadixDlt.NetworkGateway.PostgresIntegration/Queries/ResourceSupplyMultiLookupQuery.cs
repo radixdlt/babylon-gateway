@@ -73,15 +73,9 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 
-internal static class ResourceSupplyQuery
+internal static class ResourceSupplyMultiLookupQuery
 {
-    public static async Task<ResourceEntitySupplyHistory> GetResourceSupplyData(ReadOnlyDbContext dbContext, long entityId, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        var response = await GetResourcesSupplyData(dbContext, new[] { entityId }, ledgerState, token);
-        return response[entityId];
-    }
-
-    public static async Task<IDictionary<long, ResourceEntitySupplyHistory>> GetResourcesSupplyData(ReadOnlyDbContext dbContext, long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    public static async Task<IDictionary<long, ResourceEntitySupplyHistory>> Execute(ReadOnlyDbContext dbContext, long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         if (entityIds.Length == 0)
         {
