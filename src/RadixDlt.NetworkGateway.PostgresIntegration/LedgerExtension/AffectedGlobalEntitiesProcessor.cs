@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="AffectedGlobalEntitiesProcessor.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;

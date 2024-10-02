@@ -108,7 +108,7 @@ internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
         var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
         var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
 
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchema(
+        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
             _dbContext,
             _dapperWrapper,
             keyValueStore.Id,
@@ -140,14 +140,14 @@ internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
         var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
         var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
 
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchema(
+        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
             _dbContext,
             _dapperWrapper,
             keyValueStore.Id,
             ledgerState,
             token);
 
-        return await KeyValueStoreQueries.KeyValueStoreData(
+        return await KeyValueStoreQueries.KeyValueStoreDataMultiLookupQuery(
             _dbContext,
             _dapperWrapper,
             keyValueStore,

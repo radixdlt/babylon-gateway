@@ -181,10 +181,7 @@ LEFT JOIN LATERAL (
         entries.value,
         entries.is_locked,
         entries.is_deleted,
-        CASE WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit OR entries.filter_out
-            THEN TRUE
-            ELSE FALSE
-        END AS filter_out,
+        ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC) = vars.per_entity_page_limit OR entries.filter_out AS filter_out,
         CASE
             WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.per_entity_page_limit
                 THEN definitions.cursor

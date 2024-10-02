@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="AccountStateQuerier.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;

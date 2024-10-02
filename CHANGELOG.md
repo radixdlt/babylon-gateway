@@ -29,8 +29,8 @@ Release built: _not released yet_
 
 
 ### Bug fixes
-
 - Added missing `total_count` property to `/state/validators/list` response.
+
 ### API Changes
 - Restored previously removed `total_count` property to `/state/key-value-store/keys` endpoint.
 

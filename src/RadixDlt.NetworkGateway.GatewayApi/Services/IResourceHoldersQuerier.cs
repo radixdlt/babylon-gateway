@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="IExtensionsQuerier.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using RadixDlt.NetworkGateway.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;

@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="KeyValueStoreTotalsHistory.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

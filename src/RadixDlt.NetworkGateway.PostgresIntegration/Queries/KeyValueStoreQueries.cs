@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="KeyValueStoreQueries.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
@@ -200,10 +196,7 @@ LEFT JOIN LATERAL (
         entries.value,
         entries.is_locked,
         entries.is_deleted,
-        CASE WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.page_limit OR entries.filter_out
-                THEN TRUE
-                ELSE FALSE
-            END AS filter_out,
+        ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC) = vars.page_limit OR entries.filter_out AS filter_out,
         CASE
             WHEN (ROW_NUMBER() OVER (ORDER BY definitions.cursor DESC)) = vars.page_limit
                 THEN definitions.cursor
@@ -211,16 +204,16 @@ LEFT JOIN LATERAL (
                 THEN ROW(definitions.key_first_seen_state_version, definitions.id - 1)
             END AS next_cursor_inclusive
     FROM (
-             SELECT
-                 d.id,
-                 d.key,
-                 d.cursor,
-                 d.from_state_version AS key_first_seen_state_version,
-                 (ROW_NUMBER() OVER (ORDER BY d.cursor DESC)) = vars.definition_read_limit AS is_last_candidate
-             FROM definitions_with_cursor d
-             WHERE d.key_value_store_entity_id = vars.key_value_store_entity_id AND ((NOT vars.use_cursor) OR d.cursor <= vars.start_cursor_inclusive)
-             ORDER BY d.cursor DESC
-             LIMIT vars.definition_read_limit
+            SELECT
+                d.id,
+                d.key,
+                d.cursor,
+                d.from_state_version AS key_first_seen_state_version,
+                (ROW_NUMBER() OVER (ORDER BY d.cursor DESC)) = vars.definition_read_limit AS is_last_candidate
+            FROM definitions_with_cursor d
+            WHERE d.key_value_store_entity_id = vars.key_value_store_entity_id AND ((NOT vars.use_cursor) OR d.cursor <= vars.start_cursor_inclusive)
+            ORDER BY d.cursor DESC
+            LIMIT vars.definition_read_limit
     ) definitions
     INNER JOIN LATERAL (
         SELECT
@@ -292,7 +285,7 @@ ORDER BY entries_per_entity.cursor DESC
         );
     }
 
-    internal static async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
+    internal static async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreDataMultiLookupQuery(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
         Entity keyValueStoreEntity,
@@ -385,7 +378,7 @@ LEFT JOIN LATERAL (
         return new GatewayModel.StateKeyValueStoreDataResponse(ledgerState, keyValueStoreEntity.Address, items);
     }
 
-    internal static async Task<KeyValueStoreSchemaResultRow> KeyValueStoreSchema(
+    internal static async Task<KeyValueStoreSchemaResultRow> KeyValueStoreSchemaLookupQuery(
         ReadOnlyDbContext dbContext,
         IDapperWrapper dapperWrapper,
         long keyValueStoreId,
