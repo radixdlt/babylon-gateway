@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20240927111052_InitialCreate")]
+    [Migration("20241001130214_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -993,6 +993,38 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("KeyValueStoreEntityId", "FromStateVersion");
 
                     b.ToTable("key_value_store_schema_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreTotalsHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("TotalEntriesExcludingDeleted")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_entries_excluding_deleted");
+
+                    b.Property<long>("TotalEntriesIncludingDeleted")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_entries_including_deleted");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.ToTable("key_value_store_totals_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>

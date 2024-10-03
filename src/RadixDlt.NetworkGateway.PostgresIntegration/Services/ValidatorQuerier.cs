@@ -179,6 +179,14 @@ LEFT JOIN LATERAL (
         var validatorsPageSize = _endpointConfiguration.Value.ValidatorsPageSize;
         var idBoundary = cursor?.IdBoundary ?? 0;
 
+        var validatorsCount = await _dbContext
+            .Entities
+            .OfType<GlobalValidatorEntity>()
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
+            .Where(e => e.Id >= idBoundary)
+            .AnnotateMetricName("GetValidatorsCount")
+            .CountAsync(token);
+
         var validatorsAndOneMore = await _dbContext
             .Entities
             .OfType<GlobalValidatorEntity>()
@@ -335,6 +343,6 @@ INNER JOIN LATERAL (
             ? new GatewayModel.StateValidatorsListCursor(validatorsAndOneMore.Last().Id).ToCursorString()
             : null;
 
-        return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, nextCursor, items));
+        return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(validatorsCount, nextCursor, items));
     }
 }

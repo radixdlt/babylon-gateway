@@ -77,7 +77,7 @@ internal record struct KeyValueStoreEntryDbLookup(long KeyValueStoreEntityId, Va
 
 internal record struct KeyValueStoreChangePointerLookup(long KeyValueStoreEntityId, long StateVersion, ValueBytes Key);
 
-internal record KeyValueStoreChangePointer(CoreModel.GenericKeyValueStoreEntrySubstate KeyValueStoreEntry);
+internal record KeyValueStoreChangePointer(CoreModel.GenericKeyValueStoreEntrySubstate NewSubstate, CoreModel.GenericKeyValueStoreEntrySubstate? PreviousSubstate);
 
 internal class KeyValueStoreProcessor
 {
@@ -85,9 +85,11 @@ internal class KeyValueStoreProcessor
 
     private readonly Dictionary<KeyValueStoreEntryDbLookup, long> _observedEntryDefinitions = new();
     private readonly Dictionary<KeyValueStoreEntryDbLookup, KeyValueStoreEntryDefinition> _existingEntryDefinitions = new();
+    private readonly Dictionary<long, KeyValueStoreTotalsHistory> _existingTotalsHistory = new();
 
     private readonly List<KeyValueStoreEntryDefinition> _entryDefinitionsToAdd = new();
     private readonly List<KeyValueStoreEntryHistory> _entryHistoryToAdd = new();
+    private readonly List<KeyValueStoreTotalsHistory> _totalsHistoryToAdd = new();
 
     private ChangeTracker<KeyValueStoreChangePointerLookup, KeyValueStoreChangePointer> _changes = new();
 
@@ -96,14 +98,16 @@ internal class KeyValueStoreProcessor
         _context = context;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.GenericKeyValueStoreEntrySubstate genericKeyValueStoreEntry)
         {
             var key = (ValueBytes)genericKeyValueStoreEntry.Key.KeyData.GetDataBytes();
             var kvStoreEntryLookup = new KeyValueStoreChangePointerLookup(referencedEntity.DatabaseId, stateVersion, key);
 
-            _changes.Add(kvStoreEntryLookup, new KeyValueStoreChangePointer(genericKeyValueStoreEntry));
+            _changes.Add(kvStoreEntryLookup, new KeyValueStoreChangePointer(genericKeyValueStoreEntry, substate.PreviousValue?.SubstateData as CoreModel.GenericKeyValueStoreEntrySubstate));
             _observedEntryDefinitions.TryAdd(new KeyValueStoreEntryDbLookup(referencedEntity.DatabaseId, key), stateVersion);
         }
     }
@@ -111,6 +115,7 @@ internal class KeyValueStoreProcessor
     public async Task LoadDependencies()
     {
         _existingEntryDefinitions.AddRange(await ExistingKeyValueStoreEntryDefinitions());
+        _existingTotalsHistory.AddRange(await ExistingKeyValueStoreTotalsHistory());
     }
 
     public void ProcessChanges()
@@ -131,17 +136,48 @@ internal class KeyValueStoreProcessor
 
         foreach (var change in _changes.AsEnumerable())
         {
-            var isDeleted = change.Value.KeyValueStoreEntry.Value == null;
+            var isDeleted = change.Value.NewSubstate.Value == null;
 
             _entryHistoryToAdd.Add(new KeyValueStoreEntryHistory
             {
                 Id = _context.Sequences.KeyValueStoreEntryHistorySequence++,
                 FromStateVersion = change.Key.StateVersion,
                 KeyValueStoreEntryDefinitionId = _existingEntryDefinitions[new KeyValueStoreEntryDbLookup(change.Key.KeyValueStoreEntityId, change.Key.Key)].Id,
-                Value = isDeleted ? null : change.Value.KeyValueStoreEntry.Value!.Data.StructData.GetDataBytes(),
+                Value = isDeleted ? null : change.Value.NewSubstate.Value!.Data.StructData.GetDataBytes(),
                 IsDeleted = isDeleted,
-                IsLocked = change.Value.KeyValueStoreEntry.IsLocked,
+                IsLocked = change.Value.NewSubstate.IsLocked,
             });
+
+            var totalsExists = _existingTotalsHistory.TryGetValue(change.Key.KeyValueStoreEntityId, out var previousTotals);
+
+            var newTotals = new KeyValueStoreTotalsHistory
+            {
+                Id = _context.Sequences.EntityMetadataTotalsHistorySequence++,
+                FromStateVersion = change.Key.StateVersion,
+                EntityId = change.Key.KeyValueStoreEntityId,
+                TotalEntriesExcludingDeleted = totalsExists ? previousTotals!.TotalEntriesExcludingDeleted : 0,
+                TotalEntriesIncludingDeleted = totalsExists ? previousTotals!.TotalEntriesIncludingDeleted : 0,
+            };
+
+            switch (change.Value)
+            {
+                case { PreviousSubstate: null, NewSubstate.Value: null }:
+                    newTotals.TotalEntriesIncludingDeleted++;
+                    break;
+                case { PreviousSubstate: null, NewSubstate.Value: not null }:
+                    newTotals.TotalEntriesIncludingDeleted++;
+                    newTotals.TotalEntriesExcludingDeleted++;
+                    break;
+                case { PreviousSubstate.Value: not null, NewSubstate.Value: null }:
+                    newTotals.TotalEntriesExcludingDeleted--;
+                    break;
+                case { PreviousSubstate.Value: null, NewSubstate.Value: not null }:
+                    newTotals.TotalEntriesExcludingDeleted++;
+                    break;
+            }
+
+            _existingTotalsHistory[change.Key.KeyValueStoreEntityId] = newTotals;
+            _totalsHistoryToAdd.Add(newTotals);
         }
     }
 
@@ -151,6 +187,7 @@ internal class KeyValueStoreProcessor
 
         rowsInserted += await CopyKeyValueStoreEntryDefinition();
         rowsInserted += await CopyKeyValueStoreEntryHistory();
+        rowsInserted += await CopyKeyValueStoreTotalsHistory();
 
         return rowsInserted;
     }
@@ -171,6 +208,35 @@ SELECT *
 FROM key_value_store_entry_definition
 WHERE (key_value_store_entity_id, key) IN (SELECT * FROM variables)",
             e => new KeyValueStoreEntryDbLookup(e.KeyValueStoreEntityId, (ValueBytes)e.Key));
+    }
+
+    private async Task<IDictionary<long, KeyValueStoreTotalsHistory>> ExistingKeyValueStoreTotalsHistory()
+    {
+        var entityIds = _observedEntryDefinitions
+            .Keys
+            .Select(x => x.KeyValueStoreEntityId)
+            .ToHashSet();
+
+        if (entityIds.Count == 0)
+        {
+            return ImmutableDictionary<long, KeyValueStoreTotalsHistory>.Empty;
+        }
+
+        return await _context.ReadHelper.LoadDependencies<long, KeyValueStoreTotalsHistory>(
+            @$"
+WITH variables (entity_id) AS (
+    SELECT UNNEST({entityIds})
+)
+SELECT kvsth.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM key_value_store_totals_history
+    WHERE entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) kvsth ON true;",
+            e => e.EntityId);
     }
 
     private Task<int> CopyKeyValueStoreEntryDefinition() => _context.WriteHelper.Copy(
@@ -195,5 +261,17 @@ WHERE (key_value_store_entity_id, key) IN (SELECT * FROM variables)",
             await writer.WriteAsync(e.Value?.ToArray(), NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
+        });
+
+    private Task<int> CopyKeyValueStoreTotalsHistory() => _context.WriteHelper.Copy(
+        _totalsHistoryToAdd,
+        "COPY key_value_store_totals_history (id, from_state_version, entity_id, total_entries_including_deleted, total_entries_excluding_deleted) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.TotalEntriesIncludingDeleted, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.TotalEntriesExcludingDeleted, NpgsqlDbType.Bigint, token);
         });
 }

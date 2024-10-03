@@ -842,7 +842,7 @@ UPDATE pending_transactions
                         accountResourcePreferenceRulesProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         accountDefaultDepositRuleProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         accountAuthorizedDepositorsProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
-                        keyValueStoreProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
+                        keyValueStoreProcessor.VisitUpsert(substate, referencedEntity, stateVersion);
                         validatorProcessor.VisitUpsert(substateData, referencedEntity, stateVersion, passingEpoch);
                         accountLockerProcessor.VisitUpsert(substateData, referencedEntity, stateVersion);
                         affectedGlobalEntitiesProcessor.VisitUpsert(referencedEntity, stateVersion);

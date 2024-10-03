@@ -108,14 +108,15 @@ internal class AccountLockerProcessor
             var account = _referencedEntities.Get((EntityAddress)accountLocker.Key.AccountAddress);
             var keyValueStore = _referencedEntities.Get((EntityAddress)accountLocker.Value.ResourceVaults.EntityAddress);
 
-            _definitionsToAdd.Add(new AccountLockerEntryDefinition
-            {
-                Id = _context.Sequences.AccountLockerEntryDefinitionSequence++,
-                FromStateVersion = stateVersion,
-                AccountLockerEntityId = referencedEntity.DatabaseId,
-                AccountEntityId = account.DatabaseId,
-                KeyValueStoreEntityId = keyValueStore.DatabaseId,
-            });
+            _definitionsToAdd.Add(
+                new AccountLockerEntryDefinition
+                {
+                    Id = _context.Sequences.AccountLockerEntryDefinitionSequence++,
+                    FromStateVersion = stateVersion,
+                    AccountLockerEntityId = referencedEntity.DatabaseId,
+                    AccountEntityId = account.DatabaseId,
+                    KeyValueStoreEntityId = keyValueStore.DatabaseId,
+                });
         }
 
         if (substateData is CoreModel.GenericKeyValueStoreEntrySubstate keyValueStoreEntry)
@@ -163,20 +164,24 @@ internal class AccountLockerProcessor
     public void ProcessChanges()
     {
         _existingEntryDefinitions.AddRange(_definitionsToAdd.ToDictionary(e => new AccountLockerEntryDbLookup(e.AccountLockerEntityId, e.AccountEntityId)));
-        _resourceVaultDefinitionsToAdd.AddRange(_observedVaultDefinitions.Select(rv => new AccountLockerEntryResourceVaultDefinition
-        {
-            Id = _context.Sequences.AccountLockerEntryResourceVaultDefinitionSequence++,
-            FromStateVersion = rv.StateVersion,
-            AccountLockerDefinitionId = _existingEntryDefinitions[new AccountLockerEntryDbLookup(rv.AccountLockerEntityId, rv.AccountEntityId)].Id,
-            ResourceEntityId = _referencedEntities.Get(rv.ResourceAddress).DatabaseId,
-            VaultEntityId = _referencedEntities.Get(rv.VaultAddress).DatabaseId,
-        }));
-        _touchHistoryToAdd.AddRange(_observedTouchHistory.Select(th => new AccountLockerEntryTouchHistory
-        {
-            Id = _context.Sequences.AccountLockerEntryTouchHistorySequence++,
-            FromStateVersion = th.StateVersion,
-            AccountLockerDefinitionId = _existingEntryDefinitions[new AccountLockerEntryDbLookup(th.AccountLockerEntityId, th.AccountEntityId)].Id,
-        }));
+        _resourceVaultDefinitionsToAdd.AddRange(
+            _observedVaultDefinitions.Select(
+                rv => new AccountLockerEntryResourceVaultDefinition
+                {
+                    Id = _context.Sequences.AccountLockerEntryResourceVaultDefinitionSequence++,
+                    FromStateVersion = rv.StateVersion,
+                    AccountLockerDefinitionId = _existingEntryDefinitions[new AccountLockerEntryDbLookup(rv.AccountLockerEntityId, rv.AccountEntityId)].Id,
+                    ResourceEntityId = _referencedEntities.Get(rv.ResourceAddress).DatabaseId,
+                    VaultEntityId = _referencedEntities.Get(rv.VaultAddress).DatabaseId,
+                }));
+        _touchHistoryToAdd.AddRange(
+            _observedTouchHistory.Select(
+                th => new AccountLockerEntryTouchHistory
+                {
+                    Id = _context.Sequences.AccountLockerEntryTouchHistorySequence++,
+                    FromStateVersion = th.StateVersion,
+                    AccountLockerDefinitionId = _existingEntryDefinitions[new AccountLockerEntryDbLookup(th.AccountLockerEntityId, th.AccountEntityId)].Id,
+                }));
     }
 
     public async Task<int> SaveEntities()

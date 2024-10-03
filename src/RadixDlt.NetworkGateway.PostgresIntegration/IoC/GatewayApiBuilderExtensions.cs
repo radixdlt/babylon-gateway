@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services.AccountDepositSettings;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services.PendingTransactions;
 using IPackageQuerier = RadixDlt.NetworkGateway.GatewayApi.Services.IPackageQuerier;
 

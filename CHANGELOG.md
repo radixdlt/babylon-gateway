@@ -27,8 +27,12 @@ Release built: _not released yet_
 >   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
 >   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
 
-### API Changes
 
+### Bug fixes
+- Added missing `total_count` property to `/state/validators/list` response.
+
+### API Changes
+- Restored previously removed `total_count` property to `/state/key-value-store/keys` endpoint.
 
 ### Database changes
 - Refactored multiple aggregates. Queries follow a similar strategy as key value stores and utilize `_entry_definition`, `_entry_history`, and `_totals_history` tables to return data
@@ -50,7 +54,8 @@ Release built: _not released yet_
         - New `non_fungible_vault_entry_definition` table, which holds information about non fungible held by a given vault.
         - New `non_fungible_vault_entry_history` table which holds history of given non fungible inside vault.
         - Renamed `entity_vault_history` to `vault_balance_history`. Holds information about vault content (amount of fungibles or count of non fungible ids inside vault) at a given state version.
-
+    - Key value store
+        - New `key_value_store_totals_history` table, which holds total count of all keys under a given store at a given state version.
 
 ## 1.7.3
 Release built: 26.09.2024

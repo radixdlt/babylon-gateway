@@ -118,7 +118,14 @@ internal class AccountLockerQuerier : IAccountLockerQuerier
 
         var cd = new CommandDefinition(
             commandText: @"
-SELECT d.id AS Id, d.from_state_version AS FromStateVersion, re.discriminator AS ResourceDiscriminator, re.address AS ResourceAddress, ve.address AS VaultAddress, vh.from_state_version AS LastUpdatedAtStateVersion, vh.balance AS Balance
+SELECT
+    d.id AS Id,
+    d.from_state_version AS FromStateVersion,
+    re.discriminator AS ResourceDiscriminator,
+    re.address AS ResourceAddress,
+    ve.address AS VaultAddress,
+    vh.from_state_version AS LastUpdatedAtStateVersion,
+    vh.balance AS Balance
 FROM account_locker_entry_resource_vault_definition d
 INNER JOIN entities re ON re.id = d.resource_entity_id
 INNER JOIN entities ve ON ve.id = d.vault_entity_id
