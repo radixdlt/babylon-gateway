@@ -63,7 +63,7 @@
  */
 
 using Dapper;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models.CustomTypes;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries.CustomTypes;
 using System;
 using System.Data;
 

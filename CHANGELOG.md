@@ -3,19 +3,54 @@ Release built: _not released yet_
 
 > [!CAUTION]
 > **Breaking Changes:**
-> - Changed ordering of entity metadata returned from `/state/entity/metadata`, `/state/entity/page/metadata` endpoints. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending.
-
-
-### Bug fixes
+> - Changed ordering of entity metadata. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending. Affected endpoints:
+>   - `/state/entity/metadata`
+>   - `/state/entity/page/metadata`
+> - Changed ordering of fungible and non fungible resources. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending. Affected endpoints:
+>   - `/state/entity/details`
+>   - `/state/entity/page/fungibles/`
+>   - `/state/entity/page/non-fungibles/`
+> - Changed ordering of vaults when using vault aggregation level. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending.  Affected endpoints:
+>   - `/state/entity/details`
+>   - `/state/entity/page/fungibles/`
+>   - `/state/entity/page/fungible-vaults/`
+>   - `/state/entity/page/non-fungibles/`
+>   - `/state/entity/page/non-fungible-vaults/`
+> - Changed ordering of non fungible ids. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending. Affected endpoints:
+>   - `/state/entity/page/non-fungible-vault/ids`
+>   - `/state/entity/details` (when using `non_fungible_include_nfids` opt-in)
+>   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
+>   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
+> -  Existing non fungible vaults with no items will no longer return `items: null` and will return an empty array `items: []` instead, as we do in all other collections. Affected endpoints:
+>   - `/state/entity/page/non-fungible-vault/ids`
+>   - `/state/entity/details` (when using `non_fungible_include_nfids` opt-in)
+>   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
+>   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
 
 ### API Changes
 
+
 ### Database changes
-- Refactored entity metadata aggregate. Queries for metadata follow a similar strategy as key value stores and utilize `_entry_definition`, `_entry_history`, and `_totals_history` tables to return data
-  - Removed `entity_metadata_aggregate_history` table.
-  - New `entity_metadata_totals_history` table which holds total counts of metadata per entity.
-  - New `entity_metadata_entry_definition` table which holds information about all the metadata keys ever created for a given entity.
-  - Renamed `entity_metadata_history` to `entity_metadata_entry_history`, replaced `entity_id` and `key` columns with `entity_metadata_entry_definition_id`.
+- Refactored multiple aggregates. Queries follow a similar strategy as key value stores and utilize `_entry_definition`, `_entry_history`, and `_totals_history` tables to return data
+    - Metadata
+        - Removed `entity_metadata_aggregate_history` table.
+        - New `entity_metadata_entry_definition` table, which holds information about all the metadata keys ever created for a given entity.
+        - Renamed `entity_metadata_history` to `entity_metadata_entry_history`, replaced `entity_id` and `key` columns with `entity_metadata_entry_definition_id`. Holds history of given metadata key at a given state version.
+        - New `entity_metadata_totals_history` table, which holds total counts of metadata per entity.
+    - Resource globally aggregated
+        - Removed `entity_resource_aggregate_history` table.
+        - New `entity_resource_entry_definition` table, which holds information about all resources which have ever been held by a given global entity.
+        - New `entity_resource_balance_history` table, which holds the sum of globally aggregated resource held by a global entity at a given state version.
+        - New `entity_resource_totals_history` table, which holds total count of different resources under a given global entity at a given state version.
+    - Resource vault aggregated
+        - Removed `entity_resource_aggregated_vaults_history` and `entity_resource_vault_aggregate_history` tables.
+        - New `entity_resource_vault_entry_definition` table, which holds information about vaults of a given resource held under a given global entity.
+        - New `entity_resource_vault_totals_history` table, which holds total count of all vaults of a given resource held under a given global entity at a given state version.
+    - Vault content
+        - New `non_fungible_vault_entry_definition` table, which holds information about non fungible held by a given vault.
+        - New `non_fungible_vault_entry_history` table which holds history of given non fungible inside vault.
+        - Renamed `entity_vault_history` to `vault_balance_history`. Holds information about vault content (amount of fungibles or count of non fungible ids inside vault) at a given state version.
+
 
 ## 1.7.3
 Release built: 26.09.2024

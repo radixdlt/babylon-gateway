@@ -71,6 +71,8 @@ using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services.PendingTransactions;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

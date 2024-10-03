@@ -70,6 +70,8 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -81,19 +83,25 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
 {
-    private record KeyValueStoreEntryViewModel(long Id, byte[] Key, long FromStateVersion, byte[] Value, bool IsDeleted, bool IsLocked, long LastUpdatedAtStateVersion);
+    private record KeyValueStoreEntryResultRow(long Id, byte[] Key, long FromStateVersion, byte[] Value, bool IsDeleted, bool IsLocked, long LastUpdatedAtStateVersion);
 
-    private record KeyValueStoreSchemaModel(byte[] KeySchema, long KeyTypeIndex, SborTypeKind KeySborTypeKind, byte[] ValueSchema, long ValueTypeIndex, SborTypeKind ValueSborTypeKind);
+    private record KeyValueStoreSchemaResultRow(byte[] KeySchema, long KeyTypeIndex, SborTypeKind KeySborTypeKind, byte[] ValueSchema, long ValueTypeIndex, SborTypeKind ValueSborTypeKind);
 
     private readonly IDapperWrapper _dapperWrapper;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IEntityQuerier _entityQuerier;
 
-    public KeyValueStoreQuerier(IDapperWrapper dapperWrapper, ReadOnlyDbContext dbContext, INetworkConfigurationProvider networkConfigurationProvider)
+    public KeyValueStoreQuerier(
+        IDapperWrapper dapperWrapper,
+        ReadOnlyDbContext dbContext,
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IEntityQuerier entityQuerier)
     {
         _dapperWrapper = dapperWrapper;
         _dbContext = dbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _entityQuerier = entityQuerier;
     }
 
     public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
@@ -103,7 +111,7 @@ internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
         int pageSize,
         CancellationToken token = default)
     {
-        var keyValueStore = await QueryHelper.GetEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
+        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
         var keyValueStoreSchema = await GetKeyValueStoreSchema(keyValueStore.Id, ledgerState, token);
 
         var cd = new CommandDefinition(
@@ -135,20 +143,26 @@ LIMIT @limit
             },
             cancellationToken: token);
 
-        var entriesAndOneMore = (await _dapperWrapper.QueryAsync<KeyValueStoreEntryViewModel>(_dbContext.Database.GetDbConnection(), cd)).ToList();
+        var entriesAndOneMore = (await _dapperWrapper.QueryAsync<KeyValueStoreEntryResultRow>(_dbContext.Database.GetDbConnection(), cd)).ToList();
         var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
 
         var items = entriesAndOneMore
             .Take(pageSize)
-            .Select(e =>
-            {
-                var keyProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.KeySchema, keyValueStoreSchema.KeySborTypeKind, keyValueStoreSchema.KeyTypeIndex, networkId);
+            .Select(
+                e =>
+                {
+                    var keyProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(
+                        e.Key,
+                        keyValueStoreSchema.KeySchema,
+                        keyValueStoreSchema.KeySborTypeKind,
+                        keyValueStoreSchema.KeyTypeIndex,
+                        networkId);
 
-                return new GatewayModel.StateKeyValueStoreKeysResponseItem(
-                    key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), keyProgrammaticJson),
-                    lastUpdatedAtStateVersion: e.LastUpdatedAtStateVersion
-                );
-            })
+                    return new GatewayModel.StateKeyValueStoreKeysResponseItem(
+                        key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), keyProgrammaticJson),
+                        lastUpdatedAtStateVersion: e.LastUpdatedAtStateVersion
+                    );
+                })
             .ToList();
 
         var nextCursor = entriesAndOneMore.Count == pageSize + 1
@@ -169,7 +183,7 @@ LIMIT @limit
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var keyValueStore = await QueryHelper.GetEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
+        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(_dbContext, keyValueStoreAddress, ledgerState, token);
         var keyValueStoreSchema = await GetKeyValueStoreSchema(keyValueStore.Id, ledgerState, token);
 
         var cd = new CommandDefinition(
@@ -194,7 +208,7 @@ WHERE d.key_value_store_entity_id = @keyValueStoreEntityId AND d.key = ANY(@keys
 
         var items = new List<GatewayModel.StateKeyValueStoreDataResponseItem>();
 
-        foreach (var e in await _dapperWrapper.QueryAsync<KeyValueStoreEntryViewModel>(_dbContext.Database.GetDbConnection(), cd))
+        foreach (var e in await _dapperWrapper.QueryAsync<KeyValueStoreEntryResultRow>(_dbContext.Database.GetDbConnection(), cd))
         {
             if (e.IsDeleted)
             {
@@ -202,22 +216,31 @@ WHERE d.key_value_store_entity_id = @keyValueStoreEntityId AND d.key = ANY(@keys
             }
 
             var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-            var keyProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.KeySchema, keyValueStoreSchema.KeySborTypeKind,
-                keyValueStoreSchema.KeyTypeIndex, networkId);
-            var valueProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(e.Value, keyValueStoreSchema.ValueSchema, keyValueStoreSchema.ValueSborTypeKind,
-                keyValueStoreSchema.ValueTypeIndex, networkId);
+            var keyProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(
+                e.Key,
+                keyValueStoreSchema.KeySchema,
+                keyValueStoreSchema.KeySborTypeKind,
+                keyValueStoreSchema.KeyTypeIndex,
+                networkId);
+            var valueProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(
+                e.Value,
+                keyValueStoreSchema.ValueSchema,
+                keyValueStoreSchema.ValueSborTypeKind,
+                keyValueStoreSchema.ValueTypeIndex,
+                networkId);
 
-            items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(
-                key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), keyProgrammaticJson),
-                value: new GatewayModel.ScryptoSborValue(e.Value.ToHex(), valueProgrammaticJson),
-                lastUpdatedAtStateVersion: e.LastUpdatedAtStateVersion,
-                isLocked: e.IsLocked));
+            items.Add(
+                new GatewayModel.StateKeyValueStoreDataResponseItem(
+                    key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), keyProgrammaticJson),
+                    value: new GatewayModel.ScryptoSborValue(e.Value.ToHex(), valueProgrammaticJson),
+                    lastUpdatedAtStateVersion: e.LastUpdatedAtStateVersion,
+                    isLocked: e.IsLocked));
         }
 
         return new GatewayModel.StateKeyValueStoreDataResponse(ledgerState, keyValueStoreAddress, items);
     }
 
-    private async Task<KeyValueStoreSchemaModel> GetKeyValueStoreSchema(
+    private async Task<KeyValueStoreSchemaResultRow> GetKeyValueStoreSchema(
         long keyValueStoreId,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
@@ -244,8 +267,10 @@ ORDER BY kvssh.from_state_version DESC
             },
             cancellationToken: token);
 
-        var keyValueStoreSchema = await _dapperWrapper.QueryFirstOrDefaultAsync<KeyValueStoreSchemaModel>(
-            _dbContext.Database.GetDbConnection(), keyValueStoreSchemaQuery, "GetKeyValueStoreSchema"
+        var keyValueStoreSchema = await _dapperWrapper.QueryFirstOrDefaultAsync<KeyValueStoreSchemaResultRow>(
+            _dbContext.Database.GetDbConnection(),
+            keyValueStoreSchemaQuery,
+            "GetKeyValueStoreSchema"
         );
 
         if (keyValueStoreSchema == null)

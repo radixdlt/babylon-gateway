@@ -218,7 +218,7 @@ internal abstract class VaultEntity : ComponentEntity
 
 internal class InternalFungibleVaultEntity : VaultEntity
 {
-    public bool IsRoyaltyVault => TryGetCorrelation(EntityRelationship.RoyaltyVaultOfComponent, out _);
+    public bool IsRoyaltyVault => TryGetCorrelation(EntityRelationship.RoyaltyVaultOfEntity, out _);
 }
 
 internal class InternalNonFungibleVaultEntity : VaultEntity

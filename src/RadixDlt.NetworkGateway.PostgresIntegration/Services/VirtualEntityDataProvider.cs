@@ -66,6 +66,7 @@ using Nito.AsyncEx;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;

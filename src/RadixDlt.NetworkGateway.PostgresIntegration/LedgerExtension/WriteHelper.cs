@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -413,258 +414,6 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityResourceAggregatedVaultsHistory(ICollection<EntityResourceAggregatedVaultsHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY entity_resource_aggregated_vaults_history (id, from_state_version, entity_id, resource_entity_id, discriminator, balance, total_count) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-
-            if (e is EntityFungibleResourceAggregatedVaultsHistory fe)
-            {
-                await writer.WriteAsync(fe.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                await writer.WriteNullAsync(token);
-            }
-            else if (e is EntityNonFungibleResourceAggregatedVaultsHistory nfe)
-            {
-                await writer.WriteNullAsync(token);
-                await writer.WriteAsync(nfe.TotalCount, NpgsqlDbType.Bigint, token);
-            }
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityResourceAggregatedVaultsHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyEntityResourceAggregateHistory(ICollection<EntityResourceAggregateHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY entity_resource_aggregate_history (id, from_state_version, entity_id, fungible_resource_entity_ids, fungible_resource_significant_update_state_versions, non_fungible_resource_entity_ids, non_fungible_resource_significant_update_state_versions) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FungibleResourceEntityIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FungibleResourceSignificantUpdateStateVersions.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleResourceEntityIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleResourceSignificantUpdateStateVersions.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityResourceAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyEntityResourceVaultAggregateHistory(ICollection<EntityResourceVaultAggregateHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY entity_resource_vault_aggregate_history (id, from_state_version, entity_id, resource_entity_id, vault_entity_ids) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.VaultEntityIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityResourceVaultAggregateHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyEntityVaultHistory(ICollection<EntityVaultHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY entity_vault_history (id, from_state_version, owner_entity_id, global_entity_id, vault_entity_id, resource_entity_id, discriminator, balance, is_royalty_vault, non_fungible_ids) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.OwnerEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-
-            switch (e)
-            {
-                case EntityFungibleVaultHistory fe:
-                    await writer.WriteAsync(fe.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                    await writer.WriteAsync(fe.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case EntityNonFungibleVaultHistory nfe:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(nfe.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(e), e, null);
-            }
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityVaultHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyNonFungibleIdDefinition(ICollection<NonFungibleIdDefinition> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY non_fungible_id_definition (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleId, NpgsqlDbType.Text, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdDefinition), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyNonFungibleIdDataHistory(ICollection<NonFungibleIdDataHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY non_fungible_id_data_history (id, from_state_version, non_fungible_id_definition_id, data, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleIdDefinitionId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Data, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdDataHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyNonFungibleIdLocationHistory(List<NonFungibleIdLocationHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY non_fungible_id_location_history (id, from_state_version, non_fungible_id_definition_id, vault_entity_id) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleIdLocationHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -737,57 +486,6 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyResourceHolders(ICollection<ResourceHolder> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var createTempTableCommand = _connection.CreateCommand();
-        createTempTableCommand.CommandText = @"
-CREATE TEMP TABLE tmp_resource_holders
-(LIKE resource_holders INCLUDING DEFAULTS)
-ON COMMIT DROP";
-
-        await createTempTableCommand.ExecuteNonQueryAsync(token);
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY tmp_resource_holders (id, entity_id, resource_entity_id, balance, last_updated_at_state_version) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(e.LastUpdatedAtStateVersion, NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-        await writer.DisposeAsync();
-
-        await using var mergeCommand = _connection.CreateCommand();
-        mergeCommand.CommandText = @"
-MERGE INTO resource_holders ro
-USING tmp_resource_holders tmp
-ON ro.entity_id = tmp.entity_id AND ro.resource_entity_id = tmp.resource_entity_id
-WHEN MATCHED AND tmp.balance = 0 THEN DELETE
-WHEN MATCHED AND tmp.balance != 0 THEN UPDATE SET balance = tmp.balance, last_updated_at_state_version = tmp.last_updated_at_state_version
-WHEN NOT MATCHED AND tmp.balance != 0 THEN INSERT VALUES(id, entity_id, resource_entity_id, balance, last_updated_at_state_version);";
-
-        await mergeCommand.ExecuteNonQueryAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyResourceHolders), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
         var sw = Stopwatch.GetTimestamp();
@@ -806,10 +504,6 @@ SELECT
     setval('entity_metadata_entry_history_id_seq', @entityMetadataEntryHistorySequence),
     setval('entity_metadata_entry_definition_id_seq', @entityMetadataEntryDefinitionSequence),
     setval('entity_metadata_totals_history_id_seq', @entityMetadataTotalsHistorySequence),
-    setval('entity_resource_aggregated_vaults_history_id_seq', @entityResourceAggregatedVaultsHistorySequence),
-    setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
-    setval('entity_resource_vault_aggregate_history_id_seq', @entityResourceVaultAggregateHistorySequence),
-    setval('entity_vault_history_id_seq', @entityVaultHistorySequence),
     setval('entity_role_assignments_aggregate_history_id_seq', @entityRoleAssignmentsAggregateHistorySequence),
     setval('entity_role_assignments_entry_history_id_seq', @entityRoleAssignmentsEntryHistorySequence),
     setval('entity_role_assignments_owner_role_history_id_seq', @entityRoleAssignmentsOwnerRoleHistorySequence),
@@ -837,7 +531,15 @@ SELECT
     setval('account_authorized_depositor_aggregate_history_id_seq', @accountAuthorizedDepositorAggregateHistorySequence),
     setval('unverified_standard_metadata_aggregate_history_id_seq', @unverifiedStandardMetadataAggregateHistorySequence),
     setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence),
-    setval('resource_holders_id_seq', @resourceHoldersSequence)
+    setval('resource_holders_id_seq', @resourceHoldersSequence),
+    setval('entity_resource_entry_definition_id_seq', @entityResourceEntryDefinitionSequence),
+    setval('entity_resource_vault_entry_definition_id_seq', @entityResourceVaultEntryDefinitionSequence),
+    setval('entity_resource_totals_history_id_seq', @entityResourceTotalsHistorySequence),
+    setval('entity_resource_vault_totals_history_id_seq', @entityResourceVaultTotalsHistorySequence),
+    setval('entity_resource_balance_history_id_seq', @entityResourceBalanceHistorySequence),
+    setval('vault_balance_history_id_seq', @vaultBalanceHistorySequence),
+    setval('non_fungible_vault_entry_definition_id_seq', @nonFungibleVaultEntryDefinitionSequence),
+    setval('non_fungible_vault_entry_history_id_seq', @nonFungibleVaultEntryHistorySequence)
 ",
             parameters: new
             {
@@ -852,10 +554,6 @@ SELECT
                 entityMetadataEntryHistorySequence = sequences.EntityMetadataEntryHistorySequence,
                 entityMetadataEntryDefinitionSequence = sequences.EntityMetadataEntryDefinitionSequence,
                 entityMetadataTotalsHistorySequence = sequences.EntityMetadataTotalsHistorySequence,
-                entityResourceAggregatedVaultsHistorySequence = sequences.EntityResourceAggregatedVaultsHistorySequence,
-                entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
-                entityResourceVaultAggregateHistorySequence = sequences.EntityResourceVaultAggregateHistorySequence,
-                entityVaultHistorySequence = sequences.EntityVaultHistorySequence,
                 entityRoleAssignmentsAggregateHistorySequence = sequences.EntityRoleAssignmentsAggregateHistorySequence,
                 entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
                 entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,
@@ -884,6 +582,14 @@ SELECT
                 unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
                 unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
                 resourceHoldersSequence = sequences.ResourceHoldersSequence,
+                entityResourceEntryDefinitionSequence = sequences.EntityResourceEntryDefinitionSequence,
+                entityResourceVaultEntryDefinitionSequence = sequences.EntityResourceVaultEntryDefinitionSequence,
+                entityResourceTotalsHistorySequence = sequences.EntityResourceTotalsHistorySequence,
+                entityResourceVaultTotalsHistorySequence = sequences.EntityResourceVaultTotalsHistorySequence,
+                entityResourceBalanceHistorySequence = sequences.EntityResourceBalanceHistorySequence,
+                vaultBalanceHistorySequence = sequences.VaultBalanceHistorySequence,
+                nonFungibleVaultEntryDefinitionSequence = sequences.NonFungibleVaultEntryDefinitionSequence,
+                nonFungibleVaultEntryHistorySequence = sequences.NonFungibleVaultEntryHistorySequence,
             },
             cancellationToken: token);
 

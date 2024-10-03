@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -119,12 +120,11 @@ internal class NativeResourceDetailsResolver
         return result;
     }
 
-    private record struct DbRow(EntityRelationship BaseRelationship, string BaseEntityAddress, string? BaseTotalSupply, EntityType RootEntityType, string RootEntityAddress, string? ResourceEntityAddress, string? ResourceBalance);
+    private record struct DbRow(EntityRelationship BaseRelationship, string BaseEntityAddress, TokenAmount? BaseTotalSupply, EntityType RootEntityType, string RootEntityAddress, string? ResourceEntityAddress, string? ResourceBalance);
 
     private async Task<IDictionary<EntityAddress, GatewayModel.NativeResourceDetails>> GetFromDatabase(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
-        var rows = await _dapperWrapper.ToListAsync<DbRow>(
-            _dbContext.Database.GetDbConnection(),
+        var cd = new CommandDefinition(
             @"WITH
 variables AS (
     SELECT
@@ -172,19 +172,23 @@ SELECT
 FROM variables var, base_with_root bwr
 LEFT JOIN LATERAL (
     SELECT *
-    FROM entity_vault_history
+    FROM vault_balance_history
     WHERE from_state_version <= var.state_version AND vault_entity_id = bwr.root_correlated_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) vault ON TRUE
-LEFT JOIN entities re ON re.id = vault.resource_entity_id
+LEFT JOIN entities ve ON ve.id = vault.vault_entity_id
+LEFT JOIN entities re ON re.id = ve.correlated_entity_ids[array_position(ve.correlated_entity_relationships, 'vault_to_resource')]
 WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_to_resource_vault, validator_to_stake_vault, access_controller_to_recovery_badge}'::entity_relationship[]);",
             new
             {
                 addresses = addresses.Select(e => (string)e).ToList(),
                 stateVersion = ledgerState.StateVersion,
             },
-            token);
+            cancellationToken: token
+        );
+
+        var rows = await _dapperWrapper.ToListAsync<DbRow>(_dbContext.Database.GetDbConnection(), cd);
 
         return rows.GroupBy(r => (EntityAddress)r.BaseEntityAddress).ToDictionary(g => g.Key, grouping =>
         {
@@ -202,7 +206,7 @@ WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_to_resource_
                 return new GatewayModel.NativeResourceValidatorClaimNftValue(rootEntityAddress);
             }
 
-            var baseTotalSupply = TokenAmount.FromSubUnitsString(grouping.First().BaseTotalSupply ?? throw new InvalidOperationException($"BaseTotalSupply cannot be empty on {grouping.Key}"));
+            var baseTotalSupply = grouping.First().BaseTotalSupply ?? throw new InvalidOperationException($"BaseTotalSupply cannot be empty on {grouping.Key}");
             var redemptionValues = new List<GatewayModel.NativeResourceRedemptionValueItem>();
 
             foreach (var entry in grouping)

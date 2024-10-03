@@ -64,6 +64,7 @@
 
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;

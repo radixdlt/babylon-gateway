@@ -83,12 +83,15 @@ internal class RelationshipProcessor
     {
         if (substateData is CoreModel.IRoyaltyVaultHolder royaltyVaultHolder && royaltyVaultHolder.TryGetRoyaltyVault(out var rv))
         {
-            _referencedEntities
-                .Get((EntityAddress)rv.EntityAddress)
-                .PostResolveConfigure((InternalFungibleVaultEntity e) =>
+            referencedEntity.PostResolveConfigure((Entity e) =>
+            {
+                e.AddCorrelation(EntityRelationship.EntityToRoyaltyVault, _referencedEntities.Get((EntityAddress)rv.EntityAddress).DatabaseId);
+
+                _referencedEntities.Get((EntityAddress)rv.EntityAddress).PostResolveConfigureLow((InternalFungibleVaultEntity ve) =>
                 {
-                    e.AddCorrelation(EntityRelationship.RoyaltyVaultOfComponent, referencedEntity.DatabaseId);
+                    ve.AddCorrelation(EntityRelationship.RoyaltyVaultOfEntity, referencedEntity.DatabaseId);
                 });
+            });
         }
 
         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate && typeInfoSubstate.Value.Details is CoreModel.ObjectTypeInfoDetails objectDetails)

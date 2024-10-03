@@ -106,12 +106,6 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<PackageCodeAggregateHistory> PackageCodeAggregateHistory => Set<PackageCodeAggregateHistory>();
 
-    public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
-
-    public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
-
-    public DbSet<EntityResourceAggregatedVaultsHistory> EntityResourceAggregatedVaultsHistory => Set<EntityResourceAggregatedVaultsHistory>();
-
     public DbSet<AccountLockerEntryDefinition> AccountLockerDefinition => Set<AccountLockerEntryDefinition>();
 
     public DbSet<AccountLockerEntryResourceVaultDefinition> AccountLockerEntryResourceVaultDefinition => Set<AccountLockerEntryResourceVaultDefinition>();
@@ -123,8 +117,6 @@ internal abstract class CommonDbContext : DbContext
     public DbSet<AccountResourcePreferenceRuleEntryHistory> AccountResourcePreferenceRuleEntryHistory => Set<AccountResourcePreferenceRuleEntryHistory>();
 
     public DbSet<AccountResourcePreferenceRuleAggregateHistory> AccountResourcePreferenceRuleAggregateHistory => Set<AccountResourcePreferenceRuleAggregateHistory>();
-
-    public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
     public DbSet<ResourceEntitySupplyHistory> ResourceEntitySupplyHistory => Set<ResourceEntitySupplyHistory>();
 
@@ -177,6 +169,22 @@ internal abstract class CommonDbContext : DbContext
     public DbSet<UnverifiedStandardMetadataEntryHistory> UnverifiedStandardMetadataEntryHistory => Set<UnverifiedStandardMetadataEntryHistory>();
 
     public DbSet<ResourceHolder> ResourceHolders => Set<ResourceHolder>();
+
+    public DbSet<EntityResourceEntryDefinition> EntityResourceEntryDefinition => Set<EntityResourceEntryDefinition>();
+
+    public DbSet<EntityResourceTotalsHistory> EntityResourceTotalsHistory => Set<EntityResourceTotalsHistory>();
+
+    public DbSet<EntityResourceBalanceHistory> EntityResourceBalanceHistory => Set<EntityResourceBalanceHistory>();
+
+    public DbSet<EntityResourceVaultEntryDefinition> EntityResourceVaultEntryDefinition => Set<EntityResourceVaultEntryDefinition>();
+
+    public DbSet<EntityResourceVaultTotalsHistory> EntityResourceVaultTotalsHistory => Set<EntityResourceVaultTotalsHistory>();
+
+    public DbSet<VaultBalanceHistory> VaultBalanceHistory => Set<VaultBalanceHistory>();
+
+    public DbSet<NonFungibleVaultEntryDefinition> NonFungibleVaultEntryDefinition => Set<NonFungibleVaultEntryDefinition>();
+
+    public DbSet<NonFungibleVaultEntryHistory> NonFungibleVaultEntryHistory => Set<NonFungibleVaultEntryHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -412,6 +420,28 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<AccountLockerEntryResourceVaultDefinition>()
             .HasIndex(e => new { e.AccountLockerDefinitionId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<EntityResourceEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<EntityResourceEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion }, "IX_entity_resource_entry_definition_fungibles")
+            .HasFilter("resource_type = 'fungible'");
+
+        modelBuilder
+            .Entity<EntityResourceEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion }, "IX_entity_resource_entry_definition_non_fungibles")
+            .HasFilter("resource_type = 'non_fungible'");
+
+        modelBuilder
+            .Entity<EntityResourceVaultEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<NonFungibleVaultEntryDefinition>()
+            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -455,56 +485,6 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityResourceAggregatedVaultsHistory>()
-            .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
-            .HasValue<EntityFungibleResourceAggregatedVaultsHistory>(ResourceType.Fungible)
-            .HasValue<EntityNonFungibleResourceAggregatedVaultsHistory>(ResourceType.NonFungible);
-
-        modelBuilder
-            .Entity<EntityResourceAggregatedVaultsHistory>()
-            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityResourceVaultAggregateHistory>()
-            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
-            .HasValue<EntityFungibleVaultHistory>(ResourceType.Fungible)
-            .HasValue<EntityNonFungibleVaultHistory>(ResourceType.NonFungible);
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.OwnerEntityId, e.VaultEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.Id, e.ResourceEntityId, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.OwnerEntityId, e.FromStateVersion })
-            .HasFilter("is_royalty_vault = true");
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion })
-            .HasFilter("is_royalty_vault = true");
-
-        modelBuilder
-            .Entity<EntityVaultHistory>()
-            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
-
-        modelBuilder
             .Entity<EntityRoleAssignmentsOwnerRoleHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
@@ -538,11 +518,11 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<NonFungibleIdLocationHistory>()
-            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
+            .HasIndex(e => new { NonFungibleIdDataId = e.NonFungibleIdDefinitionId, e.FromStateVersion });
 
         modelBuilder
             .Entity<StateHistory>()
-            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
             .Entity<PackageBlueprintHistory>()
@@ -654,5 +634,25 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<ResourceHolder>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.Balance });
+
+        modelBuilder
+            .Entity<EntityResourceTotalsHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<EntityResourceBalanceHistory>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<EntityResourceVaultTotalsHistory>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<VaultBalanceHistory>()
+            .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<NonFungibleVaultEntryHistory>()
+            .HasIndex(e => new { e.NonFungibleVaultEntryDefinitionId, e.FromStateVersion });
     }
 }

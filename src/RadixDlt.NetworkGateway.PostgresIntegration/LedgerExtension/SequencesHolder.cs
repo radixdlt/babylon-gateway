@@ -92,14 +92,6 @@ internal class SequencesHolder
 
     public long EntityMetadataTotalsHistorySequence { get; set; }
 
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
     public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
 
     public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
@@ -151,4 +143,20 @@ internal class SequencesHolder
     public long UnverifiedStandardMetadataEntryHistorySequence { get; set; }
 
     public long ResourceHoldersSequence { get; set; }
+
+    public long EntityResourceEntryDefinitionSequence { get; set; }
+
+    public long EntityResourceVaultEntryDefinitionSequence { get; set; }
+
+    public long EntityResourceTotalsHistorySequence { get; set; }
+
+    public long EntityResourceVaultTotalsHistorySequence { get; set; }
+
+    public long EntityResourceBalanceHistorySequence { get; set; }
+
+    public long VaultBalanceHistorySequence { get; set; }
+
+    public long NonFungibleVaultEntryDefinitionSequence { get; set; }
+
+    public long NonFungibleVaultEntryHistorySequence { get; set; }
 }

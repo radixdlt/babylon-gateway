@@ -69,6 +69,8 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries.CustomTypes;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
@@ -86,6 +88,27 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
+    public static string? GenerateOffsetCursor(int offset, int limit, long totalCount)
+    {
+        return offset + limit < totalCount
+            ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
+            : null;
+    }
+
+    public static GatewayModel.IdBoundaryCoursor? ToGatewayModel(this IdBoundaryCursor? input)
+    {
+        return input == null
+            ? null
+            : new GatewayModel.IdBoundaryCoursor(input.Value.StateVersion, input.Value.Id);
+    }
+
+    public static IdBoundaryCursor? FromGatewayModel(this GatewayModel.IdBoundaryCoursor? input)
+    {
+        return input != null
+            ? new IdBoundaryCursor(input.StateVersionBoundary, input.IdBoundary)
+            : null;
+    }
+
     public static GatewayModel.TwoWayLinkedDappsCollectionItem ToGatewayModel(this DappDefinitionsResolvedTwoWayLink input)
     {
         return new GatewayModel.TwoWayLinkedDappsCollectionItem(input.EntityAddress);
@@ -304,27 +327,6 @@ internal static class GatewayModelExtensions
             ToolkitModel.PublicKeyHash.Ed25519 ed25519 => new GatewayModel.PublicKeyHashEddsaEd25519(ed25519.value.ToArray().ToHex()),
             _ => throw new UnreachableException($"Didn't expect {publicKeyHash} value"),
         };
-    }
-
-    public static GatewayModel.TransactionBalanceChanges ToGatewayModel(this CoreModel.LtsCommittedTransactionOutcome input)
-    {
-        var fungibleFeeBalanceChanges = new List<GatewayModel.TransactionFungibleFeeBalanceChanges>();
-        var fungibleBalanceChanges = new List<GatewayModel.TransactionFungibleBalanceChanges>();
-
-        foreach (var f in input.FungibleEntityBalanceChanges)
-        {
-            fungibleFeeBalanceChanges.AddRange(f.FeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleFeeBalanceChanges(x.Type.ToGatewayModel(), f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
-            fungibleBalanceChanges.AddRange(f.NonFeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleBalanceChanges(f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
-        }
-
-        var nonFungibleBalanceChanges = input
-            .NonFungibleEntityBalanceChanges
-            .Select(x => new GatewayModel.TransactionNonFungibleBalanceChanges(x.EntityAddress, x.ResourceAddress, x.Added, x.Removed))
-            .ToList();
-
-        return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
     }
 
     public static GatewayModel.TransactionBalanceChanges ToGatewayModel(this CoreModel.CommittedTransactionBalanceChanges input)

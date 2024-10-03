@@ -75,16 +75,16 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 internal class DefaultPackageHandler : IPackageHandler
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IEntityStateQuerier _entityStateQuerier;
+    private readonly IPackageQuerier _packageQuerier;
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
     public DefaultPackageHandler(
         ILedgerStateQuerier ledgerStateQuerier,
-        IEntityStateQuerier entityStateQuerier,
+        IPackageQuerier packageQuerier,
         IOptionsSnapshot<EndpointOptions> endpointConfiguration)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
-        _entityStateQuerier = entityStateQuerier;
+        _packageQuerier = packageQuerier;
         _endpointConfiguration = endpointConfiguration;
     }
 
@@ -97,7 +97,7 @@ internal class DefaultPackageHandler : IPackageHandler
             Limit: _endpointConfiguration.Value.ResolveHeavyPageSize(request.LimitPerPage)
         );
 
-        return await _entityStateQuerier.PackageBlueprints(pageRequest, ledgerState, token);
+        return await _packageQuerier.PackageBlueprints(pageRequest, ledgerState, token);
     }
 
     public async Task<GatewayModel.StatePackageCodePageResponse?> Codes(GatewayModel.StatePackageCodePageRequest request, CancellationToken token = default)
@@ -109,6 +109,6 @@ internal class DefaultPackageHandler : IPackageHandler
             Limit: _endpointConfiguration.Value.ResolveHeavyPageSize(request.LimitPerPage)
         );
 
-        return await _entityStateQuerier.PackageCodes(pageRequest, ledgerState, token);
+        return await _packageQuerier.PackageCodes(pageRequest, ledgerState, token);
     }
 }
