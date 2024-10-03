@@ -110,7 +110,6 @@ internal class DepositPreValidationQuerier : IDepositPreValidationQuerier
         CancellationToken token = default
     )
     {
-        var accountEntity = await _entityQuerier.GetNonVirtualEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
         var xrdResourceAddress = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).WellKnownAddresses.Xrd;
         var accountEntity = await _entityQuerier.GetEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
         if (accountEntity is VirtualAccountComponentEntity)

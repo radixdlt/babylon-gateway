@@ -109,7 +109,7 @@ internal static class TransactionMapper
             FeeSource = optIns.ReceiptFeeSource && lt.ReceiptFeeSource != null ? new JRaw(lt.ReceiptFeeSource) : null,
             CostingParameters = optIns.ReceiptCostingParameters ? new JRaw(lt.ReceiptCostingParameters) : null,
             NextEpoch = lt.ReceiptNextEpoch != null ? new JRaw(lt.ReceiptNextEpoch) : null,
-            StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.ReceiptStateUpdates) : null,
+            StateUpdates = optIns.ReceiptStateChanges && lt.ReceiptStateUpdates != null ? new JRaw(lt.ReceiptStateUpdates) : null,
             Events = optIns.ReceiptEvents ? events?.Select(x => new GatewayApiSdk.Model.EventsItem(x.Name, new JRaw(x.Emitter), x.Data)).ToList() : null,
         };
 
