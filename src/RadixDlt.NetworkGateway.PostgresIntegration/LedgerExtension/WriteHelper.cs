@@ -71,7 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -200,7 +200,58 @@ internal class WriteHelper : IWriteHelper
     {
         var sw = Stopwatch.GetTimestamp();
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            accountLockerEntryDefinitionSequence = sequences.AccountLockerEntryDefinitionSequence,
+            accountLockerEntryResourceVaultDefinitionSequence = sequences.AccountLockerEntryResourceVaultDefinitionSequence,
+            accountLockerEntryTouchHistorySequence = sequences.AccountLockerEntryTouchHistorySequence,
+            accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
+            accountResourcePreferenceRuleEntryHistorySequence = sequences.AccountResourcePreferenceRuleEntryHistorySequence,
+            accountResourcePreferenceRuleAggregateHistorySequence = sequences.AccountResourcePreferenceRuleAggregateHistorySequence,
+            stateHistorySequence = sequences.StateHistorySequence,
+            entitySequence = sequences.EntitySequence,
+            entityMetadataEntryHistorySequence = sequences.EntityMetadataEntryHistorySequence,
+            entityMetadataEntryDefinitionSequence = sequences.EntityMetadataEntryDefinitionSequence,
+            entityMetadataTotalsHistorySequence = sequences.EntityMetadataTotalsHistorySequence,
+            entityRoleAssignmentsAggregateHistorySequence = sequences.EntityRoleAssignmentsAggregateHistorySequence,
+            entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
+            entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,
+            componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
+            componentMethodRoyaltyAggregateHistorySequence = sequences.ComponentMethodRoyaltyAggregateHistorySequence,
+            resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
+            nonFungibleIdDataSequence = sequences.NonFungibleIdDefinitionSequence,
+            nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
+            nonFungibleIdLocationHistorySequence = sequences.NonFungibleIdLocationHistorySequence,
+            validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
+            validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
+            ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
+            packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
+            packageCodeHistorySequence = sequences.PackageCodeHistorySequence,
+            schemaEntryDefinitionSequence = sequences.SchemaEntryDefinitionSequence,
+            schemaEntryAggregateHistorySequence = sequences.SchemaEntryAggregateHistorySequence,
+            keyValueStoreEntryDefinitionSequence = sequences.KeyValueStoreEntryDefinitionSequence,
+            keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
+            validatorCumulativeEmissionHistorySequence = sequences.ValidatorCumulativeEmissionHistorySequence,
+            nonFungibleSchemaHistorySequence = sequences.NonFungibleSchemaHistorySequence,
+            keyValueSchemaHistorySequence = sequences.KeyValueSchemaHistorySequence,
+            packageBlueprintAggregateHistorySequence = sequences.PackageBlueprintAggregateHistorySequence,
+            packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
+            accountAuthorizedDepositorEntryHistorySequence = sequences.AccountAuthorizedDepositorEntryHistorySequence,
+            accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
+            unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
+            unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
+            resourceHoldersSequence = sequences.ResourceHoldersSequence,
+            entityResourceEntryDefinitionSequence = sequences.EntityResourceEntryDefinitionSequence,
+            entityResourceVaultEntryDefinitionSequence = sequences.EntityResourceVaultEntryDefinitionSequence,
+            entityResourceTotalsHistorySequence = sequences.EntityResourceTotalsHistorySequence,
+            entityResourceVaultTotalsHistorySequence = sequences.EntityResourceVaultTotalsHistorySequence,
+            entityResourceBalanceHistorySequence = sequences.EntityResourceBalanceHistorySequence,
+            vaultBalanceHistorySequence = sequences.VaultBalanceHistorySequence,
+            nonFungibleVaultEntryDefinitionSequence = sequences.NonFungibleVaultEntryDefinitionSequence,
+            nonFungibleVaultEntryHistorySequence = sequences.NonFungibleVaultEntryHistorySequence,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT
     setval('account_locker_entry_definition_id_seq', @accountLockerEntryDefinitionSequence),
@@ -251,56 +302,7 @@ SELECT
     setval('non_fungible_vault_entry_definition_id_seq', @nonFungibleVaultEntryDefinitionSequence),
     setval('non_fungible_vault_entry_history_id_seq', @nonFungibleVaultEntryHistorySequence)
 ",
-            parameters: new
-            {
-                accountLockerEntryDefinitionSequence = sequences.AccountLockerEntryDefinitionSequence,
-                accountLockerEntryResourceVaultDefinitionSequence = sequences.AccountLockerEntryResourceVaultDefinitionSequence,
-                accountLockerEntryTouchHistorySequence = sequences.AccountLockerEntryTouchHistorySequence,
-                accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
-                accountResourcePreferenceRuleEntryHistorySequence = sequences.AccountResourcePreferenceRuleEntryHistorySequence,
-                accountResourcePreferenceRuleAggregateHistorySequence = sequences.AccountResourcePreferenceRuleAggregateHistorySequence,
-                stateHistorySequence = sequences.StateHistorySequence,
-                entitySequence = sequences.EntitySequence,
-                entityMetadataEntryHistorySequence = sequences.EntityMetadataEntryHistorySequence,
-                entityMetadataEntryDefinitionSequence = sequences.EntityMetadataEntryDefinitionSequence,
-                entityMetadataTotalsHistorySequence = sequences.EntityMetadataTotalsHistorySequence,
-                entityRoleAssignmentsAggregateHistorySequence = sequences.EntityRoleAssignmentsAggregateHistorySequence,
-                entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
-                entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,
-                componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
-                componentMethodRoyaltyAggregateHistorySequence = sequences.ComponentMethodRoyaltyAggregateHistorySequence,
-                resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
-                nonFungibleIdDataSequence = sequences.NonFungibleIdDefinitionSequence,
-                nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
-                nonFungibleIdLocationHistorySequence = sequences.NonFungibleIdLocationHistorySequence,
-                validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
-                validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
-                ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
-                packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
-                packageCodeHistorySequence = sequences.PackageCodeHistorySequence,
-                schemaEntryDefinitionSequence = sequences.SchemaEntryDefinitionSequence,
-                schemaEntryAggregateHistorySequence = sequences.SchemaEntryAggregateHistorySequence,
-                keyValueStoreEntryDefinitionSequence = sequences.KeyValueStoreEntryDefinitionSequence,
-                keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
-                validatorCumulativeEmissionHistorySequence = sequences.ValidatorCumulativeEmissionHistorySequence,
-                nonFungibleSchemaHistorySequence = sequences.NonFungibleSchemaHistorySequence,
-                keyValueSchemaHistorySequence = sequences.KeyValueSchemaHistorySequence,
-                packageBlueprintAggregateHistorySequence = sequences.PackageBlueprintAggregateHistorySequence,
-                packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
-                accountAuthorizedDepositorEntryHistorySequence = sequences.AccountAuthorizedDepositorEntryHistorySequence,
-                accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
-                unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
-                unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
-                resourceHoldersSequence = sequences.ResourceHoldersSequence,
-                entityResourceEntryDefinitionSequence = sequences.EntityResourceEntryDefinitionSequence,
-                entityResourceVaultEntryDefinitionSequence = sequences.EntityResourceVaultEntryDefinitionSequence,
-                entityResourceTotalsHistorySequence = sequences.EntityResourceTotalsHistorySequence,
-                entityResourceVaultTotalsHistorySequence = sequences.EntityResourceVaultTotalsHistorySequence,
-                entityResourceBalanceHistorySequence = sequences.EntityResourceBalanceHistorySequence,
-                vaultBalanceHistorySequence = sequences.VaultBalanceHistorySequence,
-                nonFungibleVaultEntryDefinitionSequence = sequences.NonFungibleVaultEntryDefinitionSequence,
-                nonFungibleVaultEntryHistorySequence = sequences.NonFungibleVaultEntryHistorySequence,
-            },
+            parameters,
             cancellationToken: token);
 
         await _connection.ExecuteAsync(cd);

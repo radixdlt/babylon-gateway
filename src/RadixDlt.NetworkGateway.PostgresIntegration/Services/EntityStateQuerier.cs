@@ -170,26 +170,35 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var correlatedAddresses = await PackageQueries.GetCorrelatedEntityAddresses(_dbContext, entities, packageBlueprintHistory, ledgerState, token);
 
         // top-level & royalty vaults (if opted-in)
-        var vaultIds = entities.OfType<VaultEntity>()
+        var vaultIds = entities
+            .OfType<VaultEntity>()
             .Select(x => x.Id)
             .ToHashSet();
 
         if (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
         {
-            vaultIds.UnionWith(globalPersistedComponentEntities.Select(x => x.TryGetCorrelation(EntityRelationship.EntityToRoyaltyVault, out var royaltyVaultCorrelation) ? royaltyVaultCorrelation.EntityId : -1).Where(x => x > 0));
+            vaultIds.UnionWith(globalPersistedComponentEntities
+                .Select(x => x.TryGetCorrelation(EntityRelationship.EntityToRoyaltyVault, out var royaltyVaultCorrelation) ? royaltyVaultCorrelation.EntityId : -1)
+                .Where(x => x > 0));
         }
 
         var vaultBalances = await GetVaultBalances(vaultIds.ToArray(), ledgerState, token);
-        var fungibleResourcesConfiguration = new EntityFungibleResourcesAndVaultsPagedQuery.DetailsQueryConfiguration(defaultPageSize, aggregatePerVault ? defaultPageSize : 0, ledgerState.StateVersion);
-        var entityFungibleResources = await EntityFungibleResourcesAndVaultsPagedQuery.Details(_dbContext, _dapperWrapper, componentEntities.Select(e => e.Id).ToArray(), fungibleResourcesConfiguration, token);
-        var nonFungibleResourcesConfiguration = new EntityNonFungibleResourcesAndVaultsPagedQuery.DetailsQueryConfiguration(defaultPageSize, aggregatePerVault ? defaultPageSize : 0, ledgerState.StateVersion);
-        var entityNonFungibleResources = await EntityNonFungibleResourcesAndVaultsPagedQuery.Details(_dbContext, _dapperWrapper, componentEntities.Select(e => e.Id).ToArray(), nonFungibleResourcesConfiguration, token);
+        var fungibleResourcesConfiguration =
+            new EntityFungibleResourcesAndVaultsPagedQuery.DetailsQueryConfiguration(defaultPageSize, aggregatePerVault ? defaultPageSize : 0, ledgerState.StateVersion);
+        var entityFungibleResources =
+            await EntityFungibleResourcesAndVaultsPagedQuery.Details(_dbContext, _dapperWrapper, componentEntities.Select(e => e.Id).ToArray(), fungibleResourcesConfiguration, token);
+        var nonFungibleResourcesConfiguration =
+            new EntityNonFungibleResourcesAndVaultsPagedQuery.DetailsQueryConfiguration(defaultPageSize, aggregatePerVault ? defaultPageSize : 0, ledgerState.StateVersion);
+        var entityNonFungibleResources =
+            await EntityNonFungibleResourcesAndVaultsPagedQuery.Details(_dbContext, _dapperWrapper, componentEntities.Select(e => e.Id).ToArray(), nonFungibleResourcesConfiguration, token);
 
-        var allEntitiesToQueryForMetadata = entityFungibleResources.Values
+        var allEntitiesToQueryForMetadata = entityFungibleResources
+            .Values
             .SelectMany(x => x.FungibleResources.Values)
             .Select(r => r.ResourceEntityId)
             .Union(
-                entityNonFungibleResources.Values
+                entityNonFungibleResources
+                    .Values
                     .SelectMany(x => x.NonFungibleResources.Values)
                     .Select(x => x.ResourceEntityId))
             .Union(entities.Select(e => e.Id))
@@ -201,7 +210,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
             .Select(x => x.Id)
             .ToArray()
             .Union(
-                entityNonFungibleResources.Values
+                entityNonFungibleResources
+                    .Values
                     .SelectMany(x => x.NonFungibleResources.Values)
                     .SelectMany(x => x.Vaults.Values)
                     .Select(x => x.VaultEntityId)
@@ -284,7 +294,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                 case GlobalPackageEntity pe:
                     string? packageRoyaltyVaultBalance = null;
-                    if (optIns.PackageRoyaltyVaultBalance && pe.TryGetCorrelation(EntityRelationship.EntityToRoyaltyVault, out var packageRoyaltyRelation) && vaultBalances.TryGetValue(packageRoyaltyRelation.EntityId, out var packageRoyaltyVault))
+                    if (optIns.PackageRoyaltyVaultBalance && pe.TryGetCorrelation(EntityRelationship.EntityToRoyaltyVault, out var packageRoyaltyRelation) &&
+                        vaultBalances.TryGetValue(packageRoyaltyRelation.EntityId, out var packageRoyaltyVault))
                     {
                         packageRoyaltyVaultBalance = packageRoyaltyVault.Balance.ToString();
                     }
@@ -393,7 +404,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     roleAssignmentsHistory.TryGetValue(ce.Id, out var roleAssignments);
                     componentRoyaltyConfigs?.TryGetValue(ce.Id, out componentRoyaltyConfig);
 
-                    if (optIns.ComponentRoyaltyVaultBalance && ce.TryGetCorrelation(EntityRelationship.EntityToRoyaltyVault, out var componentRoyaltyRelation) && vaultBalances.TryGetValue(componentRoyaltyRelation.EntityId, out var componentRoyaltyVault))
+                    if (optIns.ComponentRoyaltyVaultBalance && ce.TryGetCorrelation(EntityRelationship.EntityToRoyaltyVault, out var componentRoyaltyRelation) &&
+                        vaultBalances.TryGetValue(componentRoyaltyRelation.EntityId, out var componentRoyaltyVault))
                     {
                         componentRoyaltyVaultBalance = componentRoyaltyVault.Balance.ToString();
                     }
@@ -455,12 +467,16 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
 
         var entity = await _entityQuerier.GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
-        var entityResourcesConfiguration = new EntityFungibleResourcesAndVaultsPagedQuery.ResourcesPageQueryConfiguration(defaultPageSize, aggregatePerVault ? defaultPageSize : 0, pageRequest.Cursor.FromGatewayModel(), ledgerState.StateVersion);
+        var entityResourcesConfiguration = new EntityFungibleResourcesAndVaultsPagedQuery.ResourcesPageQueryConfiguration(defaultPageSize, aggregatePerVault ? defaultPageSize : 0,
+            pageRequest.Cursor.FromGatewayModel(), ledgerState.StateVersion);
         var fungibleResourcesPage = await EntityFungibleResourcesAndVaultsPagedQuery.FungibleResourcesPage(_dbContext, _dapperWrapper, entity.Id, entityResourcesConfiguration, token);
 
         if (fungibleResourcesPage != null)
         {
-            var entityIds = fungibleResourcesPage.FungibleResources.Values.Select(x => x.ResourceEntityId)
+            var entityIds = fungibleResourcesPage
+                .FungibleResources
+                .Values
+                .Select(x => x.ResourceEntityId)
                 .Union(new[] { entity.Id })
                 .ToHashSet()
                 .ToArray();
@@ -494,7 +510,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entity = await _entityQuerier.GetEntity<ComponentEntity>(request.Address, ledgerState, token);
         var resourceEntity = await _entityQuerier.GetEntity<GlobalFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
         var entityResourcesConfiguration = new EntityFungibleResourcesAndVaultsPagedQuery.VaultsPageQueryConfiguration(defaultPageSize, request.Cursor.FromGatewayModel(), ledgerState.StateVersion);
-        var fungibleResourceVaultsPage = await EntityFungibleResourcesAndVaultsPagedQuery.FungibleResourceVaultsPage(_dbContext, _dapperWrapper, entity.Id, resourceEntity.Id, entityResourcesConfiguration, token);
+        var fungibleResourceVaultsPage =
+            await EntityFungibleResourcesAndVaultsPagedQuery.FungibleResourceVaultsPage(_dbContext, _dapperWrapper, entity.Id, resourceEntity.Id, entityResourcesConfiguration, token);
 
         if (fungibleResourceVaultsPage != null)
         {
@@ -508,7 +525,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
             }
         }
 
-        return new GatewayModel.StateEntityFungibleResourceVaultsPageResponse(ledgerState, 0, null, new List<GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem>(), entity.Address, resourceEntity.Address);
+        return new GatewayModel.StateEntityFungibleResourceVaultsPageResponse(ledgerState, 0, null, new List<GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem>(), entity.Address,
+            resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateEntityNonFungiblesPageResponse> EntityNonFungibleResourcesPage(
@@ -521,12 +539,16 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
 
         var entity = await _entityQuerier.GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
-        var entityResourcesConfiguration = new EntityNonFungibleResourcesAndVaultsPagedQuery.ResourcesPageQueryConfiguration(defaultPageSize, aggregatePerVault ? defaultPageSize : 0, pageRequest.Cursor.FromGatewayModel(), ledgerState.StateVersion);
+        var entityResourcesConfiguration = new EntityNonFungibleResourcesAndVaultsPagedQuery.ResourcesPageQueryConfiguration(defaultPageSize, aggregatePerVault ? defaultPageSize : 0,
+            pageRequest.Cursor.FromGatewayModel(), ledgerState.StateVersion);
         var entityResources = await EntityNonFungibleResourcesAndVaultsPagedQuery.NonFungibleResourcesPage(_dbContext, _dapperWrapper, entity.Id, entityResourcesConfiguration, token);
 
         if (entityResources != null)
         {
-            var entityIds = entityResources.NonFungibleResources.Values.Select(x => x.ResourceEntityId)
+            var entityIds = entityResources
+                .NonFungibleResources
+                .Values
+                .Select(x => x.ResourceEntityId)
                 .Union(new[] { entity.Id })
                 .ToHashSet()
                 .ToArray();
@@ -570,7 +592,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entity = await _entityQuerier.GetEntity<ComponentEntity>(request.Address, ledgerState, token);
         var resourceEntity = await _entityQuerier.GetEntity<GlobalNonFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
         var entityResourcesConfiguration = new EntityNonFungibleResourcesAndVaultsPagedQuery.VaultsPageQueryConfiguration(defaultPageSize, request.Cursor.FromGatewayModel(), ledgerState.StateVersion);
-        var entityResources = await EntityNonFungibleResourcesAndVaultsPagedQuery.NonFungibleResourceVaultsPage(_dbContext, _dapperWrapper, entity.Id, resourceEntity.Id, entityResourcesConfiguration, token);
+        var entityResources =
+            await EntityNonFungibleResourcesAndVaultsPagedQuery.NonFungibleResourceVaultsPage(_dbContext, _dapperWrapper, entity.Id, resourceEntity.Id, entityResourcesConfiguration, token);
 
         if (entityResources != null)
         {
@@ -594,7 +617,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
             }
         }
 
-        return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(ledgerState, 0, null, new List<GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>(), entity.Address, resourceEntity.Address);
+        return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(ledgerState, 0, null, new List<GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>(),
+            entity.Address, resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(
@@ -668,7 +692,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             request.Cursor.FromGatewayModel(),
             request.Limit,
             _endpointConfiguration.Value.MaxDefinitionsLookupLimit
-            );
+        );
 
         var nonFungibleIdsPerVault = await NonFungibleVaultContentsPagedQuery.Execute(
             _dbContext,
@@ -724,7 +748,15 @@ INNER JOIN LATERAL (
             return ImmutableDictionary<long, SchemaEntryViewModel[]>.Empty;
         }
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            entityIds = entityIds.ToList(),
+            startIndex = offset + 1,
+            endIndex = offset + limit,
+            stateVersion = ledgerState.StateVersion,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 WITH variables (entity_id) AS (SELECT UNNEST(@entityIds)),
 schema_slices AS
@@ -744,13 +776,7 @@ FROM schema_slices AS ss
 INNER JOIN LATERAL UNNEST(schema_slice) WITH ORDINALITY AS schema_join(id, ordinality) ON TRUE
 INNER JOIN schema_entry_definition sed ON sed.id = schema_join.id
 ORDER BY schema_join.ordinality ASC;",
-            parameters: new
-            {
-                entityIds = entityIds.ToList(),
-                startIndex = offset + 1,
-                endIndex = offset + limit,
-                stateVersion = ledgerState.StateVersion,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         return (await _dbContext.Database.GetDbConnection().QueryAsync<SchemaEntryViewModel>(cd))

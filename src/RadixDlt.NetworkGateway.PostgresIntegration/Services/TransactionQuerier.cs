@@ -62,14 +62,13 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -86,47 +85,6 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
-
-// TODO PP: all these can be made private when we combine mapping with query.
-internal record ReceiptEvent(string Name, string Emitter, byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
-
-internal record LedgerTransactionQueryResult(
-    long StateVersion,
-    long Epoch,
-    long RoundInEpoch,
-    TokenAmount FeePaid,
-    long[] AffectedGlobalEntities,
-    DateTime RoundTimestamp,
-    LedgerTransactionStatus ReceiptStatus,
-    string? ReceiptFeeSource,
-    string? ReceiptFeeDestination,
-    string? ReceiptErrorMessage,
-    LedgerTransactionType Discriminator,
-    string PayloadHash,
-    string IntentHash,
-    string? Message,
-    LedgerTransactionManifestClass[] ManifestClasses,
-    byte[]? RawPayload,
-    string? ReceiptCostingParameters,
-    string? ReceiptFeeSummary,
-    string? ReceiptNextEpoch,
-    string? ReceiptOutput,
-    string? ReceiptStateUpdates,
-    string? BalanceChanges,
-    string? ManifestInstructions
-)
-{
-    public List<ReceiptEvent> Events { get; set; } = new();
-}
-
-internal record ReceiptEvents(
-    string[] ReceiptEventEmitters,
-    string[] ReceiptEventNames,
-    byte[][] ReceiptEventSbors,
-    long[] ReceiptEventSchemaEntityIds,
-    byte[][] ReceiptEventSchemaHashes,
-    long[] ReceiptEventTypeIndexes,
-    SborTypeKind[] ReceiptEventSborTypeKinds);
 
 internal record Event(string Name, string Emitter, GatewayModel.ProgrammaticScryptoSborValue Data);
 
@@ -529,126 +487,12 @@ internal class TransactionQuerier : ITransactionQuerier
         return aggregator.IntoResponse();
     }
 
-    private async Task<ICollection<PendingTransactionSummary>> LookupPendingTransactionsByIntentHash(string intentHash, CancellationToken token = default)
-    {
-        return await _rwDbContext
-            .PendingTransactions
-            .Where(pt => pt.IntentHash == intentHash)
-            .Select(
-                pt =>
-                    new PendingTransactionSummary(
-                        pt.PayloadHash,
-                        pt.EndEpochExclusive,
-                        pt.GatewayHandling.ResubmitFromTimestamp,
-                        pt.GatewayHandling.HandlingStatusReason,
-                        pt.LedgerDetails.PayloadLedgerStatus,
-                        pt.LedgerDetails.IntentLedgerStatus,
-                        pt.LedgerDetails.InitialRejectionReason,
-                        pt.LedgerDetails.LatestRejectionReason,
-                        pt.NetworkDetails.LastSubmitErrorTitle
-                    )
-            )
-            .AnnotateMetricName()
-            .AsNoTracking()
-            .ToListAsync(token);
-    }
-
-    // TODO PP: DO we want to move just that query to separate file. I guess so.
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(
         List<long> transactionStateVersions,
         GatewayModel.TransactionDetailsOptIns optIns,
         CancellationToken token)
     {
-        var cd = new CommandDefinition(
-            @"WITH vars AS (
-    SELECT
-        @includeRawHex AS with_raw_payload,
-        true AS with_receipt_costing_parameters,
-        true AS with_receipt_fee_summary,
-        true AS with_receipt_next_epoch,
-        @includeReceiptOutput AS with_receipt_output,
-        @includeReceiptStateChanges AS with_receipt_state_updates,
-        @includeReceiptEvents AS with_receipt_events,
-        @includeBalanceChanges  AS with_balance_changes,
-        @includeManifestInstructions AS with_manifest_instructions,
-        @transactionStateVersions AS transaction_state_versions
-)
-SELECT
-    lt.state_version,
-    epoch,
-    round_in_epoch,
-    CAST(fee_paid AS TEXT),
-    affected_global_entities,
-    round_timestamp,
-    receipt_status,
-    receipt_fee_source,
-    receipt_fee_destination,
-    receipt_error_message,
-    discriminator,
-    payload_hash,
-    intent_hash,
-    message,
-    manifest_classes,
-    CASE WHEN vars.with_raw_payload THEN raw_payload END AS raw_payload,
-    CASE WHEN vars.with_receipt_costing_parameters THEN receipt_costing_parameters END AS receipt_costing_parameters,
-    CASE WHEN vars.with_receipt_fee_summary THEN receipt_fee_summary END AS receipt_fee_summary,
-    CASE WHEN vars.with_receipt_next_epoch THEN receipt_next_epoch  END AS receipt_next_epoch,
-    CASE WHEN vars.with_receipt_output THEN receipt_output END AS receipt_output,
-    CASE WHEN vars.with_receipt_state_updates THEN receipt_state_updates END AS receipt_state_updates,
-    CASE WHEN vars.with_balance_changes THEN balance_changes END AS balance_changes,
-    CASE WHEN vars.with_manifest_instructions THEN manifest_instructions END AS manifest_instructions,
-    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_emitters END AS ReceiptEventEmitters,
-    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_names END AS ReceiptEventNames,
-    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_sbors END AS ReceiptEventSbors,
-    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_schema_entity_ids END AS ReceiptEventSchemaEntityIds,
-    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_schema_hashes END AS ReceiptEventSchemaHashes,
-    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_type_indexes END AS ReceiptEventTypeIndexes,
-    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_sbor_type_kinds END AS ReceiptEventSborTypeKinds
-FROM vars
-CROSS JOIN ledger_transactions lt
-LEFT JOIN ledger_transaction_events lte ON vars.with_receipt_events AND lte.state_version = lt.state_version
-WHERE lt.state_version = ANY(vars.transaction_state_versions)",
-            new
-            {
-                includeRawHex = optIns.RawHex,
-                includeReceiptOutput = optIns.ReceiptOutput,
-                includeReceiptStateChanges = optIns.ReceiptStateChanges,
-                includeReceiptEvents = optIns.ReceiptEvents,
-                includeBalanceChanges = optIns.BalanceChanges,
-                includeManifestInstructions = optIns.ManifestInstructions,
-                transactionStateVersions = transactionStateVersions,
-            });
-
-        var transactions = (await _dapperWrapper.QueryAsync<LedgerTransactionQueryResult, ReceiptEvents?, LedgerTransactionQueryResult>(
-            _dbContext.Database.GetDbConnection(),
-            cd,
-            (transaction, events) =>
-            {
-                if (events == null)
-                {
-                    return transaction;
-                }
-
-                var mappedEvents = events
-                    .ReceiptEventEmitters
-                    .Select(
-                        (_, i) => new ReceiptEvent(
-                            events.ReceiptEventNames[i],
-                            events.ReceiptEventEmitters[i],
-                            events.ReceiptEventSbors[i],
-                            events.ReceiptEventSchemaEntityIds[i],
-                            events.ReceiptEventSchemaHashes[i],
-                            events.ReceiptEventTypeIndexes[i],
-                            events.ReceiptEventSborTypeKinds[i]))
-                    .ToList();
-
-                transaction.Events = mappedEvents;
-
-                return transaction;
-            },
-            "ReceiptEventEmitters",
-            "GetTransactions")).ToList();
-
+        var transactions = await TransactionDetailsQuery.Execute(_dapperWrapper, _dbContext, transactionStateVersions, optIns, token);
         var entityIdToAddressMap = await _entityQuerier.ResolveEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToHashSet().ToList(), token);
 
         var schemaLookups = transactions
@@ -674,8 +518,44 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                 .ToDictionaryAsync(x => new SchemaLookup(x.EntityId, x.SchemaHash), x => x.Schema, token);
         }
 
-        List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
         var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
+        var mappedTransactions = MapTransactions(transactions, transactionStateVersions, optIns, entityIdToAddressMap, schemas, networkId);
+        return mappedTransactions;
+    }
+
+    private async Task<ICollection<PendingTransactionSummary>> LookupPendingTransactionsByIntentHash(string intentHash, CancellationToken token = default)
+    {
+        return await _rwDbContext
+            .PendingTransactions
+            .Where(pt => pt.IntentHash == intentHash)
+            .Select(
+                pt =>
+                    new PendingTransactionSummary(
+                        pt.PayloadHash,
+                        pt.EndEpochExclusive,
+                        pt.GatewayHandling.ResubmitFromTimestamp,
+                        pt.GatewayHandling.HandlingStatusReason,
+                        pt.LedgerDetails.PayloadLedgerStatus,
+                        pt.LedgerDetails.IntentLedgerStatus,
+                        pt.LedgerDetails.InitialRejectionReason,
+                        pt.LedgerDetails.LatestRejectionReason,
+                        pt.NetworkDetails.LastSubmitErrorTitle
+                    )
+            )
+            .AnnotateMetricName()
+            .AsNoTracking()
+            .ToListAsync(token);
+    }
+
+    private List<GatewayModel.CommittedTransactionInfo> MapTransactions(
+        IList<TransactionDetailsQuery.LedgerTransactionQueryResult> transactions,
+        IList<long> transactionStateVersions,
+        GatewayModel.TransactionDetailsOptIns optIns,
+        IDictionary<long, EntityAddress> entityIdToAddressMap,
+        IDictionary<SchemaLookup, byte[]> schemas,
+        byte networkId)
+    {
+        var mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
 
         foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)).ToList())
         {
@@ -685,17 +565,19 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
             {
                 var storedBalanceChanges = JsonConvert.DeserializeObject<CoreModel.CommittedTransactionBalanceChanges>(transaction.BalanceChanges);
 
-                if (storedBalanceChanges == null)
+                if (storedBalanceChanges != null)
+                {
+                    balanceChanges = storedBalanceChanges.ToGatewayModel();
+                }
+                else
                 {
                     throw new InvalidOperationException("Unable to deserialize stored balance changes into CoreModel.CommittedTransactionBalanceChanges");
                 }
-
-                balanceChanges = storedBalanceChanges.ToGatewayModel();
             }
 
-            if (!optIns.ReceiptEvents || schemaLookups?.Any() == false)
+            if (!optIns.ReceiptEvents)
             {
-                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null, balanceChanges));
+                mappedTransactions.Add(MapSingleTransaction(transaction, optIns, entityIdToAddressMap, null, balanceChanges));
             }
             else
             {
@@ -712,10 +594,74 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                     events.Add(new Event(@event.Name, @event.Emitter, eventData));
                 }
 
-                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events, balanceChanges));
+                mappedTransactions.Add(MapSingleTransaction(transaction, optIns, entityIdToAddressMap, events, balanceChanges));
             }
         }
 
         return mappedTransactions;
+    }
+
+    private GatewayModel.CommittedTransactionInfo MapSingleTransaction(
+        TransactionDetailsQuery.LedgerTransactionQueryResult lt,
+        GatewayModel.TransactionDetailsOptIns optIns,
+        IDictionary<long, EntityAddress> entityIdToAddressMap,
+        IList<Event>? events,
+        GatewayModel.TransactionBalanceChanges? transactionBalanceChanges)
+    {
+        string? payloadHash = null;
+        string? intentHash = null;
+        string? rawHex = null;
+        JRaw? message = null;
+        string? manifestInstructions = null;
+        List<GatewayModel.ManifestClass>? manifestClasses = null;
+
+        if (lt.Discriminator == LedgerTransactionType.User)
+        {
+            payloadHash = lt.PayloadHash;
+            intentHash = lt.IntentHash;
+            rawHex = optIns.RawHex ? lt.RawPayload!.ToHex() : null;
+            message = lt.Message != null ? new JRaw(lt.Message) : null;
+            manifestInstructions = optIns.ManifestInstructions ? lt.ManifestInstructions : null;
+            manifestClasses = lt.ManifestClasses.Select(mc => mc.ToGatewayModel()).ToList();
+        }
+
+        var status = lt.ReceiptStatus switch
+        {
+            LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.CommittedSuccess,
+            LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
+            _ => throw new UnreachableException($"Didn't expect {lt.ReceiptStatus} value"),
+        };
+
+        return new GatewayModel.CommittedTransactionInfo(
+            stateVersion: lt.StateVersion,
+            epoch: lt.Epoch,
+            round: lt.RoundInEpoch,
+            roundTimestamp: lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
+            transactionStatus: status,
+            affectedGlobalEntities: optIns.AffectedGlobalEntities ? lt.AffectedGlobalEntities.Select(x => entityIdToAddressMap[x].ToString()).ToList() : null,
+            payloadHash: payloadHash,
+            intentHash: intentHash,
+            feePaid: lt.FeePaid.ToString(),
+            confirmedAt: lt.RoundTimestamp,
+            errorMessage: lt.ReceiptErrorMessage,
+            rawHex: rawHex,
+            receipt: new GatewayModel.TransactionReceipt
+            {
+                ErrorMessage = lt.ReceiptErrorMessage,
+                Status = status,
+                Output = optIns.ReceiptOutput && lt.ReceiptOutput != null ? new JRaw(lt.ReceiptOutput) : null,
+                FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.ReceiptFeeSummary) : null,
+                FeeDestination = optIns.ReceiptFeeDestination && lt.ReceiptFeeDestination != null ? new JRaw(lt.ReceiptFeeDestination) : null,
+                FeeSource = optIns.ReceiptFeeSource && lt.ReceiptFeeSource != null ? new JRaw(lt.ReceiptFeeSource) : null,
+                CostingParameters = optIns.ReceiptCostingParameters ? new JRaw(lt.ReceiptCostingParameters) : null,
+                NextEpoch = lt.ReceiptNextEpoch != null ? new JRaw(lt.ReceiptNextEpoch) : null,
+                StateUpdates = optIns.ReceiptStateChanges && lt.ReceiptStateUpdates != null ? new JRaw(lt.ReceiptStateUpdates) : null,
+                Events = optIns.ReceiptEvents ? events?.Select(x => new GatewayModel.EventsItem(x.Name, new JRaw(x.Emitter), x.Data)).ToList() : null,
+            },
+            message: message,
+            balanceChanges: optIns.BalanceChanges ? transactionBalanceChanges : null,
+            manifestInstructions: manifestInstructions,
+            manifestClasses: manifestClasses
+        );
     }
 }

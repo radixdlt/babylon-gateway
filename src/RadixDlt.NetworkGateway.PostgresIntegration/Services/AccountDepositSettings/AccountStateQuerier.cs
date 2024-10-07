@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -115,7 +114,15 @@ internal class AccountStateQuerier : IAccountStateQuerier
     {
         var accountEntity = await _entityQuerier.GetNonVirtualEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            accountEntityId = accountEntity.Id,
+            stateVersion = ledgerState.StateVersion,
+            startIndex = offset + 1,
+            endIndex = offset + limit,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 WITH slices AS (
 SELECT
@@ -135,13 +142,7 @@ INNER JOIN LATERAL UNNEST(resource_preference_rules_slice) WITH ORDINALITY AS re
 INNER JOIN account_resource_preference_rule_entry_history arpreh ON arpreh.id = resource_preference_join.id
 INNER JOIN entities resource_entity on arpreh.resource_entity_id = resource_entity.id
 ORDER BY resource_preference_join.ordinality ASC;",
-            parameters: new
-            {
-                accountEntityId = accountEntity.Id,
-                stateVersion = ledgerState.StateVersion,
-                startIndex = offset + 1,
-                endIndex = offset + limit,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var queryResult = (await _dapperWrapper.QueryAsync<AccountResourcePreferenceRulesResultRow>(_dbContext.Database.GetDbConnection(), cd)).ToList();
@@ -174,7 +175,15 @@ ORDER BY resource_preference_join.ordinality ASC;",
     {
         var accountEntity = await _entityQuerier.GetNonVirtualEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            accountEntityId = accountEntity.Id,
+            stateVersion = ledgerState.StateVersion,
+            startIndex = offset + 1,
+            endIndex = offset + limit,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 WITH slices AS (
     SELECT
@@ -197,13 +206,7 @@ FROM slices
          LEFT JOIN entities resource_entity on aadeh.resource_entity_id = resource_entity.id
          LEFT JOIN entities non_fungible_resource_entity on aadeh.resource_entity_id = non_fungible_resource_entity.id
 ORDER BY resource_authorized_depositors_join.ordinality ASC;",
-            parameters: new
-            {
-                accountEntityId = accountEntity.Id,
-                stateVersion = ledgerState.StateVersion,
-                startIndex = offset + 1,
-                endIndex = offset + limit,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var queryResult = (await _dapperWrapper.QueryAsync<AccountAuthorizedDepositorsResultRow>(_dbContext.Database.GetDbConnection(), cd)).ToList();

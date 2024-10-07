@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -87,7 +86,14 @@ internal class AccountLockerQuerier : IAccountLockerQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IDapperWrapper _dapperWrapper;
 
-    private record AccountLockerVaultsResultRow(long Id, long FromStateVersion, EntityType ResourceDiscriminator, string ResourceAddress, string VaultAddress, long LastUpdatedAtStateVersion, TokenAmount? Balance);
+    private record AccountLockerVaultsResultRow(
+        long Id,
+        long FromStateVersion,
+        EntityType ResourceDiscriminator,
+        string ResourceAddress,
+        string VaultAddress,
+        long LastUpdatedAtStateVersion,
+        TokenAmount? Balance);
 
     private record AccountLockerTouchedAtResultRow(long AccountLockerEntityId, long AccountEntityId, long LastUpdatedAt);
 
@@ -116,7 +122,16 @@ internal class AccountLockerQuerier : IAccountLockerQuerier
             throw new AccountLockerNotFoundException(pageRequest.AccountLockerAddress.LockerAddress, pageRequest.AccountLockerAddress.AccountAddress);
         }
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            accountLockerDefinitionId = accountLockerEntryDefinition.Id,
+            stateVersion = ledgerState.StateVersion,
+            cursorStateVersion = pageRequest.Cursor?.StateVersionBoundary ?? long.MaxValue,
+            cursorId = pageRequest.Cursor?.IdBoundary ?? long.MaxValue,
+            limit = pageRequest.Limit + 1,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT
     d.id AS Id,
@@ -142,14 +157,7 @@ WHERE
   AND (d.from_state_version, d.id) <= (@cursorStateVersion, @cursorId)
 ORDER BY d.from_state_version DESC, d.id DESC
 LIMIT @limit;",
-            parameters: new
-            {
-                accountLockerDefinitionId = accountLockerEntryDefinition.Id,
-                stateVersion = ledgerState.StateVersion,
-                cursorStateVersion = pageRequest.Cursor?.StateVersionBoundary ?? long.MaxValue,
-                cursorId = pageRequest.Cursor?.IdBoundary ?? long.MaxValue,
-                limit = pageRequest.Limit + 1,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var vaultsAndOneMore = (await _dapperWrapper.QueryAsync<AccountLockerVaultsResultRow>(_dbContext.Database.GetDbConnection(), cd, "vaultsAndOneMore")).ToList();
@@ -198,7 +206,10 @@ LIMIT @limit;",
         );
     }
 
-    public async Task<GatewayModel.StateAccountLockersTouchedAtResponse> AccountLockersTouchedAt(IList<AccountLockerAddress> accountLockers, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateAccountLockersTouchedAtResponse> AccountLockersTouchedAt(
+        IList<AccountLockerAddress> accountLockers,
+        GatewayModel.LedgerState atLedgerState,
+        CancellationToken token = default)
     {
         var entityAddresses = accountLockers.SelectMany(l => new[] { l.LockerAddress, l.AccountAddress }).ToHashSet().ToList();
         var entities = await _entityQuerier.GetEntities(entityAddresses, atLedgerState, token);
@@ -217,7 +228,14 @@ LIMIT @limit;",
 
         accountLockers.Unzip(l => GetAddressOrThrow(l.LockerAddress), l => GetAddressOrThrow(l.AccountAddress), out var accountLockerEntityIds, out var accountEntityIds);
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            accountLockerEntityIds = accountLockerEntityIds,
+            accountEntityIds = accountEntityIds,
+            stateVersion = atLedgerState.StateVersion,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 WITH variables AS (
     SELECT UNNEST(@accountLockerEntityIds) AS account_locker_entity_id, UNNEST(@accountEntityIds) AS account_entity_id
@@ -236,12 +254,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) th ON TRUE;",
-            parameters: new
-            {
-                accountLockerEntityIds = accountLockerEntityIds,
-                accountEntityIds = accountEntityIds,
-                stateVersion = atLedgerState.StateVersion,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var items = new List<GatewayModel.StateAccountLockersTouchedAtResponseItem>();

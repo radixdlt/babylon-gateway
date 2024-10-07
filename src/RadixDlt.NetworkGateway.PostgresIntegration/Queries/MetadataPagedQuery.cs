@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Queries.CustomTypes;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
@@ -116,7 +115,18 @@ internal static class MetadataPagedQuery
             return ImmutableDictionary<long, GatewayModel.EntityMetadataCollection>.Empty;
         }
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            entityIds = entityIds,
+            useCursor = queryConfiguration.Cursor is not null,
+            atLedgerState = ledgerState.StateVersion,
+            cursorStateVersion = queryConfiguration.Cursor?.StateVersionBoundary ?? 0,
+            cursorDefinitionId = queryConfiguration.Cursor?.IdBoundary ?? 0,
+            perEntityPageLimit = queryConfiguration.PageSize + 1,
+            perEntityDefinitionReadLimit = Math.Floor(queryConfiguration.MaxDefinitionsLookupLimit / (decimal)entityIds.Count),
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             @"
 WITH vars AS (
     SELECT
@@ -218,16 +228,7 @@ LIMIT vars.per_entity_page_limit
 ) entries_per_entity ON TRUE
 ORDER BY entries_per_entity.cursor DESC
 ;",
-            new
-            {
-                entityIds = entityIds,
-                useCursor = queryConfiguration.Cursor is not null,
-                atLedgerState = ledgerState.StateVersion,
-                cursorStateVersion = queryConfiguration.Cursor?.StateVersionBoundary ?? 0,
-                cursorDefinitionId = queryConfiguration.Cursor?.IdBoundary ?? 0,
-                perEntityPageLimit = queryConfiguration.PageSize + 1,
-                perEntityDefinitionReadLimit = Math.Floor(queryConfiguration.MaxDefinitionsLookupLimit / (decimal)entityIds.Count),
-            },
+            parameters,
             cancellationToken: token);
         var queryResult = (await dapperWrapper.ToListAsync<QueryResultRow>(dbConnection, cd)).ToList();
 
