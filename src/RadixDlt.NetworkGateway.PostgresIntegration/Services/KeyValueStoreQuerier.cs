@@ -106,7 +106,7 @@ internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
         CancellationToken token = default)
     {
         var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        var keyValueStore = await _entityQuerier.GetNonPreAllocatedEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
 
         var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
             _dbContext,
@@ -138,7 +138,7 @@ internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
         CancellationToken token = default)
     {
         var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        var keyValueStore = await _entityQuerier.GetNonPreAllocatedEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
 
         var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
             _dbContext,

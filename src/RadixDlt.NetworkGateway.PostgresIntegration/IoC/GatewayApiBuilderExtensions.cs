@@ -106,7 +106,7 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<IValidatorQuerier, ValidatorQuerier>()
             .AddScoped<IPackageQuerier, PackageQuerier>()
             .AddScoped<IEntityQuerier, EntityQuerier>()
-            .AddScoped<IVirtualEntityDataProvider, VirtualEntityDataProvider>()
+            .AddScoped<IPreAllocatedEntityDataProvider, PreAllocatedEntityDataProvider>()
             .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
             .AddScoped<IDapperWrapper, DapperWrapper>()
             .AddSingleton<MetricsInterceptor>();
