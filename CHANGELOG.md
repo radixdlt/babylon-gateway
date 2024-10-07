@@ -3,6 +3,13 @@ Release built: _not released yet_
 
 > [!CAUTION]
 > **Breaking Changes:**
+> - Manifest addresses are no longer indexed in the `/stream/transactions` endpoint for failed transactions. Affected filters:
+>   - `manifest_accounts_withdrawn_from_filter`
+>   - `manifest_accounts_deposited_into_filter`
+>   - `manifest_badges_presented_filter`
+>   - `manifest_resources_filter`
+>   - `accounts_with_manifest_owner_method_calls`
+>   - `accounts_without_manifest_owner_method_calls`
 > - Changed ordering of entity metadata. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending. Affected endpoints:
 >   - `/state/entity/metadata`
 >   - `/state/entity/page/metadata`
