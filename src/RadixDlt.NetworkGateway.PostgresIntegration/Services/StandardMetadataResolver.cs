@@ -123,7 +123,18 @@ internal class StandardMetadataResolver
             return ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
         }
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            dappAccountTypeDappDefinition = StandardMetadataConstants.DappAccountTypeDappDefinition,
+            validationUnknown = StandardMetadataConstants.ValidationUnknown,
+            validationOnLedgerSucceeded = StandardMetadataConstants.ValidationOnLedgerSucceeded,
+            validationOnLedgerAppCheck = StandardMetadataConstants.ValidationOnLedgerAppCheck,
+            validationOffLedgerAppCheck = StandardMetadataConstants.ValidationOffLedgerAppCheck,
+            stateVersion = ledgerState.StateVersion,
+            entityIds = entityIds,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             @"
 WITH
     variables (entity_id) AS (SELECT UNNEST(@entityIds)),
@@ -292,16 +303,7 @@ SELECT
     coalesce(target_value, target_entity_address) AS TargetValue,
     validation_result AS ValidationResult
 FROM resolved",
-            new
-            {
-                dappAccountTypeDappDefinition = StandardMetadataConstants.DappAccountTypeDappDefinition,
-                validationUnknown = StandardMetadataConstants.ValidationUnknown,
-                validationOnLedgerSucceeded = StandardMetadataConstants.ValidationOnLedgerSucceeded,
-                validationOnLedgerAppCheck = StandardMetadataConstants.ValidationOnLedgerAppCheck,
-                validationOffLedgerAppCheck = StandardMetadataConstants.ValidationOffLedgerAppCheck,
-                stateVersion = ledgerState.StateVersion,
-                entityIds = entityIds,
-            },
+            parameters,
             cancellationToken: token);
 
         var partiallyValidatedEntries = await _dapperWrapper.ToListAsync<PartiallyValidatedTwoWayLink>(_dbContext.Database.GetDbConnection(), cd);
@@ -326,7 +328,11 @@ FROM resolved",
         return result.ToDictionary(e => e.Key, e => (ICollection<ResolvedTwoWayLink>)e.Value.ToList());
     }
 
-    private async ValueTask<TwoWayLinkValidationResult> ResolveTwoWayLink(PartiallyValidatedTwoWayLink link, bool validateOnLedgerOnly, ICollection<PartiallyValidatedTwoWayLink> allEntries, CancellationToken token)
+    private async ValueTask<TwoWayLinkValidationResult> ResolveTwoWayLink(
+        PartiallyValidatedTwoWayLink link,
+        bool validateOnLedgerOnly,
+        ICollection<PartiallyValidatedTwoWayLink> allEntries,
+        CancellationToken token)
     {
         if (link.ValidationResult == StandardMetadataConstants.ValidationUnknown)
         {

@@ -67,6 +67,7 @@ using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -100,7 +101,15 @@ internal static class PackageQueries
             return ImmutableDictionary<long, PackageBlueprintResultRow[]>.Empty;
         }
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            packageEntityIds = packageEntityIds.ToList(),
+            startIndex = offset + 1,
+            endIndex = offset + limit,
+            stateVersion = ledgerState.StateVersion,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 WITH variables (package_entity_id) AS (SELECT UNNEST(@packageEntityIds)),
 blueprint_slices AS
@@ -120,13 +129,7 @@ FROM blueprint_slices AS bs
 INNER JOIN LATERAL UNNEST(blueprint_slice) WITH ORDINALITY AS blueprint_join(id, ordinality) ON TRUE
 INNER JOIN package_blueprint_history pbh ON pbh.id = blueprint_join.id
 ORDER BY blueprint_join.ordinality ASC;",
-            parameters: new
-            {
-                packageEntityIds = packageEntityIds.ToList(),
-                startIndex = offset + 1,
-                endIndex = offset + limit,
-                stateVersion = ledgerState.StateVersion,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         return (await dbContext.Database.GetDbConnection().QueryAsync<PackageBlueprintResultRow>(cd))
@@ -148,7 +151,15 @@ ORDER BY blueprint_join.ordinality ASC;",
             return ImmutableDictionary<long, PackageCodeResultRow[]>.Empty;
         }
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            packageEntityIds = packageEntityIds.ToList(),
+            startIndex = offset + 1,
+            endIndex = offset + limit,
+            stateVersion = ledgerState.StateVersion,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 WITH variables (package_entity_id) AS (SELECT UNNEST(@packageEntityIds)),
 code_slices AS
@@ -168,13 +179,7 @@ FROM code_slices AS cs
 INNER JOIN LATERAL UNNEST(code_slice) WITH ORDINALITY AS code_join(id, ordinality) ON TRUE
 INNER JOIN package_code_history pch ON pch.id = code_join.id
 ORDER BY code_join.ordinality ASC;",
-            parameters: new
-            {
-                packageEntityIds = packageEntityIds.ToList(),
-                startIndex = offset + 1,
-                endIndex = offset + limit,
-                stateVersion = ledgerState.StateVersion,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         return (await dbContext.Database.GetDbConnection().QueryAsync<PackageCodeResultRow>(cd))

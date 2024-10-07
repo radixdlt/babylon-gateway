@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -142,7 +143,7 @@ WHERE id IN(
     public async Task<SequencesHolder> LoadSequences(CancellationToken token)
     {
         var sw = Stopwatch.GetTimestamp();
-        var cd = new CommandDefinition(
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT
     nextval('account_locker_entry_definition_id_seq') AS AccountLockerEntryDefinitionSequence,

@@ -559,8 +559,20 @@ internal class TransactionQuerier : ITransactionQuerier
         GatewayModel.TransactionDetailsOptIns optIns,
         CancellationToken token)
     {
-        var cd = new CommandDefinition(
-            @"WITH vars AS (
+        var parameters = new
+        {
+            includeRawHex = optIns.RawHex,
+            includeReceiptOutput = optIns.ReceiptOutput,
+            includeReceiptStateChanges = optIns.ReceiptStateChanges,
+            includeReceiptEvents = optIns.ReceiptEvents,
+            includeBalanceChanges = optIns.BalanceChanges,
+            includeManifestInstructions = optIns.ManifestInstructions,
+            transactionStateVersions = transactionStateVersions,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
+            @"
+WITH vars AS (
     SELECT
         @includeRawHex AS with_raw_payload,
         true AS with_receipt_costing_parameters,
@@ -608,16 +620,7 @@ FROM vars
 CROSS JOIN ledger_transactions lt
 LEFT JOIN ledger_transaction_events lte ON vars.with_receipt_events AND lte.state_version = lt.state_version
 WHERE lt.state_version = ANY(vars.transaction_state_versions)",
-            new
-            {
-                includeRawHex = optIns.RawHex,
-                includeReceiptOutput = optIns.ReceiptOutput,
-                includeReceiptStateChanges = optIns.ReceiptStateChanges,
-                includeReceiptEvents = optIns.ReceiptEvents,
-                includeBalanceChanges = optIns.BalanceChanges,
-                includeManifestInstructions = optIns.ManifestInstructions,
-                transactionStateVersions = transactionStateVersions,
-            });
+            parameters);
 
         var transactions = (await _dapperWrapper.QueryAsync<LedgerTransactionQueryResult, ReceiptEvents?, LedgerTransactionQueryResult>(
             _dbContext.Database.GetDbConnection(),

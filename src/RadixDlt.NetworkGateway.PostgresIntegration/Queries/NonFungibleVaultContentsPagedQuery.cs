@@ -118,7 +118,18 @@ internal static class NonFungibleVaultContentsPagedQuery
             throw new InvalidOperationException("Can't use cursor if executing against multiple vault entities.");
         }
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            vaultEntityIds = vaultEntityIds.ToList(),
+            useCursor = configuration.Cursor is not null,
+            cursorStateVersion = configuration.Cursor?.StateVersion,
+            cursorId = configuration.Cursor?.Id,
+            atLedgerState = ledgerState.StateVersion,
+            perEntityDefinitionReadLimit = Math.Floor(configuration.MaxDefinitionsLookupLimit / (decimal)vaultEntityIds.Count),
+            perEntityPageLimit = configuration.PageSize + 1,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             @"
 WITH vars AS (
     SELECT
@@ -218,16 +229,7 @@ LEFT JOIN LATERAL (
 ) vault_balance ON TRUE
 ORDER BY entries.cursor DESC
 ;",
-            new
-            {
-                vaultEntityIds = vaultEntityIds.ToList(),
-                useCursor = configuration.Cursor is not null,
-                cursorStateVersion = configuration.Cursor?.StateVersion,
-                cursorId = configuration.Cursor?.Id,
-                atLedgerState = ledgerState.StateVersion,
-                perEntityDefinitionReadLimit = Math.Floor(configuration.MaxDefinitionsLookupLimit / (decimal)vaultEntityIds.Count),
-                perEntityPageLimit = configuration.PageSize + 1,
-            },
+            parameters,
             cancellationToken: token);
 
         var queryResult = (await dapperWrapper.QueryAsync<QueryResultRow>(dbContext.Database.GetDbConnection(), cd)).ToList();
