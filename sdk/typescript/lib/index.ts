@@ -1,13 +1,14 @@
 import { RadixNetworkConfigById } from './helpers/networks'
 import {
   ConfigurationParameters,
+  ExtensionsApi,
   StateApi,
   StatisticsApi,
   StatusApi,
   StreamApi,
   TransactionApi,
 } from './generated'
-import { State, Statistics, Status, Stream, Transaction } from './subapis'
+import { Extensions, State, Statistics, Status, Stream, Transaction } from './subapis'
 import { RuntimeConfiguration } from './runtime'
 import { normalizeBasePath } from './helpers/normalize-base-path'
 import { SDK_VERSION } from './constants'
@@ -88,6 +89,7 @@ export class GatewayApiClient {
   status: Status
   transaction: Transaction
   statistics: Statistics
+  extensions: Extensions
 
   private lowLevel: {
     state: StateApi
@@ -95,6 +97,7 @@ export class GatewayApiClient {
     status: StatusApi
     transaction: TransactionApi
     statistics: StatisticsApi
+    extensions: ExtensionsApi
   }
 
   constructor(configuration: RuntimeConfiguration) {
@@ -104,6 +107,7 @@ export class GatewayApiClient {
       status: new StatusApi(configuration),
       transaction: new TransactionApi(configuration),
       statistics: new StatisticsApi(configuration),
+      extensions: new ExtensionsApi(configuration),
     }
 
     this.state = new State(this.lowLevel.state, configuration)
@@ -111,5 +115,6 @@ export class GatewayApiClient {
     this.status = new Status(this.lowLevel.status)
     this.transaction = new Transaction(this.lowLevel.transaction)
     this.statistics = new Statistics(this.lowLevel.statistics, configuration)
+    this.extensions = new Extensions(this.lowLevel.extensions)
   }
 }
