@@ -101,6 +101,28 @@ internal class OriginLedgerTransactionMarkerProcessor : ITransactionMarkerProces
                     OriginType = LedgerTransactionMarkerOriginType.User,
                 });
         }
+
+        if (committedTransaction.LedgerTransaction is CoreApiSdk.Model.RoundUpdateLedgerTransaction)
+        {
+            _ledgerTransactionMarkersToAdd.Add(
+                new OriginLedgerTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    StateVersion = stateVersion,
+                    OriginType = LedgerTransactionMarkerOriginType.RoundUpdate,
+                });
+        }
+
+        if (committedTransaction.LedgerTransaction is CoreApiSdk.Model.FlashLedgerTransaction)
+        {
+            _ledgerTransactionMarkersToAdd.Add(
+                new OriginLedgerTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    StateVersion = stateVersion,
+                    OriginType = LedgerTransactionMarkerOriginType.Flash,
+                });
+        }
     }
 
     public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()

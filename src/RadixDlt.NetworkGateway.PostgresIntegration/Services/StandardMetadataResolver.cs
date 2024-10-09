@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;

@@ -45,6 +45,7 @@ Release built: _not released yet_
 ### Bug fixes
 - Added missing `total_count` property to `/state/validators/list` response.
 - Fix `/transaction/account-deposit-pre-validation` for uninstantiated pre-allocated accounts. It no longer returns error with code 404 `Entity not found`. 
+- Restored round update transactions from `/stream/transactions` endpoint.
 
 ### API Changes
 - Restored previously removed `total_count` property to `/state/key-value-store/keys` endpoint.

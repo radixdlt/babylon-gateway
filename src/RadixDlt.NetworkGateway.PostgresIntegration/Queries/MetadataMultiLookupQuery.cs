@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Utils;

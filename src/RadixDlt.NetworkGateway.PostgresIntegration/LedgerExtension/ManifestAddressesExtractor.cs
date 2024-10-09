@@ -63,7 +63,6 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;

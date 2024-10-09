@@ -73,6 +73,8 @@ internal enum LedgerTransactionMarkerOriginType
 {
     User,
     EpochChange,
+    RoundUpdate,
+    Flash,
 }
 
 internal enum LedgerTransactionMarkerEventType
