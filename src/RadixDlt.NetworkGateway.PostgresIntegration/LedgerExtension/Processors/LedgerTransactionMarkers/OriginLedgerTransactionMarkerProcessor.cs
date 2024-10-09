@@ -64,7 +64,12 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
+using FlashLedgerTransaction = RadixDlt.CoreApiSdk.Model.FlashLedgerTransaction;
+using GenesisLedgerTransaction = RadixDlt.CoreApiSdk.Model.GenesisLedgerTransaction;
+using RoundUpdateLedgerTransaction = RadixDlt.CoreApiSdk.Model.RoundUpdateLedgerTransaction;
+using UserLedgerTransaction = RadixDlt.CoreApiSdk.Model.UserLedgerTransaction;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
@@ -91,16 +96,22 @@ internal class OriginLedgerTransactionMarkerProcessor : ITransactionMarkerProces
                 });
         }
 
-        if (committedTransaction.LedgerTransaction is CoreApiSdk.Model.UserLedgerTransaction)
+        var origin = committedTransaction.LedgerTransaction switch
         {
-            _ledgerTransactionMarkersToAdd.Add(
-                new OriginLedgerTransactionMarker
-                {
-                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                    StateVersion = stateVersion,
-                    OriginType = LedgerTransactionMarkerOriginType.User,
-                });
-        }
+            FlashLedgerTransaction => LedgerTransactionMarkerOriginType.Flash,
+            GenesisLedgerTransaction => LedgerTransactionMarkerOriginType.Genesis,
+            RoundUpdateLedgerTransaction => LedgerTransactionMarkerOriginType.RoundUpdate,
+            UserLedgerTransaction => LedgerTransactionMarkerOriginType.User,
+            _ => throw new ArgumentOutOfRangeException($"Unexpected ledger transaction type: {committedTransaction.LedgerTransaction.GetType()}"),
+        };
+
+        _ledgerTransactionMarkersToAdd.Add(
+            new OriginLedgerTransactionMarker
+            {
+                Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                StateVersion = stateVersion,
+                OriginType = origin,
+            });
     }
 
     public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
