@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Nito.AsyncEx;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
@@ -79,72 +78,38 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal interface IPreAllocatedEntityDataProvider
 {
-    public Task<bool> IsPreAllocatedAccountAddress(EntityAddress address);
-
-    public Task<bool> IsPreAllocatedIdentityAddress(EntityAddress address);
-
     Task<(GatewayModel.StateEntityDetailsResponseComponentDetails Details, GatewayModel.EntityMetadataCollection Metadata)> GetPreAllocatedEntityData(EntityAddress address);
 }
 
 internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly AsyncLazy<byte> _secp256k1PreAllocatedAccountDiscriminator;
-    private readonly AsyncLazy<byte> _ed25519PreAllocatedAccountDiscriminator;
-    private readonly AsyncLazy<byte> _secp256k1PreAllocatedIdentityDiscriminator;
-    private readonly AsyncLazy<byte> _ed25519PreAllocatedIdentityDiscriminator;
     private readonly List<GatewayModel.ComponentEntityRoleAssignmentEntry> _preAllocatedAccountRoleAssignmentEntries;
     private readonly List<GatewayModel.ComponentEntityRoleAssignmentEntry> _preAllocatedIdentityRoleAssignmentEntries;
 
     public PreAllocatedEntityDataProvider(INetworkConfigurationProvider networkConfigurationProvider, IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
-        async Task<byte> GetAddressBytePrefix(AddressEntityType addressEntityType)
-        {
-            var networkConfiguration = await networkConfigurationProvider.GetNetworkConfiguration();
-
-            return networkConfiguration.AddressTypeDefinitions.First(atd => atd.EntityType == addressEntityType).AddressBytePrefix;
-        }
-
-        AsyncLazy<byte> CreateAsyncLazy(AddressEntityType addressEntityType)
-        {
-            return new AsyncLazy<byte>(async () => await GetAddressBytePrefix(addressEntityType), AsyncLazyFlags.RetryOnFailure);
-        }
-
         _networkConfigurationProvider = networkConfigurationProvider;
-        _secp256k1PreAllocatedAccountDiscriminator = CreateAsyncLazy(AddressEntityType.GlobalVirtualSecp256k1Account);
-        _ed25519PreAllocatedAccountDiscriminator = CreateAsyncLazy(AddressEntityType.GlobalVirtualEd25519Account);
-        _secp256k1PreAllocatedIdentityDiscriminator = CreateAsyncLazy(AddressEntityType.GlobalVirtualSecp256k1Identity);
-        _ed25519PreAllocatedIdentityDiscriminator = CreateAsyncLazy(AddressEntityType.GlobalVirtualEd25519Identity);
-        _preAllocatedAccountRoleAssignmentEntries = GenerateVirtualAccountRoleAssignmentEntries(roleAssignmentsKeyProvider);
-        _preAllocatedIdentityRoleAssignmentEntries = GenerateVirtualIdentityRoleAssignmentEntries(roleAssignmentsKeyProvider);
-    }
-
-    public Task<bool> IsPreAllocatedAccountAddress(EntityAddress address)
-    {
-        return IsAccount(DecodeAddress(address, false));
-    }
-
-    public Task<bool> IsPreAllocatedIdentityAddress(EntityAddress address)
-    {
-        return IsIdentity(DecodeAddress(address, false));
+        _preAllocatedAccountRoleAssignmentEntries = GeneratePreAllocatedAccountRoleAssignmentEntries(roleAssignmentsKeyProvider);
+        _preAllocatedIdentityRoleAssignmentEntries = GeneratePreAllocatedIdentityRoleAssignmentEntries(roleAssignmentsKeyProvider);
     }
 
     public async Task<(GatewayModel.StateEntityDetailsResponseComponentDetails Details, GatewayModel.EntityMetadataCollection Metadata)> GetPreAllocatedEntityData(EntityAddress address)
     {
-        var decoded = DecodeAddress(address, true);
+        var decoded = address.Decode();
         var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration();
 
-        if (await IsSecp256k1(decoded) == false && await IsEd25519(decoded) == false)
+        if (!decoded.IsSecp256k() && !decoded.IsEd25519())
         {
             throw new ArgumentException("Failed to detect key algorithm (ed25519 or secp256k1)", nameof(address));
         }
 
-        if (await IsAccount(decoded) == false && await IsIdentity(decoded) == false)
+        if (!decoded.IsPreAllocatedAccountAddress() && !decoded.IsPreAllocatedIdentityAddress())
         {
             throw new ArgumentException("Failed to detect entity type (account or identity)", nameof(address));
         }
 
-        ToolkitModel.PublicKeyHash publicKeyHash = await IsSecp256k1(decoded)
+        ToolkitModel.PublicKeyHash publicKeyHash = decoded.IsSecp256k()
             ? new ToolkitModel.PublicKeyHash.Secp256k1(decoded.AddressBytes)
             : new ToolkitModel.PublicKeyHash.Ed25519(decoded.AddressBytes);
 
@@ -163,7 +128,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
             simpleRep: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes)),
             idType: CoreModel.NonFungibleIdType.Bytes,
             sborHex: ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborEncode(new ToolkitModel.NonFungibleLocalId.Bytes(decoded.AddressBytes)).ToArray().ToHex());
-        var roleAssignmentOwnerProofGlobalId = await IsSecp256k1(decoded)
+        var roleAssignmentOwnerProofGlobalId = decoded.IsSecp256k()
             ? new CoreModel.NonFungibleGlobalId(networkConfiguration.WellKnownAddresses.Secp256k1SignatureVirtualBadge, roleAssignmentOwnerProofLocalId)
             : new CoreModel.NonFungibleGlobalId(networkConfiguration.WellKnownAddresses.Ed25519SignatureVirtualBadge, roleAssignmentOwnerProofLocalId);
         var ownerRule = new CoreModel.ProtectedAccessRule(new CoreModel.ProofAccessRuleNode(new CoreModel.RequireProofRule(new CoreModel.NonFungibleRequirement(roleAssignmentOwnerProofGlobalId))));
@@ -177,7 +142,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
                 new List<GatewayModel.RoleKey> { new("_self_", GatewayModel.ObjectModuleId.Main) }),
         };
 
-        var details = await IsAccount(decoded)
+        var details = decoded.IsPreAllocatedAccountAddress()
             ? new GatewayModel.StateEntityDetailsResponseComponentDetails(
                 packageAddress: networkConfiguration.WellKnownAddresses.AccountPackage,
                 blueprintName: "Account",
@@ -211,39 +176,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
         return (details, metadata);
     }
 
-    private DecodedRadixAddress DecodeAddress(EntityAddress address, bool strict)
-    {
-        var decodedAddress = RadixAddressCodec.Decode(address);
-
-        if (strict && decodedAddress.Data.Length != 30)
-        {
-            throw new ArgumentException("Expected address to be 30 bytes in length.", nameof(address));
-        }
-
-        return decodedAddress;
-    }
-
-    private async Task<bool> IsAccount(DecodedRadixAddress decoded)
-    {
-        return decoded.DiscriminatorByte == await _secp256k1PreAllocatedAccountDiscriminator.Task || decoded.DiscriminatorByte == await _ed25519PreAllocatedAccountDiscriminator.Task;
-    }
-
-    private async Task<bool> IsIdentity(DecodedRadixAddress decoded)
-    {
-        return decoded.DiscriminatorByte == await _secp256k1PreAllocatedIdentityDiscriminator.Task || decoded.DiscriminatorByte == await _ed25519PreAllocatedIdentityDiscriminator.Task;
-    }
-
-    private async Task<bool> IsSecp256k1(DecodedRadixAddress decoded)
-    {
-        return decoded.DiscriminatorByte == await _secp256k1PreAllocatedAccountDiscriminator.Task || decoded.DiscriminatorByte == await _secp256k1PreAllocatedIdentityDiscriminator.Task;
-    }
-
-    private async Task<bool> IsEd25519(DecodedRadixAddress decoded)
-    {
-        return decoded.DiscriminatorByte == await _ed25519PreAllocatedAccountDiscriminator.Task || decoded.DiscriminatorByte == await _ed25519PreAllocatedIdentityDiscriminator.Task;
-    }
-
-    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GenerateVirtualAccountRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
+    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GeneratePreAllocatedAccountRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
         return roleAssignmentsKeyProvider
             .MetadataModulesKeys
@@ -255,7 +188,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
             .ToList();
     }
 
-    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GenerateVirtualIdentityRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
+    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GeneratePreAllocatedIdentityRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
         return roleAssignmentsKeyProvider
             .AllNativeModulesKeys

@@ -74,30 +74,28 @@ internal static class ManifestAddressesExtractor
 {
     internal record PresentedProof(EntityAddress AccountAddress, EntityAddress ResourceAddress);
 
-    internal record AddressWithEntityType(ToolkitModel.EntityType EntityType, EntityAddress Address);
-
     internal record ManifestAddresses(
         List<EntityAddress> PackageAddresses,
         List<EntityAddress> ComponentAddresses,
         List<EntityAddress> ResourceAddresses,
-        List<AddressWithEntityType> AccountAddresses,
-        List<AddressWithEntityType> AccountsRequiringAuth,
-        List<AddressWithEntityType> AccountsWithdrawnFrom,
-        List<AddressWithEntityType> AccountsDepositedInto,
-        List<AddressWithEntityType> IdentityAddresses,
-        List<AddressWithEntityType> IdentitiesRequiringAuth,
+        List<EntityAddress> AccountAddresses,
+        List<EntityAddress> AccountsRequiringAuth,
+        List<EntityAddress> AccountsWithdrawnFrom,
+        List<EntityAddress> AccountsDepositedInto,
+        List<EntityAddress> IdentityAddresses,
+        List<EntityAddress> IdentitiesRequiringAuth,
         List<PresentedProof> PresentedProofs)
     {
         public List<EntityAddress> All() =>
             PackageAddresses
                 .Concat(ComponentAddresses)
                 .Concat(ResourceAddresses)
-                .Concat(AccountAddresses.Select(x => x.Address))
-                .Concat(AccountsRequiringAuth.Select(x => x.Address))
-                .Concat(AccountsWithdrawnFrom.Select(x => x.Address))
-                .Concat(AccountsDepositedInto.Select(x => x.Address))
-                .Concat(IdentityAddresses.Select(x => x.Address))
-                .Concat(IdentitiesRequiringAuth.Select(x => x.Address))
+                .Concat(AccountAddresses)
+                .Concat(AccountsRequiringAuth)
+                .Concat(AccountsWithdrawnFrom)
+                .Concat(AccountsDepositedInto)
+                .Concat(IdentityAddresses)
+                .Concat(IdentitiesRequiringAuth)
                 .Concat(PresentedProofs.Select(x => x.AccountAddress))
                 .Concat(PresentedProofs.Select(x => x.ResourceAddress))
                 .Distinct()
@@ -111,10 +109,10 @@ internal static class ManifestAddressesExtractor
         var manifestSummary = manifest.Summary(networkId);
 
         var presentedProofs = ExtractProofs(manifestSummary.presentedProofs);
-        var accountsRequiringAuth = manifestSummary.accountsRequiringAuth.Select(x => new AddressWithEntityType(x.EntityType(), (EntityAddress)x.AddressString())).ToList();
-        var accountsWithdrawnFrom = manifestSummary.accountsWithdrawnFrom.Select(x => new AddressWithEntityType(x.EntityType(), (EntityAddress)x.AddressString())).ToList();
-        var accountsDepositedInto = manifestSummary.accountsDepositedInto.Select(x => new AddressWithEntityType(x.EntityType(), (EntityAddress)x.AddressString())).ToList();
-        var identitiesRequiringAuth = manifestSummary.identitiesRequiringAuth.Select(x => new AddressWithEntityType(x.EntityType(), (EntityAddress)x.AddressString())).ToList();
+        var accountsRequiringAuth = manifestSummary.accountsRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsWithdrawnFrom = manifestSummary.accountsWithdrawnFrom.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsDepositedInto = manifestSummary.accountsDepositedInto.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var identitiesRequiringAuth = manifestSummary.identitiesRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
 
         var packageAddresses = allAddresses
             .Where(x => x.Key == ToolkitModel.EntityType.GlobalPackage)
@@ -137,7 +135,7 @@ internal static class ManifestAddressesExtractor
                     is ToolkitModel.EntityType.GlobalAccount
                     or ToolkitModel.EntityType.GlobalVirtualEd25519Account
                     or ToolkitModel.EntityType.GlobalVirtualSecp256k1Account)
-            .SelectMany(x => x.Value.Select(y => new AddressWithEntityType(y.EntityType(), (EntityAddress)y.AddressString())))
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();
 
         var identityAddresses = allAddresses
@@ -146,7 +144,7 @@ internal static class ManifestAddressesExtractor
                     is ToolkitModel.EntityType.GlobalIdentity
                     or ToolkitModel.EntityType.GlobalVirtualEd25519Identity
                     or ToolkitModel.EntityType.GlobalVirtualSecp256k1Identity)
-            .SelectMany(x => x.Value.Select(y => new AddressWithEntityType(y.EntityType(), (EntityAddress)y.AddressString())))
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();
 
         return new ManifestAddresses(

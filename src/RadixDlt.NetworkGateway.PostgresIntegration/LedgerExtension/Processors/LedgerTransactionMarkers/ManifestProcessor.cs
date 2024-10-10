@@ -213,9 +213,9 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
                     });
             }
 
-            foreach (var addressWithEntityType in extractedAddresses.AccountsRequiringAuth)
+            foreach (var entityAddress in extractedAddresses.AccountsRequiringAuth)
             {
-                if (_referencedEntities.TryGet(addressWithEntityType.Address, out var referencedEntity))
+                if (_referencedEntities.TryGet(entityAddress, out var referencedEntity))
                 {
                     ledgerTransactionMarkersToAdd.Add(
                         new ManifestAddressLedgerTransactionMarker
@@ -226,15 +226,15 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
                             EntityId = referencedEntity.DatabaseId,
                         });
                 }
-                else if (addressWithEntityType.EntityType is not (ToolkitModel.EntityType.GlobalVirtualEd25519Account or ToolkitModel.EntityType.GlobalVirtualSecp256k1Account))
+                else if (!entityAddress.Decode().IsPreAllocatedAccountAddress())
                 {
-                    throw new UnreachableException($"Entity: {addressWithEntityType.Address} was not present in referenced entities dictionary.");
+                    throw new UnreachableException($"Entity: {entityAddress} was not present in referenced entities dictionary.");
                 }
             }
 
-            foreach (var addressWithEntityType in extractedAddresses.AccountsDepositedInto)
+            foreach (var entityAddress in extractedAddresses.AccountsDepositedInto)
             {
-                if (_referencedEntities.TryGet(addressWithEntityType.Address, out var referencedEntity))
+                if (_referencedEntities.TryGet(entityAddress, out var referencedEntity))
                 {
                     ledgerTransactionMarkersToAdd.Add(
                         new ManifestAddressLedgerTransactionMarker
@@ -245,15 +245,15 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
                             EntityId = referencedEntity.DatabaseId,
                         });
                 }
-                else if (addressWithEntityType.EntityType is not (ToolkitModel.EntityType.GlobalVirtualEd25519Account or ToolkitModel.EntityType.GlobalVirtualSecp256k1Account))
+                else if (!entityAddress.Decode().IsPreAllocatedAccountAddress())
                 {
-                    throw new UnreachableException($"Entity: {addressWithEntityType.Address} was not present in referenced entities dictionary.");
+                    throw new UnreachableException($"Entity: {entityAddress} was not present in referenced entities dictionary.");
                 }
             }
 
-            foreach (var addressWithEntityType in extractedAddresses.AccountsWithdrawnFrom)
+            foreach (var entityAddress in extractedAddresses.AccountsWithdrawnFrom)
             {
-                if (_referencedEntities.TryGet(addressWithEntityType.Address, out var referencedEntity))
+                if (_referencedEntities.TryGet(entityAddress, out var referencedEntity))
                 {
                     ledgerTransactionMarkersToAdd.Add(
                         new ManifestAddressLedgerTransactionMarker
@@ -264,9 +264,9 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
                             EntityId = referencedEntity.DatabaseId,
                         });
                 }
-                else if (addressWithEntityType.EntityType is not (ToolkitModel.EntityType.GlobalVirtualEd25519Account or ToolkitModel.EntityType.GlobalVirtualSecp256k1Account))
+                else if (!entityAddress.Decode().IsPreAllocatedAccountAddress())
                 {
-                    throw new UnreachableException($"Entity: {addressWithEntityType.Address} was not present in referenced entities dictionary.");
+                    throw new UnreachableException($"Entity: {entityAddress} was not present in referenced entities dictionary.");
                 }
             }
         }

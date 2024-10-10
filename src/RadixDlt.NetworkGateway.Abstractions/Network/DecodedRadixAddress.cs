@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,38 +62,31 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using System;
+namespace RadixDlt.NetworkGateway.Abstractions.Network;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
-
-public sealed class RadixAddressValidator : AbstractValidator<string>
+public sealed record DecodedRadixAddress(string Hrp, byte[] Data, Bech32Codec.Variant Variant)
 {
-    public RadixAddressValidator(INetworkConfigurationProvider networkConfigurationProvider)
+    private const byte Secp256kPreAllocatedAccountPrefix = 209;
+    private const byte Secp256kPreAllocatedIdentityPrefix = 210;
+    private const byte Ed25519PreAllocatedAccountPrefix = 81;
+    private const byte Ed25519PreAllocatedIdentityPrefix = 82;
+
+    public bool IsPreAllocated() => IsPreAllocatedAccountAddress() || IsPreAllocatedIdentityAddress();
+
+    public bool IsSecp256k() => DiscriminatorByte is Secp256kPreAllocatedAccountPrefix or Secp256kPreAllocatedIdentityPrefix;
+
+    public bool IsEd25519() => DiscriminatorByte is Ed25519PreAllocatedAccountPrefix or Ed25519PreAllocatedIdentityPrefix;
+
+    public bool IsPreAllocatedAccountAddress() => DiscriminatorByte is Secp256kPreAllocatedAccountPrefix or Ed25519PreAllocatedAccountPrefix;
+
+    public bool IsPreAllocatedIdentityAddress() => DiscriminatorByte is Secp256kPreAllocatedIdentityPrefix or Ed25519PreAllocatedIdentityPrefix;
+
+    public byte DiscriminatorByte => Data[0];
+
+    public byte[] AddressBytes => Data[1..];
+
+    public override string ToString()
     {
-        // Cannot use .CustomAsync() as ASP.NET's validation pipeline is not asynchronous, see: https://docs.fluentvalidation.net/en/latest/async.html
-        RuleFor(x => x)
-            .Custom((address, context) =>
-            {
-                context.MessageFormatter.AppendArgument("PropertyName", context.PropertyPath);
-
-                try
-                {
-                    var networkHrpSuffix = networkConfigurationProvider.GetNetworkConfiguration().GetAwaiter().GetResult().HrpSuffix;
-                    var decodedAddress = RadixAddressCodec.Decode(address);
-
-                    if (!decodedAddress.Hrp.EndsWith(networkHrpSuffix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        context.MessageFormatter.AppendArgument("networkHrpSuffix", networkHrpSuffix);
-                        context.AddFailure("'{PropertyName}' doesn't belong to this network. Expected network Hrp suffix: {networkHrpSuffix}");
-                    }
-                }
-                catch (AddressException)
-                {
-                    context.AddFailure("'{PropertyName}' must be a valid Bech32M-encoded RadixAddress.");
-                }
-            });
+        return RadixAddressCodec.Encode(Hrp, Data);
     }
 }

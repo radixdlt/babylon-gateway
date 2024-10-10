@@ -113,7 +113,7 @@ internal class EntityQuerier : IEntityQuerier
 
         if (entity == null)
         {
-            entity = await TryResolveAsPreAllocatedEntity(address);
+            entity = TryResolveAsPreAllocatedEntity(address);
 
             if (entity == null)
             {
@@ -188,7 +188,7 @@ internal class EntityQuerier : IEntityQuerier
 
         foreach (var address in addresses.Except(entities.Keys))
         {
-            var preAllocatedEntity = await TryResolveAsPreAllocatedEntity(address);
+            var preAllocatedEntity = TryResolveAsPreAllocatedEntity(address);
 
             if (preAllocatedEntity != null)
             {
@@ -199,14 +199,14 @@ internal class EntityQuerier : IEntityQuerier
         return entities.Values;
     }
 
-    private async Task<Entity?> TryResolveAsPreAllocatedEntity(EntityAddress address)
+    private static Entity? TryResolveAsPreAllocatedEntity(EntityAddress address)
     {
-        if (await _preAllocatedEntityDataProvider.IsPreAllocatedAccountAddress(address))
+        if (address.IsAccount && address.Decode().IsPreAllocatedAccountAddress())
         {
             return new PreAllocatedAccountComponentEntity(address);
         }
 
-        if (await _preAllocatedEntityDataProvider.IsPreAllocatedIdentityAddress(address))
+        if (address.IsIdentity && address.Decode().IsPreAllocatedIdentityAddress())
         {
             return new PreAllocatedIdentityEntity(address);
         }
