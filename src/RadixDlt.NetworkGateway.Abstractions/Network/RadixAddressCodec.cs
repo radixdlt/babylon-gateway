@@ -73,6 +73,21 @@ namespace RadixDlt.NetworkGateway.Abstractions.Network;
 
 public sealed record DecodedRadixAddress(string Hrp, byte[] Data, Bech32Codec.Variant Variant)
 {
+    private const byte Secp256kPreAllocatedAccountPrefix = 209;
+    private const byte Secp256kPreAllocatedIdentityPrefix = 210;
+    private const byte Ed25519PreAllocatedAccountPrefix = 81;
+    private const byte Ed25519PreAllocatedIdentityPrefix = 82;
+
+    public bool IsPreAllocated() => IsPreAllocatedAccountAddress() || IsPreAllocatedIdentityAddress();
+
+    public bool IsSecp256k() => DiscriminatorByte is Secp256kPreAllocatedAccountPrefix or Secp256kPreAllocatedIdentityPrefix;
+
+    public bool IsEd25519() => DiscriminatorByte is Ed25519PreAllocatedAccountPrefix or Ed25519PreAllocatedIdentityPrefix;
+
+    public bool IsPreAllocatedAccountAddress() => DiscriminatorByte is Secp256kPreAllocatedAccountPrefix or Ed25519PreAllocatedAccountPrefix;
+
+    public bool IsPreAllocatedIdentityAddress() => DiscriminatorByte is Secp256kPreAllocatedIdentityPrefix or Ed25519PreAllocatedIdentityPrefix;
+
     public byte DiscriminatorByte => Data[0];
 
     public byte[] AddressBytes => Data[1..];
@@ -90,7 +105,7 @@ public static class RadixAddressCodec
         return Bech32Codec.Encode(hrp, EncodeAddressDataInBase32(addressData), Bech32Codec.Variant.Bech32M);
     }
 
-    public static DecodedRadixAddress Decode(string encoded)
+    public static DecodedRadixAddress Decode(string encoded, bool strict = false)
     {
         var (hrp, rawBase32Data, variant) = Bech32Codec.Decode(encoded);
         var addressData = DecodeBase32IntoAddressData(rawBase32Data);
@@ -102,7 +117,12 @@ public static class RadixAddressCodec
 
         if (variant != Bech32Codec.Variant.Bech32M)
         {
-            throw new AddressException("Only Bech32M addresses are supported");
+            throw new AddressException($"Only Bech32M addresses are supported, decoded variant: {variant}");
+        }
+
+        if (strict && addressData.Length != 30)
+        {
+            throw new AddressException($"Expected address to be 30 bytes in length. But was {addressData.Length}");
         }
 
         return new DecodedRadixAddress(hrp, addressData, variant);
