@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -283,7 +282,23 @@ internal static class EntityNonFungibleResourcesAndVaultsPagedQuery
             throw new InvalidOperationException("Neither resource filter nor cursors can be used if executing against multiple entities.");
         }
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            entityIds = entityIds.ToList(),
+            resourceEntityId = resourceEntityId,
+            nonFungibleResourcesPerEntity = configuration.NonFungibleResourcesPerEntity == 0 ? 0 : configuration.NonFungibleResourcesPerEntity + 1,
+            vaultsPerResource = configuration.VaultsPerResource == 0 ? 0 : configuration.VaultsPerResource + 1,
+            useVaultAggregation = configuration.VaultsPerResource > 0,
+            useResourceCursor = configuration.ResourceCursor is not null,
+            resourceCursorStateVersion = configuration.ResourceCursor?.StateVersion,
+            resourceCursorId = configuration.ResourceCursor?.Id,
+            useVaultCursor = configuration.VaultCursor is not null,
+            vaultCursorStateVersion = configuration.VaultCursor?.StateVersion,
+            vaultCursorId = configuration.VaultCursor?.Id,
+            atLedgerState = configuration.AtLedgerState,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             @"
 WITH variables AS (
     SELECT
@@ -409,21 +424,7 @@ LEFT JOIN LATERAL (
     LIMIT 1
 ) vault_balance_history ON var.use_vault_aggregation
 ORDER BY definitions.cursor DESC, vault_entry_definition.cursor DESC",
-            new
-            {
-                entityIds = entityIds.ToList(),
-                resourceEntityId = resourceEntityId,
-                nonFungibleResourcesPerEntity = configuration.NonFungibleResourcesPerEntity == 0 ? 0 : configuration.NonFungibleResourcesPerEntity + 1,
-                vaultsPerResource = configuration.VaultsPerResource == 0 ? 0 : configuration.VaultsPerResource + 1,
-                useVaultAggregation = configuration.VaultsPerResource > 0,
-                useResourceCursor = configuration.ResourceCursor is not null,
-                resourceCursorStateVersion = configuration.ResourceCursor?.StateVersion,
-                resourceCursorId = configuration.ResourceCursor?.Id,
-                useVaultCursor = configuration.VaultCursor is not null,
-                vaultCursorStateVersion = configuration.VaultCursor?.StateVersion,
-                vaultCursorId = configuration.VaultCursor?.Id,
-                atLedgerState = configuration.AtLedgerState,
-            },
+            parameters,
             cancellationToken: token);
 
         var result = new Dictionary<long, PerEntityQueryResultRow>();

@@ -111,6 +111,22 @@ internal static class Extensions
         return value;
     }
 
+    public static TVal Update<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Action<TVal> updateFactory)
+        where TKey : notnull
+    {
+        ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
+        ArgumentNullException.ThrowIfNull(key, nameof(key));
+        ArgumentNullException.ThrowIfNull(updateFactory, nameof(updateFactory));
+
+        if (!dictionary.TryGetValue(key, out var existingValue))
+        {
+            throw new ArgumentException($"Key with index: {key} not found in dictionary.");
+        }
+
+        updateFactory(existingValue);
+        return existingValue;
+    }
+
     public static void AddRange<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, IDictionary<TKey, TVal> other)
     {
         ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));

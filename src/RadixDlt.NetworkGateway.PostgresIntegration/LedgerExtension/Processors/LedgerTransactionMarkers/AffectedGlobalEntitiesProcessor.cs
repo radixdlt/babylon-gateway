@@ -62,99 +62,67 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
+internal class AffectedGlobalEntitiesProcessor : ITransactionMarkerProcessor, ISubstateUpsertProcessor, ISubstateDeleteProcessor
 {
-    private readonly IDapperWrapper _dapperWrapper;
-    private readonly ReadOnlyDbContext _dbContext;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IEntityQuerier _entityQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
+    private readonly ProcessorContext _context;
+    private readonly ReferencedEntityDictionary _referencedEntities;
+    private readonly NetworkConfiguration _networkConfiguration;
+    private readonly Dictionary<long, HashSet<long>> _affectedGlobalEntities = new();
 
-    public KeyValueStoreQuerier(
-        IDapperWrapper dapperWrapper,
-        ReadOnlyDbContext dbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IEntityQuerier entityQuerier,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    public AffectedGlobalEntitiesProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
     {
-        _dapperWrapper = dapperWrapper;
-        _dbContext = dbContext;
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _entityQuerier = entityQuerier;
-        _endpointConfiguration = endpointConfiguration;
+        _context = context;
+        _referencedEntities = referencedEntities;
+        _networkConfiguration = networkConfiguration;
     }
 
-    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
-        EntityAddress keyValueStoreAddress,
-        GatewayModel.LedgerState ledgerState,
-        GatewayModel.IdBoundaryCoursor? cursor,
-        int pageSize,
-        CancellationToken token = default)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
+    }
 
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
+    public void VisitDelete(CoreApiSdk.Model.SubstateId substateId, ReferencedEntity referencedEntity, long stateVersion)
+    {
+        _affectedGlobalEntities
+            .GetOrAdd(stateVersion, _ => new HashSet<long>())
+            .Add(referencedEntity.AffectedGlobalEntityId);
+    }
 
-        return await KeyValueStoreQueries.KeyValueStoreKeys(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            ledgerState,
-            networkId,
-            new KeyValueStoreQueries.KeyValueStoreKeysQueryConfiguration
+    public HashSet<long> GetAllAffectedGlobalEntities(long stateVersion)
+    {
+        return _affectedGlobalEntities.TryGetValue(stateVersion, out var hashSet) ? hashSet : new HashSet<long>();
+    }
+
+    public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
+    {
+        var excludedEntityIds = new[]
+        {
+            _referencedEntities.Get((EntityAddress)_networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
+            _referencedEntities.Get((EntityAddress)_networkConfiguration.WellKnownAddresses.TransactionTracker).DatabaseId,
+        };
+
+        foreach (var stateVersionAffectedEntities in _affectedGlobalEntities)
+        {
+            foreach (var entityId in stateVersionAffectedEntities.Value.Where(entityId => !excludedEntityIds.Contains(entityId)))
             {
-                Cursor = cursor,
-                MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
-                PageSize = pageSize,
-            },
-            token);
-    }
-
-    public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
-        EntityAddress keyValueStoreAddress,
-        IList<ValueBytes> keys,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreDataMultiLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            keys,
-            networkId,
-            ledgerState,
-            token);
+                yield return new AffectedGlobalEntityTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    EntityId = entityId,
+                    StateVersion = stateVersionAffectedEntities.Key,
+                };
+            }
+        }
     }
 }

@@ -62,81 +62,59 @@
  * permissions under this License.
  */
 
-using NpgsqlTypes;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct AccountDefaultDepositRuleChangePointerLookup(long AccountEntityId, long StateVersion);
-
-internal record AccountDefaultDepositRuleChangePointer
+internal interface IProcessorBase
 {
-    public List<CoreModel.AccountFieldStateSubstate> AccountFieldStateEntries { get; } = new();
+    Task LoadDependenciesAsync();
+
+    void ProcessChanges();
+
+    Task<int> SaveEntitiesAsync();
 }
 
-internal class AccountDefaultDepositRuleProcessor
+internal interface IDecodedEventProcessor
 {
-    private readonly ProcessorContext _context;
-    private readonly ChangeTracker<AccountDefaultDepositRuleChangePointerLookup, AccountDefaultDepositRuleChangePointer> _changeTracker = new();
-    private readonly List<AccountDefaultDepositRuleHistory> _rulesToAdd = new();
+    void VisitDecodedEvent(ToolkitModel.TypedNativeEvent decodedEvent, ReferencedEntity eventEmitterEntity, long stateVersion);
+}
 
-    public AccountDefaultDepositRuleProcessor(ProcessorContext context)
-    {
-        _context = context;
-    }
+internal interface ITransactionProcessor
+{
+    void VisitTransaction(CoreModel.CommittedTransaction transaction, long stateVersion);
+}
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
-    {
-        if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
-        {
-            _changeTracker
-                .GetOrAdd(
-                    new AccountDefaultDepositRuleChangePointerLookup(referencedEntity.DatabaseId, stateVersion),
-                    _ => new AccountDefaultDepositRuleChangePointer())
-                .AccountFieldStateEntries
-                .Add(accountFieldState);
-        }
-    }
+internal interface IEventProcessor
+{
+    void VisitEvent(CoreModel.Event @event, long stateVersion);
+}
 
-    public void ProcessChanges()
-    {
-        foreach (var (lookup, change) in _changeTracker.AsEnumerable())
-        {
-            foreach (var accountFieldStateChange in change.AccountFieldStateEntries)
-            {
-                _rulesToAdd.Add(
-                    new AccountDefaultDepositRuleHistory
-                    {
-                        Id = _context.Sequences.AccountDefaultDepositRuleHistorySequence++,
-                        FromStateVersion = lookup.StateVersion,
-                        AccountEntityId = lookup.AccountEntityId,
-                        DefaultDepositRule = accountFieldStateChange.Value.DefaultDepositRule.ToModel(),
-                    });
-            }
-        }
-    }
+internal interface ISubstateUpsertProcessor
+{
+    void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion);
+}
 
-    public async Task<int> SaveEntities()
-    {
-        var rowsInserted = 0;
+internal interface ISubstateScanUpsertProcessor
+{
+    void OnUpsertScan(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion);
+}
 
-        rowsInserted += await CopyAccountDefaultDepositRuleHistory();
+internal interface ITransactionScanProcessor
+{
+    void OnTransactionScan(CoreModel.CommittedTransaction transaction, long stateVersion);
+}
 
-        return rowsInserted;
-    }
+internal interface ISubstateDeleteProcessor
+{
+    void VisitDelete(CoreModel.SubstateId substateId, ReferencedEntity referencedEntity, long stateVersion);
+}
 
-    private Task<int> CopyAccountDefaultDepositRuleHistory() => _context.WriteHelper.Copy(
-        _rulesToAdd,
-        "COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)",
-        async (writer, e, token) =>
-        {
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.DefaultDepositRule, "account_default_deposit_rule", token);
-        });
+internal interface ITransactionMarkerProcessor
+{
+    IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers();
 }

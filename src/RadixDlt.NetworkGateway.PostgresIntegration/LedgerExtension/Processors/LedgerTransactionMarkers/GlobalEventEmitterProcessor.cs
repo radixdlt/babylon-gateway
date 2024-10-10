@@ -62,99 +62,74 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
+using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
+internal class GlobalEventEmitterProcessor : ITransactionMarkerProcessor, IEventProcessor
 {
-    private readonly IDapperWrapper _dapperWrapper;
-    private readonly ReadOnlyDbContext _dbContext;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IEntityQuerier _entityQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
+    private readonly ProcessorContext _context;
+    private readonly ReferencedEntityDictionary _referencedEntities;
+    private readonly NetworkConfiguration _networkConfiguration;
+    private readonly Dictionary<long, HashSet<long>> _globalEventEmitters = new();
 
-    public KeyValueStoreQuerier(
-        IDapperWrapper dapperWrapper,
-        ReadOnlyDbContext dbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IEntityQuerier entityQuerier,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    public GlobalEventEmitterProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
     {
-        _dapperWrapper = dapperWrapper;
-        _dbContext = dbContext;
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _entityQuerier = entityQuerier;
-        _endpointConfiguration = endpointConfiguration;
+        _context = context;
+        _referencedEntities = referencedEntities;
+        _networkConfiguration = networkConfiguration;
     }
 
-    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
-        EntityAddress keyValueStoreAddress,
-        GatewayModel.LedgerState ledgerState,
-        GatewayModel.IdBoundaryCoursor? cursor,
-        int pageSize,
-        CancellationToken token = default)
+    public void VisitEvent(CoreModel.Event @event, long stateVersion)
     {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        switch (@event.Type.Emitter)
+        {
+            case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
+                var methodEventEmitterEntity = _referencedEntities.Get((EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress);
+                var globalEventEmitterEntityId = methodEventEmitterEntity.GlobalEventEmitterEntityId;
 
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
+                _globalEventEmitters
+                    .GetOrAdd(stateVersion, _ => new HashSet<long>())
+                    .Add(globalEventEmitterEntityId);
 
-        return await KeyValueStoreQueries.KeyValueStoreKeys(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            ledgerState,
-            networkId,
-            new KeyValueStoreQueries.KeyValueStoreKeysQueryConfiguration
+                break;
+            case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
+                var functionEventEmitterEntity = _referencedEntities.Get((EntityAddress)functionEventEmitterIdentifier.PackageAddress);
+
+                _globalEventEmitters
+                    .GetOrAdd(stateVersion, _ => new HashSet<long>())
+                    .Add(functionEventEmitterEntity.GlobalEventEmitterEntityId);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException($"Unexpected event emitter type {@event.Type.Emitter.GetType()}");
+        }
+    }
+
+    public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
+    {
+        var excludedEntityIds = new[]
+        {
+            _referencedEntities.Get((EntityAddress)_networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
+            _referencedEntities.Get((EntityAddress)_networkConfiguration.WellKnownAddresses.Xrd).DatabaseId,
+        };
+
+        foreach (var stateVersionAffectedEntities in _globalEventEmitters)
+        {
+            foreach (var entityId in stateVersionAffectedEntities.Value.Where(x => !excludedEntityIds.Contains(x)))
             {
-                Cursor = cursor,
-                MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
-                PageSize = pageSize,
-            },
-            token);
-    }
-
-    public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
-        EntityAddress keyValueStoreAddress,
-        IList<ValueBytes> keys,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreDataMultiLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            keys,
-            networkId,
-            ledgerState,
-            token);
+                yield return new EventGlobalEmitterTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    EntityId = entityId,
+                    StateVersion = stateVersionAffectedEntities.Key,
+                };
+            }
+        }
     }
 }

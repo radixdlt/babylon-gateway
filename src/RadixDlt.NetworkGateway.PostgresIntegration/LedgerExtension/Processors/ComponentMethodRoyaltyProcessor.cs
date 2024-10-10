@@ -63,89 +63,71 @@
  */
 
 using NpgsqlTypes;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct SchemaDefinitionEntryDbLookup(long EntityId, ValueBytes SchemaHash);
-
-internal record struct SchemaChangePointerLookup(long EntityId, long StateVersion);
-
-internal record SchemaChangePointer
+internal class ComponentMethodRoyaltyProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
-    public List<CoreModel.SchemaEntrySubstate> Entries { get; } = new();
+    private record struct ComponentMethodRoyaltyEntryDbLookup(long EntityId, string MethodName);
 
-    public List<string> DeletedSchemaHashes { get; } = new();
-}
+    private record struct ComponentMethodRoyaltyChangePointerLookup(long EntityId, long StateVersion);
 
-internal class EntitySchemaProcessor
-{
+    private record ComponentMethodRoyaltyChangePointer(ReferencedEntity ReferencedEntity)
+    {
+        public List<CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate> Entries { get; } = new();
+    }
+
     private readonly ProcessorContext _context;
 
-    private readonly ChangeTracker<SchemaChangePointerLookup, SchemaChangePointer> _changes = new();
+    private ChangeTracker<ComponentMethodRoyaltyChangePointerLookup, ComponentMethodRoyaltyChangePointer> _changes = new();
 
-    private readonly Dictionary<long, SchemaEntryAggregateHistory> _mostRecentAggregates = new();
-    private readonly Dictionary<SchemaDefinitionEntryDbLookup, SchemaEntryDefinition> _existingSchemas = new();
+    private Dictionary<long, ComponentMethodRoyaltyAggregateHistory> _mostRecentAggregates = new();
+    private Dictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory> _mostRecentEntries = new();
 
-    private readonly List<SchemaEntryAggregateHistory> _aggregatesToAdd = new();
-    private readonly List<SchemaEntryDefinition> _definitionsToAdd = new();
+    private List<ComponentMethodRoyaltyAggregateHistory> _aggregatesToAdd = new();
+    private List<ComponentMethodRoyaltyEntryHistory> _entriesToAdd = new();
 
-    public EntitySchemaProcessor(ProcessorContext context)
+    public ComponentMethodRoyaltyProcessor(ProcessorContext context)
     {
         _context = context;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
-        if (substateData is CoreModel.SchemaEntrySubstate schemaEntry)
+        var substateData = substate.Value.SubstateData;
+
+        if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
         {
             _changes
-                .GetOrAdd(new SchemaChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new SchemaChangePointer())
+                .GetOrAdd(new ComponentMethodRoyaltyChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new ComponentMethodRoyaltyChangePointer(referencedEntity))
                 .Entries
-                .Add(schemaEntry);
+                .Add(methodRoyaltyEntry);
         }
     }
 
-    public void VisitDelete(CoreModel.SubstateId substateId, ReferencedEntity referencedEntity, long stateVersion)
+    public async Task LoadDependenciesAsync()
     {
-        if (substateId.SubstateType == CoreModel.SubstateType.SchemaEntry)
-        {
-            var keyHex = ((CoreModel.MapSubstateKey)substateId.SubstateKey).KeyHex;
-            var schemaHash = ScryptoSborUtils.DataToProgrammaticScryptoSborValueBytes(keyHex.ConvertFromHex(), _context.NetworkConfiguration.Id);
-
-            _changes
-                .GetOrAdd(new SchemaChangePointerLookup(referencedEntity.DatabaseId, stateVersion), _ => new SchemaChangePointer())
-                .DeletedSchemaHashes
-                .Add(schemaHash.Hex);
-        }
-    }
-
-    public async Task LoadDependencies()
-    {
-        _mostRecentAggregates.AddRange(await MostRecentSchemaEntryAggregateHistory());
-        _existingSchemas.AddRange(await LoadExistingSchemas());
+        _mostRecentEntries.AddRange(await MostRecentComponentMethodRoyaltyEntryHistory());
+        _mostRecentAggregates.AddRange(await MostRecentComponentMethodRoyaltyAggregateHistory());
     }
 
     public void ProcessChanges()
     {
         foreach (var (lookup, change) in _changes.AsEnumerable())
         {
-            SchemaEntryAggregateHistory aggregate;
+            ComponentMethodRoyaltyAggregateHistory aggregate;
 
             if (!_mostRecentAggregates.TryGetValue(lookup.EntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
             {
-                aggregate = new SchemaEntryAggregateHistory
+                aggregate = new ComponentMethodRoyaltyAggregateHistory
                 {
-                    Id = _context.Sequences.SchemaEntryAggregateHistorySequence++,
+                    Id = _context.Sequences.ComponentMethodRoyaltyAggregateHistorySequence++,
                     FromStateVersion = lookup.StateVersion,
                     EntityId = lookup.EntityId,
                     EntryIds = new List<long>(),
@@ -166,25 +148,20 @@ internal class EntitySchemaProcessor
 
             foreach (var entry in change.Entries)
             {
-                var entryDefinition = new SchemaEntryDefinition
+                var entryLookup = new ComponentMethodRoyaltyEntryDbLookup(lookup.EntityId, entry.Key.MethodName);
+                var entryHistory = new ComponentMethodRoyaltyEntryHistory
                 {
-                    Id = _context.Sequences.SchemaEntryDefinitionSequence++,
+                    Id = _context.Sequences.ComponentMethodRoyaltyEntryHistorySequence++,
                     FromStateVersion = lookup.StateVersion,
                     EntityId = lookup.EntityId,
-                    SchemaHash = entry.Key.SchemaHash.ConvertFromHex(),
-                    Schema = entry.Value.Schema.SborData.Hex.ConvertFromHex(),
+                    MethodName = entry.Key.MethodName,
+                    RoyaltyAmount = entry.Value?.RoyaltyAmount?.ToJson(),
+                    IsLocked = entry.IsLocked,
                 };
 
-                _definitionsToAdd.Add(entryDefinition);
+                _entriesToAdd.Add(entryHistory);
 
-                aggregate.EntryIds.Insert(0, entryDefinition.Id);
-            }
-
-            foreach (var deletedSchemaHash in change.DeletedSchemaHashes)
-            {
-                var entryLookup = new SchemaDefinitionEntryDbLookup(lookup.EntityId, deletedSchemaHash.ConvertFromHex());
-
-                if (_existingSchemas.TryGetValue(entryLookup, out var previousEntry))
+                if (_mostRecentEntries.TryGetValue(entryLookup, out var previousEntry))
                 {
                     var currentPosition = aggregate.EntryIds.IndexOf(previousEntry.Id);
 
@@ -192,95 +169,104 @@ internal class EntitySchemaProcessor
                     {
                         aggregate.EntryIds.RemoveAt(currentPosition);
                     }
-                    else
-                    {
-                        throw new UnreachableException($"Unexpected situation where SchemaEntryDefinition with EntityId:{entryLookup.EntityId}, SchemaHash:{deletedSchemaHash} got deleted but wasn't found in aggregate table.");
-                    }
                 }
-                else
+
+                if (entry.Value != null)
                 {
-                    throw new UnreachableException($"Unexpected situation where SchemaEntryDefinition with EntityId:{entryLookup.EntityId}, SchemaHash:{deletedSchemaHash} got deleted but wasn't found in gateway database.");
+                    aggregate.EntryIds.Insert(0, entryHistory.Id);
                 }
+
+                _mostRecentEntries[entryLookup] = entryHistory;
             }
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 
-        rowsInserted += await CopySchemaEntryDefinitions();
-        rowsInserted += await CopySchemaEntryAggregateHistory();
+        rowsInserted += await CopyComponentMethodRoyaltyEntryHistory();
+        rowsInserted += await CopyComponentMethodRoyaltyAggregateHistory();
 
         return rowsInserted;
     }
 
-    private async Task<IDictionary<long, SchemaEntryAggregateHistory>> MostRecentSchemaEntryAggregateHistory()
+    private async Task<IDictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>> MostRecentComponentMethodRoyaltyEntryHistory()
+    {
+        var lookupSet = new HashSet<ComponentMethodRoyaltyEntryDbLookup>();
+
+        foreach (var (_, change) in _changes.AsEnumerable())
+        {
+            foreach (var entry in change.Entries)
+            {
+                lookupSet.Add(new ComponentMethodRoyaltyEntryDbLookup(change.ReferencedEntity.DatabaseId, entry.Key.MethodName));
+            }
+        }
+
+        if (!lookupSet.Unzip(x => x.EntityId, x => x.MethodName, out var entityIds, out var methodNames))
+        {
+            return ImmutableDictionary<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>.Empty;
+        }
+
+        return await _context.ReadHelper.LoadDependencies<ComponentMethodRoyaltyEntryDbLookup, ComponentMethodRoyaltyEntryHistory>(
+            @$"
+WITH variables (entity_id, method_name) AS (
+    SELECT UNNEST({entityIds}), UNNEST({methodNames})
+)
+SELECT cmreh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM component_method_royalty_entry_history
+    WHERE entity_id = variables.entity_id AND method_name = variables.method_name
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) cmreh ON true;",
+            e => new ComponentMethodRoyaltyEntryDbLookup(e.EntityId, e.MethodName));
+    }
+
+    private async Task<IDictionary<long, ComponentMethodRoyaltyAggregateHistory>> MostRecentComponentMethodRoyaltyAggregateHistory()
     {
         var entityIds = _changes.Keys.Select(x => x.EntityId).ToHashSet().ToList();
 
         if (!entityIds.Any())
         {
-            return ImmutableDictionary<long, SchemaEntryAggregateHistory>.Empty;
+            return ImmutableDictionary<long, ComponentMethodRoyaltyAggregateHistory>.Empty;
         }
 
-        return await _context.ReadHelper.LoadDependencies<long, SchemaEntryAggregateHistory>(
-            @$"
+        return await _context.ReadHelper.LoadDependencies<long, ComponentMethodRoyaltyAggregateHistory>(
+            $@"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
 )
-SELECT seah.*
+SELECT cmrah.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM schema_entry_aggregate_history
+    FROM component_method_royalty_aggregate_history
     WHERE entity_id = variables.entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
-) seah ON true;",
+) cmrah ON true;",
             e => e.EntityId);
     }
 
-    private async Task<IDictionary<SchemaDefinitionEntryDbLookup, SchemaEntryDefinition>> LoadExistingSchemas()
-    {
-        var lookupSet = new HashSet<SchemaDefinitionEntryDbLookup>();
-
-        foreach (var (lookup, change) in _changes.AsEnumerable())
-        {
-            foreach (var deletedSchemaHash in change.DeletedSchemaHashes)
-            {
-                lookupSet.Add(new SchemaDefinitionEntryDbLookup(lookup.EntityId, deletedSchemaHash.ConvertFromHex()));
-            }
-        }
-
-        if (!lookupSet.Unzip(x => x.EntityId, x => (byte[])x.SchemaHash, out var entityIds, out var schemaHashes))
-        {
-            return ImmutableDictionary<SchemaDefinitionEntryDbLookup, SchemaEntryDefinition>.Empty;
-        }
-
-        return await _context.ReadHelper.LoadDependencies<SchemaDefinitionEntryDbLookup, SchemaEntryDefinition>(
-            @$"
-SELECT *
-FROM schema_entry_definition
-WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHashes}));",
-            e => new SchemaDefinitionEntryDbLookup(e.EntityId, e.SchemaHash));
-    }
-
-    private Task<int> CopySchemaEntryDefinitions() => _context.WriteHelper.Copy(
-        _definitionsToAdd,
-        "COPY schema_entry_definition (id, from_state_version, entity_id, schema_hash, schema) FROM STDIN (FORMAT BINARY)",
+    private Task<int> CopyComponentMethodRoyaltyEntryHistory() => _context.WriteHelper.Copy(
+        _entriesToAdd,
+        "COPY component_method_royalty_entry_history (id, from_state_version, entity_id, method_name, royalty_amount, is_locked) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.MethodName, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.RoyaltyAmount, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         });
 
-    private Task<int> CopySchemaEntryAggregateHistory() => _context.WriteHelper.Copy(
+    private Task<int> CopyComponentMethodRoyaltyAggregateHistory() => _context.WriteHelper.Copy(
         _aggregatesToAdd,
-        "COPY schema_entry_aggregate_history (id, from_state_version, entity_id, entry_ids) FROM STDIN (FORMAT BINARY)",
+        "COPY component_method_royalty_aggregate_history (id, from_state_version, entity_id, entry_ids) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);

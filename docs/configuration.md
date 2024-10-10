@@ -73,6 +73,20 @@ The Network Gateway services can be configured in line with the [configuration i
 - `DataAggregator__Network__MaxAllowedStateVersionLagToBeConsideredSynced` (type: `int`, default value: `100`) - maximum allowed state version lag for CoreAPI node to be considered synced.
 - `DataAggregator__Network__IgnoreNonSyncedNodes` (type: `bool`, default value: `true`) - controls if nodes with a different status than healthy and synced should be used by the Data Aggregator.
 
+#### Storage
+- `DataAggregator__Storage__StoreTransactionReceiptEvents` (type: `enum`, default value: `StoreForAllTransactions`) - controls if data aggregator should store transaction receipt events in database.
+  - Possible values:
+     - `StoreForAllTransactions` (default) - will store data for all transactions.
+     - `StoryOnlyForUserTransactionsAndEpochChanges` - will store data for user transactions and transactions that resulted in epoch change.
+     - `StoreOnlyForUserTransactions` - will store data only for user transactions.
+     - `DoNotStore` - will not store any data.
+- `DataAggregator__Storage__StoreReceiptStateUpdates` (type: `enum`, default value: `StoreForAllTransactions`) - controls if data aggregator should store transaction receipt state updates in database.
+  - Possible values:
+      - `StoreForAllTransactions` (default) - will store data for all transactions.
+      - `StoryOnlyForUserTransactionsAndEpochChanges` - will store data for user transactions and transactions that resulted in epoch change.
+      - `StoreOnlyForUserTransactions` - will store data only for user transactions.
+      - `DoNotStore` - will not store any data.
+
 #### Monitoring
 `DataAggregator__Monitoring__StartupGracePeriodSeconds` (type: `int`, default value: `10`) - duration (seconds) of start-up grace period for Data Aggregator.
 `DataAggregator__Monitoring__UnhealthyCommitmentGapSeconds` (type: `int`, default value: `20`) - time window since the last committed transaction (seconds) in which Data Aggregator is considered healthy if does not commit new transactions.

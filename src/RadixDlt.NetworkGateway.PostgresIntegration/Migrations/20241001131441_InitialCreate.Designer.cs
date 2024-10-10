@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20241001130214_InitialCreate")]
+    [Migration("20241001131441_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1076,41 +1076,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("receipt_error_message");
 
-                    b.Property<string[]>("ReceiptEventEmitters")
-                        .IsRequired()
-                        .HasColumnType("jsonb[]")
-                        .HasColumnName("receipt_event_emitters");
-
-                    b.Property<string[]>("ReceiptEventNames")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("receipt_event_names");
-
-                    b.Property<SborTypeKind[]>("ReceiptEventSborTypeKinds")
-                        .IsRequired()
-                        .HasColumnType("sbor_type_kind[]")
-                        .HasColumnName("receipt_event_sbor_type_kinds");
-
-                    b.Property<byte[][]>("ReceiptEventSbors")
-                        .IsRequired()
-                        .HasColumnType("bytea[]")
-                        .HasColumnName("receipt_event_sbors");
-
-                    b.Property<long[]>("ReceiptEventSchemaEntityIds")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("receipt_event_schema_entity_ids");
-
-                    b.Property<byte[][]>("ReceiptEventSchemaHashes")
-                        .IsRequired()
-                        .HasColumnType("bytea[]")
-                        .HasColumnName("receipt_event_schema_hashes");
-
-                    b.Property<long[]>("ReceiptEventTypeIndexes")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("receipt_event_type_indexes");
-
                     b.Property<string>("ReceiptFeeDestination")
                         .HasColumnType("jsonb")
                         .HasColumnName("receipt_fee_destination");
@@ -1133,7 +1098,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("receipt_output");
 
                     b.Property<string>("ReceiptStateUpdates")
-                        .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("receipt_state_updates");
 
@@ -1185,6 +1149,52 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator<LedgerTransactionType>("discriminator");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionEvents", b =>
+                {
+                    b.Property<long>("StateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("state_version");
+
+                    b.Property<string[]>("ReceiptEventEmitters")
+                        .IsRequired()
+                        .HasColumnType("jsonb[]")
+                        .HasColumnName("receipt_event_emitters");
+
+                    b.Property<string[]>("ReceiptEventNames")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("receipt_event_names");
+
+                    b.Property<SborTypeKind[]>("ReceiptEventSborTypeKinds")
+                        .IsRequired()
+                        .HasColumnType("sbor_type_kind[]")
+                        .HasColumnName("receipt_event_sbor_type_kinds");
+
+                    b.Property<byte[][]>("ReceiptEventSbors")
+                        .IsRequired()
+                        .HasColumnType("bytea[]")
+                        .HasColumnName("receipt_event_sbors");
+
+                    b.Property<long[]>("ReceiptEventSchemaEntityIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("receipt_event_schema_entity_ids");
+
+                    b.Property<byte[][]>("ReceiptEventSchemaHashes")
+                        .IsRequired()
+                        .HasColumnType("bytea[]")
+                        .HasColumnName("receipt_event_schema_hashes");
+
+                    b.Property<long[]>("ReceiptEventTypeIndexes")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("receipt_event_type_indexes");
+
+                    b.HasKey("StateVersion");
+
+                    b.ToTable("ledger_transaction_events");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionMarker", b =>

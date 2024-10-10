@@ -76,51 +76,57 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct PackageCodeChangePointerLookup(long PackageEntityId, ValueBytes CodeHash, long StateVersion);
-
-internal record struct PackageCodeDbLookup(long PackageEntityId, ValueBytes CodeHash);
-
-internal record PackageCodeChangePointer
+internal class PackageCodeProcessor : IProcessorBase, ISubstateUpsertProcessor, ISubstateDeleteProcessor
 {
-    public CoreModel.PackageCodeOriginalCodeEntrySubstate? PackageCodeOriginalCode { get; set; }
+    private record struct PackageCodeChangePointerLookup(long PackageEntityId, ValueBytes CodeHash, long StateVersion);
 
-    public CoreModel.PackageCodeVmTypeEntrySubstate? PackageCodeVmType { get; set; }
+    private record struct PackageCodeDbLookup(long PackageEntityId, ValueBytes CodeHash);
 
-    public bool CodeVmTypeIsDeleted { get; set; }
+    private record PackageCodeChangePointer
+    {
+        public CoreModel.PackageCodeOriginalCodeEntrySubstate? PackageCodeOriginalCode { get; set; }
 
-    public bool PackageCodeIsDeleted { get; set; }
-}
+        public CoreModel.PackageCodeVmTypeEntrySubstate? PackageCodeVmType { get; set; }
 
-internal class PackageCodeProcessor
-{
+        public bool CodeVmTypeIsDeleted { get; set; }
+
+        public bool PackageCodeIsDeleted { get; set; }
+    }
+
     private readonly ProcessorContext _context;
 
-    private ChangeTracker<PackageCodeChangePointerLookup, PackageCodeChangePointer> _changes = new();
+    private readonly ChangeTracker<PackageCodeChangePointerLookup, PackageCodeChangePointer> _changes = new();
 
-    private Dictionary<long, PackageCodeAggregateHistory> _mostRecentAggregates = new();
-    private Dictionary<PackageCodeDbLookup, PackageCodeHistory> _mostRecentEntries = new();
+    private readonly Dictionary<long, PackageCodeAggregateHistory> _mostRecentAggregates = new();
+    private readonly Dictionary<PackageCodeDbLookup, PackageCodeHistory> _mostRecentEntries = new();
 
-    private List<PackageCodeAggregateHistory> _aggregatesToAdd = new();
-    private List<PackageCodeHistory> _entriesToAdd = new();
+    private readonly List<PackageCodeAggregateHistory> _aggregatesToAdd = new();
+    private readonly List<PackageCodeHistory> _entriesToAdd = new();
 
     public PackageCodeProcessor(ProcessorContext context)
     {
         _context = context;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
         {
             _changes
-                .GetOrAdd(new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeOriginalCode.Key.CodeHash.ConvertFromHex(), stateVersion), _ => new PackageCodeChangePointer())
+                .GetOrAdd(
+                    new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeOriginalCode.Key.CodeHash.ConvertFromHex(), stateVersion),
+                    _ => new PackageCodeChangePointer())
                 .PackageCodeOriginalCode = packageCodeOriginalCode;
         }
 
         if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
         {
             _changes
-                .GetOrAdd(new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeVmType.Key.CodeHash.ConvertFromHex(), stateVersion), _ => new PackageCodeChangePointer())
+                .GetOrAdd(
+                    new PackageCodeChangePointerLookup(referencedEntity.DatabaseId, (ValueBytes)packageCodeVmType.Key.CodeHash.ConvertFromHex(), stateVersion),
+                    _ => new PackageCodeChangePointer())
                 .PackageCodeVmType = packageCodeVmType;
         }
     }
@@ -148,7 +154,7 @@ internal class PackageCodeProcessor
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _mostRecentEntries.AddRange(await MostRecentPackageCodeHistory());
         _mostRecentAggregates.AddRange(await MostRecentPackageCodeAggregateHistory());
@@ -227,7 +233,8 @@ internal class PackageCodeProcessor
             }
             else if (change.PackageCodeIsDeleted != change.CodeVmTypeIsDeleted)
             {
-                throw new UnreachableException($"Unexpected situation where PackageCode was deleted but VmType wasn't. PackageId: {lookup.PackageEntityId}, CodeHashHex: {lookup.CodeHash.ToHex()}, StateVersion: {lookup.StateVersion}");
+                throw new UnreachableException(
+                    $"Unexpected situation where PackageCode was deleted but VmType wasn't. PackageId: {lookup.PackageEntityId}, CodeHashHex: {lookup.CodeHash.ToHex()}, StateVersion: {lookup.StateVersion}");
             }
             else
             {
@@ -246,7 +253,7 @@ internal class PackageCodeProcessor
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

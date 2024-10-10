@@ -74,11 +74,11 @@ using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors;
 
 internal record struct AccountLockerEntryDbLookup(long LockerEntityId, long AccountEntityId);
 
-internal class AccountLockerProcessor
+internal class AccountLockerProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
     private record ObservedTouch(long AccountLockerEntityId, long AccountEntityId, long StateVersion);
 
@@ -101,8 +101,10 @@ internal class AccountLockerProcessor
         _referencedEntities = referencedEntities;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.AccountLockerAccountClaimsEntrySubstate accountLocker)
         {
             var account = _referencedEntities.Get((EntityAddress)accountLocker.Key.AccountAddress);
@@ -156,7 +158,7 @@ internal class AccountLockerProcessor
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _existingEntryDefinitions.AddRange(await ExistingAccountLockerEntryDefinitions());
     }
@@ -184,7 +186,7 @@ internal class AccountLockerProcessor
                 }));
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -132,7 +131,18 @@ internal static class KeyValueStoreQueries
         KeyValueStoreKeysQueryConfiguration queryConfiguration,
         CancellationToken token = default)
     {
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            keyValueStoreEntityId = keyValueStoreEntity.Id,
+            atLedgerState = ledgerState.StateVersion,
+            useCursor = queryConfiguration.Cursor is not null,
+            cursorStateVersion = queryConfiguration.Cursor?.StateVersionBoundary ?? 0,
+            cursorDefinitionId = queryConfiguration.Cursor?.IdBoundary ?? 0,
+            definitionReadLimit = queryConfiguration.MaxDefinitionsLookupLimit,
+            pageLimit = queryConfiguration.PageSize + 1,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 WITH vars AS (
     SELECT
@@ -233,16 +243,7 @@ LEFT JOIN LATERAL (
 ) entries_per_entity ON TRUE
 ORDER BY entries_per_entity.cursor DESC
 ;",
-            parameters: new
-            {
-                keyValueStoreEntityId = keyValueStoreEntity.Id,
-                atLedgerState = ledgerState.StateVersion,
-                useCursor = queryConfiguration.Cursor is not null,
-                cursorStateVersion = queryConfiguration.Cursor?.StateVersionBoundary ?? 0,
-                cursorDefinitionId = queryConfiguration.Cursor?.IdBoundary ?? 0,
-                definitionReadLimit = queryConfiguration.MaxDefinitionsLookupLimit,
-                pageLimit = queryConfiguration.PageSize + 1,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var queryResult = (await dapperWrapper.QueryAsync<KeyValueStoreKeysResultRow>(dbContext.Database.GetDbConnection(), cd)).ToList();
@@ -295,7 +296,14 @@ ORDER BY entries_per_entity.cursor DESC
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            entityId = keyValueStoreEntity.Id,
+            atLedgerState = ledgerState.StateVersion,
+            keys = keys.Distinct().Select(k => (byte[])k).ToList(),
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 WITH vars AS (
     SELECT
@@ -339,12 +347,7 @@ LEFT JOIN LATERAL (
     ) history on true
     WHERE definition.key_value_store_entity_id = vars.entity_id AND definition.key = vars.key
 ) entries_with_definitions on TRUE",
-            parameters: new
-            {
-                entityId = keyValueStoreEntity.Id,
-                atLedgerState = ledgerState.StateVersion,
-                keys = keys.Distinct().Select(k => (byte[])k).ToList(),
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var queryResult = await dapperWrapper.QueryAsync<KeyValueStoreDataResultRow>(dbContext.Database.GetDbConnection(), cd);
@@ -385,7 +388,13 @@ LEFT JOIN LATERAL (
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var keyValueStoreSchemaQuery = new CommandDefinition(
+        var parameters = new
+        {
+            stateVersion = ledgerState.StateVersion,
+            entityId = keyValueStoreId,
+        };
+
+        var keyValueStoreSchemaQuery = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT
     ksh.schema AS KeySchema,
@@ -400,11 +409,7 @@ INNER JOIN schema_entry_definition vsh ON vsh.schema_hash = kvssh.value_schema_h
 WHERE kvssh.key_value_store_entity_id = @entityId AND kvssh.from_state_version <= @stateVersion
 ORDER BY kvssh.from_state_version DESC
 ",
-            parameters: new
-            {
-                stateVersion = ledgerState.StateVersion,
-                entityId = keyValueStoreId,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var keyValueStoreSchema = await dapperWrapper.QueryFirstOrDefaultAsync<KeyValueStoreSchemaResultRow>(

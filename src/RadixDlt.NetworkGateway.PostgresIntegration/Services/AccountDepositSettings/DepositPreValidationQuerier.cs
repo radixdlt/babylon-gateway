@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -135,7 +134,7 @@ internal class DepositPreValidationQuerier : IDepositPreValidationQuerier
             addressesToResolve.Add(badgeResourceAddress.Value);
         }
 
-        var entityAddressToIdDictionary = await _entityQuerier.ResolveEntityIds(_dbContext, addressesToResolve, ledgerState, token);
+        var entityAddressToIdDictionary = await _entityQuerier.ResolveEntityIds(addressesToResolve, ledgerState, token);
         var resourceEntityMap = entityAddressToIdDictionary
             .Where(x => resourceAddresses.Contains(x.Key))
             .ToDictionary();
@@ -197,7 +196,14 @@ internal class DepositPreValidationQuerier : IDepositPreValidationQuerier
         CancellationToken token = default
     )
     {
-        var resourcePreferencesQuery = new CommandDefinition(
+        var parameters = new
+        {
+            accountEntityId = accountEntityId,
+            stateVersion = ledgerState.StateVersion,
+            resourceEntityIds = resourceMap.Select(x => x.Value).ToList(),
+        };
+
+        var resourcePreferencesQuery = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT arpreh.resource_entity_id AS ResourceEntityId, arpreh.account_resource_preference_rule AS AccountResourcePreferenceRule
 FROM account_resource_preference_rule_entry_history arpreh
@@ -210,12 +216,7 @@ INNER JOIN (
 ) AS arprah
 ON arpreh.id = ANY(arprah.entry_ids) AND arpreh.resource_entity_id = ANY(@resourceEntityIds)
 WHERE arpreh.account_entity_id = @accountEntityId AND arpreh.from_state_version <= @stateVersion",
-            parameters: new
-            {
-                accountEntityId = accountEntityId,
-                stateVersion = ledgerState.StateVersion,
-                resourceEntityIds = resourceMap.Select(x => x.Value).ToList(),
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var resourcePreferencesQueryResult =
@@ -234,7 +235,15 @@ WHERE arpreh.account_entity_id = @accountEntityId AND arpreh.from_state_version 
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var authorizedDepositorQuery = new CommandDefinition(
+        var parameters = new
+        {
+            accountEntityId = accountEntityId,
+            stateVersion = ledgerState.StateVersion,
+            badgeResourceEntityId = badgeResourceEntityId,
+            nonFungibleId = nonFungibleBadgeNfid,
+        };
+
+        var authorizedDepositorQuery = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT 1
 FROM account_authorized_depositor_entry_history aadeh
@@ -251,13 +260,7 @@ ON aadeh.id = ANY(aadah.entry_ids) AND
     OR (aadeh.resource_entity_id = @badgeResourceEntityId AND aadeh.non_fungible_id = @nonFungibleId AND aadeh.discriminator = 'non_fungible')
 )
 WHERE aadeh.account_entity_id = @accountEntityId AND aadeh.from_state_version <= @stateVersion;",
-            parameters: new
-            {
-                accountEntityId = accountEntityId,
-                stateVersion = ledgerState.StateVersion,
-                badgeResourceEntityId = badgeResourceEntityId,
-                nonFungibleId = nonFungibleBadgeNfid,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var authorizedDepositorEntry = await _dapperWrapper.QueryFirstOrDefaultAsync<int?>(

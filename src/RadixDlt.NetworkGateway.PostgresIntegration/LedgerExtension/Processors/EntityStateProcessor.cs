@@ -75,7 +75,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class EntityStateProcessor
+internal class EntityStateProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
@@ -101,87 +101,103 @@ internal class EntityStateProcessor
 
             var schemaDetails = objectFieldStructure.ValueSchema.GetSchemaDetails();
 
-            _toAdd.Add(new SborStateHistory
-            {
-                Id = _context.Sequences.StateHistorySequence++,
-                FromStateVersion = stateVersion,
-                EntityId = referencedEntity.DatabaseId,
-                SborState = componentState.Value.DataStruct.StructData.GetDataBytes(),
-                SchemaHash = schemaDetails.SchemaHash.ConvertFromHex(),
-                SborTypeKind = schemaDetails.SborTypeKind.ToModel(),
-                TypeIndex = schemaDetails.TypeIndex,
-                SchemaDefiningEntityId = _referencedEntities.Get((EntityAddress)schemaDetails.SchemaDefiningEntityAddress).DatabaseId,
-            });
+            _toAdd.Add(
+                new SborStateHistory
+                {
+                    Id = _context.Sequences.StateHistorySequence++,
+                    FromStateVersion = stateVersion,
+                    EntityId = referencedEntity.DatabaseId,
+                    SborState = componentState.Value.DataStruct.StructData.GetDataBytes(),
+                    SchemaHash = schemaDetails.SchemaHash.ConvertFromHex(),
+                    SborTypeKind = schemaDetails.SborTypeKind.ToModel(),
+                    TypeIndex = schemaDetails.TypeIndex,
+                    SchemaDefiningEntityId = _referencedEntities.Get((EntityAddress)schemaDetails.SchemaDefiningEntityAddress).DatabaseId,
+                });
         }
 
         if (substateData is CoreModel.ValidatorFieldStateSubstate validator)
         {
-            _toAdd.Add(new JsonStateHistory
-            {
-                Id = _context.Sequences.StateHistorySequence++,
-                FromStateVersion = stateVersion,
-                EntityId = referencedEntity.DatabaseId,
-                JsonState = validator.Value.ToJson(),
-            });
+            _toAdd.Add(
+                new JsonStateHistory
+                {
+                    Id = _context.Sequences.StateHistorySequence++,
+                    FromStateVersion = stateVersion,
+                    EntityId = referencedEntity.DatabaseId,
+                    JsonState = validator.Value.ToJson(),
+                });
         }
 
         if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
         {
-            _toAdd.Add(new JsonStateHistory
-            {
-                Id = _context.Sequences.StateHistorySequence++,
-                FromStateVersion = stateVersion,
-                EntityId = referencedEntity.DatabaseId,
-                JsonState = accountFieldState.Value.ToJson(),
-            });
+            _toAdd.Add(
+                new JsonStateHistory
+                {
+                    Id = _context.Sequences.StateHistorySequence++,
+                    FromStateVersion = stateVersion,
+                    EntityId = referencedEntity.DatabaseId,
+                    JsonState = accountFieldState.Value.ToJson(),
+                });
         }
 
         if (substateData is CoreModel.AccessControllerFieldStateSubstate accessControllerFieldState)
         {
-            _toAdd.Add(new JsonStateHistory
-            {
-                Id = _context.Sequences.StateHistorySequence++,
-                FromStateVersion = stateVersion,
-                EntityId = referencedEntity.DatabaseId,
-                JsonState = accessControllerFieldState.Value.ToJson(),
-            });
+            _toAdd.Add(
+                new JsonStateHistory
+                {
+                    Id = _context.Sequences.StateHistorySequence++,
+                    FromStateVersion = stateVersion,
+                    EntityId = referencedEntity.DatabaseId,
+                    JsonState = accessControllerFieldState.Value.ToJson(),
+                });
         }
 
         if (substateData is CoreModel.OneResourcePoolFieldStateSubstate oneResourcePoolFieldStateSubstate)
         {
-            _toAdd.Add(new JsonStateHistory
-            {
-                Id = _context.Sequences.StateHistorySequence++,
-                FromStateVersion = stateVersion,
-                EntityId = referencedEntity.DatabaseId,
-                JsonState = oneResourcePoolFieldStateSubstate.Value.ToJson(),
-            });
+            _toAdd.Add(
+                new JsonStateHistory
+                {
+                    Id = _context.Sequences.StateHistorySequence++,
+                    FromStateVersion = stateVersion,
+                    EntityId = referencedEntity.DatabaseId,
+                    JsonState = oneResourcePoolFieldStateSubstate.Value.ToJson(),
+                });
         }
 
         if (substateData is CoreModel.TwoResourcePoolFieldStateSubstate twoResourcePoolFieldStateSubstate)
         {
-            _toAdd.Add(new JsonStateHistory
-            {
-                Id = _context.Sequences.StateHistorySequence++,
-                FromStateVersion = stateVersion,
-                EntityId = referencedEntity.DatabaseId,
-                JsonState = twoResourcePoolFieldStateSubstate.Value.ToJson(),
-            });
+            _toAdd.Add(
+                new JsonStateHistory
+                {
+                    Id = _context.Sequences.StateHistorySequence++,
+                    FromStateVersion = stateVersion,
+                    EntityId = referencedEntity.DatabaseId,
+                    JsonState = twoResourcePoolFieldStateSubstate.Value.ToJson(),
+                });
         }
 
         if (substateData is CoreModel.MultiResourcePoolFieldStateSubstate multiResourcePoolFieldStateSubstate)
         {
-            _toAdd.Add(new JsonStateHistory
-            {
-                Id = _context.Sequences.StateHistorySequence++,
-                FromStateVersion = stateVersion,
-                EntityId = referencedEntity.DatabaseId,
-                JsonState = multiResourcePoolFieldStateSubstate.Value.ToJson(),
-            });
+            _toAdd.Add(
+                new JsonStateHistory
+                {
+                    Id = _context.Sequences.StateHistorySequence++,
+                    FromStateVersion = stateVersion,
+                    EntityId = referencedEntity.DatabaseId,
+                    JsonState = multiResourcePoolFieldStateSubstate.Value.ToJson(),
+                });
         }
     }
 
-    public async Task<int> SaveEntities()
+    public Task LoadDependenciesAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public void ProcessChanges()
+    {
+    }
+
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

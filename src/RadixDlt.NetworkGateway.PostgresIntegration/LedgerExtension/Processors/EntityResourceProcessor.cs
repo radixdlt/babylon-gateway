@@ -80,7 +80,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class EntityResourceProcessor
+internal class EntityResourceProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
     private readonly record struct ByEntityDbLookup(long EntityId);
 
@@ -128,8 +128,10 @@ internal class EntityResourceProcessor
         _observers = observers;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion, CoreModel.IUpsertedSubstate substate)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleBalanceSubstate)
         {
             var vaultEntity = referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
@@ -156,7 +158,7 @@ internal class EntityResourceProcessor
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _existingResourceDefinitions.AddRange(await ExistingEntityResourceEntryDefinitions());
         _mostRecentResourceTotalsHistory.AddRange(await MostRecentEntityResourceTotalsHistory());
@@ -189,7 +191,7 @@ internal class EntityResourceProcessor
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

@@ -76,4 +76,6 @@ internal interface IWriteHelper
     Task<int> Copy<T>(ICollection<T> entities, string copy, Func<NpgsqlBinaryImporter, T, CancellationToken, Task> callback, [CallerMemberName] string stageName = "");
 
     T GetDiscriminator<T>(Type type);
+
+    ValueTask HandleMaxAggregateCounts(object? entity);
 }

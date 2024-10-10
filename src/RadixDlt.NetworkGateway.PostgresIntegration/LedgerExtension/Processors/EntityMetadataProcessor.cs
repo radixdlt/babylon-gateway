@@ -84,7 +84,7 @@ internal record MetadataChangePointer
     public List<MetadataEntry> Entries { get; } = new();
 }
 
-internal class EntityMetadataProcessor
+internal class EntityMetadataProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
     private readonly ProcessorContext _context;
 
@@ -119,7 +119,7 @@ internal class EntityMetadataProcessor
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _existingEntryDefinitions.AddRange(await ExistingMetadataEntryDefinitions());
         _existingTotalsHistory.AddRange(await ExistingMetadataTotalsHistory());
@@ -194,7 +194,7 @@ internal class EntityMetadataProcessor
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
         rowsInserted += await CopyEntityMetadataEntryHistory();

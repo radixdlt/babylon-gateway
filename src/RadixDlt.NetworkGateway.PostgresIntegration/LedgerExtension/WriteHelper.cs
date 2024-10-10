@@ -71,7 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -196,301 +196,62 @@ internal class WriteHelper : IWriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyLedgerTransaction(ICollection<LedgerTransaction> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY ledger_transactions (state_version, transaction_tree_hash, receipt_tree_hash, state_tree_hash, epoch, round_in_epoch, index_in_epoch, index_in_round, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, balance_changes, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_fee_source, receipt_fee_destination, receipt_costing_parameters, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_emitters, receipt_event_names, receipt_event_sbors, receipt_event_schema_entity_ids, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash, message, raw_payload, manifest_instructions, manifest_classes) FROM STDIN (FORMAT BINARY)",
-            token);
-
-        foreach (var lt in entities)
-        {
-            var discriminator = GetDiscriminator<LedgerTransactionType>(lt.GetType());
-
-            await HandleMaxAggregateCounts(lt);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.TransactionTreeHash, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(lt.ReceiptTreeHash, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(lt.StateTreeHash, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.RoundInEpoch, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.IndexInRound, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(lt.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(lt.AffectedGlobalEntities, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
-            await writer.WriteAsync(lt.CreatedTimestamp, NpgsqlDbType.TimestampTz, token);
-            await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
-            await writer.WriteAsync(lt.BalanceChanges, NpgsqlDbType.Jsonb, token);
-
-            await writer.WriteAsync(lt.EngineReceipt.StateUpdates, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.Status, "ledger_transaction_status", token);
-            await writer.WriteAsync(lt.EngineReceipt.FeeSummary, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.FeeSource, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.FeeDestination, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.CostingParameters, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.ErrorMessage, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(lt.EngineReceipt.Output, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.NextEpoch, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.Events.Emitters, NpgsqlDbType.Array | NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.Events.Names, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
-            await writer.WriteAsync(lt.EngineReceipt.Events.Sbors, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(lt.EngineReceipt.Events.SchemaEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.EngineReceipt.Events.SchemaHashes, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(lt.EngineReceipt.Events.TypeIndexes, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.EngineReceipt.Events.SborTypeKinds, "sbor_type_kind[]", token);
-            await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
-
-            switch (lt)
-            {
-                case GenesisLedgerTransaction:
-                case RoundUpdateLedgerTransaction:
-                case FlashLedgerTransaction:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case UserLedgerTransaction ult:
-                    await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Text, token);
-                    await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Text, token);
-                    await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Text, token);
-                    await writer.WriteAsync(ult.Message, NpgsqlDbType.Jsonb, token);
-                    await writer.WriteAsync(ult.RawPayload, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(ult.ManifestInstructions, NpgsqlDbType.Text, token);
-                    await writer.WriteAsync(ult.ManifestClasses, "ledger_transaction_manifest_class[]", token);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(lt), lt, null);
-            }
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyLedgerTransaction), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyLedgerTransactionMarkers(ICollection<LedgerTransactionMarker> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY ledger_transaction_markers (id, state_version, discriminator, event_type, entity_id, resource_entity_id, quantity, operation_type, origin_type, manifest_class, is_most_specific) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            var discriminator = GetDiscriminator<LedgerTransactionMarkerType>(e.GetType());
-
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.StateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(discriminator, "ledger_transaction_marker_type", token);
-
-            switch (e)
-            {
-                case EventLedgerTransactionMarker eltm:
-                    await writer.WriteAsync(eltm.EventType, "ledger_transaction_marker_event_type", token);
-                    await writer.WriteAsync(eltm.EntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(eltm.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(eltm.Quantity.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case ManifestAddressLedgerTransactionMarker maltm:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(maltm.EntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(maltm.OperationType, "ledger_transaction_marker_operation_type", token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case OriginLedgerTransactionMarker oltm:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(oltm.OriginType, "ledger_transaction_marker_origin_type", token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case AffectedGlobalEntityTransactionMarker oltm:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(oltm.EntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case EventGlobalEmitterTransactionMarker egetm:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(egetm.EntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case ManifestClassMarker ttm:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(ttm.ManifestClass, "ledger_transaction_manifest_class", token);
-                    await writer.WriteAsync(ttm.IsMostSpecific, NpgsqlDbType.Boolean, token);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(e), e, null);
-            }
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyLedgerTransactionMarkers), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyResourceEntitySupplyHistory(ICollection<ResourceEntitySupplyHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY resource_entity_supply_history (id, from_state_version, resource_entity_id, total_supply, total_minted, total_burned) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.TotalSupply.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(e.TotalMinted.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(e.TotalBurned.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyResourceEntitySupplyHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY non_fungible_schema_history (id, from_state_version, resource_entity_id, schema_defining_entity_id, schema_hash, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.SchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.SborTypeKind, "sbor_type_kind", token);
-            await writer.WriteAsync(e.TypeIndex, NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyNonFungibleDataSchemaHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
-    public async Task<int> CopyKeyValueStoreSchemaHistory(ICollection<KeyValueStoreSchemaHistory> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        var sw = Stopwatch.GetTimestamp();
-
-        await using var writer =
-            await _connection.BeginBinaryImportAsync(
-                "COPY key_value_store_schema_history (id, from_state_version, key_value_store_entity_id, key_schema_defining_entity_id, key_schema_hash, key_sbor_type_kind, key_type_index, value_schema_defining_entity_id, value_schema_hash, value_sbor_type_kind, value_type_index) FROM STDIN (FORMAT BINARY)",
-                token);
-
-        foreach (var e in entities)
-        {
-            await HandleMaxAggregateCounts(e);
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.KeySchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.KeySchemaHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.KeySborTypeKind, "sbor_type_kind", token);
-            await writer.WriteAsync(e.KeyTypeIndex, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ValueSchemaDefiningEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ValueSchemaHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.ValueSborTypeKind, "sbor_type_kind", token);
-            await writer.WriteAsync(e.ValueTypeIndex, NpgsqlDbType.Bigint, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyKeyValueStoreSchemaHistory), Stopwatch.GetElapsedTime(sw), entities.Count));
-
-        return entities.Count;
-    }
-
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
         var sw = Stopwatch.GetTimestamp();
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            accountLockerEntryDefinitionSequence = sequences.AccountLockerEntryDefinitionSequence,
+            accountLockerEntryResourceVaultDefinitionSequence = sequences.AccountLockerEntryResourceVaultDefinitionSequence,
+            accountLockerEntryTouchHistorySequence = sequences.AccountLockerEntryTouchHistorySequence,
+            accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
+            accountResourcePreferenceRuleEntryHistorySequence = sequences.AccountResourcePreferenceRuleEntryHistorySequence,
+            accountResourcePreferenceRuleAggregateHistorySequence = sequences.AccountResourcePreferenceRuleAggregateHistorySequence,
+            stateHistorySequence = sequences.StateHistorySequence,
+            entitySequence = sequences.EntitySequence,
+            entityMetadataEntryHistorySequence = sequences.EntityMetadataEntryHistorySequence,
+            entityMetadataEntryDefinitionSequence = sequences.EntityMetadataEntryDefinitionSequence,
+            entityMetadataTotalsHistorySequence = sequences.EntityMetadataTotalsHistorySequence,
+            entityRoleAssignmentsAggregateHistorySequence = sequences.EntityRoleAssignmentsAggregateHistorySequence,
+            entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
+            entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,
+            componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
+            componentMethodRoyaltyAggregateHistorySequence = sequences.ComponentMethodRoyaltyAggregateHistorySequence,
+            resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
+            nonFungibleIdDataSequence = sequences.NonFungibleIdDefinitionSequence,
+            nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
+            nonFungibleIdLocationHistorySequence = sequences.NonFungibleIdLocationHistorySequence,
+            validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
+            validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
+            ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
+            packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
+            packageCodeHistorySequence = sequences.PackageCodeHistorySequence,
+            schemaEntryDefinitionSequence = sequences.SchemaEntryDefinitionSequence,
+            schemaEntryAggregateHistorySequence = sequences.SchemaEntryAggregateHistorySequence,
+            keyValueStoreEntryDefinitionSequence = sequences.KeyValueStoreEntryDefinitionSequence,
+            keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
+            validatorCumulativeEmissionHistorySequence = sequences.ValidatorCumulativeEmissionHistorySequence,
+            nonFungibleSchemaHistorySequence = sequences.NonFungibleSchemaHistorySequence,
+            keyValueSchemaHistorySequence = sequences.KeyValueSchemaHistorySequence,
+            packageBlueprintAggregateHistorySequence = sequences.PackageBlueprintAggregateHistorySequence,
+            packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
+            accountAuthorizedDepositorEntryHistorySequence = sequences.AccountAuthorizedDepositorEntryHistorySequence,
+            accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
+            unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
+            unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
+            resourceHoldersSequence = sequences.ResourceHoldersSequence,
+            entityResourceEntryDefinitionSequence = sequences.EntityResourceEntryDefinitionSequence,
+            entityResourceVaultEntryDefinitionSequence = sequences.EntityResourceVaultEntryDefinitionSequence,
+            entityResourceTotalsHistorySequence = sequences.EntityResourceTotalsHistorySequence,
+            entityResourceVaultTotalsHistorySequence = sequences.EntityResourceVaultTotalsHistorySequence,
+            entityResourceBalanceHistorySequence = sequences.EntityResourceBalanceHistorySequence,
+            vaultBalanceHistorySequence = sequences.VaultBalanceHistorySequence,
+            nonFungibleVaultEntryDefinitionSequence = sequences.NonFungibleVaultEntryDefinitionSequence,
+            nonFungibleVaultEntryHistorySequence = sequences.NonFungibleVaultEntryHistorySequence,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT
     setval('account_locker_entry_definition_id_seq', @accountLockerEntryDefinitionSequence),
@@ -541,56 +302,7 @@ SELECT
     setval('non_fungible_vault_entry_definition_id_seq', @nonFungibleVaultEntryDefinitionSequence),
     setval('non_fungible_vault_entry_history_id_seq', @nonFungibleVaultEntryHistorySequence)
 ",
-            parameters: new
-            {
-                accountLockerEntryDefinitionSequence = sequences.AccountLockerEntryDefinitionSequence,
-                accountLockerEntryResourceVaultDefinitionSequence = sequences.AccountLockerEntryResourceVaultDefinitionSequence,
-                accountLockerEntryTouchHistorySequence = sequences.AccountLockerEntryTouchHistorySequence,
-                accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
-                accountResourcePreferenceRuleEntryHistorySequence = sequences.AccountResourcePreferenceRuleEntryHistorySequence,
-                accountResourcePreferenceRuleAggregateHistorySequence = sequences.AccountResourcePreferenceRuleAggregateHistorySequence,
-                stateHistorySequence = sequences.StateHistorySequence,
-                entitySequence = sequences.EntitySequence,
-                entityMetadataEntryHistorySequence = sequences.EntityMetadataEntryHistorySequence,
-                entityMetadataEntryDefinitionSequence = sequences.EntityMetadataEntryDefinitionSequence,
-                entityMetadataTotalsHistorySequence = sequences.EntityMetadataTotalsHistorySequence,
-                entityRoleAssignmentsAggregateHistorySequence = sequences.EntityRoleAssignmentsAggregateHistorySequence,
-                entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
-                entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,
-                componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
-                componentMethodRoyaltyAggregateHistorySequence = sequences.ComponentMethodRoyaltyAggregateHistorySequence,
-                resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
-                nonFungibleIdDataSequence = sequences.NonFungibleIdDefinitionSequence,
-                nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
-                nonFungibleIdLocationHistorySequence = sequences.NonFungibleIdLocationHistorySequence,
-                validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
-                validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
-                ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
-                packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
-                packageCodeHistorySequence = sequences.PackageCodeHistorySequence,
-                schemaEntryDefinitionSequence = sequences.SchemaEntryDefinitionSequence,
-                schemaEntryAggregateHistorySequence = sequences.SchemaEntryAggregateHistorySequence,
-                keyValueStoreEntryDefinitionSequence = sequences.KeyValueStoreEntryDefinitionSequence,
-                keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
-                validatorCumulativeEmissionHistorySequence = sequences.ValidatorCumulativeEmissionHistorySequence,
-                nonFungibleSchemaHistorySequence = sequences.NonFungibleSchemaHistorySequence,
-                keyValueSchemaHistorySequence = sequences.KeyValueSchemaHistorySequence,
-                packageBlueprintAggregateHistorySequence = sequences.PackageBlueprintAggregateHistorySequence,
-                packageCodeAggregateHistorySequence = sequences.PackageCodeAggregateHistorySequence,
-                accountAuthorizedDepositorEntryHistorySequence = sequences.AccountAuthorizedDepositorEntryHistorySequence,
-                accountAuthorizedDepositorAggregateHistorySequence = sequences.AccountAuthorizedDepositorAggregateHistorySequence,
-                unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
-                unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
-                resourceHoldersSequence = sequences.ResourceHoldersSequence,
-                entityResourceEntryDefinitionSequence = sequences.EntityResourceEntryDefinitionSequence,
-                entityResourceVaultEntryDefinitionSequence = sequences.EntityResourceVaultEntryDefinitionSequence,
-                entityResourceTotalsHistorySequence = sequences.EntityResourceTotalsHistorySequence,
-                entityResourceVaultTotalsHistorySequence = sequences.EntityResourceVaultTotalsHistorySequence,
-                entityResourceBalanceHistorySequence = sequences.EntityResourceBalanceHistorySequence,
-                vaultBalanceHistorySequence = sequences.VaultBalanceHistorySequence,
-                nonFungibleVaultEntryDefinitionSequence = sequences.NonFungibleVaultEntryDefinitionSequence,
-                nonFungibleVaultEntryHistorySequence = sequences.NonFungibleVaultEntryHistorySequence,
-            },
+            parameters,
             cancellationToken: token);
 
         await _connection.ExecuteAsync(cd);
@@ -608,7 +320,7 @@ SELECT
         return discriminator;
     }
 
-    private async ValueTask HandleMaxAggregateCounts(object? entity)
+    public async ValueTask HandleMaxAggregateCounts(object? entity)
     {
         if (entity is not IAggregateHolder aggregateHolder)
         {

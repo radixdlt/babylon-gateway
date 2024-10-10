@@ -70,17 +70,19 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class RelationshipProcessor
+internal class EntityRelationshipProcessor : ISubstateScanUpsertProcessor
 {
     private readonly ReferencedEntityDictionary _referencedEntities;
 
-    public RelationshipProcessor(ReferencedEntityDictionary referencedEntities)
+    public EntityRelationshipProcessor(ReferencedEntityDictionary referencedEntities)
     {
         _referencedEntities = referencedEntities;
     }
 
-    public void ScanUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void OnUpsertScan(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.IRoyaltyVaultHolder royaltyVaultHolder && royaltyVaultHolder.TryGetRoyaltyVault(out var rv))
         {
             referencedEntity.PostResolveConfigure((Entity e) =>

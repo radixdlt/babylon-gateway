@@ -75,37 +75,39 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct RoleAssignmentEntryDbLookup(long EntityId, string KeyRole, ModuleId KeyModule);
-
-internal record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
-
-internal record RoleAssignmentsChangePointer
+internal class EntityRoleAssignmentProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
-    public CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
+    private record struct RoleAssignmentEntryDbLookup(long EntityId, string KeyRole, ModuleId KeyModule);
 
-    public List<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new();
-}
+    private record struct RoleAssignmentsChangePointerLookup(long EntityId, long StateVersion);
 
-internal class EntityRoleAssignmentProcessor
-{
+    private record RoleAssignmentsChangePointer
+    {
+        public CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
+
+        public List<CoreModel.RoleAssignmentModuleRuleEntrySubstate> Entries { get; } = new();
+    }
+
     private readonly ProcessorContext _context;
 
-    private ChangeTracker<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer> _changes = new();
+    private readonly ChangeTracker<RoleAssignmentsChangePointerLookup, RoleAssignmentsChangePointer> _changes = new();
 
-    private Dictionary<long, EntityRoleAssignmentsAggregateHistory> _mostRecentAggregates = new();
-    private Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory> _mostRecentEntries = new();
+    private readonly Dictionary<long, EntityRoleAssignmentsAggregateHistory> _mostRecentAggregates = new();
+    private readonly Dictionary<RoleAssignmentEntryDbLookup, EntityRoleAssignmentsEntryHistory> _mostRecentEntries = new();
 
-    private List<EntityRoleAssignmentsAggregateHistory> _aggregatesToAdd = new();
-    private List<EntityRoleAssignmentsEntryHistory> _entriesToAdd = new();
-    private List<EntityRoleAssignmentsOwnerRoleHistory> _ownersToAdd = new();
+    private readonly List<EntityRoleAssignmentsAggregateHistory> _aggregatesToAdd = new();
+    private readonly List<EntityRoleAssignmentsEntryHistory> _entriesToAdd = new();
+    private readonly List<EntityRoleAssignmentsOwnerRoleHistory> _ownersToAdd = new();
 
     public EntityRoleAssignmentProcessor(ProcessorContext context)
     {
         _context = context;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.RoleAssignmentModuleFieldOwnerRoleSubstate accessRulesFieldOwnerRole)
         {
             _changes
@@ -121,7 +123,7 @@ internal class EntityRoleAssignmentProcessor
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _mostRecentEntries.AddRange(await MostRecentEntityRoleAssignmentsEntryHistory());
         _mostRecentAggregates.AddRange(await MostRecentEntityRoleAssignmentsAggregateHistory());
@@ -208,7 +210,7 @@ internal class EntityRoleAssignmentProcessor
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

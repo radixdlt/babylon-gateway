@@ -72,9 +72,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal static class DapperWrapperExtensions
 {
-    public static async Task<IList<T>> ToListAsync<T>(this IDapperWrapper dapperWrapper, DbConnection dbConnection, CommandDefinition cd)
+    public static async Task<IList<T>> ToListAsync<T>(this IDapperWrapper dapperWrapper, DbConnection dbConnection, CommandDefinition cd, string operationName = "")
     {
-        var result = await dapperWrapper.QueryAsync<T>(dbConnection, cd);
+        var result = await dapperWrapper.QueryAsync<T>(dbConnection, cd, operationName);
 
         return result.ToList();
     }

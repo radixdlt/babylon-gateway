@@ -62,99 +62,49 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
+internal class OriginLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor
 {
-    private readonly IDapperWrapper _dapperWrapper;
-    private readonly ReadOnlyDbContext _dbContext;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IEntityQuerier _entityQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
+    private readonly ProcessorContext _context;
+    private readonly List<OriginLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
 
-    public KeyValueStoreQuerier(
-        IDapperWrapper dapperWrapper,
-        ReadOnlyDbContext dbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IEntityQuerier entityQuerier,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    public OriginLedgerTransactionMarkerProcessor(ProcessorContext context, ReferencedEntityDictionary _, NetworkConfiguration __)
     {
-        _dapperWrapper = dapperWrapper;
-        _dbContext = dbContext;
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _entityQuerier = entityQuerier;
-        _endpointConfiguration = endpointConfiguration;
+        _context = context;
     }
 
-    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
-        EntityAddress keyValueStoreAddress,
-        GatewayModel.LedgerState ledgerState,
-        GatewayModel.IdBoundaryCoursor? cursor,
-        int pageSize,
-        CancellationToken token = default)
+    public void VisitTransaction(CoreApiSdk.Model.CommittedTransaction committedTransaction, long stateVersion)
     {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        if (committedTransaction.Receipt.NextEpoch != null)
+        {
+            _ledgerTransactionMarkersToAdd.Add(
+                new OriginLedgerTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    StateVersion = stateVersion,
+                    OriginType = LedgerTransactionMarkerOriginType.EpochChange,
+                });
+        }
 
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreKeys(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            ledgerState,
-            networkId,
-            new KeyValueStoreQueries.KeyValueStoreKeysQueryConfiguration
-            {
-                Cursor = cursor,
-                MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
-                PageSize = pageSize,
-            },
-            token);
+        if (committedTransaction.LedgerTransaction is CoreApiSdk.Model.UserLedgerTransaction)
+        {
+            _ledgerTransactionMarkersToAdd.Add(
+                new OriginLedgerTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    StateVersion = stateVersion,
+                    OriginType = LedgerTransactionMarkerOriginType.User,
+                });
+        }
     }
 
-    public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
-        EntityAddress keyValueStoreAddress,
-        IList<ValueBytes> keys,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
+    public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
     {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreDataMultiLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            keys,
-            networkId,
-            ledgerState,
-            token);
+        return _ledgerTransactionMarkersToAdd;
     }
 }

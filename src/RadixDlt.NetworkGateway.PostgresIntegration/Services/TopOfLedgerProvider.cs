@@ -121,9 +121,6 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
             ? await PreGenesisTransactionSummary()
             : new TransactionSummary(
                 StateVersion: lastTransaction.StateVersion,
-                TransactionTreeHash: lastTransaction.TransactionTreeHash,
-                ReceiptTreeHash: lastTransaction.ReceiptTreeHash,
-                StateTreeHash: lastTransaction.StateTreeHash,
                 RoundTimestamp: lastTransaction.RoundTimestamp,
                 NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
                 CreatedTimestamp: lastTransaction.CreatedTimestamp,
@@ -139,9 +136,6 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
         // Nearly all of theses turn out to be unused!
         return new TransactionSummary(
             StateVersion: 0,
-            TransactionTreeHash: string.Empty,
-            ReceiptTreeHash: string.Empty,
-            StateTreeHash: string.Empty,
             RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             CreatedTimestamp: _clock.UtcNow,

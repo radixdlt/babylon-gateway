@@ -73,43 +73,42 @@ using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class ValidatorEmissionProcessor
+internal class ValidatorEmissionProcessor : IProcessorBase, IDecodedEventProcessor
 {
     private record Emission(long FromStateVersion, long ValidatorEntityId, long EpochNumber, long ProposalsMade, long ProposalsMissed);
 
     private readonly ProcessorContext _context;
-
-    private Dictionary<long, ValidatorCumulativeEmissionHistory> _mostRecentCumulativeEmissions = new();
-
-    private List<Emission> _emissions = new();
-    private List<ValidatorCumulativeEmissionHistory> _cumulativeEmissionsToAdd = new();
+    private readonly Dictionary<long, ValidatorCumulativeEmissionHistory> _mostRecentCumulativeEmissions = new();
+    private readonly List<Emission> _observedEmissions = new();
+    private readonly List<ValidatorCumulativeEmissionHistory> _cumulativeEmissionsToAdd = new();
 
     public ValidatorEmissionProcessor(ProcessorContext context)
     {
         _context = context;
     }
 
-    public void VisitEvent(ToolkitModel.TypedNativeEvent decodedEvent, ReferencedEntity eventEmitterEntity, long stateVersion)
+    public void VisitDecodedEvent(ToolkitModel.TypedNativeEvent decodedEvent, ReferencedEntity eventEmitterEntity, long stateVersion)
     {
         if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
         {
-            _emissions.Add(new Emission(
-                stateVersion,
-                eventEmitterEntity.DatabaseId,
-                (long)validatorUptimeEvent.epoch,
-                (long)validatorUptimeEvent.proposalsMade,
-                (long)validatorUptimeEvent.proposalsMissed));
+            _observedEmissions.Add(
+                new Emission(
+                    stateVersion,
+                    eventEmitterEntity.DatabaseId,
+                    (long)validatorUptimeEvent.epoch,
+                    (long)validatorUptimeEvent.proposalsMade,
+                    (long)validatorUptimeEvent.proposalsMissed));
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _mostRecentCumulativeEmissions.AddRange(await MostRecentCumulativeEmissions());
     }
 
     public void ProcessChanges()
     {
-        foreach (var emission in _emissions)
+        foreach (var emission in _observedEmissions)
         {
             var proposalsMade = 0L;
             var proposalsMissed = 0L;
@@ -142,7 +141,7 @@ internal class ValidatorEmissionProcessor
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 
@@ -153,7 +152,7 @@ internal class ValidatorEmissionProcessor
 
     private async Task<IDictionary<long, ValidatorCumulativeEmissionHistory>> MostRecentCumulativeEmissions()
     {
-        var validatorEntityIds = _emissions.Select(e => e.ValidatorEntityId).ToHashSet().ToList();
+        var validatorEntityIds = _observedEmissions.Select(e => e.ValidatorEntityId).ToHashSet().ToList();
 
         if (!validatorEntityIds.Any())
         {

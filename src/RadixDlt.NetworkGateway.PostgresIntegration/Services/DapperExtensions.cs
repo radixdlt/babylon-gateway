@@ -62,99 +62,24 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
-using System.Collections.Generic;
+using Dapper;
+using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
+internal static class DapperExtensions
 {
-    private readonly IDapperWrapper _dapperWrapper;
-    private readonly ReadOnlyDbContext _dbContext;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IEntityQuerier _entityQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
-
-    public KeyValueStoreQuerier(
-        IDapperWrapper dapperWrapper,
-        ReadOnlyDbContext dbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IEntityQuerier entityQuerier,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    public static CommandDefinition CreateCommandDefinition(
+        [StringSyntax("PostgreSQL")]string commandText,
+        object? parameters = null,
+        IDbTransaction? transaction = null,
+        int? commandTimeout = null,
+        CommandType? commandType = null,
+        CommandFlags flags = CommandFlags.Buffered,
+        CancellationToken cancellationToken = default)
     {
-        _dapperWrapper = dapperWrapper;
-        _dbContext = dbContext;
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _entityQuerier = entityQuerier;
-        _endpointConfiguration = endpointConfiguration;
-    }
-
-    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
-        EntityAddress keyValueStoreAddress,
-        GatewayModel.LedgerState ledgerState,
-        GatewayModel.IdBoundaryCoursor? cursor,
-        int pageSize,
-        CancellationToken token = default)
-    {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreKeys(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            ledgerState,
-            networkId,
-            new KeyValueStoreQueries.KeyValueStoreKeysQueryConfiguration
-            {
-                Cursor = cursor,
-                MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
-                PageSize = pageSize,
-            },
-            token);
-    }
-
-    public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
-        EntityAddress keyValueStoreAddress,
-        IList<ValueBytes> keys,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreDataMultiLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            keys,
-            networkId,
-            ledgerState,
-            token);
+        return new CommandDefinition(commandText, parameters, transaction, commandTimeout, commandType, flags, cancellationToken);
     }
 }

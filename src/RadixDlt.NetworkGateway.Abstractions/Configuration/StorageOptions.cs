@@ -62,74 +62,33 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
-internal class GlobalEventEmitterProcessor
+public sealed class StorageOptions
 {
-    private readonly long[] _excludedEntityIds;
-    private readonly ProcessorContext _context;
-    private readonly ReferencedEntityDictionary _referencedEntities;
-    private readonly Dictionary<long, HashSet<long>> _globalEventEmitters = new();
+    [ConfigurationKeyName("StoreTransactionReceiptEvents")]
+    public LedgerTransactionStorageOption StoreTransactionReceiptEvents { get; set; } = LedgerTransactionStorageOption.StoreForAllTransactions;
 
-    public GlobalEventEmitterProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
+    [ConfigurationKeyName("StoreReceiptStateUpdates")]
+    public LedgerTransactionStorageOption StoreReceiptStateUpdates { get; set; } = LedgerTransactionStorageOption.StoreForAllTransactions;
+}
+
+public sealed class StorageOptionsValidator : AbstractOptionsValidator<StorageOptions>
+{
+    public StorageOptionsValidator()
     {
-        _context = context;
-        _referencedEntities = referencedEntities;
-        _excludedEntityIds = new[]
-        {
-            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.ConsensusManager).DatabaseId,
-            referencedEntities.Get((EntityAddress)networkConfiguration.WellKnownAddresses.Xrd).DatabaseId,
-        };
+        RuleFor(x => x.StoreTransactionReceiptEvents).IsInEnum();
+        RuleFor(x => x.StoreReceiptStateUpdates).IsInEnum();
     }
+}
 
-    public void VisitEvent(CoreModel.Event @event, long stateVersion)
-    {
-        switch (@event.Type.Emitter)
-        {
-            case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
-                var methodEventEmitterEntity = _referencedEntities.Get((EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress);
-                var globalEventEmitterEntityId = methodEventEmitterEntity.GlobalEventEmitterEntityId;
-
-                if (!_excludedEntityIds.Contains(globalEventEmitterEntityId))
-                {
-                    _globalEventEmitters
-                        .GetOrAdd(stateVersion, _ => new HashSet<long>())
-                        .Add(globalEventEmitterEntityId);
-                }
-
-                break;
-            case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
-                var functionEventEmitterEntity = _referencedEntities.Get((EntityAddress)functionEventEmitterIdentifier.PackageAddress);
-                _globalEventEmitters
-                    .GetOrAdd(stateVersion, _ => new HashSet<long>())
-                    .Add(functionEventEmitterEntity.GlobalEventEmitterEntityId);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException($"Unexpected event emitter type {@event.Type.Emitter.GetType()}");
-        }
-    }
-
-    public IEnumerable<EventGlobalEmitterTransactionMarker> CreateTransactionMarkers()
-    {
-        foreach (var stateVersionAffectedEntities in _globalEventEmitters)
-        {
-            foreach (var entityId in stateVersionAffectedEntities.Value)
-            {
-                yield return new EventGlobalEmitterTransactionMarker
-                {
-                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                    EntityId = entityId,
-                    StateVersion = stateVersionAffectedEntities.Key,
-                };
-            }
-        }
-    }
+public enum LedgerTransactionStorageOption
+{
+    StoreForAllTransactions,
+    StoryOnlyForUserTransactionsAndEpochChanges,
+    StoreOnlyForUserTransactions,
+    DoNotStore,
 }

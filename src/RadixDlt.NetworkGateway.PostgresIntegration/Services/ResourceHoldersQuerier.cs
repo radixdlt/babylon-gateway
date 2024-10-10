@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
@@ -113,7 +112,15 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
 
         var totalCount = await _dbContext.ResourceHolders.CountAsync(x => x.ResourceEntityId == resourceEntity.Id, token);
 
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            resourceEntityId = resourceEntity.Id,
+            balanceBoundary = cursor?.BalanceBoundary ?? TokenAmount.MaxValue.ToString(),
+            idBoundary = cursor?.IdBoundary ?? long.MaxValue,
+            limit = limit + 1,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             @"
 SELECT
     ro.id as Id,
@@ -127,13 +134,7 @@ WHERE ro.resource_entity_id = @resourceEntityId
   AND (ro.balance, ro.id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)
 ORDER BY (ro.balance, ro.entity_id) DESC
 LIMIT @limit",
-            new
-            {
-                resourceEntityId = resourceEntity.Id,
-                balanceBoundary = cursor?.BalanceBoundary ?? TokenAmount.MaxValue.ToString(),
-                idBoundary = cursor?.IdBoundary ?? long.MaxValue,
-                limit = limit + 1,
-            },
+            parameters,
             cancellationToken: token
         );
 

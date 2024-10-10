@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
@@ -116,7 +115,14 @@ internal static class MetadataMultiLookupQuery
             metadataKeysParameter.Add(metadataKey);
         }
 
-        var commandDefinition = new CommandDefinition(
+        var parameters = new
+        {
+            entityIds = entityIdsParameter,
+            metadataKeys = metadataKeysParameter,
+            atLedgerState = ledgerState.StateVersion,
+        };
+
+        var commandDefinition = DapperExtensions.CreateCommandDefinition(
             @"
 WITH vars AS (
     SELECT
@@ -162,12 +168,7 @@ LEFT JOIN LATERAL (
     WHERE definition.entity_id = vars.entity_id AND definition.key = vars.metadata_key
  ) entries_with_definitions on TRUE
 ;",
-            new
-            {
-                entityIds = entityIdsParameter,
-                metadataKeys = metadataKeysParameter,
-                atLedgerState = ledgerState.StateVersion,
-            },
+            parameters,
             cancellationToken: token
         );
 

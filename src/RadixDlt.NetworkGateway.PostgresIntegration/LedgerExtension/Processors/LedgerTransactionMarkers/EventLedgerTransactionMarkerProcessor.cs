@@ -62,99 +62,83 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
+using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
+using RadixEngineToolkit;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal class KeyValueStoreQuerier : IKeyValueStoreQuerier
+internal class EventLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor, IDecodedEventProcessor
 {
-    private readonly IDapperWrapper _dapperWrapper;
-    private readonly ReadOnlyDbContext _dbContext;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IEntityQuerier _entityQuerier;
-    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
+    private readonly ProcessorContext _context;
+    private readonly List<EventLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
 
-    public KeyValueStoreQuerier(
-        IDapperWrapper dapperWrapper,
-        ReadOnlyDbContext dbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IEntityQuerier entityQuerier,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    public EventLedgerTransactionMarkerProcessor(ProcessorContext context, ReferencedEntityDictionary _, NetworkConfiguration __)
     {
-        _dapperWrapper = dapperWrapper;
-        _dbContext = dbContext;
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _entityQuerier = entityQuerier;
-        _endpointConfiguration = endpointConfiguration;
+        _context = context;
     }
 
-    public async Task<GatewayModel.StateKeyValueStoreKeysResponse> KeyValueStoreKeys(
-        EntityAddress keyValueStoreAddress,
-        GatewayModel.LedgerState ledgerState,
-        GatewayModel.IdBoundaryCoursor? cursor,
-        int pageSize,
-        CancellationToken token = default)
+    public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
     {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreKeys(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            ledgerState,
-            networkId,
-            new KeyValueStoreQueries.KeyValueStoreKeysQueryConfiguration
-            {
-                Cursor = cursor,
-                MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
-                PageSize = pageSize,
-            },
-            token);
+        return _ledgerTransactionMarkersToAdd;
     }
 
-    public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(
-        EntityAddress keyValueStoreAddress,
-        IList<ValueBytes> keys,
-        GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
+    public void VisitDecodedEvent(TypedNativeEvent decodedEvent, ReferencedEntity eventEmitterEntity, long stateVersion)
     {
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var keyValueStore = await _entityQuerier.GetNonVirtualEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-
-        var keyValueStoreSchema = await KeyValueStoreQueries.KeyValueStoreSchemaLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore.Id,
-            ledgerState,
-            token);
-
-        return await KeyValueStoreQueries.KeyValueStoreDataMultiLookupQuery(
-            _dbContext,
-            _dapperWrapper,
-            keyValueStore,
-            keyValueStoreSchema,
-            keys,
-            networkId,
-            ledgerState,
-            token);
+        if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
+        {
+            _ledgerTransactionMarkersToAdd.Add(
+                new EventLedgerTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    StateVersion = stateVersion,
+                    EventType = LedgerTransactionMarkerEventType.Withdrawal,
+                    EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
+                    ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().GetResourceEntityId(),
+                    Quantity = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.AsStr()),
+                });
+        }
+        else if (EventDecoder.TryGetFungibleVaultDepositEvent(decodedEvent, out var fungibleVaultDepositEvent))
+        {
+            _ledgerTransactionMarkersToAdd.Add(
+                new EventLedgerTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    StateVersion = stateVersion,
+                    EventType = LedgerTransactionMarkerEventType.Deposit,
+                    EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
+                    ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().GetResourceEntityId(),
+                    Quantity = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.AsStr()),
+                });
+        }
+        else if (EventDecoder.TryGetNonFungibleVaultWithdrawalEvent(decodedEvent, out var nonFungibleVaultWithdrawalEvent))
+        {
+            _ledgerTransactionMarkersToAdd.Add(
+                new EventLedgerTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    StateVersion = stateVersion,
+                    EventType = LedgerTransactionMarkerEventType.Withdrawal,
+                    EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
+                    ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().GetResourceEntityId(),
+                    Quantity = TokenAmount.FromDecimalString(nonFungibleVaultWithdrawalEvent.Length.ToString()),
+                });
+        }
+        else if (EventDecoder.TryGetNonFungibleVaultDepositEvent(decodedEvent, out var nonFungibleVaultDepositEvent))
+        {
+            _ledgerTransactionMarkersToAdd.Add(
+                new EventLedgerTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    StateVersion = stateVersion,
+                    EventType = LedgerTransactionMarkerEventType.Deposit,
+                    EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
+                    ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().GetResourceEntityId(),
+                    Quantity = TokenAmount.FromDecimalString(nonFungibleVaultDepositEvent.Length.ToString()),
+                });
+        }
     }
 }

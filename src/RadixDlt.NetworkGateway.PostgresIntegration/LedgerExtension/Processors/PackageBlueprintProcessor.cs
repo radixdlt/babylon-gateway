@@ -88,18 +88,18 @@ internal record PackageBlueprintChangePointer
     public CoreModel.PackageBlueprintAuthTemplateEntrySubstate? PackageBlueprintAuthTemplate { get; set; }
 }
 
-internal class PackageBlueprintProcessor
+internal class PackageBlueprintProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
 
-    private ChangeTracker<PackageBlueprintChangePointerLookup, PackageBlueprintChangePointer> _changes = new();
+    private readonly ChangeTracker<PackageBlueprintChangePointerLookup, PackageBlueprintChangePointer> _changes = new();
 
-    private Dictionary<long, PackageBlueprintAggregateHistory> _mostRecentAggregates = new();
-    private Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory> _mostRecentEntries = new();
+    private readonly Dictionary<long, PackageBlueprintAggregateHistory> _mostRecentAggregates = new();
+    private readonly Dictionary<PackageBlueprintDbLookup, PackageBlueprintHistory> _mostRecentEntries = new();
 
-    private List<PackageBlueprintAggregateHistory> _aggregatesToAdd = new();
-    private List<PackageBlueprintHistory> _entriesToAdd = new();
+    private readonly List<PackageBlueprintAggregateHistory> _aggregatesToAdd = new();
+    private readonly List<PackageBlueprintHistory> _entriesToAdd = new();
 
     public PackageBlueprintProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
     {
@@ -107,38 +107,56 @@ internal class PackageBlueprintProcessor
         _referencedEntities = referencedEntities;
     }
 
-    public void VisitUpsert(CoreModel.Substate substateData, ReferencedEntity referencedEntity, long stateVersion)
+    public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        var substateData = substate.Value.SubstateData;
+
         if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
         {
             _changes
-                .GetOrAdd(new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion, stateVersion), _ => new PackageBlueprintChangePointer())
+                .GetOrAdd(
+                    new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion, stateVersion),
+                    _ => new PackageBlueprintChangePointer())
                 .PackageBlueprintDefinition = packageBlueprintDefinition;
         }
 
         if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate packageBlueprintDependencies)
         {
             _changes
-                .GetOrAdd(new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion, stateVersion), _ => new PackageBlueprintChangePointer())
+                .GetOrAdd(
+                    new PackageBlueprintChangePointerLookup(
+                        referencedEntity.DatabaseId,
+                        packageBlueprintDependencies.Key.BlueprintName,
+                        packageBlueprintDependencies.Key.BlueprintVersion,
+                        stateVersion),
+                    _ => new PackageBlueprintChangePointer())
                 .PackageBlueprintDependencies = packageBlueprintDependencies;
         }
 
         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
         {
             _changes
-                .GetOrAdd(new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion, stateVersion), _ => new PackageBlueprintChangePointer())
+                .GetOrAdd(
+                    new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion, stateVersion),
+                    _ => new PackageBlueprintChangePointer())
                 .PackageBlueprintRoyalty = packageBlueprintRoyalty;
         }
 
         if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate packageBlueprintAuthTemplate)
         {
             _changes
-                .GetOrAdd(new PackageBlueprintChangePointerLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion, stateVersion), _ => new PackageBlueprintChangePointer())
+                .GetOrAdd(
+                    new PackageBlueprintChangePointerLookup(
+                        referencedEntity.DatabaseId,
+                        packageBlueprintAuthTemplate.Key.BlueprintName,
+                        packageBlueprintAuthTemplate.Key.BlueprintVersion,
+                        stateVersion),
+                    _ => new PackageBlueprintChangePointer())
                 .PackageBlueprintAuthTemplate = packageBlueprintAuthTemplate;
         }
     }
 
-    public async Task LoadDependencies()
+    public async Task LoadDependenciesAsync()
     {
         _mostRecentEntries.AddRange(await MostRecentPackageCodeHistory());
         _mostRecentAggregates.AddRange(await MostRecentPackageBlueprintAggregateHistory());
@@ -223,7 +241,8 @@ internal class PackageBlueprintProcessor
 
             if (change.PackageBlueprintDependencies != null)
             {
-                entryHistory.DependantEntityIds = change.PackageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                entryHistory.DependantEntityIds =
+                    change.PackageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
             }
 
             if (change.PackageBlueprintRoyalty != null)
@@ -240,7 +259,7 @@ internal class PackageBlueprintProcessor
         }
     }
 
-    public async Task<int> SaveEntities()
+    public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
 

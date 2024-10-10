@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -88,7 +87,12 @@ internal static class NonFungibleResourceQueries
 
     private record NonFungibleIdLocationViewModel(string NonFungibleId, bool IsDeleted, long OwnerVaultId, EntityAddress OwnerVaultAddress, long FromStateVersion);
 
-    private record NonFungibleIdLocationVaultOwnerViewModel(long VaultId, long VaultParentAncestorId, EntityAddress VaultParentAncestorAddress, long VaultGlobalAncestorId, EntityAddress VaultGlobalAncestorAddress);
+    private record NonFungibleIdLocationVaultOwnerViewModel(
+        long VaultId,
+        long VaultParentAncestorId,
+        EntityAddress VaultParentAncestorAddress,
+        long VaultGlobalAncestorId,
+        EntityAddress VaultGlobalAncestorAddress);
 
     private record NonFungibleIdsQueryResult(long Id, long FromStateVersion, string NonFungibleId, TokenAmount TotalMinted);
 
@@ -101,7 +105,16 @@ internal static class NonFungibleResourceQueries
         int pageSize,
         CancellationToken token = default)
     {
-        var cd = new CommandDefinition(
+        var parameters = new
+        {
+            nonFungibleResourceEntityId = resourceEntity.Id,
+            stateVersion = ledgerState.StateVersion,
+            cursorStateVersion = cursor?.StateVersionBoundary ?? 1,
+            cursorId = cursor?.IdBoundary ?? 1,
+            limit = pageSize + 1,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: $@"
 SELECT
     d.id AS Id,
@@ -130,14 +143,7 @@ WHERE
 ORDER BY (d.from_state_version, d.id) ASC
 LIMIT @limit
 ;",
-            parameters: new
-            {
-                nonFungibleResourceEntityId = resourceEntity.Id,
-                stateVersion = ledgerState.StateVersion,
-                cursorStateVersion = cursor?.StateVersionBoundary ?? 1,
-                cursorId = cursor?.IdBoundary ?? 1,
-                limit = pageSize + 1,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var entriesAndOneMore = (await dapperWrapper.QueryAsync<NonFungibleIdsQueryResult>(dbContext.Database.GetDbConnection(), cd))
@@ -172,7 +178,13 @@ LIMIT @limit
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var nonFungibleDataSchemaQuery = new CommandDefinition(
+        var parameters = new
+        {
+            stateVersion = ledgerState.StateVersion,
+            entityId = resourceEntity.Id,
+        };
+
+        var nonFungibleDataSchemaQuery = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT
     sh.schema,
@@ -182,11 +194,7 @@ FROM non_fungible_schema_history nfsh
 INNER JOIN schema_entry_definition sh ON sh.schema_hash = nfsh.schema_hash AND sh.entity_id = nfsh.schema_defining_entity_id
 WHERE nfsh.resource_entity_id = @entityId AND nfsh.from_state_version <= @stateVersion
 ORDER BY nfsh.from_state_version DESC",
-            parameters: new
-            {
-                stateVersion = ledgerState.StateVersion,
-                entityId = resourceEntity.Id,
-            },
+            parameters: parameters,
             cancellationToken: token);
 
         var nonFungibleDataSchema = await dapperWrapper.QueryFirstOrDefaultAsync<NonFungibleDataResultRow>(
@@ -200,7 +208,14 @@ ORDER BY nfsh.from_state_version DESC",
             throw new UnreachableException($"No schema found for nonfungible resource: {resourceEntity.Address}");
         }
 
-        var cd = new CommandDefinition(
+        var o = new
+        {
+            stateVersion = ledgerState.StateVersion,
+            entityId = resourceEntity.Id,
+            nonFungibleIds = nonFungibleIds,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, md.data AS Data, md.from_state_version AS DataLastUpdatedAtStateVersion
 FROM non_fungible_id_definition nfid
@@ -214,12 +229,7 @@ LEFT JOIN LATERAL (
 WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @entityId AND nfid.non_fungible_id = ANY(@nonFungibleIds)
 ORDER BY nfid.from_state_version DESC
 ",
-            parameters: new
-            {
-                stateVersion = ledgerState.StateVersion,
-                entityId = resourceEntity.Id,
-                nonFungibleIds = nonFungibleIds,
-            },
+            parameters: o,
             cancellationToken: token);
 
         var items = new List<GatewayModel.StateNonFungibleDetailsResponseItem>();
@@ -263,7 +273,14 @@ ORDER BY nfid.from_state_version DESC
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var vaultLocationsCd = new CommandDefinition(
+        var vaultLocationsParameters = new
+        {
+            stateVersion = ledgerState.StateVersion,
+            resourceEntityId = resourceEntity.Id,
+            nonFungibleIds = nonFungibleIds,
+        };
+
+        var vaultLocationsCd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 WITH variables (non_fungible_id) AS (
     SELECT UNNEST(@nonFungibleIds)
@@ -297,18 +314,18 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) lh ON TRUE
 INNER JOIN entities e ON e.id = lh.vault_entity_id AND e.from_state_version <= @stateVersion",
-            parameters: new
-            {
-                stateVersion = ledgerState.StateVersion,
-                resourceEntityId = resourceEntity.Id,
-                nonFungibleIds = nonFungibleIds,
-            },
+            parameters: vaultLocationsParameters,
             cancellationToken: token);
 
         var vaultLocationResults = (await dapperWrapper.QueryAsync<NonFungibleIdLocationViewModel>(dbContext.Database.GetDbConnection(), vaultLocationsCd))
             .ToList();
 
-        var vaultAncestorsCd = new CommandDefinition(
+        var vaultAncestorsParameters = new
+        {
+            vaultIds = vaultLocationResults.Select(x => x.OwnerVaultId).Distinct().ToList(),
+        };
+
+        var vaultAncestorsCd = DapperExtensions.CreateCommandDefinition(
             commandText: @"
 SELECT
     e.id AS VaultId,
@@ -320,10 +337,7 @@ FROM entities e
 INNER JOIN entities pae ON e.parent_ancestor_id = pae.id
 INNER JOIN entities gae ON e.global_ancestor_id = gae.id
 WHERE e.id = ANY(@vaultIds)",
-            parameters: new
-            {
-                vaultIds = vaultLocationResults.Select(x => x.OwnerVaultId).Distinct().ToList(),
-            },
+            parameters: vaultAncestorsParameters,
             cancellationToken: token);
 
         var vaultAncestorResults = (await dapperWrapper.QueryAsync<NonFungibleIdLocationVaultOwnerViewModel>(dbContext.Database.GetDbConnection(), vaultAncestorsCd))
