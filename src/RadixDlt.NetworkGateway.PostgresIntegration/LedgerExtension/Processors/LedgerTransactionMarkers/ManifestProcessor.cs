@@ -101,19 +101,19 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
             using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, _networkConfiguration.Id);
             using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
 
-            var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, _networkConfiguration.Id);
-
-            foreach (var address in extractedAddresses.All())
-            {
-                _referencedEntities.MarkSeenAddress(address);
-            }
+            AnalyzeManifestClasses(toolkitManifest, stateVersion);
 
             if (transaction.Receipt.Status == CoreModel.TransactionStatus.Succeeded)
             {
+                var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, _networkConfiguration.Id);
+
+                foreach (var address in extractedAddresses.All())
+                {
+                    _referencedEntities.MarkSeenAddress(address);
+                }
+
                 _manifestExtractedAddresses.Add(stateVersion, extractedAddresses);
             }
-
-            AnalyzeManifestClasses(toolkitManifest, stateVersion);
         }
     }
 
