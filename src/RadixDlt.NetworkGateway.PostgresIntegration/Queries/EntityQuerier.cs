@@ -64,6 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
@@ -81,7 +82,7 @@ internal interface IEntityQuerier
     Task<TEntity> GetEntity<TEntity>(EntityAddress address, GatewayApiSdk.Model.LedgerState ledgerState, CancellationToken token)
         where TEntity : Entity;
 
-    Task<TEntity> GetNonVirtualEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    Task<TEntity> GetNonPreAllocatedEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
         where TEntity : Entity;
 
     Task<IDictionary<EntityAddress, long>> ResolveEntityIds(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token);
@@ -93,12 +94,12 @@ internal interface IEntityQuerier
 
 internal class EntityQuerier : IEntityQuerier
 {
-    private readonly IVirtualEntityDataProvider _virtualEntityDataProvider;
+    private readonly IPreAllocatedEntityDataProvider _preAllocatedEntityDataProvider;
     private readonly ReadOnlyDbContext _dbContext;
 
-    public EntityQuerier(IVirtualEntityDataProvider virtualEntityDataProvider, ReadOnlyDbContext dbContext)
+    public EntityQuerier(IPreAllocatedEntityDataProvider preAllocatedEntityDataProvider, ReadOnlyDbContext dbContext)
     {
-        _virtualEntityDataProvider = virtualEntityDataProvider;
+        _preAllocatedEntityDataProvider = preAllocatedEntityDataProvider;
         _dbContext = dbContext;
     }
 
@@ -113,7 +114,7 @@ internal class EntityQuerier : IEntityQuerier
 
         if (entity == null)
         {
-            entity = await TryResolveAsVirtualEntity(address);
+            entity = TryResolveAsPreAllocatedEntity(address);
 
             if (entity == null)
             {
@@ -130,7 +131,7 @@ internal class EntityQuerier : IEntityQuerier
         return typedEntity;
     }
 
-    public async Task<TEntity> GetNonVirtualEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    public async Task<TEntity> GetNonPreAllocatedEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
         where TEntity : Entity
     {
         var entity = await _dbContext
@@ -188,27 +189,27 @@ internal class EntityQuerier : IEntityQuerier
 
         foreach (var address in addresses.Except(entities.Keys))
         {
-            var virtualEntity = await TryResolveAsVirtualEntity(address);
+            var preAllocatedEntity = TryResolveAsPreAllocatedEntity(address);
 
-            if (virtualEntity != null)
+            if (preAllocatedEntity != null)
             {
-                entities.Add(virtualEntity.Address, virtualEntity);
+                entities.Add(preAllocatedEntity.Address, preAllocatedEntity);
             }
         }
 
         return entities.Values;
     }
 
-    private async Task<Entity?> TryResolveAsVirtualEntity(EntityAddress address)
+    private static Entity? TryResolveAsPreAllocatedEntity(EntityAddress address)
     {
-        if (await _virtualEntityDataProvider.IsVirtualAccountAddress(address))
+        if (address.IsAccount && RadixAddressCodec.Decode(address).IsPreAllocatedAccountAddress())
         {
-            return new VirtualAccountComponentEntity(address);
+            return new PreAllocatedAccountComponentEntity(address);
         }
 
-        if (await _virtualEntityDataProvider.IsVirtualIdentityAddress(address))
+        if (address.IsIdentity && RadixAddressCodec.Decode(address).IsPreAllocatedIdentityAddress())
         {
-            return new VirtualIdentityEntity(address);
+            return new PreAllocatedIdentityEntity(address);
         }
 
         return null;

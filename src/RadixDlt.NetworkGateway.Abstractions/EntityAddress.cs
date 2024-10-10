@@ -82,6 +82,8 @@ public readonly record struct EntityAddress
 
     public bool IsAccount => _address.StartsWith("account_");
 
+    public bool IsIdentity => _address.StartsWith("identity_");
+
     public bool IsResource => _address.StartsWith("resource_");
 
     public static implicit operator string(EntityAddress ra) => ra._address;
