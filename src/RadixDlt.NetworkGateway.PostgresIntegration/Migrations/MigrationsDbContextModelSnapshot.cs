@@ -97,7 +97,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from", "account_owner_method_call", "badge_presented" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_origin_type", new[] { "user", "epoch_change", "round_update", "flash", "genesis" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_origin_type", new[] { "user", "epoch_change", "validator", "protocol_update", "genesis" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address", "affected_global_entity", "manifest_class", "event_global_emitter" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "round_update", "flash" });

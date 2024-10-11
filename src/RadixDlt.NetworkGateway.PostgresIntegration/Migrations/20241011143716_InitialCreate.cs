@@ -90,7 +90,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call,badge_presented")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change,round_update,flash,genesis")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change,validator,protocol_update,genesis")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash")

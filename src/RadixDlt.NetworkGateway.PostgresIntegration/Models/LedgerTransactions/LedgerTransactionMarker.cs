@@ -72,9 +72,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 internal enum LedgerTransactionMarkerOriginType
 {
     User,
+
+    /// <summary>
+    /// Additional marker that will be assigned to validator transactions resulting in epoch changes.
+    /// </summary>
     EpochChange,
-    RoundUpdate,
-    Flash,
+
+    Validator,
+
+    ProtocolUpdate,
+
     Genesis,
 }
 

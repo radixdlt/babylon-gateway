@@ -98,9 +98,9 @@ internal class OriginLedgerTransactionMarkerProcessor : ITransactionMarkerProces
 
         var origin = committedTransaction.LedgerTransaction switch
         {
-            FlashLedgerTransaction => LedgerTransactionMarkerOriginType.Flash,
+            FlashLedgerTransaction => LedgerTransactionMarkerOriginType.ProtocolUpdate,
             GenesisLedgerTransaction => LedgerTransactionMarkerOriginType.Genesis,
-            RoundUpdateLedgerTransaction => LedgerTransactionMarkerOriginType.RoundUpdate,
+            RoundUpdateLedgerTransaction => LedgerTransactionMarkerOriginType.Validator,
             UserLedgerTransaction => LedgerTransactionMarkerOriginType.User,
             _ => throw new ArgumentOutOfRangeException($"Unexpected ledger transaction type: {committedTransaction.LedgerTransaction.GetType()}"),
         };
