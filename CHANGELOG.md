@@ -73,7 +73,7 @@ Release built: _not released yet_
     - Key value store
         - New `key_value_store_totals_history` table, which holds total count of all keys under a given store at a given state version.
 - Changed `receipt_state_updates` in the `ledger_transactions` table to be nullable.
-- Moved all `receipt_event_*` columns from the `ledger_transactions` to the separate `ledger_transaction_events` table.
+- Moved all `receipt_event_*` columns from the `ledger_transactions` table to a new separate `ledger_transaction_events` table.
 - Added new `origin_type` types (`Genesis`, `Flash`, and `RoundUpdate`) to the `ledger_transaction_markers` table.
 
 ## 1.7.3
