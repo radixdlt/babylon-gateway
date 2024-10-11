@@ -49,6 +49,7 @@ Release built: _not released yet_
 
 ### API Changes
 - Restored previously removed `total_count` property to `/state/key-value-store/keys` endpoint.
+- Added missing value for `total_count` property to the `/state/account-locker/page/vaults` endpoint.
 
 ### Database changes
 - Refactored multiple aggregates. Queries follow a similar strategy as key value stores and utilize `_entry_definition`, `_entry_history`, and `_totals_history` tables to return data
@@ -72,6 +73,9 @@ Release built: _not released yet_
         - Renamed `entity_vault_history` to `vault_balance_history`. Holds information about vault content (amount of fungibles or count of non fungible ids inside vault) at a given state version.
     - Key value store
         - New `key_value_store_totals_history` table, which holds total count of all keys under a given store at a given state version.
+    - Account lockers
+        - New `account_locker_totals_history` table, which holds the total number of accounts that have key value stores under the given account locker.
+        - New `account_locker_entry_resource_vault_totals_history` table, which holds the total number of resources/vaults under the given account in an account locker.
 - Changed `receipt_state_updates` in the `ledger_transactions` table to be nullable.
 - Moved all `receipt_event_*` columns from the `ledger_transactions` table to a new separate `ledger_transaction_events` table.
 - Added new `origin_type` types (`Genesis`, `Flash`, and `RoundUpdate`) to the `ledger_transaction_markers` table.

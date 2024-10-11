@@ -103,6 +103,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountLockerEntryDefinition> AccountLockerDefinition => Set<AccountLockerEntryDefinition>();
 
+    public DbSet<AccountLockerTotalsHistory> AccountLockerTotalsHistory => Set<AccountLockerTotalsHistory>();
+
     public DbSet<AccountLockerEntryResourceVaultDefinition> AccountLockerEntryResourceVaultDefinition => Set<AccountLockerEntryResourceVaultDefinition>();
 
     public DbSet<AccountLockerEntryTouchHistory> AccountLockerEntryTouchHistory => Set<AccountLockerEntryTouchHistory>();
@@ -420,6 +422,14 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<AccountLockerEntryResourceVaultDefinition>()
+            .HasIndex(e => new { e.AccountLockerDefinitionId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountLockerTotalsHistory>()
+            .HasIndex(e => new { e.AccountLockerEntityId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<AccountLockerEntryResourceVaultTotalsHistory>()
             .HasIndex(e => new { e.AccountLockerDefinitionId, e.FromStateVersion });
 
         modelBuilder

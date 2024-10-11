@@ -149,6 +149,8 @@ SELECT
     nextval('account_locker_entry_definition_id_seq') AS AccountLockerEntryDefinitionSequence,
     nextval('account_locker_entry_resource_vault_definition_id_seq') AS AccountLockerEntryResourceVaultDefinitionSequence,
     nextval('account_locker_entry_touch_history_id_seq') AS AccountLockerEntryTouchHistorySequence,
+    nextval('account_locker_totals_history_id_seq') AS AccountLockerTotalsHistorySequence,
+    nextval('account_locker_entry_resource_vault_totals_history_id_seq') AS AccountLockerEntryResourceVaultTotalsHistorySequence,
     nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
     nextval('account_resource_preference_rule_entry_history_id_seq') AS AccountResourcePreferenceRuleEntryHistorySequence,
     nextval('account_resource_preference_rule_aggregate_history_id_seq') AS AccountResourcePreferenceRuleAggregateHistorySequence,

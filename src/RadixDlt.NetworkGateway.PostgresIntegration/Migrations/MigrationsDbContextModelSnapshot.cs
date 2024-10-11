@@ -68,11 +68,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
-using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable
@@ -270,6 +267,34 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("account_locker_entry_resource_vault_definition");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountLockerEntryResourceVaultTotalsHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountLockerDefinitionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_definition_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("TotalResources")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_resources");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountLockerDefinitionId", "FromStateVersion");
+
+                    b.ToTable("account_locker_entry_resource_vault_totals_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountLockerEntryTouchHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -292,6 +317,34 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("AccountLockerDefinitionId", "FromStateVersion");
 
                     b.ToTable("account_locker_entry_touch_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountLockerTotalsHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountLockerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_locker_entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("TotalAccounts")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_accounts");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountLockerEntityId", "FromStateVersion");
+
+                    b.ToTable("account_locker_totals_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountResourcePreferenceRuleAggregateHistory", b =>
