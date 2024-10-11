@@ -69,6 +69,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using ToolkitModel = RadixEngineToolkit;
@@ -80,7 +81,6 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
     private readonly NetworkConfiguration _networkConfiguration;
-    private readonly List<LedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
 
     private readonly Dictionary<long, ManifestAddressesExtractor.ManifestAddresses> _manifestExtractedAddresses = new();
     private readonly Dictionary<long, List<LedgerTransactionManifestClass>> _manifestClasses = new();
@@ -101,27 +101,30 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
             using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, _networkConfiguration.Id);
             using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
 
-            var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, _networkConfiguration.Id);
-
-            foreach (var address in extractedAddresses.All())
-            {
-                _referencedEntities.MarkSeenAddress(address);
-            }
-
-            _manifestExtractedAddresses.Add(stateVersion, extractedAddresses);
-
             AnalyzeManifestClasses(toolkitManifest, stateVersion);
+
+            if (transaction.Receipt.Status == CoreModel.TransactionStatus.Succeeded)
+            {
+                var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, _networkConfiguration.Id);
+
+                foreach (var address in extractedAddresses.All())
+                {
+                    _referencedEntities.MarkSeenAddress(address);
+                }
+
+                _manifestExtractedAddresses.Add(stateVersion, extractedAddresses);
+            }
         }
     }
 
     public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
     {
-        foreach (var stateVersion in _manifestExtractedAddresses.Keys)
-        {
-            AnalyzeAddresses(stateVersion);
-        }
+        var ledgerTransactionMarkersToAdd = new List<LedgerTransactionMarker>();
 
-        return _ledgerTransactionMarkersToAdd;
+        ledgerTransactionMarkersToAdd.AddRange(CreateMarkersForManifestAddresses());
+        ledgerTransactionMarkersToAdd.AddRange(CreateMarkersForManifestClasses());
+
+        return ledgerTransactionMarkersToAdd;
     }
 
     public LedgerTransactionManifestClass[] GetManifestClasses(long stateVersion)
@@ -129,107 +132,145 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
         return _manifestClasses.TryGetValue(stateVersion, out var mc) ? mc.ToArray() : Array.Empty<LedgerTransactionManifestClass>();
     }
 
-    public void AnalyzeManifestClasses(ToolkitModel.TransactionManifest toolkitManifest, long stateVersion)
+    private void AnalyzeManifestClasses(ToolkitModel.TransactionManifest toolkitManifest, long stateVersion)
     {
         var manifestSummary = toolkitManifest.Summary(_networkConfiguration.Id);
 
-        for (var i = 0; i < manifestSummary.classification.Length; ++i)
+        foreach (var manifestClass in manifestSummary.classification)
         {
-            var manifestClass = manifestSummary.classification[i].ToModel();
+            var mapped = manifestClass.ToModel();
 
             _manifestClasses
                 .GetOrAdd(stateVersion, _ => new List<LedgerTransactionManifestClass>())
-                .Add(manifestClass);
-
-            _ledgerTransactionMarkersToAdd.Add(
-                new ManifestClassMarker
-                {
-                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                    StateVersion = stateVersion,
-                    ManifestClass = manifestClass,
-                    IsMostSpecific = i == 0,
-                });
+                .Add(mapped);
         }
     }
 
-    private void AnalyzeAddresses(long stateVersion)
+    private IEnumerable<LedgerTransactionMarker> CreateMarkersForManifestClasses()
     {
-        if (_manifestExtractedAddresses.TryGetValue(stateVersion, out var extractedAddresses))
+        var ledgerTransactionMarkersToAdd = new List<LedgerTransactionMarker>();
+
+        foreach (var stateVersion in _manifestClasses.Keys)
         {
+            for (int i = 0; i < _manifestClasses[stateVersion].Count; ++i)
+            {
+                ledgerTransactionMarkersToAdd.Add(
+                    new ManifestClassMarker
+                    {
+                        Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                        StateVersion = stateVersion,
+                        ManifestClass = _manifestClasses[stateVersion][i],
+                        IsMostSpecific = i == 0,
+                    });
+            }
+        }
+
+        return ledgerTransactionMarkersToAdd;
+    }
+
+    private IEnumerable<LedgerTransactionMarker> CreateMarkersForManifestAddresses()
+    {
+        var ledgerTransactionMarkersToAdd = new List<LedgerTransactionMarker>();
+
+        foreach (var stateVersion in _manifestExtractedAddresses.Keys)
+        {
+            if (!_manifestExtractedAddresses.TryGetValue(stateVersion, out var extractedAddresses))
+            {
+                return ledgerTransactionMarkersToAdd;
+            }
+
             foreach (var proofResourceAddress in extractedAddresses.PresentedProofs.Select(x => x.ResourceAddress).ToHashSet())
             {
-                if (_referencedEntities.TryGet(proofResourceAddress, out var re))
+                if (!_referencedEntities.TryGet(proofResourceAddress, out var referencedEntity))
                 {
-                    _ledgerTransactionMarkersToAdd.Add(
-                        new ManifestAddressLedgerTransactionMarker
-                        {
-                            Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                            StateVersion = stateVersion,
-                            OperationType = LedgerTransactionMarkerOperationType.BadgePresented,
-                            EntityId = re.DatabaseId,
-                        });
+                    throw new UnreachableException($"Entity: {proofResourceAddress} was not present in referenced entities dictionary.");
                 }
+
+                ledgerTransactionMarkersToAdd.Add(
+                    new ManifestAddressLedgerTransactionMarker
+                    {
+                        Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                        StateVersion = stateVersion,
+                        OperationType = LedgerTransactionMarkerOperationType.BadgePresented,
+                        EntityId = referencedEntity.DatabaseId,
+                    });
             }
 
-            foreach (var address in extractedAddresses.ResourceAddresses)
+            foreach (var resourceAddress in extractedAddresses.ResourceAddresses)
             {
-                if (_referencedEntities.TryGet(address, out var re))
+                if (!_referencedEntities.TryGet(resourceAddress, out var referencedEntity))
                 {
-                    _ledgerTransactionMarkersToAdd.Add(
-                        new ManifestAddressLedgerTransactionMarker
-                        {
-                            Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                            StateVersion = stateVersion,
-                            OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
-                            EntityId = re.DatabaseId,
-                        });
+                    throw new UnreachableException($"Entity: {resourceAddress} was not present in referenced entities dictionary.");
                 }
+
+                ledgerTransactionMarkersToAdd.Add(
+                    new ManifestAddressLedgerTransactionMarker
+                    {
+                        Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                        StateVersion = stateVersion,
+                        OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
+                        EntityId = referencedEntity.DatabaseId,
+                    });
             }
 
-            foreach (var address in extractedAddresses.AccountsRequiringAuth)
+            foreach (var entityAddress in extractedAddresses.AccountsRequiringAuth)
             {
-                if (_referencedEntities.TryGet(address, out var re))
+                if (_referencedEntities.TryGet(entityAddress, out var referencedEntity))
                 {
-                    _ledgerTransactionMarkersToAdd.Add(
+                    ledgerTransactionMarkersToAdd.Add(
                         new ManifestAddressLedgerTransactionMarker
                         {
                             Id = _context.Sequences.LedgerTransactionMarkerSequence++,
                             StateVersion = stateVersion,
                             OperationType = LedgerTransactionMarkerOperationType.AccountOwnerMethodCall,
-                            EntityId = re.DatabaseId,
+                            EntityId = referencedEntity.DatabaseId,
                         });
+                }
+                else if (!entityAddress.Decode().IsPreAllocatedAccountAddress())
+                {
+                    throw new UnreachableException($"Entity: {entityAddress} was not present in referenced entities dictionary.");
                 }
             }
 
-            foreach (var address in extractedAddresses.AccountsDepositedInto)
+            foreach (var entityAddress in extractedAddresses.AccountsDepositedInto)
             {
-                if (_referencedEntities.TryGet(address, out var re))
+                if (_referencedEntities.TryGet(entityAddress, out var referencedEntity))
                 {
-                    _ledgerTransactionMarkersToAdd.Add(
+                    ledgerTransactionMarkersToAdd.Add(
                         new ManifestAddressLedgerTransactionMarker
                         {
                             Id = _context.Sequences.LedgerTransactionMarkerSequence++,
                             StateVersion = stateVersion,
                             OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
-                            EntityId = re.DatabaseId,
+                            EntityId = referencedEntity.DatabaseId,
                         });
+                }
+                else if (!entityAddress.Decode().IsPreAllocatedAccountAddress())
+                {
+                    throw new UnreachableException($"Entity: {entityAddress} was not present in referenced entities dictionary.");
                 }
             }
 
-            foreach (var address in extractedAddresses.AccountsWithdrawnFrom)
+            foreach (var entityAddress in extractedAddresses.AccountsWithdrawnFrom)
             {
-                if (_referencedEntities.TryGet(address, out var re))
+                if (_referencedEntities.TryGet(entityAddress, out var referencedEntity))
                 {
-                    _ledgerTransactionMarkersToAdd.Add(
+                    ledgerTransactionMarkersToAdd.Add(
                         new ManifestAddressLedgerTransactionMarker
                         {
                             Id = _context.Sequences.LedgerTransactionMarkerSequence++,
                             StateVersion = stateVersion,
                             OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
-                            EntityId = re.DatabaseId,
+                            EntityId = referencedEntity.DatabaseId,
                         });
                 }
+                else if (!entityAddress.Decode().IsPreAllocatedAccountAddress())
+                {
+                    throw new UnreachableException($"Entity: {entityAddress} was not present in referenced entities dictionary.");
                 }
             }
         }
+
+        return ledgerTransactionMarkersToAdd;
     }
+}

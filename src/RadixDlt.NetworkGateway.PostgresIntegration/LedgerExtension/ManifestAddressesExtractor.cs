@@ -114,22 +114,36 @@ internal static class ManifestAddressesExtractor
         var accountsDepositedInto = manifestSummary.accountsDepositedInto.Select(x => (EntityAddress)x.AddressString()).ToList();
         var identitiesRequiringAuth = manifestSummary.identitiesRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
 
-        var packageAddresses = allAddresses.Where(x => x.Key == ToolkitModel.EntityType.GlobalPackage).SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+        var packageAddresses = allAddresses
+            .Where(x => x.Key == ToolkitModel.EntityType.GlobalPackage)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
+
         var componentAddresses = allAddresses
             .Where(x => x.Key is ToolkitModel.EntityType.GlobalGenericComponent or ToolkitModel.EntityType.InternalGenericComponent)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();
+
         var resourceAddresses = allAddresses
             .Where(x => x.Key is ToolkitModel.EntityType.GlobalFungibleResourceManager or ToolkitModel.EntityType.GlobalNonFungibleResourceManager)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();
+
         var accountAddresses = allAddresses
-            .Where(x => x.Key is ToolkitModel.EntityType.GlobalAccount or ToolkitModel.EntityType.GlobalVirtualEd25519Account
-                or ToolkitModel.EntityType.GlobalVirtualSecp256k1Account)
+            .Where(
+                x => x.Key
+                    is ToolkitModel.EntityType.GlobalAccount
+                    or ToolkitModel.EntityType.GlobalVirtualEd25519Account
+                    or ToolkitModel.EntityType.GlobalVirtualSecp256k1Account)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();
+
         var identityAddresses = allAddresses
-            .Where(x => x.Key is ToolkitModel.EntityType.GlobalIdentity or ToolkitModel.EntityType.GlobalVirtualEd25519Identity or ToolkitModel.EntityType.GlobalVirtualSecp256k1Identity)
+            .Where(
+                x => x.Key
+                    is ToolkitModel.EntityType.GlobalIdentity
+                    or ToolkitModel.EntityType.GlobalVirtualEd25519Identity
+                    or ToolkitModel.EntityType.GlobalVirtualSecp256k1Identity)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();
 
@@ -159,18 +173,18 @@ internal static class ManifestAddressesExtractor
                 switch (proof)
                 {
                     case ToolkitModel.ResourceSpecifier.Amount fungibleProof:
-                        {
-                            var resourceAddress = (EntityAddress)fungibleProof.resourceAddress.AddressString();
-                            mapped.Add(new PresentedProof(accountAddress, resourceAddress));
-                            break;
-                        }
+                    {
+                        var resourceAddress = (EntityAddress)fungibleProof.resourceAddress.AddressString();
+                        mapped.Add(new PresentedProof(accountAddress, resourceAddress));
+                        break;
+                    }
 
                     case ToolkitModel.ResourceSpecifier.Ids nonFungibleProof:
-                        {
-                            var resourceAddress = (EntityAddress)nonFungibleProof.resourceAddress.AddressString();
-                            mapped.Add(new PresentedProof(accountAddress, resourceAddress));
-                            break;
-                        }
+                    {
+                        var resourceAddress = (EntityAddress)nonFungibleProof.resourceAddress.AddressString();
+                        mapped.Add(new PresentedProof(accountAddress, resourceAddress));
+                        break;
+                    }
 
                     default:
                         throw new UnreachableException($"Unexpected proof type {proof.GetType()}");

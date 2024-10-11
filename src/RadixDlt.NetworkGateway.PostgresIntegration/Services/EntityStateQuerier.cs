@@ -99,7 +99,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
     private readonly ReadOnlyDbContext _dbContext;
-    private readonly IVirtualEntityDataProvider _virtualEntityDataProvider;
+    private readonly IPreAllocatedEntityDataProvider _preAllocatedEntityDataProvider;
     private readonly IRoleAssignmentQuerier _roleAssignmentQuerier;
     private readonly IDapperWrapper _dapperWrapper;
     private readonly IEntityQuerier _entityQuerier;
@@ -108,7 +108,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         INetworkConfigurationProvider networkConfigurationProvider,
         ReadOnlyDbContext dbContext,
         IOptionsSnapshot<EndpointOptions> endpointConfiguration,
-        IVirtualEntityDataProvider virtualEntityDataProvider,
+        IPreAllocatedEntityDataProvider preAllocatedEntityDataProvider,
         IRoleAssignmentQuerier roleAssignmentQuerier,
         IDapperWrapper dapperWrapper,
         IEntityQuerier entityQuerier)
@@ -116,7 +116,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
         _endpointConfiguration = endpointConfiguration;
-        _virtualEntityDataProvider = virtualEntityDataProvider;
+        _preAllocatedEntityDataProvider = preAllocatedEntityDataProvider;
         _roleAssignmentQuerier = roleAssignmentQuerier;
         _dapperWrapper = dapperWrapper;
         _entityQuerier = entityQuerier;
@@ -343,12 +343,12 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         twoWayLinkedDappAddress: twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress);
                     break;
 
-                case VirtualIdentityEntity:
-                case VirtualAccountComponentEntity:
-                    var virtualEntityData = await _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
+                case PreAllocatedIdentityEntity:
+                case PreAllocatedAccountComponentEntity:
+                    var preAllocatedEntityData = await _preAllocatedEntityDataProvider.GetPreAllocatedEntityData(entity.Address);
 
-                    details = virtualEntityData.Details;
-                    metadata[entity.Id] = virtualEntityData.Metadata;
+                    details = preAllocatedEntityData.Details;
+                    metadata[entity.Id] = preAllocatedEntityData.Metadata;
                     break;
 
                 case InternalFungibleVaultEntity ifve:
@@ -629,10 +629,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entity = await _entityQuerier.GetEntity<Entity>(request.Address, ledgerState, token);
         GatewayModel.EntityMetadataCollection metadata;
 
-        if (entity is VirtualIdentityEntity or VirtualAccountComponentEntity)
+        if (entity is PreAllocatedIdentityEntity or PreAllocatedAccountComponentEntity)
         {
-            var (_, virtualEntityMetadata) = await _virtualEntityDataProvider.GetVirtualEntityData(entity.Address);
-            metadata = virtualEntityMetadata;
+            var (_, preAllocatedEntityMetadata) = await _preAllocatedEntityDataProvider.GetPreAllocatedEntityData(entity.Address);
+            metadata = preAllocatedEntityMetadata;
         }
         else
         {

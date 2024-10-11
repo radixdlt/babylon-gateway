@@ -111,7 +111,7 @@ internal class DepositPreValidationQuerier : IDepositPreValidationQuerier
     {
         var xrdResourceAddress = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).WellKnownAddresses.Xrd;
         var accountEntity = await _entityQuerier.GetEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
-        if (accountEntity is VirtualAccountComponentEntity)
+        if (accountEntity is PreAllocatedAccountComponentEntity)
         {
             var resourceItems = resourceAddresses
                 .Select(
