@@ -63,7 +63,6 @@
  */
 
 using FluentValidation;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using System;
 
