@@ -186,6 +186,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "account_locker_entry_resource_vault_totals_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_locker_definition_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_resources = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_locker_entry_resource_vault_totals_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "account_locker_entry_touch_history",
                 columns: table => new
                 {
@@ -197,6 +212,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_account_locker_entry_touch_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_locker_totals_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_locker_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_accounts = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_locker_totals_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1066,9 +1096,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "account_locker_definition_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_account_locker_entry_resource_vault_totals_history_account_~",
+                table: "account_locker_entry_resource_vault_totals_history",
+                columns: new[] { "account_locker_definition_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_account_locker_entry_touch_history_account_locker_definitio~",
                 table: "account_locker_entry_touch_history",
                 columns: new[] { "account_locker_definition_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_locker_totals_history_account_locker_entity_id_from~",
+                table: "account_locker_totals_history",
+                columns: new[] { "account_locker_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_resource_preference_rule_aggregate_history_account_~",
@@ -1459,7 +1499,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "account_locker_entry_resource_vault_definition");
 
             migrationBuilder.DropTable(
+                name: "account_locker_entry_resource_vault_totals_history");
+
+            migrationBuilder.DropTable(
                 name: "account_locker_entry_touch_history");
+
+            migrationBuilder.DropTable(
+                name: "account_locker_totals_history");
 
             migrationBuilder.DropTable(
                 name: "account_resource_preference_rule_aggregate_history");

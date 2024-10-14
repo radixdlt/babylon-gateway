@@ -93,7 +93,8 @@ internal class AccountLockerQuerier : IAccountLockerQuerier
         string ResourceAddress,
         string VaultAddress,
         long LastUpdatedAtStateVersion,
-        TokenAmount? Balance);
+        TokenAmount? Balance,
+        long TotalResources);
 
     private record AccountLockerTouchedAtResultRow(long AccountLockerEntityId, long AccountEntityId, long LastUpdatedAt);
 
@@ -140,17 +141,28 @@ SELECT
     re.address AS ResourceAddress,
     ve.address AS VaultAddress,
     vh.from_state_version AS LastUpdatedAtStateVersion,
-    vh.balance AS Balance
+    vh.balance AS Balance,
+    ervth.total_resources as TotalResources
 FROM account_locker_entry_resource_vault_definition d
 INNER JOIN entities re ON re.id = d.resource_entity_id
 INNER JOIN entities ve ON ve.id = d.vault_entity_id
 INNER JOIN LATERAL (
-    SELECT balance::text AS balance, from_state_version
+    SELECT
+        balance::text AS balance,
+        from_state_version
     FROM vault_balance_history
     WHERE vault_entity_id = ve.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) vh ON true
+INNER JOIN LATERAL (
+    SELECT
+        total_resources
+    FROM account_locker_entry_resource_vault_totals_history
+    WHERE account_locker_definition_id = @accountLockerDefinitionId AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) ervth ON true
 WHERE
     d.account_locker_definition_id = @accountLockerDefinitionId
   AND d.from_state_version <= @stateVersion
@@ -197,11 +209,14 @@ LIMIT @limit;",
             ? new GatewayModel.StateAccountLockerAccountResourcesCursor(vaultsAndOneMore.Last().FromStateVersion, vaultsAndOneMore.Last().Id).ToCursorString()
             : null;
 
+        var totalCount = vaultsAndOneMore.FirstOrDefault()?.TotalResources;
+
         return new GatewayModel.StateAccountLockerPageVaultsResponse(
             ledgerState: ledgerState,
             lockerAddress: accountLocker.Address,
             accountAddress: account.Address,
             nextCursor: nextCursor,
+            totalCount: totalCount,
             items: items
         );
     }

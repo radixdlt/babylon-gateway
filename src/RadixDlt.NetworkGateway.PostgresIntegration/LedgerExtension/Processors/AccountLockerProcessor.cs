@@ -90,10 +90,14 @@ internal class AccountLockerProcessor : IProcessorBase, ISubstateUpsertProcessor
     private readonly HashSet<ObservedTouch> _observedTouchHistory = new();
     private readonly List<ObservedVault> _observedVaultDefinitions = new();
     private readonly Dictionary<AccountLockerEntryDbLookup, AccountLockerEntryDefinition> _existingEntryDefinitions = new();
+    private readonly Dictionary<long, AccountLockerTotalsHistory> _existingTotalsHistory = new();
+    private readonly Dictionary<long, AccountLockerEntryResourceVaultTotalsHistory> _existingResourceVaultTotalsHistory = new();
 
     private readonly List<AccountLockerEntryDefinition> _definitionsToAdd = new();
     private readonly List<AccountLockerEntryResourceVaultDefinition> _resourceVaultDefinitionsToAdd = new();
     private readonly List<AccountLockerEntryTouchHistory> _touchHistoryToAdd = new();
+    private readonly List<AccountLockerTotalsHistory> _totalsHistoryToAdd = new();
+    private readonly List<AccountLockerEntryResourceVaultTotalsHistory> _resourceVaultTotalsHistoryToAdd = new();
 
     public AccountLockerProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
     {
@@ -161,11 +165,14 @@ internal class AccountLockerProcessor : IProcessorBase, ISubstateUpsertProcessor
     public async Task LoadDependenciesAsync()
     {
         _existingEntryDefinitions.AddRange(await ExistingAccountLockerEntryDefinitions());
+        _existingTotalsHistory.AddRange(await ExistingAccountLockerTotalsHistory());
+        _existingResourceVaultTotalsHistory.AddRange(await ExistingAccountLockerEntryResourceVaultTotalsHistory());
     }
 
     public void ProcessChanges()
     {
         _existingEntryDefinitions.AddRange(_definitionsToAdd.ToDictionary(e => new AccountLockerEntryDbLookup(e.AccountLockerEntityId, e.AccountEntityId)));
+
         _resourceVaultDefinitionsToAdd.AddRange(
             _observedVaultDefinitions.Select(
                 rv => new AccountLockerEntryResourceVaultDefinition
@@ -176,6 +183,7 @@ internal class AccountLockerProcessor : IProcessorBase, ISubstateUpsertProcessor
                     ResourceEntityId = _referencedEntities.Get(rv.ResourceAddress).DatabaseId,
                     VaultEntityId = _referencedEntities.Get(rv.VaultAddress).DatabaseId,
                 }));
+
         _touchHistoryToAdd.AddRange(
             _observedTouchHistory.Select(
                 th => new AccountLockerEntryTouchHistory
@@ -184,6 +192,38 @@ internal class AccountLockerProcessor : IProcessorBase, ISubstateUpsertProcessor
                     FromStateVersion = th.StateVersion,
                     AccountLockerDefinitionId = _existingEntryDefinitions[new AccountLockerEntryDbLookup(th.AccountLockerEntityId, th.AccountEntityId)].Id,
                 }));
+
+        foreach (var newDefinition in _definitionsToAdd)
+        {
+            var totalsExists = _existingTotalsHistory.TryGetValue(newDefinition.AccountEntityId, out var existingTotals);
+
+            var newTotals = new AccountLockerTotalsHistory
+            {
+                Id = _context.Sequences.AccountLockerTotalsHistorySequence++,
+                FromStateVersion = newDefinition.FromStateVersion,
+                AccountLockerEntityId = newDefinition.AccountEntityId,
+                TotalAccounts = totalsExists ? existingTotals!.TotalAccounts + 1 : 1,
+            };
+
+            _totalsHistoryToAdd.Add(newTotals);
+            _existingTotalsHistory[newDefinition.AccountEntityId] = newTotals;
+        }
+
+        foreach (var newVaultDefinition in _resourceVaultDefinitionsToAdd)
+        {
+            var totalsExists = _existingResourceVaultTotalsHistory.TryGetValue(newVaultDefinition.AccountLockerDefinitionId, out var existingTotals);
+
+            var newTotals = new AccountLockerEntryResourceVaultTotalsHistory
+            {
+                Id = _context.Sequences.AccountLockerEntryResourceVaultTotalsHistorySequence++,
+                FromStateVersion = newVaultDefinition.FromStateVersion,
+                AccountLockerDefinitionId = newVaultDefinition.AccountLockerDefinitionId,
+                TotalResources = totalsExists ? existingTotals!.TotalResources + 1 : 1,
+            };
+
+            _resourceVaultTotalsHistoryToAdd.Add(newTotals);
+            _existingResourceVaultTotalsHistory[newVaultDefinition.AccountLockerDefinitionId] = newTotals;
+        }
     }
 
     public async Task<int> SaveEntitiesAsync()
@@ -193,6 +233,8 @@ internal class AccountLockerProcessor : IProcessorBase, ISubstateUpsertProcessor
         rowsInserted += await CopyAccountLockerEntryDefinition();
         rowsInserted += await CopyAccountLockerEntryResourceVaultDefinition();
         rowsInserted += await CopyAccountLockerEntryTouchHistory();
+        rowsInserted += await CopyAccountLockerTotalsHistory();
+        rowsInserted += await CopyAccountLockerResourceVaultTotalsHistory();
 
         return rowsInserted;
     }
@@ -213,6 +255,62 @@ SELECT *
 FROM account_locker_entry_definition
 WHERE (account_locker_entity_id, account_entity_id) IN (SELECT * FROM variables)",
             e => new AccountLockerEntryDbLookup(e.AccountLockerEntityId, e.AccountEntityId));
+    }
+
+    private async Task<IDictionary<long, AccountLockerTotalsHistory>> ExistingAccountLockerTotalsHistory()
+    {
+        var accountLockerEntityIds = _observedVaultDefinitions
+            .Select(x => x.AccountLockerEntityId)
+            .ToHashSet();
+
+        if (accountLockerEntityIds.Count == 0)
+        {
+            return ImmutableDictionary<long, AccountLockerTotalsHistory>.Empty;
+        }
+
+        return await _context.ReadHelper.LoadDependencies<long, AccountLockerTotalsHistory>(
+            @$"
+WITH variables (account_locker_entity_id) AS (
+    SELECT UNNEST({accountLockerEntityIds})
+)
+SELECT alth.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM account_locker_totals_history
+    WHERE account_locker_entity_id = variables.account_locker_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) alth ON true;",
+            e => e.AccountLockerEntityId);
+    }
+
+    private async Task<IDictionary<long, AccountLockerEntryResourceVaultTotalsHistory>> ExistingAccountLockerEntryResourceVaultTotalsHistory()
+    {
+        var accountLockerDefinitionIds = _existingEntryDefinitions.Values
+            .Select(x => x.Id)
+            .ToHashSet();
+
+        if (accountLockerDefinitionIds.Count == 0)
+        {
+            return ImmutableDictionary<long, AccountLockerEntryResourceVaultTotalsHistory>.Empty;
+        }
+
+        return await _context.ReadHelper.LoadDependencies<long, AccountLockerEntryResourceVaultTotalsHistory>(
+            @$"
+WITH variables (account_locker_definition_id) AS (
+    SELECT UNNEST({accountLockerDefinitionIds})
+)
+SELECT alrvth.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM account_locker_entry_resource_vault_totals_history
+    WHERE account_locker_definition_id = variables.account_locker_definition_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) alrvth ON true;",
+            e => e.AccountLockerDefinitionId);
     }
 
     private Task<int> CopyAccountLockerEntryDefinition() => _context.WriteHelper.Copy(
@@ -247,5 +345,27 @@ WHERE (account_locker_entity_id, account_entity_id) IN (SELECT * FROM variables)
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.AccountLockerDefinitionId, NpgsqlDbType.Bigint, token);
+        });
+
+    private Task<int> CopyAccountLockerTotalsHistory() => _context.WriteHelper.Copy(
+        _totalsHistoryToAdd,
+        "COPY account_locker_totals_history (id, from_state_version, account_locker_entity_id, total_accounts) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AccountLockerEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.TotalAccounts, NpgsqlDbType.Bigint, token);
+        });
+
+    private Task<int> CopyAccountLockerResourceVaultTotalsHistory() => _context.WriteHelper.Copy(
+        _resourceVaultTotalsHistoryToAdd,
+        "COPY account_locker_entry_resource_vault_totals_history (id, from_state_version, account_locker_definition_id, total_resources) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AccountLockerDefinitionId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.TotalResources, NpgsqlDbType.Bigint, token);
         });
 }
