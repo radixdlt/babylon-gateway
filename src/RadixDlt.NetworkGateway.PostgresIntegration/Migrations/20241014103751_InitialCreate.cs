@@ -90,8 +90,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call,badge_presented")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change,validator,protocol_update,genesis")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_transaction_type", "user,epoch_change,round_change,genesis_flash,genesis_transaction,protocol_update_flash,protocol_update_transaction")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "transaction_type,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash")
                 .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
@@ -572,7 +572,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     operation_type = table.Column<LedgerTransactionMarkerOperationType>(type: "ledger_transaction_marker_operation_type", nullable: true),
                     manifest_class = table.Column<LedgerTransactionManifestClass>(type: "ledger_transaction_manifest_class", nullable: true),
                     is_most_specific = table.Column<bool>(type: "boolean", nullable: true),
-                    origin_type = table.Column<LedgerTransactionMarkerOriginType>(type: "ledger_transaction_marker_origin_type", nullable: true)
+                    transaction_type = table.Column<LedgerTransactionMarkerTransactionType>(type: "ledger_transaction_marker_transaction_type", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1241,15 +1241,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'manifest_address'");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transaction_markers_origin_type_state_version",
-                table: "ledger_transaction_markers",
-                columns: new[] { "origin_type", "state_version" },
-                filter: "discriminator = 'origin'");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_markers_state_version",
                 table: "ledger_transaction_markers",
                 column: "state_version");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_transaction_type_state_version",
+                table: "ledger_transaction_markers",
+                columns: new[] { "transaction_type", "state_version" },
+                filter: "discriminator = 'transaction_type'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_epoch_round_in_epoch",

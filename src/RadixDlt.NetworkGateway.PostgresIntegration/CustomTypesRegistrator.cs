@@ -114,7 +114,7 @@ internal static class CustomTypesRegistrator
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerEventType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOperationType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOriginType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerTransactionType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PackageVmType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionPayloadLedgerStatus>();

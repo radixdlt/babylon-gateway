@@ -376,17 +376,17 @@ internal class TransactionQuerier : ITransactionQuerier
         }
         else
         {
-            var originType = request.SearchCriteria.Kind switch
+            var transactionType = request.SearchCriteria.Kind switch
             {
-                LedgerTransactionKindFilter.UserOnly => LedgerTransactionMarkerOriginType.User,
-                LedgerTransactionKindFilter.EpochChangeOnly => LedgerTransactionMarkerOriginType.EpochChange,
+                LedgerTransactionKindFilter.UserOnly => LedgerTransactionMarkerTransactionType.User,
+                LedgerTransactionKindFilter.EpochChangeOnly => LedgerTransactionMarkerTransactionType.EpochChange,
                 _ => throw new UnreachableException($"Unexpected value of kindFilter: {request.SearchCriteria.Kind}"),
             };
 
             searchQuery = searchQuery
                 .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                .OfType<OriginLedgerTransactionMarker>()
-                .Where(oltm => oltm.OriginType == originType)
+                .OfType<TransactionTypeLedgerTransactionMarker>()
+                .Where(oltm => oltm.TransactionType == transactionType)
                 .Where(oltm => oltm.StateVersion <= upperStateVersion && oltm.StateVersion >= (lowerStateVersion ?? oltm.StateVersion))
                 .Select(oltm => oltm.StateVersion);
         }

@@ -129,7 +129,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<LedgerTransactionMarkerType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionMarkerEventType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionMarkerOperationType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOriginType>();
+                dataSourceBuilder.MapEnum<LedgerTransactionMarkerTransactionType>();
                 dataSourceBuilder.MapEnum<NonFungibleIdType>();
                 dataSourceBuilder.MapEnum<PackageVmType>();
                 dataSourceBuilder.MapEnum<PendingTransactionPayloadLedgerStatus>();

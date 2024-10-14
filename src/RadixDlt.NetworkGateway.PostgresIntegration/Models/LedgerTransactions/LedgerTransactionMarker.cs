@@ -69,20 +69,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal enum LedgerTransactionMarkerOriginType
+internal enum LedgerTransactionMarkerTransactionType
 {
     User,
-
-    /// <summary>
-    /// Additional marker that will be assigned to validator transactions resulting in epoch changes.
-    /// </summary>
     EpochChange,
-
-    Validator,
-
-    ProtocolUpdate,
-
-    Genesis,
+    RoundChange,
+    GenesisFlash,
+    GenesisTransaction,
+    ProtocolUpdateFlash,
+    ProtocolUpdateTransaction,
 }
 
 internal enum LedgerTransactionMarkerEventType
@@ -111,10 +106,10 @@ internal abstract class LedgerTransactionMarker
     public long StateVersion { get; set; }
 }
 
-internal class OriginLedgerTransactionMarker : LedgerTransactionMarker
+internal class TransactionTypeLedgerTransactionMarker : LedgerTransactionMarker
 {
-    [Column("origin_type")]
-    public LedgerTransactionMarkerOriginType OriginType { get; set; }
+    [Column("transaction_type")]
+    public LedgerTransactionMarkerTransactionType TransactionType { get; set; }
 }
 
 internal class EventLedgerTransactionMarker : LedgerTransactionMarker

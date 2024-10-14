@@ -202,7 +202,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerEventType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOperationType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerTransactionType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PackageVmType>();
         modelBuilder.HasPostgresEnum<PendingTransactionPayloadLedgerStatus>();
@@ -275,7 +275,7 @@ internal abstract class CommonDbContext : DbContext
             .Entity<LedgerTransactionMarker>()
             .HasDiscriminator<LedgerTransactionMarkerType>(DiscriminatorColumnName)
             .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)
-            .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
+            .HasValue<TransactionTypeLedgerTransactionMarker>(LedgerTransactionMarkerType.TransactionType)
             .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress)
             .HasValue<ManifestClassMarker>(LedgerTransactionMarkerType.ManifestClass)
             .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity)
@@ -291,9 +291,9 @@ internal abstract class CommonDbContext : DbContext
             .HasFilter("discriminator = 'event'");
 
         modelBuilder
-            .Entity<OriginLedgerTransactionMarker>()
-            .HasIndex(e => new { e.OriginType, e.StateVersion })
-            .HasFilter("discriminator = 'origin'");
+            .Entity<TransactionTypeLedgerTransactionMarker>()
+            .HasIndex(e => new { e.TransactionType, e.StateVersion })
+            .HasFilter("discriminator = 'transaction_type'");
 
         modelBuilder
             .Entity<ManifestAddressLedgerTransactionMarker>()

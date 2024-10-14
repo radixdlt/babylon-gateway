@@ -73,44 +73,37 @@ using UserLedgerTransaction = RadixDlt.CoreApiSdk.Model.UserLedgerTransaction;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal class OriginLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor
+internal class TransactionTypeLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor
 {
     private readonly ProcessorContext _context;
-    private readonly List<OriginLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
+    private readonly List<TransactionTypeLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
 
-    public OriginLedgerTransactionMarkerProcessor(ProcessorContext context, ReferencedEntityDictionary _, NetworkConfiguration __)
+    public TransactionTypeLedgerTransactionMarkerProcessor(ProcessorContext context, ReferencedEntityDictionary _, NetworkConfiguration __)
     {
         _context = context;
     }
 
     public void VisitTransaction(CoreApiSdk.Model.CommittedTransaction committedTransaction, long stateVersion)
     {
-        if (committedTransaction.Receipt.NextEpoch != null)
+        var transactionType = committedTransaction.LedgerTransaction switch
         {
-            _ledgerTransactionMarkersToAdd.Add(
-                new OriginLedgerTransactionMarker
-                {
-                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                    StateVersion = stateVersion,
-                    OriginType = LedgerTransactionMarkerOriginType.EpochChange,
-                });
-        }
-
-        var origin = committedTransaction.LedgerTransaction switch
-        {
-            FlashLedgerTransaction => LedgerTransactionMarkerOriginType.ProtocolUpdate,
-            GenesisLedgerTransaction => LedgerTransactionMarkerOriginType.Genesis,
-            RoundUpdateLedgerTransaction => LedgerTransactionMarkerOriginType.Validator,
-            UserLedgerTransaction => LedgerTransactionMarkerOriginType.User,
+            FlashLedgerTransaction => LedgerTransactionMarkerTransactionType.ProtocolUpdateFlash,
+            GenesisLedgerTransaction genesisLedgerTransaction => genesisLedgerTransaction.IsFlash
+                ? LedgerTransactionMarkerTransactionType.GenesisFlash
+                : LedgerTransactionMarkerTransactionType.GenesisTransaction,
+            RoundUpdateLedgerTransaction => committedTransaction.Receipt.NextEpoch != null
+                ? LedgerTransactionMarkerTransactionType.EpochChange
+                : LedgerTransactionMarkerTransactionType.RoundChange,
+            UserLedgerTransaction => LedgerTransactionMarkerTransactionType.User,
             _ => throw new ArgumentOutOfRangeException($"Unexpected ledger transaction type: {committedTransaction.LedgerTransaction.GetType()}"),
         };
 
         _ledgerTransactionMarkersToAdd.Add(
-            new OriginLedgerTransactionMarker
+            new TransactionTypeLedgerTransactionMarker
             {
                 Id = _context.Sequences.LedgerTransactionMarkerSequence++,
                 StateVersion = stateVersion,
-                OriginType = origin,
+                TransactionType = transactionType,
             });
     }
 
