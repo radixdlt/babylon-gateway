@@ -198,13 +198,6 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.ComponentRoyaltyConfig ToGatewayModel(this ComponentMethodRoyaltyEntryHistory[]? input)
-    {
-        return new GatewayModel.ComponentRoyaltyConfig(
-            isEnabled: input != null,
-            methodRules: input?.Select(e => new GatewayModel.ComponentMethodRoyalty(e.MethodName, TranscodeRoyaltyAmount(e.RoyaltyAmount))).ToList());
-    }
-
     public static GatewayModel.PackageBlueprintCollectionItem ToGatewayModel(this PackageBlueprintHistory input, Dictionary<long, EntityAddress> correlatedAddresses)
     {
         return new GatewayModel.PackageBlueprintCollectionItem(
@@ -263,10 +256,12 @@ internal static class GatewayModelExtensions
 
         foreach (var f in input.FungibleEntityBalanceChanges)
         {
-            fungibleFeeBalanceChanges.AddRange(f.FeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleFeeBalanceChanges(x.Type.ToGatewayModel(), f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
-            fungibleBalanceChanges.AddRange(f.NonFeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleBalanceChanges(f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
+            fungibleFeeBalanceChanges.AddRange(
+                f.FeeBalanceChanges
+                    .Select(x => new GatewayModel.TransactionFungibleFeeBalanceChanges(x.Type.ToGatewayModel(), f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
+            fungibleBalanceChanges.AddRange(
+                f.NonFeeBalanceChanges
+                    .Select(x => new GatewayModel.TransactionFungibleBalanceChanges(f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
         }
 
         var nonFungibleBalanceChanges = input
@@ -277,7 +272,7 @@ internal static class GatewayModelExtensions
         return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
     }
 
-    private static GatewayModel.RoyaltyAmount? ToGatewayModel(this CoreModel.RoyaltyAmount? input)
+    internal static GatewayModel.RoyaltyAmount? ToGatewayModel(this CoreModel.RoyaltyAmount? input)
     {
         if (input == null)
         {
@@ -306,16 +301,6 @@ internal static class GatewayModelExtensions
         };
     }
 
-    private static GatewayModel.RoyaltyAmount? TranscodeRoyaltyAmount(string? input)
-    {
-        if (input == null)
-        {
-            return null;
-        }
-
-        return JsonConvert.DeserializeObject<CoreModel.RoyaltyAmount>(input).ToGatewayModel();
-    }
-
     private static GatewayModel.BlueprintRoyaltyConfig? TranscodeBlueprintRoyaltyConfig(string? input)
     {
         if (input == null)
@@ -334,7 +319,8 @@ internal static class GatewayModelExtensions
 
         if (coreModel.MethodRules != null)
         {
-            methodRules = coreModel.MethodRules
+            methodRules = coreModel
+                .MethodRules
                 .Select(mr => new GatewayModel.BlueprintMethodRoyalty(mr.MethodName, mr.RoyaltyAmount.ToGatewayModel()))
                 .ToList();
         }

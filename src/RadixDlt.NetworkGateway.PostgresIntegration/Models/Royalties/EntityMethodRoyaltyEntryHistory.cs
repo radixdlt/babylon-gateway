@@ -62,107 +62,30 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("entity_method_royalty_entry_history")]
+public class EntityMethodRoyaltyEntryHistory
 {
-    public long AccountLockerEntryDefinitionSequence { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public long AccountLockerEntryResourceVaultDefinitionSequence { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public long AccountLockerEntryTouchHistorySequence { get; set; }
+    [Column("definition_id")]
+    public long DefinitionId { get; set; }
 
-    public long AccountLockerTotalsHistorySequence { get; set; }
+    [Column("royalty_amount", TypeName = "jsonb")]
+    public string? RoyaltyAmount { get; set; }
 
-    public long AccountLockerEntryResourceVaultTotalsHistorySequence { get; set; }
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
 
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
-
-    public long AccountResourcePreferenceRuleEntryHistorySequence { get; set; }
-
-    public long AccountResourcePreferenceRuleAggregateHistorySequence { get; set; }
-
-    public long AccountAuthorizedDepositorEntryHistorySequence { get; set; }
-
-    public long AccountAuthorizedDepositorAggregateHistorySequence { get; set; }
-
-    public long StateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataEntryHistorySequence { get; set; }
-
-    public long EntityMetadataEntryDefinitionSequence { get; set; }
-
-    public long EntityMetadataTotalsHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long EntityMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long EntityMethodRoyaltyTotalsHistorySequence { get; set; }
-
-    public long EntityMethodRoyaltyEntryDefinitionSequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDefinitionSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdLocationHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long SchemaEntryDefinitionSequence { get; set; }
-
-    public long SchemaEntryAggregateHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryDefinitionSequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorCumulativeEmissionHistorySequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
-
-    public long PackageBlueprintAggregateHistorySequence { get; set; }
-
-    public long PackageCodeAggregateHistorySequence { get; set; }
-
-    public long UnverifiedStandardMetadataAggregateHistorySequence { get; set; }
-
-    public long UnverifiedStandardMetadataEntryHistorySequence { get; set; }
-
-    public long ResourceHoldersSequence { get; set; }
-
-    public long EntityResourceEntryDefinitionSequence { get; set; }
-
-    public long EntityResourceVaultEntryDefinitionSequence { get; set; }
-
-    public long EntityResourceTotalsHistorySequence { get; set; }
-
-    public long EntityResourceVaultTotalsHistorySequence { get; set; }
-
-    public long EntityResourceBalanceHistorySequence { get; set; }
-
-    public long VaultBalanceHistorySequence { get; set; }
-
-    public long NonFungibleVaultEntryDefinitionSequence { get; set; }
-
-    public long NonFungibleVaultEntryHistorySequence { get; set; }
+    [Column("is_locked")]
+    public bool IsLocked { get; set; }
 }

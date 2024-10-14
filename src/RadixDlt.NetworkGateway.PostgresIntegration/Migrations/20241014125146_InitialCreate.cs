@@ -262,38 +262,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "component_method_royalty_aggregate_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_component_method_royalty_aggregate_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "component_method_royalty_entry_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    method_name = table.Column<string>(type: "text", nullable: false),
-                    royalty_amount = table.Column<string>(type: "jsonb", nullable: true),
-                    is_locked = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_component_method_royalty_entry_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "entities",
                 columns: table => new
                 {
@@ -367,6 +335,54 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_entity_metadata_totals_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_method_royalty_entry_definition",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    method_name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_method_royalty_entry_definition", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_method_royalty_entry_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    definition_id = table.Column<long>(type: "bigint", nullable: false),
+                    royalty_amount = table.Column<string>(type: "jsonb", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    is_locked = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_method_royalty_entry_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_method_royalty_totals_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_entries_including_deleted = table.Column<long>(type: "bigint", nullable: false),
+                    total_entries_excluding_deleted = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_method_royalty_totals_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1121,21 +1137,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "account_entity_id", "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_component_method_royalty_aggregate_history_entity_id_from_s~",
-                table: "component_method_royalty_aggregate_history",
-                columns: new[] { "entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_component_method_royalty_entry_history_entity_id_from_state~",
-                table: "component_method_royalty_entry_history",
-                columns: new[] { "entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_component_method_royalty_entry_history_entity_id_method_nam~",
-                table: "component_method_royalty_entry_history",
-                columns: new[] { "entity_id", "method_name", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_entities_address",
                 table: "entities",
                 column: "address",
@@ -1165,6 +1166,26 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_entity_metadata_totals_history_entity_id_from_state_version",
                 table: "entity_metadata_totals_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_method_royalty_entry_definition_entity_id_from_state~",
+                table: "entity_method_royalty_entry_definition",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_method_royalty_entry_definition_entity_id_method_name",
+                table: "entity_method_royalty_entry_definition",
+                columns: new[] { "entity_id", "method_name" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_method_royalty_entry_history_definition_id_from_stat~",
+                table: "entity_method_royalty_entry_history",
+                columns: new[] { "definition_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_method_royalty_totals_history_entity_id_from_state_v~",
+                table: "entity_method_royalty_totals_history",
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
@@ -1514,12 +1535,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "account_resource_preference_rule_entry_history");
 
             migrationBuilder.DropTable(
-                name: "component_method_royalty_aggregate_history");
-
-            migrationBuilder.DropTable(
-                name: "component_method_royalty_entry_history");
-
-            migrationBuilder.DropTable(
                 name: "entities");
 
             migrationBuilder.DropTable(
@@ -1530,6 +1545,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "entity_metadata_totals_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_method_royalty_entry_definition");
+
+            migrationBuilder.DropTable(
+                name: "entity_method_royalty_entry_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_method_royalty_totals_history");
 
             migrationBuilder.DropTable(
                 name: "entity_resource_balance_history");

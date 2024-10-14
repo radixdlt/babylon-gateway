@@ -135,9 +135,11 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityRoleAssignmentsAggregateHistory> EntityRoleAssignmentsAggregateHistory => Set<EntityRoleAssignmentsAggregateHistory>();
 
-    public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentEntityMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
+    public DbSet<EntityMethodRoyaltyEntryHistory> ComponentEntityMethodRoyaltyEntryHistory => Set<EntityMethodRoyaltyEntryHistory>();
 
-    public DbSet<ComponentMethodRoyaltyAggregateHistory> ComponentEntityMethodRoyaltyAggregateHistory => Set<ComponentMethodRoyaltyAggregateHistory>();
+    public DbSet<EntityMethodRoyaltyEntryDefinition> EntityMethodRoyaltyEntryDefinition => Set<EntityMethodRoyaltyEntryDefinition>();
+
+    public DbSet<EntityMethodRoyaltyTotalsHistory> EntityMethodTotalsHistory => Set<EntityMethodRoyaltyTotalsHistory>();
 
     public DbSet<PackageBlueprintHistory> PackageBlueprintHistory => Set<PackageBlueprintHistory>();
 
@@ -508,15 +510,19 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<ComponentMethodRoyaltyEntryHistory>()
+            .Entity<EntityMethodRoyaltyEntryHistory>()
+            .HasIndex(e => new { e.DefinitionId, e.FromStateVersion });
+
+        modelBuilder
+            .Entity<EntityMethodRoyaltyEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.MethodName });
+
+        modelBuilder
+            .Entity<EntityMethodRoyaltyEntryDefinition>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<ComponentMethodRoyaltyEntryHistory>()
-            .HasIndex(e => new { e.EntityId, e.MethodName, e.FromStateVersion });
-
-        modelBuilder
-            .Entity<ComponentMethodRoyaltyAggregateHistory>()
+            .Entity<EntityMethodRoyaltyTotalsHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder

@@ -619,7 +619,7 @@ UPDATE pending_transactions
             new EntityStateProcessor(processorContext, referencedEntities),
             new EntityMetadataProcessor(processorContext),
             new EntitySchemaProcessor(processorContext, referencedEntities),
-            new ComponentMethodRoyaltyProcessor(processorContext),
+            new EntityMethodRoyaltyProcessor(processorContext),
             new EntityRoleAssignmentProcessor(processorContext),
             new PackageCodeProcessor(processorContext),
             new PackageBlueprintProcessor(processorContext, referencedEntities),

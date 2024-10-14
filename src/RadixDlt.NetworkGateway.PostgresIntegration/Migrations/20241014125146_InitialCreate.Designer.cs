@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20241011144531_InitialCreate")]
+    [Migration("20241014125146_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -418,74 +418,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("account_resource_preference_rule_entry_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentMethodRoyaltyAggregateHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("EntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entity_id");
-
-                    b.Property<List<long>>("EntryIds")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("entry_ids");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntityId", "FromStateVersion");
-
-                    b.ToTable("component_method_royalty_aggregate_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentMethodRoyaltyEntryHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("EntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entity_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_locked");
-
-                    b.Property<string>("MethodName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("method_name");
-
-                    b.Property<string>("RoyaltyAmount")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("royalty_amount");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntityId", "FromStateVersion");
-
-                    b.HasIndex("EntityId", "MethodName", "FromStateVersion");
-
-                    b.ToTable("component_method_royalty_entry_history");
-                });
-
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity", b =>
                 {
                     b.Property<long>("Id")
@@ -649,6 +581,105 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("EntityId", "FromStateVersion");
 
                     b.ToTable("entity_metadata_totals_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityMethodRoyaltyEntryDefinition", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<string>("MethodName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("method_name");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.HasIndex("EntityId", "MethodName");
+
+                    b.ToTable("entity_method_royalty_entry_definition");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityMethodRoyaltyEntryHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("DefinitionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("definition_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
+
+                    b.Property<string>("RoyaltyAmount")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("royalty_amount");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DefinitionId", "FromStateVersion");
+
+                    b.ToTable("entity_method_royalty_entry_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityMethodRoyaltyTotalsHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("TotalEntriesExcludingDeleted")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_entries_excluding_deleted");
+
+                    b.Property<long>("TotalEntriesIncludingDeleted")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_entries_including_deleted");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.ToTable("entity_method_royalty_totals_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceBalanceHistory", b =>

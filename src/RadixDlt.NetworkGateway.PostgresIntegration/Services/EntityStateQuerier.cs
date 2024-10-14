@@ -243,7 +243,12 @@ internal class EntityStateQuerier : IEntityStateQuerier
         // virtual entities generate those on their own (dynamically generated information)
         var stateHistory = await GetStateHistory(persistedComponentEntities, ledgerState, token);
         var componentRoyaltyConfigs = globalPersistedComponentEntities.Any() && optIns.ComponentRoyaltyConfig
-            ? await GetComponentRoyaltyConfigs(globalPersistedComponentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
+            ? await EntityRoyaltyConfigQuery.Execute(
+                _dbContext.Database.GetDbConnection(),
+                _dapperWrapper,
+                globalPersistedComponentEntities.Select(x => x.Id).ToArray(),
+                ledgerState,
+                token)
             : null;
 
         var items = new List<GatewayModel.StateEntityDetailsResponseItem>();
@@ -381,7 +386,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                 case ComponentEntity ce:
                     string? componentRoyaltyVaultBalance = null;
-                    ComponentMethodRoyaltyEntryHistory[]? componentRoyaltyConfig = null;
+                    GatewayModel.ComponentRoyaltyConfig? componentRoyaltyConfig = null;
                     GatewayModel.TwoWayLinkedDappOnLedgerDetails? twoWayLinkedDappOnLedgerDetails = null;
                     var nonAccountTwoWayLinkedDapp = twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress;
 
@@ -417,7 +422,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         state: state != null ? new JRaw(state) : null,
                         roleAssignments: roleAssignments,
                         royaltyVaultBalance: componentRoyaltyVaultBalance,
-                        royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null,
+                        royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig : null,
                         twoWayLinkedDappAddress: nonAccountTwoWayLinkedDapp,
                         twoWayLinkedDappDetails: twoWayLinkedDappOnLedgerDetails,
                         nativeResourceDetails: nativeResourceDetails);
@@ -877,40 +882,5 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({schemaEntityIds}), UNNEST({sch
         }
 
         return result;
-    }
-
-    private async Task<Dictionary<long, ComponentMethodRoyaltyEntryHistory[]>> GetComponentRoyaltyConfigs(long[] componentEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        if (!componentEntityIds.Any())
-        {
-            return new Dictionary<long, ComponentMethodRoyaltyEntryHistory[]>();
-        }
-
-        return (await _dbContext
-                .ComponentEntityMethodRoyaltyEntryHistory
-                .FromSqlInterpolated($@"
-WITH variables (component_entity_id) AS (
-   SELECT UNNEST({componentEntityIds})
-),
-aggregates AS (
-   SELECT cmrah.*
-   FROM variables
-   INNER JOIN LATERAL (
-        SELECT *
-        FROM component_method_royalty_aggregate_history
-        WHERE entity_id = variables.component_entity_id AND from_state_version <= {ledgerState.StateVersion}
-        ORDER BY from_state_version DESC
-        LIMIT 1
-   ) cmrah ON TRUE
-)
-SELECT cmreh.*
-FROM aggregates
-INNER JOIN LATERAL UNNEST(entry_ids) WITH ORDINALITY AS component_method_royalty_join(id, ordinality) ON TRUE
-INNER JOIN component_method_royalty_entry_history cmreh ON cmreh.id = component_method_royalty_join.id
-ORDER BY component_method_royalty_join.ordinality ASC;")
-                .AnnotateMetricName()
-                .ToListAsync(token))
-            .GroupBy(b => b.EntityId)
-            .ToDictionary(g => g.Key, g => g.ToArray());
     }
 }

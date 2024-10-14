@@ -62,14 +62,17 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+// <copyright file="EntityMethodRoyaltyEntryDefinition.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("component_method_royalty_aggregate_history")]
-public class ComponentMethodRoyaltyAggregateHistory : IAggregateHolder
+[Table("entity_method_royalty_entry_definition")]
+public class EntityMethodRoyaltyEntryDefinition
 {
     [Key]
     [Column("id")]
@@ -81,11 +84,6 @@ public class ComponentMethodRoyaltyAggregateHistory : IAggregateHolder
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("entry_ids")]
-    public List<long> EntryIds { get; set; }
-
-    IEnumerable<(string Name, int TotalCount)> IAggregateHolder.AggregateCounts()
-    {
-        yield return (nameof(EntryIds), EntryIds.Count);
-    }
+    [Column("method_name")]
+    public string MethodName { get; set; }
 }

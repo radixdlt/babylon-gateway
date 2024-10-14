@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("component_method_royalty_entry_history")]
-public class ComponentMethodRoyaltyEntryHistory
+[Table("entity_method_royalty_totals_history")]
+public class EntityMethodRoyaltyTotalsHistory
 {
     [Key]
     [Column("id")]
@@ -80,12 +80,9 @@ public class ComponentMethodRoyaltyEntryHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("method_name")]
-    public string MethodName { get; set; }
+    [Column("total_entries_including_deleted")]
+    public long TotalEntriesIncludingDeleted { get; set; }
 
-    [Column("royalty_amount", TypeName = "jsonb")]
-    public string? RoyaltyAmount { get; set; }
-
-    [Column("is_locked")]
-    public bool IsLocked { get; set; }
+    [Column("total_entries_excluding_deleted")]
+    public long TotalEntriesExcludingDeleted { get; set; }
 }

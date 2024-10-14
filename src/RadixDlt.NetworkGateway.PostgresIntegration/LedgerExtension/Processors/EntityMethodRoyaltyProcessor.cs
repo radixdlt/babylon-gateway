@@ -63,7 +63,6 @@
  */
 
 using NpgsqlTypes;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -73,32 +72,32 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record struct MetadataEntryDbLookup(long EntityId, string Key);
+internal record struct EntityMethodRoyaltyEntry(CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate NewSubstate, CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate? PreviousSubstate);
 
-internal record struct MetadataChangePointerLookup(long EntityId, long StateVersion);
-
-internal record struct MetadataEntry(CoreModel.MetadataModuleEntrySubstate NewSubstate, CoreModel.MetadataModuleEntrySubstate? PreviousSubstate);
-
-internal record MetadataChangePointer
+internal class EntityMethodRoyaltyProcessor : IProcessorBase, ISubstateUpsertProcessor
 {
-    public List<MetadataEntry> Entries { get; } = new();
-}
+    private record struct EntityMethodRoyaltyEntryDbLookup(long EntityId, string MethodName);
 
-internal class EntityMetadataProcessor : IProcessorBase, ISubstateUpsertProcessor
-{
+    private record struct EntityMethodRoyaltyChangePointerLookup(long EntityId, long StateVersion);
+
+    private record EntityMethodRoyaltyChangePointer(ReferencedEntity ReferencedEntity)
+    {
+        public List<EntityMethodRoyaltyEntry> Entries { get; } = new();
+    }
+
     private readonly ProcessorContext _context;
 
-    private readonly Dictionary<MetadataEntryDbLookup, long> _observedEntryDefinitions = new();
-    private readonly Dictionary<MetadataEntryDbLookup, EntityMetadataEntryDefinition> _existingEntryDefinitions = new();
-    private readonly Dictionary<long, EntityMetadataTotalsHistory> _existingTotalsHistory = new();
+    private readonly Dictionary<EntityMethodRoyaltyEntryDbLookup, long> _observedEntryDefinitions = new();
+    private readonly Dictionary<EntityMethodRoyaltyEntryDbLookup, EntityMethodRoyaltyEntryDefinition> _existingEntryDefinitions = new();
+    private readonly Dictionary<long, EntityMethodRoyaltyTotalsHistory> _existingTotalsHistory = new();
 
-    private readonly Dictionary<MetadataEntryDbLookup, EntityMetadataEntryDefinition> _entryDefinitionsToAdd = new();
-    private readonly List<EntityMetadataEntryHistory> _entryHistoryToAdd = new();
-    private readonly List<EntityMetadataTotalsHistory> _totalsHistoryToAdd = new();
+    private readonly Dictionary<EntityMethodRoyaltyEntryDbLookup, EntityMethodRoyaltyEntryDefinition> _entryDefinitionsToAdd = new();
+    private readonly List<EntityMethodRoyaltyEntryHistory> _entryHistoryToAdd = new();
+    private readonly List<EntityMethodRoyaltyTotalsHistory> _totalsHistoryToAdd = new();
 
-    private readonly ChangeTracker<MetadataChangePointerLookup, MetadataChangePointer> _changes = new();
+    private readonly ChangeTracker<EntityMethodRoyaltyChangePointerLookup, EntityMethodRoyaltyChangePointer> _changes = new();
 
-    public EntityMetadataProcessor(ProcessorContext context)
+    public EntityMethodRoyaltyProcessor(ProcessorContext context)
     {
         _context = context;
     }
@@ -107,34 +106,35 @@ internal class EntityMetadataProcessor : IProcessorBase, ISubstateUpsertProcesso
     {
         var substateData = substate.Value.SubstateData;
 
-        if (substateData is CoreModel.MetadataModuleEntrySubstate metadataEntry)
+        if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
         {
-            var lookup = new MetadataChangePointerLookup(referencedEntity.DatabaseId, stateVersion);
+            var lookup = new EntityMethodRoyaltyChangePointerLookup(referencedEntity.DatabaseId, stateVersion);
 
-            _changes.GetOrAdd(lookup, _ => new MetadataChangePointer())
+            _changes
+                .GetOrAdd(lookup, _ => new EntityMethodRoyaltyChangePointer(referencedEntity))
                 .Entries
-                .Add(new MetadataEntry(metadataEntry, substate.PreviousValue?.SubstateData as CoreModel.MetadataModuleEntrySubstate));
+                .Add(new EntityMethodRoyaltyEntry(methodRoyaltyEntry, substate.PreviousValue?.SubstateData as CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate));
 
-            _observedEntryDefinitions.TryAdd(new MetadataEntryDbLookup(referencedEntity.DatabaseId, metadataEntry.Key.Name), stateVersion);
+            _observedEntryDefinitions.TryAdd(new EntityMethodRoyaltyEntryDbLookup(referencedEntity.DatabaseId, methodRoyaltyEntry.Key.MethodName), stateVersion);
         }
     }
 
     public async Task LoadDependenciesAsync()
     {
-        _existingEntryDefinitions.AddRange(await ExistingMetadataEntryDefinitions());
-        _existingTotalsHistory.AddRange(await ExistingMetadataTotalsHistory());
+        _existingEntryDefinitions.AddRange(await ExistingEntryDefinitions());
+        _existingTotalsHistory.AddRange(await ExistingTotalsHistory());
     }
 
     public void ProcessChanges()
     {
         foreach (var lookup in _observedEntryDefinitions.Keys.Except(_existingEntryDefinitions.Keys))
         {
-            var entryDefinition = new EntityMetadataEntryDefinition
+            var entryDefinition = new EntityMethodRoyaltyEntryDefinition
             {
-                Id = _context.Sequences.KeyValueStoreEntryDefinitionSequence++,
+                Id = _context.Sequences.EntityMethodRoyaltyEntryDefinitionSequence++,
                 FromStateVersion = _observedEntryDefinitions[lookup],
                 EntityId = lookup.EntityId,
-                Key = lookup.Key,
+                MethodName = lookup.MethodName,
             };
 
             _entryDefinitionsToAdd[lookup] = entryDefinition;
@@ -145,9 +145,9 @@ internal class EntityMetadataProcessor : IProcessorBase, ISubstateUpsertProcesso
         {
             var totalsExists = _existingTotalsHistory.TryGetValue(change.Key.EntityId, out var previousTotals);
 
-            var newTotals = new EntityMetadataTotalsHistory
+            var newTotals = new EntityMethodRoyaltyTotalsHistory
             {
-                Id = _context.Sequences.EntityMetadataTotalsHistorySequence++,
+                Id = _context.Sequences.EntityMethodRoyaltyTotalsHistorySequence++,
                 FromStateVersion = change.Key.StateVersion,
                 EntityId = change.Key.EntityId,
                 TotalEntriesExcludingDeleted = totalsExists ? previousTotals!.TotalEntriesExcludingDeleted : 0,
@@ -160,12 +160,12 @@ internal class EntityMetadataProcessor : IProcessorBase, ISubstateUpsertProcesso
                 var newEntry = entry.NewSubstate;
 
                 _entryHistoryToAdd.Add(
-                    new EntityMetadataEntryHistory
+                    new EntityMethodRoyaltyEntryHistory
                     {
-                        Id = _context.Sequences.EntityMetadataEntryHistorySequence++,
+                        Id = _context.Sequences.KeyValueStoreEntryHistorySequence++,
                         FromStateVersion = change.Key.StateVersion,
-                        EntityMetadataEntryDefinitionId = _existingEntryDefinitions[new MetadataEntryDbLookup(change.Key.EntityId, newEntry.Key!.Name)].Id,
-                        Value = isDeleted ? null : newEntry.Value!.DataStruct.StructData.Hex.ConvertFromHex(),
+                        DefinitionId = _existingEntryDefinitions[new EntityMethodRoyaltyEntryDbLookup(change.Key.EntityId, newEntry.Key!.MethodName)].Id,
+                        RoyaltyAmount = entry.NewSubstate.Value?.RoyaltyAmount?.ToJson(),
                         IsDeleted = isDeleted,
                         IsLocked = newEntry.IsLocked,
                     });
@@ -197,38 +197,40 @@ internal class EntityMetadataProcessor : IProcessorBase, ISubstateUpsertProcesso
     public async Task<int> SaveEntitiesAsync()
     {
         var rowsInserted = 0;
-        rowsInserted += await CopyEntityMetadataEntryHistory();
-        rowsInserted += await CopyEntityMetadataEntryDefinition();
-        rowsInserted += await CopyEntityMetadataTotalsHistory();
+
+        rowsInserted += await CopyEntryHistory();
+        rowsInserted += await CopyDefinitions();
+        rowsInserted += await CopyTotalsHistory();
+
         return rowsInserted;
     }
 
-    private async Task<IDictionary<MetadataEntryDbLookup, EntityMetadataEntryDefinition>> ExistingMetadataEntryDefinitions()
+    private async Task<IDictionary<EntityMethodRoyaltyEntryDbLookup, EntityMethodRoyaltyEntryDefinition>> ExistingEntryDefinitions()
     {
         if (!_observedEntryDefinitions
                 .Keys
                 .ToHashSet()
                 .Unzip(
                     x => x.EntityId,
-                    x => x.Key,
+                    x => x.MethodName,
                     out var entityIds,
-                    out var keys))
+                    out var methodNames))
         {
-            return ImmutableDictionary<MetadataEntryDbLookup, EntityMetadataEntryDefinition>.Empty;
+            return ImmutableDictionary<EntityMethodRoyaltyEntryDbLookup, EntityMethodRoyaltyEntryDefinition>.Empty;
         }
 
-        return await _context.ReadHelper.LoadDependencies<MetadataEntryDbLookup, EntityMetadataEntryDefinition>(
+        return await _context.ReadHelper.LoadDependencies<EntityMethodRoyaltyEntryDbLookup, EntityMethodRoyaltyEntryDefinition>(
             @$"
-WITH variables (entity_id, key) AS (
-    SELECT UNNEST({entityIds}), UNNEST({keys})
+WITH variables (entity_id, method_name) AS (
+    SELECT UNNEST({entityIds}), UNNEST({methodNames})
 )
 SELECT *
-FROM entity_metadata_entry_definition
-WHERE (entity_id, key) IN (SELECT * FROM variables)",
-            e => new MetadataEntryDbLookup(e.EntityId, e.Key));
+FROM entity_method_royalty_entry_definition
+WHERE (entity_id, method_name) IN (SELECT * FROM variables)",
+            e => new EntityMethodRoyaltyEntryDbLookup(e.EntityId, e.MethodName));
     }
 
-    private async Task<IDictionary<long, EntityMetadataTotalsHistory>> ExistingMetadataTotalsHistory()
+    private async Task<IDictionary<long, EntityMethodRoyaltyTotalsHistory>> ExistingTotalsHistory()
     {
         var entityIds = _observedEntryDefinitions
             .Keys
@@ -237,53 +239,53 @@ WHERE (entity_id, key) IN (SELECT * FROM variables)",
 
         if (entityIds.Count == 0)
         {
-            return ImmutableDictionary<long, EntityMetadataTotalsHistory>.Empty;
+            return ImmutableDictionary<long, EntityMethodRoyaltyTotalsHistory>.Empty;
         }
 
-        return await _context.ReadHelper.LoadDependencies<long, EntityMetadataTotalsHistory>(
+        return await _context.ReadHelper.LoadDependencies<long, EntityMethodRoyaltyTotalsHistory>(
             @$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
 )
-SELECT emth.*
+SELECT emrth.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_metadata_totals_history
+    FROM entity_method_royalty_totals_history
     WHERE entity_id = variables.entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
-) emth ON true;",
+) emrth ON true;",
             e => e.EntityId);
     }
 
-    private Task<int> CopyEntityMetadataEntryDefinition() => _context.WriteHelper.Copy(
+    private Task<int> CopyEntryHistory() => _context.WriteHelper.Copy(
+        _entryHistoryToAdd,
+        "COPY entity_method_royalty_entry_history (id, from_state_version, definition_id, royalty_amount, is_locked, is_deleted) FROM STDIN (FORMAT BINARY)",
+        async (writer, e, token) =>
+        {
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.DefinitionId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.RoyaltyAmount, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+        });
+
+    private Task<int> CopyDefinitions() => _context.WriteHelper.Copy(
         _entryDefinitionsToAdd.Values,
-        "COPY entity_metadata_entry_definition (id, from_state_version, entity_id, key) FROM STDIN (FORMAT BINARY)",
+        "COPY entity_method_royalty_entry_definition (id, from_state_version, entity_id, method_name) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Key, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.MethodName, NpgsqlDbType.Text, token);
         });
 
-    private Task<int> CopyEntityMetadataEntryHistory() => _context.WriteHelper.Copy(
-        _entryHistoryToAdd,
-        "COPY entity_metadata_entry_history (id, from_state_version, entity_metadata_entry_definition_id, value, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)",
-        async (writer, e, token) =>
-        {
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityMetadataEntryDefinitionId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Value, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
-        });
-
-    private Task<int> CopyEntityMetadataTotalsHistory() => _context.WriteHelper.Copy(
+    private Task<int> CopyTotalsHistory() => _context.WriteHelper.Copy(
         _totalsHistoryToAdd,
-        "COPY entity_metadata_totals_history (id, from_state_version, entity_id, total_entries_including_deleted, total_entries_excluding_deleted) FROM STDIN (FORMAT BINARY)",
+        "COPY entity_method_royalty_totals_history (id, from_state_version, entity_id, total_entries_including_deleted, total_entries_excluding_deleted) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
