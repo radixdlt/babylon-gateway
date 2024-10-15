@@ -76,7 +76,7 @@ internal class EventLedgerTransactionMarkerProcessor : ITransactionMarkerProcess
     private readonly ProcessorContext _context;
     private readonly List<EventLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
 
-    public EventLedgerTransactionMarkerProcessor(ProcessorContext context, ReferencedEntityDictionary _, NetworkConfiguration __)
+    public EventLedgerTransactionMarkerProcessor(ProcessorContext context)
     {
         _context = context;
     }

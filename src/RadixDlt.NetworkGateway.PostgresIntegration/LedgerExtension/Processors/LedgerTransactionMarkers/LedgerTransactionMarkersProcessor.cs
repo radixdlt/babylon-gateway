@@ -85,6 +85,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
     private readonly GlobalEventEmitterProcessor _globalEventEmitterProcessor;
     private readonly AffectedGlobalEntitiesProcessor _affectedGlobalEntitiesProcessor;
     private readonly EventLedgerTransactionMarkerProcessor _eventLedgerTransactionMarkerProcessor;
+    private readonly EpochChangeLedgerTransactionMarkerProcessor _epochChangeLedgerTransactionMarkerProcessor;
 
     public LedgerTransactionMarkersProcessor(
         ManifestProcessor manifestProcessor,
@@ -98,9 +99,10 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
         _writeHelper = writeHelper;
         _manifestProcessor = manifestProcessor;
         _affectedGlobalEntitiesProcessor = affectedGlobalEntitiesProcessor;
-        _transactionTypeLedgerTransactionMarkerProcessor = new TransactionTypeLedgerTransactionMarkerProcessor(context, referencedEntities, networkConfiguration);
+        _transactionTypeLedgerTransactionMarkerProcessor = new TransactionTypeLedgerTransactionMarkerProcessor(context);
         _globalEventEmitterProcessor = new GlobalEventEmitterProcessor(context, referencedEntities, networkConfiguration);
-        _eventLedgerTransactionMarkerProcessor = new EventLedgerTransactionMarkerProcessor(context, referencedEntities, networkConfiguration);
+        _eventLedgerTransactionMarkerProcessor = new EventLedgerTransactionMarkerProcessor(context);
+        _epochChangeLedgerTransactionMarkerProcessor = new EpochChangeLedgerTransactionMarkerProcessor(context);
     }
 
     public Task LoadDependenciesAsync()
@@ -116,6 +118,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
     public void VisitTransaction(CoreModel.CommittedTransaction transaction, long stateVersion)
     {
         _transactionTypeLedgerTransactionMarkerProcessor.VisitTransaction(transaction, stateVersion);
+        _epochChangeLedgerTransactionMarkerProcessor.VisitTransaction(transaction, stateVersion);
     }
 
     public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
@@ -145,6 +148,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
         _ledgerTransactionMarkersToAdd.AddRange(_eventLedgerTransactionMarkerProcessor.CreateTransactionMarkers());
         _ledgerTransactionMarkersToAdd.AddRange(_manifestProcessor.CreateTransactionMarkers());
         _ledgerTransactionMarkersToAdd.AddRange(_transactionTypeLedgerTransactionMarkerProcessor.CreateTransactionMarkers());
+        _ledgerTransactionMarkersToAdd.AddRange(_epochChangeLedgerTransactionMarkerProcessor.CreateTransactionMarkers());
     }
 
     public async Task<int> SaveEntitiesAsync()
@@ -158,7 +162,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
 
     private Task<int> CopyLedgerTransactionMarkers() => _context.WriteHelper.Copy(
         _ledgerTransactionMarkersToAdd,
-        "COPY ledger_transaction_markers (id, state_version, discriminator, event_type, entity_id, resource_entity_id, quantity, operation_type, transaction_type, manifest_class, is_most_specific) FROM STDIN (FORMAT BINARY)",
+        "COPY ledger_transaction_markers (id, state_version, discriminator, event_type, entity_id, resource_entity_id, quantity, operation_type, transaction_type, manifest_class, is_most_specific, epoch_change) FROM STDIN (FORMAT BINARY)",
         async (writer, e, token) =>
         {
             var discriminator = _writeHelper.GetDiscriminator<LedgerTransactionMarkerType>(e.GetType());
@@ -178,6 +182,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
                     break;
                 case ManifestAddressLedgerTransactionMarker maltm:
                     await writer.WriteNullAsync(token);
@@ -185,6 +190,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(maltm.OperationType, "ledger_transaction_marker_operation_type", token);
+                    await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
@@ -198,10 +204,12 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
                     await writer.WriteAsync(oltm.TransactionType, "ledger_transaction_marker_transaction_type", token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
                     break;
                 case AffectedGlobalEntityTransactionMarker oltm:
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(oltm.EntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
@@ -218,6 +226,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
                     break;
                 case ManifestClassMarker ttm:
                     await writer.WriteNullAsync(token);
@@ -228,6 +237,18 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(ttm.ManifestClass, "ledger_transaction_manifest_class", token);
                     await writer.WriteAsync(ttm.IsMostSpecific, NpgsqlDbType.Boolean, token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case EpochChangeLedgerTransactionMarker ectm:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(ectm.EpochChange, token);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(e), e, null);

@@ -72,7 +72,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 internal enum LedgerTransactionMarkerTransactionType
 {
     User,
-    EpochChange,
     RoundChange,
     GenesisFlash,
     GenesisTransaction,
@@ -104,6 +103,12 @@ internal abstract class LedgerTransactionMarker
 
     [Column("state_version")]
     public long StateVersion { get; set; }
+}
+
+internal class EpochChangeLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("epoch_change")]
+    public bool EpochChange { get; set; }
 }
 
 internal class TransactionTypeLedgerTransactionMarker : LedgerTransactionMarker

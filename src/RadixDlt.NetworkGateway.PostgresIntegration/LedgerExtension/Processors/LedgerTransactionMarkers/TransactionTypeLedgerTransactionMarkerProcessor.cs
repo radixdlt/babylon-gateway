@@ -78,7 +78,7 @@ internal class TransactionTypeLedgerTransactionMarkerProcessor : ITransactionMar
     private readonly ProcessorContext _context;
     private readonly List<TransactionTypeLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
 
-    public TransactionTypeLedgerTransactionMarkerProcessor(ProcessorContext context, ReferencedEntityDictionary _, NetworkConfiguration __)
+    public TransactionTypeLedgerTransactionMarkerProcessor(ProcessorContext context)
     {
         _context = context;
     }
@@ -91,9 +91,7 @@ internal class TransactionTypeLedgerTransactionMarkerProcessor : ITransactionMar
             GenesisLedgerTransaction genesisLedgerTransaction => genesisLedgerTransaction.IsFlash
                 ? LedgerTransactionMarkerTransactionType.GenesisFlash
                 : LedgerTransactionMarkerTransactionType.GenesisTransaction,
-            RoundUpdateLedgerTransaction => committedTransaction.Receipt.NextEpoch != null
-                ? LedgerTransactionMarkerTransactionType.EpochChange
-                : LedgerTransactionMarkerTransactionType.RoundChange,
+            RoundUpdateLedgerTransaction => LedgerTransactionMarkerTransactionType.RoundChange,
             UserLedgerTransaction => LedgerTransactionMarkerTransactionType.User,
             _ => throw new ArgumentOutOfRangeException($"Unexpected ledger transaction type: {committedTransaction.LedgerTransaction.GetType()}"),
         };

@@ -72,4 +72,5 @@ public enum LedgerTransactionMarkerType
     AffectedGlobalEntity,
     ManifestClass,
     EventGlobalEmitter,
+    EpochChange,
 }

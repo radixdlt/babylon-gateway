@@ -90,8 +90,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call,badge_presented")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_transaction_type", "user,epoch_change,round_change,genesis_flash,genesis_transaction,protocol_update_flash,protocol_update_transaction")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "transaction_type,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_transaction_type", "user,round_change,genesis_flash,genesis_transaction,protocol_update_flash,protocol_update_transaction")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "transaction_type,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter,epoch_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash")
                 .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
@@ -566,6 +566,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     state_version = table.Column<long>(type: "bigint", nullable: false),
                     discriminator = table.Column<LedgerTransactionMarkerType>(type: "ledger_transaction_marker_type", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    epoch_change = table.Column<bool>(type: "boolean", nullable: true),
                     event_type = table.Column<LedgerTransactionMarkerEventType>(type: "ledger_transaction_marker_event_type", nullable: true),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     quantity = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
