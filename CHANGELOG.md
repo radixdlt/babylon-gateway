@@ -29,10 +29,11 @@ Release built: _not released yet_
 >   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
 >   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
 > -  Existing non fungible vaults with no items will no longer return `items: null` and will return an empty array `items: []` instead, as we do in all other collections. Affected endpoints:
->   - `/state/entity/page/non-fungible-vault/ids`
->   - `/state/entity/details` (when using `non_fungible_include_nfids` opt-in)
->   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
->   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
+>    - `/state/entity/page/non-fungible-vault/ids`
+>    - `/state/entity/details` (when using `non_fungible_include_nfids` opt-in)
+>    - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
+>    - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
+>
 
 ### What’s new?
 - New configuration options `DataAggregator__Storage__StoreTransactionReceiptEvents`, and `DataAggregator__Storage__StoreReceiptStateUpdates` for the data aggregator to configure if a transaction's receipt events and receipt state updates should be stored in the database. It is meant to be used by gateway runners who want to reduce their database size. Keep in mind that when disabled, the corresponding properties will be missing on a response from both the `/stream/transactions` and the `/transaction/committed-details` endpoints. You can save significant space by using `StoryOnlyForUserTransactionsAndEpochChanges` and only excluding round change transactions, which aren't typically read from the `/stream/transactions` endpoint.
