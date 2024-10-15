@@ -110,6 +110,9 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("ResourceHoldersMaxPageSize")]
     public int ResourceHoldersMaxPageSize { get; set; } = 1000;
 
+    [ConfigurationKeyName("MaxDefinitionsLookupLimit")]
+    public int MaxDefinitionsLookupLimit { get; set; } = 50_000;
+
     [ConfigurationKeyName("TransactionStreamMaxFilterCount")]
     public int TransactionStreamMaxFilterCount { get; set; } = 10;
 

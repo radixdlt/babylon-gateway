@@ -69,23 +69,42 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Queries.CustomTypes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using LedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction;
 using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
 using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 using ToolkitModel = RadixEngineToolkit;
-using UserLedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransaction;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
+    public static string? GenerateOffsetCursor(int offset, int limit, long totalCount)
+    {
+        return offset + limit < totalCount
+            ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
+            : null;
+    }
+
+    public static GatewayModel.IdBoundaryCoursor? ToGatewayModel(this IdBoundaryCursor? input)
+    {
+        return input == null
+            ? null
+            : new GatewayModel.IdBoundaryCoursor(input.Value.StateVersion, input.Value.Id);
+    }
+
+    public static IdBoundaryCursor? FromGatewayModel(this GatewayModel.IdBoundaryCoursor? input)
+    {
+        return input != null
+            ? new IdBoundaryCursor(input.StateVersionBoundary, input.IdBoundary)
+            : null;
+    }
+
     public static GatewayModel.TwoWayLinkedDappsCollectionItem ToGatewayModel(this DappDefinitionsResolvedTwoWayLink input)
     {
         return new GatewayModel.TwoWayLinkedDappsCollectionItem(input.EntityAddress);
@@ -157,75 +176,6 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(
-        this LedgerTransaction lt,
-        GatewayModel.TransactionDetailsOptIns optIns,
-        Dictionary<long, string> entityIdToAddressMap,
-        List<TransactionQuerier.Event>? events,
-        GatewayModel.TransactionBalanceChanges? transactionBalanceChanges)
-    {
-        string? payloadHash = null;
-        string? intentHash = null;
-        string? rawHex = null;
-        JRaw? message = null;
-        string? manifestInstructions = null;
-        List<GatewayModel.ManifestClass>? manifestClasses = null;
-
-        if (lt is UserLedgerTransaction ult)
-        {
-            payloadHash = ult.PayloadHash;
-            intentHash = ult.IntentHash;
-            rawHex = optIns.RawHex ? ult.RawPayload.ToHex() : null;
-            message = ult.Message != null ? new JRaw(ult.Message) : null;
-            manifestInstructions = optIns.ManifestInstructions ? ult.ManifestInstructions : null;
-            manifestClasses = ult.ManifestClasses.Select(mc => mc.ToGatewayModel()).ToList();
-        }
-
-        var receipt = new GatewayModel.TransactionReceipt
-        {
-            ErrorMessage = lt.EngineReceipt.ErrorMessage,
-            Status = ToGatewayModel(lt.EngineReceipt.Status),
-            Output = optIns.ReceiptOutput && lt.EngineReceipt.Output != null ? new JRaw(lt.EngineReceipt.Output) : null,
-            FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.EngineReceipt.FeeSummary) : null,
-            FeeDestination = optIns.ReceiptFeeDestination && lt.EngineReceipt.FeeDestination != null ? new JRaw(lt.EngineReceipt.FeeDestination) : null,
-            FeeSource = optIns.ReceiptFeeSource && lt.EngineReceipt.FeeSource != null ? new JRaw(lt.EngineReceipt.FeeSource) : null,
-            CostingParameters = optIns.ReceiptCostingParameters ? new JRaw(lt.EngineReceipt.CostingParameters) : null,
-            NextEpoch = lt.EngineReceipt.NextEpoch != null ? new JRaw(lt.EngineReceipt.NextEpoch) : null,
-            StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.EngineReceipt.StateUpdates) : null,
-            Events = optIns.ReceiptEvents ? events?.Select(x => new GatewayModel.EventsItem(x.Name, new JRaw(x.Emitter), x.Data)).ToList() : null,
-        };
-
-        return new GatewayModel.CommittedTransactionInfo(
-            stateVersion: lt.StateVersion,
-            epoch: lt.Epoch,
-            round: lt.RoundInEpoch,
-            roundTimestamp: lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
-            transactionStatus: lt.EngineReceipt.Status.ToGatewayModel(),
-            affectedGlobalEntities: optIns.AffectedGlobalEntities ? lt.AffectedGlobalEntities.Select(x => entityIdToAddressMap[x]).ToList() : null,
-            payloadHash: payloadHash,
-            intentHash: intentHash,
-            feePaid: lt.FeePaid.ToString(),
-            confirmedAt: lt.RoundTimestamp,
-            errorMessage: lt.EngineReceipt.ErrorMessage,
-            rawHex: rawHex,
-            receipt: receipt,
-            message: message,
-            balanceChanges: optIns.BalanceChanges ? transactionBalanceChanges : null,
-            manifestInstructions: manifestInstructions,
-            manifestClasses: manifestClasses
-        );
-    }
-
-    public static GatewayModel.TransactionStatus ToGatewayModel(this LedgerTransactionStatus status)
-    {
-        return status switch
-        {
-            LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.CommittedSuccess,
-            LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
-            _ => throw new UnreachableException($"Didn't expect {status} value"),
-        };
-    }
-
     public static GatewayModel.PackageVmType ToGatewayModel(this PackageVmType vmType)
     {
         return vmType switch
@@ -246,13 +196,6 @@ internal static class GatewayModelExtensions
             ModuleId.RoleAssignment => GatewayModel.ObjectModuleId.RoleAssignment,
             _ => throw new UnreachableException($"Didn't expect {moduleId} value"),
         };
-    }
-
-    public static GatewayModel.ComponentRoyaltyConfig ToGatewayModel(this ComponentMethodRoyaltyEntryHistory[]? input)
-    {
-        return new GatewayModel.ComponentRoyaltyConfig(
-            isEnabled: input != null,
-            methodRules: input?.Select(e => new GatewayModel.ComponentMethodRoyalty(e.MethodName, TranscodeRoyaltyAmount(e.RoyaltyAmount))).ToList());
     }
 
     public static GatewayModel.PackageBlueprintCollectionItem ToGatewayModel(this PackageBlueprintHistory input, Dictionary<long, EntityAddress> correlatedAddresses)
@@ -306,27 +249,6 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.TransactionBalanceChanges ToGatewayModel(this CoreModel.LtsCommittedTransactionOutcome input)
-    {
-        var fungibleFeeBalanceChanges = new List<GatewayModel.TransactionFungibleFeeBalanceChanges>();
-        var fungibleBalanceChanges = new List<GatewayModel.TransactionFungibleBalanceChanges>();
-
-        foreach (var f in input.FungibleEntityBalanceChanges)
-        {
-            fungibleFeeBalanceChanges.AddRange(f.FeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleFeeBalanceChanges(x.Type.ToGatewayModel(), f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
-            fungibleBalanceChanges.AddRange(f.NonFeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleBalanceChanges(f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
-        }
-
-        var nonFungibleBalanceChanges = input
-            .NonFungibleEntityBalanceChanges
-            .Select(x => new GatewayModel.TransactionNonFungibleBalanceChanges(x.EntityAddress, x.ResourceAddress, x.Added, x.Removed))
-            .ToList();
-
-        return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
-    }
-
     public static GatewayModel.TransactionBalanceChanges ToGatewayModel(this CoreModel.CommittedTransactionBalanceChanges input)
     {
         var fungibleFeeBalanceChanges = new List<GatewayModel.TransactionFungibleFeeBalanceChanges>();
@@ -334,10 +256,12 @@ internal static class GatewayModelExtensions
 
         foreach (var f in input.FungibleEntityBalanceChanges)
         {
-            fungibleFeeBalanceChanges.AddRange(f.FeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleFeeBalanceChanges(x.Type.ToGatewayModel(), f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
-            fungibleBalanceChanges.AddRange(f.NonFeeBalanceChanges
-                .Select(x => new GatewayModel.TransactionFungibleBalanceChanges(f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
+            fungibleFeeBalanceChanges.AddRange(
+                f.FeeBalanceChanges
+                    .Select(x => new GatewayModel.TransactionFungibleFeeBalanceChanges(x.Type.ToGatewayModel(), f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
+            fungibleBalanceChanges.AddRange(
+                f.NonFeeBalanceChanges
+                    .Select(x => new GatewayModel.TransactionFungibleBalanceChanges(f.EntityAddress, x.ResourceAddress, x.BalanceChange)));
         }
 
         var nonFungibleBalanceChanges = input
@@ -348,7 +272,7 @@ internal static class GatewayModelExtensions
         return new GatewayModel.TransactionBalanceChanges(fungibleFeeBalanceChanges, fungibleBalanceChanges, nonFungibleBalanceChanges);
     }
 
-    private static GatewayModel.RoyaltyAmount? ToGatewayModel(this CoreModel.RoyaltyAmount? input)
+    internal static GatewayModel.RoyaltyAmount? ToGatewayModel(this CoreModel.RoyaltyAmount? input)
     {
         if (input == null)
         {
@@ -377,16 +301,6 @@ internal static class GatewayModelExtensions
         };
     }
 
-    private static GatewayModel.RoyaltyAmount? TranscodeRoyaltyAmount(string? input)
-    {
-        if (input == null)
-        {
-            return null;
-        }
-
-        return JsonConvert.DeserializeObject<CoreModel.RoyaltyAmount>(input).ToGatewayModel();
-    }
-
     private static GatewayModel.BlueprintRoyaltyConfig? TranscodeBlueprintRoyaltyConfig(string? input)
     {
         if (input == null)
@@ -405,7 +319,8 @@ internal static class GatewayModelExtensions
 
         if (coreModel.MethodRules != null)
         {
-            methodRules = coreModel.MethodRules
+            methodRules = coreModel
+                .MethodRules
                 .Select(mr => new GatewayModel.BlueprintMethodRoyalty(mr.MethodName, mr.RoyaltyAmount.ToGatewayModel()))
                 .ToList();
         }

@@ -72,6 +72,10 @@ internal class SequencesHolder
 
     public long AccountLockerEntryTouchHistorySequence { get; set; }
 
+    public long AccountLockerTotalsHistorySequence { get; set; }
+
+    public long AccountLockerEntryResourceVaultTotalsHistorySequence { get; set; }
+
     public long AccountDefaultDepositRuleHistorySequence { get; set; }
 
     public long AccountResourcePreferenceRuleEntryHistorySequence { get; set; }
@@ -86,17 +90,11 @@ internal class SequencesHolder
 
     public long EntitySequence { get; set; }
 
-    public long EntityMetadataHistorySequence { get; set; }
+    public long EntityMetadataEntryHistorySequence { get; set; }
 
-    public long EntityMetadataAggregateHistorySequence { get; set; }
+    public long EntityMetadataEntryDefinitionSequence { get; set; }
 
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
+    public long EntityMetadataTotalsHistorySequence { get; set; }
 
     public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
 
@@ -104,9 +102,11 @@ internal class SequencesHolder
 
     public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
 
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
+    public long EntityMethodRoyaltyEntryHistorySequence { get; set; }
 
-    public long ComponentMethodRoyaltyAggregateHistorySequence { get; set; }
+    public long EntityMethodRoyaltyTotalsHistorySequence { get; set; }
+
+    public long EntityMethodRoyaltyEntryDefinitionSequence { get; set; }
 
     public long ResourceEntitySupplyHistorySequence { get; set; }
 
@@ -149,4 +149,20 @@ internal class SequencesHolder
     public long UnverifiedStandardMetadataEntryHistorySequence { get; set; }
 
     public long ResourceHoldersSequence { get; set; }
+
+    public long EntityResourceEntryDefinitionSequence { get; set; }
+
+    public long EntityResourceVaultEntryDefinitionSequence { get; set; }
+
+    public long EntityResourceTotalsHistorySequence { get; set; }
+
+    public long EntityResourceVaultTotalsHistorySequence { get; set; }
+
+    public long EntityResourceBalanceHistorySequence { get; set; }
+
+    public long VaultBalanceHistorySequence { get; set; }
+
+    public long NonFungibleVaultEntryDefinitionSequence { get; set; }
+
+    public long NonFungibleVaultEntryHistorySequence { get; set; }
 }
