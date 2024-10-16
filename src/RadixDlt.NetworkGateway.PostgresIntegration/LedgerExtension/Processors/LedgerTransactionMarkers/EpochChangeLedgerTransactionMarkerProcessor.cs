@@ -62,11 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="EpochChangeLedgerTransactionMarkerProcessor.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 

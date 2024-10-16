@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="TransactionDetailsQuery.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
