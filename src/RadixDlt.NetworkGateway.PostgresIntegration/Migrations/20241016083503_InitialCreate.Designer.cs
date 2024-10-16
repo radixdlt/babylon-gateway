@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20241015121553_InitialCreate")]
+    [Migration("20241016083503_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -2651,6 +2651,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<bool>("EpochChange")
                         .HasColumnType("boolean")
                         .HasColumnName("epoch_change");
+
+                    b.HasIndex("EpochChange", "StateVersion")
+                        .HasFilter("discriminator = 'epoch_change'");
 
                     b.ToTable("ledger_transaction_markers");
 

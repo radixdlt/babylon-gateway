@@ -2649,6 +2649,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("epoch_change");
 
+                    b.HasIndex("EpochChange", "StateVersion")
+                        .HasFilter("discriminator = 'epoch_change'");
+
                     b.ToTable("ledger_transaction_markers");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.EpochChange);

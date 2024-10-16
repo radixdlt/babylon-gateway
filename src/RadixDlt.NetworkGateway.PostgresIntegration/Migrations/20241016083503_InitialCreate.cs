@@ -1218,6 +1218,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'affected_global_entity'");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_epoch_change_state_version",
+                table: "ledger_transaction_markers",
+                columns: new[] { "epoch_change", "state_version" },
+                filter: "discriminator = 'epoch_change'");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_markers_event_type_entity_id_state_versi~",
                 table: "ledger_transaction_markers",
                 columns: new[] { "event_type", "entity_id", "state_version" },
