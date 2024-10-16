@@ -62,42 +62,31 @@
  * permissions under this License.
  */
 
-// <copyright file="EpochChangeLedgerTransactionMarkerProcessor.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+using Microsoft.EntityFrameworkCore.Migrations;
 
-using RadixDlt.NetworkGateway.Abstractions.Network;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections.Generic;
+#nullable disable
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
-
-internal class EpochChangeLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    private readonly ProcessorContext _context;
-    private readonly List<EpochChangeLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
-
-    public EpochChangeLedgerTransactionMarkerProcessor(ProcessorContext context)
+    /// <inheritdoc />
+    public partial class AddMissingIndexForEpochChange : Migration
     {
-        _context = context;
-    }
-
-    public void VisitTransaction(CoreApiSdk.Model.CommittedTransaction committedTransaction, long stateVersion)
-    {
-        if (committedTransaction.Receipt.NextEpoch != null)
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            _ledgerTransactionMarkersToAdd.Add(
-                new EpochChangeLedgerTransactionMarker
-                {
-                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
-                    StateVersion = stateVersion,
-                    EpochChange = true,
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_epoch_change_state_version",
+                table: "ledger_transaction_markers",
+                columns: new[] { "epoch_change", "state_version" },
+                filter: "discriminator = 'epoch_change'");
         }
-    }
 
-    public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
-    {
-        return _ledgerTransactionMarkersToAdd;
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_ledger_transaction_markers_epoch_change_state_version",
+                table: "ledger_transaction_markers");
+        }
     }
 }

@@ -297,6 +297,11 @@ internal abstract class CommonDbContext : DbContext
             .HasFilter("discriminator = 'transaction_type'");
 
         modelBuilder
+            .Entity<EpochChangeLedgerTransactionMarker>()
+            .HasIndex(e => new { e.EpochChange, e.StateVersion })
+            .HasFilter("discriminator = 'epoch_change'");
+
+        modelBuilder
             .Entity<ManifestAddressLedgerTransactionMarker>()
             .HasIndex(e => new { e.OperationType, e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'manifest_address'");
