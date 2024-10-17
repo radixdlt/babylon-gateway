@@ -124,7 +124,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: babylon-gateway-arm
+      runs_on: selfhosted-ec2-ubuntu-22-arm-4core
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-database-migrations"
@@ -167,7 +167,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: babylon-gateway-arm
+      runs_on: selfhosted-ec2-ubuntu-22-arm-4core
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-data-aggregator"
@@ -210,7 +210,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: babylon-gateway-arm
+      runs_on: selfhosted-ec2-ubuntu-22-arm-4core
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-gateway-api"
