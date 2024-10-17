@@ -124,7 +124,7 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: selfhosted-ec2-ubuntu-22-arm-4core
+      runs_on: [ubuntu-22.04, arm]
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-database-migrations"
