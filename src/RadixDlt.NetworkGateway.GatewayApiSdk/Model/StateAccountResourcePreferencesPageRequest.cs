@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="StateAccountResourcePreferencesPageRequest.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 public partial class StateAccountResourcePreferencesPageRequest : IPaginableRequest

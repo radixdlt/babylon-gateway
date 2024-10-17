@@ -64,7 +64,7 @@
 
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -218,7 +218,7 @@ internal abstract class VaultEntity : ComponentEntity
 
 internal class InternalFungibleVaultEntity : VaultEntity
 {
-    public bool IsRoyaltyVault => TryGetCorrelation(EntityRelationship.RoyaltyVaultOfComponent, out _);
+    public bool IsRoyaltyVault => TryGetCorrelation(EntityRelationship.RoyaltyVaultOfEntity, out _);
 }
 
 internal class InternalNonFungibleVaultEntity : VaultEntity
@@ -251,9 +251,9 @@ internal class GlobalPackageEntity : ComponentEntity
 
 // This is transient model, not stored in database
 // "virtual" should be understood as un-instantiated, pre-allocated entity
-internal class VirtualAccountComponentEntity : GlobalAccountEntity
+internal class PreAllocatedAccountComponentEntity : GlobalAccountEntity
 {
-    public VirtualAccountComponentEntity(EntityAddress address)
+    public PreAllocatedAccountComponentEntity(EntityAddress address)
     {
         Address = address;
         IsGlobal = true;
@@ -262,9 +262,9 @@ internal class VirtualAccountComponentEntity : GlobalAccountEntity
 
 // This is transient model, not stored in database
 // "virtual" should be understood as un-instantiated, pre-allocated entity
-internal class VirtualIdentityEntity : GlobalIdentityEntity
+internal class PreAllocatedIdentityEntity : GlobalIdentityEntity
 {
-    public VirtualIdentityEntity(EntityAddress address)
+    public PreAllocatedIdentityEntity(EntityAddress address)
     {
         Address = address;
         IsGlobal = true;

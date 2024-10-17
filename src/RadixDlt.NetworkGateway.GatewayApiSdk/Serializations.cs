@@ -76,11 +76,11 @@ internal static class Serializations
         return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
     }
 
-    public static T FromBase64JsonOrDefault<T>(string input)
+    public static T FromBase64JsonOrDefault<T>(string input) where T : class
     {
         if (string.IsNullOrWhiteSpace(input))
         {
-            return default;
+            return null;
         }
 
         try
@@ -89,7 +89,7 @@ internal static class Serializations
         }
         catch (Exception)
         {
-            return default;
+            return null;
         }
     }
 }

@@ -62,9 +62,12 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -175,5 +178,14 @@ internal static class DbQueryExtensions
             .ThenBy(lt => lt.StateVersion)
             .Take(1)
             .AnnotateMetricName();
+    }
+
+    public static IQueryable<T> AnnotateMetricName<T>(
+        this IQueryable<T> source,
+        string operationName = "",
+        [CallerMemberName] string methodName = "")
+    {
+        var queryNameTag = SqlQueryMetricsHelper.GenerateQueryNameTag(operationName, methodName);
+        return source.TagWith(queryNameTag);
     }
 }

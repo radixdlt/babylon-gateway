@@ -66,10 +66,11 @@ namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
 public enum LedgerTransactionMarkerType
 {
-    Origin,
+    TransactionType,
     Event,
     ManifestAddress,
     AffectedGlobalEntity,
     ManifestClass,
     EventGlobalEmitter,
+    EpochChange,
 }

@@ -67,13 +67,13 @@ using System.Runtime.Serialization;
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 [DataContract]
-public sealed record IdBoundaryCoursor(long? StateVersionBoundary, long? IdBoundary)
+public sealed record IdBoundaryCoursor(long StateVersionBoundary, long IdBoundary)
 {
     [DataMember(Name = "sv", EmitDefaultValue = false)]
-    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
+    public long StateVersionBoundary { get; set; } = StateVersionBoundary;
 
     [DataMember(Name = "id", EmitDefaultValue = false)]
-    public long? IdBoundary { get; set; } = IdBoundary;
+    public long IdBoundary { get; set; } = IdBoundary;
 
     public static IdBoundaryCoursor FromCursorString(string cursorString)
     {

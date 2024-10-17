@@ -62,32 +62,27 @@
  * permissions under this License.
  */
 
-// ReSharper disable CommentTypo
-// ReSharper disable StringLiteralTypo
-// ReSharper disable IdentifierTypo
-/* The above is a fix for ReShaper not liking the work "Bech" */
-
 using System;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Network;
-
-public sealed record DecodedRadixAddress(string Hrp, byte[] Data, Bech32Codec.Variant Variant)
-{
-    public byte DiscriminatorByte => Data[0];
-
-    public byte[] AddressBytes => Data[1..];
-
-    public override string ToString()
-    {
-        return RadixAddressCodec.Encode(Hrp, Data);
-    }
-}
 
 public static class RadixAddressCodec
 {
     public static string Encode(string hrp, ReadOnlySpan<byte> addressData)
     {
         return Bech32Codec.Encode(hrp, EncodeAddressDataInBase32(addressData), Bech32Codec.Variant.Bech32M);
+    }
+
+    public static DecodedRadixAddress DecodeEntityAddress(string encoded)
+    {
+        var decoded = Decode(encoded);
+
+        if (decoded.Data.Length != 30)
+        {
+            throw new AddressException($"Entity address is expected to be 30 bytes in length. But was {decoded.Data.Length}");
+        }
+
+        return decoded;
     }
 
     public static DecodedRadixAddress Decode(string encoded)
@@ -102,7 +97,7 @@ public static class RadixAddressCodec
 
         if (variant != Bech32Codec.Variant.Bech32M)
         {
-            throw new AddressException("Only Bech32M addresses are supported");
+            throw new AddressException($"Only Bech32M addresses are supported, decoded variant: {variant}");
         }
 
         return new DecodedRadixAddress(hrp, addressData, variant);

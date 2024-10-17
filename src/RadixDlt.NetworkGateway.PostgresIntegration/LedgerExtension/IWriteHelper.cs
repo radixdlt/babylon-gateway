@@ -63,7 +63,6 @@
  */
 
 using Npgsql;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -76,33 +75,7 @@ internal interface IWriteHelper
 {
     Task<int> Copy<T>(ICollection<T> entities, string copy, Func<NpgsqlBinaryImporter, T, CancellationToken, Task> callback, [CallerMemberName] string stageName = "");
 
-    Task<int> CopyEntity(ICollection<Entity> entities, CancellationToken token);
-
-    Task<int> CopyLedgerTransaction(ICollection<LedgerTransaction> entities, CancellationToken token);
-
-    Task<int> CopyLedgerTransactionMarkers(ICollection<LedgerTransactionMarker> entities, CancellationToken token);
-
-    Task<int> CopyResourceEntitySupplyHistory(ICollection<ResourceEntitySupplyHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityResourceAggregatedVaultsHistory(ICollection<EntityResourceAggregatedVaultsHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityResourceAggregateHistory(ICollection<EntityResourceAggregateHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityResourceVaultAggregateHistory(ICollection<EntityResourceVaultAggregateHistory> entities, CancellationToken token);
-
-    Task<int> CopyEntityVaultHistory(ICollection<EntityVaultHistory> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleIdDefinition(ICollection<NonFungibleIdDefinition> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleIdDataHistory(ICollection<NonFungibleIdDataHistory> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleIdLocationHistory(List<NonFungibleIdLocationHistory> entities, CancellationToken token);
-
-    Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token);
-
-    Task<int> CopyKeyValueStoreSchemaHistory(ICollection<KeyValueStoreSchemaHistory> entities, CancellationToken token);
-
-    Task UpdateSequences(SequencesHolder sequences, CancellationToken token);
-
     T GetDiscriminator<T>(Type type);
+
+    ValueTask HandleMaxAggregateCounts(object? entity);
 }

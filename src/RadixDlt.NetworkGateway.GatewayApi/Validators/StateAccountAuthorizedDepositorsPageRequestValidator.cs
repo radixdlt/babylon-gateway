@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="StateAccountAuthorizedDepositorsPageRequestValidator.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using FluentValidation;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 

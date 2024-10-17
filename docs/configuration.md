@@ -30,6 +30,7 @@ The Network Gateway services can be configured in line with the [configuration i
 - `GatewayApi__Endpoint__ValidatorsUptimePageSize` (type: `int`, default value: `200`) -  fixed page size for `/statistics/validators/uptime` endpoint.
 
 - `GatewayApi__Endpoint__RequestTimeout` - (type: `timespan in string format [d.]hh:mm:ss[.fffffff]`, default value: `10s`) - the amount of time after which request gets canceled and timeout is returned from API.
+- `GatewayApi__Endpoint__MaxDefinitionsLookupLimit` - (type: `int`, default value: `50 000`) - Max number of definitions to scan when searching for non-deleted entries.
 
 #### Ledger Lag
 - `GatewayApi__AcceptableLedgerLag__PreventReadRequestsIfDbLedgerIsBehind` (type: `bool`, default value: `true`) - controls if API will return a response if observed ledger state by the gateway is behind.
@@ -71,6 +72,20 @@ The Network Gateway services can be configured in line with the [configuration i
 - `DataAggregator__Network__CoreApiHttpProxyAddress` (type: `string`, default value: `empty`) - URL to be used as a proxy when calling core API.
 - `DataAggregator__Network__MaxAllowedStateVersionLagToBeConsideredSynced` (type: `int`, default value: `100`) - maximum allowed state version lag for CoreAPI node to be considered synced.
 - `DataAggregator__Network__IgnoreNonSyncedNodes` (type: `bool`, default value: `true`) - controls if nodes with a different status than healthy and synced should be used by the Data Aggregator.
+
+#### Storage
+- `DataAggregator__Storage__StoreTransactionReceiptEvents` (type: `enum`, default value: `StoreForAllTransactions`) - controls if data aggregator should store transaction receipt events in database.
+  - Possible values:
+     - `StoreForAllTransactions` (default) - will store data for all transactions.
+     - `StoryOnlyForUserTransactionsAndEpochChanges` - will store data for user transactions and transactions that resulted in epoch change.
+     - `StoreOnlyForUserTransactions` - will store data only for user transactions.
+     - `DoNotStore` - will not store any data.
+- `DataAggregator__Storage__StoreReceiptStateUpdates` (type: `enum`, default value: `StoreForAllTransactions`) - controls if data aggregator should store transaction receipt state updates in database.
+  - Possible values:
+      - `StoreForAllTransactions` (default) - will store data for all transactions.
+      - `StoryOnlyForUserTransactionsAndEpochChanges` - will store data for user transactions and transactions that resulted in epoch change.
+      - `StoreOnlyForUserTransactions` - will store data only for user transactions.
+      - `DoNotStore` - will not store any data.
 
 #### Monitoring
 `DataAggregator__Monitoring__StartupGracePeriodSeconds` (type: `int`, default value: `10`) - duration (seconds) of start-up grace period for Data Aggregator.

@@ -62,10 +62,6 @@
  * permissions under this License.
  */
 
-// <copyright file="TransactionTransferValidationRequestValidator.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;

@@ -72,7 +72,7 @@ using Newtonsoft.Json;
 using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.PostgresIntegration.IoC;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
 using System;
 
