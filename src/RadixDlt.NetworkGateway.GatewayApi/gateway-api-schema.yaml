@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.7.3
+  version: v1.8.0
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
@@ -2317,16 +2317,14 @@ components:
 
     TwoWayLinkedDappsCollection:
       description: A collection of two-way linked (resolved & verified) dApps linked to the entity defining this collection.
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/TwoWayLinkedDappsCollectionItem"
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TwoWayLinkedDappsCollectionItem"
     TwoWayLinkedDappsCollectionItem:
       type: object
       required:
@@ -2337,16 +2335,14 @@ components:
 
     TwoWayLinkedEntitiesCollection:
       description: A collection of two-way linked (resolved & verified) entities linked to the entity defining this collection.
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/TwoWayLinkedEntitiesCollectionItem"
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TwoWayLinkedEntitiesCollectionItem"
     TwoWayLinkedEntitiesCollectionItem:
       type: object
       required:
@@ -4055,11 +4051,14 @@ components:
     StreamTransactionsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
           required:
             - items
           properties:
+            next_cursor:
+              description: If specified, contains a cursor to query next page of the `items` collection.
+              type: string
+              nullable: true
             items:
               description: The page of user transactions.
               type: array

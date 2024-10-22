@@ -1,3 +1,89 @@
+## 1.8.0
+Release built: _not released yet_
+
+> [!CAUTION]
+> **Breaking Changes:**
+> - Manifest addresses are no longer indexed in the `/stream/transactions` endpoint for failed transactions. Affected filters:
+>   - `manifest_accounts_withdrawn_from_filter`
+>   - `manifest_accounts_deposited_into_filter`
+>   - `manifest_badges_presented_filter`
+>   - `manifest_resources_filter`
+>   - `accounts_with_manifest_owner_method_calls`
+>   - `accounts_without_manifest_owner_method_calls`
+> - Changed ordering of entity metadata. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending. Affected endpoints:
+>   - `/state/entity/metadata`
+>   - `/state/entity/page/metadata`
+> - Changed ordering of fungible and non fungible resources. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending. Affected endpoints:
+>   - `/state/entity/details`
+>   - `/state/entity/page/fungibles/`
+>   - `/state/entity/page/non-fungibles/`
+> - Changed ordering of vaults when using vault aggregation level. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending.  Affected endpoints:
+>   - `/state/entity/details`
+>   - `/state/entity/page/fungibles/`
+>   - `/state/entity/page/fungible-vaults/`
+>   - `/state/entity/page/non-fungibles/`
+>   - `/state/entity/page/non-fungible-vaults/`
+> - Changed ordering of non fungible ids. Entries are no longer ordered by their last modification state version but rather by their first appearance on the network, descending. Affected endpoints:
+>   - `/state/entity/page/non-fungible-vault/ids`
+>   - `/state/entity/details` (when using `non_fungible_include_nfids` opt-in)
+>   - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
+>   - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
+> -  Existing non fungible vaults with no items will no longer return `items: null` and will return an empty array `items: []` instead, as we do in all other collections. Affected endpoints:
+>    - `/state/entity/page/non-fungible-vault/ids`
+>    - `/state/entity/details` (when using `non_fungible_include_nfids` opt-in)
+>    - `/state/entity/page/non-fungibles/` (when using `non_fungible_include_nfids` opt-in)
+>    - `/state/entity/page/non-fungible-vaults/` (when using `non_fungible_include_nfids` opt-in)
+>
+
+### What’s new?
+- New configuration options `DataAggregator__Storage__StoreTransactionReceiptEvents`, and `DataAggregator__Storage__StoreReceiptStateUpdates` for the data aggregator to configure if a transaction's receipt events and receipt state updates should be stored in the database. It is meant to be used by gateway runners who want to reduce their database size. Keep in mind that when disabled, the corresponding properties will be missing on a response from both the `/stream/transactions` and the `/transaction/committed-details` endpoints. You can save significant space by using `StoryOnlyForUserTransactionsAndEpochChanges` and only excluding round change transactions, which aren't typically read from the `/stream/transactions` endpoint.
+  - Possible values:
+    - `StoreForAllTransactions` (default) - will store data for all transactions.
+    - `StoryOnlyForUserTransactionsAndEpochChanges` - will store data for user transactions and transactions that resulted in epoch change.
+    - `StoreOnlyForUserTransactions` - will store data only for user transactions.
+    - `DoNotStore` - will not store any data.
+
+### Bug fixes
+- Added missing `total_count` property to `/state/validators/list` response.
+- Fix `/transaction/account-deposit-pre-validation` for uninstantiated pre-allocated accounts. It no longer returns error with code 404 `Entity not found`. 
+- Restored missing round update transactions from the `/stream/transactions` endpoint.
+
+### API Changes
+- Restored previously removed `total_count` property to `/state/key-value-store/keys` endpoint.
+
+### Database changes
+- Refactored multiple aggregates. Queries follow a similar strategy as key value stores and utilize `_entry_definition`, `_entry_history`, and `_totals_history` tables to return data
+    - Metadata
+        - Removed `entity_metadata_aggregate_history` table.
+        - New `entity_metadata_entry_definition` table, which holds information about all the metadata keys ever created for a given entity.
+        - Renamed `entity_metadata_history` to `entity_metadata_entry_history`, replaced `entity_id` and `key` columns with `entity_metadata_entry_definition_id`. Holds history of given metadata key at a given state version.
+        - New `entity_metadata_totals_history` table, which holds total counts of metadata per entity.
+    - Resource globally aggregated
+        - Removed `entity_resource_aggregate_history` table.
+        - New `entity_resource_entry_definition` table, which holds information about all resources which have ever been held by a given global entity.
+        - New `entity_resource_balance_history` table, which holds the sum of globally aggregated resource held by a global entity at a given state version.
+        - New `entity_resource_totals_history` table, which holds total count of different resources under a given global entity at a given state version.
+    - Resource vault aggregated
+        - Removed `entity_resource_aggregated_vaults_history` and `entity_resource_vault_aggregate_history` tables.
+        - New `entity_resource_vault_entry_definition` table, which holds information about vaults of a given resource held under a given global entity.
+        - New `entity_resource_vault_totals_history` table, which holds total count of all vaults of a given resource held under a given global entity at a given state version.
+    - Vault content
+        - New `non_fungible_vault_entry_definition` table, which holds information about non fungible held by a given vault.
+        - New `non_fungible_vault_entry_history` table which holds history of given non fungible inside vault.
+        - Renamed `entity_vault_history` to `vault_balance_history`. Holds information about vault content (amount of fungibles or count of non fungible ids inside vault) at a given state version.
+    - Key value store
+        - New `key_value_store_totals_history` table, which holds total count of all keys under a given store at a given state version.
+- Changed `receipt_state_updates` in the `ledger_transactions` table to be nullable.
+- Moved all `receipt_event_*` columns from the `ledger_transactions` table to a new separate `ledger_transaction_events` table.
+- Renamed `origin_type` marker type to `transaction_type` (stored in the `ledger_transaction_markers` table), possible values:
+  - `User`
+  - `RoundChange`
+  - `GenesisFlash`
+  - `GenesisTransaction`
+  - `ProtocolUpdateFlash`
+  - `ProtocolUpdateTransaction`
+- New transaction marker type `epoch_change` (stored in the `ledger_transaction_markers` table), entry for this marker indicates that this transaction resulted in an epoch change.
+
 ## 1.7.3
 Release built: 26.09.2024
 

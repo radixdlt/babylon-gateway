@@ -77,4 +77,9 @@ public interface IValidatorQuerier
         GatewayModel.LedgerState ledgerState,
         GatewayModel.LedgerState? fromLedgerState,
         CancellationToken token = default);
+
+    Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(
+        GatewayModel.StateValidatorsListCursor? cursor,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default);
 }

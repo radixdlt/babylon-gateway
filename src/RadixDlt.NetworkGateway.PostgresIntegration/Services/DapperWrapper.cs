@@ -69,6 +69,7 @@ using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Metrics;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -82,6 +83,22 @@ public interface IDapperWrapper
     Task<IEnumerable<T>> QueryAsync<T>(
         IDbConnection connection,
         CommandDefinition command,
+        string operationName = "",
+        [CallerMemberName] string methodName = "");
+
+    Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(
+        IDbConnection connection,
+        CommandDefinition command,
+        Func<TFirst, TSecond, TReturn> map,
+        string splitOn,
+        string operationName = "",
+        [CallerMemberName] string methodName = "");
+
+    Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(
+        IDbConnection connection,
+        CommandDefinition command,
+        Func<TFirst, TSecond, TThird, TReturn> map,
+        string splitOn,
         string operationName = "",
         [CallerMemberName] string methodName = "");
 
@@ -114,25 +131,29 @@ public class DapperWrapper : IDapperWrapper
         string operationName = "",
         [CallerMemberName] string methodName = "")
     {
-        var stopwatch = Stopwatch.StartNew();
+        return await Execute(() => connection.QueryAsync<T>(command), command, operationName, methodName);
+    }
 
-        var result = await connection.QueryAsync<T>(command);
+    public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(
+        IDbConnection connection,
+        CommandDefinition command,
+        Func<TFirst, TSecond, TReturn> map,
+        string splitOn,
+        string operationName = "",
+        [CallerMemberName] string methodName = "")
+    {
+        return await Execute(() => connection.QueryAsync(command, map, splitOn), command, operationName, methodName);
+    }
 
-        var elapsed = stopwatch.Elapsed;
-        var queryName = SqlQueryMetricsHelper.GetQueryNameValue(operationName, methodName);
-
-        _sqlQueryObserver.OnSqlQueryExecuted(queryName, elapsed);
-
-        var logQueriesLongerThan = _slowQueriesLoggingOptions.CurrentValue.SlowQueryThreshold;
-        if (elapsed > logQueriesLongerThan)
-        {
-            var parameters = JsonConvert.SerializeObject(command.Parameters);
-            _logger.LogWarning(
-                "Long running query: {Query}, parameters: {QueryParameters} duration: {QueryDuration} seconds",
-                command.CommandText, parameters, elapsed);
-        }
-
-        return result;
+    public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(
+        IDbConnection connection,
+        CommandDefinition command,
+        Func<TFirst, TSecond, TThird, TReturn> map,
+        string splitOn,
+        string operationName = "",
+        [CallerMemberName] string methodName = "")
+    {
+        return await Execute(() => connection.QueryAsync(command, map, splitOn), command, operationName, methodName);
     }
 
     public async Task<T?> QueryFirstOrDefaultAsync<T>(
@@ -141,9 +162,14 @@ public class DapperWrapper : IDapperWrapper
         string operationName = "",
         [CallerMemberName] string methodName = "")
     {
+        return await Execute(() => connection.QueryFirstOrDefaultAsync<T>(command), command, operationName, methodName);
+    }
+
+    private async Task<TReturn> Execute<TReturn>(Func<Task<TReturn>> operation, CommandDefinition command, string operationName, string methodName)
+    {
         var stopwatch = Stopwatch.StartNew();
 
-        var result = await connection.QueryFirstOrDefaultAsync<T>(command);
+        TReturn result = await operation();
 
         var elapsed = stopwatch.Elapsed;
         var queryName = SqlQueryMetricsHelper.GetQueryNameValue(operationName, methodName);
