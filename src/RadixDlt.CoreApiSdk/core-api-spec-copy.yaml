@@ -53,7 +53,7 @@ openapi: 3.0.0
 # => Hex-encoded bytes/payload should end _hex and not include _bytes
 info:
   # Should be the release version, and the release display name
-  version: 'v1.2.2'
+  version: 'v1.2.3'
   title: 'Radix Core API'
   license:
     name: The Radix License, Version 1.0
@@ -142,13 +142,13 @@ tags:
 
       User transactions are formed of a core "intent", which is then signed by 0+ signatories, before being notarized. The output is called a notarized payload.
       It is this notarized transaction payload which is submitted to the network.
-      
+
       For most users, this construction process will generally happen in their Radix Wallet. If you wish to construct transactions programmatically or offline,
       you will need to integrate the Radix Engine Toolkit into your application for construction and finalization.
 
       Once submitted, a transaction payload can end up being either rejected or committed. Transactions get rejected if they fail to pass certain criteria at the given time.
       A transaction payload can be marked as a:
-      - **Permanent Rejection** if it is never possible for it to be committed (eg it's statically invalid, or only valid up until epoch 100 and it's now epoch 101)
+      - **Permanent Rejection** if it is never possible for it to be committed (e.g. it's statically invalid, or only valid up until epoch 100 and it's now epoch 101)
       - **Temporary Rejection** if it still may be possible that the transaction payload could be committed
 
       A given intent typically is only part of one submitted notarized payload, but it's possible for a notary to notarize and submit multiple payloads for the same intent.
@@ -166,7 +166,7 @@ tags:
       ## State Model
 
       The Radix Engine State Model can be thought of as a forest of state sub-trees.
-      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them. 
+      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them.
       These substates are typed, and can own other entities, forming a tree of ownership.
 
       Each state sub-tree has a root entity, and a single Bech32M Global Address, with a human-readable-prefix (and prefix byte) matching the root entity type.
@@ -176,7 +176,7 @@ tags:
   - name: Construction
     x-displayName: Transaction Construction
     x-traitTag: true # Don't display endpoints under this tag
-    description: |      
+    description: |
       To construct and submit a transaction using the LTS endpoints:
 
       * Query `/lts/transaction/construction` to retrieve the current epoch (according to your node).
@@ -796,13 +796,13 @@ paths:
       summary: Stream Proofs
       description: |
         Returns a stream of proofs committed to the node's ledger.
-        
+
         NOTE: This endpoint may return different results on different nodes:
         * Each node may persist different subset of signatures on a given proofs, as long as enough
         of the validator set has signed.
         * Inside an epoch, different nodes may receive and persist / keep different proofs, subject to
         constraints on gaps between proofs.
-        
+
         Proofs during an epoch can also be garbage collected by the node after the fact. Therefore
         proofs may disappear from this stream.
 
@@ -814,7 +814,7 @@ paths:
         * All end-of-epoch proofs (from epoch number)
         * All end-of-epoch proofs triggering a protocol update
         * All node-injected proofs enacting genesis or a protocol update (for protocol update name, from state version)
-        
+
         The end-of-epoch proofs can be used to "trustlessly" verify the validator set for a given epoch.
         By tracking the fact that validators for epoch N sign the next validator set for epoch N + 1,
         this chain of proofs can be used to provide proof of the current validator set from a hardcoded
@@ -1444,6 +1444,12 @@ components:
         message:
           description: The optional transaction message. Only returned if present and enabled in `TransactionFormatOptions` on your request.
           $ref: "#/components/schemas/TransactionMessage"
+    NotarizedTransactionV2:
+      type: object
+      properties:
+        todo:
+          type: string
+      # TODO:CUTTLEFISH
     TransactionMessageType:
       type: string
       enum:
@@ -2152,6 +2158,7 @@ components:
         - Main
         - Schema
         - BootLoader
+        - ProtocolUpdateStatus
     PartitionKind:
       type: string
       description: |
@@ -2389,7 +2396,7 @@ components:
           type: string
           description: |
             A decimal string-encoded 64-bit signed integer, marking the unix timestamp in seconds.
-            
+
             Note: this field accurately represents the full range of possible on-ledger values (i.e.
             `-2^63 <= seconds < 2^63`). This is contrary to the `InstantMs` type used in other
             places of this API.
@@ -2399,7 +2406,7 @@ components:
             The RFC 3339 / ISO 8601 string representation of the timestamp. Will always use "Z"
             (denoting UTC) and a second-precision (i.e. *skipping* the `.000` milliseconds part).
             E.g.: `2023-01-26T18:30:09Z`.
-            
+
             Note: This field will *not* be present if the actual on-ledger `unix_timestamp_seconds`
             value is outside the basic range supported by the RFC 3339 / ISO 8601 standard, which
             starts at year 1583 (i.e. the beginning of the Gregorian calendar) and ends at year
@@ -2619,7 +2626,7 @@ components:
           required:
             - public_key
             - signature
-          description: The EdDSA public key and signature 
+          description: The EdDSA public key and signature
           properties:
             public_key:
               $ref: '#/components/schemas/EddsaEd25519PublicKey'
@@ -3291,6 +3298,8 @@ components:
         - TypeInfo
         - SystemBoot
         - KernelBoot
+        - TransactionValidationConfiguration
+        - ProtocolUpdateStatusSummary
     ObjectSubstateTypeReferenceType:
       type: string
       enum:
@@ -3790,13 +3799,13 @@ components:
         mapping:
           # NOTE:
           # There is an important convention to these names, for consistency:
-          # 
+          #
           # For each distinct typed substate, form [SubstateType] = [ModuleSpecifier][SubstateSpecifier][SubstateTypeVersion]
           # - [ModuleSpecifier] is either [ModuleName]Module for non-main modules, or [EntityType] for main modules
           # - [SubstateSpecifier] is either:
           #   - Field[SubstateDescriptor] for Field partitions
           #   - [SubstateDescriptor]Entry for Collection partitions (KeyValueStore, Index and SortedIndex)
-          # - [SubstateTypeVersion] is empty ("") for V1 substates, but will eg be V2/V3/V4 for newer substate versions
+          # - [SubstateTypeVersion] is empty ("") for V1 substates, but will e.g. be V2/V3/V4 for newer substate versions
           #
           # And then define:
           # - [SubstateName] = [SubstateType]Substate
@@ -3812,6 +3821,8 @@ components:
           BootLoaderModuleFieldSystemBoot: '#/components/schemas/BootLoaderModuleFieldSystemBootSubstate'
           BootLoaderModuleFieldVmBoot: '#/components/schemas/BootLoaderModuleFieldVmBootSubstate'
           BootLoaderModuleFieldKernelBoot: '#/components/schemas/BootLoaderModuleFieldKernelBootSubstate'
+          BootLoaderModuleFieldTransactionValidationConfiguration: '#/components/schemas/BootLoaderModuleFieldTransactionValidationConfigurationSubstate'
+          ProtocolUpdateStatusModuleFieldSummary: '#/components/schemas/ProtocolUpdateStatusModuleFieldSummarySubstate'
           TypeInfoModuleFieldTypeInfo: '#/components/schemas/TypeInfoModuleFieldTypeInfoSubstate'
           RoleAssignmentModuleFieldOwnerRole: '#/components/schemas/RoleAssignmentModuleFieldOwnerRoleSubstate'
           RoleAssignmentModuleRuleEntry: '#/components/schemas/RoleAssignmentModuleRuleEntrySubstate'
@@ -3918,6 +3929,8 @@ components:
         - AccountLockerAccountClaimsEntry
         - BootLoaderModuleFieldSystemBoot
         - BootLoaderModuleFieldKernelBoot
+        - BootLoaderModuleFieldTransactionValidationConfiguration
+        - ProtocolUpdateStatusModuleFieldSummary
 ################################################
 # GENERAL / SHARED MODELS - substate key types #
 ################################################
@@ -4085,8 +4098,16 @@ components:
       required:
         - system_parameters
       properties:
+        system_version:
+          $ref: '#/components/schemas/SystemVersion'
         system_parameters:
           $ref: '#/components/schemas/SystemParameters'
+    SystemVersion:
+      description: The SystemVersion was added at Cuttlefish. Before that it can be assumed to be V1.
+      type: string
+      enum:
+        - V1
+        - V2
     SystemParameters:
       type: object
       required:
@@ -4291,6 +4312,29 @@ components:
               $ref: '#/components/schemas/BootLoaderModuleFieldKernelBootValue'
     BootLoaderModuleFieldKernelBootValue:
       type: object
+      properties:
+        always_visible_nodes_version:
+          $ref: '#/components/schemas/AlwaysVisibleGlobalNodesVersion'
+    AlwaysVisibleGlobalNodesVersion:
+      type: string
+      description: |
+        This was added in Cuttlefish. Before that, this value was missing, but can be assumed to be V1.
+      enum:
+        - V1
+        - V2
+    BootLoaderModuleFieldTransactionValidationConfigurationSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+        # TODO:CUTTLEFISH
+    ProtocolUpdateStatusModuleFieldSummarySubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          description: |
+            This substate is only used in resim to track protocol update status.
+            It isn't expected to be seen in the node, which uses proofs to track protocol update status.
+        # TODO:CUTTLEFISH
     TypeInfoModuleFieldTypeInfoSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
@@ -4439,7 +4483,7 @@ components:
           description: |
             The generic substitution is provided remotely by a blueprint type.
             The `resolved_full_type_id` is added by the node, and is always present in the model returned from the transaction stream API.
-            Other APIs may not resolve the type from the blueprint definition. 
+            Other APIs may not resolve the type from the blueprint definition.
           required:
             - blueprint_type_identifier
           properties:
@@ -5176,8 +5220,8 @@ components:
         effective_epoch_start:
           description: |
             The effective time the epoch started. A drift-free measure, used to work out when the
-            epoch should ideally end. 
-            
+            epoch should ideally end.
+
             Note: in abnormal cases (e.g. Byzantine network quorum), this on-ledger field may be set
             to an arbitrary, extreme value allowed by 64-bit signed integer. The API will still
             clamp the timestamp to `0 <= ms <= 100000000000000 (== 10^14)`, which translates to
@@ -5188,7 +5232,7 @@ components:
             The actual time the epoch started. Not used by any logic, but the difference between
             this and the effective start gives a measure of the time it took for the end-of-epoch
             to be noticed.
-            
+
             Note: in abnormal cases (e.g. Byzantine network quorum), this on-ledger field may be set
             to an arbitrary, extreme value allowed by 64-bit signed integer. The API will still
             clamp the timestamp to `0 <= ms <= 100000000000000 (== 10^14)`, which translates to
@@ -5307,7 +5351,7 @@ components:
           description: |
             The latest round proposer's timestamp.
             An honest quorum of validators keeps this aligned with wall-clock time, and non-decreasing.
-            
+
             Note: in abnormal cases (e.g. Byzantine network quorum), this on-ledger field may be set
             to an arbitrary, extreme value allowed by 64-bit signed integer. The API will still
             clamp the timestamp to `0 <= ms <= 100000000000000 (== 10^14)`, which translates to
@@ -5754,7 +5798,7 @@ components:
           description: |
             The latest round proposer's timestamp (rounded down to the current minute).
             This is provided so that the client can detect if the node is synced up or not.
-            
+
             Note: in abnormal cases (e.g. Byzantine network quorum), this on-ledger field may be set
             to an arbitrary, extreme value allowed by 64-bit signed integer. The API will still
             clamp the timestamp to `0 <= ms <= 100000000000000 (== 10^14)`, which translates to
@@ -5829,7 +5873,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -6277,7 +6321,7 @@ components:
           description: |
             If present, this field indicates the entity contributed to the payment of the fee.
             The change in balance will always be negative.
-            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in 
+            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in
             `fee_balance_changes`.
         fee_balance_changes:
           type: array
@@ -6895,6 +6939,7 @@ components:
         - SignedTransactionIntent
         - TransactionIntent
         - LedgerTransaction
+        - NotarizedTransactionV2
     ParsedTransaction:
       type: object
       required:
@@ -6907,6 +6952,7 @@ components:
         mapping:
           # NOTE: These need to match ParsedTransactionType
           NotarizedTransaction: '#/components/schemas/ParsedNotarizedTransaction'
+          NotarizedTransactionV2: '#/components/schemas/ParsedNotarizedTransactionV2'
           SignedTransactionIntent: '#/components/schemas/ParsedSignedTransactionIntent'
           TransactionIntent: '#/components/schemas/ParsedTransactionIntent'
           LedgerTransaction: '#/components/schemas/ParsedLedgerTransaction'
@@ -6927,7 +6973,38 @@ components:
                 If the transaction is known to not be valid, this gives a reason.
                 Different levels of validation are performed, dependent on the validation mode.
                 Note that, even if validation mode is Static or Full, the transaction may
-                still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid).
+                still be rejected or fail due to issues at runtime (e.g. if the loan cannot be repaid).
+              required:
+                - reason
+                - is_permanent
+              properties:
+                reason:
+                  type: string
+                  description: |
+                    The error message.
+                is_permanent:
+                  type: boolean
+                  description: |
+                    Whether the error is known to be permanent, or not.
+                    This relates to whether the transaction would be rejected permanently or temporarily if submitted.
+    ParsedNotarizedTransactionV2:
+      allOf:
+        - $ref: "#/components/schemas/ParsedTransaction"
+        - type: object
+          required:
+            - identifiers
+          properties:
+            notarized_transaction:
+              $ref: "#/components/schemas/NotarizedTransactionV2"
+            identifiers:
+              $ref: "#/components/schemas/ParsedNotarizedTransactionIdentifiers"
+            validation_error:
+              type: object
+              description: |
+                If the transaction is known to not be valid, this gives a reason.
+                Different levels of validation are performed, dependent on the validation mode.
+                Note that, even if validation mode is Static or Full, the transaction may
+                still be rejected or fail due to issues at runtime (e.g. if the loan cannot be repaid).
               required:
                 - reason
                 - is_permanent
@@ -7261,7 +7338,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -7382,8 +7459,6 @@ components:
       required:
         - network
         - manifest
-        - start_epoch_inclusive
-        - end_epoch_exclusive
         - cost_unit_limit
         - tip_percentage
         - nonce
@@ -7395,10 +7470,10 @@ components:
         at_ledger_state:
           $ref: "#/components/schemas/LedgerStateSelector"
         manifest:
-          description: A text-representation of a transaction manifest
+          description: A text representation of a transaction manifest.
           type: string
         blobs_hex:
-          description: An array of hex-encoded blob data (optional)
+          description: An array of hex-encoded blob data, if referenced by the manifest.
           type: array
           items:
             type: string
@@ -7407,32 +7482,41 @@ components:
           format: int64
           minimum: 0
           maximum: 10000000000
-          description: An integer between `0` and `10^10`, marking the epoch at which the transaction starts being valid
+          description: |
+            An integer between `0` and `10^10`, marking the epoch at which the transaction starts
+            being valid. If omitted, the current epoch will be used (taking into account the
+            `at_ledger_state`, if specified).
         end_epoch_exclusive:
           type: integer
           format: int64
           minimum: 0
           maximum: 10000000000
-          description: An integer between `0` and `10^10`, marking the epoch at which the transaction is no longer valid
+          description: |
+            An integer between `0` and `10^10`, marking the epoch at which the transaction is no
+            longer valid. If omitted, a maximum epoch (relative to the `start_epoch_inclusive`) will
+            be used.
         notary_public_key:
           $ref: "#/components/schemas/PublicKey"
-          description: The notary public key to use (optional)
+          description: The notary public key to use (optional).
         notary_is_signatory:
           type: boolean
-          description: Whether the notary should count as a signatory (optional, default false)
+          description: Whether the notary should count as a signatory (defaults to `false`).
         tip_percentage:
           type: integer
           format: int32
           minimum: 0
           maximum: 65535
-          description: An integer between `0` and `65535`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
+          description: |
+            An integer between `0` and `65535`, giving the validator tip as a percentage amount.
+            A value of `1` corresponds to a 1% fee.
         nonce:
           type: integer
           format: int64
           minimum: 0
           maximum: 4294967295
           description: |
-            An integer between `0` and `2^32 - 1`, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent).
+            An integer between `0` and `2^32 - 1`, chosen to allow a unique intent to be created
+            (to enable submitting an otherwise identical/duplicate intent).
         signer_public_keys:
           type: array
           items:
@@ -7452,31 +7536,41 @@ components:
             - skip_epoch_check
           properties:
             use_free_credit:
+              description: |
+                Whether to use a virtual, preview-only pool of XRD to pay for all execution fees.
               type: boolean
             assume_all_signature_proofs:
+              description: |
+                Whether the virtual signature proofs should be automatically placed in the auth zone.
               type: boolean
             skip_epoch_check:
+              description: |
+                Whether to skip the epoch range check (i.e. ignoring the `start_epoch_inclusive` and
+                `end_epoch_exclusive` parameters, if specified).
+
+                Note: effectively, without an epoch range, the Radix Engine cannot perform the
+                *intent hash duplicate* detection, which means that this check will be skipped as well.
               type: boolean
             # This was added later so isn't required; for backwards compatibility
             disable_auth_checks:
               description: |
-                Can be used to skip performing auth checks during runtime.
-                
+                Whether to skip the auth checks during execution.
+
                 This could be used to e.g.:
-                * Preview protocol update style transactions
+                * Preview protocol update style transactions.
                 * Mint resources for previewing trades with resources you don't own. If doing this, be warned:
                   * Only resources which were potentially mintable/burnable at creation time
-                  will be mintable/burnable, due to feature flags on the resource.
+                    will be mintable/burnable, due to feature flags on the resource.
                   * Please see the below warning about unexpected results if using this approach.
-                
-                Please be warned - this mode of operation is quite a departure from normal operation:
-                * Calculated fees will likely be lower than a standard execution
+
+                Warning: this mode of operation is quite a departure from normal operation:
+                * Calculated fees will likely be lower than a standard execution.
                 * This mode can subtly break invariants some dApp code might rely on, or result in unexpected
-                behaviour, so the resulting execution result might not be valid for your needs. For example,
-                if I used this flag to mint pool units to preview a redemption (or some dApp interaction which
-                behind the scenes redeemed them), they'd redeem for less than they're currently worth,
-                because the blueprint code relies on the total supply of the pool units to calculate their
-                redemption worth, and you've just inflated the total supply through the mint operation.
+                  behaviour, so the resulting execution result might not be valid for your needs. For example,
+                  if I used this flag to mint pool units to preview a redemption (or some dApp interaction which
+                  behind the scenes redeemed them), they'd redeem for less than they're currently worth,
+                  because the blueprint code relies on the total supply of the pool units to calculate their
+                  redemption worth, and you've just inflated the total supply through the mint operation.
               type: boolean
     TransactionPreviewResponseOptions:
       type: object
@@ -7484,7 +7578,7 @@ components:
       properties:
         radix_engine_toolkit_receipt:
           type: boolean
-          description: | 
+          description: |
             This flag controls whether the preview response will include a Radix Engine Toolkit serializable
             receipt or not. If not provided, this defaults to `false` and no toolkit receipt is provided in
             the response.
@@ -7502,13 +7596,13 @@ components:
           description: A summarized state of the ledger on top of which the preview was performed.
         encoded_receipt:
           type: string
-          description: | 
+          description: |
             The hex-sbor-encoded receipt.
 
-            This field is deprecated and will be removed from the API with the release of the next 
-            protocol update, cuttlefish. This field was provided primarily for use with the Radix 
-            Engine Toolkit and its execution summary functionality. If you still wish to use this 
-            functionality update your Radix Engine Toolkit and use the receipt provided in the 
+            This field is deprecated and will be removed from the API with the release of the next
+            protocol update, cuttlefish. This field was provided primarily for use with the Radix
+            Engine Toolkit and its execution summary functionality. If you still wish to use this
+            functionality update your Radix Engine Toolkit and use the receipt provided in the
             `radix_engine_toolkit_receipt` field of this response.
           deprecated: true
         receipt:
@@ -7519,12 +7613,12 @@ components:
             An optional field which is only provided if the `request_radix_engine_toolkit_receipt`
             flag is set to true when requesting a transaction preview from the API.
 
-            This receipt is primarily intended for use with the toolkit and may contain information 
-            that is already available in the receipt provided in the `receipt` field of this 
+            This receipt is primarily intended for use with the toolkit and may contain information
+            that is already available in the receipt provided in the `receipt` field of this
             response.
 
-            A typical client of this API is not expected to use this receipt. The primary clients 
-            this receipt is intended for is the Radix wallet or any client that needs to perform 
+            A typical client of this API is not expected to use this receipt. The primary clients
+            this receipt is intended for is the Radix wallet or any client that needs to perform
             execution summaries on their transactions.
         instruction_resource_changes:
           type: array
@@ -7885,15 +7979,54 @@ components:
       allOf:
         - $ref: "#/components/schemas/LedgerProofOrigin"
         - type: object
+          description: |
+            Represents a proof from the execution of the babylon genesis protocol update, which starts
+            the babylon-node ledger.
+            Behind-the-scenes, this is now the same as a `ProtocolUpdateLedgerProofOrigin`,
+            but is kept separate for backwards-compatibility.
+
+            NOTE: Some of these values may be placeholder values on nodes which haven't resynced since
+            Cuttlefish. In particular, the following values might be invalid on such nodes:
+
+            * `batch_group_idx` (placeholder of 0)
+            * `batch_group_name` (placeholder of "")
+            * `batch_idx` (whatever the non-grouped index was)
+            * `batch_name` (placeholder of "")
+            * `is_end_of_update` (placeholder of false)
           required:
+            - protocol_version_name
             - genesis_opaque_hash
+            - batch_group_idx
+            - batch_group_name
+            - batch_idx
+            - batch_name
+            - is_end_of_update
           properties:
+            protocol_version_name:
+              type: string
+            # Should be config_hash but can't change due to backwards-compatibility
             genesis_opaque_hash:
               type: string
+            # Should be batch_group_index but can't change due to backwards-compatibility
+            batch_group_idx:
+              type: integer
+              format: int64
+            batch_group_name:
+              type: string
+            # Should be batch_index but can't change due to backwards-compatibility
+            batch_idx:
+              type: integer
+              format: int64
+            batch_name:
+              type: string
+            is_end_of_update:
+              type: boolean
     ConsensusLedgerProofOrigin:
       allOf:
         - $ref: "#/components/schemas/LedgerProofOrigin"
         - type: object
+          description: |
+            Represents a proof from the execution of a consensus round.
           required:
             - opaque_hash
             - timestamped_signatures
@@ -7908,15 +8041,50 @@ components:
       allOf:
         - $ref: "#/components/schemas/LedgerProofOrigin"
         - type: object
+          description: |
+            Represents a proof from the execution of a non-genesis protocol update.
+            The execution of a protocol update is organised into batch groups, and
+            then these batch groups are organised into batches, with each batch committed
+            atomically.
+
+            NOTE: Some of these values may be placeholder values for protocol updates pre-Cuttlefish
+            on nodes which haven't resynced since Cuttlefish. In particular, the following values might be
+            invalid on such nodesL
+
+            * `config_hash` (placeholder of all zeros)
+            * `batch_group_idx` (placeholder of 0)
+            * `batch_group_name` (placeholder of "")
+            * `batch_idx` (whatever the non-grouped index was)
+            * `batch_name` (placeholder of "")
+            * `is_end_of_update` (placeholder of false)
           required:
             - protocol_version_name
+            - config_hash
+            - batch_group_idx
+            - batch_group_name
             - batch_idx
+            - batch_name
+            - is_end_of_update
           properties:
             protocol_version_name:
               type: string
+            # Should be config_hash but can't change due to backwards-compatibility
+            config_hash:
+              type: string
+            # Should be batch_group_index but can't change due to backwards-compatibility
+            batch_group_idx:
+              type: integer
+              format: int64
+            batch_group_name:
+              type: string
+            # Should be batch_index but can't change due to backwards-compatibility
             batch_idx:
               type: integer
               format: int64
+            batch_name:
+              type: string
+            is_end_of_update:
+              type: boolean
     LedgerProof:
       type: object
       required:
@@ -8003,6 +8171,7 @@ components:
         - User
         - RoundUpdate
         - Flash
+        - UserV2
     LedgerTransaction:
       type: object
       required:
@@ -8019,6 +8188,7 @@ components:
           # NOTE: These need to match LedgerTransactionType
           Genesis: '#/components/schemas/GenesisLedgerTransaction'
           User: '#/components/schemas/UserLedgerTransaction'
+          UserV2: '#/components/schemas/UserLedgerTransactionV2'
           RoundUpdate: '#/components/schemas/RoundUpdateLedgerTransaction'
           Flash: '#/components/schemas/FlashLedgerTransaction'
     GenesisLedgerTransaction:
@@ -8044,6 +8214,15 @@ components:
           properties:
             notarized_transaction:
               $ref: "#/components/schemas/NotarizedTransaction"
+    UserLedgerTransactionV2:
+      allOf:
+        - $ref: "#/components/schemas/LedgerTransaction"
+        - type: object
+          required:
+            - notarized_transaction
+          properties:
+            notarized_transaction:
+              $ref: "#/components/schemas/NotarizedTransactionV2"
     RoundUpdateLedgerTransaction:
       allOf:
         - $ref: "#/components/schemas/LedgerTransaction"
@@ -8078,7 +8257,7 @@ components:
           $ref: '#/components/schemas/InstantMs'
           description: |
             The round proposer's timestamp.
-            
+
             Note: in abnormal cases (e.g. Byzantine network quorum), this on-ledger field may be set
             to an arbitrary, extreme value allowed by 64-bit signed integer. The API will still
             clamp the timestamp to `0 <= ms <= 100000000000000 (== 10^14)`, which translates to
