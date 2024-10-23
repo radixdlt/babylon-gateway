@@ -158,7 +158,7 @@ internal class PackageBlueprintProcessor : IProcessorBase, ISubstateUpsertProces
 
     public async Task LoadDependenciesAsync()
     {
-        _mostRecentEntries.AddRange(await MostRecentPackageCodeHistory());
+        _mostRecentEntries.AddRange(await MostRecentPackageBlueprintHistory());
         _mostRecentAggregates.AddRange(await MostRecentPackageBlueprintAggregateHistory());
     }
 
@@ -269,7 +269,7 @@ internal class PackageBlueprintProcessor : IProcessorBase, ISubstateUpsertProces
         return rowsInserted;
     }
 
-    private async Task<IDictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>> MostRecentPackageCodeHistory()
+    private async Task<IDictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>> MostRecentPackageBlueprintHistory()
     {
         var lookupSet = _changes.Keys.ToHashSet();
 
