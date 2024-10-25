@@ -1,8 +1,8 @@
 ## 1.9.0
 Release built: _not released yet_
 
-## 1.8.0
-Release built: 22.10.2024
+## 1.8.1
+Release built: 23.10.2024
 
 > [!CAUTION]
 > **Breaking Changes:**

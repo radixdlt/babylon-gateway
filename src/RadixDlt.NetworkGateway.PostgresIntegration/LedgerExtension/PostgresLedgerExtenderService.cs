@@ -623,7 +623,6 @@ UPDATE pending_transactions
             new EntityRoleAssignmentProcessor(processorContext),
             new PackageCodeProcessor(processorContext),
             new PackageBlueprintProcessor(processorContext, referencedEntities),
-            new PackageBlueprintProcessor(processorContext, referencedEntities),
             new AccountAuthorizedDepositorsProcessor(processorContext, referencedEntities),
             new AccountResourcePreferenceRulesProcessor(processorContext, referencedEntities),
             new AccountDefaultDepositRuleProcessor(processorContext),
