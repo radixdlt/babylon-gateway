@@ -136,6 +136,7 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
         return _manifestClasses.TryGetValue(stateVersion, out var mc) ? mc.ToArray() : Array.Empty<LedgerTransactionManifestClass>();
     }
 
+    // TODO PP: it has to support v2 as well or we need separate method.
     private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV1 toolkitManifest, long stateVersion)
     {
         var manifestSummary = toolkitManifest.StaticAnalysis(_networkConfiguration.Id);

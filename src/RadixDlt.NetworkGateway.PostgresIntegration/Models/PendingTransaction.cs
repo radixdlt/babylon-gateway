@@ -126,7 +126,7 @@ internal class PendingTransaction
         PendingTransactionHandlingConfig handlingConfig,
         string payloadHash,
         string intentHash,
-        long endEpochExclusive,
+        ulong endEpochExclusive,
         byte[] notarizedTransaction,
         DateTime timestamp
     )
@@ -135,7 +135,7 @@ internal class PendingTransaction
         {
             PayloadHash = payloadHash,
             IntentHash = intentHash,
-            EndEpochExclusive = endEpochExclusive,
+            EndEpochExclusive = (long)endEpochExclusive,
             Payload = new PendingTransactionPayload
             {
                 NotarizedTransactionBlob = notarizedTransaction,

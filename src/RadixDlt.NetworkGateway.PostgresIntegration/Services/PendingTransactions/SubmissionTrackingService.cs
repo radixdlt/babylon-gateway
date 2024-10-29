@@ -106,7 +106,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         string networkName,
         string nodeName,
         PendingTransactionHandlingConfig handlingConfig,
-        ToolkitModel.NotarizedTransactionV1 notarizedTransaction,
+        ParsedTransactionData parsedTransactionData,
         byte[] notarizedTransactionBytes,
         TimeSpan submissionTimeout,
         long currentEpoch,
@@ -115,7 +115,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         var (alreadyKnown, pendingTransaction) = await HandleObservedSubmission(
             handlingConfig,
             _clock.UtcNow,
-            notarizedTransaction,
+            parsedTransactionData,
             notarizedTransactionBytes,
             token);
 
@@ -148,12 +148,12 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
     private async Task<TrackedSubmission> HandleObservedSubmission(
         PendingTransactionHandlingConfig handlingConfig,
         DateTime submittedTimestamp,
-        ToolkitModel.NotarizedTransactionV1 notarizedTransaction,
+        ParsedTransactionData parsedTransactionData,
         byte[] notarizedTransactionBytes,
         CancellationToken token = default
     )
     {
-        var result = await TrackSubmission(handlingConfig, submittedTimestamp, notarizedTransaction, notarizedTransactionBytes, token);
+        var result = await TrackSubmission(handlingConfig, submittedTimestamp, parsedTransactionData, notarizedTransactionBytes, token);
         await _observers.ForEachAsync(observer => observer.OnSubmissionTrackedInDatabase(result.AlreadyKnown));
         return result;
     }
@@ -163,16 +163,14 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
     private async Task<TrackedSubmission> TrackSubmission(
         PendingTransactionHandlingConfig handlingConfig,
         DateTime submittedTimestamp,
-        ToolkitModel.NotarizedTransactionV1 notarizedTransaction,
+        ParsedTransactionData parsedTransactionData,
         byte[] notarizedTransactionBytes,
         CancellationToken token = default
     )
     {
-        var payloadHash = notarizedTransaction.NotarizedTransactionHash().AsStr();
-
         var existingPendingTransaction = await _dbContext
             .PendingTransactions
-            .Where(t => t.PayloadHash == payloadHash)
+            .Where(t => t.PayloadHash == parsedTransactionData.PayloadHash)
             .AnnotateMetricName()
             .SingleOrDefaultAsync(token);
 
@@ -183,9 +181,9 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
         var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeToGateway(
             handlingConfig,
-            payloadHash,
-            notarizedTransaction.IntentHash().AsStr(),
-            (long)notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive,
+            parsedTransactionData.PayloadHash,
+            parsedTransactionData.IntentHash,
+            parsedTransactionData.EndEpochExclusive,
             notarizedTransactionBytes,
             submittedTimestamp
         );

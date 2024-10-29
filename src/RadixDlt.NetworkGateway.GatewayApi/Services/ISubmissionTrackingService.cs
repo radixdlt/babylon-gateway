@@ -79,7 +79,7 @@ public interface ISubmissionTrackingService
         string networkName,
         string nodeName,
         PendingTransactionHandlingConfig handlingConfig,
-        ToolkitModel.NotarizedTransactionV1 notarizedTransaction,
+        ParsedTransactionData parsedTransactionData,
         byte[] notarizedTransactionBytes,
         TimeSpan submissionTimeout,
         long currentEpoch,

@@ -102,6 +102,7 @@ internal static class ManifestAddressesExtractor
                 .ToList();
     }
 
+    // TODO PP: it has to support manifest v2 as well or we need separate method.
     public static ManifestAddresses ExtractAddresses(ToolkitModel.TransactionManifestV1 manifest, byte networkId)
     {
         var allAddresses = manifest.ExtractAddresses();
