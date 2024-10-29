@@ -102,11 +102,11 @@ internal static class ManifestAddressesExtractor
                 .ToList();
     }
 
-    public static ManifestAddresses ExtractAddresses(ToolkitModel.TransactionManifest manifest, byte networkId)
+    public static ManifestAddresses ExtractAddresses(ToolkitModel.TransactionManifestV1 manifest, byte networkId)
     {
         var allAddresses = manifest.ExtractAddresses();
 
-        var manifestSummary = manifest.Summary(networkId);
+        var manifestSummary = manifest.StaticAnalysis(networkId);
 
         var presentedProofs = ExtractProofs(manifestSummary.presentedProofs);
         var accountsRequiringAuth = manifestSummary.accountsRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
@@ -133,8 +133,8 @@ internal static class ManifestAddressesExtractor
             .Where(
                 x => x.Key
                     is ToolkitModel.EntityType.GlobalAccount
-                    or ToolkitModel.EntityType.GlobalVirtualEd25519Account
-                    or ToolkitModel.EntityType.GlobalVirtualSecp256k1Account)
+                    or ToolkitModel.EntityType.GlobalPreallocatedEd25519Account
+                    or ToolkitModel.EntityType.GlobalPreallocatedSecp256k1Account)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();
 
@@ -142,8 +142,8 @@ internal static class ManifestAddressesExtractor
             .Where(
                 x => x.Key
                     is ToolkitModel.EntityType.GlobalIdentity
-                    or ToolkitModel.EntityType.GlobalVirtualEd25519Identity
-                    or ToolkitModel.EntityType.GlobalVirtualSecp256k1Identity)
+                    or ToolkitModel.EntityType.GlobalPreallocatedEd25519Identity
+                    or ToolkitModel.EntityType.GlobalPreallocatedSecp256k1Identity)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
             .ToList();
 

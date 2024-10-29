@@ -152,7 +152,7 @@ internal class SubmissionService : ISubmissionService
         return new GatewayModel.TransactionSubmitResponse(duplicate: false);
     }
 
-    private async Task CheckPendingTransactionEpochValidity(GatewayModel.LedgerState ledgerState, ToolkitModel.NotarizedTransaction parsedTransaction)
+    private async Task CheckPendingTransactionEpochValidity(GatewayModel.LedgerState ledgerState, ToolkitModel.NotarizedTransactionV1 parsedTransaction)
     {
         var header = parsedTransaction.SignedIntent().Intent().Header();
         var currentEpoch = (ulong)ledgerState.Epoch;
@@ -170,12 +170,12 @@ internal class SubmissionService : ISubmissionService
         }
     }
 
-    private async Task<ToolkitModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(byte[] notarizedTransactionBytes)
+    private async Task<ToolkitModel.NotarizedTransactionV1> HandlePreSubmissionParseTransaction(byte[] notarizedTransactionBytes)
     {
         try
         {
-            var notarizedTransaction = ToolkitModel.NotarizedTransaction.Decompile(notarizedTransactionBytes);
-            notarizedTransaction.StaticallyValidate(ToolkitModel.ValidationConfig.Default((await _networkConfigurationProvider.GetNetworkConfiguration()).Id));
+            var notarizedTransaction = ToolkitModel.NotarizedTransactionV1.FromPayloadBytes(notarizedTransactionBytes);
+            notarizedTransaction.StaticallyValidate((await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
             return notarizedTransaction;
         }
         catch (ToolkitModel.RadixEngineToolkitException.TransactionValidationFailed ex)

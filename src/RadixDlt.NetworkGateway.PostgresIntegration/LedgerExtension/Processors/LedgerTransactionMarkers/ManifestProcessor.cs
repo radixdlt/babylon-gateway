@@ -98,8 +98,8 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
         {
             var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
             var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
-            using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, _networkConfiguration.Id);
-            using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
+            using var manifestInstructions = ToolkitModel.InstructionsV1.FromString(coreInstructions, _networkConfiguration.Id);
+            using var toolkitManifest = new ToolkitModel.TransactionManifestV1(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
 
             AnalyzeManifestClasses(toolkitManifest, stateVersion);
 
@@ -136,9 +136,9 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
         return _manifestClasses.TryGetValue(stateVersion, out var mc) ? mc.ToArray() : Array.Empty<LedgerTransactionManifestClass>();
     }
 
-    private void AnalyzeManifestClasses(ToolkitModel.TransactionManifest toolkitManifest, long stateVersion)
+    private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV1 toolkitManifest, long stateVersion)
     {
-        var manifestSummary = toolkitManifest.Summary(_networkConfiguration.Id);
+        var manifestSummary = toolkitManifest.StaticAnalysis(_networkConfiguration.Id);
 
         foreach (var manifestClass in manifestSummary.classification)
         {

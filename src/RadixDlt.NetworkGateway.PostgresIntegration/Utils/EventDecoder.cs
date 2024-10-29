@@ -154,7 +154,7 @@ public static class EventDecoder
         using var emitter = new ToolkitModel.Emitter.Method(address, MapModuleId(methodEventEmitter.ObjectModuleId));
         using var hash = new ToolkitModel.Hash(Convert.FromHexString(@event.Type.TypeReference.FullTypeId.SchemaHash));
         using var eventIdentifier = new ToolkitModel.EventTypeIdentifier(emitter, @event.Type.Name);
-        return ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToTypedNativeEvent(eventIdentifier, @event.Data.GetDataBytes(), networkId);
+        return ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToNativeEvent(eventIdentifier, @event.Data.GetDataBytes(), networkId);
     }
 
     private static ToolkitModel.ModuleId MapModuleId(CoreModel.ModuleId core) =>

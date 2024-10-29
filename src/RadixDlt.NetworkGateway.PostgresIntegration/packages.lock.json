@@ -74,9 +74,9 @@
       },
       "RadixDlt.RadixEngineToolkit": {
         "type": "Direct",
-        "requested": "[2.1.0, )",
-        "resolved": "2.1.0",
-        "contentHash": "+c3+oc6Do0mPO5T1xHKnkzTgXiVPxez6OLWYC+48c3PcOEdUeKxC8u2dxZgSwOuiFItPUkIGQy6uI3+5+D1zcw=="
+        "requested": "[2.2.0-dev3, )",
+        "resolved": "2.2.0-dev3",
+        "contentHash": "SjGjjJUIr1Ge3ZJaS+2Yt5xPlwLS1yZZvxs7wcBrSuFEpxLVgYbYhValHrec8IzELk3ZAaYmVhS5U6+6VLBtJA=="
       },
       "StyleCop.Analyzers": {
         "type": "Direct",
@@ -645,13 +645,13 @@
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Nito.AsyncEx.Coordination": "[5.1.2, )",
-          "RadixDlt.CoreApiSdk": "[1.7.0-develop, )"
+          "RadixDlt.CoreApiSdk": "[1.9.0-develop, )"
         }
       },
       "radixdlt.networkgateway.dataaggregator": {
         "type": "Project",
         "dependencies": {
-          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )"
+          "RadixDlt.NetworkGateway.Abstractions": "[1.9.0-develop, )"
         }
       },
       "radixdlt.networkgateway.gatewayapi": {
@@ -659,9 +659,9 @@
         "dependencies": {
           "FluentValidation.AspNetCore": "[11.3.0, )",
           "Microsoft.Extensions.Http.Polly": "[8.0.2, )",
-          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )",
-          "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.7.0-develop, )",
-          "RadixDlt.RadixEngineToolkit": "[2.1.0, )"
+          "RadixDlt.NetworkGateway.Abstractions": "[1.9.0-develop, )",
+          "RadixDlt.NetworkGateway.GatewayApiSdk": "[1.9.0-develop, )",
+          "RadixDlt.RadixEngineToolkit": "[2.2.0-dev3, )"
         }
       },
       "radixdlt.networkgateway.gatewayapisdk": {
@@ -670,7 +670,7 @@
           "JsonSubTypes": "[2.0.1, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Polly": "[8.3.0, )",
-          "RadixDlt.NetworkGateway.Abstractions": "[1.7.0-develop, )"
+          "RadixDlt.NetworkGateway.Abstractions": "[1.9.0-develop, )"
         }
       },
       "FluentValidation": {

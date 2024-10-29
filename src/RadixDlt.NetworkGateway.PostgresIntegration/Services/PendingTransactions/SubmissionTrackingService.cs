@@ -106,7 +106,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         string networkName,
         string nodeName,
         PendingTransactionHandlingConfig handlingConfig,
-        ToolkitModel.NotarizedTransaction notarizedTransaction,
+        ToolkitModel.NotarizedTransactionV1 notarizedTransaction,
         byte[] notarizedTransactionBytes,
         TimeSpan submissionTimeout,
         long currentEpoch,
@@ -148,7 +148,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
     private async Task<TrackedSubmission> HandleObservedSubmission(
         PendingTransactionHandlingConfig handlingConfig,
         DateTime submittedTimestamp,
-        ToolkitModel.NotarizedTransaction notarizedTransaction,
+        ToolkitModel.NotarizedTransactionV1 notarizedTransaction,
         byte[] notarizedTransactionBytes,
         CancellationToken token = default
     )
@@ -163,7 +163,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
     private async Task<TrackedSubmission> TrackSubmission(
         PendingTransactionHandlingConfig handlingConfig,
         DateTime submittedTimestamp,
-        ToolkitModel.NotarizedTransaction notarizedTransaction,
+        ToolkitModel.NotarizedTransactionV1 notarizedTransaction,
         byte[] notarizedTransactionBytes,
         CancellationToken token = default
     )
