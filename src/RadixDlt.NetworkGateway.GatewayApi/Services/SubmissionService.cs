@@ -227,6 +227,7 @@ internal class SubmissionService : ISubmissionService
     private ParsedTransactionData HandlePreSubmissionParseTransactionV2(byte[] notarizedTransactionBytes)
     {
         using var notarizedTransaction = ToolkitModel.NotarizedTransactionV2.FromPayloadBytes(notarizedTransactionBytes);
+        // TODO PP: add static validation once Omar/David will extend toolkit.
 
         return new ParsedTransactionData(
             notarizedTransaction.IntentHash().AsStr(),
