@@ -188,7 +188,7 @@ internal class SubmissionService : ISubmissionService
 
             if (isV2UserTransaction)
             {
-                return HandlePreSubmissionParseTransactionV2(notarizedTransactionBytes);
+                return await HandlePreSubmissionParseTransactionV2(notarizedTransactionBytes);
             }
 
             throw new NotSupportedException($"Unrecognized transaction. Discriminator byte: {notarizedTransactionBytes[2]}. Only V1 or V2 user transaction is supported");
@@ -224,10 +224,10 @@ internal class SubmissionService : ISubmissionService
             notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive);
     }
 
-    private ParsedTransactionData HandlePreSubmissionParseTransactionV2(byte[] notarizedTransactionBytes)
+    private async Task<ParsedTransactionData> HandlePreSubmissionParseTransactionV2(byte[] notarizedTransactionBytes)
     {
         using var notarizedTransaction = ToolkitModel.NotarizedTransactionV2.FromPayloadBytes(notarizedTransactionBytes);
-        // TODO PP: add static validation once Omar/David will extend toolkit.
+        notarizedTransaction.StaticallyValidate((await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
 
         return new ParsedTransactionData(
             notarizedTransaction.IntentHash().AsStr(),
