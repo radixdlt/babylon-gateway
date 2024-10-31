@@ -114,6 +114,7 @@ internal static class NonFungibleResourceQueries
             limit = pageSize + 1,
         };
 
+        // TODO PP: why do we join with id data history here, it's not used at all.
         var cd = DapperExtensions.CreateCommandDefinition(
             commandText: $@"
 SELECT
