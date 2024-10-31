@@ -34,16 +34,16 @@ export class Transaction {
   getCommittedDetails(
     transactionIntentHash: string,
     options?: {
-      rawHex: false
-      receiptEvents: false
-      receiptFeeSource: false
-      receiptFeeSummary: false
-      receiptFeeDestination: false
-      receiptCostingParameters: false
-      receiptStateChanges: false
-      affectedGlobalEntities: false
-      balanceChanges: false
-      receiptOutput: false
+      rawHex: boolean
+      receiptEvents: boolean
+      receiptFeeSource: boolean
+      receiptFeeSummary: boolean
+      receiptFeeDestination: boolean
+      receiptCostingParameters: boolean
+      receiptStateChanges: boolean
+      affectedGlobalEntities: boolean
+      balanceChanges: boolean
+      receiptOutput: boolean
     }
   ): Promise<TransactionCommittedDetailsResponse> {
     return this.innerClient.transactionCommittedDetails({
