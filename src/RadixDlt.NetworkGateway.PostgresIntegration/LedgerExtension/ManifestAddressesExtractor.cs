@@ -102,8 +102,67 @@ internal static class ManifestAddressesExtractor
                 .ToList();
     }
 
-    // TODO PP: it has to support manifest v2 as well or we need separate method.
     public static ManifestAddresses ExtractAddresses(ToolkitModel.TransactionManifestV1 manifest, byte networkId)
+    {
+        var allAddresses = manifest.ExtractAddresses();
+
+        var manifestSummary = manifest.StaticAnalysis(networkId);
+
+        var presentedProofs = ExtractProofs(manifestSummary.presentedProofs);
+        var accountsRequiringAuth = manifestSummary.accountsRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsWithdrawnFrom = manifestSummary.accountsWithdrawnFrom.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsDepositedInto = manifestSummary.accountsDepositedInto.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var identitiesRequiringAuth = manifestSummary.identitiesRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
+
+        var packageAddresses = allAddresses
+            .Where(x => x.Key == ToolkitModel.EntityType.GlobalPackage)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
+
+        var componentAddresses = allAddresses
+            .Where(x => x.Key is ToolkitModel.EntityType.GlobalGenericComponent or ToolkitModel.EntityType.InternalGenericComponent)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
+
+        var resourceAddresses = allAddresses
+            .Where(x => x.Key is ToolkitModel.EntityType.GlobalFungibleResourceManager or ToolkitModel.EntityType.GlobalNonFungibleResourceManager)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
+
+        var accountAddresses = allAddresses
+            .Where(
+                x => x.Key
+                    is ToolkitModel.EntityType.GlobalAccount
+                    or ToolkitModel.EntityType.GlobalPreallocatedEd25519Account
+                    or ToolkitModel.EntityType.GlobalPreallocatedSecp256k1Account)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
+
+        var identityAddresses = allAddresses
+            .Where(
+                x => x.Key
+                    is ToolkitModel.EntityType.GlobalIdentity
+                    or ToolkitModel.EntityType.GlobalPreallocatedEd25519Identity
+                    or ToolkitModel.EntityType.GlobalPreallocatedSecp256k1Identity)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
+
+        return new ManifestAddresses(
+            packageAddresses,
+            componentAddresses,
+            resourceAddresses,
+            accountAddresses,
+            accountsRequiringAuth,
+            accountsWithdrawnFrom,
+            accountsDepositedInto,
+            identityAddresses,
+            identitiesRequiringAuth,
+            presentedProofs
+        );
+    }
+
+    // TODO PP: that's ugly duplication, consider refactoring that.
+    public static ManifestAddresses ExtractAddresses(ToolkitModel.TransactionManifestV2 manifest, byte networkId)
     {
         var allAddresses = manifest.ExtractAddresses();
 

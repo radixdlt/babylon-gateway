@@ -117,7 +117,28 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
         }
         else if (transaction.LedgerTransaction is CoreModel.UserLedgerTransactionV2 userLedgerTransactionV2)
         {
-            throw new NotImplementedException("TODO PP: wait for David to implement v2 fully.");
+            var coreInstructions = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.Instructions;
+            var coreBlobs = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.BlobsHex;
+
+            // TODO PP: that's array of disposable. not sure if that's the best option to go.
+            var children = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.ChildrenSpecifiers
+                .Select(x => new ToolkitModel.Hash(Convert.FromHexString(x))).ToArray();
+            using var manifestInstructions = ToolkitModel.InstructionsV2.FromString(coreInstructions, _networkConfiguration.Id);
+            using var toolkitManifest = new ToolkitModel.TransactionManifestV2(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray(), children);
+
+            AnalyzeManifestClasses(toolkitManifest, stateVersion);
+
+            if (transaction.Receipt.Status == CoreModel.TransactionStatus.Succeeded)
+            {
+                var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest, _networkConfiguration.Id);
+
+                foreach (var address in extractedAddresses.All())
+                {
+                    _referencedEntities.MarkSeenAddress(address);
+                }
+
+                _manifestExtractedAddresses.Add(stateVersion, extractedAddresses);
+            }
         }
     }
 
@@ -136,8 +157,22 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
         return _manifestClasses.TryGetValue(stateVersion, out var mc) ? mc.ToArray() : Array.Empty<LedgerTransactionManifestClass>();
     }
 
-    // TODO PP: it has to support v2 as well or we need separate method.
     private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV1 toolkitManifest, long stateVersion)
+    {
+        var manifestSummary = toolkitManifest.StaticAnalysis(_networkConfiguration.Id);
+
+        foreach (var manifestClass in manifestSummary.classification)
+        {
+            var mapped = manifestClass.ToModel();
+
+            _manifestClasses
+                .GetOrAdd(stateVersion, _ => new List<LedgerTransactionManifestClass>())
+                .Add(mapped);
+        }
+    }
+
+    // TODO PP: that's ugly duplication, consider refactoring that.
+    private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV2 toolkitManifest, long stateVersion)
     {
         var manifestSummary = toolkitManifest.StaticAnalysis(_networkConfiguration.Id);
 

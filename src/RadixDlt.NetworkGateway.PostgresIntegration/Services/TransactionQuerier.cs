@@ -438,6 +438,7 @@ internal class TransactionQuerier : ITransactionQuerier
         bool withDetails,
         CancellationToken token = default)
     {
+        // TODO PP: That will not work as we have v1 and v2 user transactions.
         var stateVersion = await _dbContext
             .LedgerTransactions
             .OfType<UserLedgerTransaction>()
@@ -464,6 +465,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<GatewayModel.TransactionStatusResponse> ResolveTransactionStatusResponse(GatewayModel.LedgerState ledgerState, string intentHash, CancellationToken token = default)
     {
+        // TODO PP: That will not work as we have v1 and v2 user transactions.
         var maybeCommittedTransactionSummary = await _dbContext
             .LedgerTransactions
             .OfType<UserLedgerTransaction>()

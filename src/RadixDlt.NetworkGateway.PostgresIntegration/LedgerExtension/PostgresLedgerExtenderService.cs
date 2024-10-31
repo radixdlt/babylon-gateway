@@ -159,7 +159,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 return ct.LedgerTransaction switch
                 {
                     CoreModel.UserLedgerTransaction ult => ult.NotarizedTransaction.HashBech32m,
-                    CoreModel.UserLedgerTransactionV2 ultv2 => throw new NotImplementedException("Not yet supported in core api TODO PP"),
+                    CoreModel.UserLedgerTransactionV2 ultv2 => ultv2.NotarizedTransaction.HashBech32m,
                     _ => throw new UnreachableException($"Expected UserLedgerTransaction or UserLedgerTransactionV2 but found {ct.LedgerTransaction.GetType()}"),
                 };
             })

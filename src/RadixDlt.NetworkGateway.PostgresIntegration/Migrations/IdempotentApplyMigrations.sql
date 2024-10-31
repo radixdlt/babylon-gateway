@@ -1407,3 +1407,22 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241031170311_AddUserTransactionV2') THEN
+    ALTER TYPE ledger_transaction_type ADD VALUE 'user_v2' BEFORE 'round_update';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241031170311_AddUserTransactionV2') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20241031170311_AddUserTransactionV2', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+

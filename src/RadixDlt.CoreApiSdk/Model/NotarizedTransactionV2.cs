@@ -62,13 +62,13 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using System;
 
-public enum LedgerTransactionType
+namespace RadixDlt.CoreApiSdk.Model;
+
+public partial class NotarizedTransactionV2
 {
-    Genesis,
-    User,
-    UserV2,
-    RoundUpdate,
-    Flash,
+    private byte[] _payloadBytes;
+
+    public byte[] GetPayloadBytes() => _payloadBytes ??= Convert.FromHexString(PayloadHex);
 }

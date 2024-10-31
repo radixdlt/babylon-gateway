@@ -190,14 +190,23 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
                 CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
                 {
                     PayloadHash = ult.NotarizedTransaction.HashBech32m,
+                    RawPayload = ult.NotarizedTransaction.GetPayloadBytes(),
                     IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.HashBech32m,
                     SignedIntentHash = ult.NotarizedTransaction.SignedIntent.HashBech32m,
                     Message = ult.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
-                    RawPayload = ult.NotarizedTransaction.GetPayloadBytes(),
                     ManifestInstructions = ult.NotarizedTransaction.SignedIntent.Intent.Instructions,
                     ManifestClasses = _manifestProcessor.GetManifestClasses(stateVersion),
                 },
-                CoreModel.UserLedgerTransactionV2 ultv2 => throw new NotImplementedException("TODO PP: wait for david to implement that"),
+                CoreModel.UserLedgerTransactionV2 ultv2 => new UserLedgerTransactionV2
+                {
+                    PayloadHash = ultv2.NotarizedTransaction.HashBech32m,
+                    RawPayload = ultv2.NotarizedTransaction.GetPayloadBytes(),
+                    IntentHash = ultv2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.HashBech32m,
+                    SignedIntentHash = ultv2.NotarizedTransaction.SignedTransactionIntent.HashBech32m,
+                    Message = ultv2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.Message?.ToJson(),
+                    ManifestInstructions = ultv2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.Instructions,
+                    ManifestClasses = _manifestProcessor.GetManifestClasses(stateVersion),
+                },
                 CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
                 CoreModel.FlashLedgerTransaction => new FlashLedgerTransaction(),
                 _ => throw new UnreachableException($"Unsupported transaction type: {committedTransaction.LedgerTransaction.GetType()}"),
@@ -343,6 +352,15 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
                     await writer.WriteAsync(ult.RawPayload, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(ult.ManifestInstructions, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(ult.ManifestClasses, "ledger_transaction_manifest_class[]", token);
+                    break;
+                case UserLedgerTransactionV2 ultv2:
+                    await writer.WriteAsync(ultv2.PayloadHash, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(ultv2.IntentHash, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(ultv2.SignedIntentHash, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(ultv2.Message, NpgsqlDbType.Jsonb, token);
+                    await writer.WriteAsync(ultv2.RawPayload, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(ultv2.ManifestInstructions, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(ultv2.ManifestClasses, "ledger_transaction_manifest_class[]", token);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lt), lt, null);
