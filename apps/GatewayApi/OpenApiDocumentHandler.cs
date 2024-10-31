@@ -93,11 +93,11 @@ public static class OpenApiDocumentHandler
         HttpContext context,
         CancellationToken token = default)
     {
-        var placeholderReplacements = await GetPlaceholderReplacements(networkConfigurationProvider, transactionHandler, ledgerStateQuerier, token);
+        var placeholderReplacements = await GetPlaceholderReplacementsAsync(networkConfigurationProvider, transactionHandler, ledgerStateQuerier, token);
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
         var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");
-        var readResult = await new OpenApiStreamReader().ReadAsync(stream);
+        var readResult = await new OpenApiStreamReader().ReadAsync(stream, token);
         var document = readResult.OpenApiDocument;
 
         RemoveRedoclySpecificTags(document.Tags);
@@ -170,7 +170,7 @@ public static class OpenApiDocumentHandler
         public long LedgerStateVersion { get; set; }
     }
 
-    private static async Task<PlaceholderReplacements> GetPlaceholderReplacements(
+    private static async Task<PlaceholderReplacements> GetPlaceholderReplacementsAsync(
         INetworkConfigurationProvider networkConfigurationProvider,
         ITransactionHandler transactionHandler,
         ILedgerStateQuerier ledgerStateQuerier,
