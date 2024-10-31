@@ -197,6 +197,7 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
                     ManifestInstructions = ult.NotarizedTransaction.SignedIntent.Intent.Instructions,
                     ManifestClasses = _manifestProcessor.GetManifestClasses(stateVersion),
                 },
+                CoreModel.UserLedgerTransactionV2 ultv2 => throw new NotImplementedException("TODO PP: wait for david to implement that"),
                 CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
                 CoreModel.FlashLedgerTransaction => new FlashLedgerTransaction(),
                 _ => throw new UnreachableException($"Unsupported transaction type: {committedTransaction.LedgerTransaction.GetType()}"),
@@ -228,8 +229,8 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
 
             _ledgerTransactionsToAdd.Add(ledgerTransaction);
 
-            var isUserTransaction = committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction;
-            var isUserTransactionOrEpochChange = committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction || data.NewEpochIndex.HasValue;
+            var isUserTransaction = committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction or CoreModel.UserLedgerTransactionV2;
+            var isUserTransactionOrEpochChange = isUserTransaction || data.NewEpochIndex.HasValue;
 
             if (_context.StorageOptions.StoreReceiptStateUpdates == LedgerTransactionStorageOption.StoreForAllTransactions ||
                 (_context.StorageOptions.StoreReceiptStateUpdates == LedgerTransactionStorageOption.StoreOnlyForUserTransactions && isUserTransaction) ||

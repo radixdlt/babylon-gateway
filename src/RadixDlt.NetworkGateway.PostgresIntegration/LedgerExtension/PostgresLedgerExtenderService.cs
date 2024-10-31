@@ -153,8 +153,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
     {
         var timestamp = _clock.UtcNow;
         var payloadHashes = committedTransactions
-            .Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction)
-            .Select(ct => ((CoreModel.UserLedgerTransaction)ct.LedgerTransaction).NotarizedTransaction.HashBech32m)
+            .Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction or CoreModel.UserLedgerTransactionV2)
+            .Select(ct =>
+            {
+                return ct.LedgerTransaction switch
+                {
+                    CoreModel.UserLedgerTransaction ult => ult.NotarizedTransaction.HashBech32m,
+                    CoreModel.UserLedgerTransactionV2 ultv2 => throw new NotImplementedException("Not yet supported in core api TODO PP"),
+                    _ => throw new UnreachableException($"Expected UserLedgerTransaction or UserLedgerTransactionV2 but found {ct.LedgerTransaction.GetType()}"),
+                };
+            })
             .ToList();
 
         var pendingTransactions = await dbContext

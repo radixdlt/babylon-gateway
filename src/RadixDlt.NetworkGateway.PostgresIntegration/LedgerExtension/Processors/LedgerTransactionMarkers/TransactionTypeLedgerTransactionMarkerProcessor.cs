@@ -65,10 +65,7 @@
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
-using FlashLedgerTransaction = RadixDlt.CoreApiSdk.Model.FlashLedgerTransaction;
-using GenesisLedgerTransaction = RadixDlt.CoreApiSdk.Model.GenesisLedgerTransaction;
-using RoundUpdateLedgerTransaction = RadixDlt.CoreApiSdk.Model.RoundUpdateLedgerTransaction;
-using UserLedgerTransaction = RadixDlt.CoreApiSdk.Model.UserLedgerTransaction;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
@@ -82,16 +79,17 @@ internal class TransactionTypeLedgerTransactionMarkerProcessor : ITransactionMar
         _context = context;
     }
 
-    public void VisitTransaction(CoreApiSdk.Model.CommittedTransaction committedTransaction, long stateVersion)
+    public void VisitTransaction(CoreModel.CommittedTransaction committedTransaction, long stateVersion)
     {
         var transactionType = committedTransaction.LedgerTransaction switch
         {
-            FlashLedgerTransaction => LedgerTransactionMarkerTransactionType.ProtocolUpdateFlash,
-            GenesisLedgerTransaction genesisLedgerTransaction => genesisLedgerTransaction.IsFlash
+            CoreModel.FlashLedgerTransaction => LedgerTransactionMarkerTransactionType.ProtocolUpdateFlash,
+            CoreModel.GenesisLedgerTransaction genesisLedgerTransaction => genesisLedgerTransaction.IsFlash
                 ? LedgerTransactionMarkerTransactionType.GenesisFlash
                 : LedgerTransactionMarkerTransactionType.GenesisTransaction,
-            RoundUpdateLedgerTransaction => LedgerTransactionMarkerTransactionType.RoundChange,
-            UserLedgerTransaction => LedgerTransactionMarkerTransactionType.User,
+            CoreModel.RoundUpdateLedgerTransaction => LedgerTransactionMarkerTransactionType.RoundChange,
+            CoreModel.UserLedgerTransaction => LedgerTransactionMarkerTransactionType.User,
+            CoreModel.UserLedgerTransactionV2 => LedgerTransactionMarkerTransactionType.User,
             _ => throw new ArgumentOutOfRangeException($"Unexpected ledger transaction type: {committedTransaction.LedgerTransaction.GetType()}"),
         };
 

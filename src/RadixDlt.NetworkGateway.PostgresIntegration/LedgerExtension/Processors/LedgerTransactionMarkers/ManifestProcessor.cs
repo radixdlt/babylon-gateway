@@ -115,6 +115,10 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
                 _manifestExtractedAddresses.Add(stateVersion, extractedAddresses);
             }
         }
+        else if (transaction.LedgerTransaction is CoreModel.UserLedgerTransactionV2 userLedgerTransactionV2)
+        {
+            throw new NotImplementedException("TODO PP: wait for David to implement v2 fully.");
+        }
     }
 
     public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
