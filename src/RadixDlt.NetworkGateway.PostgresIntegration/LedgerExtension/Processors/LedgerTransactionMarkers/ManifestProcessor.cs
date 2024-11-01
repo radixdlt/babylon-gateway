@@ -159,7 +159,7 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
 
     private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV1 toolkitManifest, long stateVersion)
     {
-        var manifestSummary = toolkitManifest.StaticAnalysisAndValidate(_networkConfiguration.Id);
+        var manifestSummary = toolkitManifest.StaticallyAnalyze(_networkConfiguration.Id);
 
         foreach (var manifestClass in manifestSummary.classification)
         {
@@ -174,7 +174,7 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
     // TODO PP: that's ugly duplication, consider refactoring that.
     private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV2 toolkitManifest, long stateVersion)
     {
-        var manifestSummary = toolkitManifest.StaticAnalysisAndValidate(_networkConfiguration.Id);
+        var manifestSummary = toolkitManifest.StaticallyAnalyze(_networkConfiguration.Id);
 
         foreach (var manifestClass in manifestSummary.classification)
         {
