@@ -121,8 +121,8 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
             var coreBlobs = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.BlobsHex;
 
             // TODO PP: that's array of disposable. not sure if that's the best option to go.
-            var children = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.ChildrenSpecifiers
-                .Select(x => new ToolkitModel.Hash(Convert.FromHexString(x))).ToArray();
+            var children = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.NonRootSubintents
+                .Select(x => new ToolkitModel.Hash(Convert.FromHexString(x.Hash))).ToArray();
             using var manifestInstructions = ToolkitModel.InstructionsV2.FromString(coreInstructions, _networkConfiguration.Id);
             using var toolkitManifest = new ToolkitModel.TransactionManifestV2(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray(), children);
 
@@ -159,7 +159,7 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
 
     private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV1 toolkitManifest, long stateVersion)
     {
-        var manifestSummary = toolkitManifest.StaticAnalysis(_networkConfiguration.Id);
+        var manifestSummary = toolkitManifest.StaticAnalysisAndValidate(_networkConfiguration.Id);
 
         foreach (var manifestClass in manifestSummary.classification)
         {
@@ -174,7 +174,7 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
     // TODO PP: that's ugly duplication, consider refactoring that.
     private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV2 toolkitManifest, long stateVersion)
     {
-        var manifestSummary = toolkitManifest.StaticAnalysis(_networkConfiguration.Id);
+        var manifestSummary = toolkitManifest.StaticAnalysisAndValidate(_networkConfiguration.Id);
 
         foreach (var manifestClass in manifestSummary.classification)
         {

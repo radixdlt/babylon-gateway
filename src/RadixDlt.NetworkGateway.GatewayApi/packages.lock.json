@@ -25,9 +25,9 @@
       },
       "RadixDlt.RadixEngineToolkit": {
         "type": "Direct",
-        "requested": "[2.2.0-dev6, )",
-        "resolved": "2.2.0-dev6",
-        "contentHash": "FG01HIL/x1GXPoYEIA2ZuXXirq5HySKnGuUIuf4gXbBnGPiZuG5SiEMFLLFOHUhMJVsCYbQcmC2GCnVk7jC34g=="
+        "requested": "[2.2.0-dev7, )",
+        "resolved": "2.2.0-dev7",
+        "contentHash": "pelTlaGFYo/c0JZona5Q/XETESOaCZj+OxIog+bOTRBYJ0SAGJGD+MU6XTWP3ijmnbNuk9WCW/Xqp80sobpRIg=="
       },
       "StyleCop.Analyzers": {
         "type": "Direct",

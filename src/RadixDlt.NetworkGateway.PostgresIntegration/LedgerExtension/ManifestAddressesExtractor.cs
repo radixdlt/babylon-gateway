@@ -106,7 +106,7 @@ internal static class ManifestAddressesExtractor
     {
         var allAddresses = manifest.ExtractAddresses();
 
-        var manifestSummary = manifest.StaticAnalysis(networkId);
+        var manifestSummary = manifest.StaticAnalysisAndValidate(networkId);
 
         var presentedProofs = ExtractProofs(manifestSummary.presentedProofs);
         var accountsRequiringAuth = manifestSummary.accountsRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
@@ -166,7 +166,7 @@ internal static class ManifestAddressesExtractor
     {
         var allAddresses = manifest.ExtractAddresses();
 
-        var manifestSummary = manifest.StaticAnalysis(networkId);
+        var manifestSummary = manifest.StaticAnalysisAndValidate(networkId);
 
         var presentedProofs = ExtractProofs(manifestSummary.presentedProofs);
         var accountsRequiringAuth = manifestSummary.accountsRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
