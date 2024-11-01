@@ -89,7 +89,7 @@ jobs:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
       - name: Publish Gateway Settings
-        uses: RDXWorks-actions/upload-artifact@main
+        uses: RDXWorks-actions/upload-artifact-v4@main
         with:
           path: Directory.Build.props
           name: build_props
