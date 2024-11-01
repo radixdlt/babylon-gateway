@@ -1426,3 +1426,29 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241101083728_AddLedgerSubintentTable') THEN
+    CREATE TABLE ledger_subintent (
+        subintent_hash text NOT NULL,
+        subintent_index bigint NOT NULL,
+        committed_at_state_version bigint,
+        message jsonb,
+        manifest_instructions text NOT NULL,
+        CONSTRAINT "PK_ledger_subintent" PRIMARY KEY (subintent_hash)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241101083728_AddLedgerSubintentTable') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20241101083728_AddLedgerSubintentTable', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+
