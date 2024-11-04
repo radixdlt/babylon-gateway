@@ -1412,42 +1412,30 @@ START TRANSACTION;
 
 DO $EF$
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241031170311_AddUserTransactionV2') THEN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241104092537_SupportUserTransactionV2') THEN
     ALTER TYPE ledger_transaction_type ADD VALUE 'user_v2' BEFORE 'round_update';
     END IF;
 END $EF$;
 
 DO $EF$
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241031170311_AddUserTransactionV2') THEN
-    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-    VALUES ('20241031170311_AddUserTransactionV2', '8.0.2');
-    END IF;
-END $EF$;
-COMMIT;
-
-START TRANSACTION;
-
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241101083728_AddLedgerSubintentTable') THEN
-    CREATE TABLE ledger_subintent (
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241104092537_SupportUserTransactionV2') THEN
+    CREATE TABLE ledger_subintents (
         subintent_hash text NOT NULL,
         subintent_index bigint NOT NULL,
         committed_at_state_version bigint,
         message jsonb,
         manifest_instructions text NOT NULL,
-        CONSTRAINT "PK_ledger_subintent" PRIMARY KEY (subintent_hash)
+        CONSTRAINT "PK_ledger_subintents" PRIMARY KEY (subintent_hash)
     );
     END IF;
 END $EF$;
 
 DO $EF$
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241101083728_AddLedgerSubintentTable') THEN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241104092537_SupportUserTransactionV2') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-    VALUES ('20241101083728_AddLedgerSubintentTable', '8.0.2');
+    VALUES ('20241104092537_SupportUserTransactionV2', '8.0.2');
     END IF;
 END $EF$;
 COMMIT;

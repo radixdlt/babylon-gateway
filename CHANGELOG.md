@@ -1,5 +1,10 @@
 ## 1.9.0
 Release built: _not released yet_
+- TODO PP
+  - Add new endpoint to check subintent status
+  - add new endpoint for user transaction v2 preview
+  - fix changelog
+  - fix all todos
 
 ## 1.8.2
 Release built: 4.11.2024

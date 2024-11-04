@@ -69,7 +69,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUserTransactionV2 : Migration
+    public partial class SupportUserTransactionV2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -119,11 +119,29 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .OldAnnotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
                 .OldAnnotation("Npgsql:Enum:standard_metadata_key", "dapp_account_type,dapp_definition,dapp_definitions,dapp_claimed_websites,dapp_claimed_entities,dapp_account_locker")
                 .OldAnnotation("Npgsql:Enum:state_type", "json,sbor");
+
+            migrationBuilder.CreateTable(
+                name: "ledger_subintents",
+                columns: table => new
+                {
+                    subintent_hash = table.Column<string>(type: "text", nullable: false),
+                    subintent_index = table.Column<long>(type: "bigint", nullable: false),
+                    committed_at_state_version = table.Column<long>(type: "bigint", nullable: true),
+                    message = table.Column<string>(type: "jsonb", nullable: true),
+                    manifest_instructions = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ledger_subintents", x => x.subintent_hash);
+                });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ledger_subintents");
+
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:account_default_deposit_rule", "accept,reject,allow_existing")
                 .Annotation("Npgsql:Enum:account_resource_preference_rule", "allowed,disallowed")

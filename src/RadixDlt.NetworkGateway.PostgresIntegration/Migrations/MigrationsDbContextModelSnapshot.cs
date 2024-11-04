@@ -68,11 +68,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
-using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable
@@ -1049,7 +1046,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("SubintentHash");
 
-                    b.ToTable("ledger_subintent");
+                    b.ToTable("ledger_subintents");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>
@@ -2576,6 +2573,52 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(EntityType.InternalNonFungibleVault);
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.BaseUserLedgerTransaction", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
+
+                    b.Property<string>("IntentHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("intent_hash");
+
+                    b.Property<LedgerTransactionManifestClass[]>("ManifestClasses")
+                        .IsRequired()
+                        .HasColumnType("ledger_transaction_manifest_class[]")
+                        .HasColumnName("manifest_classes");
+
+                    b.Property<string>("ManifestInstructions")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("manifest_instructions");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("message");
+
+                    b.Property<string>("PayloadHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload_hash");
+
+                    b.Property<byte[]>("RawPayload")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("raw_payload");
+
+                    b.Property<string>("SignedIntentHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("signed_intent_hash");
+
+                    b.HasIndex("IntentHash")
+                        .HasFilter("intent_hash IS NOT NULL");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
+
+                    b.ToTable("ledger_transactions");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.FlashLedgerTransaction", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
@@ -2601,116 +2644,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("ledger_transactions");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionType.RoundUpdate);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransaction", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
-
-                    b.Property<string>("IntentHash")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("intent_hash");
-
-                    b.Property<LedgerTransactionManifestClass[]>("ManifestClasses")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("ledger_transaction_manifest_class[]")
-                        .HasColumnName("manifest_classes");
-
-                    b.Property<string>("ManifestInstructions")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("manifest_instructions");
-
-                    b.Property<string>("Message")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("message");
-
-                    b.Property<string>("PayloadHash")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("payload_hash");
-
-                    b.Property<byte[]>("RawPayload")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bytea")
-                        .HasColumnName("raw_payload");
-
-                    b.Property<string>("SignedIntentHash")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("signed_intent_hash");
-
-                    b.HasIndex("IntentHash")
-                        .HasFilter("intent_hash IS NOT NULL");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
-
-                    b.ToTable("ledger_transactions");
-
-                    b.HasDiscriminator().HasValue(LedgerTransactionType.User);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransactionV2", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
-
-                    b.Property<string>("IntentHash")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("intent_hash");
-
-                    b.Property<LedgerTransactionManifestClass[]>("ManifestClasses")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("ledger_transaction_manifest_class[]")
-                        .HasColumnName("manifest_classes");
-
-                    b.Property<string>("ManifestInstructions")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("manifest_instructions");
-
-                    b.Property<string>("Message")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("message");
-
-                    b.Property<string>("PayloadHash")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("payload_hash");
-
-                    b.Property<byte[]>("RawPayload")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bytea")
-                        .HasColumnName("raw_payload");
-
-                    b.Property<string>("SignedIntentHash")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("signed_intent_hash");
-
-                    b.HasIndex("IntentHash")
-                        .HasFilter("intent_hash IS NOT NULL");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
-
-                    b.ToTable("ledger_transactions");
-
-                    b.HasDiscriminator().HasValue(LedgerTransactionType.UserV2);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AffectedGlobalEntityTransactionMarker", b =>
@@ -2981,6 +2914,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("unverified_standard_metadata_entry_history");
 
                     b.HasDiscriminator().HasValue(StandardMetadataKey.DappDefinitions);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransactionV1", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.BaseUserLedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionType.User);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransactionV2", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.BaseUserLedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionType.UserV2);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>

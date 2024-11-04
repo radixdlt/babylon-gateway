@@ -78,7 +78,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreApi = RadixDlt.CoreApiSdk.Api;
-using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services.PendingTransactions;
 

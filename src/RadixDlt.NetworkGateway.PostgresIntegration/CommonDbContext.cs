@@ -245,20 +245,14 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<LedgerTransaction>()
             .HasDiscriminator<LedgerTransactionType>(DiscriminatorColumnName)
-            .HasValue<UserLedgerTransaction>(LedgerTransactionType.User)
+            .HasValue<UserLedgerTransactionV1>(LedgerTransactionType.User)
             .HasValue<UserLedgerTransactionV2>(LedgerTransactionType.UserV2)
             .HasValue<RoundUpdateLedgerTransaction>(LedgerTransactionType.RoundUpdate)
             .HasValue<GenesisLedgerTransaction>(LedgerTransactionType.Genesis)
             .HasValue<FlashLedgerTransaction>(LedgerTransactionType.Flash);
 
         modelBuilder
-            .Entity<UserLedgerTransaction>()
-            .HasIndex(lt => lt.IntentHash)
-            .HasMethod("hash")
-            .HasFilter("intent_hash IS NOT NULL");
-
-        modelBuilder
-            .Entity<UserLedgerTransactionV2>()
+            .Entity<BaseUserLedgerTransaction>()
             .HasIndex(lt => lt.IntentHash)
             .HasMethod("hash")
             .HasFilter("intent_hash IS NOT NULL");

@@ -438,10 +438,9 @@ internal class TransactionQuerier : ITransactionQuerier
         bool withDetails,
         CancellationToken token = default)
     {
-        // TODO PP: That will not work as we have v1 and v2 user transactions.
         var stateVersion = await _dbContext
             .LedgerTransactions
-            .OfType<UserLedgerTransaction>()
+            .OfType<BaseUserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion && ult.IntentHash == intentHash)
             .Select(ult => ult.StateVersion)
             .AnnotateMetricName()
@@ -465,10 +464,9 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<GatewayModel.TransactionStatusResponse> ResolveTransactionStatusResponse(GatewayModel.LedgerState ledgerState, string intentHash, CancellationToken token = default)
     {
-        // TODO PP: That will not work as we have v1 and v2 user transactions.
         var maybeCommittedTransactionSummary = await _dbContext
             .LedgerTransactions
-            .OfType<UserLedgerTransaction>()
+            .OfType<BaseUserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion && ult.IntentHash == intentHash)
             .Select(
                 ult => new CommittedTransactionSummary(
@@ -619,7 +617,7 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
         string? manifestInstructions = null;
         List<GatewayModel.ManifestClass>? manifestClasses = null;
 
-        if (lt.Discriminator == LedgerTransactionType.User)
+        if (lt.Discriminator is LedgerTransactionType.User or LedgerTransactionType.UserV2)
         {
             payloadHash = lt.PayloadHash;
             intentHash = lt.IntentHash;

@@ -68,7 +68,6 @@ using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 

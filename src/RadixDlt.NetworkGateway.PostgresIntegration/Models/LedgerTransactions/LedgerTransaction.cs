@@ -202,7 +202,7 @@ internal class GenesisLedgerTransaction : LedgerTransaction
 {
 }
 
-internal class UserLedgerTransaction : LedgerTransaction
+internal abstract class BaseUserLedgerTransaction : LedgerTransaction
 {
     /// <summary>
     /// The transaction payload hash, also known as the notarized transaction hash (for user transactions).
@@ -240,42 +240,12 @@ internal class UserLedgerTransaction : LedgerTransaction
     public LedgerTransactionManifestClass[] ManifestClasses { get; set; }
 }
 
-internal class UserLedgerTransactionV2 : LedgerTransaction
+internal class UserLedgerTransactionV1 : BaseUserLedgerTransaction
 {
-    /// <summary>
-    /// The transaction payload hash, also known as the notarized transaction hash (for user transactions).
-    /// This shouldn't be used for user transaction tracking, because it could be mutated in transit.
-    /// The intent hash should be used for tracking of user transactions.
-    /// </summary>
-    [Column("payload_hash")]
-    public string PayloadHash { get; set; }
+}
 
-    /// <summary>
-    /// The transaction intent hash. The engine ensures two transactions with the same intent hash cannot be committed.
-    /// </summary>
-    [Column("intent_hash")]
-    public string IntentHash { get; set; }
-
-    /// <summary>
-    /// The hash of the signed transaction, which is what the notary signs.
-    /// </summary>
-    [Column("signed_intent_hash")]
-    public string SignedIntentHash { get; set; }
-
-    [Column("message", TypeName = "jsonb")]
-    public string? Message { get; set; }
-
-    /// <summary>
-    /// The raw payload of the transaction.
-    /// </summary>
-    [Column("raw_payload")]
-    public byte[] RawPayload { get; set; }
-
-    [Column("manifest_instructions")]
-    public string ManifestInstructions { get; set; }
-
-    [Column("manifest_classes")]
-    public LedgerTransactionManifestClass[] ManifestClasses { get; set; }
+internal class UserLedgerTransactionV2 : BaseUserLedgerTransaction
+{
 }
 
 internal class RoundUpdateLedgerTransaction : LedgerTransaction

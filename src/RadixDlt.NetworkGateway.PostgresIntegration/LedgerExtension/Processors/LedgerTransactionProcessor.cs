@@ -185,14 +185,14 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
             LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction switch
             {
                 CoreModel.GenesisLedgerTransaction => new GenesisLedgerTransaction(),
-                CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
+                CoreModel.UserLedgerTransaction ultv1 => new UserLedgerTransactionV1
                 {
-                    PayloadHash = ult.NotarizedTransaction.HashBech32m,
-                    RawPayload = ult.NotarizedTransaction.GetPayloadBytes(),
-                    IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.HashBech32m,
-                    SignedIntentHash = ult.NotarizedTransaction.SignedIntent.HashBech32m,
-                    Message = ult.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
-                    ManifestInstructions = ult.NotarizedTransaction.SignedIntent.Intent.Instructions,
+                    PayloadHash = ultv1.NotarizedTransaction.HashBech32m,
+                    RawPayload = ultv1.NotarizedTransaction.GetPayloadBytes(),
+                    IntentHash = ultv1.NotarizedTransaction.SignedIntent.Intent.HashBech32m,
+                    SignedIntentHash = ultv1.NotarizedTransaction.SignedIntent.HashBech32m,
+                    Message = ultv1.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
+                    ManifestInstructions = ultv1.NotarizedTransaction.SignedIntent.Intent.Instructions,
                     ManifestClasses = _manifestProcessor.GetManifestClasses(stateVersion),
                 },
                 CoreModel.UserLedgerTransactionV2 ultv2 => new UserLedgerTransactionV2
@@ -358,7 +358,7 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     break;
-                case UserLedgerTransaction ult:
+                case UserLedgerTransactionV1 ult:
                     await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Text, token);
@@ -398,7 +398,7 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
 
     private Task<int> CopyLedgerSubintents() => _context.WriteHelper.Copy(
         _ledgerSubintentsToAdd,
-        "COPY ledger_subintent (subintent_hash, subintent_index, committed_at_state_version, message, manifest_instructions) FROM STDIN (FORMAT BINARY)",
+        "COPY ledger_subintents (subintent_hash, subintent_index, committed_at_state_version, message, manifest_instructions) FROM STDIN (FORMAT BINARY)",
         async (writer, subintent, token) =>
         {
             await writer.WriteAsync(subintent.SubintentHash, NpgsqlDbType.Text, token);

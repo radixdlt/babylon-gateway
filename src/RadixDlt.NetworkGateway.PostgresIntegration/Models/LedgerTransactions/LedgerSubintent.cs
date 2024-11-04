@@ -67,7 +67,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("ledger_subintent")]
+[Table("ledger_subintents")]
 internal class LedgerSubintent
 {
     // TODO PP: do we want string as pk or do we want to create int key and index for that?
