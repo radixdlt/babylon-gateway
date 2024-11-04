@@ -1,5 +1,5 @@
 ## 1.8.2
-Release built: _not released yet_
+Release built: 4.11.2024
 
 ### Bug fixes
 - Fix processing multiple changes to single non fungible id data (`NonFungibleResourceManagerDataEntrySubstate`) in one batch. It might result in
