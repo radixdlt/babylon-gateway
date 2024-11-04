@@ -1,3 +1,18 @@
+## 1.8.2
+Release built: _not released yet_
+
+### Bug fixes
+- Fix processing multiple changes to single non fungible id data (`NonFungibleResourceManagerDataEntrySubstate`) in one batch. It might result in
+  - Wrong data stored and returned from the `/state/non-fungible/data` endpoint.
+  - Not tracking properly that non fungible id got deleted, which might lead to returning an invalid location of non fungible id. Affected endpoints are
+    - `/state/non-fungible/location`
+    - And all endpoints that return non fungible vault content 
+      - `/state/entity/details`
+      - `/state/entity/page/non-fungibles/`
+      - `/state/entity/page/non-fungible-vaults/`
+      - `/state/entity/page/non-fungible-vault/ids`
+
+
 ## 1.8.1
 Release built: 23.10.2024
 

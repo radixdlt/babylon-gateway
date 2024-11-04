@@ -84,13 +84,13 @@ internal class VaultProcessor : IProcessorBase, ISubstateUpsertProcessor, ISubst
 
     private readonly record struct NonFungibleVaultChange(VaultEntity VaultEntity, string NonFungibleLocalId, bool IsDeposit, long StateVersion);
 
-    private readonly record struct NonFungibleIdChange(bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
+    private readonly record struct NonFungibleIdChange(long NonFungibleResourceEntityId, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
 
     private readonly ProcessorContext _context;
 
     private readonly List<VaultBalanceSnapshot> _observedVaultBalanceSnapshots = new();
     private readonly List<NonFungibleVaultChange> _observedNonFungibleVaultChanges = new();
-    private readonly Dictionary<NonFungibleIdDefinitionDbLookup, NonFungibleIdChange> _observedNonFungibleDataEntries = new();
+    private readonly List<NonFungibleIdChange> _observedNonFungibleDataChanges = new();
     private readonly Dictionary<NonFungibleIdDefinitionDbLookup, NonFungibleIdDefinition> _existingNonFungibleIdDefinitions = new();
     private readonly Dictionary<NonFungibleVaultEntryDefinitionDbLookup, NonFungibleVaultEntryDefinition> _existingNonFungibleVaultEntryDefinitions = new();
     private readonly List<VaultBalanceHistory> _balanceHistoryToAdd = new();
@@ -129,9 +129,10 @@ internal class VaultProcessor : IProcessorBase, ISubstateUpsertProcessor, ISubst
         {
             var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(((CoreModel.MapSubstateKey)substate.SubstateId.SubstateKey).KeyHex);
 
-            _observedNonFungibleDataEntries.TryAdd(
-                new NonFungibleIdDefinitionDbLookup(referencedEntity.DatabaseId, nonFungibleId),
+            _observedNonFungibleDataChanges.Add(
                 new NonFungibleIdChange(
+                    referencedEntity.DatabaseId,
+                    nonFungibleId,
                     nonFungibleResourceManagerDataEntrySubstate.Value == null,
                     nonFungibleResourceManagerDataEntrySubstate.IsLocked,
                     nonFungibleResourceManagerDataEntrySubstate.Value?.DataStruct.StructData.GetDataBytes(),
@@ -176,8 +177,10 @@ internal class VaultProcessor : IProcessorBase, ISubstateUpsertProcessor, ISubst
                     Balance = x.Balance,
                 }));
 
-        foreach (var (lookup, nonFungibleIdChange) in _observedNonFungibleDataEntries)
+        foreach (var nonFungibleIdDataChange in _observedNonFungibleDataChanges)
         {
+            var lookup = new NonFungibleIdDefinitionDbLookup(nonFungibleIdDataChange.NonFungibleResourceEntityId, nonFungibleIdDataChange.NonFungibleId);
+
             var definition = _existingNonFungibleIdDefinitions.GetOrAdd(
                 lookup,
                 _ =>
@@ -185,7 +188,7 @@ internal class VaultProcessor : IProcessorBase, ISubstateUpsertProcessor, ISubst
                     var definition = new NonFungibleIdDefinition
                     {
                         Id = _context.Sequences.NonFungibleIdDefinitionSequence++,
-                        FromStateVersion = nonFungibleIdChange.StateVersion,
+                        FromStateVersion = nonFungibleIdDataChange.StateVersion,
                         NonFungibleResourceEntityId = lookup.NonFungibleResourceEntityId,
                         NonFungibleId = lookup.NonFungibleId,
                     };
@@ -199,11 +202,11 @@ internal class VaultProcessor : IProcessorBase, ISubstateUpsertProcessor, ISubst
                 new NonFungibleIdDataHistory
                 {
                     Id = _context.Sequences.NonFungibleIdDataHistorySequence++,
-                    FromStateVersion = nonFungibleIdChange.StateVersion,
+                    FromStateVersion = nonFungibleIdDataChange.StateVersion,
                     NonFungibleIdDefinitionId = definition.Id,
-                    Data = nonFungibleIdChange.MutableData,
-                    IsDeleted = nonFungibleIdChange.IsDeleted,
-                    IsLocked = nonFungibleIdChange.IsLocked,
+                    Data = nonFungibleIdDataChange.MutableData,
+                    IsDeleted = nonFungibleIdDataChange.IsDeleted,
+                    IsLocked = nonFungibleIdDataChange.IsLocked,
                 });
         }
 
@@ -282,13 +285,17 @@ internal class VaultProcessor : IProcessorBase, ISubstateUpsertProcessor, ISubst
 
     private async Task<IDictionary<NonFungibleIdDefinitionDbLookup, NonFungibleIdDefinition>> ExistingNonFungibleIdDefinitions()
     {
-        var lookup = _observedNonFungibleVaultChanges
+        var vaultChangesLookups = _observedNonFungibleVaultChanges
             .Select(x => new NonFungibleIdDefinitionDbLookup(x.VaultEntity.GetResourceEntityId(), x.NonFungibleLocalId))
             .ToHashSet();
 
-        lookup.UnionWith(_observedNonFungibleDataEntries.Keys);
+        var dataChangesLookups = _observedNonFungibleDataChanges
+            .Select(x => new NonFungibleIdDefinitionDbLookup(x.NonFungibleResourceEntityId, x.NonFungibleId))
+            .ToHashSet();
 
-        if (!lookup.Unzip(x => x.NonFungibleResourceEntityId, x => x.NonFungibleId, out var resourceEntityIds, out var nonFungibleLocalIds))
+        var lookups = vaultChangesLookups.Union(dataChangesLookups).ToHashSet();
+
+        if (!lookups.Unzip(x => x.NonFungibleResourceEntityId, x => x.NonFungibleId, out var resourceEntityIds, out var nonFungibleLocalIds))
         {
             return ImmutableDictionary<NonFungibleIdDefinitionDbLookup, NonFungibleIdDefinition>.Empty;
         }
