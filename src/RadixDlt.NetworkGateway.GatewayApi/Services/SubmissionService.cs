@@ -191,7 +191,7 @@ internal class SubmissionService : ISubmissionService
                 return await HandlePreSubmissionParseTransactionV2(notarizedTransactionBytes);
             }
 
-            throw new NotSupportedException($"Unrecognized transaction. Discriminator byte: {notarizedTransactionBytes[2]}. Only V1 or V2 user transaction is supported");
+            throw InvalidTransactionException.FromStaticallyInvalid("Unable to decode transaction. Unexpected payload prefix.");
         }
         catch (ToolkitModel.RadixEngineToolkitException.TransactionValidationFailed ex)
         {
