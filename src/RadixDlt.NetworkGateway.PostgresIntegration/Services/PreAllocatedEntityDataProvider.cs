@@ -191,7 +191,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
     private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GeneratePreAllocatedIdentityRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
         return roleAssignmentsKeyProvider
-            .AllNativeModulesKeys
+            .MetadataModulesKeys
             .Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
                 new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ModuleId.ToGatewayModel()),
                 new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
