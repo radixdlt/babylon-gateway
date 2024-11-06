@@ -1343,6 +1343,29 @@ paths:
                 $ref: "#/components/schemas/TransactionStatusResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
+  "/transaction/subintent-status":
+    post:
+      operationId: TransactionSubintentStatus
+      summary: Get Transaction Subintent Status
+      description: |
+        Returns subintent status and details based on supplied subintent hash.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionSubintentStatusRequest"
+      responses:
+        "200":
+          description: Transaction Status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionSubintentStatusResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
 
   "/transaction/account-deposit-pre-validation":
     post:
@@ -2980,6 +3003,7 @@ components:
           description: |
             A collection of zero or more manifest classes ordered from the most specific class to the least specific one.
             This field will be present only for user transactions.
+            For user transactions with subintents only root transaction intent is used to determine manifest classes.
           type: array
           nullable: true
           items:
@@ -2991,6 +3015,15 @@ components:
             This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
         balance_changes:
           $ref: "#/components/schemas/TransactionBalanceChanges"
+        subintent_details:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionSubintentDetails"
+        child_subintent_hashes:
+          description: the child subintent hashes of the root transaction intent.
+          type: array
+          items:
+            $ref: "#/components/schemas/HashBech32mString"
 
     TransactionStatus:
       type: string
@@ -3003,6 +3036,14 @@ components:
         - CommittedFailure
         - Pending
         - Rejected
+
+    TransactionSubintentStatus:
+      type: string
+      description: |
+        A more specific subintent status. See the description field for further information.
+      enum:
+        - Unknown
+        - CommittedSuccess
 
     TransactionIntentStatus:
       type: string
@@ -3675,6 +3716,41 @@ components:
             deciding_factors:
               $ref: "#/components/schemas/AccountDepositPreValidationDecidingFactors"
 
+    TransactionSubintentStatusRequest:
+      allOf:
+        - type: object
+          required:
+            - subintent_hash
+          properties:
+            subintent_hash:
+              $ref: "#/components/schemas/HashBech32mString"
+      example:
+        subintent_hash: "<transaction-subintent-hash>"
+    TransactionSubintentStatusResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - subintent_status
+            - subintent_status_description
+          properties:
+            subintent_status:
+              $ref: "#/components/schemas/TransactionSubintentStatus"
+            subintent_status_description:
+              description: |
+                An additional description to clarify the intent status.
+              type: string
+            finalized_at_state_version:
+              description: |
+                the state version when this subintent was finalized.
+              type: integer
+              format: int64
+              nullable: true
+            finalized_at_transaction_intent_hash:
+              description: |
+                The intent hash of the transaction in which it was committed.
+              $ref: "#/components/schemas/HashBech32mString"
+
     TransactionStatusRequest:
       allOf:
         - type: object
@@ -3854,6 +3930,30 @@ components:
           properties:
             transaction:
               $ref: "#/components/schemas/CommittedTransactionInfo"
+
+    TransactionSubintentDetails:
+      type: object
+      required:
+        - subintent_hash
+      properties:
+        subintent_hash:
+          $ref: "#/components/schemas/HashBech32mString"
+        manifest_instructions:
+          description: |
+            A text-representation of a subintent transaction manifest.
+            This field will be present only for user transactions and when explicitly opted-in using `manifest_instructions` flag.
+          type: string
+          nullable: true
+        message:
+          type: object
+          description: |
+            The optional subintent message.
+            This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
+        child_subintent_hashes:
+          description: the child subintent hashes a given subintent.
+          type: array
+          items:
+            $ref: "#/components/schemas/HashBech32mString"
 
     TransactionBalanceChanges:
       type: object

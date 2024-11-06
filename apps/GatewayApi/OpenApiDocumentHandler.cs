@@ -88,12 +88,11 @@ public static class OpenApiDocumentHandler
 {
     public static async Task Handle(
         [FromServices] INetworkConfigurationProvider networkConfigurationProvider,
-        [FromServices] ITransactionHandler transactionHandler,
-        [FromServices] ILedgerStateQuerier ledgerStateQuerier,
+        [FromServices] ITransactionQuerier transactionQuerier,
         HttpContext context,
         CancellationToken token = default)
     {
-        var placeholderReplacements = await GetPlaceholderReplacementsAsync(networkConfigurationProvider, transactionHandler, ledgerStateQuerier, token);
+        var placeholderReplacements = await GetPlaceholderReplacementsAsync(networkConfigurationProvider, transactionQuerier, token);
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
         var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");
@@ -124,6 +123,7 @@ public static class OpenApiDocumentHandler
         response = OptionalReplace(response, "<component-entity-address>", placeholderReplacements.ComponentAddress);
         response = OptionalReplace(response, "<package-address>", placeholderReplacements.PackageAddress);
         response = OptionalReplace(response, "<transaction-intent-hash>", placeholderReplacements.CommittedTransactionIntentHash);
+        response = OptionalReplace(response, "<transaction-subintent-hash>", placeholderReplacements.CommittedSubintentHash);
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
@@ -163,17 +163,16 @@ public static class OpenApiDocumentHandler
 
         public string? CommittedTransactionIntentHash { get; set; }
 
+        public string? CommittedSubintentHash { get; set; }
+
         public byte? NetworkId { get; set; }
 
         public string? NetworkName { get; set; }
-
-        public long LedgerStateVersion { get; set; }
     }
 
     private static async Task<PlaceholderReplacements> GetPlaceholderReplacementsAsync(
         INetworkConfigurationProvider networkConfigurationProvider,
-        ITransactionHandler transactionHandler,
-        ILedgerStateQuerier ledgerStateQuerier,
+        ITransactionQuerier transactionQuerier,
         CancellationToken token)
     {
         var placeholderReplacements = new PlaceholderReplacements();
@@ -194,8 +193,9 @@ public static class OpenApiDocumentHandler
 
         try
         {
-            var sampleTransaction = (await transactionHandler.StreamTransactions(new StreamTransactionsRequest(limitPerPage: 1), token)).Items.FirstOrDefault();
-            placeholderReplacements.CommittedTransactionIntentHash = sampleTransaction?.IntentHash;
+            var (randomIntentHash, randomSubintentHash) = await transactionQuerier.GetOpenApiDocumentHandlerDetails(token);
+            placeholderReplacements.CommittedTransactionIntentHash = randomIntentHash;
+            placeholderReplacements.CommittedSubintentHash = randomSubintentHash;
         }
         catch (Exception)
         {

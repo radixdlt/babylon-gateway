@@ -70,26 +70,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 [Table("ledger_subintents")]
 internal class LedgerSubintent
 {
-    // TODO PP: do we want string as pk or do we want to create int key and index for that?
     [Key]
     [Column("subintent_hash")]
+    [StringLength(90)]
     public string SubintentHash { get; set; }
 
-    [Column("subintent_index")]
-    public long SubintentIndex { get; set; }
+    [Column("finalized_at_state_version")]
+    public long FinalizedAtStateVersion { get; set; }
 
-    // TODO PP: do we want to store somewhere failed state versions?
-
-    // TODO PP: assume we're gonna store that once we spot it got committed on ledger?
-    [Column("committed_at_state_version")]
-    public long? CommittedAtStateVersion { get; set; }
-
-    // TODO PP: is that separate from tx root (all applies to both msg and instructions)
-    // We could possibly have another table we could store anything potentially large, e.g.:
-    // David: Although, honestly, we could potentially just extract these from the parent transaction on demand in the Gateway API so perhaps we don’t even need to save these? :slightly_smiling_face:
-    [Column("message", TypeName = "jsonb")]
-    public string? Message { get; set; }
-
-    [Column("manifest_instructions")]
-    public string ManifestInstructions { get; set; }
+    [Column("finalized_at_transaction_intent_hash")]
+    [StringLength(90)]
+    public string FinalizedAtTransactionIntentHash { get; set; }
 }

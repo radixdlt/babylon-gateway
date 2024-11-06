@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,73 +62,35 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public interface ITransactionQuerier
+[Table("ledger_transaction_subintent_data")]
+internal class LedgerTransactionSubintentData
 {
-    Task<(string? RandomIntentHash, string? RandomSubintentHash)> GetOpenApiDocumentHandlerDetails(CancellationToken token = default);
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [Column("state_version")]
+    public long StateVersion { get; set; }
 
-    Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
+    [Column("child_subintent_hashes")]
+    public List<string> ChildSubintentHashes { get; set; }
 
-    Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
-        string intentHash,
-        GatewayModel.TransactionDetailsOptIns optIns,
-        GatewayModel.LedgerState ledgerState,
-        bool withDetails,
-        CancellationToken token = default);
-
-    Task<GatewayModel.TransactionStatusResponse> ResolveTransactionStatusResponse(
-        GatewayModel.LedgerState ledgerState,
-        string intentHash,
-        CancellationToken token = default);
-
-    Task<GatewayModel.TransactionSubintentStatusResponse> ResolveTransactionSubintentStatusResponse(
-        GatewayModel.LedgerState ledgerState,
-        string subintentHash,
-        CancellationToken token = default);
+    [Column("subintent_data", TypeName = "jsonb")]
+    public string SubintentData { get; set; }
 }
 
-public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions)
+internal class SubintentData
 {
-    public static readonly TransactionPageWithoutTotal Empty = new(null, new List<GatewayModel.CommittedTransactionInfo>());
-}
+    public string SubintentHash { get; set; }
 
-public sealed record TransactionStreamPageRequest(
-    long? FromStateVersion,
-    GatewayModel.LedgerTransactionsCursor? Cursor,
-    int PageSize,
-    bool AscendingOrder,
-    TransactionStreamPageRequestSearchCriteria SearchCriteria,
-    GatewayModel.TransactionDetailsOptIns OptIns);
+    public List<string> ChildSubintentHashes { get; set; }
 
-public class TransactionStreamPageRequestSearchCriteria
-{
-    public LedgerTransactionKindFilter Kind { get; set; }
+    public string ManifestInstructions { get; set; }
 
-    public HashSet<LedgerTransactionEventFilter> Events { get; set; } = new();
-
-    public HashSet<EntityAddress> ManifestAccountsDepositedInto { get; set; } = new();
-
-    public HashSet<EntityAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
-
-    public HashSet<EntityAddress> ManifestResources { get; set; } = new();
-
-    public HashSet<EntityAddress> BadgesPresented { get; set; } = new();
-
-    public HashSet<EntityAddress> AffectedGlobalEntities { get; set; } = new();
-
-    public HashSet<EntityAddress> EventGlobalEmitters { get; set; } = new();
-
-    public HashSet<EntityAddress> AccountsWithoutManifestOwnerMethodCalls { get; set; } = new();
-
-    public HashSet<EntityAddress> AccountsWithManifestOwnerMethodCalls { get; set; } = new();
-
-    public ManifestClassFilter? ManifestClassFilter { get; set; }
+    public string? Message { get; set; }
 }

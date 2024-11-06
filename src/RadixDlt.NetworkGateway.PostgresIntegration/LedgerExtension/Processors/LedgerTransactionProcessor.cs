@@ -100,6 +100,7 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
     private readonly IClock _clock;
     private readonly List<LedgerTransaction> _ledgerTransactionsToAdd = new();
     private readonly List<LedgerSubintent> _ledgerSubintentsToAdd = new();
+    private readonly List<LedgerTransactionSubintentData> _subintentDataToAdd = new();
     private readonly List<LedgerTransactionEvents> _ledgerTransactionEventsToAdd = new();
     private readonly ReferencedEntityDictionary _referencedEntities;
     private readonly ManifestProcessor _manifestProcessor;
@@ -244,11 +245,32 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
                         (x, index) =>
                             new LedgerSubintent
                             {
-                                Message = x.IntentCore.Message?.ToJson(),
-                                ManifestInstructions = x.IntentCore.Instructions,
                                 SubintentHash = x.HashBech32m,
-                                SubintentIndex = index,
+                                FinalizedAtStateVersion = stateVersion,
+                                FinalizedAtTransactionIntentHash = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.HashBech32m,
                             }));
+
+                var subintentData = userLedgerTransactionV2
+                    .NotarizedTransaction
+                    .SignedTransactionIntent
+                    .TransactionIntent
+                    .NonRootSubintents
+                    .Select(
+                        x => new SubintentData
+                        {
+                            SubintentHash = x.HashBech32m,
+                            Message = x.IntentCore.Message?.ToJson(),
+                            ManifestInstructions = x.IntentCore.Instructions,
+                            ChildSubintentHashes = x.IntentCore.ChildrenSpecifiers,
+                        })
+                    .ToList();
+
+                _subintentDataToAdd.Add(new LedgerTransactionSubintentData
+                {
+                    StateVersion = stateVersion,
+                    ChildSubintentHashes = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.ChildrenSpecifiers,
+                    SubintentData = JsonConvert.SerializeObject(subintentData),
+                });
             }
 
             var isUserTransaction = committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction or CoreModel.UserLedgerTransactionV2;
@@ -307,6 +329,7 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
         rowsInserted += await CopyLedgerTransactions();
         rowsInserted += await CopyLedgerTransactionEvents();
         rowsInserted += await CopyLedgerSubintents();
+        rowsInserted += await CopyLedgerTransactionSubintentData();
 
         return rowsInserted;
     }
@@ -398,13 +421,21 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
 
     private Task<int> CopyLedgerSubintents() => _context.WriteHelper.Copy(
         _ledgerSubintentsToAdd,
-        "COPY ledger_subintents (subintent_hash, subintent_index, committed_at_state_version, message, manifest_instructions) FROM STDIN (FORMAT BINARY)",
+        "COPY ledger_subintents (subintent_hash, finalized_at_state_version, finalized_at_transaction_intent_hash) FROM STDIN (FORMAT BINARY)",
         async (writer, subintent, token) =>
         {
             await writer.WriteAsync(subintent.SubintentHash, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(subintent.SubintentIndex, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(subintent.CommittedAtStateVersion, NpgsqlDbType.Integer, token);
-            await writer.WriteAsync(subintent.Message, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(subintent.ManifestInstructions, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(subintent.FinalizedAtStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(subintent.FinalizedAtTransactionIntentHash, NpgsqlDbType.Text, token);
+        });
+
+    private Task<int> CopyLedgerTransactionSubintentData() => _context.WriteHelper.Copy(
+        _subintentDataToAdd,
+        "COPY ledger_transaction_subintent_data (state_version, child_subintent_hashes, subintent_data) FROM STDIN (FORMAT BINARY)",
+        async (writer, subintent, token) =>
+        {
+            await writer.WriteAsync(subintent.StateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(subintent.ChildSubintentHashes, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
+            await writer.WriteAsync(subintent.SubintentData, NpgsqlDbType.Jsonb, token);
         });
 }

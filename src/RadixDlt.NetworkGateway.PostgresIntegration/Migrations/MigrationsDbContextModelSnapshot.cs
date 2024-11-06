@@ -68,8 +68,11 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable
@@ -1024,25 +1027,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerSubintent", b =>
                 {
                     b.Property<string>("SubintentHash")
-                        .HasColumnType("text")
+                        .HasMaxLength(90)
+                        .HasColumnType("character varying(90)")
                         .HasColumnName("subintent_hash");
 
-                    b.Property<long?>("CommittedAtStateVersion")
+                    b.Property<long>("FinalizedAtStateVersion")
                         .HasColumnType("bigint")
-                        .HasColumnName("committed_at_state_version");
+                        .HasColumnName("finalized_at_state_version");
 
-                    b.Property<string>("ManifestInstructions")
+                    b.Property<string>("FinalizedAtTransactionIntentHash")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("manifest_instructions");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("message");
-
-                    b.Property<long>("SubintentIndex")
-                        .HasColumnType("bigint")
-                        .HasColumnName("subintent_index");
+                        .HasMaxLength(90)
+                        .HasColumnType("character varying(90)")
+                        .HasColumnName("finalized_at_transaction_intent_hash");
 
                     b.HasKey("SubintentHash");
 
@@ -1244,6 +1241,27 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator<LedgerTransactionMarkerType>("discriminator");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionSubintentData", b =>
+                {
+                    b.Property<long>("StateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("state_version");
+
+                    b.Property<List<string>>("ChildSubintentHashes")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("child_subintent_hashes");
+
+                    b.Property<string>("SubintentData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("subintent_data");
+
+                    b.HasKey("StateVersion");
+
+                    b.ToTable("ledger_transaction_subintent_data");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdDataHistory", b =>

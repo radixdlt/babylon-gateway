@@ -116,6 +116,12 @@ internal class DefaultTransactionHandler : ITransactionHandler
         return await _transactionQuerier.ResolveTransactionStatusResponse(ledgerState, request.IntentHash, token);
     }
 
+    public async Task<GatewayModel.TransactionSubintentStatusResponse> SubintentStatus(GatewayModel.TransactionSubintentStatusRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
+        return await _transactionQuerier.ResolveTransactionSubintentStatusResponse(ledgerState, request.SubintentHash, token);
+    }
+
     public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);

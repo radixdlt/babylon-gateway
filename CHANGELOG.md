@@ -1,10 +1,18 @@
 ## 1.9.0
 Release built: _not released yet_
-- TODO PP
-  - Add new endpoint to check subintent status
-  - add new endpoint for user transaction v2 preview
-  - fix changelog
-  - fix all todos
+
+### What’s new?
+- Added support for the `cuttlefish` protocol version.
+
+### API Changes
+- Added a new `/transaction/subintent-status` endpoint that lets you check the status of a transaction subintent.
+- Added new optional `subintent_details` and `child_subintent_hashes` fields to the `/transaction/committed-details` endpoint, providing information about the transaction subintents if present.
+- TODO PP: new endpoint for transaction v2 preview.
+
+### Database changes
+- New `ledger_subintents` table that stores information about subintent status.
+- New `UserV2` ledger transaction type discriminator in the `ledger_transactions` table.
+- New `ledger_transaction_subintent_data` table that stores additional information about the transaction's subintents.
 
 ## 1.8.2
 Release built: 4.11.2024

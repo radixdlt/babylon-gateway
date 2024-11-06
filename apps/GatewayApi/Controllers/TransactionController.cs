@@ -87,6 +87,12 @@ public sealed class TransactionController : ControllerBase
         return await _transactionHandler.Construction(token);
     }
 
+    [HttpPost("subintent-status")]
+    public async Task<GatewayModel.TransactionSubintentStatusResponse> Status(GatewayModel.TransactionSubintentStatusRequest request, CancellationToken token)
+    {
+        return await _transactionHandler.SubintentStatus(request, token);
+    }
+
     [HttpPost("status")]
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
     {

@@ -114,6 +114,14 @@ internal class TransactionQuerier : ITransactionQuerier
         _entityQuerier = entityQuerier;
     }
 
+    public async Task<(string? RandomIntentHash, string? RandomSubintentHash)> GetOpenApiDocumentHandlerDetails(CancellationToken token = default)
+    {
+        var randomIntentHash = (await _dbContext.LedgerTransactions.OfType<BaseUserLedgerTransaction>().FirstOrDefaultAsync(token))?.IntentHash;
+        var randomSubintentHash = (await _dbContext.LedgerSubintents.FirstOrDefaultAsync(token))?.SubintentHash;
+
+        return (randomIntentHash, randomSubintentHash);
+    }
+
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
     {
         var referencedAddresses = request
@@ -489,6 +497,21 @@ internal class TransactionQuerier : ITransactionQuerier
         return aggregator.IntoResponse();
     }
 
+    public async Task<GatewayModel.TransactionSubintentStatusResponse> ResolveTransactionSubintentStatusResponse(GatewayModel.LedgerState ledgerState, string subintentHash, CancellationToken token = default)
+    {
+        var subintent = await _dbContext.LedgerSubintents.SingleOrDefaultAsync(x => x.SubintentHash == subintentHash, token);
+        var subintentStatus = subintent != null ? GatewayModel.TransactionSubintentStatus.CommittedSuccess : GatewayModel.TransactionSubintentStatus.Unknown;
+        var statusDescription = subintentStatus switch
+        {
+            GatewayModel.TransactionSubintentStatus.CommittedSuccess => "The subintent has been successfully committed to the ledger at the given finalized_state_version. Use the committed details endpoint to read further details.",
+            GatewayModel.TransactionSubintentStatus.Unknown => "The gateway has not seen the subintent committed as a success, but otherwise, its status is unknown. It may not exist, it may have expired, it may still be possible for it to commit as a success. Note that, unlike transaction intents, subintents can commit as a failure 0 or more times and still commit as a success.",
+            _ => throw new NotSupportedException($"Not supported subintent status: {subintentStatus}"),
+        };
+
+        return new GatewayModel.TransactionSubintentStatusResponse(
+            ledgerState, subintentStatus, statusDescription, subintent?.FinalizedAtStateVersion, subintent?.FinalizedAtTransactionIntentHash);
+    }
+
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(
         List<long> transactionStateVersions,
         GatewayModel.TransactionDetailsOptIns optIns,
@@ -660,6 +683,14 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                 StateUpdates = optIns.ReceiptStateChanges && lt.ReceiptStateUpdates != null ? new JRaw(lt.ReceiptStateUpdates) : null,
                 Events = optIns.ReceiptEvents ? events?.Select(x => new GatewayModel.EventsItem(x.Name, new JRaw(x.Emitter), x.Data)).ToList() : null,
             },
+            subintentDetails: lt.SubintentData?.SubintentData
+                .Select(x => new GatewayModel.TransactionSubintentDetails(
+                    x.SubintentHash,
+                    optIns.ManifestInstructions ? x.ManifestInstructions : null,
+                    x.Message != null ? new JRaw(x.Message) : null,
+                    x.ChildSubintentHashes))
+                .ToList(),
+            childSubintentHashes: lt.SubintentData?.ChildSubintentHashes,
             message: message,
             balanceChanges: optIns.BalanceChanges ? transactionBalanceChanges : null,
             manifestInstructions: manifestInstructions,
