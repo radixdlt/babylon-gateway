@@ -84,52 +84,104 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ErrorResponseType
+    /// PreviewTransaction
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ErrorResponseType
+    [DataContract(Name = "PreviewTransaction")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransaction), "Compiled")]
+    [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransaction), "CompiledPreviewTransaction")]
+    public partial class PreviewTransaction : IEquatable<PreviewTransaction>
     {
-        /// <summary>
-        /// Enum Basic for value: Basic
-        /// </summary>
-        [EnumMember(Value = "Basic")]
-        Basic = 1,
 
         /// <summary>
-        /// Enum TransactionSubmit for value: TransactionSubmit
+        /// Gets or Sets Type
         /// </summary>
-        [EnumMember(Value = "TransactionSubmit")]
-        TransactionSubmit = 2,
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public PreviewTransactionType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PreviewTransaction" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected PreviewTransaction() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PreviewTransaction" /> class.
+        /// </summary>
+        /// <param name="type">type (required).</param>
+        public PreviewTransaction(PreviewTransactionType type = default(PreviewTransactionType))
+        {
+            this.Type = type;
+        }
 
         /// <summary>
-        /// Enum LtsTransactionSubmit for value: LtsTransactionSubmit
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "LtsTransactionSubmit")]
-        LtsTransactionSubmit = 3,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class PreviewTransaction {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum TransactionPreviewV2 for value: TransactionPreviewV2
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "TransactionPreviewV2")]
-        TransactionPreviewV2 = 4,
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum StreamTransactions for value: StreamTransactions
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "StreamTransactions")]
-        StreamTransactions = 5,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as PreviewTransaction);
+        }
 
         /// <summary>
-        /// Enum StreamProofs for value: StreamProofs
+        /// Returns true if PreviewTransaction instances are equal
         /// </summary>
-        [EnumMember(Value = "StreamProofs")]
-        StreamProofs = 6
+        /// <param name="input">Instance of PreviewTransaction to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(PreviewTransaction input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                return hashCode;
+            }
+        }
 
     }
 

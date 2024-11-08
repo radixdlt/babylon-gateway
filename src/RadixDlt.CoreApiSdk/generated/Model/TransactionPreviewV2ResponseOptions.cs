@@ -90,46 +90,120 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ErrorResponseType
+    /// A set of flags to configure the response of the transaction preview.
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ErrorResponseType
+    [DataContract(Name = "TransactionPreviewV2ResponseOptions")]
+    public partial class TransactionPreviewV2ResponseOptions : IEquatable<TransactionPreviewV2ResponseOptions>
     {
         /// <summary>
-        /// Enum Basic for value: Basic
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2ResponseOptions" /> class.
         /// </summary>
-        [EnumMember(Value = "Basic")]
-        Basic = 1,
+        /// <param name="coreApiReceipt">This flag controls whether the preview response will include a Core API receipt or not. If not provided, this defaults to &#x60;false&#x60; and no core api receipt is provided in the response. .</param>
+        /// <param name="radixEngineToolkitReceipt">This flag controls whether the preview response will include a Radix Engine Toolkit serializable receipt or not. If not provided, this defaults to &#x60;false&#x60; and no toolkit receipt is provided in the response. .</param>
+        /// <param name="logs">This flag controls whether the preview response will include execution logs. If not provided, this defaults to &#x60;false&#x60; and no logs will be provided in the response. .</param>
+        public TransactionPreviewV2ResponseOptions(bool coreApiReceipt = default(bool), bool radixEngineToolkitReceipt = default(bool), bool logs = default(bool))
+        {
+            this.CoreApiReceipt = coreApiReceipt;
+            this.RadixEngineToolkitReceipt = radixEngineToolkitReceipt;
+            this.Logs = logs;
+        }
 
         /// <summary>
-        /// Enum TransactionSubmit for value: TransactionSubmit
+        /// This flag controls whether the preview response will include a Core API receipt or not. If not provided, this defaults to &#x60;false&#x60; and no core api receipt is provided in the response. 
         /// </summary>
-        [EnumMember(Value = "TransactionSubmit")]
-        TransactionSubmit = 2,
+        /// <value>This flag controls whether the preview response will include a Core API receipt or not. If not provided, this defaults to &#x60;false&#x60; and no core api receipt is provided in the response. </value>
+        [DataMember(Name = "core_api_receipt", EmitDefaultValue = true)]
+        public bool CoreApiReceipt { get; set; }
 
         /// <summary>
-        /// Enum LtsTransactionSubmit for value: LtsTransactionSubmit
+        /// This flag controls whether the preview response will include a Radix Engine Toolkit serializable receipt or not. If not provided, this defaults to &#x60;false&#x60; and no toolkit receipt is provided in the response. 
         /// </summary>
-        [EnumMember(Value = "LtsTransactionSubmit")]
-        LtsTransactionSubmit = 3,
+        /// <value>This flag controls whether the preview response will include a Radix Engine Toolkit serializable receipt or not. If not provided, this defaults to &#x60;false&#x60; and no toolkit receipt is provided in the response. </value>
+        [DataMember(Name = "radix_engine_toolkit_receipt", EmitDefaultValue = true)]
+        public bool RadixEngineToolkitReceipt { get; set; }
 
         /// <summary>
-        /// Enum TransactionPreviewV2 for value: TransactionPreviewV2
+        /// This flag controls whether the preview response will include execution logs. If not provided, this defaults to &#x60;false&#x60; and no logs will be provided in the response. 
         /// </summary>
-        [EnumMember(Value = "TransactionPreviewV2")]
-        TransactionPreviewV2 = 4,
+        /// <value>This flag controls whether the preview response will include execution logs. If not provided, this defaults to &#x60;false&#x60; and no logs will be provided in the response. </value>
+        [DataMember(Name = "logs", EmitDefaultValue = true)]
+        public bool Logs { get; set; }
 
         /// <summary>
-        /// Enum StreamTransactions for value: StreamTransactions
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "StreamTransactions")]
-        StreamTransactions = 5,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class TransactionPreviewV2ResponseOptions {\n");
+            sb.Append("  CoreApiReceipt: ").Append(CoreApiReceipt).Append("\n");
+            sb.Append("  RadixEngineToolkitReceipt: ").Append(RadixEngineToolkitReceipt).Append("\n");
+            sb.Append("  Logs: ").Append(Logs).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum StreamProofs for value: StreamProofs
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "StreamProofs")]
-        StreamProofs = 6
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as TransactionPreviewV2ResponseOptions);
+        }
+
+        /// <summary>
+        /// Returns true if TransactionPreviewV2ResponseOptions instances are equal
+        /// </summary>
+        /// <param name="input">Instance of TransactionPreviewV2ResponseOptions to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(TransactionPreviewV2ResponseOptions input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.CoreApiReceipt == input.CoreApiReceipt ||
+                    this.CoreApiReceipt.Equals(input.CoreApiReceipt)
+                ) && 
+                (
+                    this.RadixEngineToolkitReceipt == input.RadixEngineToolkitReceipt ||
+                    this.RadixEngineToolkitReceipt.Equals(input.RadixEngineToolkitReceipt)
+                ) && 
+                (
+                    this.Logs == input.Logs ||
+                    this.Logs.Equals(input.Logs)
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.CoreApiReceipt.GetHashCode();
+                hashCode = (hashCode * 59) + this.RadixEngineToolkitReceipt.GetHashCode();
+                hashCode = (hashCode * 59) + this.Logs.GetHashCode();
+                return hashCode;
+            }
+        }
 
     }
 

@@ -84,52 +84,117 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ErrorResponseType
+    /// TransactionPreviewV2ErrorResponse
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ErrorResponseType
+    [DataContract(Name = "TransactionPreviewV2ErrorResponse")]
+    [JsonConverter(typeof(JsonSubtypes), "error_type")]
+    [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "Basic")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitErrorResponse), "LtsTransactionSubmit")]
+    [JsonSubtypes.KnownSubType(typeof(StreamProofsErrorResponse), "StreamProofs")]
+    [JsonSubtypes.KnownSubType(typeof(StreamTransactionsErrorResponse), "StreamTransactions")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionPreviewV2ErrorResponse), "TransactionPreviewV2")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmit")]
+    public partial class TransactionPreviewV2ErrorResponse : ErrorResponse, IEquatable<TransactionPreviewV2ErrorResponse>
     {
         /// <summary>
-        /// Enum Basic for value: Basic
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2ErrorResponse" /> class.
         /// </summary>
-        [EnumMember(Value = "Basic")]
-        Basic = 1,
+        [JsonConstructorAttribute]
+        protected TransactionPreviewV2ErrorResponse() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2ErrorResponse" /> class.
+        /// </summary>
+        /// <param name="details">details.</param>
+        /// <param name="errorType">errorType (required) (default to ErrorResponseType.TransactionPreviewV2).</param>
+        /// <param name="code">A numeric code corresponding to the given HTTP error code. (required).</param>
+        /// <param name="message">A human-readable error message. (required).</param>
+        /// <param name="traceId">A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden..</param>
+        public TransactionPreviewV2ErrorResponse(TransactionPreviewV2ErrorDetails details = default(TransactionPreviewV2ErrorDetails), ErrorResponseType errorType = ErrorResponseType.TransactionPreviewV2, int code = default(int), string message = default(string), string traceId = default(string)) : base(errorType, code, message, traceId)
+        {
+            this.Details = details;
+        }
 
         /// <summary>
-        /// Enum TransactionSubmit for value: TransactionSubmit
+        /// Gets or Sets Details
         /// </summary>
-        [EnumMember(Value = "TransactionSubmit")]
-        TransactionSubmit = 2,
+        [DataMember(Name = "details", EmitDefaultValue = true)]
+        public TransactionPreviewV2ErrorDetails Details { get; set; }
 
         /// <summary>
-        /// Enum LtsTransactionSubmit for value: LtsTransactionSubmit
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "LtsTransactionSubmit")]
-        LtsTransactionSubmit = 3,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class TransactionPreviewV2ErrorResponse {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum TransactionPreviewV2 for value: TransactionPreviewV2
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "TransactionPreviewV2")]
-        TransactionPreviewV2 = 4,
+        /// <returns>JSON string presentation of the object</returns>
+        public override string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum StreamTransactions for value: StreamTransactions
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "StreamTransactions")]
-        StreamTransactions = 5,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as TransactionPreviewV2ErrorResponse);
+        }
 
         /// <summary>
-        /// Enum StreamProofs for value: StreamProofs
+        /// Returns true if TransactionPreviewV2ErrorResponse instances are equal
         /// </summary>
-        [EnumMember(Value = "StreamProofs")]
-        StreamProofs = 6
+        /// <param name="input">Instance of TransactionPreviewV2ErrorResponse to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(TransactionPreviewV2ErrorResponse input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return base.Equals(input) && 
+                (
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = base.GetHashCode();
+                if (this.Details != null)
+                {
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

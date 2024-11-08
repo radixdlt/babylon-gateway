@@ -99,6 +99,7 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitErrorResponse), "LtsTransactionSubmit")]
     [JsonSubtypes.KnownSubType(typeof(StreamProofsErrorResponse), "StreamProofs")]
     [JsonSubtypes.KnownSubType(typeof(StreamTransactionsErrorResponse), "StreamTransactions")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionPreviewV2ErrorResponse), "TransactionPreviewV2")]
     [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmit")]
     public partial class LtsTransactionSubmitErrorResponse : ErrorResponse, IEquatable<LtsTransactionSubmitErrorResponse>
     {

@@ -134,10 +134,10 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <returns>ApiResponse of TransactionParseResponse</returns>
         ApiResponse<TransactionParseResponse> TransactionParsePostWithHttpInfo(TransactionParseRequest transactionParseRequest);
         /// <summary>
-        /// Transaction Preview
+        /// Transaction Preview V1
         /// </summary>
         /// <remarks>
-        /// Preview a transaction against the latest network state, and returns the preview receipt. 
+        /// Preview a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  For V2 transactions (and beyond) the &#x60;/preview-v2&#x60; endpoint should be used instead. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionPreviewRequest"></param>
@@ -145,15 +145,36 @@ namespace RadixDlt.CoreApiSdk.Api
         TransactionPreviewResponse TransactionPreviewPost(TransactionPreviewRequest transactionPreviewRequest);
 
         /// <summary>
-        /// Transaction Preview
+        /// Transaction Preview V1
         /// </summary>
         /// <remarks>
-        /// Preview a transaction against the latest network state, and returns the preview receipt. 
+        /// Preview a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  For V2 transactions (and beyond) the &#x60;/preview-v2&#x60; endpoint should be used instead. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionPreviewRequest"></param>
         /// <returns>ApiResponse of TransactionPreviewResponse</returns>
         ApiResponse<TransactionPreviewResponse> TransactionPreviewPostWithHttpInfo(TransactionPreviewRequest transactionPreviewRequest);
+        /// <summary>
+        /// Transaction Preview V2
+        /// </summary>
+        /// <remarks>
+        /// Previews a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  This endpoint supports V2 transactions (and beyond). If you still need to preview V1 transactions, you should use the &#x60;/preview&#x60; endpoint instead. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewV2Request"></param>
+        /// <returns>TransactionPreviewV2Response</returns>
+        TransactionPreviewV2Response TransactionPreviewV2Post(TransactionPreviewV2Request transactionPreviewV2Request);
+
+        /// <summary>
+        /// Transaction Preview V2
+        /// </summary>
+        /// <remarks>
+        /// Previews a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  This endpoint supports V2 transactions (and beyond). If you still need to preview V1 transactions, you should use the &#x60;/preview&#x60; endpoint instead. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewV2Request"></param>
+        /// <returns>ApiResponse of TransactionPreviewV2Response</returns>
+        ApiResponse<TransactionPreviewV2Response> TransactionPreviewV2PostWithHttpInfo(TransactionPreviewV2Request transactionPreviewV2Request);
         /// <summary>
         /// Get Transaction Receipt
         /// </summary>
@@ -273,10 +294,10 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <returns>Task of ApiResponse (TransactionParseResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<TransactionParseResponse>> TransactionParsePostWithHttpInfoAsync(TransactionParseRequest transactionParseRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Transaction Preview
+        /// Transaction Preview V1
         /// </summary>
         /// <remarks>
-        /// Preview a transaction against the latest network state, and returns the preview receipt. 
+        /// Preview a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  For V2 transactions (and beyond) the &#x60;/preview-v2&#x60; endpoint should be used instead. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionPreviewRequest"></param>
@@ -285,16 +306,39 @@ namespace RadixDlt.CoreApiSdk.Api
         System.Threading.Tasks.Task<TransactionPreviewResponse> TransactionPreviewPostAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Transaction Preview
+        /// Transaction Preview V1
         /// </summary>
         /// <remarks>
-        /// Preview a transaction against the latest network state, and returns the preview receipt. 
+        /// Preview a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  For V2 transactions (and beyond) the &#x60;/preview-v2&#x60; endpoint should be used instead. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionPreviewRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (TransactionPreviewResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<TransactionPreviewResponse>> TransactionPreviewPostWithHttpInfoAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Transaction Preview V2
+        /// </summary>
+        /// <remarks>
+        /// Previews a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  This endpoint supports V2 transactions (and beyond). If you still need to preview V1 transactions, you should use the &#x60;/preview&#x60; endpoint instead. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewV2Request"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionPreviewV2Response</returns>
+        System.Threading.Tasks.Task<TransactionPreviewV2Response> TransactionPreviewV2PostAsync(TransactionPreviewV2Request transactionPreviewV2Request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Transaction Preview V2
+        /// </summary>
+        /// <remarks>
+        /// Previews a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  This endpoint supports V2 transactions (and beyond). If you still need to preview V1 transactions, you should use the &#x60;/preview&#x60; endpoint instead. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewV2Request"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionPreviewV2Response)</returns>
+        System.Threading.Tasks.Task<ApiResponse<TransactionPreviewV2Response>> TransactionPreviewV2PostWithHttpInfoAsync(TransactionPreviewV2Request transactionPreviewV2Request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Transaction Receipt
         /// </summary>
@@ -812,7 +856,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Preview Preview a transaction against the latest network state, and returns the preview receipt. 
+        /// Transaction Preview V1 Preview a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  For V2 transactions (and beyond) the &#x60;/preview-v2&#x60; endpoint should be used instead. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionPreviewRequest"></param>
@@ -824,7 +868,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Preview Preview a transaction against the latest network state, and returns the preview receipt. 
+        /// Transaction Preview V1 Preview a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  For V2 transactions (and beyond) the &#x60;/preview-v2&#x60; endpoint should be used instead. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionPreviewRequest"></param>
@@ -868,7 +912,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Preview Preview a transaction against the latest network state, and returns the preview receipt. 
+        /// Transaction Preview V1 Preview a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  For V2 transactions (and beyond) the &#x60;/preview-v2&#x60; endpoint should be used instead. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionPreviewRequest"></param>
@@ -881,7 +925,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Preview Preview a transaction against the latest network state, and returns the preview receipt. 
+        /// Transaction Preview V1 Preview a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  For V2 transactions (and beyond) the &#x60;/preview-v2&#x60; endpoint should be used instead. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionPreviewRequest"></param>
@@ -922,6 +966,123 @@ namespace RadixDlt.CoreApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("TransactionPreviewPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Transaction Preview V2 Previews a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  This endpoint supports V2 transactions (and beyond). If you still need to preview V1 transactions, you should use the &#x60;/preview&#x60; endpoint instead. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewV2Request"></param>
+        /// <returns>TransactionPreviewV2Response</returns>
+        public TransactionPreviewV2Response TransactionPreviewV2Post(TransactionPreviewV2Request transactionPreviewV2Request)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionPreviewV2Response> localVarResponse = TransactionPreviewV2PostWithHttpInfo(transactionPreviewV2Request);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Transaction Preview V2 Previews a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  This endpoint supports V2 transactions (and beyond). If you still need to preview V1 transactions, you should use the &#x60;/preview&#x60; endpoint instead. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewV2Request"></param>
+        /// <returns>ApiResponse of TransactionPreviewV2Response</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionPreviewV2Response> TransactionPreviewV2PostWithHttpInfo(TransactionPreviewV2Request transactionPreviewV2Request)
+        {
+            // verify the required parameter 'transactionPreviewV2Request' is set
+            if (transactionPreviewV2Request == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'transactionPreviewV2Request' when calling TransactionApi->TransactionPreviewV2Post");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionPreviewV2Request;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<TransactionPreviewV2Response>("/transaction/preview-v2", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionPreviewV2Post", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Transaction Preview V2 Previews a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  This endpoint supports V2 transactions (and beyond). If you still need to preview V1 transactions, you should use the &#x60;/preview&#x60; endpoint instead. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewV2Request"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionPreviewV2Response</returns>
+        public async System.Threading.Tasks.Task<TransactionPreviewV2Response> TransactionPreviewV2PostAsync(TransactionPreviewV2Request transactionPreviewV2Request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionPreviewV2Response> localVarResponse = await TransactionPreviewV2PostWithHttpInfoAsync(transactionPreviewV2Request, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Transaction Preview V2 Previews a transaction against the latest network state, and returns the preview receipt. If the node has enabled it, you may be able to also preview against recent network state.  This endpoint supports V2 transactions (and beyond). If you still need to preview V1 transactions, you should use the &#x60;/preview&#x60; endpoint instead. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewV2Request"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionPreviewV2Response)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionPreviewV2Response>> TransactionPreviewV2PostWithHttpInfoAsync(TransactionPreviewV2Request transactionPreviewV2Request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'transactionPreviewV2Request' is set
+            if (transactionPreviewV2Request == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'transactionPreviewV2Request' when calling TransactionApi->TransactionPreviewV2Post");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionPreviewV2Request;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionPreviewV2Response>("/transaction/preview-v2", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionPreviewV2Post", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

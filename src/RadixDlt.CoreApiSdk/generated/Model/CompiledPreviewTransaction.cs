@@ -91,75 +91,39 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ErrorResponse
+    /// CompiledPreviewTransaction
     /// </summary>
-    [DataContract(Name = "ErrorResponse")]
-    [JsonConverter(typeof(JsonSubtypes), "error_type")]
-    [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "Basic")]
-    [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "BasicErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitErrorResponse), "LtsTransactionSubmit")]
-    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitErrorResponse), "LtsTransactionSubmitErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(StreamProofsErrorResponse), "StreamProofs")]
-    [JsonSubtypes.KnownSubType(typeof(StreamProofsErrorResponse), "StreamProofsErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(StreamTransactionsErrorResponse), "StreamTransactions")]
-    [JsonSubtypes.KnownSubType(typeof(StreamTransactionsErrorResponse), "StreamTransactionsErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionPreviewV2ErrorResponse), "TransactionPreviewV2")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionPreviewV2ErrorResponse), "TransactionPreviewV2ErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmit")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmitErrorResponse")]
-    public partial class ErrorResponse : IEquatable<ErrorResponse>
+    [DataContract(Name = "CompiledPreviewTransaction")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransaction), "Compiled")]
+    public partial class CompiledPreviewTransaction : PreviewTransaction, IEquatable<CompiledPreviewTransaction>
     {
-
         /// <summary>
-        /// Gets or Sets ErrorType
-        /// </summary>
-        [DataMember(Name = "error_type", IsRequired = true, EmitDefaultValue = true)]
-        public ErrorResponseType ErrorType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ErrorResponse" /> class.
+        /// Initializes a new instance of the <see cref="CompiledPreviewTransaction" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ErrorResponse() { }
+        protected CompiledPreviewTransaction() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ErrorResponse" /> class.
+        /// Initializes a new instance of the <see cref="CompiledPreviewTransaction" /> class.
         /// </summary>
-        /// <param name="errorType">errorType (required).</param>
-        /// <param name="code">A numeric code corresponding to the given HTTP error code. (required).</param>
-        /// <param name="message">A human-readable error message. (required).</param>
-        /// <param name="traceId">A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden..</param>
-        public ErrorResponse(ErrorResponseType errorType = default(ErrorResponseType), int code = default(int), string message = default(string), string traceId = default(string))
+        /// <param name="previewTransactionHex">A hex-encoded, compiled &#x60;RawPreviewTransaction&#x60;.  As of Cuttlefish, only &#x60;PreviewTransactionV2&#x60; is supported.  A &#x60;PreviewTransactionV2&#x60; can be created with a v2 transaction builder: * If using Rust, it can be created with a &#x60;TransactionV2Builder&#x60; using &#x60;build_preview_transaction()&#x60;   and then converted to hex with &#x60;preview_transaction.to_raw().unwrap().to_hex()&#x60; * If using the toolkit, you can create this using the v2 transaction builder.  Some subtleties: * Partial transactions can&#39;t be previewed. Instead, they must be wrapped inside a   transaction wrapper, so that the engine knows how to yield to them appropriately. * Currently the builder assumes that the signed partial transactions have real signatures.   This isn&#39;t strictly required, and we may create a builder in future which allows providing   public keys when building partial transactions for use in preview. * If you don&#39;t have signatures to hand, you can simply not sign the partial transactions,   and then use the &#x60;assume_all_signature_proofs&#x60; preview flag, although be advised that   this may result in the fee estimate being slightly lower during preview. * We may create more ergonomic builders for PreviewTransactions which allow use of   public keys to denote the signers of subintents. Let us know if this is important   for your use case.  (required).</param>
+        /// <param name="type">type (required) (default to PreviewTransactionType.Compiled).</param>
+        public CompiledPreviewTransaction(string previewTransactionHex = default(string), PreviewTransactionType type = PreviewTransactionType.Compiled) : base(type)
         {
-            this.ErrorType = errorType;
-            this.Code = code;
-            // to ensure "message" is required (not null)
-            if (message == null)
+            // to ensure "previewTransactionHex" is required (not null)
+            if (previewTransactionHex == null)
             {
-                throw new ArgumentNullException("message is a required property for ErrorResponse and cannot be null");
+                throw new ArgumentNullException("previewTransactionHex is a required property for CompiledPreviewTransaction and cannot be null");
             }
-            this.Message = message;
-            this.TraceId = traceId;
+            this.PreviewTransactionHex = previewTransactionHex;
         }
 
         /// <summary>
-        /// A numeric code corresponding to the given HTTP error code.
+        /// A hex-encoded, compiled &#x60;RawPreviewTransaction&#x60;.  As of Cuttlefish, only &#x60;PreviewTransactionV2&#x60; is supported.  A &#x60;PreviewTransactionV2&#x60; can be created with a v2 transaction builder: * If using Rust, it can be created with a &#x60;TransactionV2Builder&#x60; using &#x60;build_preview_transaction()&#x60;   and then converted to hex with &#x60;preview_transaction.to_raw().unwrap().to_hex()&#x60; * If using the toolkit, you can create this using the v2 transaction builder.  Some subtleties: * Partial transactions can&#39;t be previewed. Instead, they must be wrapped inside a   transaction wrapper, so that the engine knows how to yield to them appropriately. * Currently the builder assumes that the signed partial transactions have real signatures.   This isn&#39;t strictly required, and we may create a builder in future which allows providing   public keys when building partial transactions for use in preview. * If you don&#39;t have signatures to hand, you can simply not sign the partial transactions,   and then use the &#x60;assume_all_signature_proofs&#x60; preview flag, although be advised that   this may result in the fee estimate being slightly lower during preview. * We may create more ergonomic builders for PreviewTransactions which allow use of   public keys to denote the signers of subintents. Let us know if this is important   for your use case. 
         /// </summary>
-        /// <value>A numeric code corresponding to the given HTTP error code.</value>
-        [DataMember(Name = "code", IsRequired = true, EmitDefaultValue = true)]
-        public int Code { get; set; }
-
-        /// <summary>
-        /// A human-readable error message.
-        /// </summary>
-        /// <value>A human-readable error message.</value>
-        [DataMember(Name = "message", IsRequired = true, EmitDefaultValue = true)]
-        public string Message { get; set; }
-
-        /// <summary>
-        /// A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden.
-        /// </summary>
-        /// <value>A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden.</value>
-        [DataMember(Name = "trace_id", EmitDefaultValue = true)]
-        public string TraceId { get; set; }
+        /// <value>A hex-encoded, compiled &#x60;RawPreviewTransaction&#x60;.  As of Cuttlefish, only &#x60;PreviewTransactionV2&#x60; is supported.  A &#x60;PreviewTransactionV2&#x60; can be created with a v2 transaction builder: * If using Rust, it can be created with a &#x60;TransactionV2Builder&#x60; using &#x60;build_preview_transaction()&#x60;   and then converted to hex with &#x60;preview_transaction.to_raw().unwrap().to_hex()&#x60; * If using the toolkit, you can create this using the v2 transaction builder.  Some subtleties: * Partial transactions can&#39;t be previewed. Instead, they must be wrapped inside a   transaction wrapper, so that the engine knows how to yield to them appropriately. * Currently the builder assumes that the signed partial transactions have real signatures.   This isn&#39;t strictly required, and we may create a builder in future which allows providing   public keys when building partial transactions for use in preview. * If you don&#39;t have signatures to hand, you can simply not sign the partial transactions,   and then use the &#x60;assume_all_signature_proofs&#x60; preview flag, although be advised that   this may result in the fee estimate being slightly lower during preview. * We may create more ergonomic builders for PreviewTransactions which allow use of   public keys to denote the signers of subintents. Let us know if this is important   for your use case. </value>
+        [DataMember(Name = "preview_transaction_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PreviewTransactionHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -168,11 +132,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ErrorResponse {\n");
-            sb.Append("  ErrorType: ").Append(ErrorType).Append("\n");
-            sb.Append("  Code: ").Append(Code).Append("\n");
-            sb.Append("  Message: ").Append(Message).Append("\n");
-            sb.Append("  TraceId: ").Append(TraceId).Append("\n");
+            sb.Append("class CompiledPreviewTransaction {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  PreviewTransactionHex: ").Append(PreviewTransactionHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,7 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -193,38 +155,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ErrorResponse);
+            return this.Equals(input as CompiledPreviewTransaction);
         }
 
         /// <summary>
-        /// Returns true if ErrorResponse instances are equal
+        /// Returns true if CompiledPreviewTransaction instances are equal
         /// </summary>
-        /// <param name="input">Instance of ErrorResponse to be compared</param>
+        /// <param name="input">Instance of CompiledPreviewTransaction to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ErrorResponse input)
+        public bool Equals(CompiledPreviewTransaction input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.ErrorType == input.ErrorType ||
-                    this.ErrorType.Equals(input.ErrorType)
-                ) && 
-                (
-                    this.Code == input.Code ||
-                    this.Code.Equals(input.Code)
-                ) && 
-                (
-                    this.Message == input.Message ||
-                    (this.Message != null &&
-                    this.Message.Equals(input.Message))
-                ) && 
-                (
-                    this.TraceId == input.TraceId ||
-                    (this.TraceId != null &&
-                    this.TraceId.Equals(input.TraceId))
+                    this.PreviewTransactionHex == input.PreviewTransactionHex ||
+                    (this.PreviewTransactionHex != null &&
+                    this.PreviewTransactionHex.Equals(input.PreviewTransactionHex))
                 );
         }
 
@@ -236,16 +185,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ErrorType.GetHashCode();
-                hashCode = (hashCode * 59) + this.Code.GetHashCode();
-                if (this.Message != null)
+                int hashCode = base.GetHashCode();
+                if (this.PreviewTransactionHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Message.GetHashCode();
-                }
-                if (this.TraceId != null)
-                {
-                    hashCode = (hashCode * 59) + this.TraceId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviewTransactionHex.GetHashCode();
                 }
                 return hashCode;
             }

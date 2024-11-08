@@ -107,17 +107,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="manifest">A text representation of a transaction manifest. (required).</param>
         /// <param name="blobsHex">An array of hex-encoded blob data, if referenced by the manifest..</param>
-        /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If omitted, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified). .</param>
-        /// <param name="endEpochExclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid. If omitted, a maximum epoch (relative to the &#x60;start_epoch_inclusive&#x60;) will be used. .</param>
+        /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If not provided, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified). .</param>
+        /// <param name="endEpochExclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid. If not provided, a maximum epoch (relative to the &#x60;start_epoch_inclusive&#x60;) will be used. .</param>
         /// <param name="notaryPublicKey">notaryPublicKey.</param>
-        /// <param name="notaryIsSignatory">Whether the notary should count as a signatory (defaults to &#x60;false&#x60;)..</param>
-        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to a 1% fee.  (required).</param>
-        /// <param name="nonce">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent).  (required).</param>
-        /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
+        /// <param name="notaryIsSignatory">Whether the notary should be used as a signer (optional). If not provided, this defaults to false. .</param>
+        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to a 1% fee. If not provided, this defaults to 0. .</param>
+        /// <param name="nonce">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent). If not provided, this defaults to 0. .</param>
+        /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers. If not provided, this defaults to an empty array. .</param>
         /// <param name="message">message.</param>
         /// <param name="options">options.</param>
-        /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string network = default(string), LedgerStateSelector atLedgerState = default(LedgerStateSelector), string manifest = default(string), List<string> blobsHex = default(List<string>), long? startEpochInclusive = default(long?), long? endEpochExclusive = default(long?), PublicKey notaryPublicKey = default(PublicKey), bool? notaryIsSignatory = default(bool?), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionMessage message = default(TransactionMessage), TransactionPreviewResponseOptions options = default(TransactionPreviewResponseOptions), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        /// <param name="flags">flags.</param>
+        public TransactionPreviewRequest(string network = default(string), LedgerStateSelector atLedgerState = default(LedgerStateSelector), string manifest = default(string), List<string> blobsHex = default(List<string>), long? startEpochInclusive = default(long?), long? endEpochExclusive = default(long?), PublicKey notaryPublicKey = default(PublicKey), bool? notaryIsSignatory = default(bool?), int? tipPercentage = default(int?), long? nonce = default(long?), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionMessage message = default(TransactionMessage), TransactionPreviewResponseOptions options = default(TransactionPreviewResponseOptions), PreviewFlags flags = default(PreviewFlags))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -131,28 +131,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("manifest is a required property for TransactionPreviewRequest and cannot be null");
             }
             this.Manifest = manifest;
-            this.TipPercentage = tipPercentage;
-            this.Nonce = nonce;
-            // to ensure "signerPublicKeys" is required (not null)
-            if (signerPublicKeys == null)
-            {
-                throw new ArgumentNullException("signerPublicKeys is a required property for TransactionPreviewRequest and cannot be null");
-            }
-            this.SignerPublicKeys = signerPublicKeys;
-            // to ensure "flags" is required (not null)
-            if (flags == null)
-            {
-                throw new ArgumentNullException("flags is a required property for TransactionPreviewRequest and cannot be null");
-            }
-            this.Flags = flags;
             this.AtLedgerState = atLedgerState;
             this.BlobsHex = blobsHex;
             this.StartEpochInclusive = startEpochInclusive;
             this.EndEpochExclusive = endEpochExclusive;
             this.NotaryPublicKey = notaryPublicKey;
             this.NotaryIsSignatory = notaryIsSignatory;
+            this.TipPercentage = tipPercentage;
+            this.Nonce = nonce;
+            this.SignerPublicKeys = signerPublicKeys;
             this.Message = message;
             this.Options = options;
+            this.Flags = flags;
         }
 
         /// <summary>
@@ -183,16 +173,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<string> BlobsHex { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If omitted, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified). 
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If not provided, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified). 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If omitted, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified). </value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid. If not provided, the current epoch will be used (taking into account the &#x60;at_ledger_state&#x60;, if specified). </value>
         [DataMember(Name = "start_epoch_inclusive", EmitDefaultValue = false)]
         public long? StartEpochInclusive { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid. If omitted, a maximum epoch (relative to the &#x60;start_epoch_inclusive&#x60;) will be used. 
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid. If not provided, a maximum epoch (relative to the &#x60;start_epoch_inclusive&#x60;) will be used. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid. If omitted, a maximum epoch (relative to the &#x60;start_epoch_inclusive&#x60;) will be used. </value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid. If not provided, a maximum epoch (relative to the &#x60;start_epoch_inclusive&#x60;) will be used. </value>
         [DataMember(Name = "end_epoch_exclusive", EmitDefaultValue = false)]
         public long? EndEpochExclusive { get; set; }
 
@@ -203,31 +193,31 @@ namespace RadixDlt.CoreApiSdk.Model
         public PublicKey NotaryPublicKey { get; set; }
 
         /// <summary>
-        /// Whether the notary should count as a signatory (defaults to &#x60;false&#x60;).
+        /// Whether the notary should be used as a signer (optional). If not provided, this defaults to false. 
         /// </summary>
-        /// <value>Whether the notary should count as a signatory (defaults to &#x60;false&#x60;).</value>
+        /// <value>Whether the notary should be used as a signer (optional). If not provided, this defaults to false. </value>
         [DataMember(Name = "notary_is_signatory", EmitDefaultValue = false)]
         public bool? NotaryIsSignatory { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to a 1% fee. 
+        /// An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to a 1% fee. If not provided, this defaults to 0. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to a 1% fee. </value>
-        [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
-        public int TipPercentage { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to a 1% fee. If not provided, this defaults to 0. </value>
+        [DataMember(Name = "tip_percentage", EmitDefaultValue = false)]
+        public int? TipPercentage { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent). 
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent). If not provided, this defaults to 0. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent). </value>
-        [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
-        public long Nonce { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent). If not provided, this defaults to 0. </value>
+        [DataMember(Name = "nonce", EmitDefaultValue = false)]
+        public long? Nonce { get; set; }
 
         /// <summary>
-        /// A list of public keys to be used as transaction signers
+        /// A list of public keys to be used as transaction signers. If not provided, this defaults to an empty array. 
         /// </summary>
-        /// <value>A list of public keys to be used as transaction signers</value>
-        [DataMember(Name = "signer_public_keys", IsRequired = true, EmitDefaultValue = true)]
+        /// <value>A list of public keys to be used as transaction signers. If not provided, this defaults to an empty array. </value>
+        [DataMember(Name = "signer_public_keys", EmitDefaultValue = true)]
         public List<PublicKey> SignerPublicKeys { get; set; }
 
         /// <summary>
@@ -245,8 +235,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets Flags
         /// </summary>
-        [DataMember(Name = "flags", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionPreviewRequestFlags Flags { get; set; }
+        [DataMember(Name = "flags", EmitDefaultValue = true)]
+        public PreviewFlags Flags { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -348,11 +338,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.TipPercentage == input.TipPercentage ||
-                    this.TipPercentage.Equals(input.TipPercentage)
+                    (this.TipPercentage != null &&
+                    this.TipPercentage.Equals(input.TipPercentage))
                 ) && 
                 (
                     this.Nonce == input.Nonce ||
-                    this.Nonce.Equals(input.Nonce)
+                    (this.Nonce != null &&
+                    this.Nonce.Equals(input.Nonce))
                 ) && 
                 (
                     this.SignerPublicKeys == input.SignerPublicKeys ||
@@ -418,8 +410,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NotaryIsSignatory.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
-                hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
+                if (this.TipPercentage != null)
+                {
+                    hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
+                }
+                if (this.Nonce != null)
+                {
+                    hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
+                }
                 if (this.SignerPublicKeys != null)
                 {
                     hashCode = (hashCode * 59) + this.SignerPublicKeys.GetHashCode();

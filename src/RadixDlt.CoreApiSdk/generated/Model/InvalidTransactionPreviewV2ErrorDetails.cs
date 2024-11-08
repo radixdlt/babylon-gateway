@@ -84,52 +84,114 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ErrorResponseType
+    /// InvalidTransactionPreviewV2ErrorDetails
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ErrorResponseType
+    [DataContract(Name = "InvalidTransactionPreviewV2ErrorDetails")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(InvalidTransactionPreviewV2ErrorDetails), "Invalid")]
+    public partial class InvalidTransactionPreviewV2ErrorDetails : TransactionPreviewV2ErrorDetails, IEquatable<InvalidTransactionPreviewV2ErrorDetails>
     {
         /// <summary>
-        /// Enum Basic for value: Basic
+        /// Initializes a new instance of the <see cref="InvalidTransactionPreviewV2ErrorDetails" /> class.
         /// </summary>
-        [EnumMember(Value = "Basic")]
-        Basic = 1,
+        [JsonConstructorAttribute]
+        protected InvalidTransactionPreviewV2ErrorDetails() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InvalidTransactionPreviewV2ErrorDetails" /> class.
+        /// </summary>
+        /// <param name="validationError">validationError (required).</param>
+        /// <param name="type">type (required) (default to TransactionPreviewV2ErrorDetailsType.Invalid).</param>
+        public InvalidTransactionPreviewV2ErrorDetails(string validationError = default(string), TransactionPreviewV2ErrorDetailsType type = TransactionPreviewV2ErrorDetailsType.Invalid) : base(type)
+        {
+            // to ensure "validationError" is required (not null)
+            if (validationError == null)
+            {
+                throw new ArgumentNullException("validationError is a required property for InvalidTransactionPreviewV2ErrorDetails and cannot be null");
+            }
+            this.ValidationError = validationError;
+        }
 
         /// <summary>
-        /// Enum TransactionSubmit for value: TransactionSubmit
+        /// Gets or Sets ValidationError
         /// </summary>
-        [EnumMember(Value = "TransactionSubmit")]
-        TransactionSubmit = 2,
+        [DataMember(Name = "validation_error", IsRequired = true, EmitDefaultValue = true)]
+        public string ValidationError { get; set; }
 
         /// <summary>
-        /// Enum LtsTransactionSubmit for value: LtsTransactionSubmit
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "LtsTransactionSubmit")]
-        LtsTransactionSubmit = 3,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class InvalidTransactionPreviewV2ErrorDetails {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  ValidationError: ").Append(ValidationError).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum TransactionPreviewV2 for value: TransactionPreviewV2
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "TransactionPreviewV2")]
-        TransactionPreviewV2 = 4,
+        /// <returns>JSON string presentation of the object</returns>
+        public override string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum StreamTransactions for value: StreamTransactions
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "StreamTransactions")]
-        StreamTransactions = 5,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as InvalidTransactionPreviewV2ErrorDetails);
+        }
 
         /// <summary>
-        /// Enum StreamProofs for value: StreamProofs
+        /// Returns true if InvalidTransactionPreviewV2ErrorDetails instances are equal
         /// </summary>
-        [EnumMember(Value = "StreamProofs")]
-        StreamProofs = 6
+        /// <param name="input">Instance of InvalidTransactionPreviewV2ErrorDetails to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(InvalidTransactionPreviewV2ErrorDetails input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return base.Equals(input) && 
+                (
+                    this.ValidationError == input.ValidationError ||
+                    (this.ValidationError != null &&
+                    this.ValidationError.Equals(input.ValidationError))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = base.GetHashCode();
+                if (this.ValidationError != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValidationError.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

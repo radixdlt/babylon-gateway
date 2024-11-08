@@ -90,46 +90,16 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ErrorResponseType
+    /// Defines TransactionPreviewV2ErrorDetailsType
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum ErrorResponseType
+    public enum TransactionPreviewV2ErrorDetailsType
     {
         /// <summary>
-        /// Enum Basic for value: Basic
+        /// Enum Invalid for value: Invalid
         /// </summary>
-        [EnumMember(Value = "Basic")]
-        Basic = 1,
-
-        /// <summary>
-        /// Enum TransactionSubmit for value: TransactionSubmit
-        /// </summary>
-        [EnumMember(Value = "TransactionSubmit")]
-        TransactionSubmit = 2,
-
-        /// <summary>
-        /// Enum LtsTransactionSubmit for value: LtsTransactionSubmit
-        /// </summary>
-        [EnumMember(Value = "LtsTransactionSubmit")]
-        LtsTransactionSubmit = 3,
-
-        /// <summary>
-        /// Enum TransactionPreviewV2 for value: TransactionPreviewV2
-        /// </summary>
-        [EnumMember(Value = "TransactionPreviewV2")]
-        TransactionPreviewV2 = 4,
-
-        /// <summary>
-        /// Enum StreamTransactions for value: StreamTransactions
-        /// </summary>
-        [EnumMember(Value = "StreamTransactions")]
-        StreamTransactions = 5,
-
-        /// <summary>
-        /// Enum StreamProofs for value: StreamProofs
-        /// </summary>
-        [EnumMember(Value = "StreamProofs")]
-        StreamProofs = 6
+        [EnumMember(Value = "Invalid")]
+        Invalid = 1
 
     }
 

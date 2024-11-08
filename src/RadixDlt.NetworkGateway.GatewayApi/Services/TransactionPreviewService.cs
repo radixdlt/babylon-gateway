@@ -131,7 +131,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
             _ => throw new UnreachableException($"Didn't expect {publicKey.GetType().Name} type"),
         };
 
-        var coreRequestFlags = new CoreModel.TransactionPreviewRequestFlags(
+        var coreRequestFlags = new CoreModel.PreviewFlags(
             useFreeCredit: request.Flags.UseFreeCredit,
             assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
             skipEpochCheck: request.Flags.SkipEpochCheck,

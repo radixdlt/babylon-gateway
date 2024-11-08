@@ -84,82 +84,67 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ErrorResponse
+    /// TransactionPreviewV2Response
     /// </summary>
-    [DataContract(Name = "ErrorResponse")]
-    [JsonConverter(typeof(JsonSubtypes), "error_type")]
-    [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "Basic")]
-    [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "BasicErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitErrorResponse), "LtsTransactionSubmit")]
-    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitErrorResponse), "LtsTransactionSubmitErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(StreamProofsErrorResponse), "StreamProofs")]
-    [JsonSubtypes.KnownSubType(typeof(StreamProofsErrorResponse), "StreamProofsErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(StreamTransactionsErrorResponse), "StreamTransactions")]
-    [JsonSubtypes.KnownSubType(typeof(StreamTransactionsErrorResponse), "StreamTransactionsErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionPreviewV2ErrorResponse), "TransactionPreviewV2")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionPreviewV2ErrorResponse), "TransactionPreviewV2ErrorResponse")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmit")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmitErrorResponse")]
-    public partial class ErrorResponse : IEquatable<ErrorResponse>
+    [DataContract(Name = "TransactionPreviewV2Response")]
+    public partial class TransactionPreviewV2Response : IEquatable<TransactionPreviewV2Response>
     {
-
         /// <summary>
-        /// Gets or Sets ErrorType
-        /// </summary>
-        [DataMember(Name = "error_type", IsRequired = true, EmitDefaultValue = true)]
-        public ErrorResponseType ErrorType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ErrorResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2Response" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ErrorResponse() { }
+        protected TransactionPreviewV2Response() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ErrorResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2Response" /> class.
         /// </summary>
-        /// <param name="errorType">errorType (required).</param>
-        /// <param name="code">A numeric code corresponding to the given HTTP error code. (required).</param>
-        /// <param name="message">A human-readable error message. (required).</param>
-        /// <param name="traceId">A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden..</param>
-        public ErrorResponse(ErrorResponseType errorType = default(ErrorResponseType), int code = default(int), string message = default(string), string traceId = default(string))
+        /// <param name="atLedgerState">atLedgerState (required).</param>
+        /// <param name="receipt">receipt.</param>
+        /// <param name="radixEngineToolkitReceipt">An optional field which is only provided if the &#x60;radix_engine_toolkit_receipt&#x60; flag is set to true in the &#x60;options&#x60; property of the request.  This receipt is primarily intended for use with the toolkit and may contain information  that is already available in the receipt provided in the &#x60;receipt&#x60; field of this  response.  A typical client of this API is not expected to use this receipt. The primary clients  this receipt is intended for is the Radix wallet or any client that needs to perform  execution summaries on their transactions. .</param>
+        /// <param name="logs">An optional field which is only provided if the &#x60;logs&#x60; flag is set to true in the &#x60;options&#x60; property of the request.  If present, it gives the emitted logs from the transaction execution. .</param>
+        public TransactionPreviewV2Response(LedgerStateSummary atLedgerState = default(LedgerStateSummary), TransactionReceipt receipt = default(TransactionReceipt), Object radixEngineToolkitReceipt = default(Object), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
         {
-            this.ErrorType = errorType;
-            this.Code = code;
-            // to ensure "message" is required (not null)
-            if (message == null)
+            // to ensure "atLedgerState" is required (not null)
+            if (atLedgerState == null)
             {
-                throw new ArgumentNullException("message is a required property for ErrorResponse and cannot be null");
+                throw new ArgumentNullException("atLedgerState is a required property for TransactionPreviewV2Response and cannot be null");
             }
-            this.Message = message;
-            this.TraceId = traceId;
+            this.AtLedgerState = atLedgerState;
+            this.Receipt = receipt;
+            this.RadixEngineToolkitReceipt = radixEngineToolkitReceipt;
+            this.Logs = logs;
         }
 
         /// <summary>
-        /// A numeric code corresponding to the given HTTP error code.
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        /// <value>A numeric code corresponding to the given HTTP error code.</value>
-        [DataMember(Name = "code", IsRequired = true, EmitDefaultValue = true)]
-        public int Code { get; set; }
+        [DataMember(Name = "at_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerStateSummary AtLedgerState { get; set; }
 
         /// <summary>
-        /// A human-readable error message.
+        /// Gets or Sets Receipt
         /// </summary>
-        /// <value>A human-readable error message.</value>
-        [DataMember(Name = "message", IsRequired = true, EmitDefaultValue = true)]
-        public string Message { get; set; }
+        [DataMember(Name = "receipt", EmitDefaultValue = true)]
+        public TransactionReceipt Receipt { get; set; }
 
         /// <summary>
-        /// A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden.
+        /// An optional field which is only provided if the &#x60;radix_engine_toolkit_receipt&#x60; flag is set to true in the &#x60;options&#x60; property of the request.  This receipt is primarily intended for use with the toolkit and may contain information  that is already available in the receipt provided in the &#x60;receipt&#x60; field of this  response.  A typical client of this API is not expected to use this receipt. The primary clients  this receipt is intended for is the Radix wallet or any client that needs to perform  execution summaries on their transactions. 
         /// </summary>
-        /// <value>A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden.</value>
-        [DataMember(Name = "trace_id", EmitDefaultValue = true)]
-        public string TraceId { get; set; }
+        /// <value>An optional field which is only provided if the &#x60;radix_engine_toolkit_receipt&#x60; flag is set to true in the &#x60;options&#x60; property of the request.  This receipt is primarily intended for use with the toolkit and may contain information  that is already available in the receipt provided in the &#x60;receipt&#x60; field of this  response.  A typical client of this API is not expected to use this receipt. The primary clients  this receipt is intended for is the Radix wallet or any client that needs to perform  execution summaries on their transactions. </value>
+        [DataMember(Name = "radix_engine_toolkit_receipt", EmitDefaultValue = true)]
+        public Object RadixEngineToolkitReceipt { get; set; }
+
+        /// <summary>
+        /// An optional field which is only provided if the &#x60;logs&#x60; flag is set to true in the &#x60;options&#x60; property of the request.  If present, it gives the emitted logs from the transaction execution. 
+        /// </summary>
+        /// <value>An optional field which is only provided if the &#x60;logs&#x60; flag is set to true in the &#x60;options&#x60; property of the request.  If present, it gives the emitted logs from the transaction execution. </value>
+        [DataMember(Name = "logs", EmitDefaultValue = true)]
+        public List<TransactionPreviewResponseLogsInner> Logs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -168,11 +153,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ErrorResponse {\n");
-            sb.Append("  ErrorType: ").Append(ErrorType).Append("\n");
-            sb.Append("  Code: ").Append(Code).Append("\n");
-            sb.Append("  Message: ").Append(Message).Append("\n");
-            sb.Append("  TraceId: ").Append(TraceId).Append("\n");
+            sb.Append("class TransactionPreviewV2Response {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("  RadixEngineToolkitReceipt: ").Append(RadixEngineToolkitReceipt).Append("\n");
+            sb.Append("  Logs: ").Append(Logs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -193,15 +178,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ErrorResponse);
+            return this.Equals(input as TransactionPreviewV2Response);
         }
 
         /// <summary>
-        /// Returns true if ErrorResponse instances are equal
+        /// Returns true if TransactionPreviewV2Response instances are equal
         /// </summary>
-        /// <param name="input">Instance of ErrorResponse to be compared</param>
+        /// <param name="input">Instance of TransactionPreviewV2Response to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ErrorResponse input)
+        public bool Equals(TransactionPreviewV2Response input)
         {
             if (input == null)
             {
@@ -209,22 +194,25 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ErrorType == input.ErrorType ||
-                    this.ErrorType.Equals(input.ErrorType)
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.Code == input.Code ||
-                    this.Code.Equals(input.Code)
+                    this.Receipt == input.Receipt ||
+                    (this.Receipt != null &&
+                    this.Receipt.Equals(input.Receipt))
                 ) && 
                 (
-                    this.Message == input.Message ||
-                    (this.Message != null &&
-                    this.Message.Equals(input.Message))
+                    this.RadixEngineToolkitReceipt == input.RadixEngineToolkitReceipt ||
+                    (this.RadixEngineToolkitReceipt != null &&
+                    this.RadixEngineToolkitReceipt.Equals(input.RadixEngineToolkitReceipt))
                 ) && 
                 (
-                    this.TraceId == input.TraceId ||
-                    (this.TraceId != null &&
-                    this.TraceId.Equals(input.TraceId))
+                    this.Logs == input.Logs ||
+                    this.Logs != null &&
+                    input.Logs != null &&
+                    this.Logs.SequenceEqual(input.Logs)
                 );
         }
 
@@ -237,15 +225,21 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ErrorType.GetHashCode();
-                hashCode = (hashCode * 59) + this.Code.GetHashCode();
-                if (this.Message != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.Message.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.TraceId != null)
+                if (this.Receipt != null)
                 {
-                    hashCode = (hashCode * 59) + this.TraceId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                }
+                if (this.RadixEngineToolkitReceipt != null)
+                {
+                    hashCode = (hashCode * 59) + this.RadixEngineToolkitReceipt.GetHashCode();
+                }
+                if (this.Logs != null)
+                {
+                    hashCode = (hashCode * 59) + this.Logs.GetHashCode();
                 }
                 return hashCode;
             }

@@ -90,46 +90,93 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ErrorResponseType
+    /// TransactionPreviewV2ErrorResponseAllOf
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ErrorResponseType
+    [DataContract(Name = "TransactionPreviewV2ErrorResponse_allOf")]
+    public partial class TransactionPreviewV2ErrorResponseAllOf : IEquatable<TransactionPreviewV2ErrorResponseAllOf>
     {
         /// <summary>
-        /// Enum Basic for value: Basic
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2ErrorResponseAllOf" /> class.
         /// </summary>
-        [EnumMember(Value = "Basic")]
-        Basic = 1,
+        /// <param name="details">details.</param>
+        public TransactionPreviewV2ErrorResponseAllOf(TransactionPreviewV2ErrorDetails details = default(TransactionPreviewV2ErrorDetails))
+        {
+            this.Details = details;
+        }
 
         /// <summary>
-        /// Enum TransactionSubmit for value: TransactionSubmit
+        /// Gets or Sets Details
         /// </summary>
-        [EnumMember(Value = "TransactionSubmit")]
-        TransactionSubmit = 2,
+        [DataMember(Name = "details", EmitDefaultValue = true)]
+        public TransactionPreviewV2ErrorDetails Details { get; set; }
 
         /// <summary>
-        /// Enum LtsTransactionSubmit for value: LtsTransactionSubmit
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "LtsTransactionSubmit")]
-        LtsTransactionSubmit = 3,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class TransactionPreviewV2ErrorResponseAllOf {\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum TransactionPreviewV2 for value: TransactionPreviewV2
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "TransactionPreviewV2")]
-        TransactionPreviewV2 = 4,
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum StreamTransactions for value: StreamTransactions
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "StreamTransactions")]
-        StreamTransactions = 5,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as TransactionPreviewV2ErrorResponseAllOf);
+        }
 
         /// <summary>
-        /// Enum StreamProofs for value: StreamProofs
+        /// Returns true if TransactionPreviewV2ErrorResponseAllOf instances are equal
         /// </summary>
-        [EnumMember(Value = "StreamProofs")]
-        StreamProofs = 6
+        /// <param name="input">Instance of TransactionPreviewV2ErrorResponseAllOf to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(TransactionPreviewV2ErrorResponseAllOf input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                if (this.Details != null)
+                {
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

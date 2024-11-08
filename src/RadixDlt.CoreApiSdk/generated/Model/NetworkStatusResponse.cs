@@ -107,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="genesisEpochRound">genesisEpochRound.</param>
         /// <param name="postGenesisStateIdentifier">postGenesisStateIdentifier.</param>
         /// <param name="postGenesisEpochRound">postGenesisEpochRound.</param>
-        /// <param name="currentStateIdentifier">currentStateIdentifier.</param>
+        /// <param name="currentStateIdentifier">currentStateIdentifier (required).</param>
         /// <param name="currentEpochRound">currentEpochRound.</param>
         /// <param name="currentProtocolVersion">A descriptor for the current protocol version that the node is running.  (required).</param>
         public NetworkStatusResponse(CommittedStateIdentifier preGenesisStateIdentifier = default(CommittedStateIdentifier), EpochRound genesisEpochRound = default(EpochRound), CommittedStateIdentifier postGenesisStateIdentifier = default(CommittedStateIdentifier), EpochRound postGenesisEpochRound = default(EpochRound), CommittedStateIdentifier currentStateIdentifier = default(CommittedStateIdentifier), EpochRound currentEpochRound = default(EpochRound), string currentProtocolVersion = default(string))
@@ -118,6 +118,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("preGenesisStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
             }
             this.PreGenesisStateIdentifier = preGenesisStateIdentifier;
+            // to ensure "currentStateIdentifier" is required (not null)
+            if (currentStateIdentifier == null)
+            {
+                throw new ArgumentNullException("currentStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
+            }
+            this.CurrentStateIdentifier = currentStateIdentifier;
             // to ensure "currentProtocolVersion" is required (not null)
             if (currentProtocolVersion == null)
             {
@@ -127,7 +133,6 @@ namespace RadixDlt.CoreApiSdk.Model
             this.GenesisEpochRound = genesisEpochRound;
             this.PostGenesisStateIdentifier = postGenesisStateIdentifier;
             this.PostGenesisEpochRound = postGenesisEpochRound;
-            this.CurrentStateIdentifier = currentStateIdentifier;
             this.CurrentEpochRound = currentEpochRound;
         }
 
@@ -158,7 +163,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets CurrentStateIdentifier
         /// </summary>
-        [DataMember(Name = "current_state_identifier", EmitDefaultValue = true)]
+        [DataMember(Name = "current_state_identifier", IsRequired = true, EmitDefaultValue = true)]
         public CommittedStateIdentifier CurrentStateIdentifier { get; set; }
 
         /// <summary>

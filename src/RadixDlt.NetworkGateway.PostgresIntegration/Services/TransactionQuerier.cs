@@ -698,3 +698,5 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
         );
     }
 }
+
+// check if we can add well known configuration during release if we deploy node first or gateway first.
