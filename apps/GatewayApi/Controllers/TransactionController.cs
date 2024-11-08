@@ -111,6 +111,12 @@ public sealed class TransactionController : ControllerBase
         return await _transactionHandler.Preview(request, token);
     }
 
+    [HttpPost("preview-v2")]
+    public async Task<GatewayModel.TransactionPreviewV2Response> PreviewV2(GatewayModel.TransactionPreviewV2Request request, CancellationToken token)
+    {
+        return await _transactionHandler.PreviewV2(request, token);
+    }
+
     [HttpPost("submit")]
     public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
     {

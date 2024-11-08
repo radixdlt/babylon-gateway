@@ -153,6 +153,27 @@ internal class GatewayApiMetricObserver :
             new CounterConfiguration { LabelNames = new[] { "target_node" } }
         );
 
+    private static readonly Counter _transactionPreviewV2RequestCount = Metrics
+        .CreateCounter(
+            "ng_construction_transaction_preview_v2_request_count",
+            "Number of transaction preview-v2 requests",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
+        );
+
+    private static readonly Counter _transactionPreviewV2SuccessCount = Metrics
+        .CreateCounter(
+            "ng_construction_transaction_preview_v2_success_count",
+            "Number of transaction preview-v2 successes",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
+        );
+
+    private static readonly Counter _transactionPreviewV2ErrorCount = Metrics
+        .CreateCounter(
+            "ng_construction_transaction_preview_v2_error_count",
+            "Number of transaction preview-v2 errors",
+            new CounterConfiguration { LabelNames = new[] { "target_node" } }
+        );
+
     private static readonly Counter _transactionSubmitResolutionByResultCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_submission_resolution_count",
@@ -271,6 +292,27 @@ internal class GatewayApiMetricObserver :
     ValueTask ITransactionPreviewServiceObserver.HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, string targetNode, Exception exception)
     {
         _transactionPreviewErrorCount.WithLabels(targetNode).Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask PreHandlePreviewV2Request(GatewayModel.TransactionPreviewV2Request request, string targetNode)
+    {
+        _transactionPreviewV2RequestCount.WithLabels(targetNode).Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask PostHandlePreviewV2Request(GatewayModel.TransactionPreviewV2Request request, string targetNode, GatewayModel.TransactionPreviewV2Response response)
+    {
+        _transactionPreviewV2SuccessCount.WithLabels(targetNode).Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask HandlePreviewV2RequestFailed(GatewayModel.TransactionPreviewV2Request request, string targetNode, Exception exception)
+    {
+        _transactionPreviewV2SuccessCount.WithLabels(targetNode).Inc();
 
         return ValueTask.CompletedTask;
     }

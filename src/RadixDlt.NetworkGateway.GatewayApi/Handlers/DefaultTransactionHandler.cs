@@ -147,6 +147,11 @@ internal class DefaultTransactionHandler : ITransactionHandler
         return await _transactionPreviewService.HandlePreviewRequest(request, token);
     }
 
+    public async Task<GatewayModel.TransactionPreviewV2Response> PreviewV2(GatewayModel.TransactionPreviewV2Request request, CancellationToken token = default)
+    {
+        return await _transactionPreviewService.HandlePreviewV2Request(request, token);
+    }
+
     public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
         var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);

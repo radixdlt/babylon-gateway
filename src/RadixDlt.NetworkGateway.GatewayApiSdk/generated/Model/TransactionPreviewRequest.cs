@@ -115,7 +115,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="message">An optional transaction message. Only affects the costing. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(TransactionPreviewOptIns optIns = default(TransactionPreviewOptIns), string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), Object message = default(Object), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(TransactionPreviewOptIns optIns = default(TransactionPreviewOptIns), string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), Object message = default(Object), TransactionPreviewFlags flags = default(TransactionPreviewFlags))
         {
             // to ensure "manifest" is required (not null)
             if (manifest == null)
@@ -225,7 +225,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Flags
         /// </summary>
         [DataMember(Name = "flags", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionPreviewRequestFlags Flags { get; set; }
+        public TransactionPreviewFlags Flags { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
