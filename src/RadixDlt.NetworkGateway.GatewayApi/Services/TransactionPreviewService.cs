@@ -217,10 +217,10 @@ internal class TransactionPreviewService : ITransactionPreviewService
 
     private async Task<GatewayModel.TransactionPreviewV2Response> HandlePreviewV2AndCreateResponse(GatewayModel.TransactionPreviewV2Request request, CancellationToken token)
     {
-        CoreModel.PreviewTransaction MapPreviewTransaction(GatewayModel.PreviewTransactionV2 previewTransaction)
+        CoreModel.PreviewTransaction MapPreviewTransaction(GatewayModel.PreviewTransaction previewTransaction)
             => previewTransaction switch
             {
-                GatewayModel.CompiledPreviewTransactionV2 compiledPreviewTransactionV2 => new CoreModel.CompiledPreviewTransaction(compiledPreviewTransactionV2.PreviewTransactionHex),
+                GatewayModel.CompiledPreviewTransaction compiledPreviewTransactionV2 => new CoreModel.CompiledPreviewTransaction(compiledPreviewTransactionV2.PreviewTransactionHex),
                 _ => throw new ArgumentOutOfRangeException(nameof(previewTransaction)),
             };
 
@@ -240,7 +240,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
                 logs: request.OptIns?.Logs ?? false
             ));
 
-        var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewV2Response, CoreModel.BasicErrorResponse>(
+        var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewV2Response, CoreModel.TransactionPreviewV2ErrorResponse>(
             () => _coreApiProvider.TransactionApi.TransactionPreviewV2PostAsync(coreRequest, token));
 
         if (result.Succeeded)
@@ -251,7 +251,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
                 radixEngineToolkitReceipt: coreResponse.RadixEngineToolkitReceipt,
                 atLedgerStateVersion: coreResponse.AtLedgerState.StateVersion,
                 receipt: coreResponse.Receipt,
-                logs: coreResponse.Logs.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
+                logs: coreResponse.Logs?.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
         }
 
         throw InvalidRequestException.FromOtherError(result.FailureResponse.Message);

@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="previewTransaction">previewTransaction (required).</param>
         /// <param name="flags">flags (required).</param>
         /// <param name="optIns">optIns.</param>
-        public TransactionPreviewV2Request(PreviewTransactionV2 previewTransaction = default(PreviewTransactionV2), TransactionPreviewFlags flags = default(TransactionPreviewFlags), TransactionPreview2OptIns optIns = default(TransactionPreview2OptIns))
+        public TransactionPreviewV2Request(PreviewTransaction previewTransaction = default(PreviewTransaction), TransactionPreviewFlags flags = default(TransactionPreviewFlags), TransactionPreview2OptIns optIns = default(TransactionPreview2OptIns))
         {
             // to ensure "previewTransaction" is required (not null)
             if (previewTransaction == null)
@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets PreviewTransaction
         /// </summary>
         [DataMember(Name = "preview_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public PreviewTransactionV2 PreviewTransaction { get; set; }
+        public PreviewTransaction PreviewTransaction { get; set; }
 
         /// <summary>
         /// Gets or Sets Flags

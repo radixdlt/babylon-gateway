@@ -3707,7 +3707,7 @@ components:
         - flags
       properties:
         preview_transaction:
-          $ref: "#/components/schemas/PreviewTransactionV2"
+          $ref: "#/components/schemas/PreviewTransaction"
         flags:
           $ref: "#/components/schemas/TransactionPreviewFlags"
         opt_ins:
@@ -3735,25 +3735,25 @@ components:
             This flag controls whether the preview response will include execution logs.
             If not provided, this defaults to `false` and no logs will be provided in the response.
 
-    PreviewTransactionV2Type:
+    PreviewTransactionType:
       type: string
       enum:
         - Compiled
-    PreviewTransactionV2:
+    PreviewTransaction:
       type: object
       required:
         - type
       properties:
         type:
-          $ref: "#/components/schemas/PreviewTransactionV2Type"
+          $ref: "#/components/schemas/PreviewTransactionType"
       discriminator:
         propertyName: type
         mapping:
           # NOTE: These need to match PreviewTransactionType
-          Compiled: '#/components/schemas/CompiledPreviewTransactionV2'
-    CompiledPreviewTransactionV2:
+          Compiled: '#/components/schemas/CompiledPreviewTransaction'
+    CompiledPreviewTransaction:
       allOf:
-        - $ref: "#/components/schemas/PreviewTransactionV2"
+        - $ref: "#/components/schemas/PreviewTransaction"
         - type: object
           required:
             - preview_transaction_hex

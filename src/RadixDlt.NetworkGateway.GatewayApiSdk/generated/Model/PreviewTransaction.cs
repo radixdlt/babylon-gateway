@@ -91,30 +91,30 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// PreviewTransactionV2
+    /// PreviewTransaction
     /// </summary>
-    [DataContract(Name = "PreviewTransactionV2")]
+    [DataContract(Name = "PreviewTransaction")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransactionV2), "Compiled")]
-    [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransactionV2), "CompiledPreviewTransactionV2")]
-    public partial class PreviewTransactionV2 : IEquatable<PreviewTransactionV2>
+    [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransaction), "Compiled")]
+    [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransaction), "CompiledPreviewTransaction")]
+    public partial class PreviewTransaction : IEquatable<PreviewTransaction>
     {
 
         /// <summary>
         /// Gets or Sets Type
         /// </summary>
         [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public PreviewTransactionV2Type Type { get; set; }
+        public PreviewTransactionType Type { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PreviewTransactionV2" /> class.
+        /// Initializes a new instance of the <see cref="PreviewTransaction" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PreviewTransactionV2() { }
+        protected PreviewTransaction() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PreviewTransactionV2" /> class.
+        /// Initializes a new instance of the <see cref="PreviewTransaction" /> class.
         /// </summary>
         /// <param name="type">type (required).</param>
-        public PreviewTransactionV2(PreviewTransactionV2Type type = default(PreviewTransactionV2Type))
+        public PreviewTransaction(PreviewTransactionType type = default(PreviewTransactionType))
         {
             this.Type = type;
         }
@@ -126,7 +126,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PreviewTransactionV2 {\n");
+            sb.Append("class PreviewTransaction {\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -148,15 +148,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PreviewTransactionV2);
+            return this.Equals(input as PreviewTransaction);
         }
 
         /// <summary>
-        /// Returns true if PreviewTransactionV2 instances are equal
+        /// Returns true if PreviewTransaction instances are equal
         /// </summary>
-        /// <param name="input">Instance of PreviewTransactionV2 to be compared</param>
+        /// <param name="input">Instance of PreviewTransaction to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PreviewTransactionV2 input)
+        public bool Equals(PreviewTransaction input)
         {
             if (input == null)
             {

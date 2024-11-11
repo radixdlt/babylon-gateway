@@ -84,36 +84,32 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// CompiledPreviewTransactionV2
+    /// CompiledPreviewTransactionAllOf
     /// </summary>
-    [DataContract(Name = "CompiledPreviewTransactionV2")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransactionV2), "Compiled")]
-    public partial class CompiledPreviewTransactionV2 : PreviewTransactionV2, IEquatable<CompiledPreviewTransactionV2>
+    [DataContract(Name = "CompiledPreviewTransaction_allOf")]
+    public partial class CompiledPreviewTransactionAllOf : IEquatable<CompiledPreviewTransactionAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompiledPreviewTransactionV2" /> class.
+        /// Initializes a new instance of the <see cref="CompiledPreviewTransactionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CompiledPreviewTransactionV2() { }
+        protected CompiledPreviewTransactionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompiledPreviewTransactionV2" /> class.
+        /// Initializes a new instance of the <see cref="CompiledPreviewTransactionAllOf" /> class.
         /// </summary>
         /// <param name="previewTransactionHex">A hex-encoded, compiled &#x60;RawPreviewTransaction&#x60;.  As of Cuttlefish, only &#x60;PreviewTransactionV2&#x60; is supported.  A &#x60;PreviewTransactionV2&#x60; can be created with a v2 transaction builder: * If using Rust, it can be created with a &#x60;TransactionV2Builder&#x60; using &#x60;build_preview_transaction()&#x60;   and then converted to hex with &#x60;preview_transaction.to_raw().unwrap().to_hex()&#x60; * If using the toolkit, you can create this using the v2 transaction builder.  Some subtleties: * Partial transactions can&#39;t be previewed. Instead, they must be wrapped inside a   transaction wrapper, so that the engine knows how to yield to them appropriately. * Currently the builder assumes that the signed partial transactions have real signatures.   This isn&#39;t strictly required, and we may create a builder in future which allows providing   public keys when building partial transactions for use in preview. * If you don&#39;t have signatures to hand, you can simply not sign the partial transactions,   and then use the &#x60;assume_all_signature_proofs&#x60; preview flag, although be advised that   this may result in the fee estimate being slightly lower during preview. * We may create more ergonomic builders for PreviewTransactions which allow use of   public keys to denote the signers of subintents. Let us know if this is important   for your use case.  (required).</param>
-        /// <param name="type">type (required) (default to PreviewTransactionV2Type.Compiled).</param>
-        public CompiledPreviewTransactionV2(string previewTransactionHex = default(string), PreviewTransactionV2Type type = PreviewTransactionV2Type.Compiled) : base(type)
+        public CompiledPreviewTransactionAllOf(string previewTransactionHex = default(string))
         {
             // to ensure "previewTransactionHex" is required (not null)
             if (previewTransactionHex == null)
             {
-                throw new ArgumentNullException("previewTransactionHex is a required property for CompiledPreviewTransactionV2 and cannot be null");
+                throw new ArgumentNullException("previewTransactionHex is a required property for CompiledPreviewTransactionAllOf and cannot be null");
             }
             this.PreviewTransactionHex = previewTransactionHex;
         }
@@ -132,8 +128,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CompiledPreviewTransactionV2 {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("class CompiledPreviewTransactionAllOf {\n");
             sb.Append("  PreviewTransactionHex: ").Append(PreviewTransactionHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -143,7 +138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -155,21 +150,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CompiledPreviewTransactionV2);
+            return this.Equals(input as CompiledPreviewTransactionAllOf);
         }
 
         /// <summary>
-        /// Returns true if CompiledPreviewTransactionV2 instances are equal
+        /// Returns true if CompiledPreviewTransactionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of CompiledPreviewTransactionV2 to be compared</param>
+        /// <param name="input">Instance of CompiledPreviewTransactionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CompiledPreviewTransactionV2 input)
+        public bool Equals(CompiledPreviewTransactionAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
                     this.PreviewTransactionHex == input.PreviewTransactionHex ||
                     (this.PreviewTransactionHex != null &&
@@ -185,7 +180,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
+                int hashCode = 41;
                 if (this.PreviewTransactionHex != null)
                 {
                     hashCode = (hashCode * 59) + this.PreviewTransactionHex.GetHashCode();

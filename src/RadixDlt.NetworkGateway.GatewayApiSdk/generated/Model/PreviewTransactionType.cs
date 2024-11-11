@@ -90,10 +90,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines PreviewTransactionV2Type
+    /// Defines PreviewTransactionType
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum PreviewTransactionV2Type
+    public enum PreviewTransactionType
     {
         /// <summary>
         /// Enum Compiled for value: Compiled
