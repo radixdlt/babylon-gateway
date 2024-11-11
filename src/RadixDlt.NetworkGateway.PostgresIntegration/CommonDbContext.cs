@@ -89,7 +89,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<LedgerTransactionSubintentData> LedgerTransactionSubintentData => Set<LedgerTransactionSubintentData>();
 
-    public DbSet<LedgerSubintent> LedgerSubintents => Set<LedgerSubintent>();
+    public DbSet<LedgerFinalizedSubintent> LedgerFinalizedSubintents => Set<LedgerFinalizedSubintent>();
 
     public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
 

@@ -104,9 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionSubintentDetails" /> class.
         /// </summary>
         /// <param name="subintentHash">Bech32m-encoded hash. (required).</param>
-        /// <param name="manifestInstructions">A text-representation of a subintent transaction manifest. This field will be present only for user transactions and when explicitly opted-in using &#x60;manifest_instructions&#x60; flag. .</param>
+        /// <param name="manifestInstructions">A text-representation of a subintent manifest. This field will be present only for user transactions and when explicitly opted-in using the &#x60;manifest_instructions&#x60; flag. .</param>
         /// <param name="message">The optional subintent message. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. .</param>
-        /// <param name="childSubintentHashes">the child subintent hashes a given subintent..</param>
+        /// <param name="childSubintentHashes">The subintent hash of each child of the subintent..</param>
         public TransactionSubintentDetails(string subintentHash = default(string), string manifestInstructions = default(string), Object message = default(Object), List<string> childSubintentHashes = default(List<string>))
         {
             // to ensure "subintentHash" is required (not null)
@@ -128,9 +128,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string SubintentHash { get; set; }
 
         /// <summary>
-        /// A text-representation of a subintent transaction manifest. This field will be present only for user transactions and when explicitly opted-in using &#x60;manifest_instructions&#x60; flag. 
+        /// A text-representation of a subintent manifest. This field will be present only for user transactions and when explicitly opted-in using the &#x60;manifest_instructions&#x60; flag. 
         /// </summary>
-        /// <value>A text-representation of a subintent transaction manifest. This field will be present only for user transactions and when explicitly opted-in using &#x60;manifest_instructions&#x60; flag. </value>
+        /// <value>A text-representation of a subintent manifest. This field will be present only for user transactions and when explicitly opted-in using the &#x60;manifest_instructions&#x60; flag. </value>
         [DataMember(Name = "manifest_instructions", EmitDefaultValue = true)]
         public string ManifestInstructions { get; set; }
 
@@ -142,9 +142,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object Message { get; set; }
 
         /// <summary>
-        /// the child subintent hashes a given subintent.
+        /// The subintent hash of each child of the subintent.
         /// </summary>
-        /// <value>the child subintent hashes a given subintent.</value>
+        /// <value>The subintent hash of each child of the subintent.</value>
         [DataMember(Name = "child_subintent_hashes", EmitDefaultValue = true)]
         public List<string> ChildSubintentHashes { get; set; }
 

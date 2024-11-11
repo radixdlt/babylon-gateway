@@ -90,24 +90,19 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionPreviewFlags
+    /// PreviewFlags
     /// </summary>
-    [DataContract(Name = "TransactionPreviewFlags")]
-    public partial class TransactionPreviewFlags : IEquatable<TransactionPreviewFlags>
+    [DataContract(Name = "PreviewFlags")]
+    public partial class PreviewFlags : IEquatable<PreviewFlags>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPreviewFlags" /> class.
+        /// Initializes a new instance of the <see cref="PreviewFlags" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionPreviewFlags() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPreviewFlags" /> class.
-        /// </summary>
-        /// <param name="useFreeCredit">Whether to use a virtual, preview-only pool of XRD to pay for all execution fees.  (required).</param>
-        /// <param name="assumeAllSignatureProofs">Whether the virtual signature proofs should be automatically placed in the auth zone.  (required).</param>
-        /// <param name="skipEpochCheck">Whether to skip the epoch range check (i.e. ignoring the &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified).  Note: effectively, without an epoch range, the Radix Engine cannot perform the *intent hash duplicate* detection, which means that this check will be skipped as well.  (required).</param>
-        /// <param name="disableAuthChecks">Whether to skip the auth checks during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own. If doing this, be warned:   * Only resources which were potentially mintable/burnable at creation time     will be mintable/burnable, due to feature flags on the resource.   * Please see the below warning about unexpected results if using this approach.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the resulting execution result might not be valid for your needs. For example,   if I used this flag to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. .</param>
-        public TransactionPreviewFlags(bool useFreeCredit = default(bool), bool assumeAllSignatureProofs = default(bool), bool skipEpochCheck = default(bool), bool disableAuthChecks = default(bool))
+        /// <param name="useFreeCredit">If enabled, a large simulated pool of XRD is marked as locked.  This mode can be used to estimate fees. To get a reliable estimate, we recommend that your transaction is as close as possible to the real transaction. For example: - You should still use a lock fee command, but you can set it to lock a fee of 0. - You should include the public keys that will sign the transaction, so the cost of   signature verification and payload size can be accounted for.  (default to false).</param>
+        /// <param name="assumeAllSignatureProofs">If enabled, each manifest processor&#39;s auth zone will be given a simulated proof of every signature, which can be used to pass signature access rules.  This can be used to preview transactions even if the required signatures are not known ahead of time.  See the documentation on [advanced access rules](https://docs.radixdlt.com/docs/advanced-accessrules#signature-requirements) for more information.  (default to false).</param>
+        /// <param name="skipEpochCheck">If enabled, the various runtime epoch-related verifications are skipped: - The &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified, are ignored. - The duplicate intent checks (which rely on the expiry epoch) are also ignored.  However, if the start and end epoch are provided, they must still be statically valid. We recommend using a value of &#x60;start_epoch_inclusive &#x3D; 1&#x60; and &#x60;end_epoch_exclusive &#x3D; 2&#x60; in this case.  (default to false).</param>
+        /// <param name="disableAuthChecks">If enabled, all authorization checks are skipped during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own.   If doing this, be warned: only resources which were potentially mintable/burnable   at creation time will be mintable/burnable, due to feature flags on the resource.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the execution result might not be valid for your needs. For example,   if this flag was used to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation.  (default to false).</param>
+        public PreviewFlags(bool useFreeCredit = false, bool assumeAllSignatureProofs = false, bool skipEpochCheck = false, bool disableAuthChecks = false)
         {
             this.UseFreeCredit = useFreeCredit;
             this.AssumeAllSignatureProofs = assumeAllSignatureProofs;
@@ -116,30 +111,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Whether to use a virtual, preview-only pool of XRD to pay for all execution fees. 
+        /// If enabled, a large simulated pool of XRD is marked as locked.  This mode can be used to estimate fees. To get a reliable estimate, we recommend that your transaction is as close as possible to the real transaction. For example: - You should still use a lock fee command, but you can set it to lock a fee of 0. - You should include the public keys that will sign the transaction, so the cost of   signature verification and payload size can be accounted for. 
         /// </summary>
-        /// <value>Whether to use a virtual, preview-only pool of XRD to pay for all execution fees. </value>
-        [DataMember(Name = "use_free_credit", IsRequired = true, EmitDefaultValue = true)]
+        /// <value>If enabled, a large simulated pool of XRD is marked as locked.  This mode can be used to estimate fees. To get a reliable estimate, we recommend that your transaction is as close as possible to the real transaction. For example: - You should still use a lock fee command, but you can set it to lock a fee of 0. - You should include the public keys that will sign the transaction, so the cost of   signature verification and payload size can be accounted for. </value>
+        [DataMember(Name = "use_free_credit", EmitDefaultValue = true)]
         public bool UseFreeCredit { get; set; }
 
         /// <summary>
-        /// Whether the virtual signature proofs should be automatically placed in the auth zone. 
+        /// If enabled, each manifest processor&#39;s auth zone will be given a simulated proof of every signature, which can be used to pass signature access rules.  This can be used to preview transactions even if the required signatures are not known ahead of time.  See the documentation on [advanced access rules](https://docs.radixdlt.com/docs/advanced-accessrules#signature-requirements) for more information. 
         /// </summary>
-        /// <value>Whether the virtual signature proofs should be automatically placed in the auth zone. </value>
-        [DataMember(Name = "assume_all_signature_proofs", IsRequired = true, EmitDefaultValue = true)]
+        /// <value>If enabled, each manifest processor&#39;s auth zone will be given a simulated proof of every signature, which can be used to pass signature access rules.  This can be used to preview transactions even if the required signatures are not known ahead of time.  See the documentation on [advanced access rules](https://docs.radixdlt.com/docs/advanced-accessrules#signature-requirements) for more information. </value>
+        [DataMember(Name = "assume_all_signature_proofs", EmitDefaultValue = true)]
         public bool AssumeAllSignatureProofs { get; set; }
 
         /// <summary>
-        /// Whether to skip the epoch range check (i.e. ignoring the &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified).  Note: effectively, without an epoch range, the Radix Engine cannot perform the *intent hash duplicate* detection, which means that this check will be skipped as well. 
+        /// If enabled, the various runtime epoch-related verifications are skipped: - The &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified, are ignored. - The duplicate intent checks (which rely on the expiry epoch) are also ignored.  However, if the start and end epoch are provided, they must still be statically valid. We recommend using a value of &#x60;start_epoch_inclusive &#x3D; 1&#x60; and &#x60;end_epoch_exclusive &#x3D; 2&#x60; in this case. 
         /// </summary>
-        /// <value>Whether to skip the epoch range check (i.e. ignoring the &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified).  Note: effectively, without an epoch range, the Radix Engine cannot perform the *intent hash duplicate* detection, which means that this check will be skipped as well. </value>
-        [DataMember(Name = "skip_epoch_check", IsRequired = true, EmitDefaultValue = true)]
+        /// <value>If enabled, the various runtime epoch-related verifications are skipped: - The &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified, are ignored. - The duplicate intent checks (which rely on the expiry epoch) are also ignored.  However, if the start and end epoch are provided, they must still be statically valid. We recommend using a value of &#x60;start_epoch_inclusive &#x3D; 1&#x60; and &#x60;end_epoch_exclusive &#x3D; 2&#x60; in this case. </value>
+        [DataMember(Name = "skip_epoch_check", EmitDefaultValue = true)]
         public bool SkipEpochCheck { get; set; }
 
         /// <summary>
-        /// Whether to skip the auth checks during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own. If doing this, be warned:   * Only resources which were potentially mintable/burnable at creation time     will be mintable/burnable, due to feature flags on the resource.   * Please see the below warning about unexpected results if using this approach.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the resulting execution result might not be valid for your needs. For example,   if I used this flag to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. 
+        /// If enabled, all authorization checks are skipped during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own.   If doing this, be warned: only resources which were potentially mintable/burnable   at creation time will be mintable/burnable, due to feature flags on the resource.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the execution result might not be valid for your needs. For example,   if this flag was used to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. 
         /// </summary>
-        /// <value>Whether to skip the auth checks during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own. If doing this, be warned:   * Only resources which were potentially mintable/burnable at creation time     will be mintable/burnable, due to feature flags on the resource.   * Please see the below warning about unexpected results if using this approach.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the resulting execution result might not be valid for your needs. For example,   if I used this flag to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. </value>
+        /// <value>If enabled, all authorization checks are skipped during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own.   If doing this, be warned: only resources which were potentially mintable/burnable   at creation time will be mintable/burnable, due to feature flags on the resource.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the execution result might not be valid for your needs. For example,   if this flag was used to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. </value>
         [DataMember(Name = "disable_auth_checks", EmitDefaultValue = true)]
         public bool DisableAuthChecks { get; set; }
 
@@ -150,7 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionPreviewFlags {\n");
+            sb.Append("class PreviewFlags {\n");
             sb.Append("  UseFreeCredit: ").Append(UseFreeCredit).Append("\n");
             sb.Append("  AssumeAllSignatureProofs: ").Append(AssumeAllSignatureProofs).Append("\n");
             sb.Append("  SkipEpochCheck: ").Append(SkipEpochCheck).Append("\n");
@@ -175,15 +170,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionPreviewFlags);
+            return this.Equals(input as PreviewFlags);
         }
 
         /// <summary>
-        /// Returns true if TransactionPreviewFlags instances are equal
+        /// Returns true if PreviewFlags instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionPreviewFlags to be compared</param>
+        /// <param name="input">Instance of PreviewFlags to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionPreviewFlags input)
+        public bool Equals(PreviewFlags input)
         {
             if (input == null)
             {

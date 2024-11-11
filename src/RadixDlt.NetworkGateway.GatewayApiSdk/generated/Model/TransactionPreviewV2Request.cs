@@ -104,9 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionPreviewV2Request" /> class.
         /// </summary>
         /// <param name="previewTransaction">previewTransaction (required).</param>
-        /// <param name="flags">flags (required).</param>
+        /// <param name="flags">flags.</param>
         /// <param name="optIns">optIns.</param>
-        public TransactionPreviewV2Request(PreviewTransaction previewTransaction = default(PreviewTransaction), TransactionPreviewFlags flags = default(TransactionPreviewFlags), TransactionPreview2OptIns optIns = default(TransactionPreview2OptIns))
+        public TransactionPreviewV2Request(PreviewTransaction previewTransaction = default(PreviewTransaction), PreviewFlags flags = default(PreviewFlags), TransactionPreviewV2OptIns optIns = default(TransactionPreviewV2OptIns))
         {
             // to ensure "previewTransaction" is required (not null)
             if (previewTransaction == null)
@@ -114,11 +114,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("previewTransaction is a required property for TransactionPreviewV2Request and cannot be null");
             }
             this.PreviewTransaction = previewTransaction;
-            // to ensure "flags" is required (not null)
-            if (flags == null)
-            {
-                throw new ArgumentNullException("flags is a required property for TransactionPreviewV2Request and cannot be null");
-            }
             this.Flags = flags;
             this.OptIns = optIns;
         }
@@ -132,14 +127,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets Flags
         /// </summary>
-        [DataMember(Name = "flags", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionPreviewFlags Flags { get; set; }
+        [DataMember(Name = "flags", EmitDefaultValue = true)]
+        public PreviewFlags Flags { get; set; }
 
         /// <summary>
         /// Gets or Sets OptIns
         /// </summary>
         [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
-        public TransactionPreview2OptIns OptIns { get; set; }
+        public TransactionPreviewV2OptIns OptIns { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

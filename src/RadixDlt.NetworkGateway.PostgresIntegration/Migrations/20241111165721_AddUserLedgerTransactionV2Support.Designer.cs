@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20241107150746_AddUserLedgerTransactionV2Support")]
+    [Migration("20241111165721_AddUserLedgerTransactionV2Support")]
     partial class AddUserLedgerTransactionV2Support
     {
         /// <inheritdoc />
@@ -1027,7 +1027,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("key_value_store_totals_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerSubintent", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerFinalizedSubintent", b =>
                 {
                     b.Property<string>("SubintentHash")
                         .HasMaxLength(90)
@@ -1046,7 +1046,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("SubintentHash");
 
-                    b.ToTable("ledger_subintents");
+                    b.ToTable("ledger_finalized_subintents");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>

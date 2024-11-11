@@ -126,6 +126,7 @@ public static class OpenApiDocumentHandler
         response = OptionalReplace(response, "<transaction-subintent-hash>", placeholderReplacements.CommittedSubintentHash);
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
+        response = OptionalReplace(response, "<sample-preview-transaction-hex>", null); // TODO PP: generate it using toolkit.
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 

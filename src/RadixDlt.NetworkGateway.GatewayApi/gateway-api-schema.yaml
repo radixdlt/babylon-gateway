@@ -1381,9 +1381,9 @@ paths:
   "/transaction/subintent-status":
     post:
       operationId: TransactionSubintentStatus
-      summary: Get Transaction Subintent Status
+      summary: Get Subintent Status
       description: |
-        Returns subintent status and details based on supplied subintent hash.
+        Returns if the given subintent has been finalized.
       tags:
         - Transaction
       requestBody:
@@ -3031,16 +3031,14 @@ components:
         manifest_instructions:
           description: |
             A text-representation of a transaction manifest.
-            This field will be present only for user transactions and when explicitly opted-in using `manifest_instructions` flag.
+            This field will be present only for user transactions and when explicitly opted-in using the `manifest_instructions` flag.
           type: string
-          nullable: true
         manifest_classes:
           description: |
             A collection of zero or more manifest classes ordered from the most specific class to the least specific one.
             This field will be present only for user transactions.
-            For user transactions with subintents only root transaction intent is used to determine manifest classes.
+            For user transactions with subintents only the root transaction intent is currently used to determine the manifest classes.
           type: array
-          nullable: true
           items:
             $ref: "#/components/schemas/ManifestClass"
         message:
@@ -3051,11 +3049,16 @@ components:
         balance_changes:
           $ref: "#/components/schemas/TransactionBalanceChanges"
         subintent_details:
+          description: |
+            Subintent details.
+            Please note that it is returned regardless of whether the transaction was committed successfully or failed, and it can be returned in multiple transactions.
           type: array
           items:
             $ref: "#/components/schemas/TransactionSubintentDetails"
         child_subintent_hashes:
-          description: the child subintent hashes of the root transaction intent.
+          description: |
+            The child subintent hashes of the root transaction intent.
+            Please note that it is returned regardless of whether the transaction was committed successfully or failed, and it can be returned in multiple transactions.
           type: array
           items:
             $ref: "#/components/schemas/HashBech32mString"
@@ -3072,10 +3075,11 @@ components:
         - Pending
         - Rejected
 
-    TransactionSubintentStatus:
+    SubintentStatus:
       type: string
       description: |
-        A more specific subintent status. See the description field for further information.
+        The finalization status of this subintent. Each subintent can only be *successfully* committed once,
+        but unlike a transaction intent, could be committed as a failure zero or more times first.
       enum:
         - Unknown
         - CommittedSuccess
@@ -3523,12 +3527,6 @@ components:
       type: object
       required:
         - manifest
-        - start_epoch_inclusive
-        - end_epoch_exclusive
-        - tip_percentage
-        - nonce
-        - signer_public_keys
-        - flags
       properties:
         opt_ins:
           $ref: "#/components/schemas/TransactionPreviewOptIns"
@@ -3546,9 +3544,8 @@ components:
           minimum: 0
           maximum: 10000000000
           description: |
-            An integer between `0` and `10^10`, marking the epoch at which the transaction starts
-            being valid. If omitted, the current epoch will be used (taking into account the
-            `at_ledger_state`, if specified).
+            An integer between `0` and `10^10`, marking the epoch at which the transaction startsbeing valid.
+            If omitted, the current epoch will be used.
         end_epoch_exclusive:
           type: integer
           format: int64
@@ -3556,14 +3553,17 @@ components:
           maximum: 10000000000
           description: |
             An integer between `0` and `10^10`, marking the epoch at which the transaction is no
-            longer valid. If omitted, a maximum epoch (relative to the `start_epoch_inclusive`) will
-            be used.
+            longer valid. If omitted, a maximum epoch (relative to the `start_epoch_inclusive`) will be used.
         notary_public_key:
           $ref: "#/components/schemas/PublicKey"
-          description: The notary public key to use (optional)
+          description: |
+            The notary public key to use.
+            If not provided, this defaults to a fixed public key.
         notary_is_signatory:
           type: boolean
-          description: Whether the notary should count as a signatory (defaults to `false`).
+          description: |
+            Whether the notary should be used as a signer (optional).
+            If not provided, this defaults to false.
         tip_percentage:
           type: integer
           format: int32
@@ -3572,6 +3572,7 @@ components:
           description: |
             An integer between `0` and `65535`, giving the validator tip as a percentage amount.
             A value of `1` corresponds to a 1% fee.
+            If not provided, this defaults to 0.
         nonce:
           type: integer
           format: int64
@@ -3579,62 +3580,80 @@ components:
           description: |
             An integer between `0` and `2^32 - 1`, chosen to allow a unique intent to be created
             (to enable submitting an otherwise identical/duplicate intent).
+            If not provided, this defaults to 0.
         signer_public_keys:
           type: array
           items:
             $ref: "#/components/schemas/PublicKey"
-          description: A list of public keys to be used as transaction signers
+          description: |
+            A list of public keys to be used as transaction signers.
+            If not provided, this defaults to an empty array.
         message:
           type: object
           description: |
             An optional transaction message. Only affects the costing.
             This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
         flags:
-          $ref: "#/components/schemas/TransactionPreviewFlags"
+          $ref: "#/components/schemas/PreviewFlags"
 
-    TransactionPreviewFlags:
+    PreviewFlags:
       type: object
-      required:
-        - use_free_credit
-        - assume_all_signature_proofs
-        - skip_epoch_check
       properties:
         use_free_credit:
           description: |
-            Whether to use a virtual, preview-only pool of XRD to pay for all execution fees.
+            If enabled, a large simulated pool of XRD is marked as locked.
+
+            This mode can be used to estimate fees. To get a reliable estimate, we recommend that your
+            transaction is as close as possible to the real transaction. For example:
+            - You should still use a lock fee command, but you can set it to lock a fee of 0.
+            - You should include the public keys that will sign the transaction, so the cost of
+              signature verification and payload size can be accounted for.
           type: boolean
+          default: false
         assume_all_signature_proofs:
           description: |
-            Whether the virtual signature proofs should be automatically placed in the auth zone.
+            If enabled, each manifest processor's auth zone will be given a simulated proof of
+            every signature, which can be used to pass signature access rules.
+
+            This can be used to preview transactions even if the required signatures are not
+            known ahead of time.
+
+            See the documentation on
+            [advanced access rules](https://docs.radixdlt.com/docs/advanced-accessrules#signature-requirements)
+            for more information.
           type: boolean
+          default: false
         skip_epoch_check:
           description: |
-            Whether to skip the epoch range check (i.e. ignoring the `start_epoch_inclusive` and
-            `end_epoch_exclusive` parameters, if specified).
+            If enabled, the various runtime epoch-related verifications are skipped:
+            - The `start_epoch_inclusive` and `end_epoch_exclusive` parameters, if specified, are ignored.
+            - The duplicate intent checks (which rely on the expiry epoch) are also ignored.
 
-            Note: effectively, without an epoch range, the Radix Engine cannot perform the
-            *intent hash duplicate* detection, which means that this check will be skipped as well.
+            However, if the start and end epoch are provided, they must still be statically valid.
+            We recommend using a value of `start_epoch_inclusive = 1` and `end_epoch_exclusive = 2` in this
+            case.
           type: boolean
+          default: false
         disable_auth_checks:
           description: |
-            Whether to skip the auth checks during execution.
+            If enabled, all authorization checks are skipped during execution.
 
             This could be used to e.g.:
             * Preview protocol update style transactions.
-            * Mint resources for previewing trades with resources you don't own. If doing this, be warned:
-              * Only resources which were potentially mintable/burnable at creation time
-                will be mintable/burnable, due to feature flags on the resource.
-              * Please see the below warning about unexpected results if using this approach.
+            * Mint resources for previewing trades with resources you don't own.
+              If doing this, be warned: only resources which were potentially mintable/burnable
+              at creation time will be mintable/burnable, due to feature flags on the resource.
 
             Warning: this mode of operation is quite a departure from normal operation:
             * Calculated fees will likely be lower than a standard execution.
             * This mode can subtly break invariants some dApp code might rely on, or result in unexpected
-              behaviour, so the resulting execution result might not be valid for your needs. For example,
-              if I used this flag to mint pool units to preview a redemption (or some dApp interaction which
+              behaviour, so the execution result might not be valid for your needs. For example,
+              if this flag was used to mint pool units to preview a redemption (or some dApp interaction which
               behind the scenes redeemed them), they'd redeem for less than they're currently worth,
               because the blueprint code relies on the total supply of the pool units to calculate their
               redemption worth, and you've just inflated the total supply through the mint operation.
           type: boolean
+          default: false
 
     TransactionPreviewOptIns:
       type: object
@@ -3659,6 +3678,7 @@ components:
         encoded_receipt:
           description: |
             The hex-sbor-encoded receipt.
+
             This field is deprecated and will be removed from the API with the release of the next
             protocol update, cuttlefish. This field was provided primarily for use with the Radix
             Engine Toolkit and its execution summary functionality. If you still wish to use this
@@ -3669,11 +3689,12 @@ components:
         radix_engine_toolkit_receipt:
           type: object
           description: |
-            An optional field which is only provided if the `request_radix_engine_toolkit_receipt`
+            An optional field which is only provided if the `radix_engine_toolkit_receipt`
             flag is set to true when requesting a transaction preview from the API.
+
             This receipt is primarily intended for use with the toolkit and may contain information
-            that is already available in the receipt provided in the `receipt` field of this
-            response.
+            that is already available in the receipt provided in the `receipt` field of this response.
+
             A typical client of this API is not expected to use this receipt. The primary clients
             this receipt is intended for is the Radix wallet or any client that needs to perform
             execution summaries on their transactions.
@@ -3704,33 +3725,48 @@ components:
       type: object
       required:
         - preview_transaction
-        - flags
       properties:
         preview_transaction:
           $ref: "#/components/schemas/PreviewTransaction"
         flags:
-          $ref: "#/components/schemas/TransactionPreviewFlags"
+          $ref: "#/components/schemas/PreviewFlags"
         opt_ins:
-          $ref: "#/components/schemas/TransactionPreview2OptIns"
+          $ref: "#/components/schemas/TransactionPreviewV2OptIns"
+      example:
+        preview_transaction:
+          type: "Compiled"
+          preview_transaction_hex: "<sample-preview-transaction-hex>"
+        flags:
+          use_free_credit: true
+          assume_all_signature_proofs: true
+          skip_epoch_check: true
+          disable_auth_checks: true
+        opt_ins:
+          core_api_receipt: true
+          radix_engine_toolkit_receipt: true
+          logs: true
 
-    TransactionPreview2OptIns:
+    TransactionPreviewV2OptIns:
       type: object
       description: A set of flags to configure the response of the transaction preview v2 endpoint.
       properties:
         core_api_receipt:
           type: boolean
+          default: false
           description: |
             This flag controls whether the preview response will include a Core API receipt or not.
             If not provided, this defaults to `false` and no core api receipt is provided in
             the response.
         radix_engine_toolkit_receipt:
           type: boolean
+          default: false
           description: |
             This flag controls whether the preview response will include a Radix Engine Toolkit serializable
             receipt or not. If not provided, this defaults to `false` and no toolkit receipt is provided in
             the response.
         logs:
           type: boolean
+          default: false
           description: |
             This flag controls whether the preview response will include execution logs.
             If not provided, this defaults to `false` and no logs will be provided in the response.
@@ -3795,7 +3831,7 @@ components:
         receipt:
           type: object
           description: |
-            This is provided unless the `core_api_receipt` flag is set to false in the `options`
+            This is provided unless the `core_api_receipt` flag is set to false in the `opt_ins `
             property of the request.
 
             This type is defined in the Core API as `TransactionReceipt`. See the Core API documentation for more details.
@@ -3803,7 +3839,7 @@ components:
           type: object
           description: |
             An optional field which is only provided if the `radix_engine_toolkit_receipt`
-            flag is set to true in the `options` property of the request.
+            flag is set to true in the `opt_ins` property of the request.
 
             This receipt is primarily intended for use with the toolkit and may contain information
             that is already available in the receipt provided in the `receipt` field of this
@@ -3816,7 +3852,7 @@ components:
           type: array
           description: |
             An optional field which is only provided if the `logs` flag is set to true in the
-            `options` property of the request.
+            `opt_ins` property of the request.
 
             If present, it gives the emitted logs from the transaction execution.
           items:
@@ -3885,13 +3921,12 @@ components:
               $ref: "#/components/schemas/AccountDepositPreValidationDecidingFactors"
 
     TransactionSubintentStatusRequest:
-      allOf:
-        - type: object
-          required:
-            - subintent_hash
-          properties:
-            subintent_hash:
-              $ref: "#/components/schemas/HashBech32mString"
+      type: object
+      required:
+        - subintent_hash
+      properties:
+        subintent_hash:
+          $ref: "#/components/schemas/HashBech32mString"
       example:
         subintent_hash: "<transaction-subintent-hash>"
     TransactionSubintentStatusResponse:
@@ -3903,20 +3938,20 @@ components:
             - subintent_status_description
           properties:
             subintent_status:
-              $ref: "#/components/schemas/TransactionSubintentStatus"
+              $ref: "#/components/schemas/SubintentStatus"
             subintent_status_description:
               description: |
-                An additional description to clarify the intent status.
+                An additional description to clarify the `subintent_status`.
               type: string
             finalized_at_state_version:
               description: |
-                the state version when this subintent was finalized.
+                The state version when the subintent was finalized (committed as a success). This field is only present if the status is `CommittedSuccess`.
               type: integer
               format: int64
               nullable: true
             finalized_at_transaction_intent_hash:
               description: |
-                The intent hash of the transaction in which it was committed.
+                The transaction intent hash of the transaction in which the subintent was finalized (committed as a success). This field is only present if the status is `CommittedSuccess`.
               $ref: "#/components/schemas/HashBech32mString"
 
     TransactionStatusRequest:
@@ -4108,17 +4143,16 @@ components:
           $ref: "#/components/schemas/HashBech32mString"
         manifest_instructions:
           description: |
-            A text-representation of a subintent transaction manifest.
-            This field will be present only for user transactions and when explicitly opted-in using `manifest_instructions` flag.
+            A text-representation of a subintent manifest.
+            This field will be present only for user transactions and when explicitly opted-in using the `manifest_instructions` flag.
           type: string
-          nullable: true
         message:
           type: object
           description: |
             The optional subintent message.
             This type is defined in the Core API as `TransactionMessage`. See the Core API documentation for more details.
         child_subintent_hashes:
-          description: the child subintent hashes a given subintent.
+          description: The subintent hash of each child of the subintent.
           type: array
           items:
             $ref: "#/components/schemas/HashBech32mString"

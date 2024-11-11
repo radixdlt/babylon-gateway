@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("ledger_subintents")]
-internal class LedgerSubintent
+[Table("ledger_finalized_subintents")]
+internal class LedgerFinalizedSubintent
 {
     [Key]
     [Column("subintent_hash")]

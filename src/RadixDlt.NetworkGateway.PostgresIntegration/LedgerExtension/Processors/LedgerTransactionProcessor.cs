@@ -99,7 +99,7 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
     private readonly ProcessorContext _context;
     private readonly IClock _clock;
     private readonly List<LedgerTransaction> _ledgerTransactionsToAdd = new();
-    private readonly List<LedgerSubintent> _ledgerSubintentsToAdd = new();
+    private readonly List<LedgerFinalizedSubintent> _ledgerFinalizedSubintentsToAdd = new();
     private readonly List<LedgerTransactionSubintentData> _subintentDataToAdd = new();
     private readonly List<LedgerTransactionEvents> _ledgerTransactionEventsToAdd = new();
     private readonly ReferencedEntityDictionary _referencedEntities;
@@ -237,18 +237,20 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
 
             _ledgerTransactionsToAdd.Add(ledgerTransaction);
 
-            if (committedTransaction.Receipt.Status == CoreModel.TransactionStatus.Succeeded
-                && committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransactionV2 userLedgerTransactionV2)
+            if (committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransactionV2 userLedgerTransactionV2)
             {
-                _ledgerSubintentsToAdd.AddRange(
-                    userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.NonRootSubintents.Select(
-                        (x, index) =>
-                            new LedgerSubintent
-                            {
-                                SubintentHash = x.HashBech32m,
-                                FinalizedAtStateVersion = stateVersion,
-                                FinalizedAtTransactionIntentHash = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.HashBech32m,
-                            }));
+                if (committedTransaction.Receipt.Status == CoreModel.TransactionStatus.Succeeded)
+                {
+                    _ledgerFinalizedSubintentsToAdd.AddRange(
+                        userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.NonRootSubintents.Select(
+                            (x, index) =>
+                                new LedgerFinalizedSubintent
+                                {
+                                    SubintentHash = x.HashBech32m,
+                                    FinalizedAtStateVersion = stateVersion,
+                                    FinalizedAtTransactionIntentHash = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.HashBech32m,
+                                }));
+                }
 
                 var subintentData = userLedgerTransactionV2
                     .NotarizedTransaction
@@ -420,8 +422,8 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
         });
 
     private Task<int> CopyLedgerSubintents() => _context.WriteHelper.Copy(
-        _ledgerSubintentsToAdd,
-        "COPY ledger_subintents (subintent_hash, finalized_at_state_version, finalized_at_transaction_intent_hash) FROM STDIN (FORMAT BINARY)",
+        _ledgerFinalizedSubintentsToAdd,
+        "COPY ledger_finalized_subintents (subintent_hash, finalized_at_state_version, finalized_at_transaction_intent_hash) FROM STDIN (FORMAT BINARY)",
         async (writer, subintent, token) =>
         {
             await writer.WriteAsync(subintent.SubintentHash, NpgsqlDbType.Text, token);

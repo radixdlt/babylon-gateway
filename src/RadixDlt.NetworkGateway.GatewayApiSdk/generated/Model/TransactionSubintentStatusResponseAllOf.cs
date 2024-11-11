@@ -100,7 +100,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets SubintentStatus
         /// </summary>
         [DataMember(Name = "subintent_status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionSubintentStatus SubintentStatus { get; set; }
+        public SubintentStatus SubintentStatus { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubintentStatusResponseAllOf" /> class.
         /// </summary>
@@ -110,10 +110,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionSubintentStatusResponseAllOf" /> class.
         /// </summary>
         /// <param name="subintentStatus">subintentStatus (required).</param>
-        /// <param name="subintentStatusDescription">An additional description to clarify the intent status.  (required).</param>
-        /// <param name="finalizedAtStateVersion">the state version when this subintent was finalized. .</param>
+        /// <param name="subintentStatusDescription">An additional description to clarify the &#x60;subintent_status&#x60;.  (required).</param>
+        /// <param name="finalizedAtStateVersion">The state version when the subintent was finalized (committed as a success). This field is only present if the status is &#x60;CommittedSuccess&#x60;. .</param>
         /// <param name="finalizedAtTransactionIntentHash">Bech32m-encoded hash..</param>
-        public TransactionSubintentStatusResponseAllOf(TransactionSubintentStatus subintentStatus = default(TransactionSubintentStatus), string subintentStatusDescription = default(string), long? finalizedAtStateVersion = default(long?), string finalizedAtTransactionIntentHash = default(string))
+        public TransactionSubintentStatusResponseAllOf(SubintentStatus subintentStatus = default(SubintentStatus), string subintentStatusDescription = default(string), long? finalizedAtStateVersion = default(long?), string finalizedAtTransactionIntentHash = default(string))
         {
             this.SubintentStatus = subintentStatus;
             // to ensure "subintentStatusDescription" is required (not null)
@@ -127,16 +127,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// An additional description to clarify the intent status. 
+        /// An additional description to clarify the &#x60;subintent_status&#x60;. 
         /// </summary>
-        /// <value>An additional description to clarify the intent status. </value>
+        /// <value>An additional description to clarify the &#x60;subintent_status&#x60;. </value>
         [DataMember(Name = "subintent_status_description", IsRequired = true, EmitDefaultValue = true)]
         public string SubintentStatusDescription { get; set; }
 
         /// <summary>
-        /// the state version when this subintent was finalized. 
+        /// The state version when the subintent was finalized (committed as a success). This field is only present if the status is &#x60;CommittedSuccess&#x60;. 
         /// </summary>
-        /// <value>the state version when this subintent was finalized. </value>
+        /// <value>The state version when the subintent was finalized (committed as a success). This field is only present if the status is &#x60;CommittedSuccess&#x60;. </value>
         [DataMember(Name = "finalized_at_state_version", EmitDefaultValue = true)]
         public long? FinalizedAtStateVersion { get; set; }
 

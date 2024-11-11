@@ -90,36 +90,44 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubintentStatusRequestAllOf
+    /// A set of flags to configure the response of the transaction preview v2 endpoint.
     /// </summary>
-    [DataContract(Name = "TransactionSubintentStatusRequest_allOf")]
-    public partial class TransactionSubintentStatusRequestAllOf : IEquatable<TransactionSubintentStatusRequestAllOf>
+    [DataContract(Name = "TransactionPreviewV2OptIns")]
+    public partial class TransactionPreviewV2OptIns : IEquatable<TransactionPreviewV2OptIns>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubintentStatusRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2OptIns" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionSubintentStatusRequestAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubintentStatusRequestAllOf" /> class.
-        /// </summary>
-        /// <param name="subintentHash">Bech32m-encoded hash. (required).</param>
-        public TransactionSubintentStatusRequestAllOf(string subintentHash = default(string))
+        /// <param name="coreApiReceipt">This flag controls whether the preview response will include a Core API receipt or not. If not provided, this defaults to &#x60;false&#x60; and no core api receipt is provided in the response.  (default to false).</param>
+        /// <param name="radixEngineToolkitReceipt">This flag controls whether the preview response will include a Radix Engine Toolkit serializable receipt or not. If not provided, this defaults to &#x60;false&#x60; and no toolkit receipt is provided in the response.  (default to false).</param>
+        /// <param name="logs">This flag controls whether the preview response will include execution logs. If not provided, this defaults to &#x60;false&#x60; and no logs will be provided in the response.  (default to false).</param>
+        public TransactionPreviewV2OptIns(bool coreApiReceipt = false, bool radixEngineToolkitReceipt = false, bool logs = false)
         {
-            // to ensure "subintentHash" is required (not null)
-            if (subintentHash == null)
-            {
-                throw new ArgumentNullException("subintentHash is a required property for TransactionSubintentStatusRequestAllOf and cannot be null");
-            }
-            this.SubintentHash = subintentHash;
+            this.CoreApiReceipt = coreApiReceipt;
+            this.RadixEngineToolkitReceipt = radixEngineToolkitReceipt;
+            this.Logs = logs;
         }
 
         /// <summary>
-        /// Bech32m-encoded hash.
+        /// This flag controls whether the preview response will include a Core API receipt or not. If not provided, this defaults to &#x60;false&#x60; and no core api receipt is provided in the response. 
         /// </summary>
-        /// <value>Bech32m-encoded hash.</value>
-        [DataMember(Name = "subintent_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SubintentHash { get; set; }
+        /// <value>This flag controls whether the preview response will include a Core API receipt or not. If not provided, this defaults to &#x60;false&#x60; and no core api receipt is provided in the response. </value>
+        [DataMember(Name = "core_api_receipt", EmitDefaultValue = true)]
+        public bool CoreApiReceipt { get; set; }
+
+        /// <summary>
+        /// This flag controls whether the preview response will include a Radix Engine Toolkit serializable receipt or not. If not provided, this defaults to &#x60;false&#x60; and no toolkit receipt is provided in the response. 
+        /// </summary>
+        /// <value>This flag controls whether the preview response will include a Radix Engine Toolkit serializable receipt or not. If not provided, this defaults to &#x60;false&#x60; and no toolkit receipt is provided in the response. </value>
+        [DataMember(Name = "radix_engine_toolkit_receipt", EmitDefaultValue = true)]
+        public bool RadixEngineToolkitReceipt { get; set; }
+
+        /// <summary>
+        /// This flag controls whether the preview response will include execution logs. If not provided, this defaults to &#x60;false&#x60; and no logs will be provided in the response. 
+        /// </summary>
+        /// <value>This flag controls whether the preview response will include execution logs. If not provided, this defaults to &#x60;false&#x60; and no logs will be provided in the response. </value>
+        [DataMember(Name = "logs", EmitDefaultValue = true)]
+        public bool Logs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +136,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubintentStatusRequestAllOf {\n");
-            sb.Append("  SubintentHash: ").Append(SubintentHash).Append("\n");
+            sb.Append("class TransactionPreviewV2OptIns {\n");
+            sb.Append("  CoreApiReceipt: ").Append(CoreApiReceipt).Append("\n");
+            sb.Append("  RadixEngineToolkitReceipt: ").Append(RadixEngineToolkitReceipt).Append("\n");
+            sb.Append("  Logs: ").Append(Logs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +160,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubintentStatusRequestAllOf);
+            return this.Equals(input as TransactionPreviewV2OptIns);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubintentStatusRequestAllOf instances are equal
+        /// Returns true if TransactionPreviewV2OptIns instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubintentStatusRequestAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionPreviewV2OptIns to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubintentStatusRequestAllOf input)
+        public bool Equals(TransactionPreviewV2OptIns input)
         {
             if (input == null)
             {
@@ -166,9 +176,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.SubintentHash == input.SubintentHash ||
-                    (this.SubintentHash != null &&
-                    this.SubintentHash.Equals(input.SubintentHash))
+                    this.CoreApiReceipt == input.CoreApiReceipt ||
+                    this.CoreApiReceipt.Equals(input.CoreApiReceipt)
+                ) && 
+                (
+                    this.RadixEngineToolkitReceipt == input.RadixEngineToolkitReceipt ||
+                    this.RadixEngineToolkitReceipt.Equals(input.RadixEngineToolkitReceipt)
+                ) && 
+                (
+                    this.Logs == input.Logs ||
+                    this.Logs.Equals(input.Logs)
                 );
         }
 
@@ -181,10 +198,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.SubintentHash != null)
-                {
-                    hashCode = (hashCode * 59) + this.SubintentHash.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.CoreApiReceipt.GetHashCode();
+                hashCode = (hashCode * 59) + this.RadixEngineToolkitReceipt.GetHashCode();
+                hashCode = (hashCode * 59) + this.Logs.GetHashCode();
                 return hashCode;
             }
         }

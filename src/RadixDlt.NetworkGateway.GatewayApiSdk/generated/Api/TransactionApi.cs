@@ -216,10 +216,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of TransactionStatusResponse</returns>
         ApiResponse<TransactionStatusResponse> TransactionStatusWithHttpInfo(TransactionStatusRequest transactionStatusRequest);
         /// <summary>
-        /// Get Transaction Subintent Status
+        /// Get Subintent Status
         /// </summary>
         /// <remarks>
-        /// Returns subintent status and details based on supplied subintent hash. 
+        /// Returns if the given subintent has been finalized. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionSubintentStatusRequest"></param>
@@ -227,10 +227,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         TransactionSubintentStatusResponse TransactionSubintentStatus(TransactionSubintentStatusRequest transactionSubintentStatusRequest);
 
         /// <summary>
-        /// Get Transaction Subintent Status
+        /// Get Subintent Status
         /// </summary>
         /// <remarks>
-        /// Returns subintent status and details based on supplied subintent hash. 
+        /// Returns if the given subintent has been finalized. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionSubintentStatusRequest"></param>
@@ -403,10 +403,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (TransactionStatusResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<TransactionStatusResponse>> TransactionStatusWithHttpInfoAsync(TransactionStatusRequest transactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Get Transaction Subintent Status
+        /// Get Subintent Status
         /// </summary>
         /// <remarks>
-        /// Returns subintent status and details based on supplied subintent hash. 
+        /// Returns if the given subintent has been finalized. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionSubintentStatusRequest"></param>
@@ -415,10 +415,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         System.Threading.Tasks.Task<TransactionSubintentStatusResponse> TransactionSubintentStatusAsync(TransactionSubintentStatusRequest transactionSubintentStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Transaction Subintent Status
+        /// Get Subintent Status
         /// </summary>
         /// <remarks>
-        /// Returns subintent status and details based on supplied subintent hash. 
+        /// Returns if the given subintent has been finalized. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionSubintentStatusRequest"></param>
@@ -1348,7 +1348,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Transaction Subintent Status Returns subintent status and details based on supplied subintent hash. 
+        /// Get Subintent Status Returns if the given subintent has been finalized. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionSubintentStatusRequest"></param>
@@ -1360,7 +1360,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Transaction Subintent Status Returns subintent status and details based on supplied subintent hash. 
+        /// Get Subintent Status Returns if the given subintent has been finalized. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionSubintentStatusRequest"></param>
@@ -1404,7 +1404,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Transaction Subintent Status Returns subintent status and details based on supplied subintent hash. 
+        /// Get Subintent Status Returns if the given subintent has been finalized. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionSubintentStatusRequest"></param>
@@ -1417,7 +1417,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Transaction Subintent Status Returns subintent status and details based on supplied subintent hash. 
+        /// Get Subintent Status Returns if the given subintent has been finalized. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionSubintentStatusRequest"></param>

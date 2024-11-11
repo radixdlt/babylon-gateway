@@ -10,7 +10,7 @@ Release built: _not released yet_
 - Added a new `/transaction/preview-v2` endpoint to preview transactions. This supports V2 transactions and beyond. If you still need to preview V1 transactions, use the `/transaction/preview` endpoint instead.
 
 ### Database changes
-- New `ledger_subintents` table that stores information about subintent status.
+- New `ledger_finalized_subintents` table that stores information about subintent status.
 - New `UserV2` ledger transaction type discriminator in the `ledger_transactions` table.
 - New `ledger_transaction_subintent_data` table that stores additional information about the transaction's subintents.
 
