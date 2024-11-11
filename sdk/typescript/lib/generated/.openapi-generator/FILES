@@ -48,6 +48,8 @@ models/AtLedgerStateMixin.ts
 models/BlueprintMethodRoyalty.ts
 models/BlueprintRoyaltyConfig.ts
 models/CommittedTransactionInfo.ts
+models/CompiledPreviewTransaction.ts
+models/CompiledPreviewTransactionAllOf.ts
 models/ComponentEntityRoleAssignmentEntry.ts
 models/ComponentEntityRoleAssignmentEntryAssignment.ts
 models/ComponentEntityRoleAssignments.ts
@@ -229,6 +231,10 @@ models/PackageCodeCollection.ts
 models/PackageCodeCollectionAllOf.ts
 models/PackageCodeCollectionItem.ts
 models/PackageVmType.ts
+models/PreviewFlags.ts
+models/PreviewTransaction.ts
+models/PreviewTransactionBase.ts
+models/PreviewTransactionType.ts
 models/ProgrammaticScryptoSborValue.ts
 models/ProgrammaticScryptoSborValueArray.ts
 models/ProgrammaticScryptoSborValueArrayAllOf.ts
@@ -407,6 +413,7 @@ models/StreamTransactionsRequestAllOfManifestClassFilter.ts
 models/StreamTransactionsRequestEventFilterItem.ts
 models/StreamTransactionsResponse.ts
 models/StreamTransactionsResponseAllOf.ts
+models/SubintentStatus.ts
 models/TransactionAccountDepositPreValidationAuthorizedDepositorBadge.ts
 models/TransactionAccountDepositPreValidationAuthorizedDepositorBadgeBase.ts
 models/TransactionBalanceChanges.ts
@@ -427,9 +434,11 @@ models/TransactionPayloadGatewayHandlingStatus.ts
 models/TransactionPayloadStatus.ts
 models/TransactionPreviewOptIns.ts
 models/TransactionPreviewRequest.ts
-models/TransactionPreviewRequestFlags.ts
 models/TransactionPreviewResponse.ts
 models/TransactionPreviewResponseLogsInner.ts
+models/TransactionPreviewV2OptIns.ts
+models/TransactionPreviewV2Request.ts
+models/TransactionPreviewV2Response.ts
 models/TransactionReceipt.ts
 models/TransactionStatus.ts
 models/TransactionStatusRequest.ts
@@ -437,6 +446,10 @@ models/TransactionStatusRequestAllOf.ts
 models/TransactionStatusResponse.ts
 models/TransactionStatusResponseAllOf.ts
 models/TransactionStatusResponseKnownPayloadItem.ts
+models/TransactionSubintentDetails.ts
+models/TransactionSubintentStatusRequest.ts
+models/TransactionSubintentStatusResponse.ts
+models/TransactionSubintentStatusResponseAllOf.ts
 models/TransactionSubmitRequest.ts
 models/TransactionSubmitResponse.ts
 models/TwoWayLinkedDappOnLedgerDetails.ts
