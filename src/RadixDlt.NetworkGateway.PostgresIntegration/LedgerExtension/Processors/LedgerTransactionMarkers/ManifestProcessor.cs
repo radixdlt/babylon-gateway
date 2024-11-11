@@ -101,7 +101,7 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
             using var manifestInstructions = ToolkitModel.InstructionsV1.FromString(coreInstructions, _networkConfiguration.Id);
             using var toolkitManifest = new ToolkitModel.TransactionManifestV1(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
 
-            AnalyzeManifestClasses(toolkitManifest, stateVersion);
+            AnalyzeManifestV1Classes(toolkitManifest, stateVersion);
 
             if (transaction.Receipt.Status == CoreModel.TransactionStatus.Succeeded)
             {
@@ -120,13 +120,12 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
             var coreInstructions = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.Instructions;
             var coreBlobs = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.BlobsHex;
 
-            // TODO PP: that's array of disposable. not sure if that's the best option to go.
             var children = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.NonRootSubintents
                 .Select(x => new ToolkitModel.Hash(Convert.FromHexString(x.Hash))).ToArray();
             using var manifestInstructions = ToolkitModel.InstructionsV2.FromString(coreInstructions, _networkConfiguration.Id);
             using var toolkitManifest = new ToolkitModel.TransactionManifestV2(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray(), children);
 
-            AnalyzeManifestClasses(toolkitManifest, stateVersion);
+            AnalyzeManifestV2Classes(toolkitManifest, stateVersion);
 
             if (transaction.Receipt.Status == CoreModel.TransactionStatus.Succeeded)
             {
@@ -157,7 +156,7 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
         return _manifestClasses.TryGetValue(stateVersion, out var mc) ? mc.ToArray() : Array.Empty<LedgerTransactionManifestClass>();
     }
 
-    private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV1 toolkitManifest, long stateVersion)
+    private void AnalyzeManifestV1Classes(ToolkitModel.TransactionManifestV1 toolkitManifest, long stateVersion)
     {
         var manifestSummary = toolkitManifest.StaticallyAnalyze(_networkConfiguration.Id);
 
@@ -171,8 +170,7 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
         }
     }
 
-    // TODO PP: that's ugly duplication, consider refactoring that.
-    private void AnalyzeManifestClasses(ToolkitModel.TransactionManifestV2 toolkitManifest, long stateVersion)
+    private void AnalyzeManifestV2Classes(ToolkitModel.TransactionManifestV2 toolkitManifest, long stateVersion)
     {
         var manifestSummary = toolkitManifest.StaticallyAnalyze(_networkConfiguration.Id);
 

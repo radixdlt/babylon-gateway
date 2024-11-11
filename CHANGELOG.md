@@ -5,9 +5,9 @@ Release built: _not released yet_
 - Added support for the `cuttlefish` protocol version.
 
 ### API Changes
-- Added a new `/transaction/subintent-status` endpoint that lets you check the status of a transaction subintent.
-- Added new optional `subintent_details` and `child_subintent_hashes` fields to the `/transaction/committed-details` endpoint, providing information about the transaction subintents if present.
-- TODO PP: new endpoint for transaction v2 preview.
+- Added a new `/transaction/subintent-status` endpoint to check the status of a transaction subintent.
+- Added two new optional fields to the `/transaction/committed-details` endpoint: `subintent_details` and `child_subintent_hashes`, which provide information about transaction subintents if present.
+- Added a new `/transaction/preview-v2` endpoint to preview transactions. This supports V2 transactions and beyond. If you still need to preview V1 transactions, use the `/transaction/preview` endpoint instead.
 
 ### Database changes
 - New `ledger_subintents` table that stores information about subintent status.

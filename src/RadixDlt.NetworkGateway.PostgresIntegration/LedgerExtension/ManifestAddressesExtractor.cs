@@ -161,7 +161,6 @@ internal static class ManifestAddressesExtractor
         );
     }
 
-    // TODO PP: that's ugly duplication, consider refactoring that.
     public static ManifestAddresses ExtractAddresses(ToolkitModel.TransactionManifestV2 manifest, byte networkId)
     {
         var allAddresses = manifest.ExtractAddresses();
