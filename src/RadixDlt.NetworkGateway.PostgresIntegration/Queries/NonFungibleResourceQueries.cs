@@ -129,13 +129,6 @@ INNER JOIN LATERAL(
     ORDER BY from_state_version DESC
     LIMIT 1
 ) totals ON TRUE
-INNER JOIN LATERAL (
-    SELECT *
-    FROM non_fungible_id_data_history
-    WHERE non_fungible_id_definition_id = d.id AND from_state_version <= @stateVersion
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) h ON TRUE
 WHERE
     d.non_fungible_resource_entity_id = @nonFungibleResourceEntityId
   AND (d.from_state_version, d.id) >= (@cursorStateVersion, @cursorId)

@@ -63,8 +63,10 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,7 +77,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal static class TransactionDetailsQuery
 {
-    internal record ReceiptEvent(string Name, string Emitter, byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
+    internal record MappedReceiptEvent(string Name, string Emitter, byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
+
+    internal record MappedSubintentData(List<string> ChildSubintentHashes, List<SubintentData> SubintentData);
 
     internal record LedgerTransactionQueryResult(
         long StateVersion,
@@ -103,8 +107,15 @@ internal static class TransactionDetailsQuery
         string? ManifestInstructions
     )
     {
-        public List<ReceiptEvent> Events { get; set; } = new();
+        public List<MappedReceiptEvent> Events { get; set; } = new();
+
+        public MappedSubintentData? SubintentData { get; set; }
     }
+
+    private record RawSubintentData(
+        List<string> ChildSubintentHashes,
+        string SubintentData
+    );
 
     private record ReceiptEvents(
         string[] ReceiptEventEmitters,
@@ -164,6 +175,7 @@ SELECT
     intent_hash,
     message,
     manifest_classes,
+
     CASE WHEN vars.with_raw_payload THEN raw_payload END AS raw_payload,
     CASE WHEN vars.with_receipt_costing_parameters THEN receipt_costing_parameters END AS receipt_costing_parameters,
     CASE WHEN vars.with_receipt_fee_summary THEN receipt_fee_summary END AS receipt_fee_summary,
@@ -178,42 +190,51 @@ SELECT
     CASE WHEN vars.with_receipt_events THEN lte.receipt_event_schema_entity_ids END AS ReceiptEventSchemaEntityIds,
     CASE WHEN vars.with_receipt_events THEN lte.receipt_event_schema_hashes END AS ReceiptEventSchemaHashes,
     CASE WHEN vars.with_receipt_events THEN lte.receipt_event_type_indexes END AS ReceiptEventTypeIndexes,
-    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_sbor_type_kinds END AS ReceiptEventSborTypeKinds
+    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_sbor_type_kinds END AS ReceiptEventSborTypeKinds,
+
+    ltsd.child_subintent_hashes AS ChildSubintentHashes,
+    ltsd.subintent_data AS SubintentData
 FROM vars
 CROSS JOIN ledger_transactions lt
 LEFT JOIN ledger_transaction_events lte ON vars.with_receipt_events AND lte.state_version = lt.state_version
+LEFT JOIN ledger_transaction_subintent_data ltsd ON ltsd.state_version = lt.state_version
 WHERE lt.state_version = ANY(vars.transaction_state_versions)",
             parameters,
             cancellationToken: token);
 
-        var transactions = (await dapperWrapper.QueryAsync<LedgerTransactionQueryResult, ReceiptEvents?, LedgerTransactionQueryResult>(
+        var transactions = (await dapperWrapper.QueryAsync<LedgerTransactionQueryResult, ReceiptEvents?, RawSubintentData?, LedgerTransactionQueryResult>(
             dbContext.Database.GetDbConnection(),
             cd,
-            (transaction, events) =>
+            (transaction, events, subintentData) =>
             {
-                if (events == null)
+                if (events != null)
                 {
-                    return transaction;
+                    var mappedEvents = events
+                        .ReceiptEventEmitters
+                        .Select(
+                            (_, i) => new MappedReceiptEvent(
+                                events.ReceiptEventNames[i],
+                                events.ReceiptEventEmitters[i],
+                                events.ReceiptEventSbors[i],
+                                events.ReceiptEventSchemaEntityIds[i],
+                                events.ReceiptEventSchemaHashes[i],
+                                events.ReceiptEventTypeIndexes[i],
+                                events.ReceiptEventSborTypeKinds[i]))
+                        .ToList();
+
+                    transaction.Events = mappedEvents;
                 }
 
-                var mappedEvents = events
-                    .ReceiptEventEmitters
-                    .Select(
-                        (_, i) => new ReceiptEvent(
-                            events.ReceiptEventNames[i],
-                            events.ReceiptEventEmitters[i],
-                            events.ReceiptEventSbors[i],
-                            events.ReceiptEventSchemaEntityIds[i],
-                            events.ReceiptEventSchemaHashes[i],
-                            events.ReceiptEventTypeIndexes[i],
-                            events.ReceiptEventSborTypeKinds[i]))
-                    .ToList();
-
-                transaction.Events = mappedEvents;
+                if (subintentData != null)
+                {
+                    var deserialized = JsonConvert.DeserializeObject<List<SubintentData>>(subintentData.SubintentData);
+                    var mappedSubintentData = new MappedSubintentData(subintentData.ChildSubintentHashes, deserialized ?? new List<SubintentData>());
+                    transaction.SubintentData = mappedSubintentData;
+                }
 
                 return transaction;
             },
-            "ReceiptEventEmitters")).ToList();
+            "ReceiptEventEmitters, ChildSubintentHashes")).ToList();
 
         return transactions;
     }

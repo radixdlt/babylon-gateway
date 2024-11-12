@@ -122,11 +122,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="errorMessage">errorMessage.</param>
         /// <param name="rawHex">Hex-encoded binary blob..</param>
         /// <param name="receipt">receipt.</param>
-        /// <param name="manifestInstructions">A text-representation of a transaction manifest. This field will be present only for user transactions and when explicitly opted-in using &#x60;manifest_instructions&#x60; flag. .</param>
-        /// <param name="manifestClasses">A collection of zero or more manifest classes ordered from the most specific class to the least specific one. This field will be present only for user transactions. .</param>
+        /// <param name="manifestInstructions">A text-representation of a transaction manifest. This field will be present only for user transactions and when explicitly opted-in using the &#x60;manifest_instructions&#x60; flag. .</param>
+        /// <param name="manifestClasses">A collection of zero or more manifest classes ordered from the most specific class to the least specific one. This field will be present only for user transactions. For user transactions with subintents only the root transaction intent is currently used to determine the manifest classes. .</param>
         /// <param name="message">The optional transaction message. This type is defined in the Core API as &#x60;TransactionMessage&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="balanceChanges">balanceChanges.</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHash = default(string), string intentHash = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), string manifestInstructions = default(string), List<ManifestClass> manifestClasses = default(List<ManifestClass>), Object message = default(Object), TransactionBalanceChanges balanceChanges = default(TransactionBalanceChanges))
+        /// <param name="subintentDetails">Subintent details. Please note that it is returned regardless of whether the transaction was committed successfully or failed, and it can be returned in multiple transactions. .</param>
+        /// <param name="childSubintentHashes">The child subintent hashes of the root transaction intent. Please note that it is returned regardless of whether the transaction was committed successfully or failed, and it can be returned in multiple transactions. .</param>
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHash = default(string), string intentHash = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), string manifestInstructions = default(string), List<ManifestClass> manifestClasses = default(List<ManifestClass>), Object message = default(Object), TransactionBalanceChanges balanceChanges = default(TransactionBalanceChanges), List<TransactionSubintentDetails> subintentDetails = default(List<TransactionSubintentDetails>), List<string> childSubintentHashes = default(List<string>))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
@@ -150,6 +152,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.ManifestClasses = manifestClasses;
             this.Message = message;
             this.BalanceChanges = balanceChanges;
+            this.SubintentDetails = subintentDetails;
+            this.ChildSubintentHashes = childSubintentHashes;
         }
 
         /// <summary>
@@ -229,16 +233,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TransactionReceipt Receipt { get; set; }
 
         /// <summary>
-        /// A text-representation of a transaction manifest. This field will be present only for user transactions and when explicitly opted-in using &#x60;manifest_instructions&#x60; flag. 
+        /// A text-representation of a transaction manifest. This field will be present only for user transactions and when explicitly opted-in using the &#x60;manifest_instructions&#x60; flag. 
         /// </summary>
-        /// <value>A text-representation of a transaction manifest. This field will be present only for user transactions and when explicitly opted-in using &#x60;manifest_instructions&#x60; flag. </value>
+        /// <value>A text-representation of a transaction manifest. This field will be present only for user transactions and when explicitly opted-in using the &#x60;manifest_instructions&#x60; flag. </value>
         [DataMember(Name = "manifest_instructions", EmitDefaultValue = true)]
         public string ManifestInstructions { get; set; }
 
         /// <summary>
-        /// A collection of zero or more manifest classes ordered from the most specific class to the least specific one. This field will be present only for user transactions. 
+        /// A collection of zero or more manifest classes ordered from the most specific class to the least specific one. This field will be present only for user transactions. For user transactions with subintents only the root transaction intent is currently used to determine the manifest classes. 
         /// </summary>
-        /// <value>A collection of zero or more manifest classes ordered from the most specific class to the least specific one. This field will be present only for user transactions. </value>
+        /// <value>A collection of zero or more manifest classes ordered from the most specific class to the least specific one. This field will be present only for user transactions. For user transactions with subintents only the root transaction intent is currently used to determine the manifest classes. </value>
         [DataMember(Name = "manifest_classes", EmitDefaultValue = true)]
         public List<ManifestClass> ManifestClasses { get; set; }
 
@@ -254,6 +258,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "balance_changes", EmitDefaultValue = true)]
         public TransactionBalanceChanges BalanceChanges { get; set; }
+
+        /// <summary>
+        /// Subintent details. Please note that it is returned regardless of whether the transaction was committed successfully or failed, and it can be returned in multiple transactions. 
+        /// </summary>
+        /// <value>Subintent details. Please note that it is returned regardless of whether the transaction was committed successfully or failed, and it can be returned in multiple transactions. </value>
+        [DataMember(Name = "subintent_details", EmitDefaultValue = true)]
+        public List<TransactionSubintentDetails> SubintentDetails { get; set; }
+
+        /// <summary>
+        /// The child subintent hashes of the root transaction intent. Please note that it is returned regardless of whether the transaction was committed successfully or failed, and it can be returned in multiple transactions. 
+        /// </summary>
+        /// <value>The child subintent hashes of the root transaction intent. Please note that it is returned regardless of whether the transaction was committed successfully or failed, and it can be returned in multiple transactions. </value>
+        [DataMember(Name = "child_subintent_hashes", EmitDefaultValue = true)]
+        public List<string> ChildSubintentHashes { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -280,6 +298,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ManifestClasses: ").Append(ManifestClasses).Append("\n");
             sb.Append("  Message: ").Append(Message).Append("\n");
             sb.Append("  BalanceChanges: ").Append(BalanceChanges).Append("\n");
+            sb.Append("  SubintentDetails: ").Append(SubintentDetails).Append("\n");
+            sb.Append("  ChildSubintentHashes: ").Append(ChildSubintentHashes).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -397,6 +417,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.BalanceChanges == input.BalanceChanges ||
                     (this.BalanceChanges != null &&
                     this.BalanceChanges.Equals(input.BalanceChanges))
+                ) && 
+                (
+                    this.SubintentDetails == input.SubintentDetails ||
+                    this.SubintentDetails != null &&
+                    input.SubintentDetails != null &&
+                    this.SubintentDetails.SequenceEqual(input.SubintentDetails)
+                ) && 
+                (
+                    this.ChildSubintentHashes == input.ChildSubintentHashes ||
+                    this.ChildSubintentHashes != null &&
+                    input.ChildSubintentHashes != null &&
+                    this.ChildSubintentHashes.SequenceEqual(input.ChildSubintentHashes)
                 );
         }
 
@@ -464,6 +496,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.BalanceChanges != null)
                 {
                     hashCode = (hashCode * 59) + this.BalanceChanges.GetHashCode();
+                }
+                if (this.SubintentDetails != null)
+                {
+                    hashCode = (hashCode * 59) + this.SubintentDetails.GetHashCode();
+                }
+                if (this.ChildSubintentHashes != null)
+                {
+                    hashCode = (hashCode * 59) + this.ChildSubintentHashes.GetHashCode();
                 }
                 return hashCode;
             }

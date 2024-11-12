@@ -90,58 +90,58 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionPreviewRequestFlags
+    /// TransactionPreviewV2Response
     /// </summary>
-    [DataContract(Name = "TransactionPreviewRequest_flags")]
-    public partial class TransactionPreviewRequestFlags : IEquatable<TransactionPreviewRequestFlags>
+    [DataContract(Name = "TransactionPreviewV2Response")]
+    public partial class TransactionPreviewV2Response : IEquatable<TransactionPreviewV2Response>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPreviewRequestFlags" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2Response" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionPreviewRequestFlags() { }
+        protected TransactionPreviewV2Response() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPreviewRequestFlags" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2Response" /> class.
         /// </summary>
-        /// <param name="useFreeCredit">Whether to use a virtual, preview-only pool of XRD to pay for all execution fees.  (required).</param>
-        /// <param name="assumeAllSignatureProofs">Whether the virtual signature proofs should be automatically placed in the auth zone.  (required).</param>
-        /// <param name="skipEpochCheck">Whether to skip the epoch range check (i.e. ignoring the &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified).  Note: effectively, without an epoch range, the Radix Engine cannot perform the *intent hash duplicate* detection, which means that this check will be skipped as well.  (required).</param>
-        /// <param name="disableAuthChecks">Whether to skip the auth checks during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own. If doing this, be warned:   * Only resources which were potentially mintable/burnable at creation time     will be mintable/burnable, due to feature flags on the resource.   * Please see the below warning about unexpected results if using this approach.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the resulting execution result might not be valid for your needs. For example,   if I used this flag to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. .</param>
-        public TransactionPreviewRequestFlags(bool useFreeCredit = default(bool), bool assumeAllSignatureProofs = default(bool), bool skipEpochCheck = default(bool), bool disableAuthChecks = default(bool))
+        /// <param name="atLedgerStateVersion">A summarized state of the ledger on top of which the preview was performed. (required).</param>
+        /// <param name="receipt">This is provided unless the &#x60;core_api_receipt&#x60; flag is set to false in the &#x60;opt_ins &#x60; property of the request.  This type is defined in the Core API as &#x60;TransactionReceipt&#x60;. See the Core API documentation for more details. .</param>
+        /// <param name="radixEngineToolkitReceipt">An optional field which is only provided if the &#x60;radix_engine_toolkit_receipt&#x60; flag is set to true in the &#x60;opt_ins&#x60; property of the request.  This receipt is primarily intended for use with the toolkit and may contain information that is already available in the receipt provided in the &#x60;receipt&#x60; field of this response.  A typical client of this API is not expected to use this receipt. The primary clients this receipt is intended for is the Radix wallet or any client that needs to perform execution summaries on their transactions. .</param>
+        /// <param name="logs">An optional field which is only provided if the &#x60;logs&#x60; flag is set to true in the &#x60;opt_ins&#x60; property of the request.  If present, it gives the emitted logs from the transaction execution. .</param>
+        public TransactionPreviewV2Response(long atLedgerStateVersion = default(long), Object receipt = default(Object), Object radixEngineToolkitReceipt = default(Object), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
         {
-            this.UseFreeCredit = useFreeCredit;
-            this.AssumeAllSignatureProofs = assumeAllSignatureProofs;
-            this.SkipEpochCheck = skipEpochCheck;
-            this.DisableAuthChecks = disableAuthChecks;
+            this.AtLedgerStateVersion = atLedgerStateVersion;
+            this.Receipt = receipt;
+            this.RadixEngineToolkitReceipt = radixEngineToolkitReceipt;
+            this.Logs = logs;
         }
 
         /// <summary>
-        /// Whether to use a virtual, preview-only pool of XRD to pay for all execution fees. 
+        /// A summarized state of the ledger on top of which the preview was performed.
         /// </summary>
-        /// <value>Whether to use a virtual, preview-only pool of XRD to pay for all execution fees. </value>
-        [DataMember(Name = "use_free_credit", IsRequired = true, EmitDefaultValue = true)]
-        public bool UseFreeCredit { get; set; }
+        /// <value>A summarized state of the ledger on top of which the preview was performed.</value>
+        [DataMember(Name = "at_ledger_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long AtLedgerStateVersion { get; set; }
 
         /// <summary>
-        /// Whether the virtual signature proofs should be automatically placed in the auth zone. 
+        /// This is provided unless the &#x60;core_api_receipt&#x60; flag is set to false in the &#x60;opt_ins &#x60; property of the request.  This type is defined in the Core API as &#x60;TransactionReceipt&#x60;. See the Core API documentation for more details. 
         /// </summary>
-        /// <value>Whether the virtual signature proofs should be automatically placed in the auth zone. </value>
-        [DataMember(Name = "assume_all_signature_proofs", IsRequired = true, EmitDefaultValue = true)]
-        public bool AssumeAllSignatureProofs { get; set; }
+        /// <value>This is provided unless the &#x60;core_api_receipt&#x60; flag is set to false in the &#x60;opt_ins &#x60; property of the request.  This type is defined in the Core API as &#x60;TransactionReceipt&#x60;. See the Core API documentation for more details. </value>
+        [DataMember(Name = "receipt", EmitDefaultValue = true)]
+        public Object Receipt { get; set; }
 
         /// <summary>
-        /// Whether to skip the epoch range check (i.e. ignoring the &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified).  Note: effectively, without an epoch range, the Radix Engine cannot perform the *intent hash duplicate* detection, which means that this check will be skipped as well. 
+        /// An optional field which is only provided if the &#x60;radix_engine_toolkit_receipt&#x60; flag is set to true in the &#x60;opt_ins&#x60; property of the request.  This receipt is primarily intended for use with the toolkit and may contain information that is already available in the receipt provided in the &#x60;receipt&#x60; field of this response.  A typical client of this API is not expected to use this receipt. The primary clients this receipt is intended for is the Radix wallet or any client that needs to perform execution summaries on their transactions. 
         /// </summary>
-        /// <value>Whether to skip the epoch range check (i.e. ignoring the &#x60;start_epoch_inclusive&#x60; and &#x60;end_epoch_exclusive&#x60; parameters, if specified).  Note: effectively, without an epoch range, the Radix Engine cannot perform the *intent hash duplicate* detection, which means that this check will be skipped as well. </value>
-        [DataMember(Name = "skip_epoch_check", IsRequired = true, EmitDefaultValue = true)]
-        public bool SkipEpochCheck { get; set; }
+        /// <value>An optional field which is only provided if the &#x60;radix_engine_toolkit_receipt&#x60; flag is set to true in the &#x60;opt_ins&#x60; property of the request.  This receipt is primarily intended for use with the toolkit and may contain information that is already available in the receipt provided in the &#x60;receipt&#x60; field of this response.  A typical client of this API is not expected to use this receipt. The primary clients this receipt is intended for is the Radix wallet or any client that needs to perform execution summaries on their transactions. </value>
+        [DataMember(Name = "radix_engine_toolkit_receipt", EmitDefaultValue = true)]
+        public Object RadixEngineToolkitReceipt { get; set; }
 
         /// <summary>
-        /// Whether to skip the auth checks during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own. If doing this, be warned:   * Only resources which were potentially mintable/burnable at creation time     will be mintable/burnable, due to feature flags on the resource.   * Please see the below warning about unexpected results if using this approach.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the resulting execution result might not be valid for your needs. For example,   if I used this flag to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. 
+        /// An optional field which is only provided if the &#x60;logs&#x60; flag is set to true in the &#x60;opt_ins&#x60; property of the request.  If present, it gives the emitted logs from the transaction execution. 
         /// </summary>
-        /// <value>Whether to skip the auth checks during execution.  This could be used to e.g.: * Preview protocol update style transactions. * Mint resources for previewing trades with resources you don&#39;t own. If doing this, be warned:   * Only resources which were potentially mintable/burnable at creation time     will be mintable/burnable, due to feature flags on the resource.   * Please see the below warning about unexpected results if using this approach.  Warning: this mode of operation is quite a departure from normal operation: * Calculated fees will likely be lower than a standard execution. * This mode can subtly break invariants some dApp code might rely on, or result in unexpected   behaviour, so the resulting execution result might not be valid for your needs. For example,   if I used this flag to mint pool units to preview a redemption (or some dApp interaction which   behind the scenes redeemed them), they&#39;d redeem for less than they&#39;re currently worth,   because the blueprint code relies on the total supply of the pool units to calculate their   redemption worth, and you&#39;ve just inflated the total supply through the mint operation. </value>
-        [DataMember(Name = "disable_auth_checks", EmitDefaultValue = true)]
-        public bool DisableAuthChecks { get; set; }
+        /// <value>An optional field which is only provided if the &#x60;logs&#x60; flag is set to true in the &#x60;opt_ins&#x60; property of the request.  If present, it gives the emitted logs from the transaction execution. </value>
+        [DataMember(Name = "logs", EmitDefaultValue = true)]
+        public List<TransactionPreviewResponseLogsInner> Logs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,11 +150,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionPreviewRequestFlags {\n");
-            sb.Append("  UseFreeCredit: ").Append(UseFreeCredit).Append("\n");
-            sb.Append("  AssumeAllSignatureProofs: ").Append(AssumeAllSignatureProofs).Append("\n");
-            sb.Append("  SkipEpochCheck: ").Append(SkipEpochCheck).Append("\n");
-            sb.Append("  DisableAuthChecks: ").Append(DisableAuthChecks).Append("\n");
+            sb.Append("class TransactionPreviewV2Response {\n");
+            sb.Append("  AtLedgerStateVersion: ").Append(AtLedgerStateVersion).Append("\n");
+            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("  RadixEngineToolkitReceipt: ").Append(RadixEngineToolkitReceipt).Append("\n");
+            sb.Append("  Logs: ").Append(Logs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,15 +175,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionPreviewRequestFlags);
+            return this.Equals(input as TransactionPreviewV2Response);
         }
 
         /// <summary>
-        /// Returns true if TransactionPreviewRequestFlags instances are equal
+        /// Returns true if TransactionPreviewV2Response instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionPreviewRequestFlags to be compared</param>
+        /// <param name="input">Instance of TransactionPreviewV2Response to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionPreviewRequestFlags input)
+        public bool Equals(TransactionPreviewV2Response input)
         {
             if (input == null)
             {
@@ -191,20 +191,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.UseFreeCredit == input.UseFreeCredit ||
-                    this.UseFreeCredit.Equals(input.UseFreeCredit)
+                    this.AtLedgerStateVersion == input.AtLedgerStateVersion ||
+                    this.AtLedgerStateVersion.Equals(input.AtLedgerStateVersion)
                 ) && 
                 (
-                    this.AssumeAllSignatureProofs == input.AssumeAllSignatureProofs ||
-                    this.AssumeAllSignatureProofs.Equals(input.AssumeAllSignatureProofs)
+                    this.Receipt == input.Receipt ||
+                    (this.Receipt != null &&
+                    this.Receipt.Equals(input.Receipt))
                 ) && 
                 (
-                    this.SkipEpochCheck == input.SkipEpochCheck ||
-                    this.SkipEpochCheck.Equals(input.SkipEpochCheck)
+                    this.RadixEngineToolkitReceipt == input.RadixEngineToolkitReceipt ||
+                    (this.RadixEngineToolkitReceipt != null &&
+                    this.RadixEngineToolkitReceipt.Equals(input.RadixEngineToolkitReceipt))
                 ) && 
                 (
-                    this.DisableAuthChecks == input.DisableAuthChecks ||
-                    this.DisableAuthChecks.Equals(input.DisableAuthChecks)
+                    this.Logs == input.Logs ||
+                    this.Logs != null &&
+                    input.Logs != null &&
+                    this.Logs.SequenceEqual(input.Logs)
                 );
         }
 
@@ -217,10 +221,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.UseFreeCredit.GetHashCode();
-                hashCode = (hashCode * 59) + this.AssumeAllSignatureProofs.GetHashCode();
-                hashCode = (hashCode * 59) + this.SkipEpochCheck.GetHashCode();
-                hashCode = (hashCode * 59) + this.DisableAuthChecks.GetHashCode();
+                hashCode = (hashCode * 59) + this.AtLedgerStateVersion.GetHashCode();
+                if (this.Receipt != null)
+                {
+                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                }
+                if (this.RadixEngineToolkitReceipt != null)
+                {
+                    hashCode = (hashCode * 59) + this.RadixEngineToolkitReceipt.GetHashCode();
+                }
+                if (this.Logs != null)
+                {
+                    hashCode = (hashCode * 59) + this.Logs.GetHashCode();
+                }
                 return hashCode;
             }
         }

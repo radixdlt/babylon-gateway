@@ -53,7 +53,7 @@ openapi: 3.0.0
 # => Hex-encoded bytes/payload should end _hex and not include _bytes
 info:
   # Should be the release version, and the release display name
-  version: 'v1.2.2'
+  version: 'v1.2.3'
   title: 'Radix Core API'
   license:
     name: The Radix License, Version 1.0
@@ -148,7 +148,7 @@ tags:
 
       Once submitted, a transaction payload can end up being either rejected or committed. Transactions get rejected if they fail to pass certain criteria at the given time.
       A transaction payload can be marked as a:
-      - **Permanent Rejection** if it is never possible for it to be committed (eg it's statically invalid, or only valid up until epoch 100 and it's now epoch 101)
+      - **Permanent Rejection** if it is never possible for it to be committed (e.g. it's statically invalid, or only valid up until epoch 100 and it's now epoch 101)
       - **Temporary Rejection** if it still may be possible that the transaction payload could be committed
 
       A given intent typically is only part of one submitted notarized payload, but it's possible for a notary to notarize and submit multiple payloads for the same intent.
@@ -758,9 +758,12 @@ paths:
                 $ref: "#/components/schemas/BasicErrorResponse"
   "/transaction/preview":
     post:
-      summary: Transaction Preview
+      summary: Transaction Preview V1
       description: |
         Preview a transaction against the latest network state, and returns the preview receipt.
+        If the node has enabled it, you may be able to also preview against recent network state.
+
+        For V2 transactions (and beyond) the `/preview-v2` endpoint should be used instead.
       tags:
         - Transaction
       requestBody:
@@ -788,6 +791,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
+  "/transaction/preview-v2":
+    post:
+      summary: Transaction Preview V2
+      description: |
+        Previews a transaction against the latest network state, and returns the preview receipt.
+        If the node has enabled it, you may be able to also preview against recent network state.
+
+        This endpoint supports V2 transactions (and beyond). If you still need to preview V1
+        transactions, you should use the `/preview` endpoint instead.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionPreviewV2Request"
+      responses:
+        '200':
+          description: Transaction preview response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionPreviewV2Response"
+        '400':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionPreviewV2ErrorResponse"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionPreviewV2ErrorResponse"
 ##################
 # Stream Sub-API #
 ##################
@@ -1288,6 +1327,7 @@ components:
         - Basic
         - TransactionSubmit
         - LtsTransactionSubmit
+        - TransactionPreviewV2
         - StreamTransactions
         - StreamProofs
     ErrorResponse:
@@ -1299,6 +1339,7 @@ components:
           Basic: "#/components/schemas/BasicErrorResponse"
           TransactionSubmit: "#/components/schemas/TransactionSubmitErrorResponse"
           LtsTransactionSubmit: "#/components/schemas/LtsTransactionSubmitErrorResponse"
+          TransactionPreviewV2: "#/components/schemas/TransactionPreviewV2ErrorResponse"
           StreamTransactions: "#/components/schemas/StreamTransactionsErrorResponse"
           StreamProofs: "#/components/schemas/StreamProofsErrorResponse"
       required:
@@ -1335,53 +1376,9 @@ components:
       description: |
         A string-encoded fixed-precision decimal to 18 decimal places.
         A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(192 - 1) <= m < 2^(192 - 1)`.
-##########################################
-# GENERAL / SHARED MODELS - Transactions #
-##########################################
-    TransactionStatus:
-      type: string
-      enum:
-        - Succeeded
-        - Failed
-        - Rejected
-      description: The status of the transaction
-    TransactionReceipt:
-      type: object
-      description: The transaction execution receipt
-      required:
-        - status
-        - state_updates
-        - fee_summary
-        - costing_parameters
-      properties:
-        status:
-          $ref: "#/components/schemas/TransactionStatus"
-        fee_summary:
-          $ref: "#/components/schemas/FeeSummary"
-        costing_parameters:
-          $ref: "#/components/schemas/CostingParameters"
-        fee_source:
-          description: Only present if the `status` is not `Rejected`.
-          $ref: "#/components/schemas/FeeSource"
-        fee_destination:
-          description: Only present if the `status` is not `Rejected`.
-          $ref: "#/components/schemas/FeeDestination"
-        state_updates:
-          $ref: "#/components/schemas/StateUpdates"
-        events:
-          type: array
-          items:
-            $ref: "#/components/schemas/Event"
-        next_epoch:
-          $ref: "#/components/schemas/NextEpoch"
-        output:
-          type: array
-          description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`)
-          items:
-            $ref: "#/components/schemas/SborData"
-        error_message:
-          type: string
-          description: Error message (only present if status is `Failed` or `Rejected`)
+##################################################
+# GENERAL / SHARED MODELS - TransactionV1 Models #
+##################################################
     NotarizedTransaction:
       type: object
       required:
@@ -1410,9 +1407,9 @@ components:
         - intent_signatures
       properties:
         hash:
-          $ref: "#/components/schemas/SignedIntentHash"
+          $ref: "#/components/schemas/SignedTransactionIntentHash"
         hash_bech32m:
-          $ref: "#/components/schemas/SignedIntentHashBech32m"
+          $ref: "#/components/schemas/SignedTransactionIntentHashBech32m"
         intent:
           $ref: "#/components/schemas/TransactionIntent"
         intent_signatures:
@@ -1427,9 +1424,9 @@ components:
         - header
       properties:
         hash:
-          $ref: "#/components/schemas/IntentHash"
+          $ref: "#/components/schemas/TransactionIntentHash"
         hash_bech32m:
-          $ref: "#/components/schemas/IntentHashBech32m"
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
         header:
           $ref: "#/components/schemas/TransactionHeader"
         instructions:
@@ -1568,8 +1565,11 @@ components:
         aes_wrapped_key_hex:
           type: string
           description: |
-            The hex-encoded wrapped key bytes from applying RFC 3394 (256-bit) AES-KeyWrap to the 128-bit message ephemeral public key, with the secret KEK provided by static Diffie-Helman between the decryptor public key, and the `dh_ephemeral_public_key` for that curve type.
-            The bytes are serialized (according to RFC 3394) as the concatenation `IV (first 8 bytes) || Cipher (wrapped 128-bit key, encoded as two 64-bit blocks)`.
+            The hex-encoded wrapped key bytes from applying RFC 3394 (256-bit) AES-KeyWrap to the message ephemeral public key, with the secret KEK provided by static Diffie-Helman between the decryptor public key, and the `dh_ephemeral_public_key` for that curve type.
+            The bytes are serialized (according to RFC 3394) as the concatenation `IV (first 8 bytes) || Cipher`.
+
+            The message ephemeral public key is 128-bit in V1 transactions, but 256-bit in V2 transactions.
+            The Cipher is the wrapped ephemeral public key, and is encoded as two 64-bit blocks in V1, and four 64-bit blocks in V2.
     TransactionHeader:
       type: object
       required:
@@ -1606,6 +1606,8 @@ components:
           maximum: 4294967295
           description: |
             An integer between `0` and `2^32 - 1`, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent).
+  
+            As of Cuttlefish and V2 transaction models, this is now referred to in documentation as the `intent_discriminator`.
         notary_public_key:
           $ref: "#/components/schemas/PublicKey"
         notary_is_signatory:
@@ -1623,6 +1625,186 @@ components:
       format: int32
       minimum: 0
       maximum: 255
+##################################################
+# GENERAL / SHARED MODELS - TransactionV2 Models #
+##################################################
+    NotarizedTransactionV2:
+      type: object
+      required:
+        - hash
+        - hash_bech32m
+        - signed_transaction_intent
+        - notary_signature
+      properties:
+        hash:
+          $ref: "#/components/schemas/NotarizedTransactionHash"
+        hash_bech32m:
+          $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
+        payload_hex:
+          type: string
+          description: The hex-encoded full notarized transaction payload. Returning this can be disabled in TransactionFormatOptions on your request (default true).
+        signed_transaction_intent:
+          $ref: "#/components/schemas/SignedTransactionIntentV2"
+        notary_signature:
+          $ref: "#/components/schemas/Signature"
+    SignedTransactionIntentV2:
+      type: object
+      required:
+        - hash
+        - hash_bech32m
+        - transaction_intent
+        - transaction_intent_signatures
+        - non_root_subintent_signatures
+      properties:
+        hash:
+          $ref: "#/components/schemas/SignedTransactionIntentHash"
+        hash_bech32m:
+          $ref: "#/components/schemas/SignedTransactionIntentHashBech32m"
+        transaction_intent:
+          $ref: "#/components/schemas/TransactionIntentV2"
+        transaction_intent_signatures:
+          $ref: "#/components/schemas/IntentSignatures"
+        non_root_subintent_signatures:
+          description: |
+            This gives the signatures for each subintent in `non_root_subintents` in `TransactionIntentV2`.
+            For committed transactions, these arrays are of equal length and correspond one-to-one in order.
+          type: array
+          items:
+            $ref: "#/components/schemas/IntentSignatures"
+    IntentSignatures:
+      type: object
+      description: Signatures against the given intent.
+      required:
+        - signatures
+      properties:
+        signatures:
+          type: array
+          items:
+            $ref: "#/components/schemas/SignatureWithPublicKey"
+    TransactionIntentV2:
+      type: object
+      required:
+        - hash
+        - hash_bech32m
+        - transaction_header
+        - root_intent_core
+        - non_root_subintents
+      properties:
+        hash:
+          $ref: "#/components/schemas/TransactionIntentHash"
+        hash_bech32m:
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
+        transaction_header:
+          $ref: "#/components/schemas/TransactionHeaderV2"
+        root_intent_core:
+          $ref: "#/components/schemas/IntentCoreV2"
+        non_root_subintents:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubintentV2"
+    TransactionHeaderV2:
+      type: object
+      required:
+        - notary_public_key
+        - notary_is_signatory
+        - tip_basis_points
+      properties:
+        notary_public_key:
+          $ref: "#/components/schemas/PublicKey"
+        notary_is_signatory:
+          type: boolean
+          description: Specifies whether the notary public key should be included in the transaction signers list
+        tip_basis_points:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: |
+            An integer between `0` and `2^32 - 1 = 4294967295`, giving the validator tip as a basis points amount.
+            That is, a value of `1` corresponds to an additional tip on 0.01% of the base fee.
+    SubintentV2:
+      type: object
+      required:
+        - hash
+        - hash_bech32m
+        - intent_core
+      properties:
+        hash:
+          $ref: "#/components/schemas/SubintentHash"
+        hash_bech32m:
+          $ref: "#/components/schemas/SubintentHashBech32m"
+        intent_core:
+          $ref: "#/components/schemas/IntentCoreV2"
+    IntentCoreV2:
+      type: object
+      required:
+        - intent_header
+        - children_specifiers
+      properties:
+        intent_header:
+          $ref: "#/components/schemas/IntentHeaderV2"
+        children_specifiers:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubintentHashBech32m"
+        blobs_hex:
+          type: object
+          description: A map of the hex-encoded blob hash, to hex-encoded blob content. Only returned if enabled in `TransactionFormatOptions` on your request.
+          additionalProperties:
+            type: string
+            description: The hex-encoded blob content
+        message:
+          description: The optional transaction message. Only returned if present and enabled in `TransactionFormatOptions` on your request.
+          $ref: "#/components/schemas/TransactionMessage"
+        instructions:
+          type: string
+          description: The decompiled transaction manifest instructions. Only returned if enabled in `TransactionFormatOptions` on your request.
+    IntentHeaderV2:
+      type: object
+      description: |
+        The metadata common to both transaction intents and subintents.
+
+        The `min_proposer_timestamp_inclusive` and `max_proposer_timestamp_exclusive` are both optional.
+      required:
+        - network_id
+        - start_epoch_inclusive
+        - end_epoch_exclusive
+        - intent_discriminator
+      properties:
+        network_id:
+          $ref: "#/components/schemas/NetworkIdentifierByte"
+        start_epoch_inclusive:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 10000000000
+          description: |
+            An integer between `0` and `10^10`, marking the epoch from which the transaction can be submitted.
+            In the case of uncommitted transactions, a value of `10^10` indicates that the epoch was >= `10^10`.
+        end_epoch_exclusive:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 10000000000
+          description: |
+            An integer between `0` and `10^10`, marking the epoch from which the transaction will no longer be valid, and be rejected.
+            In the case of uncommitted transactions, a value of `10^10` indicates that the epoch was >= `10^10`.
+        min_proposer_timestamp_inclusive:
+          $ref: "#/components/schemas/ScryptoInstant"
+        max_proposer_timestamp_exclusive:
+          $ref: "#/components/schemas/ScryptoInstant"
+        intent_discriminator:
+          type: string
+          description: |
+            The string representation of an integer between `0` and `2^64 - 1`, which can be chosen to ensure that
+            a unique intent can be created. It only needs to be unique for a particular intent content and epoch/timestamp,
+            and can be safely selected randomly to very high probability.
+
+            This field was called `nonce` in the V1 models, but was a misleading name, as it got confused with a
+            cryptographic nonce or an Ethereum-style nonce, and it is neither.
+#####################################################
+# GENERAL / SHARED MODELS - Transaction Descriptors #
+#####################################################
     LedgerStateSummary:
       type: object
       required:
@@ -1697,46 +1879,58 @@ components:
         - payload_hash_bech32m
       properties:
         intent_hash:
-          $ref: "#/components/schemas/IntentHash"
+          $ref: "#/components/schemas/TransactionIntentHash"
         intent_hash_bech32m:
-          $ref: "#/components/schemas/IntentHashBech32m"
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
         signed_intent_hash:
-          $ref: "#/components/schemas/SignedIntentHash"
+          $ref: "#/components/schemas/SignedTransactionIntentHash"
         signed_intent_hash_bech32m:
-          $ref: "#/components/schemas/SignedIntentHashBech32m"
+          $ref: "#/components/schemas/SignedTransactionIntentHashBech32m"
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
         payload_hash_bech32m:
           $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
-    IntentHashInput:
+    TransactionIntentHashInput:
       type: string
       description: |
-        The intent hash for a user transaction, also known as the transaction id.
-        This hash identifies the core content "intent" of the transaction. Each intent can only be committed once.
+        The transaction intent hash for a user transaction, also known as the transaction id.
+        This hash identifies the core "intent" of the transaction. Each transaction intent can only be committed once.
         This hash gets signed by any signatories on the transaction, to create the signed intent.
         Either hex or Bech32m-encoded strings are supported.
-    IntentHash:
+    TransactionIntentHash:
       type: string
       minLength: 64
       maxLength: 64
       description: |
-        The hex-encoded intent hash for a user transaction, also known as the transaction id.
-        This hash identifies the core content "intent" of the transaction. Each intent can only be committed once.
+        The hex-encoded transaction intent hash for a user transaction, also known as the transaction id.
+        This hash identifies the core "intent" of the transaction. Each transaction intent can only be committed once.
         This hash gets signed by any signatories on the transaction, to create the signed intent.
-    IntentHashBech32m:
+    TransactionIntentHashBech32m:
       type: string
-      description: The Bech32m-encoded human readable `IntentHash`.
-    SignedIntentHash:
+      description: The Bech32m-encoded human readable `TransactionIntentHash`.
+    SubintentHash:
+      type: string
+      minLength: 64
+      maxLength: 64
+      description: |
+        The hex-encoded subintent hash for a subintent, also known as the partial transaction id.
+        This hash identifies the subintent. Each subintent can only be *successfully* committed once,
+        but unlike a transaction intent, could be committed as a failure zero or more times first.
+        This hash gets signed by any signatories on subintent.
+    SubintentHashBech32m:
+      type: string
+      description: The Bech32m-encoded human readable `SubintentHash`.
+    SignedTransactionIntentHash:
       type: string
       minLength: 64
       maxLength: 64
       description: |
         The hex-encoded signed intent hash for a user transaction.
         This hash identifies the transaction intent, plus additional signatures.
-        This hash is signed by the notary, to create the submittable NotarizedTransaction.
-    SignedIntentHashBech32m:
+        This hash is signed by the notary, to create the submittable `NotarizedTransaction`.
+    SignedTransactionIntentHashBech32m:
       type: string
-      description: The Bech32m-encoded human readable `SignedIntentHash`.
+      description: The Bech32m-encoded human readable `SignedTransactionIntentHash`.
     NotarizedTransactionHashInput:
       type: string
       description: |
@@ -1786,6 +1980,50 @@ components:
 ######################################
 # GENERAL / SHARED MODELS - Receipts #
 ######################################
+    TransactionStatus:
+      type: string
+      enum:
+        - Succeeded
+        - Failed
+        - Rejected
+      description: The status of the transaction
+    TransactionReceipt:
+      type: object
+      description: The transaction execution receipt
+      required:
+        - status
+        - state_updates
+        - fee_summary
+        - costing_parameters
+      properties:
+        status:
+          $ref: "#/components/schemas/TransactionStatus"
+        fee_summary:
+          $ref: "#/components/schemas/FeeSummary"
+        costing_parameters:
+          $ref: "#/components/schemas/CostingParameters"
+        fee_source:
+          description: Only present if the `status` is not `Rejected`.
+          $ref: "#/components/schemas/FeeSource"
+        fee_destination:
+          description: Only present if the `status` is not `Rejected`.
+          $ref: "#/components/schemas/FeeDestination"
+        state_updates:
+          $ref: "#/components/schemas/StateUpdates"
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
+        next_epoch:
+          $ref: "#/components/schemas/NextEpoch"
+        output:
+          type: array
+          description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`)
+          items:
+            $ref: "#/components/schemas/SborData"
+        error_message:
+          type: string
+          description: Error message (only present if status is `Failed` or `Rejected`)
     FeeSummary:
       type: object
       required:
@@ -2152,6 +2390,7 @@ components:
         - Main
         - Schema
         - BootLoader
+        - ProtocolUpdateStatus
     PartitionKind:
       type: string
       description: |
@@ -2619,7 +2858,7 @@ components:
           required:
             - public_key
             - signature
-          description: The EdDSA public key and signature 
+          description: The EdDSA public key and signature
           properties:
             public_key:
               $ref: '#/components/schemas/EddsaEd25519PublicKey'
@@ -3291,6 +3530,8 @@ components:
         - TypeInfo
         - SystemBoot
         - KernelBoot
+        - TransactionValidationConfiguration
+        - ProtocolUpdateStatusSummary
     ObjectSubstateTypeReferenceType:
       type: string
       enum:
@@ -3790,13 +4031,13 @@ components:
         mapping:
           # NOTE:
           # There is an important convention to these names, for consistency:
-          # 
+          #
           # For each distinct typed substate, form [SubstateType] = [ModuleSpecifier][SubstateSpecifier][SubstateTypeVersion]
           # - [ModuleSpecifier] is either [ModuleName]Module for non-main modules, or [EntityType] for main modules
           # - [SubstateSpecifier] is either:
           #   - Field[SubstateDescriptor] for Field partitions
           #   - [SubstateDescriptor]Entry for Collection partitions (KeyValueStore, Index and SortedIndex)
-          # - [SubstateTypeVersion] is empty ("") for V1 substates, but will eg be V2/V3/V4 for newer substate versions
+          # - [SubstateTypeVersion] is empty ("") for V1 substates, but will e.g. be V2/V3/V4 for newer substate versions
           #
           # And then define:
           # - [SubstateName] = [SubstateType]Substate
@@ -3809,9 +4050,11 @@ components:
           #   - value - which references the type [SubstateValue]
           #   - key (if it's in a collection partition) - which references a substate key type [X]Key for some X.
           #   - is_locked - this is added to all substates via inclusion on the `Substate` object
+          BootLoaderModuleFieldKernelBoot: '#/components/schemas/BootLoaderModuleFieldKernelBootSubstate'
           BootLoaderModuleFieldSystemBoot: '#/components/schemas/BootLoaderModuleFieldSystemBootSubstate'
           BootLoaderModuleFieldVmBoot: '#/components/schemas/BootLoaderModuleFieldVmBootSubstate'
-          BootLoaderModuleFieldKernelBoot: '#/components/schemas/BootLoaderModuleFieldKernelBootSubstate'
+          BootLoaderModuleFieldTransactionValidationConfiguration: '#/components/schemas/BootLoaderModuleFieldTransactionValidationConfigurationSubstate'
+          ProtocolUpdateStatusModuleFieldSummary: '#/components/schemas/ProtocolUpdateStatusModuleFieldSummarySubstate'
           TypeInfoModuleFieldTypeInfo: '#/components/schemas/TypeInfoModuleFieldTypeInfoSubstate'
           RoleAssignmentModuleFieldOwnerRole: '#/components/schemas/RoleAssignmentModuleFieldOwnerRoleSubstate'
           RoleAssignmentModuleRuleEntry: '#/components/schemas/RoleAssignmentModuleRuleEntrySubstate'
@@ -3864,7 +4107,11 @@ components:
     SubstateType:
       type: string
       enum:
+        - BootLoaderModuleFieldSystemBoot
+        - BootLoaderModuleFieldKernelBoot
         - BootLoaderModuleFieldVmBoot
+        - BootLoaderModuleFieldTransactionValidationConfiguration
+        - ProtocolUpdateStatusModuleFieldSummary
         - TypeInfoModuleFieldTypeInfo
         - RoleAssignmentModuleFieldOwnerRole
         - RoleAssignmentModuleRuleEntry
@@ -3916,8 +4163,6 @@ components:
         - TransactionTrackerFieldState
         - TransactionTrackerCollectionEntry
         - AccountLockerAccountClaimsEntry
-        - BootLoaderModuleFieldSystemBoot
-        - BootLoaderModuleFieldKernelBoot
 ################################################
 # GENERAL / SHARED MODELS - substate key types #
 ################################################
@@ -4051,9 +4296,9 @@ components:
         - intent_hash_bech32m
       properties:
         intent_hash:
-          $ref: "#/components/schemas/IntentHash"
+          $ref: "#/components/schemas/TransactionIntentHash"
         intent_hash_bech32m:
-          $ref: "#/components/schemas/IntentHashBech32m"
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
     AccountAddressKey:
       type: object
       required:
@@ -4085,8 +4330,16 @@ components:
       required:
         - system_parameters
       properties:
+        system_version:
+          $ref: '#/components/schemas/SystemVersion'
         system_parameters:
           $ref: '#/components/schemas/SystemParameters'
+    SystemVersion:
+      description: The SystemVersion was added at Cuttlefish. Before that it can be assumed to be V1.
+      type: string
+      enum:
+        - V1
+        - V2
     SystemParameters:
       type: object
       required:
@@ -4291,6 +4544,82 @@ components:
               $ref: '#/components/schemas/BootLoaderModuleFieldKernelBootValue'
     BootLoaderModuleFieldKernelBootValue:
       type: object
+      properties:
+        always_visible_nodes_version:
+          $ref: '#/components/schemas/AlwaysVisibleGlobalNodesVersion'
+    AlwaysVisibleGlobalNodesVersion:
+      type: string
+      description: |
+        This was added in Cuttlefish. Before that, this value was missing, but can be assumed to be V1.
+      enum:
+        - V1
+        - V2
+    BootLoaderModuleFieldTransactionValidationConfigurationSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+        # TODO:CUTTLEFISH
+    ProtocolUpdateStatusModuleFieldSummarySubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - protocol_version
+            - update_status
+          properties:
+            protocol_version:
+              type: string
+            update_status:
+              $ref: '#/components/schemas/ProtocolUpdateStatus'
+    ProtocolUpdateStatusType:
+      type: string
+      enum:
+        - InProgress
+        - Complete
+    ProtocolUpdateStatus:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/ProtocolUpdateStatusType'
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match ProtocolUpdateStatusType options above
+          InProgress: '#/components/schemas/InProgressProtocolUpdateStatus'
+          Complete: '#/components/schemas/CompleteProtocolUpdateStatus'
+    InProgressProtocolUpdateStatus:
+      allOf:
+        - $ref: '#/components/schemas/ProtocolUpdateStatus'
+        - type: object
+          required:
+            - latest_commit
+          properties:
+            latest_commit:
+              $ref: '#/components/schemas/ProtocolUpdateStatusLatestCommit'
+    ProtocolUpdateStatusLatestCommit:
+      type: object
+      required:
+        - batch_group_index
+        - batch_group_name
+        - batch_index
+        - batch_name
+      properties:
+        batch_group_index:
+          type: integer
+          format: int64
+        batch_group_name:
+          type: string
+        batch_index:
+          type: integer
+          format: int64
+        batch_name:
+          type: string
+    CompleteProtocolUpdateStatus:
+      allOf:
+        - $ref: '#/components/schemas/ProtocolUpdateStatus'
+        - type: object
     TypeInfoModuleFieldTypeInfoSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
@@ -4439,7 +4768,7 @@ components:
           description: |
             The generic substitution is provided remotely by a blueprint type.
             The `resolved_full_type_id` is added by the node, and is always present in the model returned from the transaction stream API.
-            Other APIs may not resolve the type from the blueprint definition. 
+            Other APIs may not resolve the type from the blueprint definition.
           required:
             - blueprint_type_identifier
           properties:
@@ -5771,7 +6100,7 @@ components:
         network:
           $ref: "#/components/schemas/NetworkIdentifier"
         intent_hash:
-          $ref: "#/components/schemas/IntentHashInput"
+          $ref: "#/components/schemas/TransactionIntentHashInput"
     LtsTransactionStatusResponse:
       type: object
       required:
@@ -5829,7 +6158,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -6615,6 +6944,7 @@ components:
       required:
         - pre_genesis_state_identifier
         - current_protocol_version
+        - current_state_identifier
       properties:
         pre_genesis_state_identifier:
           $ref: "#/components/schemas/CommittedStateIdentifier"
@@ -6639,8 +6969,7 @@ components:
         current_state_identifier:
           $ref: "#/components/schemas/CommittedStateIdentifier"
           description: |
-            The current state identifier at the top of the node's copy of the ledger (ie as of the latest committed transaction).
-            It is not present until genesis has been run.
+            The current state identifier at the top of the node's copy of the ledger (i.e. as of the latest committed transaction).
         current_epoch_round:
           $ref: "#/components/schemas/EpochRound"
           description: |
@@ -6741,9 +7070,9 @@ components:
         state_version:
           $ref: "#/components/schemas/StateVersion"
         intent_hash:
-          $ref: "#/components/schemas/IntentHash"
+          $ref: "#/components/schemas/TransactionIntentHash"
         intent_hash_bech32m:
-          $ref: "#/components/schemas/IntentHashBech32m"
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
     DescribedAddress:
       type: string
       description: An arbitrary Bech32m-encoded human readable address (its type should be inferred from `logical_name`).
@@ -6775,9 +7104,9 @@ components:
         - payload_hash_bech32m
       properties:
         intent_hash:
-          $ref: "#/components/schemas/IntentHash"
+          $ref: "#/components/schemas/TransactionIntentHash"
         intent_hash_bech32m:
-          $ref: "#/components/schemas/IntentHashBech32m"
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
         payload_hash_bech32m:
@@ -6892,6 +7221,7 @@ components:
       description: The type of the parsed (partial) transaction payload
       enum:
         - NotarizedTransaction
+        - NotarizedTransactionV2
         - SignedTransactionIntent
         - TransactionIntent
         - LedgerTransaction
@@ -6907,6 +7237,7 @@ components:
         mapping:
           # NOTE: These need to match ParsedTransactionType
           NotarizedTransaction: '#/components/schemas/ParsedNotarizedTransaction'
+          NotarizedTransactionV2: '#/components/schemas/ParsedNotarizedTransactionV2'
           SignedTransactionIntent: '#/components/schemas/ParsedSignedTransactionIntent'
           TransactionIntent: '#/components/schemas/ParsedTransactionIntent'
           LedgerTransaction: '#/components/schemas/ParsedLedgerTransaction'
@@ -6927,7 +7258,38 @@ components:
                 If the transaction is known to not be valid, this gives a reason.
                 Different levels of validation are performed, dependent on the validation mode.
                 Note that, even if validation mode is Static or Full, the transaction may
-                still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid).
+                still be rejected or fail due to issues at runtime (e.g. if the loan cannot be repaid).
+              required:
+                - reason
+                - is_permanent
+              properties:
+                reason:
+                  type: string
+                  description: |
+                    The error message.
+                is_permanent:
+                  type: boolean
+                  description: |
+                    Whether the error is known to be permanent, or not.
+                    This relates to whether the transaction would be rejected permanently or temporarily if submitted.
+    ParsedNotarizedTransactionV2:
+      allOf:
+        - $ref: "#/components/schemas/ParsedTransaction"
+        - type: object
+          required:
+            - identifiers
+          properties:
+            notarized_transaction:
+              $ref: "#/components/schemas/NotarizedTransactionV2"
+            identifiers:
+              $ref: "#/components/schemas/ParsedNotarizedTransactionIdentifiers"
+            validation_error:
+              type: object
+              description: |
+                If the transaction is known to not be valid, this gives a reason.
+                Different levels of validation are performed, dependent on the validation mode.
+                Note that, even if validation mode is Static or Full, the transaction may
+                still be rejected or fail due to issues at runtime (e.g. if the loan cannot be repaid).
               required:
                 - reason
                 - is_permanent
@@ -6954,13 +7316,13 @@ components:
         - ledger_hash_bech32m
       properties:
         intent_hash:
-          $ref: "#/components/schemas/IntentHash"
+          $ref: "#/components/schemas/TransactionIntentHash"
         intent_hash_bech32m:
-          $ref: "#/components/schemas/IntentHashBech32m"
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
         signed_intent_hash:
-          $ref: "#/components/schemas/SignedIntentHash"
+          $ref: "#/components/schemas/SignedTransactionIntentHash"
         signed_intent_hash_bech32m:
-          $ref: "#/components/schemas/SignedIntentHashBech32m"
+          $ref: "#/components/schemas/SignedTransactionIntentHashBech32m"
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
         payload_hash_bech32m:
@@ -6989,13 +7351,13 @@ components:
         - signed_intent_hash_bech32m
       properties:
         intent_hash:
-          $ref: "#/components/schemas/IntentHash"
+          $ref: "#/components/schemas/TransactionIntentHash"
         intent_hash_bech32m:
-          $ref: "#/components/schemas/IntentHashBech32m"
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
         signed_intent_hash:
-          $ref: "#/components/schemas/SignedIntentHash"
+          $ref: "#/components/schemas/SignedTransactionIntentHash"
         signed_intent_hash_bech32m:
-          $ref: "#/components/schemas/SignedIntentHashBech32m"
+          $ref: "#/components/schemas/SignedTransactionIntentHashBech32m"
     ParsedTransactionIntent:
       allOf:
         - $ref: "#/components/schemas/ParsedTransaction"
@@ -7014,9 +7376,9 @@ components:
         - intent_hash_bech32m
       properties:
         intent_hash:
-          $ref: "#/components/schemas/IntentHash"
+          $ref: "#/components/schemas/TransactionIntentHash"
         intent_hash_bech32m:
-          $ref: "#/components/schemas/IntentHashBech32m"
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
     ParsedLedgerTransaction:
       allOf:
         - $ref: "#/components/schemas/ParsedTransaction"
@@ -7035,13 +7397,13 @@ components:
         - ledger_hash_bech32m
       properties:
         intent_hash:
-          $ref: "#/components/schemas/IntentHash"
+          $ref: "#/components/schemas/TransactionIntentHash"
         intent_hash_bech32m:
-          $ref: "#/components/schemas/IntentHashBech32m"
+          $ref: "#/components/schemas/TransactionIntentHashBech32m"
         signed_intent_hash:
-          $ref: "#/components/schemas/SignedIntentHash"
+          $ref: "#/components/schemas/SignedTransactionIntentHash"
         signed_intent_hash_bech32m:
-          $ref: "#/components/schemas/SignedIntentHashBech32m"
+          $ref: "#/components/schemas/SignedTransactionIntentHashBech32m"
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
         payload_hash_bech32m:
@@ -7198,7 +7560,7 @@ components:
         network:
           $ref: "#/components/schemas/NetworkIdentifier"
         intent_hash:
-          $ref: "#/components/schemas/IntentHashInput"
+          $ref: "#/components/schemas/TransactionIntentHashInput"
     TransactionStatusResponse:
       type: object
       required:
@@ -7261,7 +7623,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -7282,7 +7644,7 @@ components:
         network:
           $ref: "#/components/schemas/NetworkIdentifier"
         intent_hash:
-          $ref: "#/components/schemas/IntentHashInput"
+          $ref: "#/components/schemas/TransactionIntentHashInput"
         transaction_format_options:
           $ref: "#/components/schemas/TransactionFormatOptions"
     TransactionReceiptResponse:
@@ -7382,23 +7744,16 @@ components:
       required:
         - network
         - manifest
-        - start_epoch_inclusive
-        - end_epoch_exclusive
-        - cost_unit_limit
-        - tip_percentage
-        - nonce
-        - signer_public_keys
-        - flags
       properties:
         network:
           $ref: "#/components/schemas/NetworkIdentifier"
         at_ledger_state:
           $ref: "#/components/schemas/LedgerStateSelector"
         manifest:
-          description: A text-representation of a transaction manifest
+          description: A text representation of a transaction manifest.
           type: string
         blobs_hex:
-          description: An array of hex-encoded blob data (optional)
+          description: An array of hex-encoded blob data, if referenced by the manifest.
           type: array
           items:
             type: string
@@ -7407,77 +7762,62 @@ components:
           format: int64
           minimum: 0
           maximum: 10000000000
-          description: An integer between `0` and `10^10`, marking the epoch at which the transaction starts being valid
+          description: |
+            An integer between `0` and `10^10`, marking the epoch at which the transaction starts
+            being valid.
+            If not provided, the current epoch will be used (taking into account the
+            `at_ledger_state`, if specified).
         end_epoch_exclusive:
           type: integer
           format: int64
           minimum: 0
           maximum: 10000000000
-          description: An integer between `0` and `10^10`, marking the epoch at which the transaction is no longer valid
+          description: |
+            An integer between `0` and `10^10`, marking the epoch at which the transaction is no
+            longer valid.
+            If not provided, a maximum epoch (relative to the `start_epoch_inclusive`) will be used.
         notary_public_key:
           $ref: "#/components/schemas/PublicKey"
-          description: The notary public key to use (optional)
+          description: |
+            The notary public key to use.
+            If not provided, this defaults to a fixed public key.
         notary_is_signatory:
           type: boolean
-          description: Whether the notary should count as a signatory (optional, default false)
+          description: |
+            Whether the notary should be used as a signer (optional).
+            If not provided, this defaults to false.
         tip_percentage:
           type: integer
           format: int32
           minimum: 0
           maximum: 65535
-          description: An integer between `0` and `65535`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
+          description: |
+            An integer between `0` and `65535`, giving the validator tip as a percentage amount.
+            A value of `1` corresponds to a 1% fee.
+            If not provided, this defaults to 0.
         nonce:
           type: integer
           format: int64
           minimum: 0
           maximum: 4294967295
           description: |
-            An integer between `0` and `2^32 - 1`, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent).
+            An integer between `0` and `2^32 - 1`, chosen to allow a unique intent to be created
+            (to enable submitting an otherwise identical/duplicate intent).
+            If not provided, this defaults to 0.
         signer_public_keys:
           type: array
           items:
             $ref: "#/components/schemas/PublicKey"
-          description: A list of public keys to be used as transaction signers
+          description: |
+            A list of public keys to be used as transaction signers.
+            If not provided, this defaults to an empty array.
         message:
           description: An optional transaction message. Only affects the costing.
           $ref: "#/components/schemas/TransactionMessage"
         options:
-          description: A set of flags to configure the response of the transaction preview.
           $ref: "#/components/schemas/TransactionPreviewResponseOptions"
         flags:
-          type: object
-          required:
-            - use_free_credit
-            - assume_all_signature_proofs
-            - skip_epoch_check
-          properties:
-            use_free_credit:
-              type: boolean
-            assume_all_signature_proofs:
-              type: boolean
-            skip_epoch_check:
-              type: boolean
-            # This was added later so isn't required; for backwards compatibility
-            disable_auth_checks:
-              description: |
-                Can be used to skip performing auth checks during runtime.
-                
-                This could be used to e.g.:
-                * Preview protocol update style transactions
-                * Mint resources for previewing trades with resources you don't own. If doing this, be warned:
-                  * Only resources which were potentially mintable/burnable at creation time
-                  will be mintable/burnable, due to feature flags on the resource.
-                  * Please see the below warning about unexpected results if using this approach.
-                
-                Please be warned - this mode of operation is quite a departure from normal operation:
-                * Calculated fees will likely be lower than a standard execution
-                * This mode can subtly break invariants some dApp code might rely on, or result in unexpected
-                behaviour, so the resulting execution result might not be valid for your needs. For example,
-                if I used this flag to mint pool units to preview a redemption (or some dApp interaction which
-                behind the scenes redeemed them), they'd redeem for less than they're currently worth,
-                because the blueprint code relies on the total supply of the pool units to calculate their
-                redemption worth, and you've just inflated the total supply through the mint operation.
-              type: boolean
+          $ref: "#/components/schemas/PreviewFlags"
     TransactionPreviewResponseOptions:
       type: object
       description: A set of flags to configure the response of the transaction preview.
@@ -7516,7 +7856,7 @@ components:
         radix_engine_toolkit_receipt:
           type: object
           description: |
-            An optional field which is only provided if the `request_radix_engine_toolkit_receipt`
+            An optional field which is only provided if the `radix_engine_toolkit_receipt`
             flag is set to true when requesting a transaction preview from the API.
 
             This receipt is primarily intended for use with the toolkit and may contain information 
@@ -7542,7 +7882,223 @@ components:
                 type: string
               message:
                 type: string
-############################
+    PreviewFlags:
+      type: object
+      properties:
+        use_free_credit:
+          description: |
+            If enabled, a large simulated pool of XRD is marked as locked.
+
+            This mode can be used to estimate fees. To get a reliable estimate, we recommend that your
+            transaction is as close as possible to the real transaction. For example:
+            - You should still use a lock fee command, but you can set it to lock a fee of 0.
+            - You should include the public keys that will sign the transaction, so the cost of
+              signature verification and payload size can be accounted for.
+          type: boolean
+        assume_all_signature_proofs:
+          description: |
+            If enabled, each manifest processor's auth zone will be given a simulated proof of
+            every signature, which can be used to pass signature access rules.
+            
+            This can be used to preview transactions even if the required signatures are not
+            known ahead of time.
+
+            See the documentation on
+            [advanced access rules](https://docs.radixdlt.com/docs/advanced-accessrules#signature-requirements)
+            for more information.
+          type: boolean
+        skip_epoch_check:
+          description: |
+            If enabled, the various runtime epoch-related verifications are skipped:
+            - The `start_epoch_inclusive` and `end_epoch_exclusive` parameters, if specified, are ignored.
+            - The duplicate intent checks (which rely on the expiry epoch) are also ignored.
+            
+            However, if the start and end epoch are provided, they must still be statically valid.
+            We recommend using a value of `start_epoch_inclusive = 1` and `end_epoch_exclusive = 2` in this
+            case.
+          type: boolean
+        disable_auth_checks:
+          description: |
+            If enabled, all authorization checks are skipped during execution.
+            
+            This could be used to e.g.:
+            * Preview protocol update style transactions.
+            * Mint resources for previewing trades with resources you don't own.
+              If doing this, be warned: only resources which were potentially mintable/burnable
+              at creation time will be mintable/burnable, due to feature flags on the resource.
+            
+            Warning: this mode of operation is quite a departure from normal operation:
+            * Calculated fees will likely be lower than a standard execution.
+            * This mode can subtly break invariants some dApp code might rely on, or result in unexpected
+              behaviour, so the execution result might not be valid for your needs. For example,
+              if this flag was used to mint pool units to preview a redemption (or some dApp interaction which
+              behind the scenes redeemed them), they'd redeem for less than they're currently worth,
+              because the blueprint code relies on the total supply of the pool units to calculate their
+              redemption worth, and you've just inflated the total supply through the mint operation.
+          type: boolean
+####################################
+# REQUEST: /transaction/preview-v2 #
+####################################
+    TransactionPreviewV2Request:
+      type: object
+      required:
+        - network
+        - preview_transaction
+      properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSelector"
+        preview_transaction:
+          $ref: "#/components/schemas/PreviewTransaction"
+        flags:
+          $ref: "#/components/schemas/PreviewFlags"
+        options:
+          $ref: "#/components/schemas/TransactionPreviewV2ResponseOptions"
+    TransactionPreviewV2ResponseOptions:
+      type: object
+      description: A set of flags to configure the response of the transaction preview.
+      properties:
+        core_api_receipt:
+          type: boolean
+          description: | 
+            This flag controls whether the preview response will include a Core API receipt or not.
+            If not provided, this defaults to `false` and no core api receipt is provided in
+            the response.
+        radix_engine_toolkit_receipt:
+          type: boolean
+          description: | 
+            This flag controls whether the preview response will include a Radix Engine Toolkit serializable
+            receipt or not. If not provided, this defaults to `false` and no toolkit receipt is provided in
+            the response.
+        logs:
+          type: boolean
+          description: | 
+            This flag controls whether the preview response will include execution logs.
+            If not provided, this defaults to `false` and no logs will be provided in the response.
+    PreviewTransactionType:
+      type: string
+      enum:
+        - Compiled
+    PreviewTransaction:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/PreviewTransactionType"
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match PreviewTransactionType
+          Compiled: '#/components/schemas/CompiledPreviewTransaction'
+    CompiledPreviewTransaction:
+      allOf:
+        - $ref: "#/components/schemas/PreviewTransaction"
+        - type: object
+          required:
+            - preview_transaction_hex
+          properties:
+            preview_transaction_hex:
+              description: |
+                A hex-encoded, compiled `RawPreviewTransaction`.
+
+                As of Cuttlefish, only `PreviewTransactionV2` is supported.
+
+                A `PreviewTransactionV2` can be created with a v2 transaction builder:
+                * If using Rust, it can be created with a `TransactionV2Builder` using `build_preview_transaction()`
+                  and then converted to hex with `preview_transaction.to_raw().unwrap().to_hex()`
+                * If using the toolkit, you can create this using the v2 transaction builder.
+
+                Some subtleties:
+                * Partial transactions can't be previewed. Instead, they must be wrapped inside a
+                  transaction wrapper, so that the engine knows how to yield to them appropriately.
+                * Currently the builder assumes that the signed partial transactions have real signatures.
+                  This isn't strictly required, and we may create a builder in future which allows providing
+                  public keys when building partial transactions for use in preview.
+                * If you don't have signatures to hand, you can simply not sign the partial transactions,
+                  and then use the `assume_all_signature_proofs` preview flag, although be advised that
+                  this may result in the fee estimate being slightly lower during preview.
+                * We may create more ergonomic builders for PreviewTransactions which allow use of
+                  public keys to denote the signers of subintents. Let us know if this is important
+                  for your use case.
+              type: string
+    TransactionPreviewV2Response:
+      type: object
+      required:
+        - at_ledger_state
+      properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger on top of which the preview was performed.
+        receipt:
+          description: |
+            This is provided unless the `core_api_receipt` flag is set to false in the `options`
+            property of the request.
+          $ref: "#/components/schemas/TransactionReceipt"
+        radix_engine_toolkit_receipt:
+          type: object
+          description: |
+            An optional field which is only provided if the `radix_engine_toolkit_receipt`
+            flag is set to true in the `options` property of the request.
+
+            This receipt is primarily intended for use with the toolkit and may contain information 
+            that is already available in the receipt provided in the `receipt` field of this 
+            response.
+
+            A typical client of this API is not expected to use this receipt. The primary clients 
+            this receipt is intended for is the Radix wallet or any client that needs to perform 
+            execution summaries on their transactions.
+        logs:
+          type: array
+          description: |
+            An optional field which is only provided if the `logs` flag is set to true in the
+            `options` property of the request.
+
+            If present, it gives the emitted logs from the transaction execution.
+          items:
+            type: object
+            required:
+              - level
+              - message
+            properties:
+              level:
+                type: string
+              message:
+                type: string
+    TransactionPreviewV2ErrorResponse:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponse"
+        - type: object
+          properties:
+            details:
+              $ref: "#/components/schemas/TransactionPreviewV2ErrorDetails"
+    TransactionPreviewV2ErrorDetailsType:
+      type: string
+      enum:
+        - Invalid
+    TransactionPreviewV2ErrorDetails:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/TransactionPreviewV2ErrorDetailsType"
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match TransactionPreviewV2ErrorDetailsType
+          Invalid: "#/components/schemas/InvalidTransactionPreviewV2ErrorDetails"
+    InvalidTransactionPreviewV2ErrorDetails:
+      allOf:
+        - $ref: "#/components/schemas/TransactionPreviewV2ErrorDetails"
+        - type: object
+          required:
+            - validation_error
+          properties:
+            validation_error:
+              type: string
+###########################
 # REQUEST: /stream/proofs #
 ###########################
     StreamProofsRequest:
@@ -7885,15 +8441,55 @@ components:
       allOf:
         - $ref: "#/components/schemas/LedgerProofOrigin"
         - type: object
+          description: |
+            Represents a proof from the execution of the babylon genesis protocol update, which starts
+            the babylon-node ledger.
+
+            Behind-the-scenes, this is now the same as a `ProtocolUpdateLedgerProofOrigin`,
+            but is kept separate for backwards-compatibility.
+
+            NOTE: Some of these values may be placeholder values on nodes which haven't resynced since
+            Cuttlefish. In particular, the following values might be invalid on such nodes:
+
+            * `batch_group_idx` (placeholder of 0)
+            * `batch_group_name` (placeholder of "")
+            * `batch_idx` (placeholder of 0)
+            * `batch_name` (placeholder of "")
+            * `is_end_of_update` (placeholder of false)
           required:
+            - protocol_version_name
             - genesis_opaque_hash
+            - batch_group_idx
+            - batch_group_name
+            - batch_idx
+            - batch_name
+            - is_end_of_update
           properties:
+            protocol_version_name:
+              type: string
+            # Should be config_hash but can't change due to backwards-compatibility
             genesis_opaque_hash:
               type: string
+            # Should be batch_group_index but can't change due to backwards-compatibility
+            batch_group_idx:
+              type: integer
+              format: int64
+            batch_group_name:
+              type: string
+            # Should be batch_index but can't change due to backwards-compatibility
+            batch_idx:
+              type: integer
+              format: int64
+            batch_name:
+              type: string
+            is_end_of_update:
+              type: boolean
     ConsensusLedgerProofOrigin:
       allOf:
         - $ref: "#/components/schemas/LedgerProofOrigin"
         - type: object
+          description: |
+            Represents a proof from the execution of a consensus round.
           required:
             - opaque_hash
             - timestamped_signatures
@@ -7908,15 +8504,50 @@ components:
       allOf:
         - $ref: "#/components/schemas/LedgerProofOrigin"
         - type: object
+          description: |
+            Represents a proof from the execution of a non-genesis protocol update.
+            The execution of a protocol update is organised into batch groups, and
+            then these batch groups are organised into batches, with each batch committed
+            atomically.
+
+            NOTE: Some of these values may be placeholder values for protocol updates pre-Cuttlefish
+            on nodes which haven't resynced since Cuttlefish. In particular, the following values might be
+            invalid on such nodes:
+
+            * `config_hash` (placeholder of all zeros)
+            * `batch_group_idx` (placeholder of 0)
+            * `batch_group_name` (placeholder of "")
+            * `batch_idx` (placeholder of 0)
+            * `batch_name` (placeholder of "")
+            * `is_end_of_update` (placeholder of false)
           required:
             - protocol_version_name
+            - config_hash
+            - batch_group_idx
+            - batch_group_name
             - batch_idx
+            - batch_name
+            - is_end_of_update
           properties:
             protocol_version_name:
               type: string
+            # Should be config_hash but can't change due to backwards-compatibility
+            config_hash:
+              type: string
+            # Should be batch_group_index but can't change due to backwards-compatibility
+            batch_group_idx:
+              type: integer
+              format: int64
+            batch_group_name:
+              type: string
+            # Should be batch_index but can't change due to backwards-compatibility
             batch_idx:
               type: integer
               format: int64
+            batch_name:
+              type: string
+            is_end_of_update:
+              type: boolean
     LedgerProof:
       type: object
       required:
@@ -8001,6 +8632,7 @@ components:
       enum:
         - Genesis
         - User
+        - UserV2
         - RoundUpdate
         - Flash
     LedgerTransaction:
@@ -8019,6 +8651,7 @@ components:
           # NOTE: These need to match LedgerTransactionType
           Genesis: '#/components/schemas/GenesisLedgerTransaction'
           User: '#/components/schemas/UserLedgerTransaction'
+          UserV2: '#/components/schemas/UserLedgerTransactionV2'
           RoundUpdate: '#/components/schemas/RoundUpdateLedgerTransaction'
           Flash: '#/components/schemas/FlashLedgerTransaction'
     GenesisLedgerTransaction:
@@ -8044,6 +8677,15 @@ components:
           properties:
             notarized_transaction:
               $ref: "#/components/schemas/NotarizedTransaction"
+    UserLedgerTransactionV2:
+      allOf:
+        - $ref: "#/components/schemas/LedgerTransaction"
+        - type: object
+          required:
+            - notarized_transaction
+          properties:
+            notarized_transaction:
+              $ref: "#/components/schemas/NotarizedTransactionV2"
     RoundUpdateLedgerTransaction:
       allOf:
         - $ref: "#/components/schemas/LedgerTransaction"

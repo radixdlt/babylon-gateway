@@ -85,6 +85,8 @@ public interface ISubmissionService
     Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.LedgerState ledgerState, GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
+public record ParsedTransactionData(string IntentHash, string PayloadHash, ulong StartEpochInclusive, ulong EndEpochExclusive);
+
 internal class SubmissionService : ISubmissionService
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -114,7 +116,7 @@ internal class SubmissionService : ISubmissionService
     {
         var transactionBytes = request.GetNotarizedTransactionBytes();
         // If these checks fails, it's not worth saving this transaction to our database or submitting it to the node.
-        using var parsedTransaction = await HandlePreSubmissionParseTransaction(transactionBytes);
+        var parsedTransaction = await HandlePreSubmissionParseTransaction(transactionBytes);
         await CheckPendingTransactionEpochValidity(ledgerState, parsedTransaction);
 
         var targetNode = _coreApiProvider.CoreApiNode;
@@ -152,31 +154,44 @@ internal class SubmissionService : ISubmissionService
         return new GatewayModel.TransactionSubmitResponse(duplicate: false);
     }
 
-    private async Task CheckPendingTransactionEpochValidity(GatewayModel.LedgerState ledgerState, ToolkitModel.NotarizedTransaction parsedTransaction)
+    private async Task CheckPendingTransactionEpochValidity(GatewayModel.LedgerState ledgerState, ParsedTransactionData parsedTransaction)
     {
-        var header = parsedTransaction.SignedIntent().Intent().Header();
         var currentEpoch = (ulong)ledgerState.Epoch;
 
-        if (header.startEpochInclusive > currentEpoch + 1)
+        if (parsedTransaction.StartEpochInclusive > currentEpoch + 1)
         {
             await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.StartEpochInFuture));
-            throw InvalidTransactionException.StartEpochTooFarInFuture(currentEpoch, header.startEpochInclusive);
+            throw InvalidTransactionException.StartEpochTooFarInFuture(currentEpoch, parsedTransaction.StartEpochInclusive);
         }
 
-        if (header.endEpochExclusive <= currentEpoch)
+        if (parsedTransaction.EndEpochExclusive <= currentEpoch)
         {
             await _observers.ForEachAsync(x => x.ObserveTransactionSubmissionToGatewayOutcome(TransactionSubmissionOutcome.EndEpochInPast));
-            throw InvalidTransactionException.NoLongerValid(currentEpoch, header.endEpochExclusive);
+            throw InvalidTransactionException.NoLongerValid(currentEpoch, parsedTransaction.EndEpochExclusive);
         }
     }
 
-    private async Task<ToolkitModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(byte[] notarizedTransactionBytes)
+    private async Task<ParsedTransactionData> HandlePreSubmissionParseTransaction(byte[] notarizedTransactionBytes)
     {
         try
         {
-            var notarizedTransaction = ToolkitModel.NotarizedTransaction.Decompile(notarizedTransactionBytes);
-            notarizedTransaction.StaticallyValidate(ToolkitModel.ValidationConfig.Default((await _networkConfigurationProvider.GetNetworkConfiguration()).Id));
-            return notarizedTransaction;
+            const int V1UserTransactionDiscriminator = 3;
+            const int V2UserTransactionDiscriminator = 12;
+
+            var isV2UserTransaction = notarizedTransactionBytes[2] == V2UserTransactionDiscriminator;
+            var isV1UserTransaction = notarizedTransactionBytes[2] == V1UserTransactionDiscriminator;
+
+            if (isV1UserTransaction)
+            {
+                return await HandlePreSubmissionParseTransactionV1(notarizedTransactionBytes);
+            }
+
+            if (isV2UserTransaction)
+            {
+                return await HandlePreSubmissionParseTransactionV2(notarizedTransactionBytes);
+            }
+
+            throw InvalidTransactionException.FromStaticallyInvalid("Unable to decode transaction. Unexpected payload prefix.");
         }
         catch (ToolkitModel.RadixEngineToolkitException.TransactionValidationFailed ex)
         {
@@ -195,5 +210,29 @@ internal class SubmissionService : ISubmissionService
             _logger.LogWarning(ex, "Exception when parsing / validating submitted transaction");
             throw;
         }
+    }
+
+    private async Task<ParsedTransactionData> HandlePreSubmissionParseTransactionV1(byte[] notarizedTransactionBytes)
+    {
+        using var notarizedTransaction = ToolkitModel.NotarizedTransactionV1.FromPayloadBytes(notarizedTransactionBytes);
+        notarizedTransaction.StaticallyValidate((await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
+
+        return new ParsedTransactionData(
+            notarizedTransaction.IntentHash().AsStr(),
+            notarizedTransaction.NotarizedTransactionHash().AsStr(),
+            notarizedTransaction.SignedIntent().Intent().Header().startEpochInclusive,
+            notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive);
+    }
+
+    private async Task<ParsedTransactionData> HandlePreSubmissionParseTransactionV2(byte[] notarizedTransactionBytes)
+    {
+        using var notarizedTransaction = ToolkitModel.NotarizedTransactionV2.FromPayloadBytes(notarizedTransactionBytes);
+        notarizedTransaction.StaticallyValidate((await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
+
+        return new ParsedTransactionData(
+            notarizedTransaction.IntentHash().AsStr(),
+            notarizedTransaction.NotarizedTransactionHash().AsStr(),
+            notarizedTransaction.SignedTransactionIntent().TransactionIntent().RootIntentCore().Header().startEpochInclusive,
+            notarizedTransaction.SignedTransactionIntent().TransactionIntent().RootIntentCore().Header().endEpochExclusive);
     }
 }

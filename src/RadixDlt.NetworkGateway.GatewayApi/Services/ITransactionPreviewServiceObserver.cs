@@ -75,4 +75,10 @@ public interface ITransactionPreviewServiceObserver
     ValueTask PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, string targetNode, GatewayModel.TransactionPreviewResponse response);
 
     ValueTask HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, string targetNode, Exception exception);
+
+    ValueTask PreHandlePreviewV2Request(GatewayModel.TransactionPreviewV2Request request, string targetNode);
+
+    ValueTask PostHandlePreviewV2Request(GatewayModel.TransactionPreviewV2Request request, string targetNode, GatewayModel.TransactionPreviewV2Response response);
+
+    ValueTask HandlePreviewV2RequestFailed(GatewayModel.TransactionPreviewV2Request request, string targetNode, Exception exception);
 }

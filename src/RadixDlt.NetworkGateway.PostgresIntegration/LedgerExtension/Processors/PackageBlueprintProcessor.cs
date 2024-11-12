@@ -271,7 +271,7 @@ internal class PackageBlueprintProcessor : IProcessorBase, ISubstateUpsertProces
 
     private async Task<IDictionary<PackageBlueprintDbLookup, PackageBlueprintHistory>> MostRecentPackageBlueprintHistory()
     {
-        var lookupSet = _changes.Keys.ToHashSet();
+        var lookupSet = _changes.Keys.Select(x => new { x.PackageEntityId, x.Name, x.Version }).ToHashSet();
 
         if (!lookupSet.Unzip(x => x.PackageEntityId, x => x.Name, x => x.Version, out var packageEntityIds, out var names, out var versions))
         {
