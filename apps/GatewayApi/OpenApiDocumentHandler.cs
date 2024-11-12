@@ -69,9 +69,8 @@ using Microsoft.OpenApi.Readers;
 using Microsoft.OpenApi.Writers;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -102,10 +101,11 @@ public static class OpenApiDocumentHandler
         RemoveRedoclySpecificTags(document.Tags);
 
         document.Servers.Clear();
-        document.Servers.Add(new OpenApiServer
-        {
-            Url = "/",
-        });
+        document.Servers.Add(
+            new OpenApiServer
+            {
+                Url = "/",
+            });
 
         context.Response.StatusCode = (int)HttpStatusCode.OK;
         context.Response.ContentType = "application/json; charset=utf-8";
@@ -126,7 +126,7 @@ public static class OpenApiDocumentHandler
         response = OptionalReplace(response, "<transaction-subintent-hash>", placeholderReplacements.CommittedSubintentHash);
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
-        response = OptionalReplace(response, "<sample-preview-transaction-hex>", null); // TODO PP: generate it using toolkit.
+        response = OptionalReplace(response, "<sample-preview-transaction-hex>", placeholderReplacements.SamplePreviewTransactionHex);
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 
@@ -143,7 +143,8 @@ public static class OpenApiDocumentHandler
         var redoclyLinkTag = new OpenApiTag
         {
             Name = "Examples + More Docs",
-            Description = @"Please see the full API documentation in [ReDocly](https://radix-babylon-gateway-api.redoc.ly/) for details about the API abstractions and worked examples for many use cases.",
+            Description =
+                @"Please see the full API documentation in [ReDocly](https://radix-babylon-gateway-api.redoc.ly/) for details about the API abstractions and worked examples for many use cases.",
         };
 
         tags.Insert(1, redoclyLinkTag);
@@ -169,6 +170,8 @@ public static class OpenApiDocumentHandler
         public byte? NetworkId { get; set; }
 
         public string? NetworkName { get; set; }
+
+        public string? SamplePreviewTransactionHex { get; set; }
     }
 
     private static async Task<PlaceholderReplacements> GetPlaceholderReplacementsAsync(
@@ -194,9 +197,10 @@ public static class OpenApiDocumentHandler
 
         try
         {
-            var (randomIntentHash, randomSubintentHash) = await transactionQuerier.GetOpenApiDocumentHandlerDetails(token);
+            var (randomIntentHash, randomSubintentHash, currentEpoch) = await transactionQuerier.GetOpenApiDocumentHandlerDetails(token);
             placeholderReplacements.CommittedTransactionIntentHash = randomIntentHash;
             placeholderReplacements.CommittedSubintentHash = randomSubintentHash;
+            placeholderReplacements.SamplePreviewTransactionHex = GenerateRandomPreviewTransactionHex(networkConfiguration.Id, (ulong?)currentEpoch);
         }
         catch (Exception)
         {
@@ -204,5 +208,33 @@ public static class OpenApiDocumentHandler
         }
 
         return placeholderReplacements;
+    }
+
+    private static string GenerateRandomPreviewTransactionHex(byte networkId, ulong? currentEpoch)
+    {
+        var random = new Random();
+        var privateKey = new byte[32];
+        random.NextBytes(privateKey);
+
+        var manifest = new ManifestV2Builder(networkId)
+            .FaucetLockFee()
+            .Build();
+
+        return Convert.ToHexString(
+            new PreviewTransactionV2Builder()
+                .Manifest(manifest)
+                .IntentHeader(
+                    new IntentHeaderV2(
+                        networkId,
+                        currentEpoch ?? 1UL,
+                        currentEpoch.HasValue ? currentEpoch.Value + 100UL : 1000UL,
+                        null,
+                        null,
+                        1)
+                )
+                .TransactionHeader(new TransactionHeaderV2(PrivateKey.NewEd25519(privateKey).PublicKey(), false, 5U * 100u))
+                .Message(new MessageV2.None())
+                .Build()
+        );
     }
 }
