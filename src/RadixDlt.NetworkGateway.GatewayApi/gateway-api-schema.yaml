@@ -3477,6 +3477,10 @@ components:
               $ref: "#/components/schemas/Address"
             transaction_tracker:
               $ref: "#/components/schemas/Address"
+            transaction_tracker_package:
+              $ref: "#/components/schemas/Address"
+            test_utils_package:
+              $ref: "#/components/schemas/Address"
 
     GatewayStatusResponse:
       allOf:

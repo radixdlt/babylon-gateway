@@ -132,7 +132,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="poolPackage">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="lockerPackage">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="transactionTracker">Bech32m-encoded human readable version of the address. (required).</param>
-        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string accessRulesPackage = default(string), string roleAssignmentModulePackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string), string poolPackage = default(string), string lockerPackage = default(string), string transactionTracker = default(string))
+        /// <param name="transactionTrackerPackage">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="testUtilsPackage">Bech32m-encoded human readable version of the address..</param>
+        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string accessRulesPackage = default(string), string roleAssignmentModulePackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string), string poolPackage = default(string), string lockerPackage = default(string), string transactionTracker = default(string), string transactionTrackerPackage = default(string), string testUtilsPackage = default(string))
         {
             // to ensure "xrd" is required (not null)
             if (xrd == null)
@@ -308,6 +310,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("transactionTracker is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.TransactionTracker = transactionTracker;
+            this.TransactionTrackerPackage = transactionTrackerPackage;
+            this.TestUtilsPackage = testUtilsPackage;
         }
 
         /// <summary>
@@ -514,6 +518,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string TransactionTracker { get; set; }
 
         /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "transaction_tracker_package", EmitDefaultValue = true)]
+        public string TransactionTrackerPackage { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "test_utils_package", EmitDefaultValue = true)]
+        public string TestUtilsPackage { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -550,6 +568,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  PoolPackage: ").Append(PoolPackage).Append("\n");
             sb.Append("  LockerPackage: ").Append(LockerPackage).Append("\n");
             sb.Append("  TransactionTracker: ").Append(TransactionTracker).Append("\n");
+            sb.Append("  TransactionTrackerPackage: ").Append(TransactionTrackerPackage).Append("\n");
+            sb.Append("  TestUtilsPackage: ").Append(TestUtilsPackage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -729,6 +749,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TransactionTracker == input.TransactionTracker ||
                     (this.TransactionTracker != null &&
                     this.TransactionTracker.Equals(input.TransactionTracker))
+                ) && 
+                (
+                    this.TransactionTrackerPackage == input.TransactionTrackerPackage ||
+                    (this.TransactionTrackerPackage != null &&
+                    this.TransactionTrackerPackage.Equals(input.TransactionTrackerPackage))
+                ) && 
+                (
+                    this.TestUtilsPackage == input.TestUtilsPackage ||
+                    (this.TestUtilsPackage != null &&
+                    this.TestUtilsPackage.Equals(input.TestUtilsPackage))
                 );
         }
 
@@ -856,6 +886,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.TransactionTracker != null)
                 {
                     hashCode = (hashCode * 59) + this.TransactionTracker.GetHashCode();
+                }
+                if (this.TransactionTrackerPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.TransactionTrackerPackage.GetHashCode();
+                }
+                if (this.TestUtilsPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.TestUtilsPackage.GetHashCode();
                 }
                 return hashCode;
             }

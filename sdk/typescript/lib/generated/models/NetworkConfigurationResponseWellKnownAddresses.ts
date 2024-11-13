@@ -193,6 +193,18 @@ export interface NetworkConfigurationResponseWellKnownAddresses {
      * @memberof NetworkConfigurationResponseWellKnownAddresses
      */
     transaction_tracker: string;
+    /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof NetworkConfigurationResponseWellKnownAddresses
+     */
+    transaction_tracker_package?: string;
+    /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof NetworkConfigurationResponseWellKnownAddresses
+     */
+    test_utils_package?: string;
 }
 
 /**
@@ -272,6 +284,8 @@ export function NetworkConfigurationResponseWellKnownAddressesFromJSONTyped(json
         'pool_package': json['pool_package'],
         'locker_package': json['locker_package'],
         'transaction_tracker': json['transaction_tracker'],
+        'transaction_tracker_package': !exists(json, 'transaction_tracker_package') ? undefined : json['transaction_tracker_package'],
+        'test_utils_package': !exists(json, 'test_utils_package') ? undefined : json['test_utils_package'],
     };
 }
 
@@ -313,6 +327,8 @@ export function NetworkConfigurationResponseWellKnownAddressesToJSON(value?: Net
         'pool_package': value.pool_package,
         'locker_package': value.locker_package,
         'transaction_tracker': value.transaction_tracker,
+        'transaction_tracker_package': value.transaction_tracker_package,
+        'test_utils_package': value.test_utils_package,
     };
 }
 
