@@ -124,7 +124,9 @@ public sealed record WellKnownAddresses(
     string Faucet,
     string PoolPackage,
     string LockerPackage,
-    string TransactionTracker
+    string TransactionTracker,
+    string TransactionTrackerPackage,
+    string TestUtilsPackage
 );
 
 public enum AddressEntityType

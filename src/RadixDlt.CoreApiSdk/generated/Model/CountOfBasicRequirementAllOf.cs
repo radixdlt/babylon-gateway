@@ -84,47 +84,49 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ProtectedAccessRule
+    /// CountOfBasicRequirementAllOf
     /// </summary>
-    [DataContract(Name = "ProtectedAccessRule")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllowAllAccessRule), "AllowAll")]
-    [JsonSubtypes.KnownSubType(typeof(DenyAllAccessRule), "DenyAll")]
-    [JsonSubtypes.KnownSubType(typeof(ProtectedAccessRule), "Protected")]
-    public partial class ProtectedAccessRule : AccessRule, IEquatable<ProtectedAccessRule>
+    [DataContract(Name = "CountOfBasicRequirement_allOf")]
+    public partial class CountOfBasicRequirementAllOf : IEquatable<CountOfBasicRequirementAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
+        /// Initializes a new instance of the <see cref="CountOfBasicRequirementAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ProtectedAccessRule() { }
+        protected CountOfBasicRequirementAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
+        /// Initializes a new instance of the <see cref="CountOfBasicRequirementAllOf" /> class.
         /// </summary>
-        /// <param name="accessRule">accessRule (required).</param>
-        /// <param name="type">type (required) (default to AccessRuleType.Protected).</param>
-        public ProtectedAccessRule(CompositeRequirement accessRule = default(CompositeRequirement), AccessRuleType type = AccessRuleType.Protected) : base(type)
+        /// <param name="count">count (required).</param>
+        /// <param name="list">list (required).</param>
+        public CountOfBasicRequirementAllOf(int count = default(int), List<Requirement> list = default(List<Requirement>))
         {
-            // to ensure "accessRule" is required (not null)
-            if (accessRule == null)
+            this.Count = count;
+            // to ensure "list" is required (not null)
+            if (list == null)
             {
-                throw new ArgumentNullException("accessRule is a required property for ProtectedAccessRule and cannot be null");
+                throw new ArgumentNullException("list is a required property for CountOfBasicRequirementAllOf and cannot be null");
             }
-            this.AccessRule = accessRule;
+            this.List = list;
         }
 
         /// <summary>
-        /// Gets or Sets AccessRule
+        /// Gets or Sets Count
         /// </summary>
-        [DataMember(Name = "access_rule", IsRequired = true, EmitDefaultValue = true)]
-        public CompositeRequirement AccessRule { get; set; }
+        [DataMember(Name = "count", IsRequired = true, EmitDefaultValue = true)]
+        public int Count { get; set; }
+
+        /// <summary>
+        /// Gets or Sets List
+        /// </summary>
+        [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
+        public List<Requirement> List { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -133,9 +135,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ProtectedAccessRule {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  AccessRule: ").Append(AccessRule).Append("\n");
+            sb.Append("class CountOfBasicRequirementAllOf {\n");
+            sb.Append("  Count: ").Append(Count).Append("\n");
+            sb.Append("  List: ").Append(List).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -156,25 +158,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ProtectedAccessRule);
+            return this.Equals(input as CountOfBasicRequirementAllOf);
         }
 
         /// <summary>
-        /// Returns true if ProtectedAccessRule instances are equal
+        /// Returns true if CountOfBasicRequirementAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ProtectedAccessRule to be compared</param>
+        /// <param name="input">Instance of CountOfBasicRequirementAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ProtectedAccessRule input)
+        public bool Equals(CountOfBasicRequirementAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.AccessRule == input.AccessRule ||
-                    (this.AccessRule != null &&
-                    this.AccessRule.Equals(input.AccessRule))
+                    this.Count == input.Count ||
+                    this.Count.Equals(input.Count)
+                ) && 
+                (
+                    this.List == input.List ||
+                    this.List != null &&
+                    input.List != null &&
+                    this.List.SequenceEqual(input.List)
                 );
         }
 
@@ -186,10 +193,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.AccessRule != null)
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Count.GetHashCode();
+                if (this.List != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRule.GetHashCode();
+                    hashCode = (hashCode * 59) + this.List.GetHashCode();
                 }
                 return hashCode;
             }

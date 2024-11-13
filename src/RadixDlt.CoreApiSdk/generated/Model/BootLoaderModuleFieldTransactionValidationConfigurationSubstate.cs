@@ -159,11 +159,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="BootLoaderModuleFieldTransactionValidationConfigurationSubstate" /> class.
         /// </summary>
+        /// <param name="config">config (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.BootLoaderModuleFieldTransactionValidationConfiguration).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public BootLoaderModuleFieldTransactionValidationConfigurationSubstate(SubstateType substateType = SubstateType.BootLoaderModuleFieldTransactionValidationConfiguration, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public BootLoaderModuleFieldTransactionValidationConfigurationSubstate(TransactionValidationConfig config = default(TransactionValidationConfig), SubstateType substateType = SubstateType.BootLoaderModuleFieldTransactionValidationConfiguration, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
+            // to ensure "config" is required (not null)
+            if (config == null)
+            {
+                throw new ArgumentNullException("config is a required property for BootLoaderModuleFieldTransactionValidationConfigurationSubstate and cannot be null");
+            }
+            this.Config = config;
         }
+
+        /// <summary>
+        /// Gets or Sets Config
+        /// </summary>
+        [DataMember(Name = "config", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionValidationConfig Config { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -174,6 +187,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class BootLoaderModuleFieldTransactionValidationConfigurationSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Config: ").Append(Config).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -208,7 +222,12 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return base.Equals(input);
+            return base.Equals(input) && 
+                (
+                    this.Config == input.Config ||
+                    (this.Config != null &&
+                    this.Config.Equals(input.Config))
+                );
         }
 
         /// <summary>
@@ -220,6 +239,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                if (this.Config != null)
+                {
+                    hashCode = (hashCode * 59) + this.Config.GetHashCode();
+                }
                 return hashCode;
             }
         }

@@ -84,49 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AnyOfProofRule
+    /// AnyOfCompositeRequirementAllOf
     /// </summary>
-    [DataContract(Name = "AnyOfProofRule")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfProofRule), "AllOf")]
-    [JsonSubtypes.KnownSubType(typeof(AmountOfProofRule), "AmountOf")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfProofRule), "AnyOf")]
-    [JsonSubtypes.KnownSubType(typeof(CountOfProofRule), "CountOf")]
-    [JsonSubtypes.KnownSubType(typeof(RequireProofRule), "Require")]
-    public partial class AnyOfProofRule : ProofRule, IEquatable<AnyOfProofRule>
+    [DataContract(Name = "AnyOfCompositeRequirement_allOf")]
+    public partial class AnyOfCompositeRequirementAllOf : IEquatable<AnyOfCompositeRequirementAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AnyOfProofRule" /> class.
+        /// Initializes a new instance of the <see cref="AnyOfCompositeRequirementAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AnyOfProofRule() { }
+        protected AnyOfCompositeRequirementAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AnyOfProofRule" /> class.
+        /// Initializes a new instance of the <see cref="AnyOfCompositeRequirementAllOf" /> class.
         /// </summary>
-        /// <param name="list">list (required).</param>
-        /// <param name="type">type (required) (default to ProofRuleType.AnyOf).</param>
-        public AnyOfProofRule(List<Requirement> list = default(List<Requirement>), ProofRuleType type = ProofRuleType.AnyOf) : base(type)
+        /// <param name="accessRules">accessRules (required).</param>
+        public AnyOfCompositeRequirementAllOf(List<CompositeRequirement> accessRules = default(List<CompositeRequirement>))
         {
-            // to ensure "list" is required (not null)
-            if (list == null)
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
             {
-                throw new ArgumentNullException("list is a required property for AnyOfProofRule and cannot be null");
+                throw new ArgumentNullException("accessRules is a required property for AnyOfCompositeRequirementAllOf and cannot be null");
             }
-            this.List = list;
+            this.AccessRules = accessRules;
         }
 
         /// <summary>
-        /// Gets or Sets List
+        /// Gets or Sets AccessRules
         /// </summary>
-        [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
-        public List<Requirement> List { get; set; }
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public List<CompositeRequirement> AccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AnyOfProofRule {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  List: ").Append(List).Append("\n");
+            sb.Append("class AnyOfCompositeRequirementAllOf {\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -146,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -158,26 +149,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AnyOfProofRule);
+            return this.Equals(input as AnyOfCompositeRequirementAllOf);
         }
 
         /// <summary>
-        /// Returns true if AnyOfProofRule instances are equal
+        /// Returns true if AnyOfCompositeRequirementAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of AnyOfProofRule to be compared</param>
+        /// <param name="input">Instance of AnyOfCompositeRequirementAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AnyOfProofRule input)
+        public bool Equals(AnyOfCompositeRequirementAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.List == input.List ||
-                    this.List != null &&
-                    input.List != null &&
-                    this.List.SequenceEqual(input.List)
+                    this.AccessRules == input.AccessRules ||
+                    this.AccessRules != null &&
+                    input.AccessRules != null &&
+                    this.AccessRules.SequenceEqual(input.AccessRules)
                 );
         }
 
@@ -189,10 +180,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.List != null)
+                int hashCode = 41;
+                if (this.AccessRules != null)
                 {
-                    hashCode = (hashCode * 59) + this.List.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
                 return hashCode;
             }

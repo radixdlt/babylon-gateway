@@ -108,28 +108,48 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubmitPriorityThresholdNotMetErrorDetails" /> class.
         /// </summary>
-        /// <param name="tipPercentage">Tip percentage of the submitted (and rejected) transaction.  (required).</param>
-        /// <param name="minTipPercentageRequired">A lower bound for tip percentage at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. .</param>
+        /// <param name="tipPercentage">NOTE: This is kept for backwards compatibility, but we recommend using &#x60;tip_proportion&#x60; instead.  Tip percentage of the submitted (and rejected) transaction. For V2 transactions specifying basis point tips, the amount is rounded down.  (required).</param>
+        /// <param name="minTipPercentageRequired">NOTE: This is kept for backwards compatibility, but we recommend using &#x60;min_tip_proportion_required&#x60; instead.  A lower bound for tip percentage at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. .</param>
+        /// <param name="tipProportion">The string-encoded decimal tip proportion of the submitted (and rejected) transaction.  This field will always be present on Cuttlefish nodes, but is marked as not-required for Cuttlefish launch, to avoid a dependency on clients to update after the node is updated. .</param>
+        /// <param name="minTipProportionRequired">A lower bound for tip proportion at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. .</param>
         /// <param name="type">type (required) (default to TransactionSubmitErrorDetailsType.PriorityThresholdNotMet).</param>
-        public TransactionSubmitPriorityThresholdNotMetErrorDetails(int tipPercentage = default(int), int minTipPercentageRequired = default(int), TransactionSubmitErrorDetailsType type = TransactionSubmitErrorDetailsType.PriorityThresholdNotMet) : base(type)
+        public TransactionSubmitPriorityThresholdNotMetErrorDetails(int tipPercentage = default(int), int minTipPercentageRequired = default(int), string tipProportion = default(string), string minTipProportionRequired = default(string), TransactionSubmitErrorDetailsType type = TransactionSubmitErrorDetailsType.PriorityThresholdNotMet) : base(type)
         {
             this.TipPercentage = tipPercentage;
             this.MinTipPercentageRequired = minTipPercentageRequired;
+            this.TipProportion = tipProportion;
+            this.MinTipProportionRequired = minTipProportionRequired;
         }
 
         /// <summary>
-        /// Tip percentage of the submitted (and rejected) transaction. 
+        /// NOTE: This is kept for backwards compatibility, but we recommend using &#x60;tip_proportion&#x60; instead.  Tip percentage of the submitted (and rejected) transaction. For V2 transactions specifying basis point tips, the amount is rounded down. 
         /// </summary>
-        /// <value>Tip percentage of the submitted (and rejected) transaction. </value>
+        /// <value>NOTE: This is kept for backwards compatibility, but we recommend using &#x60;tip_proportion&#x60; instead.  Tip percentage of the submitted (and rejected) transaction. For V2 transactions specifying basis point tips, the amount is rounded down. </value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
+        [Obsolete]
         public int TipPercentage { get; set; }
 
         /// <summary>
-        /// A lower bound for tip percentage at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. 
+        /// NOTE: This is kept for backwards compatibility, but we recommend using &#x60;min_tip_proportion_required&#x60; instead.  A lower bound for tip percentage at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. 
         /// </summary>
-        /// <value>A lower bound for tip percentage at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. </value>
+        /// <value>NOTE: This is kept for backwards compatibility, but we recommend using &#x60;min_tip_proportion_required&#x60; instead.  A lower bound for tip percentage at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. </value>
         [DataMember(Name = "min_tip_percentage_required", EmitDefaultValue = true)]
+        [Obsolete]
         public int MinTipPercentageRequired { get; set; }
+
+        /// <summary>
+        /// The string-encoded decimal tip proportion of the submitted (and rejected) transaction.  This field will always be present on Cuttlefish nodes, but is marked as not-required for Cuttlefish launch, to avoid a dependency on clients to update after the node is updated. 
+        /// </summary>
+        /// <value>The string-encoded decimal tip proportion of the submitted (and rejected) transaction.  This field will always be present on Cuttlefish nodes, but is marked as not-required for Cuttlefish launch, to avoid a dependency on clients to update after the node is updated. </value>
+        [DataMember(Name = "tip_proportion", EmitDefaultValue = true)]
+        public string TipProportion { get; set; }
+
+        /// <summary>
+        /// A lower bound for tip proportion at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. 
+        /// </summary>
+        /// <value>A lower bound for tip proportion at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. </value>
+        [DataMember(Name = "min_tip_proportion_required", EmitDefaultValue = true)]
+        public string MinTipProportionRequired { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,6 +162,8 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
             sb.Append("  MinTipPercentageRequired: ").Append(MinTipPercentageRequired).Append("\n");
+            sb.Append("  TipProportion: ").Append(TipProportion).Append("\n");
+            sb.Append("  MinTipProportionRequired: ").Append(MinTipProportionRequired).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,6 +206,16 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.MinTipPercentageRequired == input.MinTipPercentageRequired ||
                     this.MinTipPercentageRequired.Equals(input.MinTipPercentageRequired)
+                ) && base.Equals(input) && 
+                (
+                    this.TipProportion == input.TipProportion ||
+                    (this.TipProportion != null &&
+                    this.TipProportion.Equals(input.TipProportion))
+                ) && base.Equals(input) && 
+                (
+                    this.MinTipProportionRequired == input.MinTipProportionRequired ||
+                    (this.MinTipProportionRequired != null &&
+                    this.MinTipProportionRequired.Equals(input.MinTipProportionRequired))
                 );
         }
 
@@ -198,6 +230,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 int hashCode = base.GetHashCode();
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
                 hashCode = (hashCode * 59) + this.MinTipPercentageRequired.GetHashCode();
+                if (this.TipProportion != null)
+                {
+                    hashCode = (hashCode * 59) + this.TipProportion.GetHashCode();
+                }
+                if (this.MinTipProportionRequired != null)
+                {
+                    hashCode = (hashCode * 59) + this.MinTipProportionRequired.GetHashCode();
+                }
                 return hashCode;
             }
         }

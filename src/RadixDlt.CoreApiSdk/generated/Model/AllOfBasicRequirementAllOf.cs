@@ -90,35 +90,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ProofAccessRuleNodeAllOf
+    /// AllOfBasicRequirementAllOf
     /// </summary>
-    [DataContract(Name = "ProofAccessRuleNode_allOf")]
-    public partial class ProofAccessRuleNodeAllOf : IEquatable<ProofAccessRuleNodeAllOf>
+    [DataContract(Name = "AllOfBasicRequirement_allOf")]
+    public partial class AllOfBasicRequirementAllOf : IEquatable<AllOfBasicRequirementAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProofAccessRuleNodeAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AllOfBasicRequirementAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ProofAccessRuleNodeAllOf() { }
+        protected AllOfBasicRequirementAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProofAccessRuleNodeAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AllOfBasicRequirementAllOf" /> class.
         /// </summary>
-        /// <param name="proofRule">proofRule (required).</param>
-        public ProofAccessRuleNodeAllOf(ProofRule proofRule = default(ProofRule))
+        /// <param name="list">list (required).</param>
+        public AllOfBasicRequirementAllOf(List<Requirement> list = default(List<Requirement>))
         {
-            // to ensure "proofRule" is required (not null)
-            if (proofRule == null)
+            // to ensure "list" is required (not null)
+            if (list == null)
             {
-                throw new ArgumentNullException("proofRule is a required property for ProofAccessRuleNodeAllOf and cannot be null");
+                throw new ArgumentNullException("list is a required property for AllOfBasicRequirementAllOf and cannot be null");
             }
-            this.ProofRule = proofRule;
+            this.List = list;
         }
 
         /// <summary>
-        /// Gets or Sets ProofRule
+        /// Gets or Sets List
         /// </summary>
-        [DataMember(Name = "proof_rule", IsRequired = true, EmitDefaultValue = true)]
-        public ProofRule ProofRule { get; set; }
+        [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
+        public List<Requirement> List { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ProofAccessRuleNodeAllOf {\n");
-            sb.Append("  ProofRule: ").Append(ProofRule).Append("\n");
+            sb.Append("class AllOfBasicRequirementAllOf {\n");
+            sb.Append("  List: ").Append(List).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +149,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ProofAccessRuleNodeAllOf);
+            return this.Equals(input as AllOfBasicRequirementAllOf);
         }
 
         /// <summary>
-        /// Returns true if ProofAccessRuleNodeAllOf instances are equal
+        /// Returns true if AllOfBasicRequirementAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ProofAccessRuleNodeAllOf to be compared</param>
+        /// <param name="input">Instance of AllOfBasicRequirementAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ProofAccessRuleNodeAllOf input)
+        public bool Equals(AllOfBasicRequirementAllOf input)
         {
             if (input == null)
             {
@@ -165,9 +165,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ProofRule == input.ProofRule ||
-                    (this.ProofRule != null &&
-                    this.ProofRule.Equals(input.ProofRule))
+                    this.List == input.List ||
+                    this.List != null &&
+                    input.List != null &&
+                    this.List.SequenceEqual(input.List)
                 );
         }
 
@@ -180,9 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ProofRule != null)
+                if (this.List != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProofRule.GetHashCode();
+                    hashCode = (hashCode * 59) + this.List.GetHashCode();
                 }
                 return hashCode;
             }

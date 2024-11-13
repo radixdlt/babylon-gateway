@@ -117,8 +117,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="stateUpdates">stateUpdates (required).</param>
         /// <param name="events">events.</param>
         /// <param name="nextEpoch">nextEpoch.</param>
-        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
-        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
+        /// <param name="output">The return data for each line of the transaction intent&#39;s manifest. This property is only present if the &#x60;status&#x60; is &#x60;Succeeded&#x60;. .</param>
+        /// <param name="errorMessage">The error message. This property is only present if the status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;. .</param>
         public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), CostingParameters costingParameters = default(CostingParameters), FeeSource feeSource = default(FeeSource), FeeDestination feeDestination = default(FeeDestination), StateUpdates stateUpdates = default(StateUpdates), List<Event> events = default(List<Event>), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
         {
             this.Status = status;
@@ -191,16 +191,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public NextEpoch NextEpoch { get; set; }
 
         /// <summary>
-        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)
+        /// The return data for each line of the transaction intent&#39;s manifest. This property is only present if the &#x60;status&#x60; is &#x60;Succeeded&#x60;. 
         /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)</value>
+        /// <value>The return data for each line of the transaction intent&#39;s manifest. This property is only present if the &#x60;status&#x60; is &#x60;Succeeded&#x60;. </value>
         [DataMember(Name = "output", EmitDefaultValue = true)]
         public List<SborData> Output { get; set; }
 
         /// <summary>
-        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
+        /// The error message. This property is only present if the status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;. 
         /// </summary>
-        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
+        /// <value>The error message. This property is only present if the status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;. </value>
         [DataMember(Name = "error_message", EmitDefaultValue = true)]
         public string ErrorMessage { get; set; }
 

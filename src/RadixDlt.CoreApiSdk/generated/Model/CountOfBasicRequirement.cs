@@ -84,46 +84,133 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ProofRuleType
+    /// CountOfBasicRequirement
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ProofRuleType
+    [DataContract(Name = "CountOfBasicRequirement")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfBasicRequirement), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AmountOfBasicRequirement), "AmountOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfBasicRequirement), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(CountOfBasicRequirement), "CountOf")]
+    [JsonSubtypes.KnownSubType(typeof(RequireBasicRequirement), "Require")]
+    public partial class CountOfBasicRequirement : BasicRequirement, IEquatable<CountOfBasicRequirement>
     {
         /// <summary>
-        /// Enum Require for value: Require
+        /// Initializes a new instance of the <see cref="CountOfBasicRequirement" /> class.
         /// </summary>
-        [EnumMember(Value = "Require")]
-        Require = 1,
+        [JsonConstructorAttribute]
+        protected CountOfBasicRequirement() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CountOfBasicRequirement" /> class.
+        /// </summary>
+        /// <param name="count">count (required).</param>
+        /// <param name="list">list (required).</param>
+        /// <param name="type">type (required) (default to BasicRequirementType.CountOf).</param>
+        public CountOfBasicRequirement(int count = default(int), List<Requirement> list = default(List<Requirement>), BasicRequirementType type = BasicRequirementType.CountOf) : base(type)
+        {
+            this.Count = count;
+            // to ensure "list" is required (not null)
+            if (list == null)
+            {
+                throw new ArgumentNullException("list is a required property for CountOfBasicRequirement and cannot be null");
+            }
+            this.List = list;
+        }
 
         /// <summary>
-        /// Enum AmountOf for value: AmountOf
+        /// Gets or Sets Count
         /// </summary>
-        [EnumMember(Value = "AmountOf")]
-        AmountOf = 2,
+        [DataMember(Name = "count", IsRequired = true, EmitDefaultValue = true)]
+        public int Count { get; set; }
 
         /// <summary>
-        /// Enum AllOf for value: AllOf
+        /// Gets or Sets List
         /// </summary>
-        [EnumMember(Value = "AllOf")]
-        AllOf = 3,
+        [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
+        public List<Requirement> List { get; set; }
 
         /// <summary>
-        /// Enum AnyOf for value: AnyOf
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "AnyOf")]
-        AnyOf = 4,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class CountOfBasicRequirement {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Count: ").Append(Count).Append("\n");
+            sb.Append("  List: ").Append(List).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum CountOf for value: CountOf
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "CountOf")]
-        CountOf = 5
+        /// <returns>JSON string presentation of the object</returns>
+        public override string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as CountOfBasicRequirement);
+        }
+
+        /// <summary>
+        /// Returns true if CountOfBasicRequirement instances are equal
+        /// </summary>
+        /// <param name="input">Instance of CountOfBasicRequirement to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(CountOfBasicRequirement input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return base.Equals(input) && 
+                (
+                    this.Count == input.Count ||
+                    this.Count.Equals(input.Count)
+                ) && base.Equals(input) && 
+                (
+                    this.List == input.List ||
+                    this.List != null &&
+                    input.List != null &&
+                    this.List.SequenceEqual(input.List)
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 59) + this.Count.GetHashCode();
+                if (this.List != null)
+                {
+                    hashCode = (hashCode * 59) + this.List.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

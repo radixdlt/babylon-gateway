@@ -84,116 +84,35 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ProtectedAccessRule
+    /// &#x60;ProofRule&#x60; is now called &#x60;BasicRequirement&#x60;. 
     /// </summary>
-    [DataContract(Name = "ProtectedAccessRule")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllowAllAccessRule), "AllowAll")]
-    [JsonSubtypes.KnownSubType(typeof(DenyAllAccessRule), "DenyAll")]
-    [JsonSubtypes.KnownSubType(typeof(ProtectedAccessRule), "Protected")]
-    public partial class ProtectedAccessRule : AccessRule, IEquatable<ProtectedAccessRule>
+    /// <value>&#x60;ProofRule&#x60; is now called &#x60;BasicRequirement&#x60;. </value>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum CompositeRequirementType
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
+        /// Enum ProofRule for value: ProofRule
         /// </summary>
-        [JsonConstructorAttribute]
-        protected ProtectedAccessRule() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
-        /// </summary>
-        /// <param name="accessRule">accessRule (required).</param>
-        /// <param name="type">type (required) (default to AccessRuleType.Protected).</param>
-        public ProtectedAccessRule(CompositeRequirement accessRule = default(CompositeRequirement), AccessRuleType type = AccessRuleType.Protected) : base(type)
-        {
-            // to ensure "accessRule" is required (not null)
-            if (accessRule == null)
-            {
-                throw new ArgumentNullException("accessRule is a required property for ProtectedAccessRule and cannot be null");
-            }
-            this.AccessRule = accessRule;
-        }
+        [EnumMember(Value = "ProofRule")]
+        ProofRule = 1,
 
         /// <summary>
-        /// Gets or Sets AccessRule
+        /// Enum AnyOf for value: AnyOf
         /// </summary>
-        [DataMember(Name = "access_rule", IsRequired = true, EmitDefaultValue = true)]
-        public CompositeRequirement AccessRule { get; set; }
+        [EnumMember(Value = "AnyOf")]
+        AnyOf = 2,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum AllOf for value: AllOf
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class ProtectedAccessRule {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  AccessRule: ").Append(AccessRule).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as ProtectedAccessRule);
-        }
-
-        /// <summary>
-        /// Returns true if ProtectedAccessRule instances are equal
-        /// </summary>
-        /// <param name="input">Instance of ProtectedAccessRule to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(ProtectedAccessRule input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return base.Equals(input) && 
-                (
-                    this.AccessRule == input.AccessRule ||
-                    (this.AccessRule != null &&
-                    this.AccessRule.Equals(input.AccessRule))
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = base.GetHashCode();
-                if (this.AccessRule != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccessRule.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "AllOf")]
+        AllOf = 3
 
     }
 

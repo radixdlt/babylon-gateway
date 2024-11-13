@@ -91,40 +91,42 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ProtectedAccessRule
+    /// AllOfBasicRequirement
     /// </summary>
-    [DataContract(Name = "ProtectedAccessRule")]
+    [DataContract(Name = "AllOfBasicRequirement")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllowAllAccessRule), "AllowAll")]
-    [JsonSubtypes.KnownSubType(typeof(DenyAllAccessRule), "DenyAll")]
-    [JsonSubtypes.KnownSubType(typeof(ProtectedAccessRule), "Protected")]
-    public partial class ProtectedAccessRule : AccessRule, IEquatable<ProtectedAccessRule>
+    [JsonSubtypes.KnownSubType(typeof(AllOfBasicRequirement), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AmountOfBasicRequirement), "AmountOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfBasicRequirement), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(CountOfBasicRequirement), "CountOf")]
+    [JsonSubtypes.KnownSubType(typeof(RequireBasicRequirement), "Require")]
+    public partial class AllOfBasicRequirement : BasicRequirement, IEquatable<AllOfBasicRequirement>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
+        /// Initializes a new instance of the <see cref="AllOfBasicRequirement" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ProtectedAccessRule() { }
+        protected AllOfBasicRequirement() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
+        /// Initializes a new instance of the <see cref="AllOfBasicRequirement" /> class.
         /// </summary>
-        /// <param name="accessRule">accessRule (required).</param>
-        /// <param name="type">type (required) (default to AccessRuleType.Protected).</param>
-        public ProtectedAccessRule(CompositeRequirement accessRule = default(CompositeRequirement), AccessRuleType type = AccessRuleType.Protected) : base(type)
+        /// <param name="list">list (required).</param>
+        /// <param name="type">type (required) (default to BasicRequirementType.AllOf).</param>
+        public AllOfBasicRequirement(List<Requirement> list = default(List<Requirement>), BasicRequirementType type = BasicRequirementType.AllOf) : base(type)
         {
-            // to ensure "accessRule" is required (not null)
-            if (accessRule == null)
+            // to ensure "list" is required (not null)
+            if (list == null)
             {
-                throw new ArgumentNullException("accessRule is a required property for ProtectedAccessRule and cannot be null");
+                throw new ArgumentNullException("list is a required property for AllOfBasicRequirement and cannot be null");
             }
-            this.AccessRule = accessRule;
+            this.List = list;
         }
 
         /// <summary>
-        /// Gets or Sets AccessRule
+        /// Gets or Sets List
         /// </summary>
-        [DataMember(Name = "access_rule", IsRequired = true, EmitDefaultValue = true)]
-        public CompositeRequirement AccessRule { get; set; }
+        [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
+        public List<Requirement> List { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -133,9 +135,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ProtectedAccessRule {\n");
+            sb.Append("class AllOfBasicRequirement {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  AccessRule: ").Append(AccessRule).Append("\n");
+            sb.Append("  List: ").Append(List).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -156,15 +158,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ProtectedAccessRule);
+            return this.Equals(input as AllOfBasicRequirement);
         }
 
         /// <summary>
-        /// Returns true if ProtectedAccessRule instances are equal
+        /// Returns true if AllOfBasicRequirement instances are equal
         /// </summary>
-        /// <param name="input">Instance of ProtectedAccessRule to be compared</param>
+        /// <param name="input">Instance of AllOfBasicRequirement to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ProtectedAccessRule input)
+        public bool Equals(AllOfBasicRequirement input)
         {
             if (input == null)
             {
@@ -172,9 +174,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.AccessRule == input.AccessRule ||
-                    (this.AccessRule != null &&
-                    this.AccessRule.Equals(input.AccessRule))
+                    this.List == input.List ||
+                    this.List != null &&
+                    input.List != null &&
+                    this.List.SequenceEqual(input.List)
                 );
         }
 
@@ -187,9 +190,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.AccessRule != null)
+                if (this.List != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRule.GetHashCode();
+                    hashCode = (hashCode * 59) + this.List.GetHashCode();
                 }
                 return hashCode;
             }

@@ -90,8 +90,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines EntityType
+    /// To improve clarity, some &#x60;EntityType&#x60; names have been updated at Cuttlefish.  But, due to backwards compatibility, the old names continue to be used here.  Notably: * &#x60;GlobalVirtualSecp256k1Account&#x60; is now &#x60;GlobalPreallocatedSecp256k1Account&#x60; elsewhere * &#x60;GlobalVirtualSecp256k1Identity&#x60; is now &#x60;GlobalPreallocatedSecp256k1Identity&#x60; elsewhere * &#x60;GlobalVirtualEd25519Account&#x60; is now &#x60;GlobalPreallocatedEd25519Account&#x60; elsewhere * &#x60;GlobalVirtualEd25519Identity&#x60; is now &#x60;GlobalPreallocatedEd25519Identity&#x60; elsewhere 
     /// </summary>
+    /// <value>To improve clarity, some &#x60;EntityType&#x60; names have been updated at Cuttlefish.  But, due to backwards compatibility, the old names continue to be used here.  Notably: * &#x60;GlobalVirtualSecp256k1Account&#x60; is now &#x60;GlobalPreallocatedSecp256k1Account&#x60; elsewhere * &#x60;GlobalVirtualSecp256k1Identity&#x60; is now &#x60;GlobalPreallocatedSecp256k1Identity&#x60; elsewhere * &#x60;GlobalVirtualEd25519Account&#x60; is now &#x60;GlobalPreallocatedEd25519Account&#x60; elsewhere * &#x60;GlobalVirtualEd25519Identity&#x60; is now &#x60;GlobalPreallocatedEd25519Identity&#x60; elsewhere </value>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum EntityType
     {

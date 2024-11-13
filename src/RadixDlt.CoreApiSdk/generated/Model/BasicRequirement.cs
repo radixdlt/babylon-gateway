@@ -84,41 +84,48 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AnyOfAccessRuleNodeAllOf
+    /// BasicRequirement
     /// </summary>
-    [DataContract(Name = "AnyOfAccessRuleNode_allOf")]
-    public partial class AnyOfAccessRuleNodeAllOf : IEquatable<AnyOfAccessRuleNodeAllOf>
+    [DataContract(Name = "BasicRequirement")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfBasicRequirement), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfBasicRequirement), "AllOfBasicRequirement")]
+    [JsonSubtypes.KnownSubType(typeof(AmountOfBasicRequirement), "AmountOf")]
+    [JsonSubtypes.KnownSubType(typeof(AmountOfBasicRequirement), "AmountOfBasicRequirement")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfBasicRequirement), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfBasicRequirement), "AnyOfBasicRequirement")]
+    [JsonSubtypes.KnownSubType(typeof(CountOfBasicRequirement), "CountOf")]
+    [JsonSubtypes.KnownSubType(typeof(CountOfBasicRequirement), "CountOfBasicRequirement")]
+    [JsonSubtypes.KnownSubType(typeof(RequireBasicRequirement), "Require")]
+    [JsonSubtypes.KnownSubType(typeof(RequireBasicRequirement), "RequireBasicRequirement")]
+    public partial class BasicRequirement : IEquatable<BasicRequirement>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnyOfAccessRuleNodeAllOf" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected AnyOfAccessRuleNodeAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnyOfAccessRuleNodeAllOf" /> class.
-        /// </summary>
-        /// <param name="accessRules">accessRules (required).</param>
-        public AnyOfAccessRuleNodeAllOf(List<AccessRuleNode> accessRules = default(List<AccessRuleNode>))
-        {
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
-            {
-                throw new ArgumentNullException("accessRules is a required property for AnyOfAccessRuleNodeAllOf and cannot be null");
-            }
-            this.AccessRules = accessRules;
-        }
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Gets or Sets Type
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccessRuleNode> AccessRules { get; set; }
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public BasicRequirementType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BasicRequirement" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected BasicRequirement() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BasicRequirement" /> class.
+        /// </summary>
+        /// <param name="type">type (required).</param>
+        public BasicRequirement(BasicRequirementType type = default(BasicRequirementType))
+        {
+            this.Type = type;
+        }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +134,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AnyOfAccessRuleNodeAllOf {\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("class BasicRequirement {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +156,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AnyOfAccessRuleNodeAllOf);
+            return this.Equals(input as BasicRequirement);
         }
 
         /// <summary>
-        /// Returns true if AnyOfAccessRuleNodeAllOf instances are equal
+        /// Returns true if BasicRequirement instances are equal
         /// </summary>
-        /// <param name="input">Instance of AnyOfAccessRuleNodeAllOf to be compared</param>
+        /// <param name="input">Instance of BasicRequirement to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AnyOfAccessRuleNodeAllOf input)
+        public bool Equals(BasicRequirement input)
         {
             if (input == null)
             {
@@ -165,10 +172,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.AccessRules == input.AccessRules ||
-                    this.AccessRules != null &&
-                    input.AccessRules != null &&
-                    this.AccessRules.SequenceEqual(input.AccessRules)
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 );
         }
 
@@ -181,10 +186,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AccessRules != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }

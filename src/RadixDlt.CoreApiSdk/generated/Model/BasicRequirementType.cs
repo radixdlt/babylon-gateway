@@ -84,117 +84,46 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AllOfAccessRuleNode
+    /// Defines BasicRequirementType
     /// </summary>
-    [DataContract(Name = "AllOfAccessRuleNode")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfAccessRuleNode), "AllOf")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfAccessRuleNode), "AnyOf")]
-    [JsonSubtypes.KnownSubType(typeof(ProofAccessRuleNode), "ProofRule")]
-    public partial class AllOfAccessRuleNode : AccessRuleNode, IEquatable<AllOfAccessRuleNode>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum BasicRequirementType
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AllOfAccessRuleNode" /> class.
+        /// Enum Require for value: Require
         /// </summary>
-        [JsonConstructorAttribute]
-        protected AllOfAccessRuleNode() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AllOfAccessRuleNode" /> class.
-        /// </summary>
-        /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="type">type (required) (default to AccessRuleNodeType.AllOf).</param>
-        public AllOfAccessRuleNode(List<AccessRuleNode> accessRules = default(List<AccessRuleNode>), AccessRuleNodeType type = AccessRuleNodeType.AllOf) : base(type)
-        {
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
-            {
-                throw new ArgumentNullException("accessRules is a required property for AllOfAccessRuleNode and cannot be null");
-            }
-            this.AccessRules = accessRules;
-        }
+        [EnumMember(Value = "Require")]
+        Require = 1,
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Enum AmountOf for value: AmountOf
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccessRuleNode> AccessRules { get; set; }
+        [EnumMember(Value = "AmountOf")]
+        AmountOf = 2,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum AllOf for value: AllOf
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class AllOfAccessRuleNode {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
+        [EnumMember(Value = "AllOf")]
+        AllOf = 3,
 
         /// <summary>
-        /// Returns the JSON string presentation of the object
+        /// Enum AnyOf for value: AnyOf
         /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
+        [EnumMember(Value = "AnyOf")]
+        AnyOf = 4,
 
         /// <summary>
-        /// Returns true if objects are equal
+        /// Enum CountOf for value: CountOf
         /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as AllOfAccessRuleNode);
-        }
-
-        /// <summary>
-        /// Returns true if AllOfAccessRuleNode instances are equal
-        /// </summary>
-        /// <param name="input">Instance of AllOfAccessRuleNode to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(AllOfAccessRuleNode input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return base.Equals(input) && 
-                (
-                    this.AccessRules == input.AccessRules ||
-                    this.AccessRules != null &&
-                    input.AccessRules != null &&
-                    this.AccessRules.SequenceEqual(input.AccessRules)
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = base.GetHashCode();
-                if (this.AccessRules != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "CountOf")]
+        CountOf = 5
 
     }
 

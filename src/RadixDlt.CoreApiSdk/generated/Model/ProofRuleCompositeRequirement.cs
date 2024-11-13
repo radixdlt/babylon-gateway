@@ -91,42 +91,40 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// RequireProofRule
+    /// ProofRuleCompositeRequirement
     /// </summary>
-    [DataContract(Name = "RequireProofRule")]
+    [DataContract(Name = "ProofRuleCompositeRequirement")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfProofRule), "AllOf")]
-    [JsonSubtypes.KnownSubType(typeof(AmountOfProofRule), "AmountOf")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfProofRule), "AnyOf")]
-    [JsonSubtypes.KnownSubType(typeof(CountOfProofRule), "CountOf")]
-    [JsonSubtypes.KnownSubType(typeof(RequireProofRule), "Require")]
-    public partial class RequireProofRule : ProofRule, IEquatable<RequireProofRule>
+    [JsonSubtypes.KnownSubType(typeof(AllOfCompositeRequirement), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfCompositeRequirement), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(ProofRuleCompositeRequirement), "ProofRule")]
+    public partial class ProofRuleCompositeRequirement : CompositeRequirement, IEquatable<ProofRuleCompositeRequirement>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequireProofRule" /> class.
+        /// Initializes a new instance of the <see cref="ProofRuleCompositeRequirement" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected RequireProofRule() { }
+        protected ProofRuleCompositeRequirement() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequireProofRule" /> class.
+        /// Initializes a new instance of the <see cref="ProofRuleCompositeRequirement" /> class.
         /// </summary>
-        /// <param name="requirement">requirement (required).</param>
-        /// <param name="type">type (required) (default to ProofRuleType.Require).</param>
-        public RequireProofRule(Requirement requirement = default(Requirement), ProofRuleType type = ProofRuleType.Require) : base(type)
+        /// <param name="proofRule">proofRule (required).</param>
+        /// <param name="type">type (required) (default to CompositeRequirementType.ProofRule).</param>
+        public ProofRuleCompositeRequirement(BasicRequirement proofRule = default(BasicRequirement), CompositeRequirementType type = CompositeRequirementType.ProofRule) : base(type)
         {
-            // to ensure "requirement" is required (not null)
-            if (requirement == null)
+            // to ensure "proofRule" is required (not null)
+            if (proofRule == null)
             {
-                throw new ArgumentNullException("requirement is a required property for RequireProofRule and cannot be null");
+                throw new ArgumentNullException("proofRule is a required property for ProofRuleCompositeRequirement and cannot be null");
             }
-            this.Requirement = requirement;
+            this.ProofRule = proofRule;
         }
 
         /// <summary>
-        /// Gets or Sets Requirement
+        /// Gets or Sets ProofRule
         /// </summary>
-        [DataMember(Name = "requirement", IsRequired = true, EmitDefaultValue = true)]
-        public Requirement Requirement { get; set; }
+        [DataMember(Name = "proof_rule", IsRequired = true, EmitDefaultValue = true)]
+        public BasicRequirement ProofRule { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +133,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class RequireProofRule {\n");
+            sb.Append("class ProofRuleCompositeRequirement {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Requirement: ").Append(Requirement).Append("\n");
+            sb.Append("  ProofRule: ").Append(ProofRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -158,15 +156,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as RequireProofRule);
+            return this.Equals(input as ProofRuleCompositeRequirement);
         }
 
         /// <summary>
-        /// Returns true if RequireProofRule instances are equal
+        /// Returns true if ProofRuleCompositeRequirement instances are equal
         /// </summary>
-        /// <param name="input">Instance of RequireProofRule to be compared</param>
+        /// <param name="input">Instance of ProofRuleCompositeRequirement to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(RequireProofRule input)
+        public bool Equals(ProofRuleCompositeRequirement input)
         {
             if (input == null)
             {
@@ -174,9 +172,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Requirement == input.Requirement ||
-                    (this.Requirement != null &&
-                    this.Requirement.Equals(input.Requirement))
+                    this.ProofRule == input.ProofRule ||
+                    (this.ProofRule != null &&
+                    this.ProofRule.Equals(input.ProofRule))
                 );
         }
 
@@ -189,9 +187,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Requirement != null)
+                if (this.ProofRule != null)
                 {
-                    hashCode = (hashCode * 59) + this.Requirement.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ProofRule.GetHashCode();
                 }
                 return hashCode;
             }

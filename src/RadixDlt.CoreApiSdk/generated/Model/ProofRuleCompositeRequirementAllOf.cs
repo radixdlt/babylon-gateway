@@ -84,44 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AccessRuleNode
+    /// ProofRuleCompositeRequirementAllOf
     /// </summary>
-    [DataContract(Name = "AccessRuleNode")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfAccessRuleNode), "AllOf")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfAccessRuleNode), "AllOfAccessRuleNode")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfAccessRuleNode), "AnyOf")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfAccessRuleNode), "AnyOfAccessRuleNode")]
-    [JsonSubtypes.KnownSubType(typeof(ProofAccessRuleNode), "ProofAccessRuleNode")]
-    [JsonSubtypes.KnownSubType(typeof(ProofAccessRuleNode), "ProofRule")]
-    public partial class AccessRuleNode : IEquatable<AccessRuleNode>
+    [DataContract(Name = "ProofRuleCompositeRequirement_allOf")]
+    public partial class ProofRuleCompositeRequirementAllOf : IEquatable<ProofRuleCompositeRequirementAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRuleNodeType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRuleNode" /> class.
+        /// Initializes a new instance of the <see cref="ProofRuleCompositeRequirementAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccessRuleNode() { }
+        protected ProofRuleCompositeRequirementAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRuleNode" /> class.
+        /// Initializes a new instance of the <see cref="ProofRuleCompositeRequirementAllOf" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public AccessRuleNode(AccessRuleNodeType type = default(AccessRuleNodeType))
+        /// <param name="proofRule">proofRule (required).</param>
+        public ProofRuleCompositeRequirementAllOf(BasicRequirement proofRule = default(BasicRequirement))
         {
-            this.Type = type;
+            // to ensure "proofRule" is required (not null)
+            if (proofRule == null)
+            {
+                throw new ArgumentNullException("proofRule is a required property for ProofRuleCompositeRequirementAllOf and cannot be null");
+            }
+            this.ProofRule = proofRule;
         }
+
+        /// <summary>
+        /// Gets or Sets ProofRule
+        /// </summary>
+        [DataMember(Name = "proof_rule", IsRequired = true, EmitDefaultValue = true)]
+        public BasicRequirement ProofRule { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,8 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccessRuleNode {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class ProofRuleCompositeRequirementAllOf {\n");
+            sb.Append("  ProofRule: ").Append(ProofRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -152,15 +149,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccessRuleNode);
+            return this.Equals(input as ProofRuleCompositeRequirementAllOf);
         }
 
         /// <summary>
-        /// Returns true if AccessRuleNode instances are equal
+        /// Returns true if ProofRuleCompositeRequirementAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccessRuleNode to be compared</param>
+        /// <param name="input">Instance of ProofRuleCompositeRequirementAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccessRuleNode input)
+        public bool Equals(ProofRuleCompositeRequirementAllOf input)
         {
             if (input == null)
             {
@@ -168,8 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.ProofRule == input.ProofRule ||
+                    (this.ProofRule != null &&
+                    this.ProofRule.Equals(input.ProofRule))
                 );
         }
 
@@ -182,7 +180,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.ProofRule != null)
+                {
+                    hashCode = (hashCode * 59) + this.ProofRule.GetHashCode();
+                }
                 return hashCode;
             }
         }

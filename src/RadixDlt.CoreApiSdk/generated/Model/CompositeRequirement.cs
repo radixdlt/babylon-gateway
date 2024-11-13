@@ -91,50 +91,37 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CountOfProofRule
+    /// This type was historically called &#x60;AccessRuleNode&#x60;. 
     /// </summary>
-    [DataContract(Name = "CountOfProofRule")]
+    [DataContract(Name = "CompositeRequirement")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfProofRule), "AllOf")]
-    [JsonSubtypes.KnownSubType(typeof(AmountOfProofRule), "AmountOf")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfProofRule), "AnyOf")]
-    [JsonSubtypes.KnownSubType(typeof(CountOfProofRule), "CountOf")]
-    [JsonSubtypes.KnownSubType(typeof(RequireProofRule), "Require")]
-    public partial class CountOfProofRule : ProofRule, IEquatable<CountOfProofRule>
+    [JsonSubtypes.KnownSubType(typeof(AllOfCompositeRequirement), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfCompositeRequirement), "AllOfCompositeRequirement")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfCompositeRequirement), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfCompositeRequirement), "AnyOfCompositeRequirement")]
+    [JsonSubtypes.KnownSubType(typeof(ProofRuleCompositeRequirement), "ProofRule")]
+    [JsonSubtypes.KnownSubType(typeof(ProofRuleCompositeRequirement), "ProofRuleCompositeRequirement")]
+    public partial class CompositeRequirement : IEquatable<CompositeRequirement>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="CountOfProofRule" /> class.
+        /// Gets or Sets Type
+        /// </summary>
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public CompositeRequirementType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CompositeRequirement" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CountOfProofRule() { }
+        protected CompositeRequirement() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CountOfProofRule" /> class.
+        /// Initializes a new instance of the <see cref="CompositeRequirement" /> class.
         /// </summary>
-        /// <param name="count">count (required).</param>
-        /// <param name="list">list (required).</param>
-        /// <param name="type">type (required) (default to ProofRuleType.CountOf).</param>
-        public CountOfProofRule(int count = default(int), List<Requirement> list = default(List<Requirement>), ProofRuleType type = ProofRuleType.CountOf) : base(type)
+        /// <param name="type">type (required).</param>
+        public CompositeRequirement(CompositeRequirementType type = default(CompositeRequirementType))
         {
-            this.Count = count;
-            // to ensure "list" is required (not null)
-            if (list == null)
-            {
-                throw new ArgumentNullException("list is a required property for CountOfProofRule and cannot be null");
-            }
-            this.List = list;
+            this.Type = type;
         }
-
-        /// <summary>
-        /// Gets or Sets Count
-        /// </summary>
-        [DataMember(Name = "count", IsRequired = true, EmitDefaultValue = true)]
-        public int Count { get; set; }
-
-        /// <summary>
-        /// Gets or Sets List
-        /// </summary>
-        [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
-        public List<Requirement> List { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,10 +130,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CountOfProofRule {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Count: ").Append(Count).Append("\n");
-            sb.Append("  List: ").Append(List).Append("\n");
+            sb.Append("class CompositeRequirement {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -155,7 +140,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -167,30 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CountOfProofRule);
+            return this.Equals(input as CompositeRequirement);
         }
 
         /// <summary>
-        /// Returns true if CountOfProofRule instances are equal
+        /// Returns true if CompositeRequirement instances are equal
         /// </summary>
-        /// <param name="input">Instance of CountOfProofRule to be compared</param>
+        /// <param name="input">Instance of CompositeRequirement to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CountOfProofRule input)
+        public bool Equals(CompositeRequirement input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Count == input.Count ||
-                    this.Count.Equals(input.Count)
-                ) && base.Equals(input) && 
-                (
-                    this.List == input.List ||
-                    this.List != null &&
-                    input.List != null &&
-                    this.List.SequenceEqual(input.List)
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 );
         }
 
@@ -202,12 +181,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.Count.GetHashCode();
-                if (this.List != null)
-                {
-                    hashCode = (hashCode * 59) + this.List.GetHashCode();
-                }
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }

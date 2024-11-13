@@ -91,56 +91,42 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AmountOfProofRule
+    /// AnyOfBasicRequirement
     /// </summary>
-    [DataContract(Name = "AmountOfProofRule")]
+    [DataContract(Name = "AnyOfBasicRequirement")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfProofRule), "AllOf")]
-    [JsonSubtypes.KnownSubType(typeof(AmountOfProofRule), "AmountOf")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfProofRule), "AnyOf")]
-    [JsonSubtypes.KnownSubType(typeof(CountOfProofRule), "CountOf")]
-    [JsonSubtypes.KnownSubType(typeof(RequireProofRule), "Require")]
-    public partial class AmountOfProofRule : ProofRule, IEquatable<AmountOfProofRule>
+    [JsonSubtypes.KnownSubType(typeof(AllOfBasicRequirement), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AmountOfBasicRequirement), "AmountOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfBasicRequirement), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(CountOfBasicRequirement), "CountOf")]
+    [JsonSubtypes.KnownSubType(typeof(RequireBasicRequirement), "Require")]
+    public partial class AnyOfBasicRequirement : BasicRequirement, IEquatable<AnyOfBasicRequirement>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AmountOfProofRule" /> class.
+        /// Initializes a new instance of the <see cref="AnyOfBasicRequirement" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AmountOfProofRule() { }
+        protected AnyOfBasicRequirement() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AmountOfProofRule" /> class.
+        /// Initializes a new instance of the <see cref="AnyOfBasicRequirement" /> class.
         /// </summary>
-        /// <param name="amount">amount (required).</param>
-        /// <param name="resource">The Bech32m-encoded human readable version of the resource address (required).</param>
-        /// <param name="type">type (required) (default to ProofRuleType.AmountOf).</param>
-        public AmountOfProofRule(string amount = default(string), string resource = default(string), ProofRuleType type = ProofRuleType.AmountOf) : base(type)
+        /// <param name="list">list (required).</param>
+        /// <param name="type">type (required) (default to BasicRequirementType.AnyOf).</param>
+        public AnyOfBasicRequirement(List<Requirement> list = default(List<Requirement>), BasicRequirementType type = BasicRequirementType.AnyOf) : base(type)
         {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
+            // to ensure "list" is required (not null)
+            if (list == null)
             {
-                throw new ArgumentNullException("amount is a required property for AmountOfProofRule and cannot be null");
+                throw new ArgumentNullException("list is a required property for AnyOfBasicRequirement and cannot be null");
             }
-            this.Amount = amount;
-            // to ensure "resource" is required (not null)
-            if (resource == null)
-            {
-                throw new ArgumentNullException("resource is a required property for AmountOfProofRule and cannot be null");
-            }
-            this.Resource = resource;
+            this.List = list;
         }
 
         /// <summary>
-        /// Gets or Sets Amount
+        /// Gets or Sets List
         /// </summary>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
-
-        /// <summary>
-        /// The Bech32m-encoded human readable version of the resource address
-        /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "resource", IsRequired = true, EmitDefaultValue = true)]
-        public string Resource { get; set; }
+        [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
+        public List<Requirement> List { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +135,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AmountOfProofRule {\n");
+            sb.Append("class AnyOfBasicRequirement {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
-            sb.Append("  Resource: ").Append(Resource).Append("\n");
+            sb.Append("  List: ").Append(List).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,15 +158,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AmountOfProofRule);
+            return this.Equals(input as AnyOfBasicRequirement);
         }
 
         /// <summary>
-        /// Returns true if AmountOfProofRule instances are equal
+        /// Returns true if AnyOfBasicRequirement instances are equal
         /// </summary>
-        /// <param name="input">Instance of AmountOfProofRule to be compared</param>
+        /// <param name="input">Instance of AnyOfBasicRequirement to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AmountOfProofRule input)
+        public bool Equals(AnyOfBasicRequirement input)
         {
             if (input == null)
             {
@@ -189,14 +174,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
-                ) && base.Equals(input) && 
-                (
-                    this.Resource == input.Resource ||
-                    (this.Resource != null &&
-                    this.Resource.Equals(input.Resource))
+                    this.List == input.List ||
+                    this.List != null &&
+                    input.List != null &&
+                    this.List.SequenceEqual(input.List)
                 );
         }
 
@@ -209,13 +190,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Amount != null)
+                if (this.List != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
-                }
-                if (this.Resource != null)
-                {
-                    hashCode = (hashCode * 59) + this.Resource.GetHashCode();
+                    hashCode = (hashCode * 59) + this.List.GetHashCode();
                 }
                 return hashCode;
             }

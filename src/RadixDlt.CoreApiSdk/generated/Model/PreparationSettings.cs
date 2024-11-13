@@ -84,49 +84,101 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AllOfProofRule
+    /// PreparationSettings
     /// </summary>
-    [DataContract(Name = "AllOfProofRule")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfProofRule), "AllOf")]
-    [JsonSubtypes.KnownSubType(typeof(AmountOfProofRule), "AmountOf")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfProofRule), "AnyOf")]
-    [JsonSubtypes.KnownSubType(typeof(CountOfProofRule), "CountOf")]
-    [JsonSubtypes.KnownSubType(typeof(RequireProofRule), "Require")]
-    public partial class AllOfProofRule : ProofRule, IEquatable<AllOfProofRule>
+    [DataContract(Name = "PreparationSettings")]
+    public partial class PreparationSettings : IEquatable<PreparationSettings>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AllOfProofRule" /> class.
+        /// Initializes a new instance of the <see cref="PreparationSettings" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AllOfProofRule() { }
+        protected PreparationSettings() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AllOfProofRule" /> class.
+        /// Initializes a new instance of the <see cref="PreparationSettings" /> class.
         /// </summary>
-        /// <param name="list">list (required).</param>
-        /// <param name="type">type (required) (default to ProofRuleType.AllOf).</param>
-        public AllOfProofRule(List<Requirement> list = default(List<Requirement>), ProofRuleType type = ProofRuleType.AllOf) : base(type)
+        /// <param name="v2TransactionsPermitted">v2TransactionsPermitted (required).</param>
+        /// <param name="maxUserPayloadLength">maxUserPayloadLength (required).</param>
+        /// <param name="maxLedgerPayloadLength">maxLedgerPayloadLength (required).</param>
+        /// <param name="maxChildSubintentsPerIntent">maxChildSubintentsPerIntent (required).</param>
+        /// <param name="maxSubintentsPerTransaction">maxSubintentsPerTransaction (required).</param>
+        /// <param name="maxBlobs">maxBlobs (required).</param>
+        public PreparationSettings(bool v2TransactionsPermitted = default(bool), string maxUserPayloadLength = default(string), string maxLedgerPayloadLength = default(string), string maxChildSubintentsPerIntent = default(string), string maxSubintentsPerTransaction = default(string), string maxBlobs = default(string))
         {
-            // to ensure "list" is required (not null)
-            if (list == null)
+            this.V2TransactionsPermitted = v2TransactionsPermitted;
+            // to ensure "maxUserPayloadLength" is required (not null)
+            if (maxUserPayloadLength == null)
             {
-                throw new ArgumentNullException("list is a required property for AllOfProofRule and cannot be null");
+                throw new ArgumentNullException("maxUserPayloadLength is a required property for PreparationSettings and cannot be null");
             }
-            this.List = list;
+            this.MaxUserPayloadLength = maxUserPayloadLength;
+            // to ensure "maxLedgerPayloadLength" is required (not null)
+            if (maxLedgerPayloadLength == null)
+            {
+                throw new ArgumentNullException("maxLedgerPayloadLength is a required property for PreparationSettings and cannot be null");
+            }
+            this.MaxLedgerPayloadLength = maxLedgerPayloadLength;
+            // to ensure "maxChildSubintentsPerIntent" is required (not null)
+            if (maxChildSubintentsPerIntent == null)
+            {
+                throw new ArgumentNullException("maxChildSubintentsPerIntent is a required property for PreparationSettings and cannot be null");
+            }
+            this.MaxChildSubintentsPerIntent = maxChildSubintentsPerIntent;
+            // to ensure "maxSubintentsPerTransaction" is required (not null)
+            if (maxSubintentsPerTransaction == null)
+            {
+                throw new ArgumentNullException("maxSubintentsPerTransaction is a required property for PreparationSettings and cannot be null");
+            }
+            this.MaxSubintentsPerTransaction = maxSubintentsPerTransaction;
+            // to ensure "maxBlobs" is required (not null)
+            if (maxBlobs == null)
+            {
+                throw new ArgumentNullException("maxBlobs is a required property for PreparationSettings and cannot be null");
+            }
+            this.MaxBlobs = maxBlobs;
         }
 
         /// <summary>
-        /// Gets or Sets List
+        /// Gets or Sets V2TransactionsPermitted
         /// </summary>
-        [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
-        public List<Requirement> List { get; set; }
+        [DataMember(Name = "v2_transactions_permitted", IsRequired = true, EmitDefaultValue = true)]
+        public bool V2TransactionsPermitted { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MaxUserPayloadLength
+        /// </summary>
+        [DataMember(Name = "max_user_payload_length", IsRequired = true, EmitDefaultValue = true)]
+        public string MaxUserPayloadLength { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MaxLedgerPayloadLength
+        /// </summary>
+        [DataMember(Name = "max_ledger_payload_length", IsRequired = true, EmitDefaultValue = true)]
+        public string MaxLedgerPayloadLength { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MaxChildSubintentsPerIntent
+        /// </summary>
+        [DataMember(Name = "max_child_subintents_per_intent", IsRequired = true, EmitDefaultValue = true)]
+        public string MaxChildSubintentsPerIntent { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MaxSubintentsPerTransaction
+        /// </summary>
+        [DataMember(Name = "max_subintents_per_transaction", IsRequired = true, EmitDefaultValue = true)]
+        public string MaxSubintentsPerTransaction { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MaxBlobs
+        /// </summary>
+        [DataMember(Name = "max_blobs", IsRequired = true, EmitDefaultValue = true)]
+        public string MaxBlobs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +187,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AllOfProofRule {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  List: ").Append(List).Append("\n");
+            sb.Append("class PreparationSettings {\n");
+            sb.Append("  V2TransactionsPermitted: ").Append(V2TransactionsPermitted).Append("\n");
+            sb.Append("  MaxUserPayloadLength: ").Append(MaxUserPayloadLength).Append("\n");
+            sb.Append("  MaxLedgerPayloadLength: ").Append(MaxLedgerPayloadLength).Append("\n");
+            sb.Append("  MaxChildSubintentsPerIntent: ").Append(MaxChildSubintentsPerIntent).Append("\n");
+            sb.Append("  MaxSubintentsPerTransaction: ").Append(MaxSubintentsPerTransaction).Append("\n");
+            sb.Append("  MaxBlobs: ").Append(MaxBlobs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -146,7 +202,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -158,26 +214,49 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AllOfProofRule);
+            return this.Equals(input as PreparationSettings);
         }
 
         /// <summary>
-        /// Returns true if AllOfProofRule instances are equal
+        /// Returns true if PreparationSettings instances are equal
         /// </summary>
-        /// <param name="input">Instance of AllOfProofRule to be compared</param>
+        /// <param name="input">Instance of PreparationSettings to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AllOfProofRule input)
+        public bool Equals(PreparationSettings input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.List == input.List ||
-                    this.List != null &&
-                    input.List != null &&
-                    this.List.SequenceEqual(input.List)
+                    this.V2TransactionsPermitted == input.V2TransactionsPermitted ||
+                    this.V2TransactionsPermitted.Equals(input.V2TransactionsPermitted)
+                ) && 
+                (
+                    this.MaxUserPayloadLength == input.MaxUserPayloadLength ||
+                    (this.MaxUserPayloadLength != null &&
+                    this.MaxUserPayloadLength.Equals(input.MaxUserPayloadLength))
+                ) && 
+                (
+                    this.MaxLedgerPayloadLength == input.MaxLedgerPayloadLength ||
+                    (this.MaxLedgerPayloadLength != null &&
+                    this.MaxLedgerPayloadLength.Equals(input.MaxLedgerPayloadLength))
+                ) && 
+                (
+                    this.MaxChildSubintentsPerIntent == input.MaxChildSubintentsPerIntent ||
+                    (this.MaxChildSubintentsPerIntent != null &&
+                    this.MaxChildSubintentsPerIntent.Equals(input.MaxChildSubintentsPerIntent))
+                ) && 
+                (
+                    this.MaxSubintentsPerTransaction == input.MaxSubintentsPerTransaction ||
+                    (this.MaxSubintentsPerTransaction != null &&
+                    this.MaxSubintentsPerTransaction.Equals(input.MaxSubintentsPerTransaction))
+                ) && 
+                (
+                    this.MaxBlobs == input.MaxBlobs ||
+                    (this.MaxBlobs != null &&
+                    this.MaxBlobs.Equals(input.MaxBlobs))
                 );
         }
 
@@ -189,10 +268,27 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.List != null)
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.V2TransactionsPermitted.GetHashCode();
+                if (this.MaxUserPayloadLength != null)
                 {
-                    hashCode = (hashCode * 59) + this.List.GetHashCode();
+                    hashCode = (hashCode * 59) + this.MaxUserPayloadLength.GetHashCode();
+                }
+                if (this.MaxLedgerPayloadLength != null)
+                {
+                    hashCode = (hashCode * 59) + this.MaxLedgerPayloadLength.GetHashCode();
+                }
+                if (this.MaxChildSubintentsPerIntent != null)
+                {
+                    hashCode = (hashCode * 59) + this.MaxChildSubintentsPerIntent.GetHashCode();
+                }
+                if (this.MaxSubintentsPerTransaction != null)
+                {
+                    hashCode = (hashCode * 59) + this.MaxSubintentsPerTransaction.GetHashCode();
+                }
+                if (this.MaxBlobs != null)
+                {
+                    hashCode = (hashCode * 59) + this.MaxBlobs.GetHashCode();
                 }
                 return hashCode;
             }

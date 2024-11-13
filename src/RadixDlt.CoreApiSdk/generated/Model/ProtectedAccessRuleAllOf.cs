@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="ProtectedAccessRuleAllOf" /> class.
         /// </summary>
         /// <param name="accessRule">accessRule (required).</param>
-        public ProtectedAccessRuleAllOf(AccessRuleNode accessRule = default(AccessRuleNode))
+        public ProtectedAccessRuleAllOf(CompositeRequirement accessRule = default(CompositeRequirement))
         {
             // to ensure "accessRule" is required (not null)
             if (accessRule == null)
@@ -118,7 +118,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets AccessRule
         /// </summary>
         [DataMember(Name = "access_rule", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRuleNode AccessRule { get; set; }
+        public CompositeRequirement AccessRule { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

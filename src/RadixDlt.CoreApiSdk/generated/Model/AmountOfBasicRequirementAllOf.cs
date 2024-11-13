@@ -84,48 +84,55 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ProofRule
+    /// AmountOfBasicRequirementAllOf
     /// </summary>
-    [DataContract(Name = "ProofRule")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfProofRule), "AllOf")]
-    [JsonSubtypes.KnownSubType(typeof(AllOfProofRule), "AllOfProofRule")]
-    [JsonSubtypes.KnownSubType(typeof(AmountOfProofRule), "AmountOf")]
-    [JsonSubtypes.KnownSubType(typeof(AmountOfProofRule), "AmountOfProofRule")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfProofRule), "AnyOf")]
-    [JsonSubtypes.KnownSubType(typeof(AnyOfProofRule), "AnyOfProofRule")]
-    [JsonSubtypes.KnownSubType(typeof(CountOfProofRule), "CountOf")]
-    [JsonSubtypes.KnownSubType(typeof(CountOfProofRule), "CountOfProofRule")]
-    [JsonSubtypes.KnownSubType(typeof(RequireProofRule), "Require")]
-    [JsonSubtypes.KnownSubType(typeof(RequireProofRule), "RequireProofRule")]
-    public partial class ProofRule : IEquatable<ProofRule>
+    [DataContract(Name = "AmountOfBasicRequirement_allOf")]
+    public partial class AmountOfBasicRequirementAllOf : IEquatable<AmountOfBasicRequirementAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public ProofRuleType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProofRule" /> class.
+        /// Initializes a new instance of the <see cref="AmountOfBasicRequirementAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ProofRule() { }
+        protected AmountOfBasicRequirementAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProofRule" /> class.
+        /// Initializes a new instance of the <see cref="AmountOfBasicRequirementAllOf" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public ProofRule(ProofRuleType type = default(ProofRuleType))
+        /// <param name="amount">amount (required).</param>
+        /// <param name="resource">The Bech32m-encoded human readable version of the resource address (required).</param>
+        public AmountOfBasicRequirementAllOf(string amount = default(string), string resource = default(string))
         {
-            this.Type = type;
+            // to ensure "amount" is required (not null)
+            if (amount == null)
+            {
+                throw new ArgumentNullException("amount is a required property for AmountOfBasicRequirementAllOf and cannot be null");
+            }
+            this.Amount = amount;
+            // to ensure "resource" is required (not null)
+            if (resource == null)
+            {
+                throw new ArgumentNullException("resource is a required property for AmountOfBasicRequirementAllOf and cannot be null");
+            }
+            this.Resource = resource;
         }
+
+        /// <summary>
+        /// Gets or Sets Amount
+        /// </summary>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the resource address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "resource", IsRequired = true, EmitDefaultValue = true)]
+        public string Resource { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -134,8 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ProofRule {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class AmountOfBasicRequirementAllOf {\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  Resource: ").Append(Resource).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -156,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ProofRule);
+            return this.Equals(input as AmountOfBasicRequirementAllOf);
         }
 
         /// <summary>
-        /// Returns true if ProofRule instances are equal
+        /// Returns true if AmountOfBasicRequirementAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ProofRule to be compared</param>
+        /// <param name="input">Instance of AmountOfBasicRequirementAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ProofRule input)
+        public bool Equals(AmountOfBasicRequirementAllOf input)
         {
             if (input == null)
             {
@@ -172,8 +180,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
+                ) && 
+                (
+                    this.Resource == input.Resource ||
+                    (this.Resource != null &&
+                    this.Resource.Equals(input.Resource))
                 );
         }
 
@@ -186,7 +200,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.Amount != null)
+                {
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                }
+                if (this.Resource != null)
+                {
+                    hashCode = (hashCode * 59) + this.Resource.GetHashCode();
+                }
                 return hashCode;
             }
         }

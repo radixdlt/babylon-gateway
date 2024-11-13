@@ -84,34 +84,118 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines AccessRuleNodeType
+    /// RequireBasicRequirement
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum AccessRuleNodeType
+    [DataContract(Name = "RequireBasicRequirement")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfBasicRequirement), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AmountOfBasicRequirement), "AmountOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfBasicRequirement), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(CountOfBasicRequirement), "CountOf")]
+    [JsonSubtypes.KnownSubType(typeof(RequireBasicRequirement), "Require")]
+    public partial class RequireBasicRequirement : BasicRequirement, IEquatable<RequireBasicRequirement>
     {
         /// <summary>
-        /// Enum ProofRule for value: ProofRule
+        /// Initializes a new instance of the <see cref="RequireBasicRequirement" /> class.
         /// </summary>
-        [EnumMember(Value = "ProofRule")]
-        ProofRule = 1,
+        [JsonConstructorAttribute]
+        protected RequireBasicRequirement() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequireBasicRequirement" /> class.
+        /// </summary>
+        /// <param name="requirement">requirement (required).</param>
+        /// <param name="type">type (required) (default to BasicRequirementType.Require).</param>
+        public RequireBasicRequirement(Requirement requirement = default(Requirement), BasicRequirementType type = BasicRequirementType.Require) : base(type)
+        {
+            // to ensure "requirement" is required (not null)
+            if (requirement == null)
+            {
+                throw new ArgumentNullException("requirement is a required property for RequireBasicRequirement and cannot be null");
+            }
+            this.Requirement = requirement;
+        }
 
         /// <summary>
-        /// Enum AnyOf for value: AnyOf
+        /// Gets or Sets Requirement
         /// </summary>
-        [EnumMember(Value = "AnyOf")]
-        AnyOf = 2,
+        [DataMember(Name = "requirement", IsRequired = true, EmitDefaultValue = true)]
+        public Requirement Requirement { get; set; }
 
         /// <summary>
-        /// Enum AllOf for value: AllOf
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "AllOf")]
-        AllOf = 3
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class RequireBasicRequirement {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Requirement: ").Append(Requirement).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public override string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as RequireBasicRequirement);
+        }
+
+        /// <summary>
+        /// Returns true if RequireBasicRequirement instances are equal
+        /// </summary>
+        /// <param name="input">Instance of RequireBasicRequirement to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(RequireBasicRequirement input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return base.Equals(input) && 
+                (
+                    this.Requirement == input.Requirement ||
+                    (this.Requirement != null &&
+                    this.Requirement.Equals(input.Requirement))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = base.GetHashCode();
+                if (this.Requirement != null)
+                {
+                    hashCode = (hashCode * 59) + this.Requirement.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

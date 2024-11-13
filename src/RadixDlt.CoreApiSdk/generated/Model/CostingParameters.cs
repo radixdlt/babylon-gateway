@@ -111,8 +111,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="xrdUsdPrice">The string-encoded decimal representing what amount of XRD is consumed by a Royalty of 1 USD. This is fixed for a given protocol version, so is not an accurate representation of the XRD price. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         /// <param name="xrdStoragePrice">The string-encoded decimal representing the price of 1 byte of state storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         /// <param name="xrdArchiveStoragePrice">The string-encoded decimal representing the price of 1 byte of archive storage, expressed in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
-        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
-        public CostingParameters(string executionCostUnitPrice = default(string), long executionCostUnitLimit = default(long), long executionCostUnitLoan = default(long), string finalizationCostUnitPrice = default(string), long finalizationCostUnitLimit = default(long), string xrdUsdPrice = default(string), string xrdStoragePrice = default(string), string xrdArchiveStoragePrice = default(string), int tipPercentage = default(int))
+        /// <param name="tipPercentage">NOTE: V2 transactions specify the tip in basis points, which gets rounded down for this &#x60;tip_percentage&#x60; field. It is recommended to instead use the &#x60;tip_proportion&#x60; field to get a fully accurate value.  An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.  (required).</param>
+        /// <param name="tipProportion">A string-encoded decimal, giving the validator tip as a proportional amount. A value of &#x60;\&quot;0.01\&quot;&#x60; corresponds to 1% of the fee being paid as a tip.  NOTE: This field is not marked as required for Cuttlefish launch, to permit cuttlefish clients to talk to pre-cuttlefish nodes. This can be changed after Cuttlefish enactment once all nodes are on Cuttlefish. .</param>
+        public CostingParameters(string executionCostUnitPrice = default(string), long executionCostUnitLimit = default(long), long executionCostUnitLoan = default(long), string finalizationCostUnitPrice = default(string), long finalizationCostUnitLimit = default(long), string xrdUsdPrice = default(string), string xrdStoragePrice = default(string), string xrdArchiveStoragePrice = default(string), int tipPercentage = default(int), string tipProportion = default(string))
         {
             // to ensure "executionCostUnitPrice" is required (not null)
             if (executionCostUnitPrice == null)
@@ -148,6 +149,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.XrdArchiveStoragePrice = xrdArchiveStoragePrice;
             this.TipPercentage = tipPercentage;
+            this.TipProportion = tipProportion;
         }
 
         /// <summary>
@@ -207,11 +209,19 @@ namespace RadixDlt.CoreApiSdk.Model
         public string XrdArchiveStoragePrice { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
+        /// NOTE: V2 transactions specify the tip in basis points, which gets rounded down for this &#x60;tip_percentage&#x60; field. It is recommended to instead use the &#x60;tip_proportion&#x60; field to get a fully accurate value.  An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
+        /// <value>NOTE: V2 transactions specify the tip in basis points, which gets rounded down for this &#x60;tip_percentage&#x60; field. It is recommended to instead use the &#x60;tip_proportion&#x60; field to get a fully accurate value.  An integer between &#x60;0&#x60; and &#x60;65535&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. </value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
+        [Obsolete]
         public int TipPercentage { get; set; }
+
+        /// <summary>
+        /// A string-encoded decimal, giving the validator tip as a proportional amount. A value of &#x60;\&quot;0.01\&quot;&#x60; corresponds to 1% of the fee being paid as a tip.  NOTE: This field is not marked as required for Cuttlefish launch, to permit cuttlefish clients to talk to pre-cuttlefish nodes. This can be changed after Cuttlefish enactment once all nodes are on Cuttlefish. 
+        /// </summary>
+        /// <value>A string-encoded decimal, giving the validator tip as a proportional amount. A value of &#x60;\&quot;0.01\&quot;&#x60; corresponds to 1% of the fee being paid as a tip.  NOTE: This field is not marked as required for Cuttlefish launch, to permit cuttlefish clients to talk to pre-cuttlefish nodes. This can be changed after Cuttlefish enactment once all nodes are on Cuttlefish. </value>
+        [DataMember(Name = "tip_proportion", EmitDefaultValue = true)]
+        public string TipProportion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -230,6 +240,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  XrdStoragePrice: ").Append(XrdStoragePrice).Append("\n");
             sb.Append("  XrdArchiveStoragePrice: ").Append(XrdArchiveStoragePrice).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
+            sb.Append("  TipProportion: ").Append(TipProportion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -305,6 +316,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.TipPercentage == input.TipPercentage ||
                     this.TipPercentage.Equals(input.TipPercentage)
+                ) && 
+                (
+                    this.TipProportion == input.TipProportion ||
+                    (this.TipProportion != null &&
+                    this.TipProportion.Equals(input.TipProportion))
                 );
         }
 
@@ -341,6 +357,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     hashCode = (hashCode * 59) + this.XrdArchiveStoragePrice.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
+                if (this.TipProportion != null)
+                {
+                    hashCode = (hashCode * 59) + this.TipProportion.GetHashCode();
+                }
                 return hashCode;
             }
         }

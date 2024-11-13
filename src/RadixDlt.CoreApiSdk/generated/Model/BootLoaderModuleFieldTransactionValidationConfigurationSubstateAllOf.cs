@@ -90,49 +90,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AmountOfProofRuleAllOf
+    /// BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf
     /// </summary>
-    [DataContract(Name = "AmountOfProofRule_allOf")]
-    public partial class AmountOfProofRuleAllOf : IEquatable<AmountOfProofRuleAllOf>
+    [DataContract(Name = "BootLoaderModuleFieldTransactionValidationConfigurationSubstate_allOf")]
+    public partial class BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf : IEquatable<BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AmountOfProofRuleAllOf" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AmountOfProofRuleAllOf() { }
+        protected BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AmountOfProofRuleAllOf" /> class.
+        /// Initializes a new instance of the <see cref="BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="amount">amount (required).</param>
-        /// <param name="resource">The Bech32m-encoded human readable version of the resource address (required).</param>
-        public AmountOfProofRuleAllOf(string amount = default(string), string resource = default(string))
+        /// <param name="config">config (required).</param>
+        public BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf(TransactionValidationConfig config = default(TransactionValidationConfig))
         {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
+            // to ensure "config" is required (not null)
+            if (config == null)
             {
-                throw new ArgumentNullException("amount is a required property for AmountOfProofRuleAllOf and cannot be null");
+                throw new ArgumentNullException("config is a required property for BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf and cannot be null");
             }
-            this.Amount = amount;
-            // to ensure "resource" is required (not null)
-            if (resource == null)
-            {
-                throw new ArgumentNullException("resource is a required property for AmountOfProofRuleAllOf and cannot be null");
-            }
-            this.Resource = resource;
+            this.Config = config;
         }
 
         /// <summary>
-        /// Gets or Sets Amount
+        /// Gets or Sets Config
         /// </summary>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
-
-        /// <summary>
-        /// The Bech32m-encoded human readable version of the resource address
-        /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "resource", IsRequired = true, EmitDefaultValue = true)]
-        public string Resource { get; set; }
+        [DataMember(Name = "config", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionValidationConfig Config { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AmountOfProofRuleAllOf {\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
-            sb.Append("  Resource: ").Append(Resource).Append("\n");
+            sb.Append("class BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf {\n");
+            sb.Append("  Config: ").Append(Config).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +149,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AmountOfProofRuleAllOf);
+            return this.Equals(input as BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if AmountOfProofRuleAllOf instances are equal
+        /// Returns true if BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of AmountOfProofRuleAllOf to be compared</param>
+        /// <param name="input">Instance of BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AmountOfProofRuleAllOf input)
+        public bool Equals(BootLoaderModuleFieldTransactionValidationConfigurationSubstateAllOf input)
         {
             if (input == null)
             {
@@ -180,14 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
-                ) && 
-                (
-                    this.Resource == input.Resource ||
-                    (this.Resource != null &&
-                    this.Resource.Equals(input.Resource))
+                    this.Config == input.Config ||
+                    (this.Config != null &&
+                    this.Config.Equals(input.Config))
                 );
         }
 
@@ -200,13 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Amount != null)
+                if (this.Config != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
-                }
-                if (this.Resource != null)
-                {
-                    hashCode = (hashCode * 59) + this.Resource.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Config.GetHashCode();
                 }
                 return hashCode;
             }

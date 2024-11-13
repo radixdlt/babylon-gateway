@@ -90,43 +90,74 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CountOfProofRuleAllOf
+    /// MessageValidationConfig
     /// </summary>
-    [DataContract(Name = "CountOfProofRule_allOf")]
-    public partial class CountOfProofRuleAllOf : IEquatable<CountOfProofRuleAllOf>
+    [DataContract(Name = "MessageValidationConfig")]
+    public partial class MessageValidationConfig : IEquatable<MessageValidationConfig>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CountOfProofRuleAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MessageValidationConfig" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CountOfProofRuleAllOf() { }
+        protected MessageValidationConfig() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CountOfProofRuleAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MessageValidationConfig" /> class.
         /// </summary>
-        /// <param name="count">count (required).</param>
-        /// <param name="list">list (required).</param>
-        public CountOfProofRuleAllOf(int count = default(int), List<Requirement> list = default(List<Requirement>))
+        /// <param name="maxPlaintextMessageLength">maxPlaintextMessageLength (required).</param>
+        /// <param name="maxEncryptedMessageLength">maxEncryptedMessageLength (required).</param>
+        /// <param name="maxMimeTypeLength">maxMimeTypeLength (required).</param>
+        /// <param name="maxDecryptors">maxDecryptors (required).</param>
+        public MessageValidationConfig(string maxPlaintextMessageLength = default(string), string maxEncryptedMessageLength = default(string), string maxMimeTypeLength = default(string), string maxDecryptors = default(string))
         {
-            this.Count = count;
-            // to ensure "list" is required (not null)
-            if (list == null)
+            // to ensure "maxPlaintextMessageLength" is required (not null)
+            if (maxPlaintextMessageLength == null)
             {
-                throw new ArgumentNullException("list is a required property for CountOfProofRuleAllOf and cannot be null");
+                throw new ArgumentNullException("maxPlaintextMessageLength is a required property for MessageValidationConfig and cannot be null");
             }
-            this.List = list;
+            this.MaxPlaintextMessageLength = maxPlaintextMessageLength;
+            // to ensure "maxEncryptedMessageLength" is required (not null)
+            if (maxEncryptedMessageLength == null)
+            {
+                throw new ArgumentNullException("maxEncryptedMessageLength is a required property for MessageValidationConfig and cannot be null");
+            }
+            this.MaxEncryptedMessageLength = maxEncryptedMessageLength;
+            // to ensure "maxMimeTypeLength" is required (not null)
+            if (maxMimeTypeLength == null)
+            {
+                throw new ArgumentNullException("maxMimeTypeLength is a required property for MessageValidationConfig and cannot be null");
+            }
+            this.MaxMimeTypeLength = maxMimeTypeLength;
+            // to ensure "maxDecryptors" is required (not null)
+            if (maxDecryptors == null)
+            {
+                throw new ArgumentNullException("maxDecryptors is a required property for MessageValidationConfig and cannot be null");
+            }
+            this.MaxDecryptors = maxDecryptors;
         }
 
         /// <summary>
-        /// Gets or Sets Count
+        /// Gets or Sets MaxPlaintextMessageLength
         /// </summary>
-        [DataMember(Name = "count", IsRequired = true, EmitDefaultValue = true)]
-        public int Count { get; set; }
+        [DataMember(Name = "max_plaintext_message_length", IsRequired = true, EmitDefaultValue = true)]
+        public string MaxPlaintextMessageLength { get; set; }
 
         /// <summary>
-        /// Gets or Sets List
+        /// Gets or Sets MaxEncryptedMessageLength
         /// </summary>
-        [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
-        public List<Requirement> List { get; set; }
+        [DataMember(Name = "max_encrypted_message_length", IsRequired = true, EmitDefaultValue = true)]
+        public string MaxEncryptedMessageLength { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MaxMimeTypeLength
+        /// </summary>
+        [DataMember(Name = "max_mime_type_length", IsRequired = true, EmitDefaultValue = true)]
+        public string MaxMimeTypeLength { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MaxDecryptors
+        /// </summary>
+        [DataMember(Name = "max_decryptors", IsRequired = true, EmitDefaultValue = true)]
+        public string MaxDecryptors { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +166,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CountOfProofRuleAllOf {\n");
-            sb.Append("  Count: ").Append(Count).Append("\n");
-            sb.Append("  List: ").Append(List).Append("\n");
+            sb.Append("class MessageValidationConfig {\n");
+            sb.Append("  MaxPlaintextMessageLength: ").Append(MaxPlaintextMessageLength).Append("\n");
+            sb.Append("  MaxEncryptedMessageLength: ").Append(MaxEncryptedMessageLength).Append("\n");
+            sb.Append("  MaxMimeTypeLength: ").Append(MaxMimeTypeLength).Append("\n");
+            sb.Append("  MaxDecryptors: ").Append(MaxDecryptors).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -158,15 +191,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CountOfProofRuleAllOf);
+            return this.Equals(input as MessageValidationConfig);
         }
 
         /// <summary>
-        /// Returns true if CountOfProofRuleAllOf instances are equal
+        /// Returns true if MessageValidationConfig instances are equal
         /// </summary>
-        /// <param name="input">Instance of CountOfProofRuleAllOf to be compared</param>
+        /// <param name="input">Instance of MessageValidationConfig to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CountOfProofRuleAllOf input)
+        public bool Equals(MessageValidationConfig input)
         {
             if (input == null)
             {
@@ -174,14 +207,24 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Count == input.Count ||
-                    this.Count.Equals(input.Count)
+                    this.MaxPlaintextMessageLength == input.MaxPlaintextMessageLength ||
+                    (this.MaxPlaintextMessageLength != null &&
+                    this.MaxPlaintextMessageLength.Equals(input.MaxPlaintextMessageLength))
                 ) && 
                 (
-                    this.List == input.List ||
-                    this.List != null &&
-                    input.List != null &&
-                    this.List.SequenceEqual(input.List)
+                    this.MaxEncryptedMessageLength == input.MaxEncryptedMessageLength ||
+                    (this.MaxEncryptedMessageLength != null &&
+                    this.MaxEncryptedMessageLength.Equals(input.MaxEncryptedMessageLength))
+                ) && 
+                (
+                    this.MaxMimeTypeLength == input.MaxMimeTypeLength ||
+                    (this.MaxMimeTypeLength != null &&
+                    this.MaxMimeTypeLength.Equals(input.MaxMimeTypeLength))
+                ) && 
+                (
+                    this.MaxDecryptors == input.MaxDecryptors ||
+                    (this.MaxDecryptors != null &&
+                    this.MaxDecryptors.Equals(input.MaxDecryptors))
                 );
         }
 
@@ -194,10 +237,21 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Count.GetHashCode();
-                if (this.List != null)
+                if (this.MaxPlaintextMessageLength != null)
                 {
-                    hashCode = (hashCode * 59) + this.List.GetHashCode();
+                    hashCode = (hashCode * 59) + this.MaxPlaintextMessageLength.GetHashCode();
+                }
+                if (this.MaxEncryptedMessageLength != null)
+                {
+                    hashCode = (hashCode * 59) + this.MaxEncryptedMessageLength.GetHashCode();
+                }
+                if (this.MaxMimeTypeLength != null)
+                {
+                    hashCode = (hashCode * 59) + this.MaxMimeTypeLength.GetHashCode();
+                }
+                if (this.MaxDecryptors != null)
+                {
+                    hashCode = (hashCode * 59) + this.MaxDecryptors.GetHashCode();
                 }
                 return hashCode;
             }

@@ -91,7 +91,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Requirement
+    /// This is called &#x60;ResourceOrNonFungible&#x60; in the engine.
     /// </summary>
     [DataContract(Name = "Requirement")]
     [JsonConverter(typeof(JsonSubtypes), "type")]

@@ -196,7 +196,9 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
                 Faucet: wa.Faucet,
                 PoolPackage: wa.PoolPackage,
                 LockerPackage: wa.LockerPackage,
-                TransactionTracker: wa.TransactionTracker
+                TransactionTracker: wa.TransactionTracker,
+                TransactionTrackerPackage: wa.TransactionTrackerPackage,
+                TestUtilsPackage: wa.TestUtilsPackage
             );
 
             return new NetworkConfiguration(

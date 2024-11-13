@@ -84,47 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ProtectedAccessRule
+    /// RequireBasicRequirementAllOf
     /// </summary>
-    [DataContract(Name = "ProtectedAccessRule")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(AllowAllAccessRule), "AllowAll")]
-    [JsonSubtypes.KnownSubType(typeof(DenyAllAccessRule), "DenyAll")]
-    [JsonSubtypes.KnownSubType(typeof(ProtectedAccessRule), "Protected")]
-    public partial class ProtectedAccessRule : AccessRule, IEquatable<ProtectedAccessRule>
+    [DataContract(Name = "RequireBasicRequirement_allOf")]
+    public partial class RequireBasicRequirementAllOf : IEquatable<RequireBasicRequirementAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
+        /// Initializes a new instance of the <see cref="RequireBasicRequirementAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ProtectedAccessRule() { }
+        protected RequireBasicRequirementAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
+        /// Initializes a new instance of the <see cref="RequireBasicRequirementAllOf" /> class.
         /// </summary>
-        /// <param name="accessRule">accessRule (required).</param>
-        /// <param name="type">type (required) (default to AccessRuleType.Protected).</param>
-        public ProtectedAccessRule(CompositeRequirement accessRule = default(CompositeRequirement), AccessRuleType type = AccessRuleType.Protected) : base(type)
+        /// <param name="requirement">requirement (required).</param>
+        public RequireBasicRequirementAllOf(Requirement requirement = default(Requirement))
         {
-            // to ensure "accessRule" is required (not null)
-            if (accessRule == null)
+            // to ensure "requirement" is required (not null)
+            if (requirement == null)
             {
-                throw new ArgumentNullException("accessRule is a required property for ProtectedAccessRule and cannot be null");
+                throw new ArgumentNullException("requirement is a required property for RequireBasicRequirementAllOf and cannot be null");
             }
-            this.AccessRule = accessRule;
+            this.Requirement = requirement;
         }
 
         /// <summary>
-        /// Gets or Sets AccessRule
+        /// Gets or Sets Requirement
         /// </summary>
-        [DataMember(Name = "access_rule", IsRequired = true, EmitDefaultValue = true)]
-        public CompositeRequirement AccessRule { get; set; }
+        [DataMember(Name = "requirement", IsRequired = true, EmitDefaultValue = true)]
+        public Requirement Requirement { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -133,9 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ProtectedAccessRule {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  AccessRule: ").Append(AccessRule).Append("\n");
+            sb.Append("class RequireBasicRequirementAllOf {\n");
+            sb.Append("  Requirement: ").Append(Requirement).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -156,25 +149,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ProtectedAccessRule);
+            return this.Equals(input as RequireBasicRequirementAllOf);
         }
 
         /// <summary>
-        /// Returns true if ProtectedAccessRule instances are equal
+        /// Returns true if RequireBasicRequirementAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ProtectedAccessRule to be compared</param>
+        /// <param name="input">Instance of RequireBasicRequirementAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ProtectedAccessRule input)
+        public bool Equals(RequireBasicRequirementAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.AccessRule == input.AccessRule ||
-                    (this.AccessRule != null &&
-                    this.AccessRule.Equals(input.AccessRule))
+                    this.Requirement == input.Requirement ||
+                    (this.Requirement != null &&
+                    this.Requirement.Equals(input.Requirement))
                 );
         }
 
@@ -186,10 +179,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.AccessRule != null)
+                int hashCode = 41;
+                if (this.Requirement != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRule.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Requirement.GetHashCode();
                 }
                 return hashCode;
             }

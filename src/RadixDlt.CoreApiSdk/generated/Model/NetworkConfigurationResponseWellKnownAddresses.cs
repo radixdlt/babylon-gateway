@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Key addresses for this network.
+    /// Key addresses for this network, as per https://docs.radixdlt.com/docs/well-known-addresses.  Note that at Cuttlefish, some of these names have been updated elsewhere in the stack, but for backwards compatibility, we must use the old names here.  Notably: - &#x60;secp256k1_signature_virtual_badge&#x60; is now &#x60;secp256k1_signature_resource&#x60; elsewhere - &#x60;ed25519_signature_virtual_badge&#x60; is now &#x60;ed25519_signature_resource&#x60; elsewhere - &#x60;package_of_direct_caller_virtual_badge&#x60; is now &#x60;package_of_direct_caller_resource&#x60; elsewhere - &#x60;global_caller_virtual_badge&#x60; is now &#x60;global_caller_resource&#x60; elsewhere - &#x60;system_transaction_badge&#x60; is now &#x60;system_transaction_resource&#x60; elsewhere 
     /// </summary>
     [DataContract(Name = "NetworkConfigurationResponse_well_known_addresses")]
     public partial class NetworkConfigurationResponseWellKnownAddresses : IEquatable<NetworkConfigurationResponseWellKnownAddresses>
@@ -106,9 +106,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="xrd">xrd (required).</param>
         /// <param name="secp256k1SignatureVirtualBadge">secp256k1SignatureVirtualBadge (required).</param>
         /// <param name="ed25519SignatureVirtualBadge">ed25519SignatureVirtualBadge (required).</param>
+        /// <param name="systemTransactionBadge">systemTransactionBadge (required).</param>
         /// <param name="packageOfDirectCallerVirtualBadge">packageOfDirectCallerVirtualBadge (required).</param>
         /// <param name="globalCallerVirtualBadge">globalCallerVirtualBadge (required).</param>
-        /// <param name="systemTransactionBadge">systemTransactionBadge (required).</param>
         /// <param name="packageOwnerBadge">packageOwnerBadge (required).</param>
         /// <param name="validatorOwnerBadge">validatorOwnerBadge (required).</param>
         /// <param name="accountOwnerBadge">accountOwnerBadge (required).</param>
@@ -126,12 +126,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="genesisHelperPackage">genesisHelperPackage (required).</param>
         /// <param name="faucetPackage">faucetPackage (required).</param>
         /// <param name="poolPackage">poolPackage (required).</param>
+        /// <param name="transactionTrackerPackage">transactionTrackerPackage.</param>
         /// <param name="lockerPackage">lockerPackage.</param>
+        /// <param name="testUtilsPackage">testUtilsPackage.</param>
         /// <param name="consensusManager">consensusManager (required).</param>
         /// <param name="genesisHelper">genesisHelper (required).</param>
         /// <param name="faucet">faucet (required).</param>
         /// <param name="transactionTracker">transactionTracker (required).</param>
-        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string roleAssignmentModulePackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string poolPackage = default(string), string lockerPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string), string transactionTracker = default(string))
+        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string roleAssignmentModulePackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string poolPackage = default(string), string transactionTrackerPackage = default(string), string lockerPackage = default(string), string testUtilsPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string), string transactionTracker = default(string))
         {
             // to ensure "xrd" is required (not null)
             if (xrd == null)
@@ -151,6 +153,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("ed25519SignatureVirtualBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.Ed25519SignatureVirtualBadge = ed25519SignatureVirtualBadge;
+            // to ensure "systemTransactionBadge" is required (not null)
+            if (systemTransactionBadge == null)
+            {
+                throw new ArgumentNullException("systemTransactionBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.SystemTransactionBadge = systemTransactionBadge;
             // to ensure "packageOfDirectCallerVirtualBadge" is required (not null)
             if (packageOfDirectCallerVirtualBadge == null)
             {
@@ -163,12 +171,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("globalCallerVirtualBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.GlobalCallerVirtualBadge = globalCallerVirtualBadge;
-            // to ensure "systemTransactionBadge" is required (not null)
-            if (systemTransactionBadge == null)
-            {
-                throw new ArgumentNullException("systemTransactionBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
-            }
-            this.SystemTransactionBadge = systemTransactionBadge;
             // to ensure "packageOwnerBadge" is required (not null)
             if (packageOwnerBadge == null)
             {
@@ -295,7 +297,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("transactionTracker is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.TransactionTracker = transactionTracker;
+            this.TransactionTrackerPackage = transactionTrackerPackage;
             this.LockerPackage = lockerPackage;
+            this.TestUtilsPackage = testUtilsPackage;
         }
 
         /// <summary>
@@ -317,6 +321,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Ed25519SignatureVirtualBadge { get; set; }
 
         /// <summary>
+        /// Gets or Sets SystemTransactionBadge
+        /// </summary>
+        [DataMember(Name = "system_transaction_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string SystemTransactionBadge { get; set; }
+
+        /// <summary>
         /// Gets or Sets PackageOfDirectCallerVirtualBadge
         /// </summary>
         [DataMember(Name = "package_of_direct_caller_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
@@ -327,12 +337,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "global_caller_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
         public string GlobalCallerVirtualBadge { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SystemTransactionBadge
-        /// </summary>
-        [DataMember(Name = "system_transaction_badge", IsRequired = true, EmitDefaultValue = true)]
-        public string SystemTransactionBadge { get; set; }
 
         /// <summary>
         /// Gets or Sets PackageOwnerBadge
@@ -437,10 +441,22 @@ namespace RadixDlt.CoreApiSdk.Model
         public string PoolPackage { get; set; }
 
         /// <summary>
+        /// Gets or Sets TransactionTrackerPackage
+        /// </summary>
+        [DataMember(Name = "transaction_tracker_package", EmitDefaultValue = true)]
+        public string TransactionTrackerPackage { get; set; }
+
+        /// <summary>
         /// Gets or Sets LockerPackage
         /// </summary>
         [DataMember(Name = "locker_package", EmitDefaultValue = true)]
         public string LockerPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TestUtilsPackage
+        /// </summary>
+        [DataMember(Name = "test_utils_package", EmitDefaultValue = true)]
+        public string TestUtilsPackage { get; set; }
 
         /// <summary>
         /// Gets or Sets ConsensusManager
@@ -477,9 +493,9 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Xrd: ").Append(Xrd).Append("\n");
             sb.Append("  Secp256k1SignatureVirtualBadge: ").Append(Secp256k1SignatureVirtualBadge).Append("\n");
             sb.Append("  Ed25519SignatureVirtualBadge: ").Append(Ed25519SignatureVirtualBadge).Append("\n");
+            sb.Append("  SystemTransactionBadge: ").Append(SystemTransactionBadge).Append("\n");
             sb.Append("  PackageOfDirectCallerVirtualBadge: ").Append(PackageOfDirectCallerVirtualBadge).Append("\n");
             sb.Append("  GlobalCallerVirtualBadge: ").Append(GlobalCallerVirtualBadge).Append("\n");
-            sb.Append("  SystemTransactionBadge: ").Append(SystemTransactionBadge).Append("\n");
             sb.Append("  PackageOwnerBadge: ").Append(PackageOwnerBadge).Append("\n");
             sb.Append("  ValidatorOwnerBadge: ").Append(ValidatorOwnerBadge).Append("\n");
             sb.Append("  AccountOwnerBadge: ").Append(AccountOwnerBadge).Append("\n");
@@ -497,7 +513,9 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  GenesisHelperPackage: ").Append(GenesisHelperPackage).Append("\n");
             sb.Append("  FaucetPackage: ").Append(FaucetPackage).Append("\n");
             sb.Append("  PoolPackage: ").Append(PoolPackage).Append("\n");
+            sb.Append("  TransactionTrackerPackage: ").Append(TransactionTrackerPackage).Append("\n");
             sb.Append("  LockerPackage: ").Append(LockerPackage).Append("\n");
+            sb.Append("  TestUtilsPackage: ").Append(TestUtilsPackage).Append("\n");
             sb.Append("  ConsensusManager: ").Append(ConsensusManager).Append("\n");
             sb.Append("  GenesisHelper: ").Append(GenesisHelper).Append("\n");
             sb.Append("  Faucet: ").Append(Faucet).Append("\n");
@@ -553,6 +571,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Ed25519SignatureVirtualBadge.Equals(input.Ed25519SignatureVirtualBadge))
                 ) && 
                 (
+                    this.SystemTransactionBadge == input.SystemTransactionBadge ||
+                    (this.SystemTransactionBadge != null &&
+                    this.SystemTransactionBadge.Equals(input.SystemTransactionBadge))
+                ) && 
+                (
                     this.PackageOfDirectCallerVirtualBadge == input.PackageOfDirectCallerVirtualBadge ||
                     (this.PackageOfDirectCallerVirtualBadge != null &&
                     this.PackageOfDirectCallerVirtualBadge.Equals(input.PackageOfDirectCallerVirtualBadge))
@@ -561,11 +584,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.GlobalCallerVirtualBadge == input.GlobalCallerVirtualBadge ||
                     (this.GlobalCallerVirtualBadge != null &&
                     this.GlobalCallerVirtualBadge.Equals(input.GlobalCallerVirtualBadge))
-                ) && 
-                (
-                    this.SystemTransactionBadge == input.SystemTransactionBadge ||
-                    (this.SystemTransactionBadge != null &&
-                    this.SystemTransactionBadge.Equals(input.SystemTransactionBadge))
                 ) && 
                 (
                     this.PackageOwnerBadge == input.PackageOwnerBadge ||
@@ -653,9 +671,19 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.PoolPackage.Equals(input.PoolPackage))
                 ) && 
                 (
+                    this.TransactionTrackerPackage == input.TransactionTrackerPackage ||
+                    (this.TransactionTrackerPackage != null &&
+                    this.TransactionTrackerPackage.Equals(input.TransactionTrackerPackage))
+                ) && 
+                (
                     this.LockerPackage == input.LockerPackage ||
                     (this.LockerPackage != null &&
                     this.LockerPackage.Equals(input.LockerPackage))
+                ) && 
+                (
+                    this.TestUtilsPackage == input.TestUtilsPackage ||
+                    (this.TestUtilsPackage != null &&
+                    this.TestUtilsPackage.Equals(input.TestUtilsPackage))
                 ) && 
                 (
                     this.ConsensusManager == input.ConsensusManager ||
@@ -700,6 +728,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Ed25519SignatureVirtualBadge.GetHashCode();
                 }
+                if (this.SystemTransactionBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.SystemTransactionBadge.GetHashCode();
+                }
                 if (this.PackageOfDirectCallerVirtualBadge != null)
                 {
                     hashCode = (hashCode * 59) + this.PackageOfDirectCallerVirtualBadge.GetHashCode();
@@ -707,10 +739,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.GlobalCallerVirtualBadge != null)
                 {
                     hashCode = (hashCode * 59) + this.GlobalCallerVirtualBadge.GetHashCode();
-                }
-                if (this.SystemTransactionBadge != null)
-                {
-                    hashCode = (hashCode * 59) + this.SystemTransactionBadge.GetHashCode();
                 }
                 if (this.PackageOwnerBadge != null)
                 {
@@ -780,9 +808,17 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.PoolPackage.GetHashCode();
                 }
+                if (this.TransactionTrackerPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.TransactionTrackerPackage.GetHashCode();
+                }
                 if (this.LockerPackage != null)
                 {
                     hashCode = (hashCode * 59) + this.LockerPackage.GetHashCode();
+                }
+                if (this.TestUtilsPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.TestUtilsPackage.GetHashCode();
                 }
                 if (this.ConsensusManager != null)
                 {
