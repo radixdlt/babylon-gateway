@@ -1407,3 +1407,46 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241111165721_AddUserLedgerTransactionV2Support') THEN
+    ALTER TYPE ledger_transaction_type ADD VALUE 'user_v2' BEFORE 'round_update';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241111165721_AddUserLedgerTransactionV2Support') THEN
+    CREATE TABLE ledger_finalized_subintents (
+        subintent_hash character varying(90) NOT NULL,
+        finalized_at_state_version bigint NOT NULL,
+        finalized_at_transaction_intent_hash character varying(90) NOT NULL,
+        CONSTRAINT "PK_ledger_finalized_subintents" PRIMARY KEY (subintent_hash)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241111165721_AddUserLedgerTransactionV2Support') THEN
+    CREATE TABLE ledger_transaction_subintent_data (
+        state_version bigint NOT NULL,
+        child_subintent_hashes text[] NOT NULL,
+        subintent_data jsonb NOT NULL,
+        CONSTRAINT "PK_ledger_transaction_subintent_data" PRIMARY KEY (state_version)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241111165721_AddUserLedgerTransactionV2Support') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20241111165721_AddUserLedgerTransactionV2Support', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+

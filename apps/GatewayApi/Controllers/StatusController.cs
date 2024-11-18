@@ -128,7 +128,9 @@ public sealed class StatusController : ControllerBase
                 faucet: wellKnownAddresses.Faucet,
                 poolPackage: wellKnownAddresses.PoolPackage,
                 lockerPackage: wellKnownAddresses.LockerPackage,
-                transactionTracker: wellKnownAddresses.TransactionTracker
+                transactionTracker: wellKnownAddresses.TransactionTracker,
+                transactionTrackerPackage: wellKnownAddresses.TransactionTrackerPackage,
+                testUtilsPackage: wellKnownAddresses.TestUtilsPackage
             )
         );
     }

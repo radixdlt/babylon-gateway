@@ -202,7 +202,7 @@ internal class GenesisLedgerTransaction : LedgerTransaction
 {
 }
 
-internal class UserLedgerTransaction : LedgerTransaction
+internal abstract class BaseUserLedgerTransaction : LedgerTransaction
 {
     /// <summary>
     /// The transaction payload hash, also known as the notarized transaction hash (for user transactions).
@@ -238,6 +238,14 @@ internal class UserLedgerTransaction : LedgerTransaction
 
     [Column("manifest_classes")]
     public LedgerTransactionManifestClass[] ManifestClasses { get; set; }
+}
+
+internal class UserLedgerTransactionV1 : BaseUserLedgerTransaction
+{
+}
+
+internal class UserLedgerTransactionV2 : BaseUserLedgerTransaction
+{
 }
 
 internal class RoundUpdateLedgerTransaction : LedgerTransaction

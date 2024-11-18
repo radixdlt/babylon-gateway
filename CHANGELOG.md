@@ -1,3 +1,19 @@
+## 1.9.0
+Release built: _not released yet_
+
+### What’s new?
+- Added support for the `cuttlefish` protocol version.
+
+### API Changes
+- Added a new `/transaction/subintent-status` endpoint to check the status of a transaction subintent.
+- Added two new optional fields to the `/transaction/committed-details` endpoint: `subintent_details` and `child_subintent_hashes`, which provide information about transaction subintents if present.
+- Added a new `/transaction/preview-v2` endpoint to preview transactions. This supports V2 transactions and beyond. If you still need to preview V1 transactions, use the `/transaction/preview` endpoint instead.
+
+### Database changes
+- New `ledger_finalized_subintents` table that stores information about subintent status.
+- New `UserV2` ledger transaction type discriminator in the `ledger_transactions` table.
+- New `ledger_transaction_subintent_data` table that stores additional information about the transaction's subintents.
+
 ## 1.8.2
 Release built: 4.11.2024
 

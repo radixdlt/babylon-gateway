@@ -82,6 +82,8 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 public interface ITransactionPreviewService
 {
     Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default);
+
+    Task<GatewayModel.TransactionPreviewV2Response> HandlePreviewV2Request(GatewayModel.TransactionPreviewV2Request request, CancellationToken token = default);
 }
 
 internal class TransactionPreviewService : ITransactionPreviewService
@@ -91,7 +93,11 @@ internal class TransactionPreviewService : ITransactionPreviewService
     private readonly IEnumerable<ITransactionPreviewServiceObserver> _observers;
     private readonly ILogger _logger;
 
-    public TransactionPreviewService(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, IEnumerable<ITransactionPreviewServiceObserver> observers, ILogger<TransactionPreviewService> logger)
+    public TransactionPreviewService(
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ICoreApiProvider coreApiProvider,
+        IEnumerable<ITransactionPreviewServiceObserver> observers,
+        ILogger<TransactionPreviewService> logger)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _coreApiProvider = coreApiProvider;
@@ -121,6 +127,28 @@ internal class TransactionPreviewService : ITransactionPreviewService
         }
     }
 
+    public async Task<GatewayModel.TransactionPreviewV2Response> HandlePreviewV2Request(GatewayModel.TransactionPreviewV2Request request, CancellationToken token = default)
+    {
+        var selectedNode = _coreApiProvider.CoreApiNode;
+
+        try
+        {
+            await _observers.ForEachAsync(x => x.PreHandlePreviewV2Request(request, selectedNode.Name));
+
+            var response = await HandlePreviewV2AndCreateResponse(request, token);
+
+            await _observers.ForEachAsync(x => x.PostHandlePreviewV2Request(request, selectedNode.Name, response));
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            await _observers.ForEachAsync(x => x.HandlePreviewV2RequestFailed(request, selectedNode.Name, ex));
+
+            throw;
+        }
+    }
+
     private async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewAndCreateResponse(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
     {
         CoreModel.PublicKey? MapPublicKey(GatewayModel.PublicKey? publicKey) => publicKey switch
@@ -131,7 +159,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
             _ => throw new UnreachableException($"Didn't expect {publicKey.GetType().Name} type"),
         };
 
-        var coreRequestFlags = new CoreModel.TransactionPreviewRequestFlags(
+        var coreRequestFlags = new CoreModel.PreviewFlags(
             useFreeCredit: request.Flags.UseFreeCredit,
             assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
             skipEpochCheck: request.Flags.SkipEpochCheck,
@@ -168,8 +196,9 @@ internal class TransactionPreviewService : ITransactionPreviewService
             flags: coreRequestFlags,
             options: new CoreModel.TransactionPreviewResponseOptions(request.OptIns?.RadixEngineToolkitReceipt ?? false));
 
-        var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() =>
-            _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(coreRequest, token));
+        var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(
+            () =>
+                _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(coreRequest, token));
 
         if (result.Succeeded)
         {
@@ -181,6 +210,48 @@ internal class TransactionPreviewService : ITransactionPreviewService
                 receipt: coreResponse.Receipt,
                 resourceChanges: coreResponse.InstructionResourceChanges.Cast<object>().ToList(),
                 logs: coreResponse.Logs.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
+        }
+
+        throw InvalidRequestException.FromOtherError(result.FailureResponse.Message);
+    }
+
+    private async Task<GatewayModel.TransactionPreviewV2Response> HandlePreviewV2AndCreateResponse(GatewayModel.TransactionPreviewV2Request request, CancellationToken token)
+    {
+        CoreModel.PreviewTransaction MapPreviewTransaction(GatewayModel.PreviewTransaction previewTransaction)
+            => previewTransaction switch
+            {
+                GatewayModel.CompiledPreviewTransaction compiledPreviewTransactionV2 => new CoreModel.CompiledPreviewTransaction(compiledPreviewTransactionV2.PreviewTransactionHex),
+                _ => throw new ArgumentOutOfRangeException(nameof(previewTransaction)),
+            };
+
+        var coreRequestFlags = new CoreModel.PreviewFlags(
+            useFreeCredit: request.Flags.UseFreeCredit,
+            assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
+            skipEpochCheck: request.Flags.SkipEpochCheck,
+            disableAuthChecks: request.Flags.DisableAuthChecks);
+
+        var coreRequest = new CoreModel.TransactionPreviewV2Request(
+            network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
+            previewTransaction: MapPreviewTransaction(request.PreviewTransaction),
+            flags: coreRequestFlags,
+            options: new CoreModel.TransactionPreviewV2ResponseOptions(
+                coreApiReceipt: request.OptIns?.CoreApiReceipt ?? false,
+                radixEngineToolkitReceipt: request.OptIns?.RadixEngineToolkitReceipt ?? false,
+                logs: request.OptIns?.Logs ?? false
+            ));
+
+        var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewV2Response, CoreModel.TransactionPreviewV2ErrorResponse>(
+            () => _coreApiProvider.TransactionApi.TransactionPreviewV2PostAsync(coreRequest, token));
+
+        if (result.Succeeded)
+        {
+            var coreResponse = result.SuccessResponse;
+
+            return new GatewayModel.TransactionPreviewV2Response(
+                radixEngineToolkitReceipt: coreResponse.RadixEngineToolkitReceipt,
+                atLedgerStateVersion: coreResponse.AtLedgerState.StateVersion,
+                receipt: coreResponse.Receipt,
+                logs: coreResponse.Logs?.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
         }
 
         throw InvalidRequestException.FromOtherError(result.FailureResponse.Message);

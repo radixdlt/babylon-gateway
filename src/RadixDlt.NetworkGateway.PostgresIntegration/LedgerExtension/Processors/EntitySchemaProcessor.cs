@@ -233,6 +233,7 @@ internal class EntitySchemaProcessor : IProcessorBase, ISubstateUpsertProcessor,
                 };
 
                 _definitionsToAdd.Add(entryDefinition);
+                _existingSchemas.Add(new SchemaDefinitionEntryDbLookup(entryDefinition.EntityId, entryDefinition.SchemaHash), entryDefinition);
 
                 aggregate.EntryIds.Insert(0, entryDefinition.Id);
             }

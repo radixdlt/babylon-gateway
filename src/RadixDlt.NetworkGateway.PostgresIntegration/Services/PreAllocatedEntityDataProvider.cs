@@ -131,7 +131,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
         var roleAssignmentOwnerProofGlobalId = decoded.IsSecp256k()
             ? new CoreModel.NonFungibleGlobalId(networkConfiguration.WellKnownAddresses.Secp256k1SignatureVirtualBadge, roleAssignmentOwnerProofLocalId)
             : new CoreModel.NonFungibleGlobalId(networkConfiguration.WellKnownAddresses.Ed25519SignatureVirtualBadge, roleAssignmentOwnerProofLocalId);
-        var ownerRule = new CoreModel.ProtectedAccessRule(new CoreModel.ProofAccessRuleNode(new CoreModel.RequireProofRule(new CoreModel.NonFungibleRequirement(roleAssignmentOwnerProofGlobalId))));
+        var ownerRule = new CoreModel.ProtectedAccessRule(new CoreModel.ProofRuleCompositeRequirement(new CoreModel.RequireBasicRequirement(new CoreModel.NonFungibleRequirement(roleAssignmentOwnerProofGlobalId))));
         var roleAssignmentOwner = new CoreModel.OwnerRole(rule: ownerRule, updater: CoreModel.OwnerRoleUpdater.Object);
 
         var securifyRule = new[]
@@ -191,7 +191,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
     private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GeneratePreAllocatedIdentityRoleAssignmentEntries(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
         return roleAssignmentsKeyProvider
-            .AllNativeModulesKeys
+            .MetadataModulesKeys
             .Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
                 new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ModuleId.ToGatewayModel()),
                 new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),

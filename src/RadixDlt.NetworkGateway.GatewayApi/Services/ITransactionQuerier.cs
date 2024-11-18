@@ -73,6 +73,8 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ITransactionQuerier
 {
+    Task<(string? RandomIntentHash, string? RandomSubintentHash, long? CurrentEpoch)> GetOpenApiDocumentHandlerDetails(CancellationToken token = default);
+
     Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
 
     Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
@@ -85,6 +87,11 @@ public interface ITransactionQuerier
     Task<GatewayModel.TransactionStatusResponse> ResolveTransactionStatusResponse(
         GatewayModel.LedgerState ledgerState,
         string intentHash,
+        CancellationToken token = default);
+
+    Task<GatewayModel.TransactionSubintentStatusResponse> ResolveTransactionSubintentStatusResponse(
+        GatewayModel.LedgerState ledgerState,
+        string subintentHash,
         CancellationToken token = default);
 }
 
