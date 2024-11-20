@@ -1,5 +1,14 @@
-## 1.9.0
+## 1.10.0
 Release built: _not released yet_
+
+## 1.9.1
+Release built: 20.11.2024
+
+### What’s new?
+- Added support for the `cuttlefish-part2` protocol version.
+
+## 1.9.0
+Release built: 18.11.2024
 
 ### What’s new?
 - Added support for the `cuttlefish` protocol version.
