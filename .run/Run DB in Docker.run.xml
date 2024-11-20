@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run DB in Docker" type="RunNativeExe" factoryName="Native Executable">
+    <option name="EXE_PATH" value="$PROJECT_DIR$/deployment/run-only-network-gateway-resources.sh" />
+    <option name="PROGRAM_PARAMETERS" value="" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/deployment" />
+    <option name="PASS_PARENT_ENVS" value="1" />
+    <option name="USE_EXTERNAL_CONSOLE" value="0" />
+    <method v="2" />
+  </configuration>
+</component>
