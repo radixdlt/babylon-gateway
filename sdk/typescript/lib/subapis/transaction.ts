@@ -5,7 +5,7 @@ import {
 } from '../generated'
 
 export class Transaction {
-  constructor(public innerClient: TransactionApi) {}
+  constructor(public innerClient: TransactionApi) { }
 
   /**
    * Get transaction status for given transaction id. Possible transaction statuses are: Unknown, CommittedSuccess, CommittedFailure, Pending, Rejected
@@ -44,6 +44,7 @@ export class Transaction {
       affectedGlobalEntities: boolean
       balanceChanges: boolean
       receiptOutput: boolean
+      manifestInstructions: boolean
     }
   ): Promise<TransactionCommittedDetailsResponse> {
     return this.innerClient.transactionCommittedDetails({
@@ -60,6 +61,7 @@ export class Transaction {
           affected_global_entities: options?.affectedGlobalEntities ?? true,
           balance_changes: options?.balanceChanges ?? true,
           receipt_output: options?.receiptOutput ?? true,
+          manifest_instructions: options?.manifestInstructions ?? true,
         },
       },
     })
