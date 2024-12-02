@@ -1,4 +1,4 @@
-## 1.10.0
+## 1.9.2
 Release built: _not released yet_
 
 ## 1.9.1
