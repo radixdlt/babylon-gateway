@@ -68,6 +68,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -112,7 +113,17 @@ internal class AccountStateQuerier : IAccountStateQuerier
         int limit,
         CancellationToken token = default)
     {
-        var accountEntity = await _entityQuerier.GetNonPreAllocatedEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
+        var accountEntity = await _entityQuerier.GetEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
+        if (accountEntity is PreAllocatedAccountComponentEntity)
+        {
+            return new GatewayModel.StateAccountResourcePreferencesPageResponse(
+                ledgerState: ledgerState,
+                accountAddress: accountAddress,
+                totalCount: 0,
+                nextCursor: null,
+                items: new List<GatewayModel.AccountResourcePreferencesResponseItem>()
+            );
+        }
 
         var parameters = new
         {
@@ -173,7 +184,17 @@ ORDER BY resource_preference_join.ordinality ASC;",
         int limit,
         CancellationToken token = default)
     {
-        var accountEntity = await _entityQuerier.GetNonPreAllocatedEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
+        var accountEntity = await _entityQuerier.GetEntity<GlobalAccountEntity>(accountAddress, ledgerState, token);
+        if (accountEntity is PreAllocatedAccountComponentEntity)
+        {
+            return new GatewayModel.StateAccountAuthorizedDepositorsPageResponse(
+                ledgerState: ledgerState,
+                accountAddress: accountAddress,
+                totalCount: 0,
+                nextCursor: null,
+                items: new List<GatewayModel.AccountAuthorizedDepositorsResponseItem>()
+            );
+        }
 
         var parameters = new
         {

@@ -1,6 +1,9 @@
 ## 1.9.2
 Release built: _not released yet_
 
+### What’s new?
+- Added support for pre-allocated, non-persisted accounts in the `/state/account/page/resource-preferences` and `/state/account/page/authorized-depositors` endpoints.
+
 ## 1.9.1
 Release built: 20.11.2024
 
