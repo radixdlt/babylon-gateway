@@ -219,7 +219,7 @@ WHERE bwr.root_correlated_entity_relationship = ANY('{resource_pool_to_resource_
                     return new GatewayModel.NativeResourceValidatorClaimNftValue(rootEntityAddress);
                 }
 
-                var baseTotalSupply = grouping.First().BaseTotalSupply ?? throw new InvalidOperationException($"BaseTotalSupply cannot be empty on {grouping.Key}");
+                var baseTotalSupply = grouping.First().BaseTotalSupply ?? TokenAmount.Zero;
                 var redemptionValues = new List<GatewayModel.NativeResourceRedemptionValueItem>();
 
                 foreach (var entry in grouping)

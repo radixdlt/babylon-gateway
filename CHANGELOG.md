@@ -8,6 +8,9 @@ Release built: _not released yet_
 - Fixed a typo in the value `StoryOnlyForUserTransactionsAndEpochChanges` (replacing `Story` with `Store`) for the configuration entries `DataAggregator__Storage__StoreTransactionReceiptEvents` and `DataAggregator__Storage__StoreReceiptStateUpdates`. It now supports both values:
   - `StoreOnlyForUserTransactionsAndEpochChanges`
   - `StoryOnlyForUserTransactionsAndEpochChanges`
+- Fixed `/state/entity/details` when querying with `native_resource_details: true` option enabled for 
+  - a validator's LSU resource address when the validator was never active.
+  - a pool's unit resource when the pool had no contributions.
 
 ## 1.9.1
 Release built: 20.11.2024
