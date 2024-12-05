@@ -267,12 +267,13 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
                         })
                     .ToList();
 
-                _subintentDataToAdd.Add(new LedgerTransactionSubintentData
-                {
-                    StateVersion = stateVersion,
-                    ChildSubintentHashes = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.ChildrenSpecifiers,
-                    SubintentData = JsonConvert.SerializeObject(subintentData),
-                });
+                _subintentDataToAdd.Add(
+                    new LedgerTransactionSubintentData
+                    {
+                        StateVersion = stateVersion,
+                        ChildSubintentHashes = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.ChildrenSpecifiers,
+                        SubintentData = JsonConvert.SerializeObject(subintentData),
+                    });
             }
 
             var isUserTransaction = committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction or CoreModel.UserLedgerTransactionV2;
@@ -280,7 +281,9 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
 
             if (_context.StorageOptions.StoreReceiptStateUpdates == LedgerTransactionStorageOption.StoreForAllTransactions ||
                 (_context.StorageOptions.StoreReceiptStateUpdates == LedgerTransactionStorageOption.StoreOnlyForUserTransactions && isUserTransaction) ||
-                (_context.StorageOptions.StoreReceiptStateUpdates == LedgerTransactionStorageOption.StoryOnlyForUserTransactionsAndEpochChanges && isUserTransactionOrEpochChange)
+                (_context.StorageOptions.StoreReceiptStateUpdates
+                    is LedgerTransactionStorageOption.StoreOnlyForUserTransactionsAndEpochChanges
+                    or LedgerTransactionStorageOption.StoryOnlyForUserTransactionsAndEpochChanges && isUserTransactionOrEpochChange)
                )
             {
                 ledgerTransaction.ReceiptStateUpdates = committedTransaction.Receipt.StateUpdates.ToJson();
@@ -288,7 +291,10 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
 
             if (_context.StorageOptions.StoreTransactionReceiptEvents == LedgerTransactionStorageOption.StoreForAllTransactions ||
                 (_context.StorageOptions.StoreTransactionReceiptEvents == LedgerTransactionStorageOption.StoreOnlyForUserTransactions && isUserTransaction) ||
-                (_context.StorageOptions.StoreTransactionReceiptEvents == LedgerTransactionStorageOption.StoryOnlyForUserTransactionsAndEpochChanges && isUserTransactionOrEpochChange)
+                (_context.StorageOptions.StoreTransactionReceiptEvents
+                     is LedgerTransactionStorageOption.StoreOnlyForUserTransactionsAndEpochChanges
+                     or LedgerTransactionStorageOption.StoryOnlyForUserTransactionsAndEpochChanges
+                 && isUserTransactionOrEpochChange)
                )
             {
                 var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();

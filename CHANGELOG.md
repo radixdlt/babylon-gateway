@@ -4,6 +4,11 @@ Release built: _not released yet_
 ### What’s new?
 - Added support for pre-allocated, non-persisted accounts in the `/state/account/page/resource-preferences` and `/state/account/page/authorized-depositors` endpoints.
 
+### Bug fixes
+- Fixed a typo in the value `StoryOnlyForUserTransactionsAndEpochChanges` (replacing `Story` with `Store`) for the configuration entries `DataAggregator__Storage__StoreTransactionReceiptEvents` and `DataAggregator__Storage__StoreReceiptStateUpdates`. It now supports both values:
+  - `StoreOnlyForUserTransactionsAndEpochChanges`
+  - `StoryOnlyForUserTransactionsAndEpochChanges`
+
 ## 1.9.1
 Release built: 20.11.2024
 
@@ -82,7 +87,7 @@ Release built: 23.10.2024
 - New configuration options `DataAggregator__Storage__StoreTransactionReceiptEvents`, and `DataAggregator__Storage__StoreReceiptStateUpdates` for the data aggregator to configure if a transaction's receipt events and receipt state updates should be stored in the database. It is meant to be used by gateway runners who want to reduce their database size. Keep in mind that when disabled, the corresponding properties will be missing on a response from both the `/stream/transactions` and the `/transaction/committed-details` endpoints. You can save significant space by using `StoryOnlyForUserTransactionsAndEpochChanges` and only excluding round change transactions, which aren't typically read from the `/stream/transactions` endpoint.
   - Possible values:
     - `StoreForAllTransactions` (default) - will store data for all transactions.
-    - `StoryOnlyForUserTransactionsAndEpochChanges` - will store data for user transactions and transactions that resulted in epoch change.
+    - `StoreOnlyForUserTransactionsAndEpochChanges` - will store data for user transactions and transactions that resulted in epoch change.
        - NOTE: The configuration option is spelt incorrectly. Please use the prefix `Story`. In a future version, this will be fixed, and both `Story` and `Store` will be accepted, for backwards-compatibility.
     - `StoreOnlyForUserTransactions` - will store data only for user transactions.
     - `DoNotStore` - will not store any data.
