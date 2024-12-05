@@ -104,7 +104,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="NativeResourceRedemptionValueItem" /> class.
         /// </summary>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource..</param>
+        /// <param name="amount">description: String-encoded decimal representing the amount of a related fungible resource.  This gives the amount of the given resource which will be received for redeeming 1 unit resource (e.g. pool units or validator stake units).  If there is zero supply of the unit resource, then the unit redemption value has no meaning and this field will not be returned. If clients are using this value as a multiplier for calculations, they can substitute any-non zero value such as \&quot;1\&quot; for the multiplier in this case. .</param>
         public NativeResourceRedemptionValueItem(string resourceAddress = default(string), string amount = default(string))
         {
             // to ensure "resourceAddress" is required (not null)
@@ -124,9 +124,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// description: String-encoded decimal representing the amount of a related fungible resource.  This gives the amount of the given resource which will be received for redeeming 1 unit resource (e.g. pool units or validator stake units).  If there is zero supply of the unit resource, then the unit redemption value has no meaning and this field will not be returned. If clients are using this value as a multiplier for calculations, they can substitute any-non zero value such as \&quot;1\&quot; for the multiplier in this case. 
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        /// <value>description: String-encoded decimal representing the amount of a related fungible resource.  This gives the amount of the given resource which will be received for redeeming 1 unit resource (e.g. pool units or validator stake units).  If there is zero supply of the unit resource, then the unit redemption value has no meaning and this field will not be returned. If clients are using this value as a multiplier for calculations, they can substitute any-non zero value such as \&quot;1\&quot; for the multiplier in this case. </value>
         [DataMember(Name = "amount", EmitDefaultValue = true)]
         public string Amount { get; set; }
 

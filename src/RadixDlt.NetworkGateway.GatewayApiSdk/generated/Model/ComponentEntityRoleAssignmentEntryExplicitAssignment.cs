@@ -91,35 +91,40 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentEntityRoleAssignmentEntryAssignment
+    /// ComponentEntityRoleAssignmentEntryExplicitAssignment
     /// </summary>
-    [DataContract(Name = "ComponentEntityRoleAssignmentEntryAssignment")]
+    [DataContract(Name = "ComponentEntityRoleAssignmentEntryExplicitAssignment")]
     [JsonConverter(typeof(JsonSubtypes), "resolution")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentEntityRoleAssignmentEntryExplicitAssignment), "ComponentEntityRoleAssignmentEntryExplicitAssignment")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentEntityRoleAssignmentEntryOwnerAssignment), "ComponentEntityRoleAssignmentEntryOwnerAssignment")]
     [JsonSubtypes.KnownSubType(typeof(ComponentEntityRoleAssignmentEntryExplicitAssignment), "Explicit")]
     [JsonSubtypes.KnownSubType(typeof(ComponentEntityRoleAssignmentEntryOwnerAssignment), "Owner")]
-    public partial class ComponentEntityRoleAssignmentEntryAssignment : IEquatable<ComponentEntityRoleAssignmentEntryAssignment>
+    public partial class ComponentEntityRoleAssignmentEntryExplicitAssignment : ComponentEntityRoleAssignmentEntryAssignment, IEquatable<ComponentEntityRoleAssignmentEntryExplicitAssignment>
     {
-
         /// <summary>
-        /// Gets or Sets Resolution
-        /// </summary>
-        [DataMember(Name = "resolution", IsRequired = true, EmitDefaultValue = true)]
-        public RoleAssignmentResolution Resolution { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryAssignment" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryExplicitAssignment" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentEntityRoleAssignmentEntryAssignment() { }
+        protected ComponentEntityRoleAssignmentEntryExplicitAssignment() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryAssignment" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryExplicitAssignment" /> class.
         /// </summary>
-        /// <param name="resolution">resolution (required).</param>
-        public ComponentEntityRoleAssignmentEntryAssignment(RoleAssignmentResolution resolution = default(RoleAssignmentResolution))
+        /// <param name="explicitRule">This type is defined in the Core API as &#x60;AccessRule&#x60;. See the Core API documentation for more details.  (required).</param>
+        /// <param name="resolution">resolution (required) (default to RoleAssignmentResolution.Explicit).</param>
+        public ComponentEntityRoleAssignmentEntryExplicitAssignment(Object explicitRule = default(Object), RoleAssignmentResolution resolution = RoleAssignmentResolution.Explicit) : base(resolution)
         {
-            this.Resolution = resolution;
+            // to ensure "explicitRule" is required (not null)
+            if (explicitRule == null)
+            {
+                throw new ArgumentNullException("explicitRule is a required property for ComponentEntityRoleAssignmentEntryExplicitAssignment and cannot be null");
+            }
+            this.ExplicitRule = explicitRule;
         }
+
+        /// <summary>
+        /// This type is defined in the Core API as &#x60;AccessRule&#x60;. See the Core API documentation for more details. 
+        /// </summary>
+        /// <value>This type is defined in the Core API as &#x60;AccessRule&#x60;. See the Core API documentation for more details. </value>
+        [DataMember(Name = "explicit_rule", IsRequired = true, EmitDefaultValue = true)]
+        public Object ExplicitRule { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +133,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentEntityRoleAssignmentEntryAssignment {\n");
-            sb.Append("  Resolution: ").Append(Resolution).Append("\n");
+            sb.Append("class ComponentEntityRoleAssignmentEntryExplicitAssignment {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  ExplicitRule: ").Append(ExplicitRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -138,7 +144,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -150,24 +156,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentEntityRoleAssignmentEntryAssignment);
+            return this.Equals(input as ComponentEntityRoleAssignmentEntryExplicitAssignment);
         }
 
         /// <summary>
-        /// Returns true if ComponentEntityRoleAssignmentEntryAssignment instances are equal
+        /// Returns true if ComponentEntityRoleAssignmentEntryExplicitAssignment instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentEntityRoleAssignmentEntryAssignment to be compared</param>
+        /// <param name="input">Instance of ComponentEntityRoleAssignmentEntryExplicitAssignment to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentEntityRoleAssignmentEntryAssignment input)
+        public bool Equals(ComponentEntityRoleAssignmentEntryExplicitAssignment input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Resolution == input.Resolution ||
-                    this.Resolution.Equals(input.Resolution)
+                    this.ExplicitRule == input.ExplicitRule ||
+                    (this.ExplicitRule != null &&
+                    this.ExplicitRule.Equals(input.ExplicitRule))
                 );
         }
 
@@ -179,8 +186,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Resolution.GetHashCode();
+                int hashCode = base.GetHashCode();
+                if (this.ExplicitRule != null)
+                {
+                    hashCode = (hashCode * 59) + this.ExplicitRule.GetHashCode();
+                }
                 return hashCode;
             }
         }
