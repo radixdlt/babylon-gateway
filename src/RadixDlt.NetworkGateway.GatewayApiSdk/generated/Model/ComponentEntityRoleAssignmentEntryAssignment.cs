@@ -91,7 +91,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentEntityRoleAssignmentEntryAssignment
+    /// Resolving the rule for this role:  If the resolution is Explicit, the rule can be read off the &#x60;explicit_rule&#x60; property on this object. If the resolution is Owner, the rule can be read off &#x60;role_assignments.owner.rule &#x60;off the role assignments object two levels up. 
     /// </summary>
     [DataContract(Name = "ComponentEntityRoleAssignmentEntryAssignment")]
     [JsonConverter(typeof(JsonSubtypes), "resolution")]
