@@ -88,6 +88,7 @@ public sealed class StorageOptionsValidator : AbstractOptionsValidator<StorageOp
 public enum LedgerTransactionStorageOption
 {
     StoreForAllTransactions,
+    StoreOnlyForUserTransactionsAndEpochChanges,
     StoryOnlyForUserTransactionsAndEpochChanges,
     StoreOnlyForUserTransactions,
     DoNotStore,

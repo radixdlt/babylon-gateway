@@ -138,7 +138,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
         {
             new GatewayModel.ComponentEntityRoleAssignmentEntry(
                 new GatewayModel.RoleKey("securify", GatewayModel.ObjectModuleId.Main),
-                new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Explicit, ownerRule),
+                new GatewayModel.ComponentEntityRoleAssignmentEntryExplicitAssignment(ownerRule),
                 new List<GatewayModel.RoleKey> { new("_self_", GatewayModel.ObjectModuleId.Main) }),
         };
 
@@ -182,7 +182,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
             .MetadataModulesKeys
             .Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
                 new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ModuleId.ToGatewayModel()),
-                new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
+                new GatewayModel.ComponentEntityRoleAssignmentEntryOwnerAssignment(),
                 entry.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ModuleId.ToGatewayModel())).ToList()
             ))
             .ToList();
@@ -194,7 +194,7 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
             .MetadataModulesKeys
             .Select(entry => new GatewayModel.ComponentEntityRoleAssignmentEntry(
                 new GatewayModel.RoleKey(entry.Key.Name, entry.Key.ModuleId.ToGatewayModel()),
-                new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
+                new GatewayModel.ComponentEntityRoleAssignmentEntryOwnerAssignment(),
                 entry.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ModuleId.ToGatewayModel())).ToList()
             ))
             .ToList();

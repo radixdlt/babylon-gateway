@@ -95,6 +95,7 @@ internal class DefaultAccountHandler : IAccountHandler
     public async Task<GatewayModel.StateAccountResourcePreferencesPageResponse> ResourcePreferences(GatewayModel.StateAccountResourcePreferencesPageRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+
         return await _accountStateQuerier.AccountResourcePreferences(
             accountAddress: (EntityAddress)request.AccountAddress,
             ledgerState: ledgerState,
@@ -108,6 +109,7 @@ internal class DefaultAccountHandler : IAccountHandler
         CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+
         return await _accountStateQuerier.AccountAuthorizedDepositors(
             accountAddress: (EntityAddress)request.AccountAddress,
             ledgerState: ledgerState,

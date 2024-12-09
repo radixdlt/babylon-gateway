@@ -1,5 +1,14 @@
-## 1.10.0
-Release built: _not released yet_
+## 1.9.2
+Release built: 9.12.2024
+
+### Bug fixes
+- Fixed a HTTP 500 response issue when querying the `/state/entity/details` endpoint with the `native_resource_details: true` opt-in for:
+    - a validator's LSU resource address when the validator was never active.
+    - a pool's unit resource when the pool had no contributions.
+- Added support for pre-allocated, non-persisted accounts in the `/state/account/page/resource-preferences` and `/state/account/page/authorized-depositors` endpoints.
+- Fixed a typo in the value `StoryOnlyForUserTransactionsAndEpochChanges` (replacing `Story` with `Store`) for the configuration entries `DataAggregator__Storage__StoreTransactionReceiptEvents` and `DataAggregator__Storage__StoreReceiptStateUpdates`. It now supports both values:
+  - `StoreOnlyForUserTransactionsAndEpochChanges`
+  - `StoryOnlyForUserTransactionsAndEpochChanges`
 
 ## 1.9.1
 Release built: 20.11.2024

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.9.0
+  version: v1.9.2
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
@@ -2160,7 +2160,6 @@ components:
         If a constraint is specified, the Gateway will resolve the request against the ledger state at that time.
         If not specified, requests will be made with respect to the top of the committed ledger.
       type: object
-      nullable: true
       properties:
         state_version:
           description: If provided, the latest ledger state lower than or equal to the given state version is returned.
@@ -2195,7 +2194,6 @@ components:
         cursor:
           description: This cursor allows forward pagination, by providing the cursor from the previous request.
           type: string
-          nullable: true
         limit_per_page:
           description: The page size requested.
           type: integer
@@ -2268,7 +2266,6 @@ components:
         next_cursor:
           description: If specified, contains a cursor to query next page of the `items` collection.
           type: string
-          nullable: true
 
     LedgerState:
       description: |
@@ -2584,6 +2581,8 @@ components:
           items:
             $ref: "#/components/schemas/ComponentEntityRoleAssignmentEntry"
 
+
+
     ComponentEntityRoleAssignmentEntry:
       type: object
       required:
@@ -2593,20 +2592,47 @@ components:
         role_key:
           $ref: "#/components/schemas/RoleKey"
         assignment:
-          type: object
-          required:
-            - resolution
-          properties:
-            resolution:
-              $ref: "#/components/schemas/RoleAssignmentResolution"
-            explicit_rule:
-              type: object
-              description: |
-                This type is defined in the Core API as `AccessRule`. See the Core API documentation for more details.
+          $ref: "#/components/schemas/ComponentEntityRoleAssignmentEntryAssignment"
         updater_roles:
           type: array
           items:
             $ref: "#/components/schemas/RoleKey"
+
+    ComponentEntityRoleAssignmentEntryAssignment:
+      type: object
+      description: |
+        Resolving the rule for this role:
+
+        If the resolution is Explicit, the rule can be read off the `explicit_rule` property on this object.
+        If the resolution is Owner, the rule can be read off `role_assignments.owner.rule `off the role assignments object two levels up.
+      required:
+        - resolution
+      properties:
+        resolution:
+          $ref: "#/components/schemas/RoleAssignmentResolution"
+      discriminator:
+        propertyName: resolution
+        mapping:
+          # NOTE: These need to match RoleAssignmentResolution
+          Explicit: '#/components/schemas/ComponentEntityRoleAssignmentEntryExplicitAssignment'
+          Owner: '#/components/schemas/ComponentEntityRoleAssignmentEntryOwnerAssignment'
+
+    ComponentEntityRoleAssignmentEntryOwnerAssignment:
+      allOf:
+        - $ref: "#/components/schemas/ComponentEntityRoleAssignmentEntryAssignment"
+        - type: object
+
+    ComponentEntityRoleAssignmentEntryExplicitAssignment:
+      allOf:
+        - $ref: "#/components/schemas/ComponentEntityRoleAssignmentEntryAssignment"
+        - type: object
+          required:
+            - explicit_rule
+          properties:
+            explicit_rule:
+              type: object
+              description: |
+                This type is defined in the Core API as `AccessRule`. See the Core API documentation for more details.
 
     RoleAssignmentResolution:
       type: string
@@ -3023,7 +3049,6 @@ components:
           format: date-time
         error_message:
           type: string
-          nullable: true
         raw_hex:
           $ref: "#/components/schemas/HexString"
         receipt:
@@ -3161,7 +3186,6 @@ components:
         error_message:
           description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
-          nullable: true
 
     EventsItem:
       type: object
@@ -3321,7 +3345,6 @@ components:
           $ref: "#/components/schemas/ValidatorVaultItem"
         state:
           type: object
-          nullable: true
           description: |
             Validator inner state representation.
             This type is defined in the Core API as `ValidatorFieldStateValue`. See the Core API documentation for more details.
@@ -3343,7 +3366,6 @@ components:
                   $ref: "#/components/schemas/BigDecimal"
             pending:
               type: object
-              nullable: true
               required:
                 - fee_factor
                 - effective_at_epoch
@@ -4010,7 +4032,6 @@ components:
                 will definitely reject or fail. This could represent a temporary error (such as out
                 of fees), or an error with a payload which doesn't end up being committed.
               type: string
-              nullable: true
     TransactionStatusResponseKnownPayloadItem:
       type: object
       required:
@@ -4036,7 +4057,6 @@ components:
             rejection (such as out of fees) which then gets resolved (e.g. by depositing money
             to pay the fee), allowing the transaction to be committed.
           type: string
-          nullable: true
         latest_error_message:
           description: |
             The latest error message received for a rejection or failure during transaction execution,
@@ -4048,21 +4068,18 @@ components:
             rejection (such as out of fees) which then gets resolved (e.g. by depositing money
             to pay the fee), allowing the transaction to be committed.
           type: string
-          nullable: true
         handling_status:
           $ref: "#/components/schemas/TransactionPayloadGatewayHandlingStatus"
         handling_status_reason:
           description: |
             Additional reason for why the Gateway has its current handling status.
           type: string
-          nullable: true
         submission_error:
           description: |
             The most recent error message received when submitting this transaction to the network.
             Please note that the presence of an error message doesn't imply that this transaction
             payload will definitely reject or fail. This could be a transient error.
           type: string
-          nullable: true
 
     TransactionCommittedDetailsRequest:
       allOf:
@@ -4163,7 +4180,6 @@ components:
 
     TransactionBalanceChanges:
       type: object
-      nullable: true # TODO make non-nullable once we eliminate CoreAPI-based implementation
       required:
         - fungible_fee_balance_changes
         - fungible_balance_changes
@@ -4364,7 +4380,6 @@ components:
             next_cursor:
               description: If specified, contains a cursor to query next page of the `items` collection.
               type: string
-              nullable: true
             items:
               description: The page of user transactions.
               type: array
@@ -5292,7 +5307,6 @@ components:
             cursor:
               description: This cursor allows forward pagination, by providing the cursor from the previous request.
               type: string
-              nullable: true
       example:
         at_ledger_state: null
     StateValidatorsListResponse:
@@ -5494,7 +5508,14 @@ components:
         resource_address:
           $ref: "#/components/schemas/Address"
         amount:
-          $ref: "#/components/schemas/BigDecimal"
+          description: |
+            description: String-encoded decimal representing the amount of a related fungible resource.
+
+            This gives the amount of the given resource which will be received for redeeming 1 unit resource (e.g. pool units or validator stake units).
+
+            If there is zero supply of the unit resource, then the unit redemption value has no meaning and this field will not be returned.
+            If clients are using this value as a multiplier for calculations, they can substitute any-non zero value such as "1" for the multiplier in this case.
+          type: string #TODO it should be $ref: "#/components/schemas/BigDecimal" but open api spec 3.0.0 doesn't allow to have ref with description added on same level.
 
     NativeResourceKind:
       type: string
@@ -6166,14 +6187,12 @@ components:
             This is only output when a schema is present and the type has a name.
             This property is ignored when the value is used as an input to the API.
           type: string
-          nullable: true
         field_name:
           description: |
             The name of the field which hosts this value.
             This property is only included if this value is a child of a `Tuple` or `Enum` with named fields.
             This property is ignored when the value is used as an input to the API.
           type: string
-          nullable: true
       discriminator:
         propertyName: kind
         mapping:
