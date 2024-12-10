@@ -37,7 +37,7 @@ export interface StateKeyValueStoreDataRequest {
      * @type {LedgerStateSelector}
      * @memberof StateKeyValueStoreDataRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}

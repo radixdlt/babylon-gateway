@@ -31,7 +31,7 @@ export interface AtLedgerStateMixin {
      * @type {LedgerStateSelector}
      * @memberof AtLedgerStateMixin
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
 }
 
 /**

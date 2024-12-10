@@ -31,7 +31,7 @@ export interface StateNonFungibleLocationRequest {
      * @type {LedgerStateSelector}
      * @memberof StateNonFungibleLocationRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}

@@ -30,7 +30,7 @@ export interface NonFungibleIdsCollection {
      * @type {string}
      * @memberof NonFungibleIdsCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<string>}

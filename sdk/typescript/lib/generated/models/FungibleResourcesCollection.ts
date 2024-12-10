@@ -37,7 +37,7 @@ export interface FungibleResourcesCollection {
      * @type {string}
      * @memberof FungibleResourcesCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<FungibleResourcesCollectionItem>}

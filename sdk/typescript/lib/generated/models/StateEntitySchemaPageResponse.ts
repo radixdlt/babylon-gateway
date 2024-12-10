@@ -49,7 +49,7 @@ export interface StateEntitySchemaPageResponse {
      * @type {string}
      * @memberof StateEntitySchemaPageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<EntitySchemaCollectionItem>}

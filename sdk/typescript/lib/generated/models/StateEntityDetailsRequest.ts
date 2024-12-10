@@ -43,7 +43,7 @@ export interface StateEntityDetailsRequest {
      * @type {LedgerStateSelector}
      * @memberof StateEntityDetailsRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * 
      * @type {StateEntityDetailsOptIns}

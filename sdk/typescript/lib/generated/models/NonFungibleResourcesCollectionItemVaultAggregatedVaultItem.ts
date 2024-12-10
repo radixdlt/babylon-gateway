@@ -30,7 +30,7 @@ export interface NonFungibleResourcesCollectionItemVaultAggregatedVaultItem {
      * @type {string}
      * @memberof NonFungibleResourcesCollectionItemVaultAggregatedVaultItem
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<string>}

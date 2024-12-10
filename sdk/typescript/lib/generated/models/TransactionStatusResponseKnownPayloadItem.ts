@@ -74,7 +74,7 @@ to pay the fee), allowing the transaction to be committed.
      * @type {string}
      * @memberof TransactionStatusResponseKnownPayloadItem
      */
-    error_message?: string;
+    error_message?: string | null;
     /**
      * The latest error message received for a rejection or failure during transaction execution,
 this is only returned if it is different from the initial error message.
@@ -88,7 +88,7 @@ to pay the fee), allowing the transaction to be committed.
      * @type {string}
      * @memberof TransactionStatusResponseKnownPayloadItem
      */
-    latest_error_message?: string;
+    latest_error_message?: string | null;
     /**
      * 
      * @type {TransactionPayloadGatewayHandlingStatus}
@@ -101,7 +101,7 @@ to pay the fee), allowing the transaction to be committed.
      * @type {string}
      * @memberof TransactionStatusResponseKnownPayloadItem
      */
-    handling_status_reason?: string;
+    handling_status_reason?: string | null;
     /**
      * The most recent error message received when submitting this transaction to the network.
 Please note that the presence of an error message doesn't imply that this transaction
@@ -110,7 +110,7 @@ payload will definitely reject or fail. This could be a transient error.
      * @type {string}
      * @memberof TransactionStatusResponseKnownPayloadItem
      */
-    submission_error?: string;
+    submission_error?: string | null;
 }
 
 /**

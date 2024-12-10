@@ -31,13 +31,13 @@ export interface StateNonFungibleIdsRequest {
      * @type {LedgerStateSelector}
      * @memberof StateNonFungibleIdsRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
      * @memberof StateNonFungibleIdsRequest
      */
-    cursor?: string;
+    cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}

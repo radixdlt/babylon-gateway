@@ -81,7 +81,7 @@ This type is defined in the Core API as `ValidatorFieldStateValue`. See the Core
      * @type {object}
      * @memberof ValidatorCollectionItem
      */
-    state: object;
+    state: object | null;
     /**
      * 
      * @type {ValidatorCollectionItemActiveInEpoch}

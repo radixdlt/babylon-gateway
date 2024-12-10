@@ -24,7 +24,7 @@ export interface StateValidatorsListRequestAllOf {
      * @type {string}
      * @memberof StateValidatorsListRequestAllOf
      */
-    cursor?: string;
+    cursor?: string | null;
 }
 
 /**

@@ -37,7 +37,7 @@ export interface AccountLockerVaultCollection {
      * @type {string}
      * @memberof AccountLockerVaultCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<AccountLockerVaultCollectionItem>}

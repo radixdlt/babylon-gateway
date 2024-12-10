@@ -37,7 +37,7 @@ export interface TransactionCommittedDetailsRequest {
      * @type {LedgerStateSelector}
      * @memberof TransactionCommittedDetailsRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * Bech32m-encoded hash.
      * @type {string}

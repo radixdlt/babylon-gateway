@@ -37,7 +37,7 @@ export interface EntityMetadataCollection {
      * @type {string}
      * @memberof EntityMetadataCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<EntityMetadataItem>}

@@ -37,7 +37,7 @@ export interface StateKeyValueStoreKeysCollection {
      * @type {string}
      * @memberof StateKeyValueStoreKeysCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<StateKeyValueStoreKeysResponseItem>}

@@ -49,7 +49,7 @@ export interface StateEntityNonFungiblesPageResponse {
      * @type {string}
      * @memberof StateEntityNonFungiblesPageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<NonFungibleResourcesCollectionItem>}

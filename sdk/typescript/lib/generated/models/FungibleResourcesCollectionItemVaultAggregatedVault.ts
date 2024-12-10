@@ -37,7 +37,7 @@ export interface FungibleResourcesCollectionItemVaultAggregatedVault {
      * @type {string}
      * @memberof FungibleResourcesCollectionItemVaultAggregatedVault
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<FungibleResourcesCollectionItemVaultAggregatedVaultItem>}

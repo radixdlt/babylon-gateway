@@ -37,7 +37,7 @@ export interface ResourceHoldersResponse {
      * @type {string}
      * @memberof ResourceHoldersResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<ResourceHoldersCollectionItem>}

@@ -37,7 +37,7 @@ export interface NonFungibleResourcesCollection {
      * @type {string}
      * @memberof NonFungibleResourcesCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<NonFungibleResourcesCollectionItem>}

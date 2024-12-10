@@ -33,13 +33,13 @@ export interface ValidatorsUptimeRequest {
      * @type {LedgerStateSelector}
      * @memberof ValidatorsUptimeRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * 
      * @type {LedgerStateSelector}
      * @memberof ValidatorsUptimeRequest
      */
-    from_ledger_state?: LedgerStateSelector;
+    from_ledger_state?: LedgerStateSelector | null;
     /**
      * 
      * @type {Array<string>}

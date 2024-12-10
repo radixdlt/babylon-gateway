@@ -49,19 +49,19 @@ export interface StreamTransactionsRequest {
      * @type {LedgerStateSelector}
      * @memberof StreamTransactionsRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * 
      * @type {LedgerStateSelector}
      * @memberof StreamTransactionsRequest
      */
-    from_ledger_state?: LedgerStateSelector;
+    from_ledger_state?: LedgerStateSelector | null;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
      * @memberof StreamTransactionsRequest
      */
-    cursor?: string;
+    cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}

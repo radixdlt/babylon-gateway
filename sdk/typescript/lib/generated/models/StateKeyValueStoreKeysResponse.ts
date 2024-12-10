@@ -49,7 +49,7 @@ export interface StateKeyValueStoreKeysResponse {
      * @type {string}
      * @memberof StateKeyValueStoreKeysResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<StateKeyValueStoreKeysResponseItem>}

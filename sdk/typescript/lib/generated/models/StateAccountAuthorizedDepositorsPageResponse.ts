@@ -49,7 +49,7 @@ export interface StateAccountAuthorizedDepositorsPageResponse {
      * @type {string}
      * @memberof StateAccountAuthorizedDepositorsPageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<AccountAuthorizedDepositorsResponseItem>}

@@ -49,7 +49,7 @@ export interface StateEntityFungibleResourceVaultsPageResponse {
      * @type {string}
      * @memberof StateEntityFungibleResourceVaultsPageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<FungibleResourcesCollectionItemVaultAggregatedVaultItem>}

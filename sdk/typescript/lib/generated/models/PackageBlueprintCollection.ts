@@ -37,7 +37,7 @@ export interface PackageBlueprintCollection {
      * @type {string}
      * @memberof PackageBlueprintCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<PackageBlueprintCollectionItem>}

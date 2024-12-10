@@ -37,7 +37,7 @@ export interface ResourceHoldersCollection {
      * @type {string}
      * @memberof ResourceHoldersCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<ResourceHoldersCollectionItem>}

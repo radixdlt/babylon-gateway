@@ -31,7 +31,7 @@ export interface FromLedgerStateMixin {
      * @type {LedgerStateSelector}
      * @memberof FromLedgerStateMixin
      */
-    from_ledger_state?: LedgerStateSelector;
+    from_ledger_state?: LedgerStateSelector | null;
 }
 
 /**

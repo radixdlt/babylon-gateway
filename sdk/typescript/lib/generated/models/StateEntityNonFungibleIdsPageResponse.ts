@@ -43,7 +43,7 @@ export interface StateEntityNonFungibleIdsPageResponse {
      * @type {string}
      * @memberof StateEntityNonFungibleIdsPageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<string>}

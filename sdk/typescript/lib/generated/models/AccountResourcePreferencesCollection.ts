@@ -37,7 +37,7 @@ export interface AccountResourcePreferencesCollection {
      * @type {string}
      * @memberof AccountResourcePreferencesCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<AccountResourcePreferencesResponseItem>}

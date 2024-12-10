@@ -43,7 +43,7 @@ export interface ValidatorCollectionItemEffectiveFeeFactor {
      * @type {ValidatorCollectionItemEffectiveFeeFactorPending}
      * @memberof ValidatorCollectionItemEffectiveFeeFactor
      */
-    pending?: ValidatorCollectionItemEffectiveFeeFactorPending;
+    pending?: ValidatorCollectionItemEffectiveFeeFactorPending | null;
 }
 
 /**

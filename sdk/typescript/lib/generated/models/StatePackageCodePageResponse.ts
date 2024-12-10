@@ -49,7 +49,7 @@ export interface StatePackageCodePageResponse {
      * @type {string}
      * @memberof StatePackageCodePageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<PackageCodeCollectionItem>}

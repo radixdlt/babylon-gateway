@@ -31,13 +31,13 @@ export interface StatePackageCodePageRequest {
      * @type {LedgerStateSelector}
      * @memberof StatePackageCodePageRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
      * @memberof StatePackageCodePageRequest
      */
-    cursor?: string;
+    cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}

@@ -31,7 +31,7 @@ export interface StreamTransactionsResponseAllOf {
      * @type {string}
      * @memberof StreamTransactionsResponseAllOf
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * The page of user transactions.
      * @type {Array<CommittedTransactionInfo>}

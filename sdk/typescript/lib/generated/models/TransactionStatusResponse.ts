@@ -97,7 +97,7 @@ of fees), or an error with a payload which doesn't end up being committed.
      * @type {string}
      * @memberof TransactionStatusResponse
      */
-    error_message?: string;
+    error_message?: string | null;
 }
 
 /**

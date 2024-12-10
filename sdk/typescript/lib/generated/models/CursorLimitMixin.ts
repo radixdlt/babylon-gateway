@@ -24,7 +24,7 @@ export interface CursorLimitMixin {
      * @type {string}
      * @memberof CursorLimitMixin
      */
-    cursor?: string;
+    cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}

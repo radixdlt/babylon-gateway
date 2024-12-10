@@ -49,7 +49,7 @@ export interface StateEntityFungiblesPageResponse {
      * @type {string}
      * @memberof StateEntityFungiblesPageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<FungibleResourcesCollectionItem>}

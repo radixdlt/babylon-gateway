@@ -71,7 +71,7 @@ This property is ignored when the value is used as an input to the API.
      * @type {string}
      * @memberof ProgrammaticScryptoSborValueBase
      */
-    type_name?: string;
+    type_name?: string | null;
     /**
      * The name of the field which hosts this value.
 This property is only included if this value is a child of a `Tuple` or `Enum` with named fields.
@@ -80,7 +80,7 @@ This property is ignored when the value is used as an input to the API.
      * @type {string}
      * @memberof ProgrammaticScryptoSborValueBase
      */
-    field_name?: string;
+    field_name?: string | null;
 }
 
 /**

@@ -31,13 +31,13 @@ export interface StateValidatorsListRequest {
      * @type {LedgerStateSelector}
      * @memberof StateValidatorsListRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
      * @memberof StateValidatorsListRequest
      */
-    cursor?: string;
+    cursor?: string | null;
 }
 
 /**

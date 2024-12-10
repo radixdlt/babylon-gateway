@@ -30,7 +30,7 @@ export interface ResultSetCursorMixin {
      * @type {string}
      * @memberof ResultSetCursorMixin
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
 }
 
 /**

@@ -2160,6 +2160,7 @@ components:
         If a constraint is specified, the Gateway will resolve the request against the ledger state at that time.
         If not specified, requests will be made with respect to the top of the committed ledger.
       type: object
+      nullable: true
       properties:
         state_version:
           description: If provided, the latest ledger state lower than or equal to the given state version is returned.
@@ -2194,6 +2195,7 @@ components:
         cursor:
           description: This cursor allows forward pagination, by providing the cursor from the previous request.
           type: string
+          nullable: true
         limit_per_page:
           description: The page size requested.
           type: integer
@@ -2266,6 +2268,7 @@ components:
         next_cursor:
           description: If specified, contains a cursor to query next page of the `items` collection.
           type: string
+          nullable: true
 
     LedgerState:
       description: |
@@ -3049,6 +3052,7 @@ components:
           format: date-time
         error_message:
           type: string
+          nullable: true
         raw_hex:
           $ref: "#/components/schemas/HexString"
         receipt:
@@ -3186,6 +3190,7 @@ components:
         error_message:
           description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
+          nullable: true
 
     EventsItem:
       type: object
@@ -3345,6 +3350,7 @@ components:
           $ref: "#/components/schemas/ValidatorVaultItem"
         state:
           type: object
+          nullable: true
           description: |
             Validator inner state representation.
             This type is defined in the Core API as `ValidatorFieldStateValue`. See the Core API documentation for more details.
@@ -3366,6 +3372,7 @@ components:
                   $ref: "#/components/schemas/BigDecimal"
             pending:
               type: object
+              nullable: true
               required:
                 - fee_factor
                 - effective_at_epoch
@@ -4032,6 +4039,7 @@ components:
                 will definitely reject or fail. This could represent a temporary error (such as out
                 of fees), or an error with a payload which doesn't end up being committed.
               type: string
+              nullable: true
     TransactionStatusResponseKnownPayloadItem:
       type: object
       required:
@@ -4057,6 +4065,7 @@ components:
             rejection (such as out of fees) which then gets resolved (e.g. by depositing money
             to pay the fee), allowing the transaction to be committed.
           type: string
+          nullable: true
         latest_error_message:
           description: |
             The latest error message received for a rejection or failure during transaction execution,
@@ -4068,18 +4077,21 @@ components:
             rejection (such as out of fees) which then gets resolved (e.g. by depositing money
             to pay the fee), allowing the transaction to be committed.
           type: string
+          nullable: true
         handling_status:
           $ref: "#/components/schemas/TransactionPayloadGatewayHandlingStatus"
         handling_status_reason:
           description: |
             Additional reason for why the Gateway has its current handling status.
           type: string
+          nullable: true
         submission_error:
           description: |
             The most recent error message received when submitting this transaction to the network.
             Please note that the presence of an error message doesn't imply that this transaction
             payload will definitely reject or fail. This could be a transient error.
           type: string
+          nullable: true
 
     TransactionCommittedDetailsRequest:
       allOf:
@@ -4180,6 +4192,7 @@ components:
 
     TransactionBalanceChanges:
       type: object
+      nullable: true # TODO make non-nullable once we eliminate CoreAPI-based implementation
       required:
         - fungible_fee_balance_changes
         - fungible_balance_changes
@@ -4380,6 +4393,7 @@ components:
             next_cursor:
               description: If specified, contains a cursor to query next page of the `items` collection.
               type: string
+              nullable: true
             items:
               description: The page of user transactions.
               type: array
@@ -5307,6 +5321,7 @@ components:
             cursor:
               description: This cursor allows forward pagination, by providing the cursor from the previous request.
               type: string
+              nullable: true
       example:
         at_ledger_state: null
     StateValidatorsListResponse:
@@ -6187,12 +6202,14 @@ components:
             This is only output when a schema is present and the type has a name.
             This property is ignored when the value is used as an input to the API.
           type: string
+          nullable: true
         field_name:
           description: |
             The name of the field which hosts this value.
             This property is only included if this value is a child of a `Tuple` or `Enum` with named fields.
             This property is ignored when the value is used as an input to the API.
           type: string
+          nullable: true
       discriminator:
         propertyName: kind
         mapping:

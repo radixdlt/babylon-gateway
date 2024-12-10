@@ -99,7 +99,7 @@ This type is defined in the Core API as `SborData`. See the Core API documentati
      * @type {string}
      * @memberof TransactionReceipt
      */
-    error_message?: string;
+    error_message?: string | null;
 }
 
 /**

@@ -37,7 +37,7 @@ export interface EntitySchemaCollection {
      * @type {string}
      * @memberof EntitySchemaCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<EntitySchemaCollectionItem>}

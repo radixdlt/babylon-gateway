@@ -115,7 +115,7 @@ export interface CommittedTransactionInfo {
      * @type {string}
      * @memberof CommittedTransactionInfo
      */
-    error_message?: string;
+    error_message?: string | null;
     /**
      * Hex-encoded binary blob.
      * @type {string}
@@ -158,7 +158,7 @@ This type is defined in the Core API as `TransactionMessage`. See the Core API d
      * @type {TransactionBalanceChanges}
      * @memberof CommittedTransactionInfo
      */
-    balance_changes?: TransactionBalanceChanges;
+    balance_changes?: TransactionBalanceChanges | null;
     /**
      * Subintent details.
 Please note that it is returned regardless of whether the transaction was committed successfully or failed, and it can be returned in multiple transactions.

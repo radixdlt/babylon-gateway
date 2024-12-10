@@ -49,7 +49,7 @@ export interface StatePackageBlueprintPageResponse {
      * @type {string}
      * @memberof StatePackageBlueprintPageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<PackageBlueprintCollectionItem>}

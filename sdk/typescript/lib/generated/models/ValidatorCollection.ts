@@ -37,7 +37,7 @@ export interface ValidatorCollection {
      * @type {string}
      * @memberof ValidatorCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<ValidatorCollectionItem>}

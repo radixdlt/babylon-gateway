@@ -49,7 +49,7 @@ export interface StateAccountLockerPageVaultsResponse {
      * @type {string}
      * @memberof StateAccountLockerPageVaultsResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<AccountLockerVaultCollectionItem>}

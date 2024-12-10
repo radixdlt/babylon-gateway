@@ -37,7 +37,7 @@ export interface StateAccountLockersTouchedAtRequest {
      * @type {LedgerStateSelector}
      * @memberof StateAccountLockersTouchedAtRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * 
      * @type {Array<AccountLockerAddress>}

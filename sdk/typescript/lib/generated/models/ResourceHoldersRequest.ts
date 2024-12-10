@@ -24,7 +24,7 @@ export interface ResourceHoldersRequest {
      * @type {string}
      * @memberof ResourceHoldersRequest
      */
-    cursor?: string;
+    cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}

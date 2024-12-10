@@ -43,7 +43,7 @@ export interface StreamTransactionsResponse {
      * @type {string}
      * @memberof StreamTransactionsResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * The page of user transactions.
      * @type {Array<CommittedTransactionInfo>}

@@ -37,7 +37,7 @@ export interface PackageCodeCollection {
      * @type {string}
      * @memberof PackageCodeCollection
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<PackageCodeCollectionItem>}

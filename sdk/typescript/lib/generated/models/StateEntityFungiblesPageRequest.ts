@@ -43,13 +43,13 @@ export interface StateEntityFungiblesPageRequest {
      * @type {LedgerStateSelector}
      * @memberof StateEntityFungiblesPageRequest
      */
-    at_ledger_state?: LedgerStateSelector;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
      * @memberof StateEntityFungiblesPageRequest
      */
-    cursor?: string;
+    cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}

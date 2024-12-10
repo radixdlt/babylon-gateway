@@ -49,7 +49,7 @@ export interface StateAccountResourcePreferencesPageResponse {
      * @type {string}
      * @memberof StateAccountResourcePreferencesPageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<AccountResourcePreferencesResponseItem>}

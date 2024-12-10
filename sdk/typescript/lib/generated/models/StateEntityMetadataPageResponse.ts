@@ -49,7 +49,7 @@ export interface StateEntityMetadataPageResponse {
      * @type {string}
      * @memberof StateEntityMetadataPageResponse
      */
-    next_cursor?: string;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<EntityMetadataItem>}
