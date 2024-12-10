@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.9.2
+  version: v1.10.0
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
@@ -2583,8 +2583,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ComponentEntityRoleAssignmentEntry"
-
-
 
     ComponentEntityRoleAssignmentEntry:
       type: object
