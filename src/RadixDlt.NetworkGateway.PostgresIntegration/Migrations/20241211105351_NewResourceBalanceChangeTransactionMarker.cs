@@ -62,16 +62,31 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-public enum LedgerTransactionMarkerType
+#nullable disable
+
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
-    TransactionType,
-    Event,
-    ManifestAddress,
-    AffectedGlobalEntity,
-    ManifestClass,
-    EventGlobalEmitter,
-    EpochChange,
-    ResourceBalanceChange,
+    /// <inheritdoc />
+    public partial class NewResourceBalanceChangeTransactionMarker : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder
+                .AlterDatabase()
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "transaction_type,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter,epoch_change,resource_balance_change")
+                .OldAnnotation("Npgsql:Enum:ledger_transaction_marker_type", "transaction_type,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter,epoch_change");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder
+                .AlterDatabase()
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "transaction_type,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter,epoch_change")
+                .OldAnnotation("Npgsql:Enum:ledger_transaction_marker_type", "transaction_type,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter,epoch_change,resource_balance_change");
+        }
+    }
 }

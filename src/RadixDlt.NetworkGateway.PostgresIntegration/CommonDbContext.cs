@@ -285,7 +285,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<ManifestClassMarker>(LedgerTransactionMarkerType.ManifestClass)
             .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity)
             .HasValue<EventGlobalEmitterTransactionMarker>(LedgerTransactionMarkerType.EventGlobalEmitter)
-            .HasValue<EpochChangeLedgerTransactionMarker>(LedgerTransactionMarkerType.EpochChange);
+            .HasValue<EpochChangeLedgerTransactionMarker>(LedgerTransactionMarkerType.EpochChange)
+            .HasValue<ResourceBalanceChangeTransactionMarker>(LedgerTransactionMarkerType.ResourceBalanceChange);
 
         modelBuilder
             .Entity<LedgerTransactionMarker>()
