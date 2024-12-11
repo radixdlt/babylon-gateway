@@ -72,7 +72,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 internal enum LedgerTransactionMarkerTransactionType
 {
     User,
-    RoundChange, // TODO PP: remove me.
+    RoundChange, // TODO PP: It can be removed safely after next resync. Without resync we should keep it here even though it's not used.
     GenesisFlash,
     GenesisTransaction,
     ProtocolUpdateFlash,
