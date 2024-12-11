@@ -86,6 +86,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
     private readonly AffectedGlobalEntitiesProcessor _affectedGlobalEntitiesProcessor;
     private readonly EventLedgerTransactionMarkerProcessor _eventLedgerTransactionMarkerProcessor;
     private readonly EpochChangeLedgerTransactionMarkerProcessor _epochChangeLedgerTransactionMarkerProcessor;
+    private readonly ResourceBalanceChangeProcessor _resourceBalanceChangeProcessor;
 
     public LedgerTransactionMarkersProcessor(
         ManifestProcessor manifestProcessor,
@@ -103,6 +104,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
         _globalEventEmitterProcessor = new GlobalEventEmitterProcessor(context, referencedEntities, networkConfiguration);
         _eventLedgerTransactionMarkerProcessor = new EventLedgerTransactionMarkerProcessor(context);
         _epochChangeLedgerTransactionMarkerProcessor = new EpochChangeLedgerTransactionMarkerProcessor(context);
+        _resourceBalanceChangeProcessor = new ResourceBalanceChangeProcessor(context, referencedEntities);
     }
 
     public Task LoadDependenciesAsync()
@@ -119,6 +121,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
     {
         _transactionTypeLedgerTransactionMarkerProcessor.VisitTransaction(transaction, stateVersion);
         _epochChangeLedgerTransactionMarkerProcessor.VisitTransaction(transaction, stateVersion);
+        _resourceBalanceChangeProcessor.VisitTransaction(transaction, stateVersion);
     }
 
     public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
@@ -149,6 +152,7 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
         _ledgerTransactionMarkersToAdd.AddRange(_manifestProcessor.CreateTransactionMarkers());
         _ledgerTransactionMarkersToAdd.AddRange(_transactionTypeLedgerTransactionMarkerProcessor.CreateTransactionMarkers());
         _ledgerTransactionMarkersToAdd.AddRange(_epochChangeLedgerTransactionMarkerProcessor.CreateTransactionMarkers());
+        _ledgerTransactionMarkersToAdd.AddRange(_resourceBalanceChangeProcessor.CreateTransactionMarkers());
     }
 
     public async Task<int> SaveEntitiesAsync()
@@ -218,6 +222,17 @@ internal class LedgerTransactionMarkersProcessor : IProcessorBase, ISubstateUpse
                     await writer.WriteNullAsync(token);
                     break;
                 case EventGlobalEmitterTransactionMarker egetm:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(egetm.EntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case ResourceBalanceChangeTransactionMarker egetm:
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(egetm.EntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullAsync(token);

@@ -130,6 +130,40 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "kind_filter", EmitDefaultValue = true)]
         public KindFilterEnum? KindFilter { get; set; }
         /// <summary>
+        /// Allows filtering by transaction status. Defaults to &#x60;All&#x60;.
+        /// </summary>
+        /// <value>Allows filtering by transaction status. Defaults to &#x60;All&#x60;.</value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum TransactionStatusFilterEnum
+        {
+            /// <summary>
+            /// Enum Successful for value: Successful
+            /// </summary>
+            [EnumMember(Value = "Successful")]
+            Successful = 1,
+
+            /// <summary>
+            /// Enum Failed for value: Failed
+            /// </summary>
+            [EnumMember(Value = "Failed")]
+            Failed = 2,
+
+            /// <summary>
+            /// Enum All for value: All
+            /// </summary>
+            [EnumMember(Value = "All")]
+            All = 3
+
+        }
+
+
+        /// <summary>
+        /// Allows filtering by transaction status. Defaults to &#x60;All&#x60;.
+        /// </summary>
+        /// <value>Allows filtering by transaction status. Defaults to &#x60;All&#x60;.</value>
+        [DataMember(Name = "transaction_status_filter", EmitDefaultValue = true)]
+        public TransactionStatusFilterEnum? TransactionStatusFilter { get; set; }
+        /// <summary>
         /// Configures the order of returned result set. Defaults to &#x60;desc&#x60;.
         /// </summary>
         /// <value>Configures the order of returned result set. Defaults to &#x60;desc&#x60;.</value>
@@ -175,9 +209,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="accountsWithoutManifestOwnerMethodCalls">Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information..</param>
         /// <param name="manifestClassFilter">manifestClassFilter.</param>
         /// <param name="eventGlobalEmittersFilter">Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter..</param>
+        /// <param name="balanceChangeResourcesFilter">Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources..</param>
+        /// <param name="transactionStatusFilter">Allows filtering by transaction status. Defaults to &#x60;All&#x60;. (default to TransactionStatusFilterEnum.All).</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
         /// <param name="optIns">optIns.</param>
-        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestBadgesPresentedFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), List<string> accountsWithManifestOwnerMethodCalls = default(List<string>), List<string> accountsWithoutManifestOwnerMethodCalls = default(List<string>), StreamTransactionsRequestAllOfManifestClassFilter manifestClassFilter = default(StreamTransactionsRequestAllOfManifestClassFilter), List<string> eventGlobalEmittersFilter = default(List<string>), OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
+        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestBadgesPresentedFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), List<string> accountsWithManifestOwnerMethodCalls = default(List<string>), List<string> accountsWithoutManifestOwnerMethodCalls = default(List<string>), StreamTransactionsRequestAllOfManifestClassFilter manifestClassFilter = default(StreamTransactionsRequestAllOfManifestClassFilter), List<string> eventGlobalEmittersFilter = default(List<string>), List<string> balanceChangeResourcesFilter = default(List<string>), TransactionStatusFilterEnum? transactionStatusFilter = TransactionStatusFilterEnum.All, OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
         {
             this.AtLedgerState = atLedgerState;
             this.FromLedgerState = fromLedgerState;
@@ -194,6 +230,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.AccountsWithoutManifestOwnerMethodCalls = accountsWithoutManifestOwnerMethodCalls;
             this.ManifestClassFilter = manifestClassFilter;
             this.EventGlobalEmittersFilter = eventGlobalEmittersFilter;
+            this.BalanceChangeResourcesFilter = balanceChangeResourcesFilter;
+            this.TransactionStatusFilter = transactionStatusFilter;
             this.Order = order;
             this.OptIns = optIns;
         }
@@ -294,6 +332,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<string> EventGlobalEmittersFilter { get; set; }
 
         /// <summary>
+        /// Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources.
+        /// </summary>
+        /// <value>Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources.</value>
+        [DataMember(Name = "balance_change_resources_filter", EmitDefaultValue = true)]
+        public List<string> BalanceChangeResourcesFilter { get; set; }
+
+        /// <summary>
         /// Gets or Sets OptIns
         /// </summary>
         [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
@@ -322,6 +367,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  AccountsWithoutManifestOwnerMethodCalls: ").Append(AccountsWithoutManifestOwnerMethodCalls).Append("\n");
             sb.Append("  ManifestClassFilter: ").Append(ManifestClassFilter).Append("\n");
             sb.Append("  EventGlobalEmittersFilter: ").Append(EventGlobalEmittersFilter).Append("\n");
+            sb.Append("  BalanceChangeResourcesFilter: ").Append(BalanceChangeResourcesFilter).Append("\n");
+            sb.Append("  TransactionStatusFilter: ").Append(TransactionStatusFilter).Append("\n");
             sb.Append("  Order: ").Append(Order).Append("\n");
             sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("}\n");
@@ -443,6 +490,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.EventGlobalEmittersFilter.SequenceEqual(input.EventGlobalEmittersFilter)
                 ) && 
                 (
+                    this.BalanceChangeResourcesFilter == input.BalanceChangeResourcesFilter ||
+                    this.BalanceChangeResourcesFilter != null &&
+                    input.BalanceChangeResourcesFilter != null &&
+                    this.BalanceChangeResourcesFilter.SequenceEqual(input.BalanceChangeResourcesFilter)
+                ) && 
+                (
+                    this.TransactionStatusFilter == input.TransactionStatusFilter ||
+                    this.TransactionStatusFilter.Equals(input.TransactionStatusFilter)
+                ) && 
+                (
                     this.Order == input.Order ||
                     this.Order.Equals(input.Order)
                 ) && 
@@ -519,6 +576,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.EventGlobalEmittersFilter.GetHashCode();
                 }
+                if (this.BalanceChangeResourcesFilter != null)
+                {
+                    hashCode = (hashCode * 59) + this.BalanceChangeResourcesFilter.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.TransactionStatusFilter.GetHashCode();
                 hashCode = (hashCode * 59) + this.Order.GetHashCode();
                 if (this.OptIns != null)
                 {

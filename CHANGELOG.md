@@ -1,3 +1,15 @@
+## 1.10.0
+Release built: _not released yet_
+
+### API Changes
+- Two new filters to `/stream/transactions` endpoint.
+  - `transaction_status_filter` - Allows filtering by transaction status (`Successful`,`Failed`, `All`). Defaults to `All`.
+  - `balance_change_resources_filter` - Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources.
+
+### Database changes
+- New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.
+- Removed `transaction_type.round_update` from the `ledger_transaction_markers` table. This should reduce database size and slightly improve the performance of the `/stream/transactions` endpoint.
+
 ## 1.9.2
 Release built: 9.12.2024
 
