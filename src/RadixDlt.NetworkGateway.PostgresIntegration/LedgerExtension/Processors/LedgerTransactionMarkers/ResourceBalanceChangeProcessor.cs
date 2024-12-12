@@ -62,77 +62,54 @@
  * permissions under this License.
  */
 
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Network;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-public interface ITransactionQuerier
+internal class ResourceBalanceChangeProcessor : ITransactionMarkerProcessor, ITransactionProcessor
 {
-    Task<(string? RandomIntentHash, string? RandomSubintentHash, long? CurrentEpoch)> GetOpenApiDocumentHandlerDetails(CancellationToken token = default);
+    private readonly ProcessorContext _context;
+    private readonly ReferencedEntityDictionary _referencedEntities;
+    private readonly Dictionary<long, HashSet<long>> _resourcesWithBalanceChanges = new();
 
-    Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
+    public ResourceBalanceChangeProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities)
+    {
+        _context = context;
+        _referencedEntities = referencedEntities;
+    }
 
-    Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
-        string intentHash,
-        GatewayModel.TransactionDetailsOptIns optIns,
-        GatewayModel.LedgerState ledgerState,
-        bool withDetails,
-        CancellationToken token = default);
+    public void VisitTransaction(CommittedTransaction transaction, long stateVersion)
+    {
+        var fungibleResourceBalanceChanges = transaction.BalanceChanges.FungibleEntityBalanceChanges
+            .SelectMany(x => x.NonFeeBalanceChanges)
+            .Select(x => _referencedEntities.Get((EntityAddress)x.ResourceAddress).DatabaseId)
+            .ToHashSet();
 
-    Task<GatewayModel.TransactionStatusResponse> ResolveTransactionStatusResponse(
-        GatewayModel.LedgerState ledgerState,
-        string intentHash,
-        CancellationToken token = default);
+        var nonFungibleResourceBalanceChanges = transaction.BalanceChanges.NonFungibleEntityBalanceChanges
+            .Select(x => _referencedEntities.Get((EntityAddress)x.ResourceAddress).DatabaseId)
+            .ToHashSet();
 
-    Task<GatewayModel.TransactionSubintentStatusResponse> ResolveTransactionSubintentStatusResponse(
-        GatewayModel.LedgerState ledgerState,
-        string subintentHash,
-        CancellationToken token = default);
-}
+        _resourcesWithBalanceChanges.Add(stateVersion, fungibleResourceBalanceChanges.Union(nonFungibleResourceBalanceChanges).ToHashSet());
+    }
 
-public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions)
-{
-    public static readonly TransactionPageWithoutTotal Empty = new(null, new List<GatewayModel.CommittedTransactionInfo>());
-}
-
-public sealed record TransactionStreamPageRequest(
-    long? FromStateVersion,
-    GatewayModel.LedgerTransactionsCursor? Cursor,
-    int PageSize,
-    bool AscendingOrder,
-    TransactionStreamPageRequestSearchCriteria SearchCriteria,
-    GatewayModel.TransactionDetailsOptIns OptIns);
-
-public class TransactionStreamPageRequestSearchCriteria
-{
-    public LedgerTransactionStatusFilter Status { get; set; }
-
-    public LedgerTransactionKindFilter Kind { get; set; }
-
-    public HashSet<LedgerTransactionEventFilter> Events { get; set; } = new();
-
-    public HashSet<EntityAddress> ManifestAccountsDepositedInto { get; set; } = new();
-
-    public HashSet<EntityAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
-
-    public HashSet<EntityAddress> ManifestResources { get; set; } = new();
-
-    public HashSet<EntityAddress> BadgesPresented { get; set; } = new();
-
-    public HashSet<EntityAddress> AffectedGlobalEntities { get; set; } = new();
-
-    public HashSet<EntityAddress> EventGlobalEmitters { get; set; } = new();
-
-    public HashSet<EntityAddress> AccountsWithoutManifestOwnerMethodCalls { get; set; } = new();
-
-    public HashSet<EntityAddress> AccountsWithManifestOwnerMethodCalls { get; set; } = new();
-
-    public HashSet<EntityAddress> BalanceChangeResources { get; set; } = new();
-
-    public ManifestClassFilter? ManifestClassFilter { get; set; }
+    public IEnumerable<LedgerTransactionMarker> CreateTransactionMarkers()
+    {
+        foreach (var stateVersionAffectedEntities in _resourcesWithBalanceChanges)
+        {
+            foreach (var entityId in stateVersionAffectedEntities.Value)
+            {
+                yield return new ResourceBalanceChangeTransactionMarker
+                {
+                    Id = _context.Sequences.LedgerTransactionMarkerSequence++,
+                    EntityId = entityId,
+                    StateVersion = stateVersionAffectedEntities.Key,
+                };
+            }
+        }
+    }
 }

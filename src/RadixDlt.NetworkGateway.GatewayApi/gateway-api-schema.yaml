@@ -4357,6 +4357,19 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/Address"
+            balance_change_resources_filter:
+              description: Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources.
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            transaction_status_filter:
+              description: Allows filtering by transaction status. Defaults to `All`.
+              type: string
+              default: All
+              enum:
+                - Successful
+                - Failed
+                - All
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string

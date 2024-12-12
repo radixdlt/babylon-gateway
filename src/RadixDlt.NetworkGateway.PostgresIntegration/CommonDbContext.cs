@@ -69,6 +69,7 @@ using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+using System;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -285,7 +286,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<ManifestClassMarker>(LedgerTransactionMarkerType.ManifestClass)
             .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity)
             .HasValue<EventGlobalEmitterTransactionMarker>(LedgerTransactionMarkerType.EventGlobalEmitter)
-            .HasValue<EpochChangeLedgerTransactionMarker>(LedgerTransactionMarkerType.EpochChange);
+            .HasValue<EpochChangeLedgerTransactionMarker>(LedgerTransactionMarkerType.EpochChange)
+            .HasValue<ResourceBalanceChangeTransactionMarker>(LedgerTransactionMarkerType.ResourceBalanceChange);
 
         modelBuilder
             .Entity<LedgerTransactionMarker>()

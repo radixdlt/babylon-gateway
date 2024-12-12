@@ -151,6 +151,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .Concat(request.SearchCriteria.BadgesPresented)
             .Concat(request.SearchCriteria.AffectedGlobalEntities)
             .Concat(request.SearchCriteria.EventGlobalEmitters)
+            .Concat(request.SearchCriteria.BalanceChangeResources)
             .Concat(
                 request.SearchCriteria.Events.SelectMany(
                     e =>
@@ -182,10 +183,17 @@ internal class TransactionQuerier : ITransactionQuerier
             ? request.Cursor?.StateVersionBoundary ?? request.FromStateVersion
             : request.FromStateVersion;
 
-        var searchQuery = _dbContext
-            .LedgerTransactionMarkers
-            .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion))
-            .Select(lt => lt.StateVersion);
+        var baseQuery = _dbContext
+            .LedgerTransactions
+            .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion));
+
+        var searchQuery = request.SearchCriteria.Status switch
+        {
+            LedgerTransactionStatusFilter.All => baseQuery.Select(lt => lt.StateVersion),
+            LedgerTransactionStatusFilter.Successful => baseQuery.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Succeeded).Select(lt => lt.StateVersion),
+            LedgerTransactionStatusFilter.Failed => baseQuery.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Failed).Select(lt => lt.StateVersion),
+            _ => throw new NotSupportedException($"Not supported status: {request.SearchCriteria.Status}"),
+        };
 
         var userKindFilterImplicitlyApplied = false;
 
@@ -201,6 +209,28 @@ internal class TransactionQuerier : ITransactionQuerier
                 }
 
                 searchQuery = ApplyLedgerTransactionMarkerOperationTypeFilter(entityId, LedgerTransactionMarkerOperationType.AccountDepositedInto, searchQuery);
+            }
+        }
+
+        if (request.SearchCriteria.BalanceChangeResources.Any())
+        {
+            foreach (var entityAddress in request.SearchCriteria.BalanceChangeResources)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = searchQuery
+                    .Join(
+                        _dbContext.LedgerTransactionMarkers,
+                        stateVersion => stateVersion,
+                        ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
+                        (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
+                    .OfType<ResourceBalanceChangeTransactionMarker>()
+                    .Where(maltm => maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
+                    .Select(maltm => maltm.StateVersion);
             }
         }
 

@@ -172,9 +172,17 @@ internal class DefaultTransactionHandler : ITransactionHandler
             _ => throw new UnreachableException($"Didn't expect {request.KindFilter} value"),
         };
 
+        var statusFilter = request.TransactionStatusFilter switch
+        {
+            GatewayModel.StreamTransactionsRequest.TransactionStatusFilterEnum.Successful => LedgerTransactionStatusFilter.Successful,
+            GatewayModel.StreamTransactionsRequest.TransactionStatusFilterEnum.Failed => LedgerTransactionStatusFilter.Failed,
+            _ => LedgerTransactionStatusFilter.All,
+        };
+
         var searchCriteria = new TransactionStreamPageRequestSearchCriteria
         {
             Kind = kindFilter,
+            Status = statusFilter,
         };
 
         request.AffectedGlobalEntitiesFilter?.ForEach(a => searchCriteria.AffectedGlobalEntities.Add((EntityAddress)a));
@@ -183,6 +191,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add((EntityAddress)a));
         request.ManifestBadgesPresentedFilter?.ForEach(a => searchCriteria.BadgesPresented.Add((EntityAddress)a));
         request.ManifestResourcesFilter?.ForEach(a => searchCriteria.ManifestResources.Add((EntityAddress)a));
+        request.BalanceChangeResourcesFilter?.ForEach(a => searchCriteria.BalanceChangeResources.Add((EntityAddress)a));
         request.EventsFilter?.ForEach(ef =>
         {
             var eventType = ef.Event switch
