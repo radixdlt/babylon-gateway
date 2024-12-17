@@ -2,9 +2,9 @@
 Release built: _not released yet_
 
 ### API Changes
-- Two new filters to `/stream/transactions` endpoint.
-  - `transaction_status_filter` - Allows filtering by transaction status (`Successful`,`Failed`, `All`). Defaults to `All`.
-  - `balance_change_resources_filter` - Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources.
+- New filters are supported on the `/stream/transactions` endpoint:
+    - `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`,`Failure`, `All`). Defaults to `All`.
+    - `balance_change_resources_filter` - Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend integrators use this instead of the `manifest_resources_filter` in most instances.
 
 ### Database changes
 - New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.

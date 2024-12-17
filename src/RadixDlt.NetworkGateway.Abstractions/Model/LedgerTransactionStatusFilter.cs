@@ -66,7 +66,7 @@ namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
 public enum LedgerTransactionStatusFilter
 {
-    Successful,
-    Failed,
+    Success,
+    Failure,
     All,
 }

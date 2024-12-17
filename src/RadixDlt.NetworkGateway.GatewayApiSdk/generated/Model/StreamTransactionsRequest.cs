@@ -130,23 +130,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "kind_filter", EmitDefaultValue = true)]
         public KindFilterEnum? KindFilter { get; set; }
         /// <summary>
-        /// Allows filtering by transaction status. Defaults to &#x60;All&#x60;.
+        /// Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.
         /// </summary>
-        /// <value>Allows filtering by transaction status. Defaults to &#x60;All&#x60;.</value>
+        /// <value>Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.</value>
         [JsonConverter(typeof(StringEnumConverter))]
         public enum TransactionStatusFilterEnum
         {
             /// <summary>
-            /// Enum Successful for value: Successful
+            /// Enum Success for value: Success
             /// </summary>
-            [EnumMember(Value = "Successful")]
-            Successful = 1,
+            [EnumMember(Value = "Success")]
+            Success = 1,
 
             /// <summary>
-            /// Enum Failed for value: Failed
+            /// Enum Failure for value: Failure
             /// </summary>
-            [EnumMember(Value = "Failed")]
-            Failed = 2,
+            [EnumMember(Value = "Failure")]
+            Failure = 2,
 
             /// <summary>
             /// Enum All for value: All
@@ -158,9 +158,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
 
         /// <summary>
-        /// Allows filtering by transaction status. Defaults to &#x60;All&#x60;.
+        /// Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.
         /// </summary>
-        /// <value>Allows filtering by transaction status. Defaults to &#x60;All&#x60;.</value>
+        /// <value>Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.</value>
         [DataMember(Name = "transaction_status_filter", EmitDefaultValue = true)]
         public TransactionStatusFilterEnum? TransactionStatusFilter { get; set; }
         /// <summary>
@@ -202,15 +202,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="manifestAccountsWithdrawnFromFilter">Allows specifying an array of account addresses. If specified, the response will contain only transactions with a manifest containing withdrawals from the given accounts..</param>
         /// <param name="manifestAccountsDepositedIntoFilter">Similar to &#x60;manifest_accounts_withdrawn_from_filter&#x60;, but will return only transactions with a manifest containing deposits to the given accounts..</param>
         /// <param name="manifestBadgesPresentedFilter">Allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented..</param>
-        /// <param name="manifestResourcesFilter">Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage)..</param>
+        /// <param name="manifestResourcesFilter">Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage). We recommend that integrators use &#x60;balance_change_resources_filter&#x60; in most cases, as it also captures resource changes that are not specified in the manifest..</param>
         /// <param name="affectedGlobalEntitiesFilter">Allows specifying an array of global addresses. If specified, the response will contain transactions that affected all of the given global entities. A global entity is marked as \&quot;affected\&quot; by a transaction if any of its state (or its descendents&#39; state) was modified as a result of the transaction. For performance reasons consensus manager and transaction tracker are excluded from that filter..</param>
         /// <param name="eventsFilter">Filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event..</param>
         /// <param name="accountsWithManifestOwnerMethodCalls">Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, contain manifest method calls to that account which require the owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information..</param>
         /// <param name="accountsWithoutManifestOwnerMethodCalls">Allows specifying an array of account addresses. If specified, the response will contain only transactions that, for all specified accounts, do NOT contain manifest method calls to that account which require owner role. See the [account docs](https://docs.radixdlt.com/docs/account) for more information..</param>
         /// <param name="manifestClassFilter">manifestClassFilter.</param>
         /// <param name="eventGlobalEmittersFilter">Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter..</param>
-        /// <param name="balanceChangeResourcesFilter">Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources..</param>
-        /// <param name="transactionStatusFilter">Allows filtering by transaction status. Defaults to &#x60;All&#x60;. (default to TransactionStatusFilterEnum.All).</param>
+        /// <param name="balanceChangeResourcesFilter">Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to &#x60;[]&#x60;. We recommend that integrators use this instead of the &#x60;manifest_resources_filter&#x60; in most cases, as it also captures resource changes that are not specified in the manifest..</param>
+        /// <param name="transactionStatusFilter">Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;. (default to TransactionStatusFilterEnum.All).</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
         /// <param name="optIns">optIns.</param>
         public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestBadgesPresentedFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), List<string> accountsWithManifestOwnerMethodCalls = default(List<string>), List<string> accountsWithoutManifestOwnerMethodCalls = default(List<string>), StreamTransactionsRequestAllOfManifestClassFilter manifestClassFilter = default(StreamTransactionsRequestAllOfManifestClassFilter), List<string> eventGlobalEmittersFilter = default(List<string>), List<string> balanceChangeResourcesFilter = default(List<string>), TransactionStatusFilterEnum? transactionStatusFilter = TransactionStatusFilterEnum.All, OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
@@ -284,9 +284,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<string> ManifestBadgesPresentedFilter { get; set; }
 
         /// <summary>
-        /// Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
+        /// Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage). We recommend that integrators use &#x60;balance_change_resources_filter&#x60; in most cases, as it also captures resource changes that are not specified in the manifest.
         /// </summary>
-        /// <value>Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).</value>
+        /// <value>Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage). We recommend that integrators use &#x60;balance_change_resources_filter&#x60; in most cases, as it also captures resource changes that are not specified in the manifest.</value>
         [DataMember(Name = "manifest_resources_filter", EmitDefaultValue = true)]
         public List<string> ManifestResourcesFilter { get; set; }
 
@@ -332,9 +332,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<string> EventGlobalEmittersFilter { get; set; }
 
         /// <summary>
-        /// Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources.
+        /// Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to &#x60;[]&#x60;. We recommend that integrators use this instead of the &#x60;manifest_resources_filter&#x60; in most cases, as it also captures resource changes that are not specified in the manifest.
         /// </summary>
-        /// <value>Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources.</value>
+        /// <value>Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to &#x60;[]&#x60;. We recommend that integrators use this instead of the &#x60;manifest_resources_filter&#x60; in most cases, as it also captures resource changes that are not specified in the manifest.</value>
         [DataMember(Name = "balance_change_resources_filter", EmitDefaultValue = true)]
         public List<string> BalanceChangeResourcesFilter { get; set; }
 

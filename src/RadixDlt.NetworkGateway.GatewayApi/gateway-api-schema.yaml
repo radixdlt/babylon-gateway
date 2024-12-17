@@ -619,7 +619,7 @@ tags:
 
       * `manifest_accounts_deposited_into_filter` - Similar to withdrawn, but will return only transactions with a manifest containing deposits to the given accounts.
 
-      * `manifest_resources_filter` - Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
+      * `manifest_resources_filter` - Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage). We recommend that integrators use `balance_change_resources_filter` in most cases, as it also captures resource changes that are not specified in the manifest.
 
       * `manifest_badges_presented_filter` - Allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented.
 
@@ -634,6 +634,10 @@ tags:
       * `event_global_emitters_filter` - Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter.
 
       * `events_filter` - Filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
+
+      * `balance_change_resources_filter` - Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend that integrators use this instead of the `manifest_resources_filter` in most cases, as it also captures resource changes that are not specified in the manifest.
+
+      * `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`,`Failure`, `All`). Defaults to `All`.
 
       Each filter is a complex object where you can specify:
       - `event` (required) - the event tag. Currently only the following tags are supported:
@@ -4317,7 +4321,7 @@ components:
               items:
                 $ref: "#/components/schemas/Address"
             manifest_resources_filter:
-              description: Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
+              description: Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage). We recommend that integrators use `balance_change_resources_filter` in most cases, as it also captures resource changes that are not specified in the manifest.
               type: array
               items:
                 $ref: "#/components/schemas/Address"
@@ -4358,17 +4362,17 @@ components:
               items:
                 $ref: "#/components/schemas/Address"
             balance_change_resources_filter:
-              description: Allows specifying an array of resources. If specified, the response will contain transactions which included non-fee related balance changes for all resources.
+              description: Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend that integrators use this instead of the `manifest_resources_filter` in most cases, as it also captures resource changes that are not specified in the manifest.
               type: array
               items:
                 $ref: "#/components/schemas/Address"
             transaction_status_filter:
-              description: Allows filtering by transaction status. Defaults to `All`.
+              description: Allows filtering by the transaction commit status (`Success`,`Failure`, `All`). Defaults to `All`.
               type: string
               default: All
               enum:
-                - Successful
-                - Failed
+                - Success
+                - Failure
                 - All
             order:
               description: Configures the order of returned result set. Defaults to `desc`.

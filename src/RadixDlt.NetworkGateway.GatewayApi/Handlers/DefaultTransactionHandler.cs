@@ -174,8 +174,8 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
         var statusFilter = request.TransactionStatusFilter switch
         {
-            GatewayModel.StreamTransactionsRequest.TransactionStatusFilterEnum.Successful => LedgerTransactionStatusFilter.Successful,
-            GatewayModel.StreamTransactionsRequest.TransactionStatusFilterEnum.Failed => LedgerTransactionStatusFilter.Failed,
+            GatewayModel.StreamTransactionsRequest.TransactionStatusFilterEnum.Success => LedgerTransactionStatusFilter.Success,
+            GatewayModel.StreamTransactionsRequest.TransactionStatusFilterEnum.Failure => LedgerTransactionStatusFilter.Failure,
             _ => LedgerTransactionStatusFilter.All,
         };
 

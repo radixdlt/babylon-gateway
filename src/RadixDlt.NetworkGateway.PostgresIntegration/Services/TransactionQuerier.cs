@@ -190,8 +190,8 @@ internal class TransactionQuerier : ITransactionQuerier
         var searchQuery = request.SearchCriteria.Status switch
         {
             LedgerTransactionStatusFilter.All => baseQuery.Select(lt => lt.StateVersion),
-            LedgerTransactionStatusFilter.Successful => baseQuery.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Succeeded).Select(lt => lt.StateVersion),
-            LedgerTransactionStatusFilter.Failed => baseQuery.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Failed).Select(lt => lt.StateVersion),
+            LedgerTransactionStatusFilter.Success => baseQuery.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Succeeded).Select(lt => lt.StateVersion),
+            LedgerTransactionStatusFilter.Failure => baseQuery.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Failed).Select(lt => lt.StateVersion),
             _ => throw new NotSupportedException($"Not supported status: {request.SearchCriteria.Status}"),
         };
 
