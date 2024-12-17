@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using System;
+using System.Diagnostics;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -269,6 +270,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<LedgerTransaction>()
             .HasIndex(lt => lt.RoundTimestamp);
+
+        modelBuilder
+            .Entity<LedgerTransaction>()
+            .HasIndex(lt => lt.ReceiptStatus);
 
         // This index lets you quickly translate Epoch/Round => StateVersion
         modelBuilder

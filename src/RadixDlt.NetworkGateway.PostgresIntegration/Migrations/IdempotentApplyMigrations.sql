@@ -1469,3 +1469,41 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241211111619_RemoveRoundUpdateTransactionMarkers') THEN
+    DELETE FROM ledger_transaction_markers WHERE transaction_type = 'round_change';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241211111619_RemoveRoundUpdateTransactionMarkers') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20241211111619_RemoveRoundUpdateTransactionMarkers', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241217093304_AddLedgerTransactionStatusIndex') THEN
+    CREATE INDEX "IX_ledger_transactions_receipt_status" ON ledger_transactions (receipt_status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20241217093304_AddLedgerTransactionStatusIndex') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20241217093304_AddLedgerTransactionStatusIndex', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+
