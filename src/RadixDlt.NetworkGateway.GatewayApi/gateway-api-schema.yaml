@@ -637,7 +637,7 @@ tags:
 
       * `balance_change_resources_filter` - Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend that integrators use this instead of the `manifest_resources_filter` in most cases, as it also captures resource changes that are not specified in the manifest.
 
-      * `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`,`Failure`, `All`). Defaults to `All`.
+      * `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
 
       Each filter is a complex object where you can specify:
       - `event` (required) - the event tag. Currently only the following tags are supported:
@@ -4367,7 +4367,7 @@ components:
               items:
                 $ref: "#/components/schemas/Address"
             transaction_status_filter:
-              description: Allows filtering by the transaction commit status (`Success`,`Failure`, `All`). Defaults to `All`.
+              description: Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
               type: string
               default: All
               enum:

@@ -3,7 +3,7 @@ Release built: _not released yet_
 
 ### API Changes
 - New filters are supported on the `/stream/transactions` endpoint:
-    - `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`,`Failure`, `All`). Defaults to `All`.
+    - `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
     - `balance_change_resources_filter` - Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend integrators use this instead of the `manifest_resources_filter` in most instances.
 
 ### Database changes

@@ -111,7 +111,7 @@ export interface StreamTransactionsRequestAllOf {
      */
     balance_change_resources_filter?: Array<string>;
     /**
-     * Allows filtering by the transaction commit status (`Success`,`Failure`, `All`). Defaults to `All`.
+     * Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
      * @type {string}
      * @memberof StreamTransactionsRequestAllOf
      */
