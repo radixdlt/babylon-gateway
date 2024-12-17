@@ -110,6 +110,8 @@ public sealed record TransactionStreamPageRequest(
 
 public class TransactionStreamPageRequestSearchCriteria
 {
+    public LedgerTransactionStatusFilter Status { get; set; }
+
     public LedgerTransactionKindFilter Kind { get; set; }
 
     public HashSet<LedgerTransactionEventFilter> Events { get; set; } = new();
@@ -129,6 +131,8 @@ public class TransactionStreamPageRequestSearchCriteria
     public HashSet<EntityAddress> AccountsWithoutManifestOwnerMethodCalls { get; set; } = new();
 
     public HashSet<EntityAddress> AccountsWithManifestOwnerMethodCalls { get; set; } = new();
+
+    public HashSet<EntityAddress> BalanceChangeResources { get; set; } = new();
 
     public ManifestClassFilter? ManifestClassFilter { get; set; }
 }

@@ -73,4 +73,5 @@ public enum LedgerTransactionMarkerType
     ManifestClass,
     EventGlobalEmitter,
     EpochChange,
+    ResourceBalanceChange,
 }
