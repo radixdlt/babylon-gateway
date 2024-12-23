@@ -2315,6 +2315,18 @@ components:
         - Global
         - Vault
 
+    SborTypeKind:
+      type: string
+      enum:
+        - SchemaLocal
+        - WellKnown
+
+    SchemaTypeId:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 4294967295
+
     ScryptoSborValue:
       type: object
       required:
@@ -3184,15 +3196,161 @@ components:
             The manifest line-by-line engine return data (only present if `status` is `CommittedSuccess`).
             This type is defined in the Core API as `SborData`. See the Core API documentation for more details.
         events:
-          description: Events emitted by a transaction.
+          description: Events emitted by a transaction. # TODO PP: add description to use detailed_events as they provide more data and context.
           type: array
           items:
             $ref: "#/components/schemas/EventsItem"
-
+        detailed_events:
+          description: TODO PP
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailedEventsItem"
         error_message:
           description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
           nullable: true
+
+    DetailedEventsItem:
+      type: object
+      required:
+        - identifier
+        - payload_type_definition
+        - emitter
+        - payload
+      properties:
+        identifier:
+          $ref: "#/components/schemas/DetailedEventIdentifier"
+        payload_type_definition:
+          $ref: "#/components/schemas/DetailedEventPayloadTypeDefinition"
+        emitter:
+          $ref: "#/components/schemas/DetailedEventEmitter"
+        payload:
+          $ref: "#/components/schemas/DetailedEventPayload"
+
+    DetailedEventIdentifier:
+      type: object
+      required:
+        - package
+        - blueprint
+        - event
+      properties:
+        package:
+          $ref: "#/components/schemas/Address"
+        blueprint:
+          type: string
+        event:
+          type: string
+
+    DetailedEventPayloadTypeDefinition:
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          $ref: "#/components/schemas/SborTypeKind"
+      discriminator:
+        propertyName: kind
+        mapping:
+          SchemaLocal: "#/components/schemas/SchemaLocalEventPayloadTypeDefinition"
+          WellKnown: "#/components/schemas/WellKnownEventPayloadTypeDefinition"
+
+    WellKnownEventPayloadTypeDefinition:
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventPayloadTypeDefinition"
+        - type: object
+          required:
+            - well_known_type_id
+          properties:
+            well_known_type_id:
+              $ref: "#/components/schemas/SchemaTypeId"
+
+    SchemaLocalEventPayloadTypeDefinition:
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventPayloadTypeDefinition"
+        - type: object
+          required:
+            - local_type_id
+            - entity
+            - schema_hash_hex
+          properties:
+            local_type_id:
+              $ref: "#/components/schemas/SchemaTypeId"
+            entity:
+              $ref: "#/components/schemas/Address"
+            schema_hash_hex:
+              $ref: "#/components/schemas/HexString"
+
+    EventEmitterType:
+      type: string
+      enum:
+        - EntityMethod
+        - PackageFunction
+
+    DetailedEventEmitter:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/EventEmitterType"
+      discriminator:
+        propertyName: type
+        mapping:
+          EntityMethod: "#/components/schemas/EntityMethodEventEmitter"
+          PackageFunction: "#/components/schemas/PackageFunctionEventEmitter"
+
+    EntityMethodEventEmitter:
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventEmitter"
+        - type: object
+      required:
+        - method_emitter
+        - global_emitter
+      properties:
+        method_emitter:
+          $ref: "#/components/schemas/MethodEmitter"
+        outer_emitter:
+          $ref: "#/components/schemas/Address"
+        global_emitter:
+          $ref: "#/components/schemas/Address"
+
+    MethodEmitter:
+      type: object
+      required:
+        - entity
+        - module
+      properties:
+        entity:
+          $ref: "#/components/schemas/Address"
+        module:
+          type: string
+
+    FunctionEmitter:
+      type: object
+      required:
+        - blueprint
+      properties:
+        blueprint:
+          type: string
+
+    PackageFunctionEventEmitter:
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventEmitter"
+        - type: object
+      required:
+        - function_emitter
+      properties:
+        function_emitter:
+          $ref: "#/components/schemas/FunctionEmitter"
+
+
+    DetailedEventPayload:
+      type: object
+      required:
+        - programmatic_json
+      properties:
+        programmatic_json:
+          type: object
 
     EventsItem:
       type: object
@@ -4137,6 +4295,10 @@ components:
           default: false
         receipt_events:
           description: if set to `true`, events inside receipt object is returned.
+          type: boolean
+          default: false
+        detailed_events:
+          description: if set to `true`, detailed events object is returned.
           type: boolean
           default: false
         receipt_output:

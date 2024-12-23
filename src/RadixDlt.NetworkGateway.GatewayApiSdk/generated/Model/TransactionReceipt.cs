@@ -113,8 +113,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nextEpoch">Information (number and active validator list) about new epoch if occured. This type is defined in the Core API as &#x60;NextEpoch&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;CommittedSuccess&#x60;). This type is defined in the Core API as &#x60;SborData&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="events">Events emitted by a transaction..</param>
+        /// <param name="detailedEvents">TODO PP.</param>
         /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(TransactionStatus? status = default(TransactionStatus?), Object feeSummary = default(Object), Object costingParameters = default(Object), Object feeDestination = default(Object), Object feeSource = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), List<EventsItem> events = default(List<EventsItem>), string errorMessage = default(string))
+        public TransactionReceipt(TransactionStatus? status = default(TransactionStatus?), Object feeSummary = default(Object), Object costingParameters = default(Object), Object feeDestination = default(Object), Object feeSource = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), List<EventsItem> events = default(List<EventsItem>), List<DetailedEventsItem> detailedEvents = default(List<DetailedEventsItem>), string errorMessage = default(string))
         {
             this.Status = status;
             this.FeeSummary = feeSummary;
@@ -125,6 +126,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.NextEpoch = nextEpoch;
             this.Output = output;
             this.Events = events;
+            this.DetailedEvents = detailedEvents;
             this.ErrorMessage = errorMessage;
         }
 
@@ -184,6 +186,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<EventsItem> Events { get; set; }
 
         /// <summary>
+        /// TODO PP
+        /// </summary>
+        /// <value>TODO PP</value>
+        [DataMember(Name = "detailed_events", EmitDefaultValue = true)]
+        public List<DetailedEventsItem> DetailedEvents { get; set; }
+
+        /// <summary>
         /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
         /// </summary>
         /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
@@ -207,6 +216,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
             sb.Append("  Output: ").Append(Output).Append("\n");
             sb.Append("  Events: ").Append(Events).Append("\n");
+            sb.Append("  DetailedEvents: ").Append(DetailedEvents).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -289,6 +299,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Events.SequenceEqual(input.Events)
                 ) && 
                 (
+                    this.DetailedEvents == input.DetailedEvents ||
+                    this.DetailedEvents != null &&
+                    input.DetailedEvents != null &&
+                    this.DetailedEvents.SequenceEqual(input.DetailedEvents)
+                ) && 
+                (
                     this.ErrorMessage == input.ErrorMessage ||
                     (this.ErrorMessage != null &&
                     this.ErrorMessage.Equals(input.ErrorMessage))
@@ -336,6 +352,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Events != null)
                 {
                     hashCode = (hashCode * 59) + this.Events.GetHashCode();
+                }
+                if (this.DetailedEvents != null)
+                {
+                    hashCode = (hashCode * 59) + this.DetailedEvents.GetHashCode();
                 }
                 if (this.ErrorMessage != null)
                 {

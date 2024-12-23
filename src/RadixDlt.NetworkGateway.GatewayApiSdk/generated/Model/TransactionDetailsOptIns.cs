@@ -105,11 +105,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="receiptFeeDestination">if set to &#x60;true&#x60;, fee destination inside receipt object is returned. (default to false).</param>
         /// <param name="receiptCostingParameters">if set to &#x60;true&#x60;, costing parameters inside receipt object is returned. (default to false).</param>
         /// <param name="receiptEvents">if set to &#x60;true&#x60;, events inside receipt object is returned. (default to false).</param>
+        /// <param name="detailedEvents">if set to &#x60;true&#x60;, detailed events object is returned. (default to false).</param>
         /// <param name="receiptOutput">(true by default) if set to &#x60;true&#x60;, transaction receipt output is returned. (default to true).</param>
         /// <param name="affectedGlobalEntities">if set to &#x60;true&#x60;, all affected global entities by given transaction are returned. (default to false).</param>
         /// <param name="manifestInstructions">if set to &#x60;true&#x60;, manifest instructions for user transactions are returned. (default to false).</param>
         /// <param name="balanceChanges">if set to &#x60;true&#x60;, returns the fungible and non-fungible balance changes.  **Warning!** This opt-in might be missing for recently committed transactions, in that case a &#x60;null&#x60; value will be returned. Retry the request until non-null value is returned.  (default to false).</param>
-        public TransactionDetailsOptIns(bool rawHex = false, bool receiptStateChanges = false, bool receiptFeeSummary = false, bool receiptFeeSource = false, bool receiptFeeDestination = false, bool receiptCostingParameters = false, bool receiptEvents = false, bool receiptOutput = true, bool affectedGlobalEntities = false, bool manifestInstructions = false, bool balanceChanges = false)
+        public TransactionDetailsOptIns(bool rawHex = false, bool receiptStateChanges = false, bool receiptFeeSummary = false, bool receiptFeeSource = false, bool receiptFeeDestination = false, bool receiptCostingParameters = false, bool receiptEvents = false, bool detailedEvents = false, bool receiptOutput = true, bool affectedGlobalEntities = false, bool manifestInstructions = false, bool balanceChanges = false)
         {
             this.RawHex = rawHex;
             this.ReceiptStateChanges = receiptStateChanges;
@@ -118,6 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.ReceiptFeeDestination = receiptFeeDestination;
             this.ReceiptCostingParameters = receiptCostingParameters;
             this.ReceiptEvents = receiptEvents;
+            this.DetailedEvents = detailedEvents;
             this.ReceiptOutput = receiptOutput;
             this.AffectedGlobalEntities = affectedGlobalEntities;
             this.ManifestInstructions = manifestInstructions;
@@ -174,6 +176,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool ReceiptEvents { get; set; }
 
         /// <summary>
+        /// if set to &#x60;true&#x60;, detailed events object is returned.
+        /// </summary>
+        /// <value>if set to &#x60;true&#x60;, detailed events object is returned.</value>
+        [DataMember(Name = "detailed_events", EmitDefaultValue = true)]
+        public bool DetailedEvents { get; set; }
+
+        /// <summary>
         /// (true by default) if set to &#x60;true&#x60;, transaction receipt output is returned.
         /// </summary>
         /// <value>(true by default) if set to &#x60;true&#x60;, transaction receipt output is returned.</value>
@@ -216,6 +225,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ReceiptFeeDestination: ").Append(ReceiptFeeDestination).Append("\n");
             sb.Append("  ReceiptCostingParameters: ").Append(ReceiptCostingParameters).Append("\n");
             sb.Append("  ReceiptEvents: ").Append(ReceiptEvents).Append("\n");
+            sb.Append("  DetailedEvents: ").Append(DetailedEvents).Append("\n");
             sb.Append("  ReceiptOutput: ").Append(ReceiptOutput).Append("\n");
             sb.Append("  AffectedGlobalEntities: ").Append(AffectedGlobalEntities).Append("\n");
             sb.Append("  ManifestInstructions: ").Append(ManifestInstructions).Append("\n");
@@ -284,6 +294,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ReceiptEvents.Equals(input.ReceiptEvents)
                 ) && 
                 (
+                    this.DetailedEvents == input.DetailedEvents ||
+                    this.DetailedEvents.Equals(input.DetailedEvents)
+                ) && 
+                (
                     this.ReceiptOutput == input.ReceiptOutput ||
                     this.ReceiptOutput.Equals(input.ReceiptOutput)
                 ) && 
@@ -317,6 +331,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 hashCode = (hashCode * 59) + this.ReceiptFeeDestination.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptCostingParameters.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptEvents.GetHashCode();
+                hashCode = (hashCode * 59) + this.DetailedEvents.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptOutput.GetHashCode();
                 hashCode = (hashCode * 59) + this.AffectedGlobalEntities.GetHashCode();
                 hashCode = (hashCode * 59) + this.ManifestInstructions.GetHashCode();
