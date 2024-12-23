@@ -62,30 +62,61 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-#nullable disable
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+internal static class EventEmitterDataQuery
 {
-    /// <inheritdoc />
-    public partial class AddLedgerTransactionStatusIndex : Migration
+    internal record EventEmitterDataQueryResult(long EmitterEntityId, string EmitterEntityAddress, string? GlobalEmitterAddress, string? OuterObjectAddress);
+
+    internal static async Task<Dictionary<long, EventEmitterDataQueryResult>> Execute(
+        IDapperWrapper dapperWrapper,
+        CommonDbContext dbContext,
+        List<long> emitterEntityIds,
+        CancellationToken token)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+        if (!emitterEntityIds.Any())
         {
-            migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_receipt_status",
-                table: "ledger_transactions",
-                column: "receipt_status");
+            return new Dictionary<long, EventEmitterDataQueryResult>();
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+        var parameters = new
         {
-            migrationBuilder.DropIndex(
-                name: "IX_ledger_transactions_receipt_status",
-                table: "ledger_transactions");
-        }
+            emitterEntityIds = emitterEntityIds,
+        };
+
+        var cd = DapperExtensions.CreateCommandDefinition(
+            @"
+WITH vars AS (
+    SELECT
+        unnest(@emitterEntityIds) AS emitter_entity_id
+)
+SELECT
+    e.id AS EmitterEntityId,
+    e.address AS EmitterEntityAddress,
+    ge.address AS GlobalEmitterAddress,
+    ooe.address AS OuterObjectAddress
+FROM vars
+INNER JOIN entities e on e.id = vars.emitter_entity_id
+LEFT JOIN entities ge on e.global_ancestor_id = ge.id
+LEFT JOIN entities ooe on e.outer_object_entity_id = ooe.id
+;",
+            parameters,
+            cancellationToken: token);
+
+        var result = (await dapperWrapper.QueryAsync<EventEmitterDataQueryResult>(dbContext.Database.GetDbConnection(), cd))
+            .ToDictionary(x => x.EmitterEntityId, x => x);
+
+        return result;
     }
 }

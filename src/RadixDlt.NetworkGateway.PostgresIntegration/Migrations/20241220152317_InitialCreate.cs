@@ -90,10 +90,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call,badge_presented")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_transaction_type", "user,round_change,genesis_flash,genesis_transaction,protocol_update_flash,protocol_update_transaction")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "transaction_type,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter,epoch_change")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_transaction_type", "user,genesis_flash,genesis_transaction,protocol_update_flash,protocol_update_transaction")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "transaction_type,event,manifest_address,affected_global_entity,manifest_class,event_global_emitter,epoch_change,resource_balance_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
-                .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update,flash")
+                .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,user_v2,round_update,flash")
                 .Annotation("Npgsql:Enum:module_id", "main,metadata,royalty,role_assignment")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,ruid")
                 .Annotation("Npgsql:Enum:package_vm_type", "native,scrypto_v1")
@@ -276,6 +276,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     parent_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
+                    outer_object_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     correlated_entity_relationships = table.Column<List<EntityRelationship>>(type: "entity_relationship[]", nullable: false),
                     correlated_entity_ids = table.Column<List<long>>(type: "bigint[]", nullable: false),
                     discriminator = table.Column<EntityType>(type: "entity_type", nullable: false),
@@ -540,10 +541,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ledger_finalized_subintents",
+                columns: table => new
+                {
+                    subintent_hash = table.Column<string>(type: "character varying(90)", maxLength: 90, nullable: false),
+                    finalized_at_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    finalized_at_transaction_intent_hash = table.Column<string>(type: "character varying(90)", maxLength: 90, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ledger_finalized_subintents", x => x.subintent_hash);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ledger_transaction_events",
                 columns: table => new
                 {
                     state_version = table.Column<long>(type: "bigint", nullable: false),
+                    receipt_event_emitter_entity_ids = table.Column<long[]>(type: "bigint[]", nullable: false),
                     receipt_event_emitters = table.Column<string[]>(type: "jsonb[]", nullable: false),
                     receipt_event_names = table.Column<string[]>(type: "text[]", nullable: false),
                     receipt_event_sbors = table.Column<byte[][]>(type: "bytea[]", nullable: false),
@@ -578,6 +593,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ledger_transaction_markers", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ledger_transaction_subintent_data",
+                columns: table => new
+                {
+                    state_version = table.Column<long>(type: "bigint", nullable: false),
+                    child_subintent_hashes = table.Column<List<string>>(type: "text[]", nullable: false),
+                    subintent_data = table.Column<string>(type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ledger_transaction_subintent_data", x => x.state_version);
                 });
 
             migrationBuilder.CreateTable(
@@ -1273,6 +1301,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_receipt_status",
+                table: "ledger_transactions",
+                column: "receipt_status");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_round_timestamp",
                 table: "ledger_transactions",
                 column: "round_timestamp");
@@ -1529,10 +1562,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "key_value_store_totals_history");
 
             migrationBuilder.DropTable(
+                name: "ledger_finalized_subintents");
+
+            migrationBuilder.DropTable(
                 name: "ledger_transaction_events");
 
             migrationBuilder.DropTable(
                 name: "ledger_transaction_markers");
+
+            migrationBuilder.DropTable(
+                name: "ledger_transaction_subintent_data");
 
             migrationBuilder.DropTable(
                 name: "ledger_transactions");

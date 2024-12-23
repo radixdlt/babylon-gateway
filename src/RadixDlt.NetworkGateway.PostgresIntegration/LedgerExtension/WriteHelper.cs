@@ -134,7 +134,7 @@ internal class WriteHelper : IWriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entity_relationships, correlated_entity_ids, discriminator, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, non_fungible_data_mutable_fields) FROM STDIN (FORMAT BINARY)",
+            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, outer_object_entity_id, correlated_entity_relationships, correlated_entity_ids, discriminator, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, non_fungible_data_mutable_fields) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var e in entities)
@@ -151,6 +151,7 @@ internal class WriteHelper : IWriteHelper
             await writer.WriteAsync(e.ParentAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.GlobalAncestorId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.OuterObjectEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Correlations.Select(x => x.Relationship).ToArray(), "entity_relationship[]", token);
             await writer.WriteAsync(e.Correlations.Select(x => x.EntityId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(discriminator, "entity_type", token);

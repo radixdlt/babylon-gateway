@@ -66,6 +66,7 @@ namespace RadixDlt.CoreApiSdk.Model;
 
 public static class NativeBlueprintNames
 {
+    public const string Validator = "Validator";
     public const string FungibleVault = "FungibleVault";
     public const string NonFungibleVault = "NonFungibleVault";
     public const string NonFungibleResourceManager = "NonFungibleResourceManager";

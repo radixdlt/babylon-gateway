@@ -107,7 +107,18 @@ internal class EntityRelationshipProcessor : ISubstateScanUpsertProcessor
             {
                 referencedEntity.PostResolveConfigure((VaultEntity e) =>
                 {
-                    e.AddCorrelation(EntityRelationship.VaultToResource, _referencedEntities.Get((EntityAddress)objectDetails.BlueprintInfo.OuterObject).DatabaseId);
+                    var resourceEntityId = _referencedEntities.Get((EntityAddress)objectDetails.BlueprintInfo.OuterObject).DatabaseId;
+                    e.OuterObjectEntityId = resourceEntityId;
+                    e.AddCorrelation(EntityRelationship.VaultToResource, resourceEntityId);
+                });
+            }
+
+            if (objectDetails.BlueprintInfo.BlueprintName is CoreModel.NativeBlueprintNames.Validator)
+            {
+                referencedEntity.PostResolveConfigure((GlobalValidatorEntity e) =>
+                {
+                    var consensusManagerEntityId = _referencedEntities.Get((EntityAddress)objectDetails.BlueprintInfo.OuterObject).DatabaseId;
+                    e.OuterObjectEntityId = consensusManagerEntityId;
                 });
             }
         }

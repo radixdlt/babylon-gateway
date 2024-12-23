@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20241016083503_InitialCreate")]
+    [Migration("20241220152317_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -100,10 +100,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from", "account_owner_method_call", "badge_presented" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_transaction_type", new[] { "user", "round_change", "genesis_flash", "genesis_transaction", "protocol_update_flash", "protocol_update_transaction" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "transaction_type", "event", "manifest_address", "affected_global_entity", "manifest_class", "event_global_emitter", "epoch_change" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_transaction_type", new[] { "user", "genesis_flash", "genesis_transaction", "protocol_update_flash", "protocol_update_transaction" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "transaction_type", "event", "manifest_address", "affected_global_entity", "manifest_class", "event_global_emitter", "epoch_change", "resource_balance_change" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "round_update", "flash" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "user_v2", "round_update", "flash" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "module_id", new[] { "main", "metadata", "royalty", "role_assignment" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "integer", "bytes", "ruid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "package_vm_type", new[] { "native", "scrypto_v1" });
@@ -469,6 +469,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<bool>("IsGlobal")
                         .HasColumnType("boolean")
                         .HasColumnName("is_global");
+
+                    b.Property<long?>("OuterObjectEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("outer_object_entity_id");
 
                     b.Property<long?>("OwnerAncestorId")
                         .HasColumnType("bigint")
@@ -1027,6 +1031,28 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("key_value_store_totals_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerFinalizedSubintent", b =>
+                {
+                    b.Property<string>("SubintentHash")
+                        .HasMaxLength(90)
+                        .HasColumnType("character varying(90)")
+                        .HasColumnName("subintent_hash");
+
+                    b.Property<long>("FinalizedAtStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("finalized_at_state_version");
+
+                    b.Property<string>("FinalizedAtTransactionIntentHash")
+                        .IsRequired()
+                        .HasMaxLength(90)
+                        .HasColumnType("character varying(90)")
+                        .HasColumnName("finalized_at_transaction_intent_hash");
+
+                    b.HasKey("SubintentHash");
+
+                    b.ToTable("ledger_finalized_subintents");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>
                 {
                     b.Property<long>("StateVersion")
@@ -1138,6 +1164,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("StateVersion");
 
+                    b.HasIndex("ReceiptStatus");
+
                     b.HasIndex("RoundTimestamp");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
@@ -1156,6 +1184,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("StateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
+
+                    b.Property<long[]>("ReceiptEventEmitterEntityIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("receipt_event_emitter_entity_ids");
 
                     b.Property<string[]>("ReceiptEventEmitters")
                         .IsRequired()
@@ -1222,6 +1255,27 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator<LedgerTransactionMarkerType>("discriminator");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionSubintentData", b =>
+                {
+                    b.Property<long>("StateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("state_version");
+
+                    b.Property<List<string>>("ChildSubintentHashes")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("child_subintent_hashes");
+
+                    b.Property<string>("SubintentData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("subintent_data");
+
+                    b.HasKey("StateVersion");
+
+                    b.ToTable("ledger_transaction_subintent_data");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdDataHistory", b =>
@@ -2551,34 +2605,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(EntityType.InternalNonFungibleVault);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.FlashLedgerTransaction", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
-
-                    b.ToTable("ledger_transactions");
-
-                    b.HasDiscriminator().HasValue(LedgerTransactionType.Flash);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GenesisLedgerTransaction", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
-
-                    b.ToTable("ledger_transactions");
-
-                    b.HasDiscriminator().HasValue(LedgerTransactionType.Genesis);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RoundUpdateLedgerTransaction", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
-
-                    b.ToTable("ledger_transactions");
-
-                    b.HasDiscriminator().HasValue(LedgerTransactionType.RoundUpdate);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransaction", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.BaseUserLedgerTransaction", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
 
@@ -2622,8 +2649,33 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
 
                     b.ToTable("ledger_transactions");
+                });
 
-                    b.HasDiscriminator().HasValue(LedgerTransactionType.User);
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.FlashLedgerTransaction", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionType.Flash);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GenesisLedgerTransaction", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionType.Genesis);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RoundUpdateLedgerTransaction", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionType.RoundUpdate);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AffectedGlobalEntityTransactionMarker", b =>
@@ -2749,6 +2801,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("ledger_transaction_markers");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.ManifestClass);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceBalanceChangeTransactionMarker", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionMarker");
+
+                    b.Property<long>("EntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.ToTable("ledger_transaction_markers");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.ResourceBalanceChange);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TransactionTypeLedgerTransactionMarker", b =>
@@ -2894,6 +2960,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("unverified_standard_metadata_entry_history");
 
                     b.HasDiscriminator().HasValue(StandardMetadataKey.DappDefinitions);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransactionV1", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.BaseUserLedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionType.User);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransactionV2", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.BaseUserLedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionType.UserV2);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>

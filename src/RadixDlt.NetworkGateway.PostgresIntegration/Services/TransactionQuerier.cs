@@ -574,12 +574,12 @@ internal class TransactionQuerier : ITransactionQuerier
 
         var schemaLookups = transactions
             .SelectMany(x => x.Events)
-            .Select(x => new TransactionReceiptEventLookup(x.EntityId, x.SchemaHash))
+            .Select(x => new TransactionReceiptEventLookup(x.SchemaEntityId, x.SchemaHash))
             .ToHashSet();
 
         Dictionary<SchemaLookup, byte[]> schemas = new Dictionary<SchemaLookup, byte[]>();
 
-        if (optIns.ReceiptEvents && schemaLookups.Any())
+        if ((optIns.ReceiptEvents || optIns.DetailedEvents) && schemaLookups.Any())
         {
             var entityIds = schemaLookups.Select(x => x.EntityId).ToList();
             var schemaHashes = schemaLookups.Select(x => (byte[])x.SchemaHash).ToList();
@@ -595,8 +595,29 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                 .ToDictionaryAsync(x => new SchemaLookup(x.EntityId, x.SchemaHash), x => x.Schema, token);
         }
 
+        Dictionary<long, SchemaDefinitionDataQuery.EventDetailsDataQueryResult> eventDetailsData = new Dictionary<long, SchemaDefinitionDataQuery.EventDetailsDataQueryResult>();
+        Dictionary<long, EventEmitterDataQuery.EventEmitterDataQueryResult> eventEmitterData = new Dictionary<long, EventEmitterDataQuery.EventEmitterDataQueryResult>();
+
+        if (optIns.DetailedEvents && transactions.SelectMany(x => x.Events).Any())
+        {
+            var schemaDefinitingEntityIds = transactions
+                .SelectMany(x => x.Events)
+                .Select(x => x.SchemaEntityId)
+                .ToHashSet()
+                .ToList();
+
+            var eventEmitterEntityIds = transactions
+                .SelectMany(x => x.Events)
+                .Select(x => x.EmiterEntityId)
+                .ToHashSet()
+                .ToList();
+
+            eventDetailsData = await SchemaDefinitionDataQuery.Execute(_dapperWrapper, _dbContext, schemaDefinitingEntityIds, token);
+            eventEmitterData = await EventEmitterDataQuery.Execute(_dapperWrapper, _dbContext, eventEmitterEntityIds, token);
+        }
+
         var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var mappedTransactions = MapTransactions(transactions, transactionStateVersions, optIns, entityIdToAddressMap, schemas, networkId);
+        var mappedTransactions = MapTransactions(transactions, transactionStateVersions, optIns, entityIdToAddressMap, eventEmitterData, eventDetailsData, schemas, networkId);
         return mappedTransactions;
     }
 
@@ -629,6 +650,8 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
         IList<long> transactionStateVersions,
         GatewayModel.TransactionDetailsOptIns optIns,
         IDictionary<long, EntityAddress> entityIdToAddressMap,
+        IDictionary<long, EventEmitterDataQuery.EventEmitterDataQueryResult> eventEmitterDataLookup,
+        IDictionary<long, SchemaDefinitionDataQuery.EventDetailsDataQueryResult> eventDetailsDataLookup,
         IDictionary<SchemaLookup, byte[]> schemas,
         byte networkId)
     {
@@ -652,17 +675,16 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                 }
             }
 
-            if (!optIns.ReceiptEvents)
+            List<Event>? events = null;
+            List<GatewayModel.DetailedEventsItem>? detailedEvents = null;
+
+            if (optIns.ReceiptEvents)
             {
-                mappedTransactions.Add(MapSingleTransaction(transaction, optIns, entityIdToAddressMap, null, balanceChanges));
-            }
-            else
-            {
-                List<Event> events = new List<Event>();
+                events = new List<Event>();
 
                 foreach (var @event in transaction.Events)
                 {
-                    if (!schemas.TryGetValue(new SchemaLookup(@event.EntityId, @event.SchemaHash), out var schema))
+                    if (!schemas.TryGetValue(new SchemaLookup(@event.SchemaEntityId, @event.SchemaHash), out var schema))
                     {
                         throw new UnreachableException($"Unable to find schema for given hash {@event.SchemaHash.ToHex()}");
                     }
@@ -670,9 +692,84 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                     var eventData = ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId);
                     events.Add(new Event(@event.Name, @event.Emitter, eventData));
                 }
-
-                mappedTransactions.Add(MapSingleTransaction(transaction, optIns, entityIdToAddressMap, events, balanceChanges));
             }
+
+            if (optIns.DetailedEvents)
+            {
+                detailedEvents = new List<GatewayModel.DetailedEventsItem>();
+
+                foreach (var @event in transaction.Events)
+                {
+                    if (!schemas.TryGetValue(new SchemaLookup(@event.SchemaEntityId, @event.SchemaHash), out var schema))
+                    {
+                        throw new UnreachableException($"Unable to find schema for given hash {@event.SchemaHash.ToHex()}");
+                    }
+
+                    // TODO PP: in edge case when someone requests for both .events and .detailed_events we might call it twice, but it's minor.
+                    var eventProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId);
+
+                    GatewayModel.DetailedEventPayloadTypeDefinition payloadTypeDefinition = @event.KeyTypeKind switch
+                    {
+                        SborTypeKind.SchemaLocal => new GatewayModel.SchemaLocalEventPayloadTypeDefinition(
+                            localTypeId: @event.TypeIndex,
+                            entity: eventDetailsDataLookup[@event.SchemaEntityId].EntityAddress,
+                            schemaHashHex: @event.SchemaHash.ToHex()),
+                        SborTypeKind.WellKnown => new GatewayModel.WellKnownEventPayloadTypeDefinition(wellKnownTypeId: @event.TypeIndex),
+                        _ => throw new NotSupportedException($"Not supported schema type kind {@event.KeyTypeKind}"),
+                    };
+
+                    var payload = new GatewayModel.DetailedEventPayload(eventProgrammaticJson);
+
+                    var parsedEmitter = JsonConvert.DeserializeObject<CoreModel.EventEmitterIdentifier>(@event.Emitter)
+                                        ?? throw new NotSupportedException($"Unable to parse event emitter {@event.Emitter}");
+
+                    if (parsedEmitter is CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier)
+                    {
+                        var detailedIdentifier = new GatewayModel.DetailedEventIdentifier(
+                            package: functionEventEmitterIdentifier.PackageAddress,
+                            blueprint: functionEventEmitterIdentifier.BlueprintName,
+                            _event: @event.Name);
+
+                        var detailedEventEmitter = new GatewayModel.PackageFunctionEventEmitter(new GatewayModel.FunctionEmitter(functionEventEmitterIdentifier.BlueprintName));
+
+                        detailedEvents.Add(new GatewayModel.DetailedEventsItem(
+                            detailedIdentifier,
+                            payloadTypeDefinition,
+                            detailedEventEmitter,
+                            payload));
+                    }
+                    else if (parsedEmitter is CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier)
+                    {
+                        var schemaDefiningEntityId = eventDetailsDataLookup[@event.SchemaEntityId];
+                        var emitterDetails = eventEmitterDataLookup[@event.EmiterEntityId];
+
+                        var detailedIdentifier = new GatewayModel.DetailedEventIdentifier(
+                            package: schemaDefiningEntityId.PackageAddress,
+                            blueprint: schemaDefiningEntityId.BlueprintName,
+                            _event: @event.Name);
+
+                        var detailedEventEmitter = new GatewayModel.EntityMethodEventEmitter(
+                            new GatewayModel.MethodEmitter(
+                                methodEventEmitterIdentifier.Entity.EntityAddress,
+                                methodEventEmitterIdentifier.ObjectModuleId.ToString()
+                            ),
+                            outerEmitter: emitterDetails.OuterObjectAddress,
+                            globalEmitter: emitterDetails.GlobalEmitterAddress ?? methodEventEmitterIdentifier.Entity.EntityAddress);
+
+                        detailedEvents.Add(new GatewayModel.DetailedEventsItem(
+                            detailedIdentifier,
+                            payloadTypeDefinition,
+                            detailedEventEmitter,
+                            payload));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException($"Not supported event emitter type {parsedEmitter.Type}");
+                    }
+                }
+            }
+
+            mappedTransactions.Add(MapSingleTransaction(transaction, optIns, entityIdToAddressMap, events, detailedEvents, balanceChanges));
         }
 
         return mappedTransactions;
@@ -682,7 +779,8 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
         TransactionDetailsQuery.LedgerTransactionQueryResult lt,
         GatewayModel.TransactionDetailsOptIns optIns,
         IDictionary<long, EntityAddress> entityIdToAddressMap,
-        IList<Event>? events,
+        List<Event>? events,
+        List<GatewayModel.DetailedEventsItem>? detailedEvents,
         GatewayModel.TransactionBalanceChanges? transactionBalanceChanges)
     {
         string? payloadHash = null;
@@ -734,6 +832,7 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                 NextEpoch = lt.ReceiptNextEpoch != null ? new JRaw(lt.ReceiptNextEpoch) : null,
                 StateUpdates = optIns.ReceiptStateChanges && lt.ReceiptStateUpdates != null ? new JRaw(lt.ReceiptStateUpdates) : null,
                 Events = optIns.ReceiptEvents ? events?.Select(x => new GatewayModel.EventsItem(x.Name, new JRaw(x.Emitter), x.Data)).ToList() : null,
+                DetailedEvents = optIns.DetailedEvents ? detailedEvents : null,
             },
             subintentDetails: lt
                 .SubintentData

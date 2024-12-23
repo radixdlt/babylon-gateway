@@ -78,6 +78,9 @@ internal class LedgerTransactionEvents
     [Column("state_version")]
     public long StateVersion { get; set; }
 
+    [Column("receipt_event_emitter_entity_ids")]
+    public long[] ReceiptEventEmitterEntityIds { get; set; }
+
     [Column("receipt_event_emitters", TypeName = "jsonb[]")]
     public string[] ReceiptEventEmitters { get; set; }
 

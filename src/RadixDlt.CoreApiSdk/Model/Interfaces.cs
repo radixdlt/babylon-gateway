@@ -77,6 +77,11 @@ public interface IRoyaltyVaultHolder
     public bool TryGetRoyaltyVault([NotNullWhen(true)] out EntityReference royaltyVault);
 }
 
+public interface IEventEmitter
+{
+    public string GetEmitterAddress();
+}
+
 public interface IEntityAddressPointer
 {
     public IEnumerable<string> GetEntityAddresses();

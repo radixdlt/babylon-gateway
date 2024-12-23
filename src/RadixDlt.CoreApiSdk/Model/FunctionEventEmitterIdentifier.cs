@@ -72,4 +72,9 @@ public partial class FunctionEventEmitterIdentifier
     {
         yield return PackageAddress;
     }
+
+    public override string GetEmitterAddress()
+    {
+        return PackageAddress;
+    }
 }
