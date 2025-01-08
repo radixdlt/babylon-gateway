@@ -596,7 +596,6 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
         }
 
         Dictionary<long, SchemaDefinitionDataQuery.EventDetailsDataQueryResult> eventDetailsData = new Dictionary<long, SchemaDefinitionDataQuery.EventDetailsDataQueryResult>();
-        Dictionary<long, EventEmitterDataQuery.EventEmitterDataQueryResult> eventEmitterData = new Dictionary<long, EventEmitterDataQuery.EventEmitterDataQueryResult>();
 
         if (optIns.DetailedEvents && transactions.SelectMany(x => x.Events).Any())
         {
@@ -608,16 +607,17 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
 
             var eventEmitterEntityIds = transactions
                 .SelectMany(x => x.Events)
-                .Select(x => x.EmiterEntityId)
+                .Select(x => x.EmitterEntityId)
                 .ToHashSet()
                 .ToList();
 
-            eventDetailsData = await SchemaDefinitionDataQuery.Execute(_dapperWrapper, _dbContext, schemaDefinitingEntityIds, token);
-            eventEmitterData = await EventEmitterDataQuery.Execute(_dapperWrapper, _dbContext, eventEmitterEntityIds, token);
+            var entityIds = schemaDefinitingEntityIds.Union(eventEmitterEntityIds).Distinct().ToList();
+
+            eventDetailsData = await SchemaDefinitionDataQuery.Execute(_dapperWrapper, _dbContext, entityIds, token);
         }
 
         var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
-        var mappedTransactions = MapTransactions(transactions, transactionStateVersions, optIns, entityIdToAddressMap, eventEmitterData, eventDetailsData, schemas, networkId);
+        var mappedTransactions = MapTransactions(transactions, transactionStateVersions, optIns, entityIdToAddressMap, eventDetailsData, schemas, networkId);
         return mappedTransactions;
     }
 
@@ -650,7 +650,6 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
         IList<long> transactionStateVersions,
         GatewayModel.TransactionDetailsOptIns optIns,
         IDictionary<long, EntityAddress> entityIdToAddressMap,
-        IDictionary<long, EventEmitterDataQuery.EventEmitterDataQueryResult> eventEmitterDataLookup,
         IDictionary<long, SchemaDefinitionDataQuery.EventDetailsDataQueryResult> eventDetailsDataLookup,
         IDictionary<SchemaLookup, byte[]> schemas,
         byte networkId)
@@ -740,12 +739,11 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                     }
                     else if (parsedEmitter is CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier)
                     {
-                        var schemaDefiningEntityId = eventDetailsDataLookup[@event.SchemaEntityId];
-                        var emitterDetails = eventEmitterDataLookup[@event.EmiterEntityId];
+                        var eventDetails = eventDetailsDataLookup[@event.EmitterEntityId];
 
                         var detailedIdentifier = new GatewayModel.DetailedEventIdentifier(
-                            package: schemaDefiningEntityId.PackageAddress,
-                            blueprint: schemaDefiningEntityId.BlueprintName,
+                            package: eventDetails.PackageAddress,
+                            blueprint: eventDetails.BlueprintName,
                             _event: @event.Name);
 
                         var detailedEventEmitter = new GatewayModel.EntityMethodEventEmitter(
@@ -753,8 +751,8 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                                 methodEventEmitterIdentifier.Entity.EntityAddress,
                                 methodEventEmitterIdentifier.ObjectModuleId.ToString()
                             ),
-                            outerEmitter: emitterDetails.OuterObjectAddress,
-                            globalEmitter: emitterDetails.GlobalEmitterAddress ?? methodEventEmitterIdentifier.Entity.EntityAddress);
+                            outerEmitter: eventDetails.OuterObjectAddress,
+                            globalEmitter: eventDetails.GlobalEmitterAddress ?? methodEventEmitterIdentifier.Entity.EntityAddress);
 
                         detailedEvents.Add(new GatewayModel.DetailedEventsItem(
                             detailedIdentifier,

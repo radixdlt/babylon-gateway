@@ -77,7 +77,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal static class TransactionDetailsQuery
 {
-    internal record MappedReceiptEvent(string Name, string Emitter, long EmiterEntityId, byte[] Data, long SchemaEntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
+    internal record MappedReceiptEvent(string Name, string Emitter, long EmitterEntityId, byte[] Data, long SchemaEntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
 
     internal record MappedSubintentData(List<string> ChildSubintentHashes, List<SubintentData> SubintentData);
 
