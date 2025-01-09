@@ -658,7 +658,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<ResourceHolder>()
-            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.Balance });
+            .HasIndex(e => new { e.ResourceEntityId, e.Balance, e.Id });
 
         modelBuilder
             .Entity<EntityResourceTotalsHistory>()

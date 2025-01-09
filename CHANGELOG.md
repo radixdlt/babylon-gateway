@@ -5,12 +5,14 @@ Release built: _not released yet_
 - New filters are supported on the `/stream/transactions` endpoint:
     - `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
     - `balance_change_resources_filter` - Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend integrators use this instead of the `manifest_resources_filter` in most instances.
+- Improved the performance of the `/extensions/resource-holders/page` endpoint.
 
 ### Database changes
 - New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.
 - Removed `transaction_type.round_update` from the `ledger_transaction_markers` table. This should reduce database size and slightly improve the performance of the `/stream/transactions` endpoint.
 - A new index `IX_ledger_transaction_markers_resource_balance_change` has been added to the `ledger_transaction_markers` table.
 - A new index `IX_ledger_transactions_receipt_status_state_version` has been added to the `ledger_transactions` table.
+- Replaced the `IX_resource_holders_entity_id_resource_entity_id_balance` index with the `IX_resource_holders_resource_entity_id_balance_id` index on the resource_holders table.
 
 ## 1.9.2
 Release built: 9.12.2024

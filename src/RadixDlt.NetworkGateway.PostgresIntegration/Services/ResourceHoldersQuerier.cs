@@ -123,16 +123,16 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
         var cd = DapperExtensions.CreateCommandDefinition(
             @"
 SELECT
-    ro.id as Id,
+    rh.id as Id,
     e.address AS EntityAddress,
-    CAST(ro.balance AS text) AS Balance,
-    ro.last_updated_at_state_version AS LastUpdatedAtStateVersion
-FROM resource_holders ro
+    CAST(rh.balance AS text) AS Balance,
+    rh.last_updated_at_state_version AS LastUpdatedAtStateVersion
+FROM resource_holders rh
 INNER JOIN entities e
-ON ro.entity_id = e.id
-WHERE ro.resource_entity_id = @resourceEntityId
-  AND (ro.balance, ro.id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)
-ORDER BY (ro.balance, ro.entity_id) DESC
+ON rh.entity_id = e.id
+WHERE rh.resource_entity_id = @resourceEntityId
+  AND (rh.balance, rh.id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)
+ORDER BY rh.balance DESC, rh.id DESC
 LIMIT @limit",
             parameters,
             cancellationToken: token
