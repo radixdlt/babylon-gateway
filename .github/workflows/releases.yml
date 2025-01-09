@@ -252,7 +252,7 @@ jobs:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
       amd_meta_data_json: ${{ needs.docker-gateway-api-dockerhub.outputs.json }}
-      aws_dockerhub_secret: github-actions/rdxworks/dockerhub-images/release-credentials
+      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
       role-to-assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
 
@@ -269,7 +269,7 @@ jobs:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
       amd_meta_data_json: ${{ needs.docker-data-aggregator-dockerhub.outputs.json }}
-      aws_dockerhub_secret: github-actions/rdxworks/dockerhub-images/release-credentials
+      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
       role-to-assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
 
@@ -286,7 +286,7 @@ jobs:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
       amd_meta_data_json: ${{ needs.docker-database-migrations-dockerhub.outputs.json }}
-      aws_dockerhub_secret: github-actions/rdxworks/dockerhub-images/release-credentials
+      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
       role-to-assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
 
