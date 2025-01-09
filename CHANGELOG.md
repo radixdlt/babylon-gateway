@@ -9,6 +9,8 @@ Release built: _not released yet_
 ### Database changes
 - New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.
 - Removed `transaction_type.round_update` from the `ledger_transaction_markers` table. This should reduce database size and slightly improve the performance of the `/stream/transactions` endpoint.
+- A new index `IX_ledger_transaction_markers_resource_balance_change` has been added to the `ledger_transaction_markers` table.
+- A new index `IX_ledger_transactions_receipt_status_state_version` has been added to the `ledger_transactions` table.
 
 ## 1.9.2
 Release built: 9.12.2024
