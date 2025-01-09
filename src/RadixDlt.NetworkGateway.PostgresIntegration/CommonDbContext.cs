@@ -273,7 +273,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<LedgerTransaction>()
-            .HasIndex(lt => lt.ReceiptStatus);
+            .HasIndex(lt => new { lt.ReceiptStatus, lt.StateVersion });
 
         // This index lets you quickly translate Epoch/Round => StateVersion
         modelBuilder
@@ -312,6 +312,12 @@ internal abstract class CommonDbContext : DbContext
             .Entity<EpochChangeLedgerTransactionMarker>()
             .HasIndex(e => new { e.EpochChange, e.StateVersion })
             .HasFilter("discriminator = 'epoch_change'");
+
+        modelBuilder
+            .Entity<ResourceBalanceChangeTransactionMarker>()
+            .HasIndex(e => new { e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'resource_balance_change'")
+            .HasDatabaseName("IX_ledger_transaction_markers_resource_balance_change");
 
         modelBuilder
             .Entity<ManifestAddressLedgerTransactionMarker>()

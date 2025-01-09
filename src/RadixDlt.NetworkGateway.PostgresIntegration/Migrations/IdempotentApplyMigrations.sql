@@ -1507,3 +1507,36 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20250109081643_AddTransactionResourceBalanceChangeIndex') THEN
+    DROP INDEX "IX_ledger_transactions_receipt_status";
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20250109081643_AddTransactionResourceBalanceChangeIndex') THEN
+    CREATE INDEX "IX_ledger_transactions_receipt_status_state_version" ON ledger_transactions (receipt_status, state_version);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20250109081643_AddTransactionResourceBalanceChangeIndex') THEN
+    CREATE INDEX "IX_ledger_transaction_markers_resource_balance_change" ON ledger_transaction_markers (entity_id, state_version) WHERE discriminator = 'resource_balance_change';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20250109081643_AddTransactionResourceBalanceChangeIndex') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20250109081643_AddTransactionResourceBalanceChangeIndex', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+
