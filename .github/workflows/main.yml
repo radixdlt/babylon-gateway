@@ -233,7 +233,7 @@ jobs:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
       amd_meta_data_json: ${{ needs.docker-gateway-api-private.outputs.json }}
-      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
+      aws_dockerhub_secret: github-actions/common/dockerhub-credentials-read-only
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
 
@@ -245,7 +245,7 @@ jobs:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
       amd_meta_data_json: ${{ needs.docker-data-aggregator-private.outputs.json }}
-      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
+      aws_dockerhub_secret: github-actions/common/dockerhub-credentials-read-only
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
 
@@ -257,7 +257,7 @@ jobs:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/join-docker-images-all-tags.yml@main
     with:
       amd_meta_data_json: ${{ needs.docker-database-migrations-private.outputs.json }}
-      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
+      aws_dockerhub_secret: github-actions/common/dockerhub-credentials-read-only
     secrets:
       role-to-assume: ${{ secrets.GH_COMMON_SECRETS_READ_ROLE }}
 
