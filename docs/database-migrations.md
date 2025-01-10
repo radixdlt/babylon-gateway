@@ -25,11 +25,7 @@ Providing the schema **ONLY** at the user level i.e `ALTER user someuser in data
 
 ### Idempotent SQL script
 
-This is a Raw SQL script that has to be executed on the database.
-
-It takes care of applying each migration only once and applying only missing migrations.
-
-It can be found in the [migrations directory](../src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/IdempotentApplyMigrations.sql)
+This is a Raw SQL script that has to be executed on the database. It takes care of applying each migration only once and applying only missing migrations. It can be found as [IdempotentApplyMigrations.sql](../src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/IdempotentApplyMigrations.sql) in the migrations directory.
 
 Before running the script, may need to ensure that the user running the script has SUPERUSER privileges, for example with:
 
@@ -37,10 +33,9 @@ Before running the script, may need to ensure that the user running the script h
 ALTER USER db_dev_superuser WITH SUPERUSER;
 ```
 
-For more information check:
-https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/applying?tabs=dotnet-core-cli#idempotent-sql-scripts
+For more information, see the [Microsoft documentation](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/applying?tabs=dotnet-core-cli#idempotent-sql-scripts) on the idempotent SQL scripts.
 
-Because of a bug in CLI responsible for generating these SQL scripts https://github.com/dotnet/efcore/issues/24512, it is possible that it will generate invalid SQL scripts (missing semicolon at the end of each command). We are trying to make sure it does not happen but since we are internally using docker images to migrate the database there is a chance that it might slip through. To fix that, simply add a semicolon at the end of the invalid command.
+Because of [a bug in CLI responsible for generating these SQL scripts](https://github.com/dotnet/efcore/issues/24512), it is possible that it will generate invalid SQL scripts (missing semicolon at the end of each command). We are trying to make sure it does not happen but since we are internally using docker images to migrate the database there is a chance that it might slip through. To fix that, simply add a semicolon at the end of the invalid command.
 
 ## Schema upgrade scenarios
 There are two scenarios that might happen between gateway versions.
