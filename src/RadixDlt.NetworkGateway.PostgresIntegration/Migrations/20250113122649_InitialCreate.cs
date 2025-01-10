@@ -1276,6 +1276,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'manifest_address'");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_resource_balance_change",
+                table: "ledger_transaction_markers",
+                columns: new[] { "entity_id", "state_version" },
+                filter: "discriminator = 'resource_balance_change'");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_markers_state_version",
                 table: "ledger_transaction_markers",
                 column: "state_version");
@@ -1301,9 +1307,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_receipt_status",
+                name: "IX_ledger_transactions_receipt_status_state_version",
                 table: "ledger_transactions",
-                column: "receipt_status");
+                columns: new[] { "receipt_status", "state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_round_timestamp",
@@ -1410,9 +1416,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_resource_holders_entity_id_resource_entity_id_balance",
+                name: "IX_resource_holders_resource_entity_id_balance_entity_id",
                 table: "resource_holders",
-                columns: new[] { "entity_id", "resource_entity_id", "balance" });
+                columns: new[] { "resource_entity_id", "balance", "entity_id" },
+                descending: new[] { false, true, false });
 
             migrationBuilder.CreateIndex(
                 name: "IX_schema_entry_aggregate_history_entity_id_from_state_version",

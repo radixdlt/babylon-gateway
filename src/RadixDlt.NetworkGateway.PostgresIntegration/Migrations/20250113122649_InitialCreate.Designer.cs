@@ -81,8 +81,8 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20250113104233_GenerateOrderedIndexForResourceHolders")]
-    partial class GenerateOrderedIndexForResourceHolders
+    [Migration("20250113122649_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -100,7 +100,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from", "account_owner_method_call", "badge_presented" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_transaction_type", new[] { "user", "round_change", "genesis_flash", "genesis_transaction", "protocol_update_flash", "protocol_update_transaction" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_transaction_type", new[] { "user", "genesis_flash", "genesis_transaction", "protocol_update_flash", "protocol_update_transaction" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "transaction_type", "event", "manifest_address", "affected_global_entity", "manifest_class", "event_global_emitter", "epoch_change", "resource_balance_change" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "user_v2", "round_update", "flash" });
@@ -469,6 +469,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<bool>("IsGlobal")
                         .HasColumnType("boolean")
                         .HasColumnName("is_global");
+
+                    b.Property<long?>("OuterObjectEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("outer_object_entity_id");
 
                     b.Property<long?>("OwnerAncestorId")
                         .HasColumnType("bigint")
@@ -1181,6 +1185,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
 
+                    b.Property<long[]>("ReceiptEventEmitterEntityIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("receipt_event_emitter_entity_ids");
+
                     b.Property<string[]>("ReceiptEventEmitters")
                         .IsRequired()
                         .HasColumnType("jsonb[]")
@@ -1764,7 +1773,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsUnique();
 
                     b.HasIndex("ResourceEntityId", "Balance", "EntityId")
-                        .IsDescending(false, true, true);
+                        .IsDescending(false, true, false);
 
                     b.ToTable("resource_holders");
                 });
