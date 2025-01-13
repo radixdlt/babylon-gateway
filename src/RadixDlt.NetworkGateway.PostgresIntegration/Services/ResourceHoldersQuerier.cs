@@ -116,7 +116,7 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
         {
             resourceEntityId = resourceEntity.Id,
             balanceBoundary = cursor?.BalanceBoundary ?? TokenAmount.MaxValue.ToString(),
-            idBoundary = cursor?.IdBoundary ?? long.MaxValue,
+            idBoundary = cursor?.IdBoundary ?? 0,
             limit = limit + 1,
         };
 
@@ -124,6 +124,11 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
         // 1. ORDER BY rh.balance DESC, rh.entity_id DESC
         // 2. ORDER BY (rh.balance, rh.entity_id) DESC
         // As second option resulted in very bad performance (it didn't use index at all, even though both fields were indexed).
+
+        // Pay attention to order by and filtering trick for fetching next pages
+        // we wanted to order by balance DESC, entity_id ASC
+        // there is no easy option to apply filter where rh.balance is lower or equal and entity_id is greater or equal.
+        // simple hack for that is to switch (@idBoundary with rh.entity_id) and do it like that - (rh.balance, @idBoundary) <= (Cast(@balanceBoundary AS numeric(1000,0)), rh.entity_id)
         var cd = DapperExtensions.CreateCommandDefinition(
             @"
 SELECT
@@ -135,8 +140,8 @@ FROM resource_holders rh
 INNER JOIN entities e
 ON rh.entity_id = e.id
 WHERE rh.resource_entity_id = @resourceEntityId
-  AND (rh.balance, rh.entity_id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)
-ORDER BY rh.balance DESC, rh.entity_id DESC
+  AND (rh.balance, @idBoundary) <= (Cast(@balanceBoundary AS numeric(1000,0)), rh.entity_id)
+ORDER BY rh.balance DESC, rh.entity_id ASC
 LIMIT @limit",
             parameters,
             cancellationToken: token

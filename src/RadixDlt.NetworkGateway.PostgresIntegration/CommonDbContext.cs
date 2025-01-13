@@ -658,10 +658,12 @@ internal abstract class CommonDbContext : DbContext
             .IsUnique();
 
         // Used by Gateway API when querying resource holders endpoint.
+        // It's quicker when inserting values to have index (balance DESC, entity_id ASC)
+        // as if new value with same balance appears we'll only have to append it at the end.
         modelBuilder
             .Entity<ResourceHolder>()
             .HasIndex(e => new { e.ResourceEntityId, e.Balance, e.EntityId })
-            .IsDescending(false, true, true);
+            .IsDescending(false, true, false);
 
         modelBuilder
             .Entity<EntityResourceTotalsHistory>()
