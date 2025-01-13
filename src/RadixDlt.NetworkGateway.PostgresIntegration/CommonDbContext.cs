@@ -651,14 +651,17 @@ internal abstract class CommonDbContext : DbContext
             .Entity<UnverifiedStandardMetadataEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.Discriminator, e.FromStateVersion });
 
+        // Used by Data aggregator when inserting new data.
         modelBuilder
             .Entity<ResourceHolder>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId })
             .IsUnique();
 
+        // Used by Gateway API when querying resource holders endpoint.
         modelBuilder
             .Entity<ResourceHolder>()
-            .HasIndex(e => new { e.ResourceEntityId, e.Balance, e.Id });
+            .HasIndex(e => new { e.ResourceEntityId, e.Balance, e.EntityId })
+            .IsDescending(false, true, true);
 
         modelBuilder
             .Entity<EntityResourceTotalsHistory>()

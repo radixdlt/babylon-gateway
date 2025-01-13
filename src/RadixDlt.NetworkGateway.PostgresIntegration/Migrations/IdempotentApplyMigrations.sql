@@ -1566,3 +1566,29 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20250113104233_GenerateOrderedIndexForResourceHolders') THEN
+    DROP INDEX "IX_resource_holders_resource_entity_id_balance_id";
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20250113104233_GenerateOrderedIndexForResourceHolders') THEN
+    CREATE INDEX "IX_resource_holders_resource_entity_id_balance_entity_id" ON resource_holders (resource_entity_id, balance DESC, entity_id DESC);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20250113104233_GenerateOrderedIndexForResourceHolders') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20250113104233_GenerateOrderedIndexForResourceHolders', '8.0.2');
+    END IF;
+END $EF$;
+COMMIT;
+
