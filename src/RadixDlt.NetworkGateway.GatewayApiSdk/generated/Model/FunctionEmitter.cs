@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// FunctionEmitter
+    /// Details of the blueprint function that emitted the event.
     /// </summary>
     [DataContract(Name = "FunctionEmitter")]
     public partial class FunctionEmitter : IEquatable<FunctionEmitter>

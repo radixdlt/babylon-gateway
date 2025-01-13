@@ -704,7 +704,6 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                         throw new UnreachableException($"Unable to find schema for given hash {@event.SchemaHash.ToHex()}");
                     }
 
-                    // TODO PP: in edge case when someone requests for both .events and .detailed_events we might call it twice, but it's minor.
                     var eventProgrammaticJson = ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema, @event.KeyTypeKind, @event.TypeIndex, networkId);
 
                     GatewayModel.DetailedEventPayloadTypeDefinition payloadTypeDefinition = @event.KeyTypeKind switch

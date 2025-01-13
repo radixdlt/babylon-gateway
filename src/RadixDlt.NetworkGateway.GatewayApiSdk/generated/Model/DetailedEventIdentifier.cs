@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// DetailedEventIdentifier
+    /// Identifier of an event.
     /// </summary>
     [DataContract(Name = "DetailedEventIdentifier")]
     public partial class DetailedEventIdentifier : IEquatable<DetailedEventIdentifier>
@@ -103,9 +103,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="DetailedEventIdentifier" /> class.
         /// </summary>
-        /// <param name="package">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="blueprint">blueprint (required).</param>
-        /// <param name="_event">_event (required).</param>
+        /// <param name="package">The address of the published package that defines the event.  Bech32m-encoded human readable version of the address.  (required).</param>
+        /// <param name="blueprint">The blueprint that defines the event. (required).</param>
+        /// <param name="_event">Event name. (required).</param>
         public DetailedEventIdentifier(string package = default(string), string blueprint = default(string), string _event = default(string))
         {
             // to ensure "package" is required (not null)
@@ -129,21 +129,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// The address of the published package that defines the event.  Bech32m-encoded human readable version of the address. 
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
+        /// <value>The address of the published package that defines the event.  Bech32m-encoded human readable version of the address. </value>
         [DataMember(Name = "package", IsRequired = true, EmitDefaultValue = true)]
         public string Package { get; set; }
 
         /// <summary>
-        /// Gets or Sets Blueprint
+        /// The blueprint that defines the event.
         /// </summary>
+        /// <value>The blueprint that defines the event.</value>
         [DataMember(Name = "blueprint", IsRequired = true, EmitDefaultValue = true)]
         public string Blueprint { get; set; }
 
         /// <summary>
-        /// Gets or Sets Event
+        /// Event name.
         /// </summary>
+        /// <value>Event name.</value>
         [DataMember(Name = "event", IsRequired = true, EmitDefaultValue = true)]
         public string Event { get; set; }
 

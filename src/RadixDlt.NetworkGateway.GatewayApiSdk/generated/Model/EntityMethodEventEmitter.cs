@@ -91,7 +91,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMethodEventEmitter
+    /// Details of the entity method&#39;s event emitter.
     /// </summary>
     [DataContract(Name = "EntityMethodEventEmitter")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
@@ -108,8 +108,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityMethodEventEmitter" /> class.
         /// </summary>
         /// <param name="methodEmitter">methodEmitter (required).</param>
-        /// <param name="outerEmitter">Bech32m-encoded human readable version of the address..</param>
-        /// <param name="globalEmitter">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="outerEmitter">The address of the outer object of the emitter. For example, for events emitted by vaults, this will be the resource address; for events emitted by validators, it will be the consensus manager address.  Bech32m-encoded human readable version of the address. .</param>
+        /// <param name="globalEmitter">The address of the global ancestor of the entity emitting the event (self if the entity emitting the event is global).  Bech32m-encoded human readable version of the address.  (required).</param>
         /// <param name="type">type (required) (default to EventEmitterType.EntityMethod).</param>
         public EntityMethodEventEmitter(MethodEmitter methodEmitter = default(MethodEmitter), string outerEmitter = default(string), string globalEmitter = default(string), EventEmitterType type = EventEmitterType.EntityMethod) : base(type)
         {
@@ -135,16 +135,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public MethodEmitter MethodEmitter { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// The address of the outer object of the emitter. For example, for events emitted by vaults, this will be the resource address; for events emitted by validators, it will be the consensus manager address.  Bech32m-encoded human readable version of the address. 
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
+        /// <value>The address of the outer object of the emitter. For example, for events emitted by vaults, this will be the resource address; for events emitted by validators, it will be the consensus manager address.  Bech32m-encoded human readable version of the address. </value>
         [DataMember(Name = "outer_emitter", EmitDefaultValue = true)]
         public string OuterEmitter { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// The address of the global ancestor of the entity emitting the event (self if the entity emitting the event is global).  Bech32m-encoded human readable version of the address. 
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
+        /// <value>The address of the global ancestor of the entity emitting the event (self if the entity emitting the event is global).  Bech32m-encoded human readable version of the address. </value>
         [DataMember(Name = "global_emitter", IsRequired = true, EmitDefaultValue = true)]
         public string GlobalEmitter { get; set; }
 

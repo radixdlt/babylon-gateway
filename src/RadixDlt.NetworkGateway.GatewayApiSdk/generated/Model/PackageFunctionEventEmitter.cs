@@ -91,7 +91,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// PackageFunctionEventEmitter
+    /// Details of the package function&#39;s event emitter.
     /// </summary>
     [DataContract(Name = "PackageFunctionEventEmitter")]
     [JsonConverter(typeof(JsonSubtypes), "type")]

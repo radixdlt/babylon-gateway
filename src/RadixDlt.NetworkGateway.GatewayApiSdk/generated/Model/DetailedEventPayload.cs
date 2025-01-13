@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// DetailedEventPayload
+    /// Event payload decoded into Programmatic JSON using its schema.
     /// </summary>
     [DataContract(Name = "DetailedEventPayload")]
     public partial class DetailedEventPayload : IEquatable<DetailedEventPayload>

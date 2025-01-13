@@ -91,7 +91,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// SchemaLocalEventPayloadTypeDefinition
+    /// Reference to a local schema type that defines the schema of an event.
     /// </summary>
     [DataContract(Name = "SchemaLocalEventPayloadTypeDefinition")]
     [JsonConverter(typeof(JsonSubtypes), "kind")]

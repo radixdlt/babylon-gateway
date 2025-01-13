@@ -104,8 +104,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="receiptFeeSource">if set to &#x60;true&#x60;, fee source inside receipt object is returned. (default to false).</param>
         /// <param name="receiptFeeDestination">if set to &#x60;true&#x60;, fee destination inside receipt object is returned. (default to false).</param>
         /// <param name="receiptCostingParameters">if set to &#x60;true&#x60;, costing parameters inside receipt object is returned. (default to false).</param>
-        /// <param name="receiptEvents">if set to &#x60;true&#x60;, events inside receipt object is returned. (default to false).</param>
-        /// <param name="detailedEvents">if set to &#x60;true&#x60;, detailed events object is returned. (default to false).</param>
+        /// <param name="receiptEvents">if set to &#x60;true&#x60;, events inside receipt object is returned. Please use the &#x60;detailed_events&#x60; instead, as it provides an enriched model with context and additional data. (default to false).</param>
+        /// <param name="detailedEvents">if set to &#x60;true&#x60;, detailed events object is returned.  For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained).  (default to false).</param>
         /// <param name="receiptOutput">(true by default) if set to &#x60;true&#x60;, transaction receipt output is returned. (default to true).</param>
         /// <param name="affectedGlobalEntities">if set to &#x60;true&#x60;, all affected global entities by given transaction are returned. (default to false).</param>
         /// <param name="manifestInstructions">if set to &#x60;true&#x60;, manifest instructions for user transactions are returned. (default to false).</param>
@@ -169,16 +169,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool ReceiptCostingParameters { get; set; }
 
         /// <summary>
-        /// if set to &#x60;true&#x60;, events inside receipt object is returned.
+        /// if set to &#x60;true&#x60;, events inside receipt object is returned. Please use the &#x60;detailed_events&#x60; instead, as it provides an enriched model with context and additional data.
         /// </summary>
-        /// <value>if set to &#x60;true&#x60;, events inside receipt object is returned.</value>
+        /// <value>if set to &#x60;true&#x60;, events inside receipt object is returned. Please use the &#x60;detailed_events&#x60; instead, as it provides an enriched model with context and additional data.</value>
         [DataMember(Name = "receipt_events", EmitDefaultValue = true)]
+        [Obsolete]
         public bool ReceiptEvents { get; set; }
 
         /// <summary>
-        /// if set to &#x60;true&#x60;, detailed events object is returned.
+        /// if set to &#x60;true&#x60;, detailed events object is returned.  For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained). 
         /// </summary>
-        /// <value>if set to &#x60;true&#x60;, detailed events object is returned.</value>
+        /// <value>if set to &#x60;true&#x60;, detailed events object is returned.  For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained). </value>
         [DataMember(Name = "detailed_events", EmitDefaultValue = true)]
         public bool DetailedEvents { get; set; }
 
