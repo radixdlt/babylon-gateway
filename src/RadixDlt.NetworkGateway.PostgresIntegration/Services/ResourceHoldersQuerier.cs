@@ -81,7 +81,7 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IDapperWrapper _dapperWrapper;
 
-    private record ResourceHoldersResultRow(long Id, EntityAddress EntityAddress, TokenAmount Balance, long LastUpdatedAtStateVersion);
+    private record ResourceHoldersResultRow(long EntityId, EntityAddress EntityAddress, TokenAmount Balance, long LastUpdatedAtStateVersion);
 
     public ResourceHoldersQuerier(ReadOnlyDbContext dbContext, IDapperWrapper dapperWrapper)
     {
@@ -132,7 +132,7 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
         var cd = DapperExtensions.CreateCommandDefinition(
             @"
 SELECT
-    rh.id as Id,
+    rh.entity_id AS EntityId,
     e.address AS EntityAddress,
     CAST(rh.balance AS text) AS Balance,
     rh.last_updated_at_state_version AS LastUpdatedAtStateVersion
@@ -152,7 +152,7 @@ LIMIT @limit",
         var nextPageExists = entriesAndOneMore.Count == limit + 1 && lastElement != null;
 
         var nextCursor = nextPageExists
-            ? new GatewayModel.ResourceHoldersCursor(lastElement!.Id, lastElement.Balance.ToSubUnitString()).ToCursorString()
+            ? new GatewayModel.ResourceHoldersCursor(lastElement!.EntityId, lastElement.Balance.ToSubUnitString()).ToCursorString()
             : null;
 
         switch (resourceEntity)
