@@ -120,6 +120,10 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
             limit = limit + 1,
         };
 
+        // Make sure to use option 1.
+        // 1. ORDER BY rh.balance DESC, rh.entity_id DESC
+        // 2. ORDER BY (rh.balance, rh.entity_id) DESC
+        // As second option resulted in very bad performance (it didn't use index at all, even though both fields were indexed).
         var cd = DapperExtensions.CreateCommandDefinition(
             @"
 SELECT
@@ -131,8 +135,8 @@ FROM resource_holders rh
 INNER JOIN entities e
 ON rh.entity_id = e.id
 WHERE rh.resource_entity_id = @resourceEntityId
-  AND (rh.balance, rh.id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)
-ORDER BY rh.balance DESC, rh.id DESC
+  AND (rh.balance, rh.entity_id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)
+ORDER BY rh.balance DESC, rh.entity_id DESC
 LIMIT @limit",
             parameters,
             cancellationToken: token
