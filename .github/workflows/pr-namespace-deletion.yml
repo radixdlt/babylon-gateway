@@ -27,7 +27,7 @@ jobs:
 
       - name: Trigger pr deletion event ${{ github.ref }}
         run: |
-          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
+          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{env.CF_GITHUB_WORKER_DISPATCH_REPO}}/dispatches' \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Basic ${{env.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
             --header 'Content-Type: application/json' \
