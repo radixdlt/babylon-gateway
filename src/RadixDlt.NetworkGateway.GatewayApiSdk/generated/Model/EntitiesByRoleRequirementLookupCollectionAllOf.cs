@@ -90,35 +90,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataNonFungibleGlobalIdArrayValueAllOf
+    /// EntitiesByRoleRequirementLookupCollectionAllOf
     /// </summary>
-    [DataContract(Name = "MetadataNonFungibleGlobalIdArrayValue_allOf")]
-    public partial class MetadataNonFungibleGlobalIdArrayValueAllOf : IEquatable<MetadataNonFungibleGlobalIdArrayValueAllOf>
+    [DataContract(Name = "EntitiesByRoleRequirementLookupCollection_allOf")]
+    public partial class EntitiesByRoleRequirementLookupCollectionAllOf : IEquatable<EntitiesByRoleRequirementLookupCollectionAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupCollectionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataNonFungibleGlobalIdArrayValueAllOf() { }
+        protected EntitiesByRoleRequirementLookupCollectionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="values">values (required).</param>
-        public MetadataNonFungibleGlobalIdArrayValueAllOf(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> values = default(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues>))
+        /// <param name="requirement">requirement (required).</param>
+        /// <param name="items">items (required).</param>
+        public EntitiesByRoleRequirementLookupCollectionAllOf(EntitiesByRoleRequirementRequestRequirement requirement = default(EntitiesByRoleRequirementRequestRequirement), List<EntitiesByRoleRequirementItem> items = default(List<EntitiesByRoleRequirementItem>))
         {
-            // to ensure "values" is required (not null)
-            if (values == null)
+            // to ensure "requirement" is required (not null)
+            if (requirement == null)
             {
-                throw new ArgumentNullException("values is a required property for MetadataNonFungibleGlobalIdArrayValueAllOf and cannot be null");
+                throw new ArgumentNullException("requirement is a required property for EntitiesByRoleRequirementLookupCollectionAllOf and cannot be null");
             }
-            this.Values = values;
+            this.Requirement = requirement;
+            // to ensure "items" is required (not null)
+            if (items == null)
+            {
+                throw new ArgumentNullException("items is a required property for EntitiesByRoleRequirementLookupCollectionAllOf and cannot be null");
+            }
+            this.Items = items;
         }
 
         /// <summary>
-        /// Gets or Sets Values
+        /// Gets or Sets Requirement
         /// </summary>
-        [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> Values { get; set; }
+        [DataMember(Name = "requirement", IsRequired = true, EmitDefaultValue = true)]
+        public EntitiesByRoleRequirementRequestRequirement Requirement { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Items
+        /// </summary>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntitiesByRoleRequirementItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +140,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataNonFungibleGlobalIdArrayValueAllOf {\n");
-            sb.Append("  Values: ").Append(Values).Append("\n");
+            sb.Append("class EntitiesByRoleRequirementLookupCollectionAllOf {\n");
+            sb.Append("  Requirement: ").Append(Requirement).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +163,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataNonFungibleGlobalIdArrayValueAllOf);
+            return this.Equals(input as EntitiesByRoleRequirementLookupCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataNonFungibleGlobalIdArrayValueAllOf instances are equal
+        /// Returns true if EntitiesByRoleRequirementLookupCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataNonFungibleGlobalIdArrayValueAllOf to be compared</param>
+        /// <param name="input">Instance of EntitiesByRoleRequirementLookupCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataNonFungibleGlobalIdArrayValueAllOf input)
+        public bool Equals(EntitiesByRoleRequirementLookupCollectionAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +179,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Values == input.Values ||
-                    this.Values != null &&
-                    input.Values != null &&
-                    this.Values.SequenceEqual(input.Values)
+                    this.Requirement == input.Requirement ||
+                    (this.Requirement != null &&
+                    this.Requirement.Equals(input.Requirement))
+                ) && 
+                (
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -181,9 +200,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Values != null)
+                if (this.Requirement != null)
                 {
-                    hashCode = (hashCode * 59) + this.Values.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Requirement.GetHashCode();
+                }
+                if (this.Items != null)
+                {
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

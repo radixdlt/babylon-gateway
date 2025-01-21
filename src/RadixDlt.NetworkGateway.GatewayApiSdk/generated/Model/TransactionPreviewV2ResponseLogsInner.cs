@@ -90,35 +90,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataNonFungibleGlobalIdArrayValueAllOf
+    /// TransactionPreviewV2ResponseLogsInner
     /// </summary>
-    [DataContract(Name = "MetadataNonFungibleGlobalIdArrayValue_allOf")]
-    public partial class MetadataNonFungibleGlobalIdArrayValueAllOf : IEquatable<MetadataNonFungibleGlobalIdArrayValueAllOf>
+    [DataContract(Name = "TransactionPreviewV2Response_logs_inner")]
+    public partial class TransactionPreviewV2ResponseLogsInner : IEquatable<TransactionPreviewV2ResponseLogsInner>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2ResponseLogsInner" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataNonFungibleGlobalIdArrayValueAllOf() { }
+        protected TransactionPreviewV2ResponseLogsInner() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewV2ResponseLogsInner" /> class.
         /// </summary>
-        /// <param name="values">values (required).</param>
-        public MetadataNonFungibleGlobalIdArrayValueAllOf(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> values = default(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues>))
+        /// <param name="level">level (required).</param>
+        /// <param name="message">message (required).</param>
+        public TransactionPreviewV2ResponseLogsInner(string level = default(string), string message = default(string))
         {
-            // to ensure "values" is required (not null)
-            if (values == null)
+            // to ensure "level" is required (not null)
+            if (level == null)
             {
-                throw new ArgumentNullException("values is a required property for MetadataNonFungibleGlobalIdArrayValueAllOf and cannot be null");
+                throw new ArgumentNullException("level is a required property for TransactionPreviewV2ResponseLogsInner and cannot be null");
             }
-            this.Values = values;
+            this.Level = level;
+            // to ensure "message" is required (not null)
+            if (message == null)
+            {
+                throw new ArgumentNullException("message is a required property for TransactionPreviewV2ResponseLogsInner and cannot be null");
+            }
+            this.Message = message;
         }
 
         /// <summary>
-        /// Gets or Sets Values
+        /// Gets or Sets Level
         /// </summary>
-        [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> Values { get; set; }
+        [DataMember(Name = "level", IsRequired = true, EmitDefaultValue = true)]
+        public string Level { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Message
+        /// </summary>
+        [DataMember(Name = "message", IsRequired = true, EmitDefaultValue = true)]
+        public string Message { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +140,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataNonFungibleGlobalIdArrayValueAllOf {\n");
-            sb.Append("  Values: ").Append(Values).Append("\n");
+            sb.Append("class TransactionPreviewV2ResponseLogsInner {\n");
+            sb.Append("  Level: ").Append(Level).Append("\n");
+            sb.Append("  Message: ").Append(Message).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +163,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataNonFungibleGlobalIdArrayValueAllOf);
+            return this.Equals(input as TransactionPreviewV2ResponseLogsInner);
         }
 
         /// <summary>
-        /// Returns true if MetadataNonFungibleGlobalIdArrayValueAllOf instances are equal
+        /// Returns true if TransactionPreviewV2ResponseLogsInner instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataNonFungibleGlobalIdArrayValueAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionPreviewV2ResponseLogsInner to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataNonFungibleGlobalIdArrayValueAllOf input)
+        public bool Equals(TransactionPreviewV2ResponseLogsInner input)
         {
             if (input == null)
             {
@@ -165,10 +179,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Values == input.Values ||
-                    this.Values != null &&
-                    input.Values != null &&
-                    this.Values.SequenceEqual(input.Values)
+                    this.Level == input.Level ||
+                    (this.Level != null &&
+                    this.Level.Equals(input.Level))
+                ) && 
+                (
+                    this.Message == input.Message ||
+                    (this.Message != null &&
+                    this.Message.Equals(input.Message))
                 );
         }
 
@@ -181,9 +199,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Values != null)
+                if (this.Level != null)
                 {
-                    hashCode = (hashCode * 59) + this.Values.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Level.GetHashCode();
+                }
+                if (this.Message != null)
+                {
+                    hashCode = (hashCode * 59) + this.Message.GetHashCode();
                 }
                 return hashCode;
             }

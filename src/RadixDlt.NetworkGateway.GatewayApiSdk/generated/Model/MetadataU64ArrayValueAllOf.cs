@@ -90,26 +90,26 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataNonFungibleGlobalIdArrayValueAllOf
+    /// MetadataU64ArrayValueAllOf
     /// </summary>
-    [DataContract(Name = "MetadataNonFungibleGlobalIdArrayValue_allOf")]
-    public partial class MetadataNonFungibleGlobalIdArrayValueAllOf : IEquatable<MetadataNonFungibleGlobalIdArrayValueAllOf>
+    [DataContract(Name = "MetadataU64ArrayValue_allOf")]
+    public partial class MetadataU64ArrayValueAllOf : IEquatable<MetadataU64ArrayValueAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataU64ArrayValueAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataNonFungibleGlobalIdArrayValueAllOf() { }
+        protected MetadataU64ArrayValueAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataU64ArrayValueAllOf" /> class.
         /// </summary>
         /// <param name="values">values (required).</param>
-        public MetadataNonFungibleGlobalIdArrayValueAllOf(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> values = default(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues>))
+        public MetadataU64ArrayValueAllOf(List<string> values = default(List<string>))
         {
             // to ensure "values" is required (not null)
             if (values == null)
             {
-                throw new ArgumentNullException("values is a required property for MetadataNonFungibleGlobalIdArrayValueAllOf and cannot be null");
+                throw new ArgumentNullException("values is a required property for MetadataU64ArrayValueAllOf and cannot be null");
             }
             this.Values = values;
         }
@@ -118,7 +118,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Values
         /// </summary>
         [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> Values { get; set; }
+        public List<string> Values { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataNonFungibleGlobalIdArrayValueAllOf {\n");
+            sb.Append("class MetadataU64ArrayValueAllOf {\n");
             sb.Append("  Values: ").Append(Values).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -149,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataNonFungibleGlobalIdArrayValueAllOf);
+            return this.Equals(input as MetadataU64ArrayValueAllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataNonFungibleGlobalIdArrayValueAllOf instances are equal
+        /// Returns true if MetadataU64ArrayValueAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataNonFungibleGlobalIdArrayValueAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataU64ArrayValueAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataNonFungibleGlobalIdArrayValueAllOf input)
+        public bool Equals(MetadataU64ArrayValueAllOf input)
         {
             if (input == null)
             {

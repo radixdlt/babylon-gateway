@@ -90,35 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataNonFungibleGlobalIdArrayValueAllOf
+    /// PublicKeyHashEddsaEd25519AllOf
     /// </summary>
-    [DataContract(Name = "MetadataNonFungibleGlobalIdArrayValue_allOf")]
-    public partial class MetadataNonFungibleGlobalIdArrayValueAllOf : IEquatable<MetadataNonFungibleGlobalIdArrayValueAllOf>
+    [DataContract(Name = "PublicKeyHashEddsaEd25519_allOf")]
+    public partial class PublicKeyHashEddsaEd25519AllOf : IEquatable<PublicKeyHashEddsaEd25519AllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PublicKeyHashEddsaEd25519AllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataNonFungibleGlobalIdArrayValueAllOf() { }
+        protected PublicKeyHashEddsaEd25519AllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PublicKeyHashEddsaEd25519AllOf" /> class.
         /// </summary>
-        /// <param name="values">values (required).</param>
-        public MetadataNonFungibleGlobalIdArrayValueAllOf(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> values = default(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues>))
+        /// <param name="hashHex">Hex-encoded SHA-256 hash. (required).</param>
+        public PublicKeyHashEddsaEd25519AllOf(string hashHex = default(string))
         {
-            // to ensure "values" is required (not null)
-            if (values == null)
+            // to ensure "hashHex" is required (not null)
+            if (hashHex == null)
             {
-                throw new ArgumentNullException("values is a required property for MetadataNonFungibleGlobalIdArrayValueAllOf and cannot be null");
+                throw new ArgumentNullException("hashHex is a required property for PublicKeyHashEddsaEd25519AllOf and cannot be null");
             }
-            this.Values = values;
+            this.HashHex = hashHex;
         }
 
         /// <summary>
-        /// Gets or Sets Values
+        /// Hex-encoded SHA-256 hash.
         /// </summary>
-        [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> Values { get; set; }
+        /// <value>Hex-encoded SHA-256 hash.</value>
+        [DataMember(Name = "hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string HashHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataNonFungibleGlobalIdArrayValueAllOf {\n");
-            sb.Append("  Values: ").Append(Values).Append("\n");
+            sb.Append("class PublicKeyHashEddsaEd25519AllOf {\n");
+            sb.Append("  HashHex: ").Append(HashHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataNonFungibleGlobalIdArrayValueAllOf);
+            return this.Equals(input as PublicKeyHashEddsaEd25519AllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataNonFungibleGlobalIdArrayValueAllOf instances are equal
+        /// Returns true if PublicKeyHashEddsaEd25519AllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataNonFungibleGlobalIdArrayValueAllOf to be compared</param>
+        /// <param name="input">Instance of PublicKeyHashEddsaEd25519AllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataNonFungibleGlobalIdArrayValueAllOf input)
+        public bool Equals(PublicKeyHashEddsaEd25519AllOf input)
         {
             if (input == null)
             {
@@ -165,10 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Values == input.Values ||
-                    this.Values != null &&
-                    input.Values != null &&
-                    this.Values.SequenceEqual(input.Values)
+                    this.HashHex == input.HashHex ||
+                    (this.HashHex != null &&
+                    this.HashHex.Equals(input.HashHex))
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Values != null)
+                if (this.HashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Values.GetHashCode();
+                    hashCode = (hashCode * 59) + this.HashHex.GetHashCode();
                 }
                 return hashCode;
             }

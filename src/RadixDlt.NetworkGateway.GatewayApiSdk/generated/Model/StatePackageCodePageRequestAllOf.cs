@@ -90,35 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataNonFungibleGlobalIdArrayValueAllOf
+    /// StatePackageCodePageRequestAllOf
     /// </summary>
-    [DataContract(Name = "MetadataNonFungibleGlobalIdArrayValue_allOf")]
-    public partial class MetadataNonFungibleGlobalIdArrayValueAllOf : IEquatable<MetadataNonFungibleGlobalIdArrayValueAllOf>
+    [DataContract(Name = "StatePackageCodePageRequest_allOf")]
+    public partial class StatePackageCodePageRequestAllOf : IEquatable<StatePackageCodePageRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StatePackageCodePageRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataNonFungibleGlobalIdArrayValueAllOf() { }
+        protected StatePackageCodePageRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StatePackageCodePageRequestAllOf" /> class.
         /// </summary>
-        /// <param name="values">values (required).</param>
-        public MetadataNonFungibleGlobalIdArrayValueAllOf(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> values = default(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues>))
+        /// <param name="packageAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        public StatePackageCodePageRequestAllOf(string packageAddress = default(string))
         {
-            // to ensure "values" is required (not null)
-            if (values == null)
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
             {
-                throw new ArgumentNullException("values is a required property for MetadataNonFungibleGlobalIdArrayValueAllOf and cannot be null");
+                throw new ArgumentNullException("packageAddress is a required property for StatePackageCodePageRequestAllOf and cannot be null");
             }
-            this.Values = values;
+            this.PackageAddress = packageAddress;
         }
 
         /// <summary>
-        /// Gets or Sets Values
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> Values { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataNonFungibleGlobalIdArrayValueAllOf {\n");
-            sb.Append("  Values: ").Append(Values).Append("\n");
+            sb.Append("class StatePackageCodePageRequestAllOf {\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataNonFungibleGlobalIdArrayValueAllOf);
+            return this.Equals(input as StatePackageCodePageRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataNonFungibleGlobalIdArrayValueAllOf instances are equal
+        /// Returns true if StatePackageCodePageRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataNonFungibleGlobalIdArrayValueAllOf to be compared</param>
+        /// <param name="input">Instance of StatePackageCodePageRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataNonFungibleGlobalIdArrayValueAllOf input)
+        public bool Equals(StatePackageCodePageRequestAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Values == input.Values ||
-                    this.Values != null &&
-                    input.Values != null &&
-                    this.Values.SequenceEqual(input.Values)
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Values != null)
+                if (this.PackageAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Values.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
                 return hashCode;
             }

@@ -2077,8 +2077,10 @@ paths:
       description: |
         A paginated endpoint to discover which global entities hold the most of a given resource.
         More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances).
+
         This endpoint operates only at the **current state version**, it is not possible to browse historical data.
         Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.
+
         Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter.
       tags:
         - Extensions
@@ -2098,6 +2100,66 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+
+  /extensions/entities-by-role-requirement/page:
+    post:
+      operationId: EntitiesByRoleRequirementPage
+      summary: Get entities by role requirement page
+      description: |
+        Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).
+
+        This endpoint operates only at the **current state version**, it is not possible to browse historical data.
+        Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.
+
+        Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter.
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementPageRequest"
+      responses:
+        "200":
+          description: List of entities that include the queried requirement.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /extensions/entities-by-role-requirement/lookup:
+    post:
+      operationId: EntitiesByRoleRequirementLookup
+      summary: Get entities by role requirement lookup
+      description: |
+        Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).
+
+        If you want to fetch subsequent pages, please use the `/extensions/entities-by-role-requirement/page` endpoint.
+
+        This endpoint operates only at the **current state version** and does not support browsing historical data.
+        As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.
+
+        Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter.
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementPageRequest"
+      responses:
+        "200":
+          description: List of entities that include the queried requirement.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
 
 components:
   responses:
@@ -3551,6 +3613,77 @@ components:
           description: number of epochs validator was active in.
           type: integer
           format: int64
+
+    EntitiesByRoleRequirementLookupCollection:
+      allOf:
+        - type: object
+          required:
+            - items
+            - requirement
+          properties:
+            requirement:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
+
+    EntitiesByRoleRequirementPageCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
+
+    EntitiesByRoleRequirementRequirementType:
+      type: string
+      enum:
+        - ResourceRequirement
+        - NonFungibleRequirement
+
+    EntitiesByRoleRequirementItem:
+      type: object
+      required:
+        - requirement_type
+        - first_seen_state_version
+      properties:
+        requirement_type:
+          $ref: "#/components/schemas/EntitiesByRoleRequirementRequirementType"
+        first_seen_state_version:
+          type: integer
+          format: int64
+      discriminator:
+        propertyName: badge_type
+        mapping:
+          ResourceRequirement: "#/components/schemas/EntitiesByResourceRoleRequirementItem"
+          NonFungibleRequirement: "#/components/schemas/EntitiesByNonFungibleRoleRequirementItem"
+
+    EntitiesByResourceRoleRequirementItem:
+      allOf:
+        - $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
+        - type: object
+          required:
+            - resource_address
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+    EntitiesByNonFungibleRoleRequirementItem:
+      allOf:
+        - $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
+        - type: object
+          required:
+            - resource_address
+            - non_fungible_id
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+            non_fungible_id:
+              $ref: "#/components/schemas/NonFungibleId"
 
     ResourceHoldersCollection:
       allOf:
@@ -5676,6 +5809,45 @@ components:
             validators:
               $ref: "#/components/schemas/ValidatorUptimeCollection"
 
+    EntitiesByRoleRequirementPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+      example:
+        limit_per_page: 100
+        resource_address: "<resource-address>"
+        non_fungible_id: "<non-fungible-id>" # TODO PP: we should probably provide some meaningful non-fungible-id that correlates with resource address.
+
+    EntitiesByRoleRequirementRequestRequirement:
+      type: object
+      required:
+        - resource_address
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        non_fungible_id:
+          $ref: "#/components/schemas/NonFungibleId"
+
+    EntitiesByRoleRequirementPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/EntitiesByRoleRequirementPageCollection"
+
+    EntitiesByRoleRequirementLookupRequest:
+      allOf:
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+      example: #TODO PP: Provide some example here if possible.
+
+    EntitiesByRoleRequirementLookupResponse:
+      allOf:
+        - $ref: "#/components/schemas/EntitiesByRoleRequirementLookupCollection"
+
     ResourceHoldersRequest:
       allOf:
         - $ref: "#/components/schemas/CursorLimitMixin"
@@ -6186,6 +6358,7 @@ components:
           properties:
             value:
               $ref: "#/components/schemas/PublicKey"
+
     MetadataNonFungibleGlobalIdValue:
       allOf:
         - $ref: "#/components/schemas/MetadataTypedValue"

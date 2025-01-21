@@ -90,35 +90,57 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataNonFungibleGlobalIdArrayValueAllOf
+    /// NativeResourceMultiResourcePoolUnitValueAllOf
     /// </summary>
-    [DataContract(Name = "MetadataNonFungibleGlobalIdArrayValue_allOf")]
-    public partial class MetadataNonFungibleGlobalIdArrayValueAllOf : IEquatable<MetadataNonFungibleGlobalIdArrayValueAllOf>
+    [DataContract(Name = "NativeResourceMultiResourcePoolUnitValue_allOf")]
+    public partial class NativeResourceMultiResourcePoolUnitValueAllOf : IEquatable<NativeResourceMultiResourcePoolUnitValueAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceMultiResourcePoolUnitValueAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataNonFungibleGlobalIdArrayValueAllOf() { }
+        protected NativeResourceMultiResourcePoolUnitValueAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NativeResourceMultiResourcePoolUnitValueAllOf" /> class.
         /// </summary>
-        /// <param name="values">values (required).</param>
-        public MetadataNonFungibleGlobalIdArrayValueAllOf(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> values = default(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues>))
+        /// <param name="poolAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="redemptionResourceCount">redemptionResourceCount (required).</param>
+        /// <param name="unitRedemptionValue">unitRedemptionValue (required).</param>
+        public NativeResourceMultiResourcePoolUnitValueAllOf(string poolAddress = default(string), int redemptionResourceCount = default(int), List<NativeResourceRedemptionValueItem> unitRedemptionValue = default(List<NativeResourceRedemptionValueItem>))
         {
-            // to ensure "values" is required (not null)
-            if (values == null)
+            // to ensure "poolAddress" is required (not null)
+            if (poolAddress == null)
             {
-                throw new ArgumentNullException("values is a required property for MetadataNonFungibleGlobalIdArrayValueAllOf and cannot be null");
+                throw new ArgumentNullException("poolAddress is a required property for NativeResourceMultiResourcePoolUnitValueAllOf and cannot be null");
             }
-            this.Values = values;
+            this.PoolAddress = poolAddress;
+            this.RedemptionResourceCount = redemptionResourceCount;
+            // to ensure "unitRedemptionValue" is required (not null)
+            if (unitRedemptionValue == null)
+            {
+                throw new ArgumentNullException("unitRedemptionValue is a required property for NativeResourceMultiResourcePoolUnitValueAllOf and cannot be null");
+            }
+            this.UnitRedemptionValue = unitRedemptionValue;
         }
 
         /// <summary>
-        /// Gets or Sets Values
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> Values { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "pool_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PoolAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RedemptionResourceCount
+        /// </summary>
+        [DataMember(Name = "redemption_resource_count", IsRequired = true, EmitDefaultValue = true)]
+        public int RedemptionResourceCount { get; set; }
+
+        /// <summary>
+        /// Gets or Sets UnitRedemptionValue
+        /// </summary>
+        [DataMember(Name = "unit_redemption_value", IsRequired = true, EmitDefaultValue = true)]
+        public List<NativeResourceRedemptionValueItem> UnitRedemptionValue { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +149,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataNonFungibleGlobalIdArrayValueAllOf {\n");
-            sb.Append("  Values: ").Append(Values).Append("\n");
+            sb.Append("class NativeResourceMultiResourcePoolUnitValueAllOf {\n");
+            sb.Append("  PoolAddress: ").Append(PoolAddress).Append("\n");
+            sb.Append("  RedemptionResourceCount: ").Append(RedemptionResourceCount).Append("\n");
+            sb.Append("  UnitRedemptionValue: ").Append(UnitRedemptionValue).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +173,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataNonFungibleGlobalIdArrayValueAllOf);
+            return this.Equals(input as NativeResourceMultiResourcePoolUnitValueAllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataNonFungibleGlobalIdArrayValueAllOf instances are equal
+        /// Returns true if NativeResourceMultiResourcePoolUnitValueAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataNonFungibleGlobalIdArrayValueAllOf to be compared</param>
+        /// <param name="input">Instance of NativeResourceMultiResourcePoolUnitValueAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataNonFungibleGlobalIdArrayValueAllOf input)
+        public bool Equals(NativeResourceMultiResourcePoolUnitValueAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +189,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Values == input.Values ||
-                    this.Values != null &&
-                    input.Values != null &&
-                    this.Values.SequenceEqual(input.Values)
+                    this.PoolAddress == input.PoolAddress ||
+                    (this.PoolAddress != null &&
+                    this.PoolAddress.Equals(input.PoolAddress))
+                ) && 
+                (
+                    this.RedemptionResourceCount == input.RedemptionResourceCount ||
+                    this.RedemptionResourceCount.Equals(input.RedemptionResourceCount)
+                ) && 
+                (
+                    this.UnitRedemptionValue == input.UnitRedemptionValue ||
+                    this.UnitRedemptionValue != null &&
+                    input.UnitRedemptionValue != null &&
+                    this.UnitRedemptionValue.SequenceEqual(input.UnitRedemptionValue)
                 );
         }
 
@@ -181,9 +214,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Values != null)
+                if (this.PoolAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Values.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PoolAddress.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.RedemptionResourceCount.GetHashCode();
+                if (this.UnitRedemptionValue != null)
+                {
+                    hashCode = (hashCode * 59) + this.UnitRedemptionValue.GetHashCode();
                 }
                 return hashCode;
             }

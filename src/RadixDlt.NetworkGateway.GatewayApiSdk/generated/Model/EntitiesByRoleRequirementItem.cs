@@ -84,41 +84,50 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataNonFungibleGlobalIdArrayValueAllOf
+    /// EntitiesByRoleRequirementItem
     /// </summary>
-    [DataContract(Name = "MetadataNonFungibleGlobalIdArrayValue_allOf")]
-    public partial class MetadataNonFungibleGlobalIdArrayValueAllOf : IEquatable<MetadataNonFungibleGlobalIdArrayValueAllOf>
+    [DataContract(Name = "EntitiesByRoleRequirementItem")]
+    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
+    [JsonSubtypes.KnownSubType(typeof(EntitiesByNonFungibleRoleRequirementItem), "EntitiesByNonFungibleRoleRequirementItem")]
+    [JsonSubtypes.KnownSubType(typeof(EntitiesByResourceRoleRequirementItem), "EntitiesByResourceRoleRequirementItem")]
+    [JsonSubtypes.KnownSubType(typeof(EntitiesByNonFungibleRoleRequirementItem), "NonFungibleRequirement")]
+    [JsonSubtypes.KnownSubType(typeof(EntitiesByResourceRoleRequirementItem), "ResourceRequirement")]
+    public partial class EntitiesByRoleRequirementItem : IEquatable<EntitiesByRoleRequirementItem>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Gets or Sets RequirementType
+        /// </summary>
+        [DataMember(Name = "requirement_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntitiesByRoleRequirementRequirementType RequirementType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataNonFungibleGlobalIdArrayValueAllOf() { }
+        protected EntitiesByRoleRequirementItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementItem" /> class.
         /// </summary>
-        /// <param name="values">values (required).</param>
-        public MetadataNonFungibleGlobalIdArrayValueAllOf(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> values = default(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues>))
+        /// <param name="requirementType">requirementType (required).</param>
+        /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
+        public EntitiesByRoleRequirementItem(EntitiesByRoleRequirementRequirementType requirementType = default(EntitiesByRoleRequirementRequirementType), long firstSeenStateVersion = default(long))
         {
-            // to ensure "values" is required (not null)
-            if (values == null)
-            {
-                throw new ArgumentNullException("values is a required property for MetadataNonFungibleGlobalIdArrayValueAllOf and cannot be null");
-            }
-            this.Values = values;
+            this.RequirementType = requirementType;
+            this.FirstSeenStateVersion = firstSeenStateVersion;
         }
 
         /// <summary>
-        /// Gets or Sets Values
+        /// Gets or Sets FirstSeenStateVersion
         /// </summary>
-        [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> Values { get; set; }
+        [DataMember(Name = "first_seen_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long FirstSeenStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataNonFungibleGlobalIdArrayValueAllOf {\n");
-            sb.Append("  Values: ").Append(Values).Append("\n");
+            sb.Append("class EntitiesByRoleRequirementItem {\n");
+            sb.Append("  RequirementType: ").Append(RequirementType).Append("\n");
+            sb.Append("  FirstSeenStateVersion: ").Append(FirstSeenStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataNonFungibleGlobalIdArrayValueAllOf);
+            return this.Equals(input as EntitiesByRoleRequirementItem);
         }
 
         /// <summary>
-        /// Returns true if MetadataNonFungibleGlobalIdArrayValueAllOf instances are equal
+        /// Returns true if EntitiesByRoleRequirementItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataNonFungibleGlobalIdArrayValueAllOf to be compared</param>
+        /// <param name="input">Instance of EntitiesByRoleRequirementItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataNonFungibleGlobalIdArrayValueAllOf input)
+        public bool Equals(EntitiesByRoleRequirementItem input)
         {
             if (input == null)
             {
@@ -165,10 +175,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Values == input.Values ||
-                    this.Values != null &&
-                    input.Values != null &&
-                    this.Values.SequenceEqual(input.Values)
+                    this.RequirementType == input.RequirementType ||
+                    this.RequirementType.Equals(input.RequirementType)
+                ) && 
+                (
+                    this.FirstSeenStateVersion == input.FirstSeenStateVersion ||
+                    this.FirstSeenStateVersion.Equals(input.FirstSeenStateVersion)
                 );
         }
 
@@ -181,10 +193,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Values != null)
-                {
-                    hashCode = (hashCode * 59) + this.Values.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.RequirementType.GetHashCode();
+                hashCode = (hashCode * 59) + this.FirstSeenStateVersion.GetHashCode();
                 return hashCode;
             }
         }

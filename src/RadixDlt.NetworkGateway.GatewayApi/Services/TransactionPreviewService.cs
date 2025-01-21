@@ -251,7 +251,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
                 radixEngineToolkitReceipt: coreResponse.RadixEngineToolkitReceipt,
                 atLedgerStateVersion: coreResponse.AtLedgerState.StateVersion,
                 receipt: coreResponse.Receipt,
-                logs: coreResponse.Logs?.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
+                logs: coreResponse.Logs?.Select(l => new GatewayModel.TransactionPreviewV2ResponseLogsInner(l.Level, l.Message)).ToList());
         }
 
         throw InvalidRequestException.FromOtherError(result.FailureResponse.Message);

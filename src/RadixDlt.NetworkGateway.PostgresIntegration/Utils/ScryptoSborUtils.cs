@@ -154,7 +154,7 @@ internal static class ScryptoSborUtils
             case ToolkitModel.MetadataValue.NonFungibleGlobalIdArrayValue nonFungibleGlobalIdArrayValue:
                 return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue
                     .value
-                    .Select(x => new GatewayModel.MetadataNonFungibleGlobalIdValueAllOf(
+                    .Select(x => new GatewayModel.MetadataNonFungibleGlobalIdArrayValueAllOfValues(
                         x.ResourceAddress().AddressString(),
                         ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(x.LocalId())))
                     .ToList());
