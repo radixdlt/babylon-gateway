@@ -2,7 +2,10 @@ name: Build TypeScript Gateway SDK
 
 on:
   push:
-    paths: '/sdk/typescript/**'
+    branches:
+      - '*'
+    paths: 
+      - '/sdk/typescript/**'
 
 jobs:
   build-gateway-sdk:
