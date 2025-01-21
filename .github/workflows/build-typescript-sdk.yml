@@ -1,0 +1,27 @@
+name: Build TypeScript Gateway SDK
+
+on:
+  push:
+    paths: '/sdk/typescript/**'
+
+jobs:
+  build-gateway-sdk:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./sdk/typescript
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Use Node.js
+        uses: RDXWorks-actions/setup-node@main
+        with:
+          node-version: "18.x"
+      - run: cat $NPM_CONFIG_USERCONFIG
+      - name: Build gateway-sdk
+        run: |
+          npm ci
+          npm run build
+          npm run test
