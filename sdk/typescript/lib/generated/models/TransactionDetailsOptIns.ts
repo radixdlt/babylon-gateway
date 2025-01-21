@@ -56,11 +56,21 @@ export interface TransactionDetailsOptIns {
      */
     receipt_costing_parameters?: boolean;
     /**
-     * if set to `true`, events inside receipt object is returned.
+     * if set to `true`, events inside receipt object is returned. Please use the `detailed_events` instead, as it provides an enriched model with context and additional data.
+     * @type {boolean}
+     * @memberof TransactionDetailsOptIns
+     * @deprecated
+     */
+    receipt_events?: boolean;
+    /**
+     * if set to `true`, detailed events object is returned.
+
+For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained).
+
      * @type {boolean}
      * @memberof TransactionDetailsOptIns
      */
-    receipt_events?: boolean;
+    detailed_events?: boolean;
     /**
      * (true by default) if set to `true`, transaction receipt output is returned.
      * @type {boolean}
@@ -116,6 +126,7 @@ export function TransactionDetailsOptInsFromJSONTyped(json: any, ignoreDiscrimin
         'receipt_fee_destination': !exists(json, 'receipt_fee_destination') ? undefined : json['receipt_fee_destination'],
         'receipt_costing_parameters': !exists(json, 'receipt_costing_parameters') ? undefined : json['receipt_costing_parameters'],
         'receipt_events': !exists(json, 'receipt_events') ? undefined : json['receipt_events'],
+        'detailed_events': !exists(json, 'detailed_events') ? undefined : json['detailed_events'],
         'receipt_output': !exists(json, 'receipt_output') ? undefined : json['receipt_output'],
         'affected_global_entities': !exists(json, 'affected_global_entities') ? undefined : json['affected_global_entities'],
         'manifest_instructions': !exists(json, 'manifest_instructions') ? undefined : json['manifest_instructions'],
@@ -139,6 +150,7 @@ export function TransactionDetailsOptInsToJSON(value?: TransactionDetailsOptIns 
         'receipt_fee_destination': value.receipt_fee_destination,
         'receipt_costing_parameters': value.receipt_costing_parameters,
         'receipt_events': value.receipt_events,
+        'detailed_events': value.detailed_events,
         'receipt_output': value.receipt_output,
         'affected_global_entities': value.affected_global_entities,
         'manifest_instructions': value.manifest_instructions,
