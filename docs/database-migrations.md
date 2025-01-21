@@ -4,31 +4,38 @@ For most of the releases database schema differs between versions. To easily mig
 For further reading, visit the official Microsoft documentation on Entity Framework migration https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli
 
 ## Executing migrations
-There are two supported methods of applying migrations. Executing Idempotent SQL script or using programmatic Entity Framework migrations (for simplicity they can be applied using docker image). You can choose whichever you prefer.
+There are two supported methods of applying migrations, discussed below:
+
+* Using programmatic Entity Framework migrations (for simplicity they can be applied using docker image)
+* Executing an Idempotent SQL script
 
 ### Docker image
 For each release, we publish a docker image which is responsible for migrating the database. Similarly to the idempotent SQL script, it takes care of applying each migration only once and applying only missing migrations.
 
-Image can be found here:
-https://hub.docker.com/r/radixdlt/babylon-ng-database-migrations
+The image  can be found here: https://hub.docker.com/r/radixdlt/babylon-ng-database-migrations
 
 To migrate the database you just need to run that image providing a connection string to the database. To do that you need to set an environment variable for the docker container `ConnectionStrings__NetworkGatewayMigrations`.
 
 #### Known issues and limitations
-In the current version of Ngpsql, if using a schema other than `public`, the migrations may fail to execute with an error message such as "__EFMigrationsHistory already exists on dbContext.Database.Migrate();". This is caused by [this underlying issue](https://github.com/npgsql/efcore.pg/issues/2878).
+In the current version of NpgSQL, if using a schema other than `public`, the migrations may fail to execute with an error message such as "__EFMigrationsHistory already exists on dbContext.Database.Migrate();". This is caused by [this underlying issue](https://github.com/npgsql/efcore.pg/issues/2878).
 
 We have implemented a workaround for this, which requires specifying the `SearchPath=schema_name` parameter to the connection string as [described here in the Ngpsql docs](https://www.npgsql.org/doc/api/Npgsql.NpgsqlConnectionStringBuilder.html#Npgsql_NpgsqlConnectionStringBuilder_SearchPath).
 
 Providing the schema **ONLY** at the user level i.e `ALTER user someuser in database mainnet SET search_path TO schema_name, public;` is not enough to activate the work-around and will result in errors.
+
 ### Idempotent SQL script
-It is a Raw SQL script that has to be executed on the database. It takes care of applying each migration only once and applying only missing migrations.
 
-It can be found in the [migrations directory](../src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/IdempotentApplyMigrations.sql)
+This is a Raw SQL script that has to be executed on the database. It takes care of applying each migration only once and applying only missing migrations. It can be found as [IdempotentApplyMigrations.sql](../src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/IdempotentApplyMigrations.sql) in the migrations directory.
 
-For more information check:
-https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/applying?tabs=dotnet-core-cli#idempotent-sql-scripts
+Before running the script, may need to ensure that the user running the script has SUPERUSER privileges, for example with:
 
-Because of a bug in CLI responsible for generating these SQL scripts https://github.com/dotnet/efcore/issues/24512, it is possible that it will generate invalid SQL scripts (missing semicolon at the end of each command). We are trying to make sure it does not happen but since we are internally using docker images to migrate the database there is a chance that it might slip through. To fix that, simply add a semicolon at the end of the invalid command.
+```sql
+ALTER USER db_dev_superuser WITH SUPERUSER;
+```
+
+For more information, see the [Microsoft documentation](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/applying?tabs=dotnet-core-cli#idempotent-sql-scripts) on the idempotent SQL scripts.
+
+Because of [a bug in CLI responsible for generating these SQL scripts](https://github.com/dotnet/efcore/issues/24512), it is possible that it will generate invalid SQL scripts (missing semicolon at the end of each command). We are trying to make sure it does not happen but since we are internally using docker images to migrate the database there is a chance that it might slip through. To fix that, simply add a semicolon at the end of the invalid command.
 
 ## Schema upgrade scenarios
 There are two scenarios that might happen between gateway versions.
