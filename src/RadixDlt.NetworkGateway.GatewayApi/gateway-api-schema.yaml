@@ -1278,9 +1278,9 @@ tags:
       The legacy event model provides only the event name (`DepositEvent`). In contrast, the detailed event model includes the blueprint name (`FungibleVault`) and the package containing this blueprint (`package_tdx_2_1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxmn4mes`).
 
       #### Emitter Data
-      The detailed event model adds two properties:
-      - `outer_emitter`: The resource address of the asset held in the vault.
-      - `global_emitter`: The account that owns the vault emitting the event.
+      The detailed event model adds two properties covering the outer object (if it exists) and global ancestor of the emitter in the state tree. As an example, for events emitted by account vaults, this translates to:
+        - `outer_emitter`: The resource address of the asset held in the vault.
+        - `global_emitter`: The account that owns the vault emitting the event.
 
       The detailed event model omits the `is_global` and `entity_type` fields because these can be inferred directly from the returned `entity` address.
 
@@ -2420,6 +2420,11 @@ components:
 
     SborTypeKind:
       type: string
+      description: |
+        Kind of SBOR type.
+
+        - If `WellKnown`, then it is a pointer to a well known scrypto type with that ID,
+        - If `SchemaLocal`, then it is an index into the given schema.
       enum:
         - SchemaLocal
         - WellKnown
@@ -4435,7 +4440,7 @@ components:
           description: |
             if set to `true`, detailed events object is returned.
 
-            For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained).
+            For more information please visit the [Detailed Events docs](#section/Detailed-Events-Explained).
           type: boolean
           default: false
         receipt_output:

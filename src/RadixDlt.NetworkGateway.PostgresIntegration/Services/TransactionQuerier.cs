@@ -751,7 +751,7 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                                 methodEventEmitterIdentifier.ObjectModuleId.ToString()
                             ),
                             outerEmitter: eventDetails.OuterObjectAddress,
-                            globalEmitter: eventDetails.GlobalEmitterAddress ?? methodEventEmitterIdentifier.Entity.EntityAddress);
+                            globalEmitter: eventDetails.GlobalAncestorAddress ?? methodEventEmitterIdentifier.Entity.EntityAddress);
 
                         detailedEvents.Add(new GatewayModel.DetailedEventsItem(
                             detailedIdentifier,

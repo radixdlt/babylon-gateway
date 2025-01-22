@@ -72,7 +72,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal static class SchemaDefinitionDataQuery
 {
-    internal record EventDetailsDataQueryResult(long EntityId, string EntityAddress, string PackageAddress, string BlueprintName, string? GlobalEmitterAddress, string? OuterObjectAddress);
+    internal record EventDetailsDataQueryResult(long EntityId, string EntityAddress, string PackageAddress, string BlueprintName, string? GlobalAncestorAddress, string? OuterObjectAddress);
 
     internal static async Task<Dictionary<long, EventDetailsDataQueryResult>> Execute(
         IDapperWrapper dapperWrapper,
@@ -101,7 +101,7 @@ SELECT
     e.address AS EntityAddress,
     pe.address as PackageAddress,
     e.blueprint_name AS BlueprintName,
-    ge.address AS GlobalEmitterAddress,
+    ge.address AS GlobalAncestorAddress,
     ooe.address AS OuterObjectAddress
 FROM vars
 INNER JOIN entities e on e.id = vars.entity_id
