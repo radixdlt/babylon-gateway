@@ -304,6 +304,7 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
                     {
                         StateVersion = stateVersion,
                         ReceiptEventEmitters = events.Select(e => e.Type.Emitter.ToJson()).ToArray(),
+                        ReceiptEventEmitterEntityIds = events.Select(e => _referencedEntities.Get((EntityAddress)e.Type.GetEmitterAddress()).DatabaseId).ToArray(),
                         ReceiptEventNames = events.Select(e => e.Type.Name).ToArray(),
                         ReceiptEventSbors = events.Select(e => e.Data.GetDataBytes()).ToArray(),
                         ReceiptEventSchemaEntityIds = events.Select(e => _referencedEntities.Get((EntityAddress)e.Type.TypeReference.FullTypeId.EntityAddress).DatabaseId).ToArray(),
@@ -414,11 +415,12 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
 
     private Task<int> CopyLedgerTransactionEvents() => _context.WriteHelper.Copy(
         _ledgerTransactionEventsToAdd,
-        "COPY ledger_transaction_events (state_version, receipt_event_emitters, receipt_event_names, receipt_event_sbors, receipt_event_schema_entity_ids, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds) FROM STDIN (FORMAT BINARY)",
+        "COPY ledger_transaction_events (state_version, receipt_event_emitters, receipt_event_emitter_entity_ids, receipt_event_names, receipt_event_sbors, receipt_event_schema_entity_ids, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds) FROM STDIN (FORMAT BINARY)",
         async (writer, lt, token) =>
         {
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.ReceiptEventEmitters, NpgsqlDbType.Array | NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.ReceiptEventEmitterEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.ReceiptEventNames, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.ReceiptEventSbors, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(lt.ReceiptEventSchemaEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);

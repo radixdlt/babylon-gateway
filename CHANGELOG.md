@@ -6,13 +6,16 @@ Release built: _not released yet_
     - `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
     - `balance_change_resources_filter` - Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend integrators use this instead of the `manifest_resources_filter` in most instances.
 - Improved the performance of the `/extensions/resource-holders/page` endpoint.
+- Added a new, detailed events model that provides more in-depth insights and additional context, allowing you to work with events more effectively. It is returned when the `detailed_events` opt-in is enabled for the `/stream/transactions` and `/stream/transactions` endpoints. The existing `events` property is now deprecated, and we advise switching to the new detailed events model.
 
 ### Database changes
 - New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.
 - Removed `transaction_type.round_update` from the `ledger_transaction_markers` table. This should reduce database size and slightly improve the performance of the `/stream/transactions` endpoint.
 - A new index `IX_ledger_transaction_markers_resource_balance_change` has been added to the `ledger_transaction_markers` table.
 - A new index `IX_ledger_transactions_receipt_status_state_version` has been added to the `ledger_transactions` table.
-- Replaced the `IX_resource_holders_entity_id_resource_entity_id_balance` index with the `IX_resource_holders_resource_entity_id_balance_id` index on the resource_holders table.
+- Replaced the `IX_resource_holders_entity_id_resource_entity_id_balance` index with the `IX_resource_holders_resource_entity_id_balance_entity_id` index on the `resource_holders` table.
+- New `outer_object_entity_id` column in the `entities` table, which holds the outer object entity id (e.g resource entity id for vaults and consensus manager entity id for validators).
+- New `receipt_event_emitter_entity_ids` column in the `ledger_transaction_events` table, which holds the emitter entity ids for transaction events.
 
 ## 1.9.2
 Release built: 9.12.2024

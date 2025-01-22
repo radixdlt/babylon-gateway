@@ -13,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { DetailedEventsItem } from './DetailedEventsItem';
+import {
+    DetailedEventsItemFromJSON,
+    DetailedEventsItemFromJSONTyped,
+    DetailedEventsItemToJSON,
+} from './DetailedEventsItem';
 import type { EventsItem } from './EventsItem';
 import {
     EventsItemFromJSON,
@@ -89,11 +95,21 @@ This type is defined in the Core API as `SborData`. See the Core API documentati
      */
     output?: object;
     /**
-     * Events emitted by a transaction.
+     * Events emitted by a transaction. Please use the `detailed_events` instead, as it provides an enriched model with context and additional data.
      * @type {Array<EventsItem>}
      * @memberof TransactionReceipt
+     * @deprecated
      */
     events?: Array<EventsItem>;
+    /**
+     * Events emitted by a transaction, enriched with additional context and data.
+
+For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained).
+
+     * @type {Array<DetailedEventsItem>}
+     * @memberof TransactionReceipt
+     */
+    detailed_events?: Array<DetailedEventsItem>;
     /**
      * Error message (only present if status is `Failed` or `Rejected`)
      * @type {string}
@@ -130,6 +146,7 @@ export function TransactionReceiptFromJSONTyped(json: any, ignoreDiscriminator: 
         'next_epoch': !exists(json, 'next_epoch') ? undefined : json['next_epoch'],
         'output': !exists(json, 'output') ? undefined : json['output'],
         'events': !exists(json, 'events') ? undefined : ((json['events'] as Array<any>).map(EventsItemFromJSON)),
+        'detailed_events': !exists(json, 'detailed_events') ? undefined : ((json['detailed_events'] as Array<any>).map(DetailedEventsItemFromJSON)),
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
 }
@@ -152,6 +169,7 @@ export function TransactionReceiptToJSON(value?: TransactionReceipt | null): any
         'next_epoch': value.next_epoch,
         'output': value.output,
         'events': value.events === undefined ? undefined : ((value.events as Array<any>).map(EventsItemToJSON)),
+        'detailed_events': value.detailed_events === undefined ? undefined : ((value.detailed_events as Array<any>).map(DetailedEventsItemToJSON)),
         'error_message': value.error_message,
     };
 }

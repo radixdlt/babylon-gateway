@@ -66,7 +66,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class EventTypeIdentifier : IEntityAddressPointer
+public partial class EventTypeIdentifier : IEntityAddressPointer, IEventEmitter
 {
     public IEnumerable<string> GetEntityAddresses()
     {
@@ -76,5 +76,10 @@ public partial class EventTypeIdentifier : IEntityAddressPointer
         {
             yield return address;
         }
+    }
+
+    public string GetEmitterAddress()
+    {
+        return Emitter.GetEmitterAddress();
     }
 }

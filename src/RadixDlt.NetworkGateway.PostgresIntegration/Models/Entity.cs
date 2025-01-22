@@ -106,6 +106,9 @@ internal abstract class Entity
     [Column("global_ancestor_id")]
     public long? GlobalAncestorId { get; set; }
 
+    [Column("outer_object_entity_id")]
+    public long? OuterObjectEntityId { get; set; }
+
     [Column("correlated_entity_relationships")]
     public List<EntityRelationship> CorrelatedEntityRelationships { get; set; } = new();
 

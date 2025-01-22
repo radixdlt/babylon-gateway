@@ -62,41 +62,59 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-#nullable disable
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
+internal static class SchemaDefinitionDataQuery
 {
-    /// <inheritdoc />
-    public partial class PerformanceFixIndexForResourceHolders : Migration
+    internal record EventDetailsDataQueryResult(long EntityId, string EntityAddress, string PackageAddress, string BlueprintName, string? GlobalAncestorAddress, string? OuterObjectAddress);
+
+    internal static async Task<Dictionary<long, EventDetailsDataQueryResult>> Execute(
+        IDapperWrapper dapperWrapper,
+        CommonDbContext dbContext,
+        List<long> entityIds,
+        CancellationToken token)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+        if (!entityIds.Any())
         {
-            migrationBuilder.DropIndex(
-                name: "IX_resource_holders_resource_entity_id_balance_entity_id",
-                table: "resource_holders");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_resource_holders_resource_entity_id_balance_entity_id",
-                table: "resource_holders",
-                columns: new[] { "resource_entity_id", "balance", "entity_id" },
-                descending: new[] { false, true, false });
+            return new Dictionary<long, EventDetailsDataQueryResult>();
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+        var parameters = new
         {
-            migrationBuilder.DropIndex(
-                name: "IX_resource_holders_resource_entity_id_balance_entity_id",
-                table: "resource_holders");
+            entityIds = entityIds,
+        };
 
-            migrationBuilder.CreateIndex(
-                name: "IX_resource_holders_resource_entity_id_balance_entity_id",
-                table: "resource_holders",
-                columns: new[] { "resource_entity_id", "balance", "entity_id" },
-                descending: new[] { false, true, true });
-        }
+        var cd = DapperExtensions.CreateCommandDefinition(
+            @"
+WITH vars AS (
+    SELECT
+        unnest(@entityIds) AS entity_id
+)
+SELECT
+    e.id AS EntityId,
+    e.address AS EntityAddress,
+    pe.address as PackageAddress,
+    e.blueprint_name AS BlueprintName,
+    ge.address AS GlobalAncestorAddress,
+    ooe.address AS OuterObjectAddress
+FROM vars
+INNER JOIN entities e on e.id = vars.entity_id
+LEFT JOIN entities ge on e.global_ancestor_id = ge.id
+LEFT JOIN entities ooe on e.outer_object_entity_id = ooe.id
+LEFT JOIN entities pe ON pe.id = e.correlated_entity_ids[array_position(e.correlated_entity_relationships, 'component_to_instantiating_package')]
+;",
+            parameters,
+            cancellationToken: token);
+
+        var result = (await dapperWrapper.QueryAsync<EventDetailsDataQueryResult>(dbContext.Database.GetDbConnection(), cd))
+            .ToDictionary(x => x.EntityId, x => x);
+
+        return result;
     }
 }

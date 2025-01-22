@@ -130,9 +130,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "kind_filter", EmitDefaultValue = true)]
         public KindFilterEnum? KindFilter { get; set; }
         /// <summary>
-        /// Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.
+        /// Allows filtering by the transaction commit status (&#x60;Success&#x60;, &#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.
         /// </summary>
-        /// <value>Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.</value>
+        /// <value>Allows filtering by the transaction commit status (&#x60;Success&#x60;, &#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.</value>
         [JsonConverter(typeof(StringEnumConverter))]
         public enum TransactionStatusFilterEnum
         {
@@ -158,9 +158,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
 
         /// <summary>
-        /// Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.
+        /// Allows filtering by the transaction commit status (&#x60;Success&#x60;, &#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.
         /// </summary>
-        /// <value>Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.</value>
+        /// <value>Allows filtering by the transaction commit status (&#x60;Success&#x60;, &#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;.</value>
         [DataMember(Name = "transaction_status_filter", EmitDefaultValue = true)]
         public TransactionStatusFilterEnum? TransactionStatusFilter { get; set; }
         /// <summary>
@@ -210,7 +210,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="manifestClassFilter">manifestClassFilter.</param>
         /// <param name="eventGlobalEmittersFilter">Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter..</param>
         /// <param name="balanceChangeResourcesFilter">Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to &#x60;[]&#x60;. We recommend that integrators use this instead of the &#x60;manifest_resources_filter&#x60; in most cases, as it also captures resource changes that are not specified in the manifest..</param>
-        /// <param name="transactionStatusFilter">Allows filtering by the transaction commit status (&#x60;Success&#x60;,&#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;. (default to TransactionStatusFilterEnum.All).</param>
+        /// <param name="transactionStatusFilter">Allows filtering by the transaction commit status (&#x60;Success&#x60;, &#x60;Failure&#x60;, &#x60;All&#x60;). Defaults to &#x60;All&#x60;. (default to TransactionStatusFilterEnum.All).</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
         /// <param name="optIns">optIns.</param>
         public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestBadgesPresentedFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<string> affectedGlobalEntitiesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), List<string> accountsWithManifestOwnerMethodCalls = default(List<string>), List<string> accountsWithoutManifestOwnerMethodCalls = default(List<string>), StreamTransactionsRequestAllOfManifestClassFilter manifestClassFilter = default(StreamTransactionsRequestAllOfManifestClassFilter), List<string> eventGlobalEmittersFilter = default(List<string>), List<string> balanceChangeResourcesFilter = default(List<string>), TransactionStatusFilterEnum? transactionStatusFilter = TransactionStatusFilterEnum.All, OrderEnum? order = default(OrderEnum?), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))

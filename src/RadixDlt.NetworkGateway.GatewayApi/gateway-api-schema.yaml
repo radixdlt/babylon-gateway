@@ -1186,6 +1186,109 @@ tags:
       In our case, we may want to look up information about the vault (for example, the vault's resource address and balance).
       This can be done with the `/state/entity/details` endpoint.
 
+      ## Detailed Events Explained
+
+      The detailed events feature provides additional context and data to the regular event model returned by the `/transaction/committed-details` and `/stream/transactions` endpoints. To include it in the response, enable the `detailed_events` opt-in.
+
+      i.e:
+        ```json
+        /transaction/committed-details
+
+        {
+          "intent_hash": "txid_tdx_2_1g42eke90x4yhur505kt3hthhaflyc7fmce5p09jwr6wglw35qrus6w34tw",
+          "opt_ins": {
+            "detailed_events": true
+          }
+        }
+        ```
+
+      Let's compare an example event returned in both models.
+
+      ### Example Event JSON
+
+      **Legacy Event Model**
+      ```json
+      {
+        "name": "DepositEvent",
+        "emitter": {
+          "type": "Method",
+          "entity": {
+            "is_global": false,
+            "entity_type": "InternalFungibleVault",
+            "entity_address": "internal_vault_tdx_2_1tr3jllkjd0h0k7sxtj5fy87fw6sfl33yc89j7fzwz0qp29k4dljgxv"
+          },
+          "object_module_id": "Main"
+        },
+        "data": {
+          "fields": [
+            {
+              "value": "10000",
+              "kind": "Decimal",
+              "field_name": "amount"
+            }
+          ],
+          "kind": "Tuple",
+          "type_name": "DepositEvent"
+        }
+      }
+      ```
+
+      **Detailed Event Model**
+      ```json
+      {
+        "identifier": {
+          "package": "package_tdx_2_1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxmn4mes",
+          "blueprint": "FungibleVault",
+          "event": "DepositEvent"
+        },
+        "payload_type_definition": {
+          "local_type_id": 25,
+          "entity": "package_tdx_2_1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxmn4mes",
+          "schema_hash_hex": "462a3fea283117aab2b01c297812bdc0fa9060b29eb5e68b847f361bc1201933",
+          "kind": "SchemaLocal"
+        },
+        "emitter": {
+          "method_emitter": {
+            "entity": "internal_vault_tdx_2_1tr3jllkjd0h0k7sxtj5fy87fw6sfl33yc89j7fzwz0qp29k4dljgxv",
+            "module": "Main"
+          },
+          "outer_emitter": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+          "global_emitter": "account_tdx_2_12x6f0l694e9fhcvcaqw9vs0mnp8m4k74cqkdkgxg2w8rvp4k63ru7r",
+          "type": "EntityMethod"
+        },
+        "payload": {
+          "programmatic_json": {
+            "fields": [
+              {
+                "value": "10000",
+                "kind": "Decimal",
+                "field_name": "amount"
+              }
+            ],
+            "kind": "Tuple",
+            "type_name": "DepositEvent"
+          }
+        }
+      }
+      ```
+
+      ### Comparison
+
+      #### Identifier Data
+      The legacy event model provides only the event name (`DepositEvent`). In contrast, the detailed event model includes the blueprint name (`FungibleVault`) and the package containing this blueprint (`package_tdx_2_1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxmn4mes`).
+
+      #### Emitter Data
+      The detailed event model adds two properties covering the outer object (if it exists) and global ancestor of the emitter in the state tree. As an example, for events emitted by account vaults, this translates to:
+        - `outer_emitter`: The resource address of the asset held in the vault.
+        - `global_emitter`: The account that owns the vault emitting the event.
+
+      The detailed event model omits the `is_global` and `entity_type` fields because these can be inferred directly from the returned `entity` address.
+
+      #### Payload
+      Both models provide the same payload data. In both cases, the payload is decoded to programmatic JSON using a schema. In the detailed event model, this data is additionally wrapped in a `programmatic_json` field.
+
+      A new addition in the detailed event model is the `payload_type_definition` field, which provides information about the event schema. In the example above, this field points to a schema (`SchemaLocal`) with a `local_type_id` of 25. This schema is defined in `package_tdx_2_1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxmn4mes` package and has a hash of `462a3fea283117aab2b01c297812bdc0fa9060b29eb5e68b847f361bc1201933`.
+
   - name: Status
     x-displayName: Status Endpoints
     description: Query information about the Gateway API status.
@@ -2315,6 +2418,23 @@ components:
         - Global
         - Vault
 
+    SborTypeKind:
+      type: string
+      description: |
+        Kind of SBOR type.
+
+        - If `WellKnown`, then it is a pointer to a well known scrypto type with that ID,
+        - If `SchemaLocal`, then it is an index into the given schema.
+      enum:
+        - SchemaLocal
+        - WellKnown
+
+    SchemaTypeId:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 4294967295
+
     ScryptoSborValue:
       type: object
       required:
@@ -3184,15 +3304,191 @@ components:
             The manifest line-by-line engine return data (only present if `status` is `CommittedSuccess`).
             This type is defined in the Core API as `SborData`. See the Core API documentation for more details.
         events:
-          description: Events emitted by a transaction.
+          deprecated: true
+          description: Events emitted by a transaction. Please use the `detailed_events` instead, as it provides an enriched model with context and additional data.
           type: array
           items:
             $ref: "#/components/schemas/EventsItem"
+        detailed_events:
+          description: |
+            Events emitted by a transaction, enriched with additional context and data.
 
+            For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained).
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailedEventsItem"
         error_message:
           description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
           nullable: true
+
+    DetailedEventsItem:
+      type: object
+      required:
+        - identifier
+        - payload_type_definition
+        - emitter
+        - payload
+      properties:
+        identifier:
+          $ref: "#/components/schemas/DetailedEventIdentifier"
+        payload_type_definition:
+          $ref: "#/components/schemas/DetailedEventPayloadTypeDefinition"
+        emitter:
+          $ref: "#/components/schemas/DetailedEventEmitter"
+        payload:
+          $ref: "#/components/schemas/DetailedEventPayload"
+
+    DetailedEventIdentifier:
+      description: Identifier of an event.
+      type: object
+      required:
+        - package
+        - blueprint
+        - event
+      properties:
+        package:
+          # TODO: Due to 3.0 open api spec limitation we can't use ref here, it should reuse $ref: "#/components/schemas/Address"
+          description: |
+            The address of the published package that defines the event.
+
+            Bech32m-encoded human readable version of the address.
+          type: string
+        blueprint:
+          description: The blueprint that defines the event.
+          type: string
+        event:
+          description: Event name.
+          type: string
+
+    DetailedEventPayloadTypeDefinition:
+      description: Detailed information about the event's payload type.
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          $ref: "#/components/schemas/SborTypeKind"
+      discriminator:
+        propertyName: kind
+        mapping:
+          SchemaLocal: "#/components/schemas/SchemaLocalEventPayloadTypeDefinition"
+          WellKnown: "#/components/schemas/WellKnownEventPayloadTypeDefinition"
+
+    WellKnownEventPayloadTypeDefinition:
+      description: Reference to a well-known type that defines the schema of an event.
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventPayloadTypeDefinition"
+        - type: object
+          required:
+            - well_known_type_id
+          properties:
+            well_known_type_id:
+              $ref: "#/components/schemas/SchemaTypeId"
+
+    SchemaLocalEventPayloadTypeDefinition:
+      description: Reference to a local schema type that defines the schema of an event.
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventPayloadTypeDefinition"
+        - type: object
+          required:
+            - local_type_id
+            - entity
+            - schema_hash_hex
+          properties:
+            local_type_id:
+              $ref: "#/components/schemas/SchemaTypeId"
+            entity:
+              $ref: "#/components/schemas/Address"
+            schema_hash_hex:
+              $ref: "#/components/schemas/HexString"
+
+    EventEmitterType:
+      type: string
+      enum:
+        - EntityMethod
+        - PackageFunction
+
+    DetailedEventEmitter:
+      description: Detailed information about the event emitter.
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/EventEmitterType"
+      discriminator:
+        propertyName: type
+        mapping:
+          EntityMethod: "#/components/schemas/EntityMethodEventEmitter"
+          PackageFunction: "#/components/schemas/PackageFunctionEventEmitter"
+
+    EntityMethodEventEmitter:
+      description: Details of the entity method's event emitter.
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventEmitter"
+        - type: object
+      required:
+        - method_emitter
+        - global_emitter
+      properties:
+        method_emitter:
+          $ref: "#/components/schemas/MethodEmitter"
+        outer_emitter:
+          # TODO: Due to 3.0 open api spec limitation we can't use ref here, it should reuse $ref: "#/components/schemas/Address"
+          description: |
+            The address of the outer object of the emitter. For example, for events emitted by vaults, this will be the resource address; for events emitted by validators, it will be the consensus manager address.
+
+            Bech32m-encoded human readable version of the address.
+          type: string
+        global_emitter:
+          # TODO: Due to 3.0 open api spec limitation we can't use ref here, it should reuse $ref: "#/components/schemas/Address"
+          description: |
+            The address of the global ancestor of the entity emitting the event (self if the entity emitting the event is global).
+
+            Bech32m-encoded human readable version of the address.
+          type: string
+
+    MethodEmitter:
+      description: Details of the component module method that emitted the event.
+      type: object
+      required:
+        - entity
+        - module
+      properties:
+        entity:
+          $ref: "#/components/schemas/Address"
+        module:
+          type: string
+
+    FunctionEmitter:
+      description: Details of the blueprint function that emitted the event.
+      type: object
+      required:
+        - blueprint
+      properties:
+        blueprint:
+          type: string
+
+    PackageFunctionEventEmitter:
+      description: Details of the package function's event emitter.
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventEmitter"
+        - type: object
+      required:
+        - function_emitter
+      properties:
+        function_emitter:
+          $ref: "#/components/schemas/FunctionEmitter"
+
+    DetailedEventPayload:
+      description: Event payload decoded into Programmatic JSON using its schema.
+      type: object
+      required:
+        - programmatic_json
+      properties:
+        programmatic_json:
+          type: object
 
     EventsItem:
       type: object
@@ -4136,7 +4432,15 @@ components:
           type: boolean
           default: false
         receipt_events:
-          description: if set to `true`, events inside receipt object is returned.
+          description: if set to `true`, events inside receipt object is returned. Please use the `detailed_events` instead, as it provides an enriched model with context and additional data.
+          deprecated: true
+          type: boolean
+          default: false
+        detailed_events:
+          description: |
+            if set to `true`, detailed events object is returned.
+
+            For more information please visit the [Detailed Events docs](#section/Detailed-Events-Explained).
           type: boolean
           default: false
         receipt_output:

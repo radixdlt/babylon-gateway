@@ -72,4 +72,9 @@ public partial class MethodEventEmitterIdentifier
     {
         yield return Entity.EntityAddress;
     }
+
+    public override string GetEmitterAddress()
+    {
+        return Entity.EntityAddress;
+    }
 }
