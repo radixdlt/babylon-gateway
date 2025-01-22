@@ -5,7 +5,7 @@ on:
     branches:
       - '*'
     paths: 
-      - '/sdk/typescript/**'
+      - 'sdk/typescript/**'
 
 jobs:
   build-gateway-sdk:
