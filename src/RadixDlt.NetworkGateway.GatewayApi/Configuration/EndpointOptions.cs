@@ -110,6 +110,9 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("ResourceHoldersMaxPageSize")]
     public int ResourceHoldersMaxPageSize { get; set; } = 1000;
 
+    [ConfigurationKeyName("EntitiesByRoleRequirementLookupMaxPageSize")]
+    public int EntitiesByRoleRequirementLookupMaxPageSize { get; set; } = 20;
+
     [ConfigurationKeyName("MaxDefinitionsLookupLimit")]
     public int MaxDefinitionsLookupLimit { get; set; } = 50_000;
 

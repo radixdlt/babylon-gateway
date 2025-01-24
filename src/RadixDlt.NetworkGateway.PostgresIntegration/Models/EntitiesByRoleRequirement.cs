@@ -62,45 +62,36 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public interface IExtensionsHandler
+[Table("entities_by_role_requirement")]
+internal abstract class EntitiesByRoleRequirement
 {
-    Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token);
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token);
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token);
+    [Column("first_seen_state_version")]
+    public long FirstSeenStateVersion { get; set; }
 }
 
-internal class DefaultExtensionsHandler(IResourceHoldersQuerier resourceHoldersQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
+internal class EntitiesByResourceRoleRequirement : EntitiesByRoleRequirement
 {
-    public async Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token)
-    {
-        var cursor = GatewayModel.ResourceHoldersCursor.FromCursorString(request.Cursor);
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+}
 
-        return await resourceHoldersQuerier.ResourceHolders(
-            (EntityAddress)request.ResourceAddress,
-            endpointConfiguration.Value.ResolveResourceHoldersPageSize(request.LimitPerPage),
-            cursor,
-            token);
-    }
+internal class EntitiesByNonFungibleRoleRequirement : EntitiesByRoleRequirement
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-    public Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token)
-    {
-        throw new System.NotImplementedException();
-    }
+    [Column("non_fungible_local_id")]
+    public string NonFungibleLocalId { get; set; }
 }

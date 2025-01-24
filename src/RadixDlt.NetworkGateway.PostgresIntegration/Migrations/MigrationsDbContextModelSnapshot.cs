@@ -93,6 +93,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_resource_preference_rule", new[] { "allowed", "disallowed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "authorized_depositor_badge_type", new[] { "resource", "non_fungible" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_relationship", new[] { "component_to_instantiating_package", "vault_to_resource", "validator_to_stake_vault", "validator_to_pending_xrd_withdraw_vault", "validator_to_locked_owner_stake_unit_vault", "validator_to_pending_owner_stake_unit_unlock_vault", "stake_unit_of_validator", "claim_token_of_validator", "entity_to_royalty_vault", "royalty_vault_of_entity", "account_locker_of_locker", "account_locker_of_account", "resource_pool_to_unit_resource", "resource_pool_to_resource", "resource_pool_to_resource_vault", "unit_resource_of_resource_pool", "resource_vault_of_resource_pool", "access_controller_to_recovery_badge", "recovery_badge_of_access_controller" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_role_requirement_type", new[] { "resource", "non_fungible" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity", "global_one_resource_pool", "global_two_resource_pool", "global_multi_resource_pool", "global_transaction_tracker", "global_account_locker" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_manifest_class", new[] { "general", "transfer", "validator_stake", "validator_unstake", "validator_claim", "account_deposit_settings_update", "pool_contribution", "pool_redemption" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
@@ -425,6 +426,35 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("EntityId", "MethodName", "FromStateVersion");
 
                     b.ToTable("component_method_royalty_entry_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByRoleRequirement", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FirstSeenStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("first_seen_state_version");
+
+                    b.Property<EntityRoleRequirementType>("discriminator")
+                        .HasColumnType("entity_role_requirement_type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("entities_by_role_requirement");
+
+                    b.HasDiscriminator<EntityRoleRequirementType>("discriminator");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity", b =>
@@ -2120,6 +2150,45 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("account_authorized_depositor_entry_history");
 
                     b.HasDiscriminator().HasValue(AuthorizedDepositorBadgeType.Resource);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByNonFungibleRoleRequirement", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByRoleRequirement");
+
+                    b.Property<string>("NonFungibleLocalId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("non_fungible_local_id");
+
+                    b.Property<long>("ResourceEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.HasIndex("ResourceEntityId", "NonFungibleLocalId")
+                        .HasFilter("discriminator = 'non_fungible'");
+
+                    b.ToTable("entities_by_role_requirement");
+
+                    b.HasDiscriminator().HasValue(EntityRoleRequirementType.NonFungible);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByResourceRoleRequirement", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByRoleRequirement");
+
+                    b.Property<long>("ResourceEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.HasIndex("ResourceEntityId")
+                        .HasFilter("discriminator = 'resource'");
+
+                    b.ToTable("entities_by_role_requirement");
+
+                    b.HasDiscriminator().HasValue(EntityRoleRequirementType.Resource);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalAccessControllerEntity", b =>

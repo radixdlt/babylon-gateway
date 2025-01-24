@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,45 +62,44 @@
  * permissions under this License.
  */
 
+using FluentValidation;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public interface IExtensionsHandler
+internal class EntitiesByRoleRequirementLookupRequestValidator : AbstractValidator<EntitiesByRoleRequirementLookupRequest>
 {
-    Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token);
+    public EntitiesByRoleRequirementLookupRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        RadixAddressValidator radixAddressValidator
+        )
+    {
+        RuleFor(x => x.Items)
+            .NotEmpty()
+            .DependentRules(
+                () =>
+                {
+                    RuleFor(x => x.Items.Count)
+                        .GreaterThan(0)
+                        .LessThanOrEqualTo(endpointOptionsSnapshot.Value.EntitiesByRoleRequirementLookupMaxPageSize);
 
-    Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token);
-
-    Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token);
+                    RuleForEach(x => x.Items)
+                        .NotEmpty()
+                        .SetValidator(new EntitiesByRoleRequirementRequestRequirementValidator(radixAddressValidator));
+                });
+    }
 }
 
-internal class DefaultExtensionsHandler(IResourceHoldersQuerier resourceHoldersQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
+internal class EntitiesByRoleRequirementRequestRequirementValidator : AbstractValidator<EntitiesByRoleRequirementRequestRequirement>
 {
-    public async Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token)
+    public EntitiesByRoleRequirementRequestRequirementValidator(
+        RadixAddressValidator radixAddressValidator
+    )
     {
-        var cursor = GatewayModel.ResourceHoldersCursor.FromCursorString(request.Cursor);
-
-        return await resourceHoldersQuerier.ResourceHolders(
-            (EntityAddress)request.ResourceAddress,
-            endpointConfiguration.Value.ResolveResourceHoldersPageSize(request.LimitPerPage),
-            cursor,
-            token);
-    }
-
-    public Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token)
-    {
-        throw new System.NotImplementedException();
+        RuleFor(x => x.ResourceAddress)
+            .NotEmpty()
+            .SetValidator(radixAddressValidator);
     }
 }
