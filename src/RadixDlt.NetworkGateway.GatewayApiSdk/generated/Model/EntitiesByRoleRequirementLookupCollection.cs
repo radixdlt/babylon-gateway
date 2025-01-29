@@ -90,35 +90,66 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntitiesByRoleRequirementLookupResponse
+    /// EntitiesByRoleRequirementLookupCollection
     /// </summary>
-    [DataContract(Name = "EntitiesByRoleRequirementLookupResponse")]
-    public partial class EntitiesByRoleRequirementLookupResponse : IEquatable<EntitiesByRoleRequirementLookupResponse>
+    [DataContract(Name = "EntitiesByRoleRequirementLookupCollection")]
+    public partial class EntitiesByRoleRequirementLookupCollection : IEquatable<EntitiesByRoleRequirementLookupCollection>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupResponse" /> class.
+        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntitiesByRoleRequirementLookupResponse() { }
+        protected EntitiesByRoleRequirementLookupCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupResponse" /> class.
+        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupCollection" /> class.
         /// </summary>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limitPerPage">The page size requested..</param>
+        /// <param name="requirement">requirement (required).</param>
         /// <param name="items">items (required).</param>
-        public EntitiesByRoleRequirementLookupResponse(List<EntitiesByRoleRequirementLookupCollection> items = default(List<EntitiesByRoleRequirementLookupCollection>))
+        public EntitiesByRoleRequirementLookupCollection(string cursor = default(string), int? limitPerPage = default(int?), EntitiesByRoleRequirementRequestRequirement requirement = default(EntitiesByRoleRequirementRequestRequirement), List<EntitiesByRoleRequirementItem> items = default(List<EntitiesByRoleRequirementItem>))
         {
+            // to ensure "requirement" is required (not null)
+            if (requirement == null)
+            {
+                throw new ArgumentNullException("requirement is a required property for EntitiesByRoleRequirementLookupCollection and cannot be null");
+            }
+            this.Requirement = requirement;
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for EntitiesByRoleRequirementLookupResponse and cannot be null");
+                throw new ArgumentNullException("items is a required property for EntitiesByRoleRequirementLookupCollection and cannot be null");
             }
             this.Items = items;
+            this.Cursor = cursor;
+            this.LimitPerPage = limitPerPage;
         }
+
+        /// <summary>
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// </summary>
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Requirement
+        /// </summary>
+        [DataMember(Name = "requirement", IsRequired = true, EmitDefaultValue = true)]
+        public EntitiesByRoleRequirementRequestRequirement Requirement { get; set; }
 
         /// <summary>
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntitiesByRoleRequirementLookupCollection> Items { get; set; }
+        public List<EntitiesByRoleRequirementItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,7 +158,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntitiesByRoleRequirementLookupResponse {\n");
+            sb.Append("class EntitiesByRoleRequirementLookupCollection {\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
+            sb.Append("  Requirement: ").Append(Requirement).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -149,21 +183,36 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntitiesByRoleRequirementLookupResponse);
+            return this.Equals(input as EntitiesByRoleRequirementLookupCollection);
         }
 
         /// <summary>
-        /// Returns true if EntitiesByRoleRequirementLookupResponse instances are equal
+        /// Returns true if EntitiesByRoleRequirementLookupCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntitiesByRoleRequirementLookupResponse to be compared</param>
+        /// <param name="input">Instance of EntitiesByRoleRequirementLookupCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntitiesByRoleRequirementLookupResponse input)
+        public bool Equals(EntitiesByRoleRequirementLookupCollection input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
+                (
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
+                ) && 
+                (
+                    this.Requirement == input.Requirement ||
+                    (this.Requirement != null &&
+                    this.Requirement.Equals(input.Requirement))
+                ) && 
                 (
                     this.Items == input.Items ||
                     this.Items != null &&
@@ -181,6 +230,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.Cursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.LimitPerPage != null)
+                {
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
+                }
+                if (this.Requirement != null)
+                {
+                    hashCode = (hashCode * 59) + this.Requirement.GetHashCode();
+                }
                 if (this.Items != null)
                 {
                     hashCode = (hashCode * 59) + this.Items.GetHashCode();
