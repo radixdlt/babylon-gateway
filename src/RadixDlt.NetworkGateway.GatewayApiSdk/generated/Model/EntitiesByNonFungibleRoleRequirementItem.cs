@@ -94,7 +94,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntitiesByNonFungibleRoleRequirementItem
     /// </summary>
     [DataContract(Name = "EntitiesByNonFungibleRoleRequirementItem")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
+    [JsonConverter(typeof(JsonSubtypes), "requirement_type")]
     [JsonSubtypes.KnownSubType(typeof(EntitiesByNonFungibleRoleRequirementItem), "NonFungibleRequirement")]
     [JsonSubtypes.KnownSubType(typeof(EntitiesByResourceRoleRequirementItem), "ResourceRequirement")]
     public partial class EntitiesByNonFungibleRoleRequirementItem : EntitiesByRoleRequirementItem, IEquatable<EntitiesByNonFungibleRoleRequirementItem>
@@ -109,9 +109,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        /// <param name="requirementType">requirementType (required).</param>
+        /// <param name="requirementType">requirementType (required) (default to EntitiesByRoleRequirementRequirementType.NonFungibleRequirement).</param>
         /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
-        public EntitiesByNonFungibleRoleRequirementItem(string resourceAddress = default(string), string nonFungibleId = default(string), EntitiesByRoleRequirementRequirementType requirementType = default(EntitiesByRoleRequirementRequirementType), long firstSeenStateVersion = default(long)) : base(requirementType, firstSeenStateVersion)
+        public EntitiesByNonFungibleRoleRequirementItem(string resourceAddress = default(string), string nonFungibleId = default(string), EntitiesByRoleRequirementRequirementType requirementType = EntitiesByRoleRequirementRequirementType.NonFungibleRequirement, long firstSeenStateVersion = default(long)) : base(requirementType, firstSeenStateVersion)
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)

@@ -2106,41 +2106,11 @@ paths:
       operationId: EntitiesByRoleRequirementPage
       summary: Get entities by role requirement page
       description: |
-        Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).
+        Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).
 
-        This endpoint operates only at the **current state version**, it is not possible to browse historical data.
-        Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.
+        It may include entities that no longer use the requirement as part of an access rule.
 
-        Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter.
-      tags:
-        - Extensions
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EntitiesByRoleRequirementPageRequest"
-      responses:
-        "200":
-          description: List of entities that include the queried requirement.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EntitiesByRoleRequirementPageResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
-
-  /extensions/entities-by-role-requirement/lookup:
-    post:
-      operationId: EntitiesByRoleRequirementLookup
-      summary: Get entities by role requirement lookup
-      description: |
-        Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).
-
-        If you want to fetch subsequent pages, please use the `/extensions/entities-by-role-requirement/page` endpoint.
-
-        This endpoint operates only at the **current state version** and does not support browsing historical data.
-        As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.
+        Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.
 
         Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter.
       tags:
@@ -2153,11 +2123,40 @@ paths:
               $ref: "#/components/schemas/EntitiesByRoleRequirementPageRequest"
       responses:
         "200":
-          description: List of entities that include the queried requirement.
+          description: List of entities that have ever used the queried requirement in their access rules.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/EntitiesByRoleRequirementPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /extensions/entities-by-role-requirement/lookup:
+    post:
+      operationId: EntitiesByRoleRequirementLookup
+      summary: Get entities by role requirement lookup
+      description: |
+        This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.
+
+        To fetch subsequent pages, please use the `/extensions/entities-by-role-requirement/page` endpoint.
+
+        Number of requirements to query is limited to `20`.
+        Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter.
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementLookupRequest"
+      responses:
+        "200":
+          description: List of entities that have ever used the queried requirements in their access rules.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementLookupResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -3614,32 +3613,6 @@ components:
           type: integer
           format: int64
 
-    EntitiesByRoleRequirementLookupCollection:
-      allOf:
-        - type: object
-          required:
-            - items
-            - requirement
-          properties:
-            requirement:
-              $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
-
-    EntitiesByRoleRequirementPageCollection:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
-
     EntitiesByRoleRequirementRequirementType:
       type: string
       enum:
@@ -3658,7 +3631,7 @@ components:
           type: integer
           format: int64
       discriminator:
-        propertyName: badge_type
+        propertyName: requirement_type
         mapping:
           ResourceRequirement: "#/components/schemas/EntitiesByResourceRoleRequirementItem"
           NonFungibleRequirement: "#/components/schemas/EntitiesByNonFungibleRoleRequirementItem"
@@ -5830,7 +5803,15 @@ components:
 
     EntitiesByRoleRequirementPageResponse:
       allOf:
-        - $ref: "#/components/schemas/EntitiesByRoleRequirementPageCollection"
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
 
     EntitiesByRoleRequirementLookupRequest:
       allOf:
@@ -5840,13 +5821,23 @@ components:
           properties:
             items:
               type: array
+              description: limited to max 20 items.
               items:
                 $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
       example: #TODO PP: Provide some example here if possible.
 
     EntitiesByRoleRequirementLookupResponse:
-      allOf:
-        - $ref: "#/components/schemas/EntitiesByRoleRequirementLookupCollection"
+      type: object
+      required:
+        - items
+        - requirement
+      properties:
+        requirement:
+          $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
 
     ResourceHoldersRequest:
       allOf:
@@ -5861,7 +5852,15 @@ components:
 
     ResourceHoldersResponse:
       allOf:
-        - $ref: "#/components/schemas/ResourceHoldersCollection"
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ResourceHoldersCollectionItem"
 
 
     #

@@ -94,7 +94,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntitiesByRoleRequirementItem
     /// </summary>
     [DataContract(Name = "EntitiesByRoleRequirementItem")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
+    [JsonConverter(typeof(JsonSubtypes), "requirement_type")]
     [JsonSubtypes.KnownSubType(typeof(EntitiesByNonFungibleRoleRequirementItem), "EntitiesByNonFungibleRoleRequirementItem")]
     [JsonSubtypes.KnownSubType(typeof(EntitiesByResourceRoleRequirementItem), "EntitiesByResourceRoleRequirementItem")]
     [JsonSubtypes.KnownSubType(typeof(EntitiesByNonFungibleRoleRequirementItem), "NonFungibleRequirement")]

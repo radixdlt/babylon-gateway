@@ -95,28 +95,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get entities by role requirement lookup
         /// </summary>
         /// <remarks>
-        /// Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).  If you want to fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  This endpoint operates only at the **current state version** and does not support browsing historical data. As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entitiesByRoleRequirementPageRequest"></param>
-        /// <returns>EntitiesByRoleRequirementPageResponse</returns>
-        EntitiesByRoleRequirementPageResponse EntitiesByRoleRequirementLookup(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest);
+        /// <param name="entitiesByRoleRequirementLookupRequest"></param>
+        /// <returns>EntitiesByRoleRequirementLookupResponse</returns>
+        EntitiesByRoleRequirementLookupResponse EntitiesByRoleRequirementLookup(EntitiesByRoleRequirementLookupRequest entitiesByRoleRequirementLookupRequest);
 
         /// <summary>
         /// Get entities by role requirement lookup
         /// </summary>
         /// <remarks>
-        /// Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).  If you want to fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  This endpoint operates only at the **current state version** and does not support browsing historical data. As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entitiesByRoleRequirementPageRequest"></param>
-        /// <returns>ApiResponse of EntitiesByRoleRequirementPageResponse</returns>
-        ApiResponse<EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementLookupWithHttpInfo(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest);
+        /// <param name="entitiesByRoleRequirementLookupRequest"></param>
+        /// <returns>ApiResponse of EntitiesByRoleRequirementLookupResponse</returns>
+        ApiResponse<EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookupWithHttpInfo(EntitiesByRoleRequirementLookupRequest entitiesByRoleRequirementLookupRequest);
         /// <summary>
         /// Get entities by role requirement page
         /// </summary>
         /// <remarks>
-        /// Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
+        /// Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  It may include entities that no longer use the requirement as part of an access rule.  Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementPageRequest"></param>
@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get entities by role requirement page
         /// </summary>
         /// <remarks>
-        /// Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
+        /// Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  It may include entities that no longer use the requirement as part of an access rule.  Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementPageRequest"></param>
@@ -167,30 +167,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get entities by role requirement lookup
         /// </summary>
         /// <remarks>
-        /// Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).  If you want to fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  This endpoint operates only at the **current state version** and does not support browsing historical data. As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entitiesByRoleRequirementPageRequest"></param>
+        /// <param name="entitiesByRoleRequirementLookupRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntitiesByRoleRequirementPageResponse</returns>
-        System.Threading.Tasks.Task<EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementLookupAsync(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of EntitiesByRoleRequirementLookupResponse</returns>
+        System.Threading.Tasks.Task<EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookupAsync(EntitiesByRoleRequirementLookupRequest entitiesByRoleRequirementLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Get entities by role requirement lookup
         /// </summary>
         /// <remarks>
-        /// Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).  If you want to fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  This endpoint operates only at the **current state version** and does not support browsing historical data. As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entitiesByRoleRequirementPageRequest"></param>
+        /// <param name="entitiesByRoleRequirementLookupRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntitiesByRoleRequirementPageResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntitiesByRoleRequirementPageResponse>> EntitiesByRoleRequirementLookupWithHttpInfoAsync(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (EntitiesByRoleRequirementLookupResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<EntitiesByRoleRequirementLookupResponse>> EntitiesByRoleRequirementLookupWithHttpInfoAsync(EntitiesByRoleRequirementLookupRequest entitiesByRoleRequirementLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get entities by role requirement page
         /// </summary>
         /// <remarks>
-        /// Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
+        /// Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  It may include entities that no longer use the requirement as part of an access rule.  Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementPageRequest"></param>
@@ -202,7 +202,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get entities by role requirement page
         /// </summary>
         /// <remarks>
-        /// Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
+        /// Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  It may include entities that no longer use the requirement as part of an access rule.  Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementPageRequest"></param>
@@ -446,28 +446,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement lookup Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).  If you want to fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  This endpoint operates only at the **current state version** and does not support browsing historical data. As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entitiesByRoleRequirementPageRequest"></param>
-        /// <returns>EntitiesByRoleRequirementPageResponse</returns>
-        public EntitiesByRoleRequirementPageResponse EntitiesByRoleRequirementLookup(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest)
+        /// <param name="entitiesByRoleRequirementLookupRequest"></param>
+        /// <returns>EntitiesByRoleRequirementLookupResponse</returns>
+        public EntitiesByRoleRequirementLookupResponse EntitiesByRoleRequirementLookup(EntitiesByRoleRequirementLookupRequest entitiesByRoleRequirementLookupRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntitiesByRoleRequirementPageResponse> localVarResponse = EntitiesByRoleRequirementLookupWithHttpInfo(entitiesByRoleRequirementPageRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntitiesByRoleRequirementLookupResponse> localVarResponse = EntitiesByRoleRequirementLookupWithHttpInfo(entitiesByRoleRequirementLookupRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get entities by role requirement lookup Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).  If you want to fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  This endpoint operates only at the **current state version** and does not support browsing historical data. As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entitiesByRoleRequirementPageRequest"></param>
-        /// <returns>ApiResponse of EntitiesByRoleRequirementPageResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementLookupWithHttpInfo(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest)
+        /// <param name="entitiesByRoleRequirementLookupRequest"></param>
+        /// <returns>ApiResponse of EntitiesByRoleRequirementLookupResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookupWithHttpInfo(EntitiesByRoleRequirementLookupRequest entitiesByRoleRequirementLookupRequest)
         {
-            // verify the required parameter 'entitiesByRoleRequirementPageRequest' is set
-            if (entitiesByRoleRequirementPageRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entitiesByRoleRequirementPageRequest' when calling ExtensionsApi->EntitiesByRoleRequirementLookup");
+            // verify the required parameter 'entitiesByRoleRequirementLookupRequest' is set
+            if (entitiesByRoleRequirementLookupRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entitiesByRoleRequirementLookupRequest' when calling ExtensionsApi->EntitiesByRoleRequirementLookup");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -486,11 +486,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entitiesByRoleRequirementPageRequest;
+            localVarRequestOptions.Data = entitiesByRoleRequirementLookupRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<EntitiesByRoleRequirementPageResponse>("/extensions/entities-by-role-requirement/lookup", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<EntitiesByRoleRequirementLookupResponse>("/extensions/entities-by-role-requirement/lookup", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -502,30 +502,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement lookup Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).  If you want to fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  This endpoint operates only at the **current state version** and does not support browsing historical data. As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entitiesByRoleRequirementPageRequest"></param>
+        /// <param name="entitiesByRoleRequirementLookupRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntitiesByRoleRequirementPageResponse</returns>
-        public async System.Threading.Tasks.Task<EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementLookupAsync(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of EntitiesByRoleRequirementLookupResponse</returns>
+        public async System.Threading.Tasks.Task<EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookupAsync(EntitiesByRoleRequirementLookupRequest entitiesByRoleRequirementLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntitiesByRoleRequirementPageResponse> localVarResponse = await EntitiesByRoleRequirementLookupWithHttpInfoAsync(entitiesByRoleRequirementPageRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntitiesByRoleRequirementLookupResponse> localVarResponse = await EntitiesByRoleRequirementLookupWithHttpInfoAsync(entitiesByRoleRequirementLookupRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get entities by role requirement lookup Lookup endpoint that allows querying by multiple requirements (resource or non-fungible global ID).  If you want to fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  This endpoint operates only at the **current state version** and does not support browsing historical data. As a result, stable pagination cannot be guaranteed due to constant data changes. Balances may change between pages, which could result in gaps or duplicate entries being returned.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entitiesByRoleRequirementPageRequest"></param>
+        /// <param name="entitiesByRoleRequirementLookupRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntitiesByRoleRequirementPageResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntitiesByRoleRequirementPageResponse>> EntitiesByRoleRequirementLookupWithHttpInfoAsync(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (EntitiesByRoleRequirementLookupResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntitiesByRoleRequirementLookupResponse>> EntitiesByRoleRequirementLookupWithHttpInfoAsync(EntitiesByRoleRequirementLookupRequest entitiesByRoleRequirementLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'entitiesByRoleRequirementPageRequest' is set
-            if (entitiesByRoleRequirementPageRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entitiesByRoleRequirementPageRequest' when calling ExtensionsApi->EntitiesByRoleRequirementLookup");
+            // verify the required parameter 'entitiesByRoleRequirementLookupRequest' is set
+            if (entitiesByRoleRequirementLookupRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entitiesByRoleRequirementLookupRequest' when calling ExtensionsApi->EntitiesByRoleRequirementLookup");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -546,12 +546,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entitiesByRoleRequirementPageRequest;
+            localVarRequestOptions.Data = entitiesByRoleRequirementLookupRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<EntitiesByRoleRequirementPageResponse>("/extensions/entities-by-role-requirement/lookup", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<EntitiesByRoleRequirementLookupResponse>("/extensions/entities-by-role-requirement/lookup", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
@@ -563,7 +563,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement page Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement page Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  It may include entities that no longer use the requirement as part of an access rule.  Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementPageRequest"></param>
@@ -575,7 +575,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement page Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement page Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  It may include entities that no longer use the requirement as part of an access rule.  Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementPageRequest"></param>
@@ -619,7 +619,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement page Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement page Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  It may include entities that no longer use the requirement as part of an access rule.  Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementPageRequest"></param>
@@ -632,7 +632,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement page Paginated endpoint that returns a page of global entities that use the provided requirement (resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement page Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).  It may include entities that no longer use the requirement as part of an access rule.  Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.  Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementPageRequest"></param>

@@ -90,26 +90,26 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntitiesByRoleRequirementPageCollectionAllOf
+    /// ResourceHoldersResponseAllOf
     /// </summary>
-    [DataContract(Name = "EntitiesByRoleRequirementPageCollection_allOf")]
-    public partial class EntitiesByRoleRequirementPageCollectionAllOf : IEquatable<EntitiesByRoleRequirementPageCollectionAllOf>
+    [DataContract(Name = "ResourceHoldersResponse_allOf")]
+    public partial class ResourceHoldersResponseAllOf : IEquatable<ResourceHoldersResponseAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementPageCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntitiesByRoleRequirementPageCollectionAllOf() { }
+        protected ResourceHoldersResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementPageCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ResourceHoldersResponseAllOf" /> class.
         /// </summary>
         /// <param name="items">items (required).</param>
-        public EntitiesByRoleRequirementPageCollectionAllOf(List<EntitiesByRoleRequirementItem> items = default(List<EntitiesByRoleRequirementItem>))
+        public ResourceHoldersResponseAllOf(List<ResourceHoldersCollectionItem> items = default(List<ResourceHoldersCollectionItem>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for EntitiesByRoleRequirementPageCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for ResourceHoldersResponseAllOf and cannot be null");
             }
             this.Items = items;
         }
@@ -118,7 +118,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntitiesByRoleRequirementItem> Items { get; set; }
+        public List<ResourceHoldersCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntitiesByRoleRequirementPageCollectionAllOf {\n");
+            sb.Append("class ResourceHoldersResponseAllOf {\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -149,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntitiesByRoleRequirementPageCollectionAllOf);
+            return this.Equals(input as ResourceHoldersResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntitiesByRoleRequirementPageCollectionAllOf instances are equal
+        /// Returns true if ResourceHoldersResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntitiesByRoleRequirementPageCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of ResourceHoldersResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntitiesByRoleRequirementPageCollectionAllOf input)
+        public bool Equals(ResourceHoldersResponseAllOf input)
         {
             if (input == null)
             {

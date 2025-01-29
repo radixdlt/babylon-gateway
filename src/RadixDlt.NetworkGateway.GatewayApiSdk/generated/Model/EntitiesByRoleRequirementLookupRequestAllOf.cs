@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupRequestAllOf" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
+        /// <param name="items">limited to max 20 items. (required).</param>
         public EntitiesByRoleRequirementLookupRequestAllOf(List<EntitiesByRoleRequirementRequestRequirement> items = default(List<EntitiesByRoleRequirementRequestRequirement>))
         {
             // to ensure "items" is required (not null)
@@ -115,8 +115,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// limited to max 20 items.
         /// </summary>
+        /// <value>limited to max 20 items.</value>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
         public List<EntitiesByRoleRequirementRequestRequirement> Items { get; set; }
 

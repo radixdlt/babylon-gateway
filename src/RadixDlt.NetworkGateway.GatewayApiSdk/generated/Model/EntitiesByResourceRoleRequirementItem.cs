@@ -94,7 +94,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntitiesByResourceRoleRequirementItem
     /// </summary>
     [DataContract(Name = "EntitiesByResourceRoleRequirementItem")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
+    [JsonConverter(typeof(JsonSubtypes), "requirement_type")]
     [JsonSubtypes.KnownSubType(typeof(EntitiesByNonFungibleRoleRequirementItem), "NonFungibleRequirement")]
     [JsonSubtypes.KnownSubType(typeof(EntitiesByResourceRoleRequirementItem), "ResourceRequirement")]
     public partial class EntitiesByResourceRoleRequirementItem : EntitiesByRoleRequirementItem, IEquatable<EntitiesByResourceRoleRequirementItem>
@@ -108,9 +108,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntitiesByResourceRoleRequirementItem" /> class.
         /// </summary>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        /// <param name="requirementType">requirementType (required).</param>
+        /// <param name="requirementType">requirementType (required) (default to EntitiesByRoleRequirementRequirementType.ResourceRequirement).</param>
         /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
-        public EntitiesByResourceRoleRequirementItem(string resourceAddress = default(string), EntitiesByRoleRequirementRequirementType requirementType = default(EntitiesByRoleRequirementRequirementType), long firstSeenStateVersion = default(long)) : base(requirementType, firstSeenStateVersion)
+        public EntitiesByResourceRoleRequirementItem(string resourceAddress = default(string), EntitiesByRoleRequirementRequirementType requirementType = EntitiesByRoleRequirementRequirementType.ResourceRequirement, long firstSeenStateVersion = default(long)) : base(requirementType, firstSeenStateVersion)
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
