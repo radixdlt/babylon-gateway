@@ -98,28 +98,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupRequest" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected EntitiesByRoleRequirementLookupRequest() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupRequest" /> class.
-        /// </summary>
-        /// <param name="items">limited to max 20 items. (required).</param>
-        public EntitiesByRoleRequirementLookupRequest(List<EntitiesByRoleRequirementRequestRequirement> items = default(List<EntitiesByRoleRequirementRequestRequirement>))
+        /// <param name="requirements">limited to max 20 items..</param>
+        public EntitiesByRoleRequirementLookupRequest(List<EntitiesByRoleRequirementRequestRequirement> requirements = default(List<EntitiesByRoleRequirementRequestRequirement>))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
-            {
-                throw new ArgumentNullException("items is a required property for EntitiesByRoleRequirementLookupRequest and cannot be null");
-            }
-            this.Items = items;
+            this.Requirements = requirements;
         }
 
         /// <summary>
         /// limited to max 20 items.
         /// </summary>
         /// <value>limited to max 20 items.</value>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntitiesByRoleRequirementRequestRequirement> Items { get; set; }
+        [DataMember(Name = "requirements", EmitDefaultValue = true)]
+        public List<EntitiesByRoleRequirementRequestRequirement> Requirements { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntitiesByRoleRequirementLookupRequest {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  Requirements: ").Append(Requirements).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,10 +156,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Requirements == input.Requirements ||
+                    this.Requirements != null &&
+                    input.Requirements != null &&
+                    this.Requirements.SequenceEqual(input.Requirements)
                 );
         }
 
@@ -182,9 +172,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.Requirements != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Requirements.GetHashCode();
                 }
                 return hashCode;
             }

@@ -103,11 +103,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupCollection" /> class.
         /// </summary>
-        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limitPerPage">The page size requested..</param>
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="requirement">requirement (required).</param>
         /// <param name="items">items (required).</param>
-        public EntitiesByRoleRequirementLookupCollection(string cursor = default(string), int? limitPerPage = default(int?), EntitiesByRoleRequirementRequestRequirement requirement = default(EntitiesByRoleRequirementRequestRequirement), List<EntitiesByRoleRequirementItem> items = default(List<EntitiesByRoleRequirementItem>))
+        public EntitiesByRoleRequirementLookupCollection(long? totalCount = default(long?), string nextCursor = default(string), EntitiesByRoleRequirementRequestRequirement requirement = default(EntitiesByRoleRequirementRequestRequirement), List<EntitiesByRoleRequirementItem> items = default(List<EntitiesByRoleRequirementItem>))
         {
             // to ensure "requirement" is required (not null)
             if (requirement == null)
@@ -121,23 +121,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("items is a required property for EntitiesByRoleRequirementLookupCollection and cannot be null");
             }
             this.Items = items;
-            this.Cursor = cursor;
-            this.LimitPerPage = limitPerPage;
+            this.TotalCount = totalCount;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = true)]
-        public string Cursor { get; set; }
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
 
         /// <summary>
-        /// The page size requested.
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>The page size requested.</value>
-        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
-        public int? LimitPerPage { get; set; }
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
 
         /// <summary>
         /// Gets or Sets Requirement
@@ -159,8 +159,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntitiesByRoleRequirementLookupCollection {\n");
-            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
             sb.Append("  Requirement: ").Append(Requirement).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
@@ -199,14 +199,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Cursor == input.Cursor ||
-                    (this.Cursor != null &&
-                    this.Cursor.Equals(input.Cursor))
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
-                    this.LimitPerPage == input.LimitPerPage ||
-                    (this.LimitPerPage != null &&
-                    this.LimitPerPage.Equals(input.LimitPerPage))
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
                     this.Requirement == input.Requirement ||
@@ -230,13 +230,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Cursor != null)
+                if (this.TotalCount != null)
                 {
-                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 }
-                if (this.LimitPerPage != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
                 if (this.Requirement != null)
                 {

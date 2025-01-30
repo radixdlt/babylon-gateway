@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,19 +93,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntitiesByRoleRequirementItem
     /// </summary>
     [DataContract(Name = "EntitiesByRoleRequirementItem")]
-    [JsonConverter(typeof(JsonSubtypes), "requirement_type")]
-    [JsonSubtypes.KnownSubType(typeof(EntitiesByNonFungibleRoleRequirementItem), "EntitiesByNonFungibleRoleRequirementItem")]
-    [JsonSubtypes.KnownSubType(typeof(EntitiesByResourceRoleRequirementItem), "EntitiesByResourceRoleRequirementItem")]
-    [JsonSubtypes.KnownSubType(typeof(EntitiesByNonFungibleRoleRequirementItem), "NonFungibleRequirement")]
-    [JsonSubtypes.KnownSubType(typeof(EntitiesByResourceRoleRequirementItem), "ResourceRequirement")]
     public partial class EntitiesByRoleRequirementItem : IEquatable<EntitiesByRoleRequirementItem>
     {
-
-        /// <summary>
-        /// Gets or Sets RequirementType
-        /// </summary>
-        [DataMember(Name = "requirement_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntitiesByRoleRequirementRequirementType RequirementType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementItem" /> class.
         /// </summary>
@@ -115,13 +103,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementItem" /> class.
         /// </summary>
-        /// <param name="requirementType">requirementType (required).</param>
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
-        public EntitiesByRoleRequirementItem(EntitiesByRoleRequirementRequirementType requirementType = default(EntitiesByRoleRequirementRequirementType), long firstSeenStateVersion = default(long))
+        public EntitiesByRoleRequirementItem(string entityAddress = default(string), long firstSeenStateVersion = default(long))
         {
-            this.RequirementType = requirementType;
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
+            {
+                throw new ArgumentNullException("entityAddress is a required property for EntitiesByRoleRequirementItem and cannot be null");
+            }
+            this.EntityAddress = entityAddress;
             this.FirstSeenStateVersion = firstSeenStateVersion;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
         /// Gets or Sets FirstSeenStateVersion
@@ -137,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntitiesByRoleRequirementItem {\n");
-            sb.Append("  RequirementType: ").Append(RequirementType).Append("\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
             sb.Append("  FirstSeenStateVersion: ").Append(FirstSeenStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -175,8 +175,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.RequirementType == input.RequirementType ||
-                    this.RequirementType.Equals(input.RequirementType)
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
                 ) && 
                 (
                     this.FirstSeenStateVersion == input.FirstSeenStateVersion ||
@@ -193,7 +194,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.RequirementType.GetHashCode();
+                if (this.EntityAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.FirstSeenStateVersion.GetHashCode();
                 return hashCode;
             }

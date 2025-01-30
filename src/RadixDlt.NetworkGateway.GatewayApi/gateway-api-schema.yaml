@@ -3613,50 +3613,17 @@ components:
           type: integer
           format: int64
 
-    EntitiesByRoleRequirementRequirementType:
-      type: string
-      enum:
-        - ResourceRequirement
-        - NonFungibleRequirement
-
     EntitiesByRoleRequirementItem:
       type: object
       required:
-        - requirement_type
         - first_seen_state_version
+        - entity_address
       properties:
-        requirement_type:
-          $ref: "#/components/schemas/EntitiesByRoleRequirementRequirementType"
+        entity_address:
+          $ref: "#/components/schemas/Address"
         first_seen_state_version:
           type: integer
           format: int64
-      discriminator:
-        propertyName: requirement_type
-        mapping:
-          ResourceRequirement: "#/components/schemas/EntitiesByResourceRoleRequirementItem"
-          NonFungibleRequirement: "#/components/schemas/EntitiesByNonFungibleRoleRequirementItem"
-
-    EntitiesByResourceRoleRequirementItem:
-      allOf:
-        - $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
-        - type: object
-          required:
-            - resource_address
-          properties:
-            resource_address:
-              $ref: "#/components/schemas/Address"
-    EntitiesByNonFungibleRoleRequirementItem:
-      allOf:
-        - $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
-        - type: object
-          required:
-            - resource_address
-            - non_fungible_id
-          properties:
-            resource_address:
-              $ref: "#/components/schemas/Address"
-            non_fungible_id:
-              $ref: "#/components/schemas/NonFungibleId"
 
     ResourceHoldersCollection:
       allOf:
@@ -3717,7 +3684,6 @@ components:
             non_fungible_ids_count:
               type: integer
               format: int64
-
 
     ValidatorCollection:
       allOf:
@@ -5819,7 +5785,7 @@ components:
           required:
             - items
           properties:
-            items:
+            requirements:
               type: array
               description: limited to max 20 items.
               items:
@@ -5838,7 +5804,7 @@ components:
 
     EntitiesByRoleRequirementLookupCollection:
       allOf:
-        - $ref: "#/components/schemas/CursorLimitMixin"
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
           required:
             - items
