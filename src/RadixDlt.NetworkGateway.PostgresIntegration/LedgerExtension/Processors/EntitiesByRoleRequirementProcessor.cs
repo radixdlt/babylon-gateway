@@ -41,7 +41,7 @@
  * cryptographic keys, tokens or assets created, exchanged, stored or arising from any
  * interaction with the Work;
  *
- * B. any failure in a transmission or loss of any token or assets keys or other digital
+ * B. any failure in a transmission or loss of any token or assets keys or othsoer digital
  * artefacts due to errors in transmission;
  *
  * C. bugs, hacks, logic errors or faults in the Work or any communication;
@@ -64,11 +64,13 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
@@ -94,6 +96,7 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
     private readonly List<EntitiesByRoleRequirement> _toAdd = new();
     private readonly CommonDbContext _dbContext;
     private readonly ILogger<EntitiesByRoleRequirementProcessor> _logger;
+    private readonly IOptionsMonitor<LedgerProcessorsOptions> _optionsMonitor;
 
     private readonly ReferencedEntityDictionary _referencedEntityDictionary;
 
@@ -101,12 +104,14 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
         ProcessorContext context,
         CommonDbContext dbContext,
         ReferencedEntityDictionary referencedEntityDictionary,
+        IOptionsMonitor<LedgerProcessorsOptions> optionsMonitor,
         IEnumerable<ILedgerExtenderServiceObserver> observers,
         ILogger<EntitiesByRoleRequirementProcessor> logger)
     {
         _context = context;
         _observers = observers;
         _logger = logger;
+        _optionsMonitor = optionsMonitor;
         _dbContext = dbContext;
         _referencedEntityDictionary = referencedEntityDictionary;
     }
@@ -188,11 +193,10 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
 
         foreach (var stateVersionEntries in _toAdd.GroupBy(x => x.FirstSeenStateVersion))
         {
-            // TODO PP: move to config.
-            const int LIMIT = 25;
-            if (stateVersionEntries.Count() > LIMIT)
+            if (stateVersionEntries.Count() > _optionsMonitor.CurrentValue.EntitiesByRoleAssignmentsPerStateVersionWarningThreashold)
             {
-                _logger.LogWarning($"State version {stateVersionEntries.Key} has more than {LIMIT} EntitiesByResourceRoleRequirement entries to add.");
+                _logger.LogWarning(
+                    $"State version {stateVersionEntries.Key} has more than {_optionsMonitor.CurrentValue.EntitiesByRoleAssignmentsPerStateVersionWarningThreashold} `entities_by_role_requirement` entries to add.");
             }
         }
     }
@@ -206,41 +210,25 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
         return rowsInserted;
     }
 
-    private void AddUsages(ToolkitResponse toolkitResponse, string entityAddress, long stateVersion)
+    private void AddUsages(AccessRuleRequirementExtractor.ExtractedRequirements toolkitResponse, string entityAddress, long stateVersion)
     {
-        foreach (var resource in toolkitResponse.ResourceUsedInRoleAssignments)
+        foreach (var resource in toolkitResponse.ResourceRequirements)
         {
-            _referencedEntityDictionary.MarkSeenAddress((EntityAddress)resource.ResourceAddress);
-            _observedByResource.TryAdd(new ResourceDbLookup(entityAddress, resource.ResourceAddress), stateVersion);
+            _referencedEntityDictionary.MarkSeenAddress((EntityAddress)resource);
+            _observedByResource.TryAdd(new ResourceDbLookup(entityAddress, resource), stateVersion);
         }
 
-        foreach (var nonFungible in toolkitResponse.NonFungibleUsedInRoleAssignments)
+        foreach (var nonFungible in toolkitResponse.NonFungibleRequirements)
         {
             _referencedEntityDictionary.MarkSeenAddress((EntityAddress)nonFungible.ResourceAddress);
             _observedByNonFungible.TryAdd(new NonFungibleDbLookup(entityAddress, nonFungible.ResourceAddress, nonFungible.NonFungibleLocalId), stateVersion);
         }
     }
 
-    // TODO PP: just tmp types. Remove after consuming real toolkit method.
-
-    private record ToolkitResponse(List<ResourceUsedInRoleAssignment> ResourceUsedInRoleAssignments, List<NonFungibleUsedInRoleAssignment> NonFungibleUsedInRoleAssignments);
-
-    private record struct ResourceUsedInRoleAssignment(string ResourceAddress);
-
-    private record struct NonFungibleUsedInRoleAssignment(string ResourceAddress, string NonFungibleLocalId);
-
-    private ToolkitResponse ExtractFromAccessRule(CoreModel.AccessRule accessRule)
+    private AccessRuleRequirementExtractor.ExtractedRequirements ExtractFromAccessRule(CoreModel.AccessRule accessRule)
     {
-        return new ToolkitResponse(
-            new List<ResourceUsedInRoleAssignment>
-            {
-                new(_context.NetworkConfiguration.WellKnownAddresses.Xrd),
-            },
-            new List<NonFungibleUsedInRoleAssignment>
-            {
-                new(_context.NetworkConfiguration.WellKnownAddresses.Ed25519SignatureVirtualBadge, "[b6e84499b83b0797ef5235553eeb7edaa0cea243c1128c2fe737]"),
-                new(_context.NetworkConfiguration.WellKnownAddresses.Secp256k1SignatureVirtualBadge, "[9f58abcbc2ebd2da349acb10773ffbc37b6af91fa8df2486c9ea]"),
-            });
+        var extractor = new AccessRuleRequirementExtractor();
+        return extractor.Extract(accessRule);
     }
 
     private async Task<int> CopyEntityByRoleAssignments()

@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.DataAggregator;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.AccountSecurityRules;
@@ -98,7 +99,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
     private readonly ITopOfLedgerProvider _topOfLedgerProvider;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly IClock _clock;
-    private readonly IOptionsMonitor<StorageOptions> _storageOptions;
+    private readonly IOptionsMonitor<StorageOptions> _storageOptionsMonitor;
+    private readonly IOptionsMonitor<LedgerProcessorsOptions> _ledgerProcessorsOptionsMonitor;
 
     public PostgresLedgerExtenderService(
         ILogger<PostgresLedgerExtenderService> logger,
@@ -107,7 +109,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         IEnumerable<ILedgerExtenderServiceObserver> observers,
         IClock clock,
         ITopOfLedgerProvider topOfLedgerProvider,
-        IOptionsMonitor<StorageOptions> storageOptions,
+        IOptionsMonitor<StorageOptions> storageOptionsMonitor,
+        IOptionsMonitor<LedgerProcessorsOptions> ledgerProcessorsOptionsMonitor,
         ILogger<EntitiesByRoleRequirementProcessor> entitiesByRoleRequirementProcessorLogger)
     {
         _logger = logger;
@@ -116,7 +119,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         _observers = observers;
         _clock = clock;
         _topOfLedgerProvider = topOfLedgerProvider;
-        _storageOptions = storageOptions;
+        _storageOptionsMonitor = storageOptionsMonitor;
+        _ledgerProcessorsOptionsMonitor = ledgerProcessorsOptionsMonitor;
         _entitiesByRoleRequirementProcessorLogger = entitiesByRoleRequirementProcessorLogger;
     }
 
@@ -263,9 +267,10 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdatePendingTransactions), sw.Elapsed, null));
         }
 
-        var processorContext = new ProcessorContext(sequences, _storageOptions.CurrentValue, readHelper, writeHelper, networkConfiguration, token);
+        var processorContext = new ProcessorContext(sequences, _storageOptionsMonitor.CurrentValue, readHelper, writeHelper, networkConfiguration, token);
         var relationshipProcessor = new EntityRelationshipProcessor(referencedEntities);
-        var entityByRoleProcessor = new EntitiesByRoleRequirementProcessor(processorContext, dbContext, referencedEntities, _observers, _entitiesByRoleRequirementProcessorLogger);
+        var entityByRoleProcessor = new EntitiesByRoleRequirementProcessor(
+            processorContext, dbContext, referencedEntities, _ledgerProcessorsOptionsMonitor, _observers, _entitiesByRoleRequirementProcessorLogger);
         var manifestProcessor = new ManifestProcessor(processorContext, referencedEntities, networkConfiguration);
         var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
 

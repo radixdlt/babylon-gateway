@@ -87,11 +87,11 @@ public static class OpenApiDocumentHandler
 {
     public static async Task Handle(
         [FromServices] INetworkConfigurationProvider networkConfigurationProvider,
-        [FromServices] ITransactionQuerier transactionQuerier,
+        [FromServices] IOpenApiDocumentQuerier querier,
         HttpContext context,
         CancellationToken token = default)
     {
-        var placeholderReplacements = await GetPlaceholderReplacementsAsync(networkConfigurationProvider, transactionQuerier, token);
+        var placeholderReplacements = await GetPlaceholderReplacementsAsync(networkConfigurationProvider, querier, token);
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
         var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");
@@ -127,6 +127,8 @@ public static class OpenApiDocumentHandler
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
         response = OptionalReplace(response, "<sample-preview-transaction-hex>", placeholderReplacements.SamplePreviewTransactionHex);
+        response = OptionalReplace(response, "<sample-requirement-non-fungible-id>", placeholderReplacements.SampleRequirementNonFungibleId);
+        response = OptionalReplace(response, "<sample-requirement-resource-address>", placeholderReplacements.SampleRequirementResourceAddress);
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 
@@ -172,11 +174,15 @@ public static class OpenApiDocumentHandler
         public string? NetworkName { get; set; }
 
         public string? SamplePreviewTransactionHex { get; set; }
+
+        public string? SampleRequirementResourceAddress { get; set; }
+
+        public string? SampleRequirementNonFungibleId { get; set; }
     }
 
     private static async Task<PlaceholderReplacements> GetPlaceholderReplacementsAsync(
         INetworkConfigurationProvider networkConfigurationProvider,
-        ITransactionQuerier transactionQuerier,
+        IOpenApiDocumentQuerier querier,
         CancellationToken token)
     {
         var placeholderReplacements = new PlaceholderReplacements();
@@ -197,10 +203,12 @@ public static class OpenApiDocumentHandler
 
         try
         {
-            var (randomIntentHash, randomSubintentHash, currentEpoch) = await transactionQuerier.GetOpenApiDocumentHandlerDetails(token);
-            placeholderReplacements.CommittedTransactionIntentHash = randomIntentHash;
-            placeholderReplacements.CommittedSubintentHash = randomSubintentHash;
-            placeholderReplacements.SamplePreviewTransactionHex = GenerateRandomPreviewTransactionHex(networkConfiguration.Id, (ulong?)currentEpoch);
+            var placeholderData = await querier.GetPlaceholderData(token);
+            placeholderReplacements.CommittedTransactionIntentHash = placeholderData.RandomIntentHash;
+            placeholderReplacements.CommittedSubintentHash = placeholderData.RandomSubintentHash;
+            placeholderReplacements.SampleRequirementResourceAddress = placeholderData.RequirementResourceAddress;
+            placeholderReplacements.SampleRequirementNonFungibleId = placeholderData.RequirementNonFungibleId;
+            placeholderReplacements.SamplePreviewTransactionHex = GenerateRandomPreviewTransactionHex(networkConfiguration.Id, (ulong?)placeholderData.CurrentEpoch);
         }
         catch (Exception)
         {

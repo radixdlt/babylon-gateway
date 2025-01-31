@@ -5759,8 +5759,8 @@ components:
         - $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
       example:
         limit_per_page: 100
-        resource_address: "<resource-address>"
-        non_fungible_id: "<non-fungible-id>" # TODO PP: we should probably provide some meaningful non-fungible-id that correlates with resource address.
+        resource_address: "<sample-requirement-resource-address>"
+        non_fungible_id: "<sample-requirement-non-fungible-id>"
 
     EntitiesByRoleRequirementRequestRequirement:
       type: object
@@ -5795,7 +5795,10 @@ components:
               description: limited to max 50 items.
               items:
                 $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
-      example: #TODO PP: Provide some example here if possible.
+      example:
+        requirements:
+          - resource_address: "<sample-requirement-resource-address>"
+            non_fungible_id: "<sample-requirement-non-fungible-id>"
 
     EntitiesByRoleRequirementLookupResponse:
       type: object
