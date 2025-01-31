@@ -95,7 +95,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get entities by role requirement lookup
         /// </summary>
         /// <remarks>
-        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To retrieve subsequent pages, use the returned cursor and call the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;50&#x60;. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementLookupRequest"></param>
@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get entities by role requirement lookup
         /// </summary>
         /// <remarks>
-        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To retrieve subsequent pages, use the returned cursor and call the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;50&#x60;. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementLookupRequest"></param>
@@ -167,7 +167,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get entities by role requirement lookup
         /// </summary>
         /// <remarks>
-        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To retrieve subsequent pages, use the returned cursor and call the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;50&#x60;. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementLookupRequest"></param>
@@ -179,7 +179,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get entities by role requirement lookup
         /// </summary>
         /// <remarks>
-        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To retrieve subsequent pages, use the returned cursor and call the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;50&#x60;. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementLookupRequest"></param>
@@ -446,7 +446,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To retrieve subsequent pages, use the returned cursor and call the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;50&#x60;. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementLookupRequest"></param>
@@ -458,7 +458,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To retrieve subsequent pages, use the returned cursor and call the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;50&#x60;. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementLookupRequest"></param>
@@ -502,7 +502,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To retrieve subsequent pages, use the returned cursor and call the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;50&#x60;. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementLookupRequest"></param>
@@ -515,7 +515,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To fetch subsequent pages, please use the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;20&#x60;. Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the &#x60;limit_per_page&#x60; parameter. 
+        /// Get entities by role requirement lookup This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.  To retrieve subsequent pages, use the returned cursor and call the &#x60;/extensions/entities-by-role-requirement/page&#x60; endpoint.  Number of requirements to query is limited to &#x60;50&#x60;. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entitiesByRoleRequirementLookupRequest"></param>

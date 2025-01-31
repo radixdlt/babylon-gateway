@@ -103,22 +103,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementPageResponseAllOf" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public EntitiesByRoleRequirementPageResponseAllOf(List<EntitiesByRoleRequirementItem> items = default(List<EntitiesByRoleRequirementItem>))
+        /// <param name="entities">entities (required).</param>
+        public EntitiesByRoleRequirementPageResponseAllOf(List<EntitiesByRoleRequirementItem> entities = default(List<EntitiesByRoleRequirementItem>))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "entities" is required (not null)
+            if (entities == null)
             {
-                throw new ArgumentNullException("items is a required property for EntitiesByRoleRequirementPageResponseAllOf and cannot be null");
+                throw new ArgumentNullException("entities is a required property for EntitiesByRoleRequirementPageResponseAllOf and cannot be null");
             }
-            this.Items = items;
+            this.Entities = entities;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Gets or Sets Entities
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntitiesByRoleRequirementItem> Items { get; set; }
+        [DataMember(Name = "entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntitiesByRoleRequirementItem> Entities { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntitiesByRoleRequirementPageResponseAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  Entities: ").Append(Entities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,10 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Entities == input.Entities ||
+                    this.Entities != null &&
+                    input.Entities != null &&
+                    this.Entities.SequenceEqual(input.Entities)
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.Entities != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Entities.GetHashCode();
                 }
                 return hashCode;
             }

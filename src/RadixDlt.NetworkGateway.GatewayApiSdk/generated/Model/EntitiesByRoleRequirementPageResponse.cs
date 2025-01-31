@@ -105,15 +105,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
-        /// <param name="items">items (required).</param>
-        public EntitiesByRoleRequirementPageResponse(long? totalCount = default(long?), string nextCursor = default(string), List<EntitiesByRoleRequirementItem> items = default(List<EntitiesByRoleRequirementItem>))
+        /// <param name="entities">entities (required).</param>
+        public EntitiesByRoleRequirementPageResponse(long? totalCount = default(long?), string nextCursor = default(string), List<EntitiesByRoleRequirementItem> entities = default(List<EntitiesByRoleRequirementItem>))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "entities" is required (not null)
+            if (entities == null)
             {
-                throw new ArgumentNullException("items is a required property for EntitiesByRoleRequirementPageResponse and cannot be null");
+                throw new ArgumentNullException("entities is a required property for EntitiesByRoleRequirementPageResponse and cannot be null");
             }
-            this.Items = items;
+            this.Entities = entities;
             this.TotalCount = totalCount;
             this.NextCursor = nextCursor;
         }
@@ -133,10 +133,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string NextCursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Gets or Sets Entities
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntitiesByRoleRequirementItem> Items { get; set; }
+        [DataMember(Name = "entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntitiesByRoleRequirementItem> Entities { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -148,7 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntitiesByRoleRequirementPageResponse {\n");
             sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  Entities: ").Append(Entities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -195,10 +195,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Entities == input.Entities ||
+                    this.Entities != null &&
+                    input.Entities != null &&
+                    this.Entities.SequenceEqual(input.Entities)
                 );
         }
 
@@ -219,9 +219,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
-                if (this.Items != null)
+                if (this.Entities != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Entities.GetHashCode();
                 }
                 return hashCode;
             }

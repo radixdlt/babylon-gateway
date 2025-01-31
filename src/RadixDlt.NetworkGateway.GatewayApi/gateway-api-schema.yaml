@@ -2138,10 +2138,9 @@ paths:
       description: |
         This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.
 
-        To fetch subsequent pages, please use the `/extensions/entities-by-role-requirement/page` endpoint.
+        To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.
 
-        Number of requirements to query is limited to `20`.
-        Under the default Gateway configuration, up to 100 entries are returned per requirement. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter.
+        Number of requirements to query is limited to `50`.
       tags:
         - Extensions
       requestBody:
@@ -2152,7 +2151,7 @@ paths:
               $ref: "#/components/schemas/EntitiesByRoleRequirementLookupRequest"
       responses:
         "200":
-          description: List of entities that have ever used the queried requirements in their access rules.
+          description: List of entities, per requested requirement, that have ever used the queried requirements in their access rules.
           content:
             application/json:
               schema:
@@ -5772,9 +5771,9 @@ components:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
           required:
-            - items
+            - entities
           properties:
-            items:
+            entities:
               type: array
               items:
                 $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
@@ -5783,11 +5782,11 @@ components:
       allOf:
         - type: object
           required:
-            - items
+            - requirements
           properties:
             requirements:
               type: array
-              description: limited to max 20 items.
+              description: limited to max 50 items.
               items:
                 $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
       example: #TODO PP: Provide some example here if possible.
@@ -5807,12 +5806,12 @@ components:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
           required:
-            - items
+            - entities
             - requirement
           properties:
             requirement:
               $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
-            items:
+            entities:
               type: array
               items:
                 $ref: "#/components/schemas/EntitiesByRoleRequirementItem"

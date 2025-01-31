@@ -98,17 +98,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupRequestAllOf" /> class.
         /// </summary>
-        /// <param name="requirements">limited to max 20 items..</param>
+        [JsonConstructorAttribute]
+        protected EntitiesByRoleRequirementLookupRequestAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupRequestAllOf" /> class.
+        /// </summary>
+        /// <param name="requirements">limited to max 50 items. (required).</param>
         public EntitiesByRoleRequirementLookupRequestAllOf(List<EntitiesByRoleRequirementRequestRequirement> requirements = default(List<EntitiesByRoleRequirementRequestRequirement>))
         {
+            // to ensure "requirements" is required (not null)
+            if (requirements == null)
+            {
+                throw new ArgumentNullException("requirements is a required property for EntitiesByRoleRequirementLookupRequestAllOf and cannot be null");
+            }
             this.Requirements = requirements;
         }
 
         /// <summary>
-        /// limited to max 20 items.
+        /// limited to max 50 items.
         /// </summary>
-        /// <value>limited to max 20 items.</value>
-        [DataMember(Name = "requirements", EmitDefaultValue = true)]
+        /// <value>limited to max 50 items.</value>
+        [DataMember(Name = "requirements", IsRequired = true, EmitDefaultValue = true)]
         public List<EntitiesByRoleRequirementRequestRequirement> Requirements { get; set; }
 
         /// <summary>

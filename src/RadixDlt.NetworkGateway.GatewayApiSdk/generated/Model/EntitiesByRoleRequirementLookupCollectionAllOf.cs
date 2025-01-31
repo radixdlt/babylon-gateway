@@ -104,8 +104,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupCollectionAllOf" /> class.
         /// </summary>
         /// <param name="requirement">requirement (required).</param>
-        /// <param name="items">items (required).</param>
-        public EntitiesByRoleRequirementLookupCollectionAllOf(EntitiesByRoleRequirementRequestRequirement requirement = default(EntitiesByRoleRequirementRequestRequirement), List<EntitiesByRoleRequirementItem> items = default(List<EntitiesByRoleRequirementItem>))
+        /// <param name="entities">entities (required).</param>
+        public EntitiesByRoleRequirementLookupCollectionAllOf(EntitiesByRoleRequirementRequestRequirement requirement = default(EntitiesByRoleRequirementRequestRequirement), List<EntitiesByRoleRequirementItem> entities = default(List<EntitiesByRoleRequirementItem>))
         {
             // to ensure "requirement" is required (not null)
             if (requirement == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("requirement is a required property for EntitiesByRoleRequirementLookupCollectionAllOf and cannot be null");
             }
             this.Requirement = requirement;
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "entities" is required (not null)
+            if (entities == null)
             {
-                throw new ArgumentNullException("items is a required property for EntitiesByRoleRequirementLookupCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("entities is a required property for EntitiesByRoleRequirementLookupCollectionAllOf and cannot be null");
             }
-            this.Items = items;
+            this.Entities = entities;
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public EntitiesByRoleRequirementRequestRequirement Requirement { get; set; }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Gets or Sets Entities
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntitiesByRoleRequirementItem> Items { get; set; }
+        [DataMember(Name = "entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntitiesByRoleRequirementItem> Entities { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +142,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntitiesByRoleRequirementLookupCollectionAllOf {\n");
             sb.Append("  Requirement: ").Append(Requirement).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  Entities: ").Append(Entities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,10 +184,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Requirement.Equals(input.Requirement))
                 ) && 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Entities == input.Entities ||
+                    this.Entities != null &&
+                    input.Entities != null &&
+                    this.Entities.SequenceEqual(input.Entities)
                 );
         }
 
@@ -204,9 +204,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Requirement.GetHashCode();
                 }
-                if (this.Items != null)
+                if (this.Entities != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Entities.GetHashCode();
                 }
                 return hashCode;
             }
