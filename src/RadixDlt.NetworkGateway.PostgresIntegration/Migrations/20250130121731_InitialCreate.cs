@@ -1155,6 +1155,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'global_validator'");
 
             migrationBuilder.CreateIndex(
+                name: "IX_entities_by_role_requirement_first_seen_state_version_id_e~1",
+                table: "entities_by_role_requirement",
+                columns: new[] { "first_seen_state_version", "id", "entity_id", "resource_entity_id", "non_fungible_local_id" },
+                filter: "discriminator = 'non_fungible'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_by_role_requirement_first_seen_state_version_id_en~",
+                table: "entities_by_role_requirement",
+                columns: new[] { "first_seen_state_version", "id", "entity_id", "resource_entity_id" },
+                filter: "discriminator = 'resource'");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_entities_by_role_requirement_resource_entity_id",
                 table: "entities_by_role_requirement",
                 column: "resource_entity_id",

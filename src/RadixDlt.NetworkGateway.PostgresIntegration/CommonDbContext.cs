@@ -674,14 +674,28 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<EntitiesByResourceRoleRequirement>(EntityRoleRequirementType.Resource)
             .HasValue<EntitiesByNonFungibleRoleRequirement>(EntityRoleRequirementType.NonFungible);
 
+        // Used by DA to insert data.
         modelBuilder
             .Entity<EntitiesByResourceRoleRequirement>()
             .HasIndex(e => new { e.ResourceEntityId })
             .HasFilter("discriminator = 'resource'");
 
+        // Used by API to fetch page of data.
+        modelBuilder
+            .Entity<EntitiesByResourceRoleRequirement>()
+            .HasIndex(e => new { e.FirstSeenStateVersion, e.Id, e.EntityId, e.ResourceEntityId })
+            .HasFilter("discriminator = 'resource'");
+
+        // Used by DA to insert data.
         modelBuilder
             .Entity<EntitiesByNonFungibleRoleRequirement>()
             .HasIndex(e => new { e.ResourceEntityId, e.NonFungibleLocalId })
+            .HasFilter("discriminator = 'non_fungible'");
+
+        // Used by API to fetch page of data.
+        modelBuilder
+            .Entity<EntitiesByNonFungibleRoleRequirement>()
+            .HasIndex(e => new { e.FirstSeenStateVersion, e.Id, e.EntityId, e.ResourceEntityId, e.NonFungibleLocalId })
             .HasFilter("discriminator = 'non_fungible'");
 
         modelBuilder

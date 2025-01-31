@@ -2169,6 +2169,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("ResourceEntityId", "NonFungibleLocalId")
                         .HasFilter("discriminator = 'non_fungible'");
 
+                    b.HasIndex("FirstSeenStateVersion", "Id", "EntityId", "ResourceEntityId", "NonFungibleLocalId")
+                        .HasDatabaseName("IX_entities_by_role_requirement_first_seen_state_version_id_e~1")
+                        .HasFilter("discriminator = 'non_fungible'");
+
                     b.ToTable("entities_by_role_requirement");
 
                     b.HasDiscriminator().HasValue(EntityRoleRequirementType.NonFungible);
@@ -2184,6 +2188,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("resource_entity_id");
 
                     b.HasIndex("ResourceEntityId")
+                        .HasFilter("discriminator = 'resource'");
+
+                    b.HasIndex("FirstSeenStateVersion", "Id", "EntityId", "ResourceEntityId")
                         .HasFilter("discriminator = 'resource'");
 
                     b.ToTable("entities_by_role_requirement");
