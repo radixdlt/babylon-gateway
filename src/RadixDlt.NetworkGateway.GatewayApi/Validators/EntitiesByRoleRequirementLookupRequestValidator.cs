@@ -83,7 +83,7 @@ internal class EntitiesByRoleRequirementLookupRequestValidator : AbstractValidat
                 {
                     RuleFor(x => x.Requirements.Count)
                         .GreaterThan(0)
-                        .LessThanOrEqualTo(endpointOptionsSnapshot.Value.EntitiesByRoleRequirementLookupMaxPageSize);
+                        .LessThanOrEqualTo(endpointOptionsSnapshot.Value.EntitiesByRoleRequirementLookupMaxRequestedRequirementsCount);
 
                     RuleForEach(x => x.Requirements)
                         .NotEmpty()

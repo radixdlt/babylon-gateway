@@ -104,7 +104,7 @@ internal class DefaultExtensionsHandler(
         return await entitiesByRoleRequirementQuerier.EntitiesByRoleRequirementPage(
             (EntityAddress)request.ResourceAddress,
             request.NonFungibleId,
-            endpointConfiguration.Value.ResolveResourceHoldersPageSize(request.LimitPerPage), // TODO PP: fix that.
+            endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
             cursor,
             token);
     }
@@ -113,7 +113,7 @@ internal class DefaultExtensionsHandler(
     {
         return await entitiesByRoleRequirementQuerier.EntitiesByRoleRequirementLookup(
             request.Requirements,
-            endpointConfiguration.Value.ResolveResourceHoldersPageSize(100), // TODO PP: fix that.
+            endpointConfiguration.Value.MaxHeavyCollectionsPageSize,
             token);
     }
 }
