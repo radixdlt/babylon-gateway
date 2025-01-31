@@ -76,16 +76,16 @@ internal class EntitiesByRoleRequirementLookupRequestValidator : AbstractValidat
         RadixAddressValidator radixAddressValidator
         )
     {
-        RuleFor(x => x.Items)
+        RuleFor(x => x.Requirements)
             .NotEmpty()
             .DependentRules(
                 () =>
                 {
-                    RuleFor(x => x.Items.Count)
+                    RuleFor(x => x.Requirements.Count)
                         .GreaterThan(0)
                         .LessThanOrEqualTo(endpointOptionsSnapshot.Value.EntitiesByRoleRequirementLookupMaxPageSize);
 
-                    RuleForEach(x => x.Items)
+                    RuleForEach(x => x.Requirements)
                         .NotEmpty()
                         .SetValidator(new EntitiesByRoleRequirementRequestRequirementValidator(radixAddressValidator));
                 });

@@ -81,7 +81,10 @@ public interface IExtensionsHandler
     Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token);
 }
 
-internal class DefaultExtensionsHandler(IResourceHoldersQuerier resourceHoldersQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
+internal class DefaultExtensionsHandler(
+    IResourceHoldersQuerier resourceHoldersQuerier,
+    IEntitiesByRoleRequirementQuerier entitiesByRoleRequirementQuerier,
+    IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
 {
     public async Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token)
     {
@@ -94,13 +97,23 @@ internal class DefaultExtensionsHandler(IResourceHoldersQuerier resourceHoldersQ
             token);
     }
 
-    public Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token)
+    public async Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token)
     {
-        throw new System.NotImplementedException();
+        var cursor = GatewayModel.IdBoundaryCoursor.FromCursorString(request.Cursor);
+
+        return await entitiesByRoleRequirementQuerier.EntitiesByRoleRequirementPage(
+            (EntityAddress)request.ResourceAddress,
+            request.NonFungibleId,
+            endpointConfiguration.Value.ResolveResourceHoldersPageSize(request.LimitPerPage), // TODO PP: fix that.
+            cursor,
+            token);
     }
 
-    public Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token)
+    public async Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token)
     {
-        throw new System.NotImplementedException();
+        return await entitiesByRoleRequirementQuerier.EntitiesByRoleRequirementLookup(
+            request.Requirements,
+            endpointConfiguration.Value.ResolveResourceHoldersPageSize(100), // TODO PP: fix that.
+            token);
     }
 }

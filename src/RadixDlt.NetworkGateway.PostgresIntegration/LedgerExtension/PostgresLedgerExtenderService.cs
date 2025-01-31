@@ -92,7 +92,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
     private record ExtendLedgerReport(TransactionSummary FinalTransaction, int RowsTouched, TimeSpan DbReadDuration, TimeSpan DbWriteDuration, TimeSpan ContentHandlingDuration);
 
     private readonly ILogger<PostgresLedgerExtenderService> _logger;
-    private readonly ILogger<EntitiesByRoleRequirementProcessor> _entitiesByRoleAssignmentProcessorLogger;
+    private readonly ILogger<EntitiesByRoleRequirementProcessor> _entitiesByRoleRequirementProcessorLogger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ITopOfLedgerProvider _topOfLedgerProvider;
@@ -108,7 +108,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         IClock clock,
         ITopOfLedgerProvider topOfLedgerProvider,
         IOptionsMonitor<StorageOptions> storageOptions,
-        ILogger<EntitiesByRoleRequirementProcessor> entitiesByRoleAssignmentProcessorLogger)
+        ILogger<EntitiesByRoleRequirementProcessor> entitiesByRoleRequirementProcessorLogger)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
@@ -117,7 +117,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         _clock = clock;
         _topOfLedgerProvider = topOfLedgerProvider;
         _storageOptions = storageOptions;
-        _entitiesByRoleAssignmentProcessorLogger = entitiesByRoleAssignmentProcessorLogger;
+        _entitiesByRoleRequirementProcessorLogger = entitiesByRoleRequirementProcessorLogger;
     }
 
     public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default)
@@ -265,7 +265,7 @@ UPDATE pending_transactions
 
         var processorContext = new ProcessorContext(sequences, _storageOptions.CurrentValue, readHelper, writeHelper, networkConfiguration, token);
         var relationshipProcessor = new EntityRelationshipProcessor(referencedEntities);
-        var entityByRoleProcessor = new EntitiesByRoleRequirementProcessor(processorContext, dbContext, referencedEntities, _observers, _entitiesByRoleAssignmentProcessorLogger);
+        var entityByRoleProcessor = new EntitiesByRoleRequirementProcessor(processorContext, dbContext, referencedEntities, _observers, _entitiesByRoleRequirementProcessorLogger);
         var manifestProcessor = new ManifestProcessor(processorContext, referencedEntities, networkConfiguration);
         var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
 
