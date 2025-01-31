@@ -2106,13 +2106,16 @@ paths:
       operationId: EntitiesByRoleRequirementPage
       summary: Get entities by role requirement page
       description: |
-        Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (Blueprint authentication templates, owner roles, or role assignments).
+        Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
+        This endpoint allows querying by a single requirement. By default it returns up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter.
+        To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.
 
-        It may include entities that no longer use the requirement as part of an access rule.
+        To lookup multiple requirements, please call the `/extensions/entities-by-role-requirement/lookup` endpoint.
 
-        Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.
-
-        Under the default Gateway configuration, up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter.
+        Behaviour:
+        - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.
+        - It may include entities that no longer use the requirement as part of an access rule.
+        - If no entities are found, an empty list will be returned.
       tags:
         - Extensions
       requestBody:
@@ -2136,11 +2139,14 @@ paths:
       operationId: EntitiesByRoleRequirementLookup
       summary: Get entities by role requirement lookup
       description: |
-        This lookup endpoint allows querying by multiple requirements (such as resource or non-fungible global ID). If no entities are found, an empty list will be returned.
-
+        This endpoint is intended to query for entities that have ever used a given requirement (resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
+        This endpoint allows querying by multiple requirements. A maximum of `50` requirements can be queried. A maximum of 20 entities per requirement will be returned.
         To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.
 
-        Number of requirements to query is limited to `50`.
+        Behaviour:
+        - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.
+        - It may include entities that no longer use the requirement as part of an access rule.
+        - If no entities are found, an empty list will be returned.
       tags:
         - Extensions
       requestBody:
