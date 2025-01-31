@@ -40,12 +40,17 @@ rm -rf "$dummyApiDirectory"
 mkdir "$dummyApiDirectory"
 
 # We're using our own build/package as OpenAPITools hasn't released develop version with few critical bugfixes yet!
+# Pull requests that isn't merged/fixed yet:
+# https://github.com/OpenAPITools/openapi-generator/pull/14533
+# 6.1.1-custom is generated using Krzysztof's pull request from that branch https://github.com/krzlabrdx/openapi-generator/tree/csharp_improvements
+
 java -jar ./openapi-generator-cli-6.1.1-custom.jar \
     generate \
     -i "$specLocation" \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
+    --inline-schema-name-defaults SKIP_SCHEMA_REUSE=true \
     --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,useOneOfDiscriminatorLookup=true,validatable=false
 
 rm -rf "../src/${packageName}/generated"

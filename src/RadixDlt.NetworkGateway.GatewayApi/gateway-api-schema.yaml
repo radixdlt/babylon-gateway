@@ -2077,8 +2077,10 @@ paths:
       description: |
         A paginated endpoint to discover which global entities hold the most of a given resource.
         More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances).
+
         This endpoint operates only at the **current state version**, it is not possible to browse historical data.
         Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.
+
         Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter.
       tags:
         - Extensions
@@ -2098,6 +2100,70 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+
+  /extensions/entities-by-role-requirement/page:
+    post:
+      operationId: EntitiesByRoleRequirementPage
+      summary: Get entities by role requirement page
+      description: |
+        Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
+        This endpoint allows querying by a single requirement. By default it returns up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter.
+        To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.
+
+        To lookup multiple requirements, please call the `/extensions/entities-by-role-requirement/lookup` endpoint.
+
+        Behaviour:
+        - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.
+        - It may include entities that no longer use the requirement as part of an access rule.
+        - If no entities are found, an empty list will be returned.
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementPageRequest"
+      responses:
+        "200":
+          description: List of entities that have ever used the queried requirement in their access rules.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /extensions/entities-by-role-requirement/lookup:
+    post:
+      operationId: EntitiesByRoleRequirementLookup
+      summary: Get entities by role requirement lookup
+      description: |
+        This endpoint is intended to query for entities that have ever used a given requirement (resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
+        This endpoint allows querying by multiple requirements. A maximum of `50` requirements can be queried. A maximum of 20 entities per requirement will be returned.
+        To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.
+
+        Behaviour:
+        - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.
+        - It may include entities that no longer use the requirement as part of an access rule.
+        - If no entities are found, an empty list will be returned.
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementLookupRequest"
+      responses:
+        "200":
+          description: List of entities, per requested requirement, that have ever used the queried requirements in their access rules.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementLookupResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
 
 components:
   responses:
@@ -3552,6 +3618,18 @@ components:
           type: integer
           format: int64
 
+    EntitiesByRoleRequirementItem:
+      type: object
+      required:
+        - first_seen_state_version
+        - entity_address
+      properties:
+        entity_address:
+          $ref: "#/components/schemas/Address"
+        first_seen_state_version:
+          type: integer
+          format: int64
+
     ResourceHoldersCollection:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
@@ -3611,7 +3689,6 @@ components:
             non_fungible_ids_count:
               type: integer
               format: int64
-
 
     ValidatorCollection:
       allOf:
@@ -5676,6 +5753,78 @@ components:
             validators:
               $ref: "#/components/schemas/ValidatorUptimeCollection"
 
+    EntitiesByRoleRequirementPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+      example:
+        limit_per_page: 100
+        resource_address: "<sample-requirement-resource-address>"
+        non_fungible_id: "<sample-requirement-non-fungible-id>"
+
+    EntitiesByRoleRequirementRequestRequirement:
+      type: object
+      required:
+        - resource_address
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        non_fungible_id:
+          $ref: "#/components/schemas/NonFungibleId"
+
+    EntitiesByRoleRequirementPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - entities
+          properties:
+            entities:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
+
+    EntitiesByRoleRequirementLookupRequest:
+      allOf:
+        - type: object
+          required:
+            - requirements
+          properties:
+            requirements:
+              type: array
+              description: limited to max 50 items.
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+      example:
+        requirements:
+          - resource_address: "<sample-requirement-resource-address>"
+            non_fungible_id: "<sample-requirement-non-fungible-id>"
+
+    EntitiesByRoleRequirementLookupResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EntitiesByRoleRequirementLookupCollection"
+
+    EntitiesByRoleRequirementLookupCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - entities
+            - requirement
+          properties:
+            requirement:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+            entities:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
+
     ResourceHoldersRequest:
       allOf:
         - $ref: "#/components/schemas/CursorLimitMixin"
@@ -5689,7 +5838,15 @@ components:
 
     ResourceHoldersResponse:
       allOf:
-        - $ref: "#/components/schemas/ResourceHoldersCollection"
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ResourceHoldersCollectionItem"
 
 
     #
@@ -6186,6 +6343,7 @@ components:
           properties:
             value:
               $ref: "#/components/schemas/PublicKey"
+
     MetadataNonFungibleGlobalIdValue:
       allOf:
         - $ref: "#/components/schemas/MetadataTypedValue"

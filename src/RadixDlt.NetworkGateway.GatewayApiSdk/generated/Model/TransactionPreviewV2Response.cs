@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="receipt">This is provided unless the &#x60;core_api_receipt&#x60; flag is set to false in the &#x60;opt_ins &#x60; property of the request.  This type is defined in the Core API as &#x60;TransactionReceipt&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="radixEngineToolkitReceipt">An optional field which is only provided if the &#x60;radix_engine_toolkit_receipt&#x60; flag is set to true in the &#x60;opt_ins&#x60; property of the request.  This receipt is primarily intended for use with the toolkit and may contain information that is already available in the receipt provided in the &#x60;receipt&#x60; field of this response.  A typical client of this API is not expected to use this receipt. The primary clients this receipt is intended for is the Radix wallet or any client that needs to perform execution summaries on their transactions. .</param>
         /// <param name="logs">An optional field which is only provided if the &#x60;logs&#x60; flag is set to true in the &#x60;opt_ins&#x60; property of the request.  If present, it gives the emitted logs from the transaction execution. .</param>
-        public TransactionPreviewV2Response(long atLedgerStateVersion = default(long), Object receipt = default(Object), Object radixEngineToolkitReceipt = default(Object), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
+        public TransactionPreviewV2Response(long atLedgerStateVersion = default(long), Object receipt = default(Object), Object radixEngineToolkitReceipt = default(Object), List<TransactionPreviewV2ResponseLogsInner> logs = default(List<TransactionPreviewV2ResponseLogsInner>))
         {
             this.AtLedgerStateVersion = atLedgerStateVersion;
             this.Receipt = receipt;
@@ -141,7 +141,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>An optional field which is only provided if the &#x60;logs&#x60; flag is set to true in the &#x60;opt_ins&#x60; property of the request.  If present, it gives the emitted logs from the transaction execution. </value>
         [DataMember(Name = "logs", EmitDefaultValue = true)]
-        public List<TransactionPreviewResponseLogsInner> Logs { get; set; }
+        public List<TransactionPreviewV2ResponseLogsInner> Logs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

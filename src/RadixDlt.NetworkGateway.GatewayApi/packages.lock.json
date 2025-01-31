@@ -25,9 +25,9 @@
       },
       "RadixDlt.RadixEngineToolkit": {
         "type": "Direct",
-        "requested": "[2.2.0-dev9, )",
-        "resolved": "2.2.0-dev9",
-        "contentHash": "FonZwFacydh2ed4V7PLGJ+doR+MXAg+b2llgXfWzYnzHuGk/oE9ETSwl92rjTjbzAy82oz53EI2YTNHWlDOLgw=="
+        "requested": "[2.2.2, )",
+        "resolved": "2.2.2",
+        "contentHash": "EX3wHoOLXVMSYUUoeAm6clg64G3WRIZOZPF9ptSs3MR5M1knqK64J6jIW5jRmfT/06D+F17haSOEPTpy1EQDbA=="
       },
       "StyleCop.Analyzers": {
         "type": "Direct",
@@ -379,7 +379,7 @@
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Nito.AsyncEx.Coordination": "[5.1.2, )",
-          "RadixDlt.CoreApiSdk": "[1.9.0-develop, )"
+          "RadixDlt.CoreApiSdk": "[1.10.0-develop, )"
         }
       },
       "radixdlt.networkgateway.gatewayapisdk": {
@@ -388,7 +388,7 @@
           "JsonSubTypes": "[2.0.1, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Polly": "[8.3.0, )",
-          "RadixDlt.NetworkGateway.Abstractions": "[1.9.0-develop, )"
+          "RadixDlt.NetworkGateway.Abstractions": "[1.10.0-develop, )"
         }
       },
       "FluentValidation": {

@@ -126,6 +126,7 @@ internal static class CustomTypesRegistrator
         NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<AuthorizedDepositorBadgeType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<StandardMetadataKey>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityRoleRequirementType>();
 #pragma warning restore CS0618
 
         _configured = true;

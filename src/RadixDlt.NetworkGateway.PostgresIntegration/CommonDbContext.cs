@@ -173,6 +173,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ResourceHolder> ResourceHolders => Set<ResourceHolder>();
 
+    public DbSet<EntitiesByRoleRequirement> EntitiesByRoleRequirement => Set<EntitiesByRoleRequirement>();
+
     public DbSet<EntityResourceEntryDefinition> EntityResourceEntryDefinition => Set<EntityResourceEntryDefinition>();
 
     public DbSet<EntityResourceTotalsHistory> EntityResourceTotalsHistory => Set<EntityResourceTotalsHistory>();
@@ -220,6 +222,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<StateType>();
         modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
         modelBuilder.HasPostgresEnum<StandardMetadataKey>();
+        modelBuilder.HasPostgresEnum<EntityRoleRequirementType>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -664,6 +667,36 @@ internal abstract class CommonDbContext : DbContext
             .Entity<ResourceHolder>()
             .HasIndex(e => new { e.ResourceEntityId, e.Balance, e.EntityId })
             .IsDescending(false, true, false);
+
+        modelBuilder
+            .Entity<EntitiesByRoleRequirement>()
+            .HasDiscriminator<EntityRoleRequirementType>(DiscriminatorColumnName)
+            .HasValue<EntitiesByResourceRoleRequirement>(EntityRoleRequirementType.Resource)
+            .HasValue<EntitiesByNonFungibleRoleRequirement>(EntityRoleRequirementType.NonFungible);
+
+        // Used by DA to insert data.
+        modelBuilder
+            .Entity<EntitiesByResourceRoleRequirement>()
+            .HasIndex(e => new { e.ResourceEntityId })
+            .HasFilter("discriminator = 'resource'");
+
+        // Used by API to fetch page of data.
+        modelBuilder
+            .Entity<EntitiesByResourceRoleRequirement>()
+            .HasIndex(e => new { e.FirstSeenStateVersion, e.Id, e.EntityId, e.ResourceEntityId })
+            .HasFilter("discriminator = 'resource'");
+
+        // Used by DA to insert data.
+        modelBuilder
+            .Entity<EntitiesByNonFungibleRoleRequirement>()
+            .HasIndex(e => new { e.ResourceEntityId, e.NonFungibleLocalId })
+            .HasFilter("discriminator = 'non_fungible'");
+
+        // Used by API to fetch page of data.
+        modelBuilder
+            .Entity<EntitiesByNonFungibleRoleRequirement>()
+            .HasIndex(e => new { e.FirstSeenStateVersion, e.Id, e.EntityId, e.ResourceEntityId, e.NonFungibleLocalId })
+            .HasFilter("discriminator = 'non_fungible'");
 
         modelBuilder
             .Entity<EntityResourceTotalsHistory>()

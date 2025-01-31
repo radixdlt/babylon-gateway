@@ -79,4 +79,16 @@ public class ExtensionsController(IExtensionsHandler extensionsHandler) : Contro
     {
         return await extensionsHandler.ResourceHolders(request, token);
     }
+
+    [HttpPost("entities-by-role-requirement/page")]
+    public async Task<GatewayModel.EntitiesByRoleRequirementPageResponse> ResourceHoldersPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token)
+    {
+        return await extensionsHandler.EntitiesByRoleRequirementPage(request, token);
+    }
+
+    [HttpPost("entities-by-role-requirement/lookup")]
+    public async Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> ResourceHoldersLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token)
+    {
+        return await extensionsHandler.EntitiesByRoleRequirementLookup(request, token);
+    }
 }

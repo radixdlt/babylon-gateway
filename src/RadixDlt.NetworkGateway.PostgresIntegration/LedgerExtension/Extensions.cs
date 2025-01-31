@@ -90,6 +90,12 @@ internal static class Extensions
         return value;
     }
 
+    public static void AddIfNotExist<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
+        where TKey : notnull
+    {
+        GetOrAdd(dictionary, key, factory);
+    }
+
     public static TVal AddOrUpdate<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> newElementFactory, Action<TVal> updateFactory)
         where TKey : notnull
     {
