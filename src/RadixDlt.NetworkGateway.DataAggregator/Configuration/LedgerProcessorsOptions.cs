@@ -70,14 +70,14 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
 public sealed record LedgerProcessorsOptions
 {
-    [ConfigurationKeyName("EntitiesByRoleAssignmentsPerStateVersionWarningThreashold")]
-    public int EntitiesByRoleAssignmentsPerStateVersionWarningThreashold { get; set; } = 25;
+    [ConfigurationKeyName("EntitiesByRoleRequirementsPerStateVersionWarningThreshold")]
+    public int EntitiesByRoleRequirementsPerStateVersionWarningThreshold { get; set; } = 25;
 }
 
 internal class LedgerProcessorsOptionsValidator : AbstractOptionsValidator<LedgerProcessorsOptions>
 {
     public LedgerProcessorsOptionsValidator()
     {
-        RuleFor(x => x.EntitiesByRoleAssignmentsPerStateVersionWarningThreashold).GreaterThan(0);
+        RuleFor(x => x.EntitiesByRoleRequirementsPerStateVersionWarningThreshold).GreaterThan(0);
     }
 }

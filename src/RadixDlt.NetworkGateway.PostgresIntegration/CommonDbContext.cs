@@ -173,7 +173,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ResourceHolder> ResourceHolders => Set<ResourceHolder>();
 
-    public DbSet<EntitiesByRoleRequirement> EntitiesByRoleRequirement => Set<EntitiesByRoleRequirement>();
+    public DbSet<EntitiesByRoleRequirementEntryDefinition> EntitiesByRoleRequirement => Set<EntitiesByRoleRequirementEntryDefinition>();
 
     public DbSet<EntityResourceEntryDefinition> EntityResourceEntryDefinition => Set<EntityResourceEntryDefinition>();
 
@@ -669,32 +669,32 @@ internal abstract class CommonDbContext : DbContext
             .IsDescending(false, true, false);
 
         modelBuilder
-            .Entity<EntitiesByRoleRequirement>()
+            .Entity<EntitiesByRoleRequirementEntryDefinition>()
             .HasDiscriminator<EntityRoleRequirementType>(DiscriminatorColumnName)
-            .HasValue<EntitiesByResourceRoleRequirement>(EntityRoleRequirementType.Resource)
-            .HasValue<EntitiesByNonFungibleRoleRequirement>(EntityRoleRequirementType.NonFungible);
+            .HasValue<EntitiesByResourceRoleRequirementEntryDefinition>(EntityRoleRequirementType.Resource)
+            .HasValue<EntitiesByNonFungibleRoleRequirementEntryDefinition>(EntityRoleRequirementType.NonFungible);
 
         // Used by DA to insert data.
         modelBuilder
-            .Entity<EntitiesByResourceRoleRequirement>()
+            .Entity<EntitiesByResourceRoleRequirementEntryDefinition>()
             .HasIndex(e => new { e.ResourceEntityId })
             .HasFilter("discriminator = 'resource'");
 
         // Used by API to fetch page of data.
         modelBuilder
-            .Entity<EntitiesByResourceRoleRequirement>()
+            .Entity<EntitiesByResourceRoleRequirementEntryDefinition>()
             .HasIndex(e => new { e.FirstSeenStateVersion, e.Id, e.EntityId, e.ResourceEntityId })
             .HasFilter("discriminator = 'resource'");
 
         // Used by DA to insert data.
         modelBuilder
-            .Entity<EntitiesByNonFungibleRoleRequirement>()
+            .Entity<EntitiesByNonFungibleRoleRequirementEntryDefinition>()
             .HasIndex(e => new { e.ResourceEntityId, e.NonFungibleLocalId })
             .HasFilter("discriminator = 'non_fungible'");
 
         // Used by API to fetch page of data.
         modelBuilder
-            .Entity<EntitiesByNonFungibleRoleRequirement>()
+            .Entity<EntitiesByNonFungibleRoleRequirementEntryDefinition>()
             .HasIndex(e => new { e.FirstSeenStateVersion, e.Id, e.EntityId, e.ResourceEntityId, e.NonFungibleLocalId })
             .HasFilter("discriminator = 'non_fungible'");
 

@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entities_by_role_requirement")]
-internal abstract class EntitiesByRoleRequirement
+[Table("entities_by_role_requirement_entry_definition")]
+internal abstract class EntitiesByRoleRequirementEntryDefinition
 {
     [Key]
     [Column("id")]
@@ -81,13 +81,13 @@ internal abstract class EntitiesByRoleRequirement
     public long FirstSeenStateVersion { get; set; }
 }
 
-internal class EntitiesByResourceRoleRequirement : EntitiesByRoleRequirement
+internal class EntitiesByResourceRoleRequirementEntryDefinition : EntitiesByRoleRequirementEntryDefinition
 {
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
 }
 
-internal class EntitiesByNonFungibleRoleRequirement : EntitiesByRoleRequirement
+internal class EntitiesByNonFungibleRoleRequirementEntryDefinition : EntitiesByRoleRequirementEntryDefinition
 {
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }

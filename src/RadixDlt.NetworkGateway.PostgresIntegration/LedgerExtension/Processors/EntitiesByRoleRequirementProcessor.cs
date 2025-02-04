@@ -93,7 +93,7 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
 
     private readonly Dictionary<ResourceDbLookup, long> _observedByResource = new();
     private readonly Dictionary<NonFungibleDbLookup, long> _observedByNonFungible = new();
-    private readonly List<EntitiesByRoleRequirement> _toAdd = new();
+    private readonly List<EntitiesByRoleRequirementEntryDefinition> _toAdd = new();
     private readonly CommonDbContext _dbContext;
     private readonly ILogger<EntitiesByRoleRequirementProcessor> _logger;
     private readonly IOptionsMonitor<LedgerProcessorsOptions> _optionsMonitor;
@@ -169,7 +169,7 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
         foreach (var entry in _observedByResource)
         {
             _toAdd.Add(
-                new EntitiesByResourceRoleRequirement
+                new EntitiesByResourceRoleRequirementEntryDefinition
                 {
                     Id = _context.Sequences.EntitiesByRoleRequirementSequence++,
                     EntityId = _referencedEntityDictionary.Get((EntityAddress)entry.Key.EntityAddress).DatabaseId,
@@ -181,7 +181,7 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
         foreach (var entry in _observedByNonFungible)
         {
             _toAdd.Add(
-                new EntitiesByNonFungibleRoleRequirement
+                new EntitiesByNonFungibleRoleRequirementEntryDefinition
                 {
                     Id = _context.Sequences.EntitiesByRoleRequirementSequence++,
                     EntityId = _referencedEntityDictionary.Get((EntityAddress)entry.Key.EntityAddress).DatabaseId,
@@ -193,10 +193,10 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
 
         foreach (var stateVersionEntries in _toAdd.GroupBy(x => x.FirstSeenStateVersion))
         {
-            if (stateVersionEntries.Count() > _optionsMonitor.CurrentValue.EntitiesByRoleAssignmentsPerStateVersionWarningThreashold)
+            if (stateVersionEntries.Count() > _optionsMonitor.CurrentValue.EntitiesByRoleRequirementsPerStateVersionWarningThreshold)
             {
                 _logger.LogWarning(
-                    $"State version {stateVersionEntries.Key} has more than {_optionsMonitor.CurrentValue.EntitiesByRoleAssignmentsPerStateVersionWarningThreashold} `entities_by_role_requirement` entries to add.");
+                    $"State version {stateVersionEntries.Key} has more than {_optionsMonitor.CurrentValue.EntitiesByRoleRequirementsPerStateVersionWarningThreshold} `entities_by_role_requirement_entry_definition` entries to add.");
             }
         }
     }
@@ -205,7 +205,7 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
     {
         var rowsInserted = 0;
 
-        rowsInserted += await CopyEntityByRoleAssignments();
+        rowsInserted += await CopyEntityByRoleRequirements();
 
         return rowsInserted;
     }
@@ -231,7 +231,7 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
         return extractor.Extract(accessRule);
     }
 
-    private async Task<int> CopyEntityByRoleAssignments()
+    private async Task<int> CopyEntityByRoleRequirements()
     {
         var entities = _toAdd;
 
@@ -246,15 +246,15 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
 
         await using var createTempTableCommand = connection.CreateCommand();
         createTempTableCommand.CommandText = @"
-CREATE TEMP TABLE tmp_entities_by_role_requirement
-(LIKE entities_by_role_requirement INCLUDING DEFAULTS)
+CREATE TEMP TABLE tmp_entities_by_role_requirement_entry_definition
+(LIKE entities_by_role_requirement_entry_definition INCLUDING DEFAULTS)
 ON COMMIT DROP";
 
         await createTempTableCommand.ExecuteNonQueryAsync(_context.Token);
 
         await using var writer =
             await connection.BeginBinaryImportAsync(
-                "COPY tmp_entities_by_role_requirement (id, entity_id, first_seen_state_version, discriminator, resource_entity_id, non_fungible_local_id) FROM STDIN (FORMAT BINARY)",
+                "COPY tmp_entities_by_role_requirement_entry_definition (id, entity_id, first_seen_state_version, discriminator, resource_entity_id, non_fungible_local_id) FROM STDIN (FORMAT BINARY)",
                 _context.Token);
 
         foreach (var e in entities)
@@ -267,13 +267,13 @@ ON COMMIT DROP";
             await writer.WriteAsync(e.FirstSeenStateVersion, NpgsqlDbType.Bigint, _context.Token);
             await writer.WriteAsync(discriminator, "entity_role_requirement_type", _context.Token);
 
-            if (e is EntitiesByResourceRoleRequirement entitiesByResourceRoleRequirement)
+            if (e is EntitiesByResourceRoleRequirementEntryDefinition entitiesByResourceRoleRequirement)
             {
                 await writer.WriteAsync(entitiesByResourceRoleRequirement.ResourceEntityId, NpgsqlDbType.Bigint, _context.Token);
                 await writer.WriteNullAsync(_context.Token);
             }
 
-            if (e is EntitiesByNonFungibleRoleRequirement entitiesByNonFungibleRoleRequirement)
+            if (e is EntitiesByNonFungibleRoleRequirementEntryDefinition entitiesByNonFungibleRoleRequirement)
             {
                 await writer.WriteAsync(entitiesByNonFungibleRoleRequirement.ResourceEntityId, NpgsqlDbType.Bigint, _context.Token);
                 await writer.WriteAsync(entitiesByNonFungibleRoleRequirement.NonFungibleLocalId, NpgsqlDbType.Text, _context.Token);
@@ -285,14 +285,14 @@ ON COMMIT DROP";
 
         await using var mergeCommand = connection.CreateCommand();
         mergeCommand.CommandText = @"
-MERGE INTO entities_by_role_requirement ebrr
-USING tmp_entities_by_role_requirement tmp
+MERGE INTO entities_by_role_requirement_entry_definition ebrr
+USING tmp_entities_by_role_requirement_entry_definition tmp
 ON ebrr.entity_id = tmp.entity_id AND ebrr.resource_entity_id = tmp.resource_entity_id AND ebrr.non_fungible_local_id = tmp.non_fungible_local_id
 WHEN NOT MATCHED THEN INSERT VALUES(id, entity_id, first_seen_state_version, discriminator, resource_entity_id, non_fungible_local_id);";
 
         await mergeCommand.ExecuteNonQueryAsync(_context.Token);
 
-        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityByRoleAssignments), Stopwatch.GetElapsedTime(sw), entities.Count));
+        await _observers.ForEachAsync(x => x.StageCompleted(nameof(CopyEntityByRoleRequirements), Stopwatch.GetElapsedTime(sw), entities.Count));
 
         return entities.Count;
     }

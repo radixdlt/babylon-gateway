@@ -68,7 +68,7 @@ The Network Gateway services can be configured in line with the [configuration i
 - `DataAggregator__SlowQueryLogging__SlowQueryThreshold` (type: `timespan in string format [d.]hh:mm:ss[.fffffff]`, default value: `250ms`) - threshold after which query is considered slow and will be logged.
 
 #### Processor related configuration
-- `DataAggregator__LedgerProcessors__EntitiesByRoleAssignmentsPerStateVersionWarningThreashold` (type: `int`, default value: `25`) - Specifies the threshold for the number of entries added to the entities_by_role_requirement table per transaction that triggers a warning.
+- `DataAggregator__LedgerProcessors__EntitiesByRoleRequirementsPerStateVersionWarningThreshold` (type: `int`, default value: `25`) - Specifies the threshold for the number of entries added to the entities_by_role_requirement_entry_definition table per transaction that triggers a warning.
 
 #### Network
 - `DataAggregator__Network__NetworkName` (type: `string`, default value: `empty`) - the name of the network data aggregator is operating on.

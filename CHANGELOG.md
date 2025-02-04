@@ -19,7 +19,7 @@ Release built: _not released yet_
 - Replaced the `IX_resource_holders_entity_id_resource_entity_id_balance` index with the `IX_resource_holders_resource_entity_id_balance_entity_id` index on the `resource_holders` table.
 - New `outer_object_entity_id` column in the `entities` table, which holds the outer object entity id (e.g resource entity id for vaults and consensus manager entity id for validators).
 - New `receipt_event_emitter_entity_ids` column in the `ledger_transaction_events` table, which holds the emitter entity ids for transaction events.
-- Added a new `entities_by_role_requirement` table that stores information about entities that have ever used a requirement (resource or non-fungible global ID) in their access rules.
+- Added a new `entities_by_role_requirement_entry_definition` table that stores information about entities that have ever used a requirement (resource or non-fungible global ID) in their access rules.
 
 ### What’s new?
 - Added a new configuration parameter, `GatewayApi__Endpoint__EntitiesByRoleRequirementLookupMaxRequestedRequirementsCount`, which sets the limit (default `50`) on the number of requirements that can be queried using the `/extensions/entities-by-role-requirement/lookup` endpoint.

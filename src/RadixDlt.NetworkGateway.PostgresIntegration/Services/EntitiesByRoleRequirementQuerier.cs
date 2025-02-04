@@ -142,7 +142,7 @@ WITH entries_with_count AS (
         ,ebrr.entity_id
         ,ebrr.first_seen_state_version
         ,COUNT(*) OVER () AS TotalCount
-    FROM entities_by_role_requirement ebrr
+    FROM entities_by_role_requirement_entry_definition ebrr
     WHERE
     (
         (@nonFungibleLocalId IS NULL AND ebrr.discriminator = 'resource' AND ebrr.resource_entity_id = @resourceEntityId)
@@ -229,13 +229,13 @@ SELECT
    ,ebrr.FirstSeenStateVersion
    ,ebrr.TotalCount
 FROM vars
-INNER JOIN entities e on vars.resource_entity_id = e.id
 INNER JOIN LATERAL (
     SELECT
          ebrr.id                          AS Id
+        ,ebrr.entity_id
         ,ebrr.first_seen_state_version    AS FirstSeenStateVersion
         ,COUNT(*) OVER ()                 AS TotalCount
-    FROM entities_by_role_requirement ebrr
+    FROM entities_by_role_requirement_entry_definition ebrr
     WHERE
         (vars.non_fungible_local_id IS NULL AND ebrr.discriminator = 'resource' AND ebrr.resource_entity_id = vars.resource_entity_id)
         OR
@@ -243,6 +243,7 @@ INNER JOIN LATERAL (
     ORDER BY ebrr.first_seen_state_version ASC, ebrr.id ASC
     LIMIT @limit
 ) ebrr on TRUE
+INNER JOIN entities e on ebrr.entity_id = e.id
 ORDER BY resource_entity_id
 ",
             parameters,

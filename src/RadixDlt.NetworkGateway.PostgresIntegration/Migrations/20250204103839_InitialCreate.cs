@@ -294,7 +294,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "entities_by_role_requirement",
+                name: "entities_by_role_requirement_entry_definition",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -307,7 +307,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_entities_by_role_requirement", x => x.id);
+                    table.PrimaryKey("PK_entities_by_role_requirement_entry_definition", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1155,28 +1155,28 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'global_validator'");
 
             migrationBuilder.CreateIndex(
-                name: "IX_entities_by_role_requirement_first_seen_state_version_id_e~1",
-                table: "entities_by_role_requirement",
+                name: "IX_entities_by_role_requirement_entry_definition_first_seen_s~1",
+                table: "entities_by_role_requirement_entry_definition",
                 columns: new[] { "first_seen_state_version", "id", "entity_id", "resource_entity_id", "non_fungible_local_id" },
                 filter: "discriminator = 'non_fungible'");
 
             migrationBuilder.CreateIndex(
-                name: "IX_entities_by_role_requirement_first_seen_state_version_id_en~",
-                table: "entities_by_role_requirement",
+                name: "IX_entities_by_role_requirement_entry_definition_first_seen_st~",
+                table: "entities_by_role_requirement_entry_definition",
                 columns: new[] { "first_seen_state_version", "id", "entity_id", "resource_entity_id" },
                 filter: "discriminator = 'resource'");
 
             migrationBuilder.CreateIndex(
-                name: "IX_entities_by_role_requirement_resource_entity_id",
-                table: "entities_by_role_requirement",
-                column: "resource_entity_id",
-                filter: "discriminator = 'resource'");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entities_by_role_requirement_resource_entity_id_non_fungibl~",
-                table: "entities_by_role_requirement",
+                name: "IX_entities_by_role_requirement_entry_definition_resource_ent~1",
+                table: "entities_by_role_requirement_entry_definition",
                 columns: new[] { "resource_entity_id", "non_fungible_local_id" },
                 filter: "discriminator = 'non_fungible'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_by_role_requirement_entry_definition_resource_enti~",
+                table: "entities_by_role_requirement_entry_definition",
+                column: "resource_entity_id",
+                filter: "discriminator = 'resource'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_entity_metadata_entry_definition_entity_id_from_state_versi~",
@@ -1566,7 +1566,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "entities");
 
             migrationBuilder.DropTable(
-                name: "entities_by_role_requirement");
+                name: "entities_by_role_requirement_entry_definition");
 
             migrationBuilder.DropTable(
                 name: "entity_metadata_entry_definition");

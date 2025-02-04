@@ -428,7 +428,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("component_method_royalty_entry_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByRoleRequirement", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByRoleRequirementEntryDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -450,7 +450,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("entities_by_role_requirement");
+                    b.ToTable("entities_by_role_requirement_entry_definition");
 
                     b.HasDiscriminator<EntityRoleRequirementType>("discriminator");
 
@@ -2152,9 +2152,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(AuthorizedDepositorBadgeType.Resource);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByNonFungibleRoleRequirement", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByNonFungibleRoleRequirementEntryDefinition", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByRoleRequirement");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByRoleRequirementEntryDefinition");
 
                     b.Property<string>("NonFungibleLocalId")
                         .IsRequired()
@@ -2167,20 +2167,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("resource_entity_id");
 
                     b.HasIndex("ResourceEntityId", "NonFungibleLocalId")
+                        .HasDatabaseName("IX_entities_by_role_requirement_entry_definition_resource_ent~1")
                         .HasFilter("discriminator = 'non_fungible'");
 
                     b.HasIndex("FirstSeenStateVersion", "Id", "EntityId", "ResourceEntityId", "NonFungibleLocalId")
-                        .HasDatabaseName("IX_entities_by_role_requirement_first_seen_state_version_id_e~1")
+                        .HasDatabaseName("IX_entities_by_role_requirement_entry_definition_first_seen_s~1")
                         .HasFilter("discriminator = 'non_fungible'");
 
-                    b.ToTable("entities_by_role_requirement");
+                    b.ToTable("entities_by_role_requirement_entry_definition");
 
                     b.HasDiscriminator().HasValue(EntityRoleRequirementType.NonFungible);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByResourceRoleRequirement", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByResourceRoleRequirementEntryDefinition", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByRoleRequirement");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntitiesByRoleRequirementEntryDefinition");
 
                     b.Property<long>("ResourceEntityId")
                         .ValueGeneratedOnUpdateSometimes()
@@ -2193,7 +2194,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("FirstSeenStateVersion", "Id", "EntityId", "ResourceEntityId")
                         .HasFilter("discriminator = 'resource'");
 
-                    b.ToTable("entities_by_role_requirement");
+                    b.ToTable("entities_by_role_requirement_entry_definition");
 
                     b.HasDiscriminator().HasValue(EntityRoleRequirementType.Resource);
                 });
