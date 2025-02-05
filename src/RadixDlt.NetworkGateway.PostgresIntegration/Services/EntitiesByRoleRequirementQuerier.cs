@@ -92,6 +92,7 @@ internal class EntitiesByRoleRequirementQuerier : IEntitiesByRoleRequirementQuer
     private record EntitiesByRoleRequirementLookupResultRow(
         long Id,
         long ResourceEntityId,
+        string NonFungibleLocalId,
         EntityAddress EntityAddress,
         long FirstSeenStateVersion,
         long TotalCount);
@@ -206,6 +207,10 @@ limit @limit;",
                 resourceEntityIdsParameter.Add(resourceEntityId);
                 nonFungibleIdsParameter.Add(item.NonFungibleId);
             }
+            else
+            {
+                throw new EntityNotFoundException(item.ResourceAddress);
+            }
         }
 
         var parameters = new
@@ -225,6 +230,7 @@ WITH vars AS (
 SELECT
     ebrr.Id
    ,vars.resource_entity_id          AS ResourceEntityId
+   ,vars. non_fungible_local_id      AS NonFungibleLocalId
    ,e.address                        AS EntityAddress
    ,ebrr.FirstSeenStateVersion
    ,ebrr.TotalCount
@@ -253,8 +259,14 @@ ORDER BY resource_entity_id
         var queryResult = await _dapperWrapper.ToListAsync<EntitiesByRoleRequirementLookupResultRow>(_dbContext.Database.GetDbConnection(), cd);
 
         var result = queryResult
-            .GroupBy(r => r.ResourceEntityId)
-            .ToDictionary(x => x.Key, x => x.ToList());
+            .GroupBy(r => (r.ResourceEntityId, r.NonFungibleLocalId))
+            .ToDictionary(
+                x => x.Key,
+                x => x
+                    .OrderBy(y => y.FirstSeenStateVersion)
+                    .ThenBy(y => y.Id)
+                    .ToList()
+            );
 
         var resultItems = new List<GatewayModel.EntitiesByRoleRequirementLookupCollection>();
 
@@ -267,7 +279,7 @@ ORDER BY resource_entity_id
                 continue;
             }
 
-            var entriesExists = result.TryGetValue(resourceEntityId, out var entriesAndOneMore);
+            var entriesExists = result.TryGetValue((resourceEntityId, requirement.NonFungibleId), out var entriesAndOneMore);
             if (!entriesExists || entriesAndOneMore == null)
             {
                 resultItems.Add(new GatewayModel.EntitiesByRoleRequirementLookupCollection(0, null, requirement, new List<GatewayModel.EntitiesByRoleRequirementItem>()));
@@ -283,6 +295,7 @@ ORDER BY resource_entity_id
                 : null;
 
             var mappedRows = entriesAndOneMore
+                .Take(limit)
                 .Select(x => new GatewayModel.EntitiesByRoleRequirementItem(x.EntityAddress, x.FirstSeenStateVersion))
                 .ToList();
 
