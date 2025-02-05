@@ -139,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="values">values (required).</param>
         /// <param name="type">type (required) (default to MetadataValueType.NonFungibleGlobalIdArray).</param>
-        public MetadataNonFungibleGlobalIdArrayValue(List<MetadataNonFungibleGlobalIdValueAllOf> values = default(List<MetadataNonFungibleGlobalIdValueAllOf>), MetadataValueType type = MetadataValueType.NonFungibleGlobalIdArray) : base(type)
+        public MetadataNonFungibleGlobalIdArrayValue(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> values = default(List<MetadataNonFungibleGlobalIdArrayValueAllOfValues>), MetadataValueType type = MetadataValueType.NonFungibleGlobalIdArray) : base(type)
         {
             // to ensure "values" is required (not null)
             if (values == null)
@@ -153,7 +153,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Values
         /// </summary>
         [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataNonFungibleGlobalIdValueAllOf> Values { get; set; }
+        public List<MetadataNonFungibleGlobalIdArrayValueAllOfValues> Values { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

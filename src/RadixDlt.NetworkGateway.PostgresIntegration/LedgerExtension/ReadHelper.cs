@@ -185,6 +185,7 @@ SELECT
     nextval('unverified_standard_metadata_aggregate_history_id_seq') AS UnverifiedStandardMetadataAggregateHistorySequence,
     nextval('unverified_standard_metadata_entry_history_id_seq') AS UnverifiedStandardMetadataEntryHistorySequence,
     nextval('resource_holders_id_seq') AS ResourceHoldersSequence,
+    nextval('entities_by_role_requirement_entry_definition_id_seq') AS EntitiesByRoleRequirementSequence,
     nextval('entity_resource_entry_definition_id_seq') AS EntityResourceEntryDefinitionSequence,
     nextval('entity_resource_vault_entry_definition_id_seq') AS EntityResourceVaultEntryDefinitionSequence,
     nextval('entity_resource_totals_history_id_seq') AS EntityResourceTotalsHistorySequence,

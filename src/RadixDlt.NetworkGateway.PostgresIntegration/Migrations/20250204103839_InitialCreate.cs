@@ -86,6 +86,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:account_resource_preference_rule", "allowed,disallowed")
                 .Annotation("Npgsql:Enum:authorized_depositor_badge_type", "resource,non_fungible")
                 .Annotation("Npgsql:Enum:entity_relationship", "component_to_instantiating_package,vault_to_resource,validator_to_stake_vault,validator_to_pending_xrd_withdraw_vault,validator_to_locked_owner_stake_unit_vault,validator_to_pending_owner_stake_unit_unlock_vault,stake_unit_of_validator,claim_token_of_validator,entity_to_royalty_vault,royalty_vault_of_entity,account_locker_of_locker,account_locker_of_account,resource_pool_to_unit_resource,resource_pool_to_resource,resource_pool_to_resource_vault,unit_resource_of_resource_pool,resource_vault_of_resource_pool,access_controller_to_recovery_badge,recovery_badge_of_access_controller")
+                .Annotation("Npgsql:Enum:entity_role_requirement_type", "resource,non_fungible")
                 .Annotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker,global_account_locker")
                 .Annotation("Npgsql:Enum:ledger_transaction_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
@@ -290,6 +291,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_entities", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entities_by_role_requirement_entry_definition",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    first_seen_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    discriminator = table.Column<EntityRoleRequirementType>(type: "entity_role_requirement_type", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    non_fungible_local_id = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entities_by_role_requirement_entry_definition", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1137,6 +1155,30 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'global_validator'");
 
             migrationBuilder.CreateIndex(
+                name: "IX_entities_by_role_requirement_entry_definition_first_seen_s~1",
+                table: "entities_by_role_requirement_entry_definition",
+                columns: new[] { "first_seen_state_version", "id", "entity_id", "resource_entity_id", "non_fungible_local_id" },
+                filter: "discriminator = 'non_fungible'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_by_role_requirement_entry_definition_first_seen_st~",
+                table: "entities_by_role_requirement_entry_definition",
+                columns: new[] { "first_seen_state_version", "id", "entity_id", "resource_entity_id" },
+                filter: "discriminator = 'resource'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_by_role_requirement_entry_definition_resource_ent~1",
+                table: "entities_by_role_requirement_entry_definition",
+                columns: new[] { "resource_entity_id", "non_fungible_local_id" },
+                filter: "discriminator = 'non_fungible'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_by_role_requirement_entry_definition_resource_enti~",
+                table: "entities_by_role_requirement_entry_definition",
+                column: "resource_entity_id",
+                filter: "discriminator = 'resource'");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_entity_metadata_entry_definition_entity_id_from_state_versi~",
                 table: "entity_metadata_entry_definition",
                 columns: new[] { "entity_id", "from_state_version" });
@@ -1522,6 +1564,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "entities");
+
+            migrationBuilder.DropTable(
+                name: "entities_by_role_requirement_entry_definition");
 
             migrationBuilder.DropTable(
                 name: "entity_metadata_entry_definition");

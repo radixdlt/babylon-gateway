@@ -90,8 +90,9 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines SborTypeKind
+    /// Kind of SBOR type.  - If &#x60;WellKnown&#x60;, then it is a pointer to a well known scrypto type with that ID, - If &#x60;SchemaLocal&#x60;, then it is an index into the given schema. 
     /// </summary>
+    /// <value>Kind of SBOR type.  - If &#x60;WellKnown&#x60;, then it is a pointer to a well known scrypto type with that ID, - If &#x60;SchemaLocal&#x60;, then it is an index into the given schema. </value>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum SborTypeKind
     {

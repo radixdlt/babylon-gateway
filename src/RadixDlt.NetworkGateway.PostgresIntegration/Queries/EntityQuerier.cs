@@ -86,6 +86,8 @@ internal interface IEntityQuerier
 
     Task<IDictionary<EntityAddress, long>> ResolveEntityIds(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token);
 
+    Task<IDictionary<EntityAddress, long>> ResolveEntityIds(List<EntityAddress> addresses, CancellationToken token);
+
     Task<IDictionary<long, EntityAddress>> ResolveEntityAddresses(List<long> entityIds, CancellationToken token = default);
 
     Task<ICollection<Entity>> GetEntities(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token);
@@ -157,6 +159,17 @@ internal class EntityQuerier : IEntityQuerier
         var entities = await _dbContext
             .Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
+            .AnnotateMetricName()
+            .ToDictionaryAsync(e => e.Address, e => e.Id, token);
+
+        return entities;
+    }
+
+    public async Task<IDictionary<EntityAddress, long>> ResolveEntityIds(List<EntityAddress> addresses, CancellationToken token)
+    {
+        var entities = await _dbContext
+            .Entities
+            .Where(e => addresses.Contains(e.Address))
             .AnnotateMetricName()
             .ToDictionaryAsync(e => e.Address, e => e.Id, token);
 

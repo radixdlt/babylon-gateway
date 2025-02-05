@@ -114,31 +114,6 @@ internal class TransactionQuerier : ITransactionQuerier
         _entityQuerier = entityQuerier;
     }
 
-    public async Task<(string? RandomIntentHash, string? RandomSubintentHash, long? CurrentEpoch)> GetOpenApiDocumentHandlerDetails(CancellationToken token = default)
-    {
-        var randomIntentHash = await _dbContext
-            .LedgerTransactions
-            .OfType<BaseUserLedgerTransaction>()
-            .Select(x => x.IntentHash)
-            .AnnotateMetricName("RandomIntentHash")
-            .FirstOrDefaultAsync(token);
-
-        var randomSubintentHash = await _dbContext
-            .LedgerFinalizedSubintents
-            .Select(x => x.SubintentHash)
-            .AnnotateMetricName("RandomSubintentHash")
-            .FirstOrDefaultAsync(token);
-
-        var currentEpoch = await _dbContext
-            .LedgerTransactions
-            .OrderByDescending(x => x.StateVersion)
-            .Select(x => x.Epoch)
-            .AnnotateMetricName("CurrentEpoch")
-            .FirstOrDefaultAsync(token);
-
-        return (randomIntentHash, randomSubintentHash, currentEpoch);
-    }
-
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
     {
         var referencedAddresses = request
