@@ -630,6 +630,9 @@ UPDATE pending_transactions
             writeHelper,
             ledgerExtension.LatestTransactionSummary);
 
+        // TODO PP: WHY? check all of them if we can call them using interface.
+        var implicitRequirementsProcessor = new ImplicitRequirementsProcessor(processorContext, referencedEntities, dbContext, _observers);
+
         var processors = new List<IProcessorBase>
         {
             ledgerTransactionProcessor,
@@ -653,6 +656,7 @@ UPDATE pending_transactions
             new StandardMetadataProcessor(processorContext, referencedEntities),
             new EntityResourceProcessor(processorContext, dbContext, _observers),
             new VaultProcessor(processorContext),
+            implicitRequirementsProcessor,
         };
 
         // step: scan all substates & events to figure out changes
@@ -666,6 +670,7 @@ UPDATE pending_transactions
                 var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
                 ledgerTransactionMarkersProcessor.VisitTransaction(committedTransaction, stateVersion);
                 ledgerTransactionProcessor.VisitTransaction(committedTransaction, stateVersion);
+                implicitRequirementsProcessor.VisitTransaction(committedTransaction, stateVersion);
 
                 try
                 {
