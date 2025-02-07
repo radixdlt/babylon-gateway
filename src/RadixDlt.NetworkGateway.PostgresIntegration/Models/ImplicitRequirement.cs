@@ -62,74 +62,51 @@
  * permissions under this License.
  */
 
-using Dapper;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
-using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal static class CustomTypesRegistrator
+[Table("implicit_requirements")]
+internal abstract class ImplicitRequirement
 {
-    private static bool _configured;
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public static void EnsureConfigured()
-    {
-        if (_configured)
-        {
-            return;
-        }
+    [Column("hash")]
+    public string Hash { get; set; }
 
-        DefaultTypeMap.MatchNamesWithUnderscores = true;
+    [Column("first_seen_state_version")]
+    public long FirstSeenStateVersion { get; set; }
+}
 
-        // needed to read int[], bigint[] and text[] columns using Dapper
-        SqlMapper.AddTypeHandler(new EntityAddressHandler());
-        SqlMapper.AddTypeHandler(new IdBoundaryCursorHandler());
-        SqlMapper.AddTypeHandler(new TokenAmountHandler());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<byte[]>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<SborTypeKind>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<LedgerTransactionManifestClass>());
+internal class GlobalCallerEntityImplicitRequirement : ImplicitRequirement
+{
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+}
 
-        SqlMapper.AddTypeHandler(new GenericListHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericListHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericListHandler<string>());
-        SqlMapper.AddTypeHandler(new GenericListHandler<byte[]>());
+internal class PackageOfDirectCallerImplicitRequirement : ImplicitRequirement
+{
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+}
 
-#pragma warning disable CS0618
-        // needed to support custom enums in postgres
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountDefaultDepositRule>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountResourcePreferenceRule>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityRelationship>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionManifestClass>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerEventType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOperationType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerTransactionType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PackageVmType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionPayloadLedgerStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionIntentLedgerStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ModuleId>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<SborTypeKind>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AuthorizedDepositorBadgeType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<StandardMetadataKey>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityRoleRequirementType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ImplicitRequirementType>();
-#pragma warning restore CS0618
+internal class GlobalCallerBlueprintImplicitRequirement : ImplicitRequirement
+{
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-        _configured = true;
-    }
+    [Column("blueprint_name")]
+    public string BlueprintName { get; set; }
+}
+
+internal class Secp256K1PublicKeyImplicitRequirement : ImplicitRequirement
+{
+}
+
+internal class Ed25519PublicKeyImplicitRequirement : ImplicitRequirement
+{
 }

@@ -142,6 +142,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<AuthorizedDepositorBadgeType>();
                 dataSourceBuilder.MapEnum<StandardMetadataKey>();
                 dataSourceBuilder.MapEnum<EntityRoleRequirementType>();
+                dataSourceBuilder.MapEnum<ImplicitRequirementType>();
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },
