@@ -2168,7 +2168,7 @@ paths:
   /extensions/implicit-requirements/lookup:
     post:
       operationId: ImplicitRequirementsLookup
-      summary: Resolve implicit requirement target from hash #TODO PP
+      summary: Resolve implicit requirement target from global nfid
       description: |
      #TODO PP
       tags:
