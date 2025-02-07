@@ -3139,19 +3139,13 @@ components:
         allows_try_deposit:
           type: boolean
 
-    # TODO PP: move it to separate
     TransactionAccountDepositPreValidationAuthorizedDepositorBadge:
       type: object
       required:
         - badge_type
-        - resource_address
       properties:
         badge_type:
           $ref: "#/components/schemas/AccountAuthorizedDepositorBadgeType"
-        resource_address:
-          # That is part of parent type because moving it to child broke OpenAPI generator and removed some other types:
-          # MetadataNonFungibleGlobalIdValueAllOf StateNonFungibleIdsRequestAllOf  MetadataNonFungibleGlobalIdArrayValueAllOf and MetadataNonFungibleGlobalIdArrayValue were affected
-          $ref: "#/components/schemas/Address"
       discriminator:
         propertyName: badge_type
         mapping:
@@ -3162,13 +3156,21 @@ components:
       allOf:
         - $ref: "#/components/schemas/TransactionAccountDepositPreValidationAuthorizedDepositorBadge"
         - type: object
+          required:
+            - resource_address
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
     AccountDepositPreValidationNonFungibleBadge:
       allOf:
         - $ref: "#/components/schemas/TransactionAccountDepositPreValidationAuthorizedDepositorBadge"
         - type: object
           required:
+            - resource_address
             - non_fungible_id
           properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
             non_fungible_id:
               $ref: "#/components/schemas/NonFungibleId"
 

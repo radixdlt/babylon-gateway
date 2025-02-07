@@ -103,9 +103,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountDepositPreValidationNonFungibleBadgeAllOf" /> class.
         /// </summary>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        public AccountDepositPreValidationNonFungibleBadgeAllOf(string nonFungibleId = default(string))
+        public AccountDepositPreValidationNonFungibleBadgeAllOf(string resourceAddress = default(string), string nonFungibleId = default(string))
         {
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for AccountDepositPreValidationNonFungibleBadgeAllOf and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
             // to ensure "nonFungibleId" is required (not null)
             if (nonFungibleId == null)
             {
@@ -113,6 +120,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.NonFungibleId = nonFungibleId;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// String-encoded non-fungible ID.
@@ -129,6 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccountDepositPreValidationNonFungibleBadgeAllOf {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -166,6 +181,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
                     this.NonFungibleId == input.NonFungibleId ||
                     (this.NonFungibleId != null &&
                     this.NonFungibleId.Equals(input.NonFungibleId))
@@ -181,6 +201,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
                 if (this.NonFungibleId != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();

@@ -84,42 +84,42 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionAccountDepositPreValidationAuthorizedDepositorBadge
+    /// AccountDepositPreValidationResourceBadgeAllOf
     /// </summary>
-    [DataContract(Name = "TransactionAccountDepositPreValidationAuthorizedDepositorBadge")]
-    [JsonConverter(typeof(JsonSubtypes), "badge_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationNonFungibleBadge), "AccountDepositPreValidationNonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationResourceBadge), "AccountDepositPreValidationResourceBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationNonFungibleBadge), "NonFungibleBadge")]
-    [JsonSubtypes.KnownSubType(typeof(AccountDepositPreValidationResourceBadge), "ResourceBadge")]
-    public partial class TransactionAccountDepositPreValidationAuthorizedDepositorBadge : IEquatable<TransactionAccountDepositPreValidationAuthorizedDepositorBadge>
+    [DataContract(Name = "AccountDepositPreValidationResourceBadge_allOf")]
+    public partial class AccountDepositPreValidationResourceBadgeAllOf : IEquatable<AccountDepositPreValidationResourceBadgeAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets BadgeType
-        /// </summary>
-        [DataMember(Name = "badge_type", IsRequired = true, EmitDefaultValue = true)]
-        public AccountAuthorizedDepositorBadgeType BadgeType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionAccountDepositPreValidationAuthorizedDepositorBadge" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResourceBadgeAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionAccountDepositPreValidationAuthorizedDepositorBadge() { }
+        protected AccountDepositPreValidationResourceBadgeAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionAccountDepositPreValidationAuthorizedDepositorBadge" /> class.
+        /// Initializes a new instance of the <see cref="AccountDepositPreValidationResourceBadgeAllOf" /> class.
         /// </summary>
-        /// <param name="badgeType">badgeType (required).</param>
-        public TransactionAccountDepositPreValidationAuthorizedDepositorBadge(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType))
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        public AccountDepositPreValidationResourceBadgeAllOf(string resourceAddress = default(string))
         {
-            this.BadgeType = badgeType;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for AccountDepositPreValidationResourceBadgeAllOf and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionAccountDepositPreValidationAuthorizedDepositorBadge {\n");
-            sb.Append("  BadgeType: ").Append(BadgeType).Append("\n");
+            sb.Append("class AccountDepositPreValidationResourceBadgeAllOf {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionAccountDepositPreValidationAuthorizedDepositorBadge);
+            return this.Equals(input as AccountDepositPreValidationResourceBadgeAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionAccountDepositPreValidationAuthorizedDepositorBadge instances are equal
+        /// Returns true if AccountDepositPreValidationResourceBadgeAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionAccountDepositPreValidationAuthorizedDepositorBadge to be compared</param>
+        /// <param name="input">Instance of AccountDepositPreValidationResourceBadgeAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionAccountDepositPreValidationAuthorizedDepositorBadge input)
+        public bool Equals(AccountDepositPreValidationResourceBadgeAllOf input)
         {
             if (input == null)
             {
@@ -166,8 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.BadgeType == input.BadgeType ||
-                    this.BadgeType.Equals(input.BadgeType)
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -180,7 +181,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.BadgeType.GetHashCode();
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
                 return hashCode;
             }
         }

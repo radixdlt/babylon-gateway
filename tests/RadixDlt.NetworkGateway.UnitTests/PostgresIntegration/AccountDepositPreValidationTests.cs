@@ -104,7 +104,7 @@ public class AccountDepositPreValidationTests
 
         var accountAddress = "account1";
         var resourceAddresses = new List<string> { "resource1", "resource2", "xrd_resource" };
-        var badge = new AccountDepositPreValidationResourceBadge(AccountAuthorizedDepositorBadgeType.ResourceBadge, "badge_resource");
+        var badge = new AccountDepositPreValidationResourceBadge("badge_resource");
         var request = new AccountDepositPreValidationRequest(accountAddress, resourceAddresses, badge);
 
         mockDepositPreValidationQuerier

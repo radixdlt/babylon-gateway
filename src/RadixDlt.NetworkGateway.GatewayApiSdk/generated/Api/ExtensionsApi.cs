@@ -134,7 +134,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of EntitiesByRoleRequirementPageResponse</returns>
         ApiResponse<EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPageWithHttpInfo(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest);
         /// <summary>
-        /// Resolve implicit requirement target from hash
+        /// Resolve implicit requirement target from global nfid
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -142,7 +142,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         ImplicitRequirementsLookupResponse ImplicitRequirementsLookup(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest);
 
         /// <summary>
-        /// Resolve implicit requirement target from hash
+        /// Resolve implicit requirement target from global nfid
         /// </summary>
         /// <remarks>
         /// 
@@ -228,7 +228,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (EntitiesByRoleRequirementPageResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<EntitiesByRoleRequirementPageResponse>> EntitiesByRoleRequirementPageWithHttpInfoAsync(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Resolve implicit requirement target from hash
+        /// Resolve implicit requirement target from global nfid
         /// </summary>
         /// <remarks>
         /// 
@@ -240,7 +240,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         System.Threading.Tasks.Task<ImplicitRequirementsLookupResponse> ImplicitRequirementsLookupAsync(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Resolve implicit requirement target from hash
+        /// Resolve implicit requirement target from global nfid
         /// </summary>
         /// <remarks>
         /// 
@@ -721,7 +721,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Resolve implicit requirement target from hash 
+        /// Resolve implicit requirement target from global nfid 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -733,7 +733,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Resolve implicit requirement target from hash 
+        /// Resolve implicit requirement target from global nfid 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -777,7 +777,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Resolve implicit requirement target from hash 
+        /// Resolve implicit requirement target from global nfid 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -790,7 +790,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Resolve implicit requirement target from hash 
+        /// Resolve implicit requirement target from global nfid 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
