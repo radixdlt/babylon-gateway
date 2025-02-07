@@ -10,6 +10,7 @@ Release built: _not released yet_
 - Added two new endpoints that allow querying for entities that have ever used a requirement (resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
   - `/extensions/entities-by-role-requirement/lookup` – allows querying by multiple requirements.
   - `/extensions/entities-by-role-requirement/page` – allows querying and paginating by a single requirement.
+- Added a new endpoint `/extensions/implicit-requirements/lookup` for resolving implicit access rule requirements (https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements).
 
 ### Database changes
 - New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.
@@ -20,6 +21,7 @@ Release built: _not released yet_
 - New `outer_object_entity_id` column in the `entities` table, which holds the outer object entity id (e.g resource entity id for vaults and consensus manager entity id for validators).
 - New `receipt_event_emitter_entity_ids` column in the `ledger_transaction_events` table, which holds the emitter entity ids for transaction events.
 - Added a new `entities_by_role_requirement_entry_definition` table that stores information about entities that have ever used a requirement (resource or non-fungible global ID) in their access rules.
+- Added a new `implicit_requirements` table to store data necessary for resolving implicit access rule requirements.
 
 ### What’s new?
 - Added a new configuration parameter, `GatewayApi__Endpoint__EntitiesByRoleRequirementLookupMaxRequestedRequirementsCount`, which sets the limit (default `50`) on the number of requirements that can be queried using the `/extensions/entities-by-role-requirement/lookup` endpoint.

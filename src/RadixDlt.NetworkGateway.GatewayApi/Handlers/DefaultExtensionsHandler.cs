@@ -79,6 +79,8 @@ public interface IExtensionsHandler
     Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token);
 
     Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token);
+
+    Task<GatewayModel.ImplicitRequirementsLookupResponse> ImplicitRequirementsLookup(GatewayModel.ImplicitRequirementsLookupRequest request, CancellationToken token);
 }
 
 internal class DefaultExtensionsHandler(
@@ -115,5 +117,10 @@ internal class DefaultExtensionsHandler(
             request.Requirements,
             endpointConfiguration.Value.MaxHeavyCollectionsPageSize,
             token);
+    }
+
+    public Task<GatewayModel.ImplicitRequirementsLookupResponse> ImplicitRequirementsLookup(GatewayModel.ImplicitRequirementsLookupRequest request, CancellationToken token)
+    {
+        throw new System.NotImplementedException();
     }
 }
