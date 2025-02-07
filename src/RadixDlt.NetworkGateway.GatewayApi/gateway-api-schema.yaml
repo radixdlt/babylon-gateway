@@ -2165,6 +2165,30 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /extensions/implicit-requirements/lookup:
+    post:
+      operationId: ImplicitRequirementsLookup
+      summary: Resolve implicit requirement target from hash #TODO PP
+      description: |
+     #TODO PP
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImplicitRequirementsLookupRequest"
+      responses:
+        "200":
+          description: List of resolved implicit requirements.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImplicitRequirementsLookupResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
 components:
   responses:
     ErrorResponse:
@@ -3115,6 +3139,7 @@ components:
         allows_try_deposit:
           type: boolean
 
+    # TODO PP: move it to separate
     TransactionAccountDepositPreValidationAuthorizedDepositorBadge:
       type: object
       required:
@@ -3618,6 +3643,17 @@ components:
           type: integer
           format: int64
 
+    NonFungibleGlobalId:
+      type: object
+      required:
+        - resource_address
+        - non_fungible_id
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        non_fungible_id:
+          $ref: "#/components/schemas/NonFungibleId"
+
     EntitiesByRoleRequirementItem:
       type: object
       required:
@@ -3629,6 +3665,87 @@ components:
         first_seen_state_version:
           type: integer
           format: int64
+
+    ResolvedImplicitRequirementType:
+      type: string
+      enum:
+        - Secp256k1PublicKey
+        - Ed25519PublicKey
+        - GlobalCallerBlueprint
+        - GlobalCallerEntity
+        - PackageOfDirectCaller
+    ResolvedImplicitRequirement:
+      type: object
+      required:
+        - type
+        - first_seen_state_version
+      properties:
+        first_seen_state_version:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/ResolvedImplicitRequirementType"
+      discriminator:
+        propertyName: type
+        mapping:
+          Secp256k1PublicKey: "#/components/schemas/ResolvedSecp256k1PublicKeyImplicitRequirement"
+          Ed25519PublicKey: "#/components/schemas/ResolvedEd25519PublicKeyImplicitRequirement"
+          GlobalCallerBlueprint: "#/components/schemas/ResolvedGlobalCallerBlueprintImplicitRequirement"
+          GlobalCallerEntity: "#/components/schemas/ResolvedGlobalCallerEntityImplicitRequirement"
+          PackageOfDirectCaller: "#/components/schemas/ResolvedPackageOfDirectCallerImplicitRequirement"
+
+    ResolvedSecp256k1PublicKeyImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - public_key_bytes
+          properties:
+            public_key_bytes:
+              $ref: "#/components/schemas/HexString"
+
+    ResolvedEd25519PublicKeyImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - public_key_bytes
+          properties:
+            public_key_bytes:
+              $ref: "#/components/schemas/HexString"
+
+    ResolvedGlobalCallerBlueprintImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - package_address
+            - blueprint_name
+          properties:
+            package_address:
+              $ref: "#/components/schemas/Address"
+            blueprint_name:
+              type: string
+
+    ResolvedGlobalCallerEntityImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - entity_address
+          properties:
+            entity_address:
+              $ref: "#/components/schemas/Address"
+
+    ResolvedPackageOfDirectCallerImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - package_address
+          properties:
+            package_address:
+              $ref: "#/components/schemas/Address"
 
     ResourceHoldersCollection:
       allOf:
@@ -3677,7 +3794,6 @@ components:
           properties:
             amount:
               $ref: "#/components/schemas/BigDecimal"
-
 
     ResourceHoldersCollectionNonFungibleResourceItem:
       allOf:
@@ -5824,6 +5940,42 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
+
+    ImplicitRequirementsLookupRequest:
+      allOf:
+        - type: object
+          required:
+            - requirements
+          properties:
+            requirements:
+              type: array
+              description: # TODO PP
+              items:
+                $ref: "#/components/schemas/NonFungibleGlobalId"
+      example:
+        requirements:
+          - resource_address: "<sample-implicit-requirement-resource-address>" # TODO PP: create it
+            non_fungible_id: "<sample-implicit-requirement-non-fungible-id>"
+
+    ImplicitRequirementsLookupResponse:
+      type: object
+      required:
+        - resolved_requirements
+      properties:
+        resolved_requirements:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImplicitRequirementsLookupCollectionItem"
+
+    ImplicitRequirementsLookupCollectionItem:
+      type: object
+      required:
+        - requirement
+      properties:
+        requirement:
+          $ref: "#/components/schemas/NonFungibleGlobalId"
+        resolved:
+          $ref: "#/components/schemas/ResolvedImplicitRequirement"
 
     ResourceHoldersRequest:
       allOf:
