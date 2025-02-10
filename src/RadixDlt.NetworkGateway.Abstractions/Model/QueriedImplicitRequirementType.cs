@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,59 +62,12 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
-
-[Table("implicit_requirements")]
-internal abstract class ImplicitRequirement
+public enum QueriedImplicitRequirementType
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("hash")]
-    public string Hash { get; set; }
-
-    [Column("first_seen_state_version")]
-    public long FirstSeenStateVersion { get; set; }
-
-    [Column(CommonDbContext.DiscriminatorColumnName)]
-    public ImplicitRequirementType Discriminator { get; set; }
-}
-
-internal class GlobalCallerEntityImplicitRequirement : ImplicitRequirement
-{
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-}
-
-internal class PackageOfDirectCallerImplicitRequirement : ImplicitRequirement
-{
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-}
-
-internal class GlobalCallerBlueprintImplicitRequirement : ImplicitRequirement
-{
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("blueprint_name")]
-    public string BlueprintName { get; set; }
-}
-
-internal class Secp256K1PublicKeyImplicitRequirement : ImplicitRequirement
-{
-    [Column("public_key_bytes")]
-    public byte[] PublicKeyBytes { get; set; }
-}
-
-internal class Ed25519PublicKeyImplicitRequirement : ImplicitRequirement
-{
-    [Column("public_key_bytes")]
-    public byte[] PublicKeyBytes { get; set; }
+    PackageOfDirectCaller,
+    GlobalCaller,
+    Ed25519PublicKey,
+    Secp256k1PublicKey,
 }

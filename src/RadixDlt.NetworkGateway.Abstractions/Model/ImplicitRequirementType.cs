@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
 public enum ImplicitRequirementType
 {

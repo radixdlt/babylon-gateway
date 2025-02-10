@@ -225,7 +225,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
         modelBuilder.HasPostgresEnum<StandardMetadataKey>();
         modelBuilder.HasPostgresEnum<EntityRoleRequirementType>();
-        modelBuilder.HasPostgresEnum<ImplicitRequirementType>();
+        modelBuilder.HasPostgresEnum<QueriedImplicitRequirementType>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -479,9 +479,11 @@ internal abstract class CommonDbContext : DbContext
 
     private static void RegisterImplicitRequirements(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<ImplicitRequirementType>();
+
         modelBuilder
             .Entity<ImplicitRequirement>()
-            .HasDiscriminator<ImplicitRequirementType>(DiscriminatorColumnName)
+            .HasDiscriminator(e => e.Discriminator)
             .HasValue<GlobalCallerEntityImplicitRequirement>(ImplicitRequirementType.GlobalCallerEntity)
             .HasValue<PackageOfDirectCallerImplicitRequirement>(ImplicitRequirementType.PackageOfDirectCaller)
             .HasValue<GlobalCallerBlueprintImplicitRequirement>(ImplicitRequirementType.GlobalCallerBlueprint)
@@ -490,42 +492,49 @@ internal abstract class CommonDbContext : DbContext
 
         // TODO PP: do we need to include discriminator in indexes as it already uses discriminator filter?
 
-        // Used by Data aggregator when inserting new data.
+        // TODO PP:
+        // should be used by Data aggregator when inserting new data. (isn't right now)
         modelBuilder
             .Entity<GlobalCallerEntityImplicitRequirement>()
             .HasIndex(e => new { e.Hash, e.EntityId })
             .HasFilter("discriminator = 'global_caller_entity'")
+            .HasDatabaseName("IX_implicit_requirements_global_caller_entity")
             .IsUnique();
 
         modelBuilder
             .Entity<PackageOfDirectCallerImplicitRequirement>()
             .HasIndex(e => new { e.Hash, e.EntityId })
             .HasFilter("discriminator = 'package_of_direct_caller'")
+            .HasDatabaseName("IX_implicit_requirements_package_of_direct_caller")
             .IsUnique();
 
         modelBuilder
             .Entity<GlobalCallerBlueprintImplicitRequirement>()
             .HasIndex(e => new { e.Hash, e.EntityId, e.BlueprintName })
             .HasFilter("discriminator = 'global_caller_blueprint'")
+            .HasDatabaseName("IX_implicit_requirements_global_caller_blueprint")
             .IsUnique();
 
         modelBuilder
             .Entity<Secp256K1PublicKeyImplicitRequirement>()
             .HasIndex(e => new { e.Hash })
             .HasFilter("discriminator = 'secp256k1public_key'")
+            .HasDatabaseName("IX_implicit_requirements_secp256k1public_key")
             .IsUnique();
 
         modelBuilder
             .Entity<Ed25519PublicKeyImplicitRequirement>()
             .HasIndex(e => new { e.Hash })
             .HasFilter("discriminator = 'ed25519public_key'")
+            .HasDatabaseName("IX_implicit_requirements_ed25519public_key")
             .IsUnique();
 
-        // TODO PP: update that once we have query.
-        // Used by API when querying.
+        // TODO PP: check performance here if we use that index.
+        // we might actually not as we're using lots of OR in query, maybe we'll have to do unions?
         modelBuilder
             .Entity<ImplicitRequirement>()
-            .HasIndex(e => new { e.Hash, e.FirstSeenStateVersion });
+            .HasIndex(e => new { e.Discriminator, e.Hash })
+            .IncludeProperties("first_seen_state_version, entity_id, blueprint_name, public_key_bytes");
     }
 
     private static void RegisterEntitiesByRoleRequirement(ModelBuilder modelBuilder)

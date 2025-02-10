@@ -102,6 +102,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:pending_transaction_intent_ledger_status", "unknown,committed,commit_pending,permanent_rejection,possible_to_commit,likely_but_not_certain_rejection")
                 .Annotation("Npgsql:Enum:pending_transaction_payload_ledger_status", "unknown,committed,commit_pending,clashing_commit,permanently_rejected,transiently_accepted,transiently_rejected")
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
+                .Annotation("Npgsql:Enum:queried_implicit_requirement_type", "package_of_direct_caller,global_caller,ed25519public_key,secp256k1public_key")
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible")
                 .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
                 .Annotation("Npgsql:Enum:standard_metadata_key", "dapp_account_type,dapp_definition,dapp_definitions,dapp_claimed_websites,dapp_claimed_entities,dapp_account_locker")
@@ -498,6 +499,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     hash = table.Column<string>(type: "text", nullable: false),
                     first_seen_state_version = table.Column<long>(type: "bigint", nullable: false),
                     discriminator = table.Column<ImplicitRequirementType>(type: "implicit_requirement_type", nullable: false),
+                    public_key_bytes = table.Column<byte[]>(type: "bytea", nullable: true),
                     entity_id = table.Column<long>(type: "bigint", nullable: true),
                     blueprint_name = table.Column<string>(type: "text", nullable: true)
                 },
@@ -1269,40 +1271,40 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_implicit_requirements_hash",
+                name: "IX_implicit_requirements_discriminator_hash",
+                table: "implicit_requirements",
+                columns: new[] { "discriminator", "hash" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_implicit_requirements_ed25519public_key",
                 table: "implicit_requirements",
                 column: "hash",
                 unique: true,
                 filter: "discriminator = 'ed25519public_key'");
 
             migrationBuilder.CreateIndex(
-                name: "IX_implicit_requirements_hash_entity_id",
-                table: "implicit_requirements",
-                columns: new[] { "hash", "entity_id" },
-                unique: true,
-                filter: "discriminator = 'global_caller_entity'");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_implicit_requirements_hash_entity_id_blueprint_name",
+                name: "IX_implicit_requirements_global_caller_blueprint",
                 table: "implicit_requirements",
                 columns: new[] { "hash", "entity_id", "blueprint_name" },
                 unique: true,
                 filter: "discriminator = 'global_caller_blueprint'");
 
             migrationBuilder.CreateIndex(
-                name: "IX_implicit_requirements_hash_entity_id1",
+                name: "IX_implicit_requirements_global_caller_entity",
+                table: "implicit_requirements",
+                columns: new[] { "hash", "entity_id" },
+                unique: true,
+                filter: "discriminator = 'global_caller_entity'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_implicit_requirements_package_of_direct_caller",
                 table: "implicit_requirements",
                 columns: new[] { "hash", "entity_id" },
                 unique: true,
                 filter: "discriminator = 'package_of_direct_caller'");
 
             migrationBuilder.CreateIndex(
-                name: "IX_implicit_requirements_hash_first_seen_state_version",
-                table: "implicit_requirements",
-                columns: new[] { "hash", "first_seen_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_implicit_requirements_hash1",
+                name: "IX_implicit_requirements_secp256k1public_key",
                 table: "implicit_requirements",
                 column: "hash",
                 unique: true,
