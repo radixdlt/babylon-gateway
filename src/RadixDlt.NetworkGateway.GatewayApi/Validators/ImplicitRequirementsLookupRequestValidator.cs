@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,66 +62,59 @@
  * permissions under this License.
  */
 
+using FluentValidation;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public interface IExtensionsHandler
+internal class ImplicitRequirementsLookupRequestValidator : AbstractValidator<ImplicitRequirementsLookupRequest>
 {
-    Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token);
+    public ImplicitRequirementsLookupRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        RadixAddressValidator radixAddressValidator,
+        INetworkConfigurationProvider networkConfigurationProvider
+        )
+    {
+        RuleFor(x => x.Requirements)
+            .NotEmpty()
+            .DependentRules(
+                () =>
+                {
+                    RuleFor(x => x.Requirements.Count)
+                        .GreaterThan(0)
+                        .LessThanOrEqualTo(endpointOptionsSnapshot.Value.ImplicitRequirementsLookupMaxRequestedRequirementsCount);
 
-    Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token);
-
-    Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token);
-
-    Task<GatewayModel.ImplicitRequirementsLookupResponse> ImplicitRequirementsLookup(GatewayModel.ImplicitRequirementsLookupRequest request, CancellationToken token);
+                    RuleForEach(x => x.Requirements)
+                        .NotEmpty()
+                        .SetValidator(new ImplicitRequirementNonFungibleGlobalIdValidator(radixAddressValidator, networkConfigurationProvider));
+                });
+    }
 }
 
-internal class DefaultExtensionsHandler(
-    IResourceHoldersQuerier resourceHoldersQuerier,
-    IEntitiesByRoleRequirementQuerier entitiesByRoleRequirementQuerier,
-    IImplicitRequirementsQuerier implicitRequirementsQuerier,
-    IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
+internal class ImplicitRequirementNonFungibleGlobalIdValidator : AbstractValidator<NonFungibleGlobalId>
 {
-    public async Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token)
+    public ImplicitRequirementNonFungibleGlobalIdValidator(RadixAddressValidator radixAddressValidator, INetworkConfigurationProvider networkConfigurationProvider)
     {
-        var cursor = GatewayModel.ResourceHoldersCursor.FromCursorString(request.Cursor);
+        var wka = networkConfigurationProvider.GetNetworkConfiguration().ConfigureAwait(false).GetAwaiter().GetResult().WellKnownAddresses;
+        var allowedImplicitRequirementResourceAddresses = new[]
+        {
+            wka.Ed25519SignatureVirtualBadge,
+            wka.Secp256k1SignatureVirtualBadge,
+            wka.GlobalCallerVirtualBadge,
+            wka.PackageOfDirectCallerVirtualBadge,
+            wka.SystemTransactionBadge,
+        };
 
-        return await resourceHoldersQuerier.ResourceHolders(
-            (EntityAddress)request.ResourceAddress,
-            endpointConfiguration.Value.ResolveResourceHoldersPageSize(request.LimitPerPage),
-            cursor,
-            token);
-    }
-
-    public async Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token)
-    {
-        var cursor = GatewayModel.IdBoundaryCoursor.FromCursorString(request.Cursor);
-
-        return await entitiesByRoleRequirementQuerier.EntitiesByRoleRequirementPage(
-            (EntityAddress)request.ResourceAddress,
-            request.NonFungibleId,
-            endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
-            cursor,
-            token);
-    }
-
-    public async Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token)
-    {
-        return await entitiesByRoleRequirementQuerier.EntitiesByRoleRequirementLookup(
-            request.Requirements,
-            endpointConfiguration.Value.MaxHeavyCollectionsPageSize,
-            token);
-    }
-
-    public async Task<GatewayModel.ImplicitRequirementsLookupResponse> ImplicitRequirementsLookup(GatewayModel.ImplicitRequirementsLookupRequest request, CancellationToken token)
-    {
-        return await implicitRequirementsQuerier.ImplicitRequirementsLookup(request.Requirements, token);
+        RuleFor(x => x.ResourceAddress)
+            .NotEmpty()
+            .SetValidator(radixAddressValidator)
+            .Must(x => allowedImplicitRequirementResourceAddresses.Contains(x))
+            .WithMessage("Only implicit requirement resource addresses are allowed: " + string.Join(", ", allowedImplicitRequirementResourceAddresses));
     }
 }
