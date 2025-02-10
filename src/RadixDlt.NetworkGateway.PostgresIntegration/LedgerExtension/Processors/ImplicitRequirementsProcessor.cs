@@ -67,6 +67,7 @@ using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.StandardMetadata;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -223,17 +224,25 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
         switch (publicKeyHash)
         {
             case PublicKeyHash.Ed25519 ed25519:
-                _secp256K1PublicKeyImplicitRequirements.TryAdd(
-                    ed25519.value.ToHex(), new Secp256K1PublicKeyImplicitRequirement
+                _ed25519PublicKeyCopyImplicitRequirements.TryAdd(
+                    ed25519.value.ToHex(),
+                    new Ed25519PublicKeyImplicitRequirement
                     {
-                        Id = _context.Sequences.ImplicitRequirementsSequence++, Hash = ed25519.value.ToHex(), FirstSeenStateVersion = stateVersion,
+                        Id = _context.Sequences.ImplicitRequirementsSequence++,
+                        Hash = ed25519.value.ToHex(),
+                        FirstSeenStateVersion = stateVersion,
+                        PublicKeyBytes = ((PublicKey.Ed25519)publicKey).value,
                     });
                 break;
             case PublicKeyHash.Secp256k1 secp256K1:
                 _secp256K1PublicKeyImplicitRequirements.TryAdd(
-                    secp256K1.value.ToHex(), new Secp256K1PublicKeyImplicitRequirement
+                    secp256K1.value.ToHex(),
+                    new Secp256K1PublicKeyImplicitRequirement
                     {
-                        Id = _context.Sequences.ImplicitRequirementsSequence++, Hash = secp256K1.value.ToHex(), FirstSeenStateVersion = stateVersion,
+                        Id = _context.Sequences.ImplicitRequirementsSequence++,
+                        Hash = secp256K1.value.ToHex(),
+                        FirstSeenStateVersion = stateVersion,
+                        PublicKeyBytes = ((PublicKey.Secp256k1)publicKey).value,
                     });
                 break;
 
@@ -293,7 +302,7 @@ ON COMMIT DROP";
 
         await using var writer =
             await connection.BeginBinaryImportAsync(
-                "COPY tmp_implicit_requirements(id, hash, first_seen_state_version, discriminator, entity_id, blueprint_name) FROM STDIN (FORMAT BINARY)",
+                "COPY tmp_implicit_requirements(id, hash, first_seen_state_version, discriminator, public_key_bytes, entity_id, blueprint_name) FROM STDIN (FORMAT BINARY)",
                 _context.Token);
 
         foreach (var e in entities)
@@ -308,24 +317,35 @@ ON COMMIT DROP";
 
             if (e is PackageOfDirectCallerImplicitRequirement packageOfDirectCallerImplicitRequirement)
             {
+                await writer.WriteNullAsync(_context.Token);
                 await writer.WriteAsync(packageOfDirectCallerImplicitRequirement.EntityId, NpgsqlDbType.Bigint, _context.Token);
                 await writer.WriteNullAsync(_context.Token);
             }
 
             if (e is GlobalCallerEntityImplicitRequirement globalCallerEntityImplicitRequirement)
             {
+                await writer.WriteNullAsync(_context.Token);
                 await writer.WriteAsync(globalCallerEntityImplicitRequirement.EntityId, NpgsqlDbType.Bigint, _context.Token);
                 await writer.WriteNullAsync(_context.Token);
             }
 
             if (e is GlobalCallerBlueprintImplicitRequirement globalCallerBlueprintImplicitRequirement)
             {
+                await writer.WriteNullAsync(_context.Token);
                 await writer.WriteAsync(globalCallerBlueprintImplicitRequirement.EntityId, NpgsqlDbType.Bigint, _context.Token);
                 await writer.WriteAsync(globalCallerBlueprintImplicitRequirement.BlueprintName, NpgsqlDbType.Text, _context.Token);
             }
 
-            if (e is Ed25519PublicKeyImplicitRequirement or Secp256K1PublicKeyImplicitRequirement)
+            if (e is Ed25519PublicKeyImplicitRequirement ed25519PublicKeyImplicitRequirement)
             {
+                await writer.WriteAsync(ed25519PublicKeyImplicitRequirement.PublicKeyBytes, NpgsqlDbType.Bytea, _context.Token);
+                await writer.WriteNullAsync(_context.Token);
+                await writer.WriteNullAsync(_context.Token);
+            }
+
+            if (e is Secp256K1PublicKeyImplicitRequirement secp256K1PublicKeyImplicitRequirement)
+            {
+                await writer.WriteAsync(secp256K1PublicKeyImplicitRequirement.PublicKeyBytes, NpgsqlDbType.Bytea, _context.Token);
                 await writer.WriteNullAsync(_context.Token);
                 await writer.WriteNullAsync(_context.Token);
             }
@@ -349,7 +369,7 @@ ON
         (tmp.discriminator  = 'package_of_direct_caller' AND oh.entity_id = tmp.entity_id) OR
         (tmp.discriminator  = 'global_caller_entity' AND oh.entity_id = tmp.entity_id)
     )
-WHEN NOT MATCHED THEN INSERT VALUES(id, hash, first_seen_state_version, discriminator, entity_id, blueprint_name);";
+WHEN NOT MATCHED THEN INSERT VALUES(id, hash, first_seen_state_version, discriminator, public_key_bytes, entity_id, blueprint_name);";
 
         await mergeCommand.ExecuteNonQueryAsync(_context.Token);
 
