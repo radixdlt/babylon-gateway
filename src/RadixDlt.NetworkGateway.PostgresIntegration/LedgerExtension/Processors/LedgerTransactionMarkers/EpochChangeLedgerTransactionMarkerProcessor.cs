@@ -67,7 +67,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal class EpochChangeLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor
+internal class EpochChangeLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor, ITransactionProcessor
 {
     private readonly ProcessorContext _context;
     private readonly List<EpochChangeLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
