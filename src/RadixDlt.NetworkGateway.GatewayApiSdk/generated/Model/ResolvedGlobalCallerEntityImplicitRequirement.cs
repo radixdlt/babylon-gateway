@@ -99,7 +99,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerBlueprintImplicitRequirement), "GlobalCallerBlueprint")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerEntityImplicitRequirement), "GlobalCallerEntity")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedPackageOfDirectCallerImplicitRequirement), "PackageOfDirectCaller")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedProtocolExecutionImplicitRequirement), "ProtocolExecution")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedSecp256k1PublicKeyImplicitRequirement), "Secp256k1PublicKey")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedValidatorExecutionImplicitRequirement), "ValidatorExecution")]
     public partial class ResolvedGlobalCallerEntityImplicitRequirement : ResolvedImplicitRequirement, IEquatable<ResolvedGlobalCallerEntityImplicitRequirement>
     {
         /// <summary>
@@ -110,11 +112,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedGlobalCallerEntityImplicitRequirement" /> class.
         /// </summary>
-        /// <param name="entityAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="type">type (required) (default to ResolvedImplicitRequirementType.GlobalCallerEntity).</param>
-        public ResolvedGlobalCallerEntityImplicitRequirement(string entityAddress = default(string), long firstSeenStateVersion = default(long), ResolvedImplicitRequirementType type = ResolvedImplicitRequirementType.GlobalCallerEntity) : base(firstSeenStateVersion, type)
+        public ResolvedGlobalCallerEntityImplicitRequirement(long firstSeenStateVersion = default(long), string entityAddress = default(string), ResolvedImplicitRequirementType type = ResolvedImplicitRequirementType.GlobalCallerEntity) : base(type)
         {
+            this.FirstSeenStateVersion = firstSeenStateVersion;
             // to ensure "entityAddress" is required (not null)
             if (entityAddress == null)
             {
@@ -122,6 +125,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.EntityAddress = entityAddress;
         }
+
+        /// <summary>
+        /// Gets or Sets FirstSeenStateVersion
+        /// </summary>
+        [DataMember(Name = "first_seen_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long FirstSeenStateVersion { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the address.
@@ -139,6 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ResolvedGlobalCallerEntityImplicitRequirement {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  FirstSeenStateVersion: ").Append(FirstSeenStateVersion).Append("\n");
             sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -176,6 +186,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
+                    this.FirstSeenStateVersion == input.FirstSeenStateVersion ||
+                    this.FirstSeenStateVersion.Equals(input.FirstSeenStateVersion)
+                ) && base.Equals(input) && 
+                (
                     this.EntityAddress == input.EntityAddress ||
                     (this.EntityAddress != null &&
                     this.EntityAddress.Equals(input.EntityAddress))
@@ -191,6 +205,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 59) + this.FirstSeenStateVersion.GetHashCode();
                 if (this.EntityAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();

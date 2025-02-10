@@ -103,10 +103,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedGlobalCallerBlueprintImplicitRequirementAllOf" /> class.
         /// </summary>
+        /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
         /// <param name="packageAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
-        public ResolvedGlobalCallerBlueprintImplicitRequirementAllOf(string packageAddress = default(string), string blueprintName = default(string))
+        public ResolvedGlobalCallerBlueprintImplicitRequirementAllOf(long firstSeenStateVersion = default(long), string packageAddress = default(string), string blueprintName = default(string))
         {
+            this.FirstSeenStateVersion = firstSeenStateVersion;
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
             {
@@ -120,6 +122,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.BlueprintName = blueprintName;
         }
+
+        /// <summary>
+        /// Gets or Sets FirstSeenStateVersion
+        /// </summary>
+        [DataMember(Name = "first_seen_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long FirstSeenStateVersion { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the address.
@@ -142,6 +150,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ResolvedGlobalCallerBlueprintImplicitRequirementAllOf {\n");
+            sb.Append("  FirstSeenStateVersion: ").Append(FirstSeenStateVersion).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("}\n");
@@ -180,6 +189,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.FirstSeenStateVersion == input.FirstSeenStateVersion ||
+                    this.FirstSeenStateVersion.Equals(input.FirstSeenStateVersion)
+                ) && 
+                (
                     this.PackageAddress == input.PackageAddress ||
                     (this.PackageAddress != null &&
                     this.PackageAddress.Equals(input.PackageAddress))
@@ -200,6 +213,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.FirstSeenStateVersion.GetHashCode();
                 if (this.PackageAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();

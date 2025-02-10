@@ -3676,15 +3676,13 @@ components:
         - GlobalCallerBlueprint
         - GlobalCallerEntity
         - PackageOfDirectCaller
+        - ProtocolExecution
+        - ValidatorExecution
     ResolvedImplicitRequirement:
       type: object
       required:
         - type
-        - first_seen_state_version
       properties:
-        first_seen_state_version:
-          type: integer
-          format: int64
         type:
           $ref: "#/components/schemas/ResolvedImplicitRequirementType"
       discriminator:
@@ -3695,15 +3693,31 @@ components:
           GlobalCallerBlueprint: "#/components/schemas/ResolvedGlobalCallerBlueprintImplicitRequirement"
           GlobalCallerEntity: "#/components/schemas/ResolvedGlobalCallerEntityImplicitRequirement"
           PackageOfDirectCaller: "#/components/schemas/ResolvedPackageOfDirectCallerImplicitRequirement"
+          ProtocolExecution: "#/components/schemas/ResolvedProtocolExecutionImplicitRequirement"
+          ValidatorExecution: "#/components/schemas/ResolvedValidatorExecutionImplicitRequirement"
+
+    ResolvedProtocolExecutionImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+
+    ResolvedValidatorExecutionImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
 
     ResolvedSecp256k1PublicKeyImplicitRequirement:
       allOf:
         - $ref: "#/components/schemas/ResolvedImplicitRequirement"
         - type: object
           required:
-            - public_key_bytes
+            - first_seen_state_version
+            - public_key_bytes_hex
           properties:
-            public_key_bytes:
+            first_seen_state_version:
+              type: integer
+              format: int64
+            public_key_bytes_hex:
               $ref: "#/components/schemas/HexString"
 
     ResolvedEd25519PublicKeyImplicitRequirement:
@@ -3711,9 +3725,13 @@ components:
         - $ref: "#/components/schemas/ResolvedImplicitRequirement"
         - type: object
           required:
-            - public_key_bytes
+            - public_key_bytes_hex
+            - first_seen_state_version
           properties:
-            public_key_bytes:
+            first_seen_state_version:
+              type: integer
+              format: int64
+            public_key_bytes_hex:
               $ref: "#/components/schemas/HexString"
 
     ResolvedGlobalCallerBlueprintImplicitRequirement:
@@ -3721,9 +3739,13 @@ components:
         - $ref: "#/components/schemas/ResolvedImplicitRequirement"
         - type: object
           required:
+            - first_seen_state_version
             - package_address
             - blueprint_name
           properties:
+            first_seen_state_version:
+              type: integer
+              format: int64
             package_address:
               $ref: "#/components/schemas/Address"
             blueprint_name:
@@ -3734,8 +3756,12 @@ components:
         - $ref: "#/components/schemas/ResolvedImplicitRequirement"
         - type: object
           required:
+            - first_seen_state_version
             - entity_address
           properties:
+            first_seen_state_version:
+              type: integer
+              format: int64
             entity_address:
               $ref: "#/components/schemas/Address"
 
@@ -3744,8 +3770,12 @@ components:
         - $ref: "#/components/schemas/ResolvedImplicitRequirement"
         - type: object
           required:
+            - first_seen_state_version
             - package_address
           properties:
+            first_seen_state_version:
+              type: integer
+              format: int64
             package_address:
               $ref: "#/components/schemas/Address"
 
@@ -5951,7 +5981,7 @@ components:
           properties:
             requirements:
               type: array
-              description: # TODO PP
+              description: # TODO PP add description and document limited to?
               items:
                 $ref: "#/components/schemas/NonFungibleGlobalId"
       example:

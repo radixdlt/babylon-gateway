@@ -99,7 +99,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerBlueprintImplicitRequirement), "GlobalCallerBlueprint")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerEntityImplicitRequirement), "GlobalCallerEntity")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedPackageOfDirectCallerImplicitRequirement), "PackageOfDirectCaller")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedProtocolExecutionImplicitRequirement), "ProtocolExecution")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedSecp256k1PublicKeyImplicitRequirement), "Secp256k1PublicKey")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedValidatorExecutionImplicitRequirement), "ValidatorExecution")]
     public partial class ResolvedEd25519PublicKeyImplicitRequirement : ResolvedImplicitRequirement, IEquatable<ResolvedEd25519PublicKeyImplicitRequirement>
     {
         /// <summary>
@@ -110,25 +112,32 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedEd25519PublicKeyImplicitRequirement" /> class.
         /// </summary>
-        /// <param name="publicKeyBytes">Hex-encoded binary blob. (required).</param>
         /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
+        /// <param name="publicKeyBytesHex">Hex-encoded binary blob. (required).</param>
         /// <param name="type">type (required) (default to ResolvedImplicitRequirementType.Ed25519PublicKey).</param>
-        public ResolvedEd25519PublicKeyImplicitRequirement(string publicKeyBytes = default(string), long firstSeenStateVersion = default(long), ResolvedImplicitRequirementType type = ResolvedImplicitRequirementType.Ed25519PublicKey) : base(firstSeenStateVersion, type)
+        public ResolvedEd25519PublicKeyImplicitRequirement(long firstSeenStateVersion = default(long), string publicKeyBytesHex = default(string), ResolvedImplicitRequirementType type = ResolvedImplicitRequirementType.Ed25519PublicKey) : base(type)
         {
-            // to ensure "publicKeyBytes" is required (not null)
-            if (publicKeyBytes == null)
+            this.FirstSeenStateVersion = firstSeenStateVersion;
+            // to ensure "publicKeyBytesHex" is required (not null)
+            if (publicKeyBytesHex == null)
             {
-                throw new ArgumentNullException("publicKeyBytes is a required property for ResolvedEd25519PublicKeyImplicitRequirement and cannot be null");
+                throw new ArgumentNullException("publicKeyBytesHex is a required property for ResolvedEd25519PublicKeyImplicitRequirement and cannot be null");
             }
-            this.PublicKeyBytes = publicKeyBytes;
+            this.PublicKeyBytesHex = publicKeyBytesHex;
         }
+
+        /// <summary>
+        /// Gets or Sets FirstSeenStateVersion
+        /// </summary>
+        [DataMember(Name = "first_seen_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long FirstSeenStateVersion { get; set; }
 
         /// <summary>
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "public_key_bytes", IsRequired = true, EmitDefaultValue = true)]
-        public string PublicKeyBytes { get; set; }
+        [DataMember(Name = "public_key_bytes_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PublicKeyBytesHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -139,7 +148,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ResolvedEd25519PublicKeyImplicitRequirement {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  PublicKeyBytes: ").Append(PublicKeyBytes).Append("\n");
+            sb.Append("  FirstSeenStateVersion: ").Append(FirstSeenStateVersion).Append("\n");
+            sb.Append("  PublicKeyBytesHex: ").Append(PublicKeyBytesHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,9 +186,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.PublicKeyBytes == input.PublicKeyBytes ||
-                    (this.PublicKeyBytes != null &&
-                    this.PublicKeyBytes.Equals(input.PublicKeyBytes))
+                    this.FirstSeenStateVersion == input.FirstSeenStateVersion ||
+                    this.FirstSeenStateVersion.Equals(input.FirstSeenStateVersion)
+                ) && base.Equals(input) && 
+                (
+                    this.PublicKeyBytesHex == input.PublicKeyBytesHex ||
+                    (this.PublicKeyBytesHex != null &&
+                    this.PublicKeyBytesHex.Equals(input.PublicKeyBytesHex))
                 );
         }
 
@@ -191,9 +205,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.PublicKeyBytes != null)
+                hashCode = (hashCode * 59) + this.FirstSeenStateVersion.GetHashCode();
+                if (this.PublicKeyBytesHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.PublicKeyBytes.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PublicKeyBytesHex.GetHashCode();
                 }
                 return hashCode;
             }

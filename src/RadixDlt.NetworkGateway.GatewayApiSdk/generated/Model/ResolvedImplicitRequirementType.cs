@@ -123,7 +123,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Enum PackageOfDirectCaller for value: PackageOfDirectCaller
         /// </summary>
         [EnumMember(Value = "PackageOfDirectCaller")]
-        PackageOfDirectCaller = 5
+        PackageOfDirectCaller = 5,
+
+        /// <summary>
+        /// Enum ProtocolExecution for value: ProtocolExecution
+        /// </summary>
+        [EnumMember(Value = "ProtocolExecution")]
+        ProtocolExecution = 6,
+
+        /// <summary>
+        /// Enum ValidatorExecution for value: ValidatorExecution
+        /// </summary>
+        [EnumMember(Value = "ValidatorExecution")]
+        ValidatorExecution = 7
 
     }
 

@@ -99,12 +99,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerBlueprintImplicitRequirement), "GlobalCallerBlueprint")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerEntityImplicitRequirement), "GlobalCallerEntity")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedPackageOfDirectCallerImplicitRequirement), "PackageOfDirectCaller")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedProtocolExecutionImplicitRequirement), "ProtocolExecution")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedEd25519PublicKeyImplicitRequirement), "ResolvedEd25519PublicKeyImplicitRequirement")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerBlueprintImplicitRequirement), "ResolvedGlobalCallerBlueprintImplicitRequirement")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerEntityImplicitRequirement), "ResolvedGlobalCallerEntityImplicitRequirement")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedPackageOfDirectCallerImplicitRequirement), "ResolvedPackageOfDirectCallerImplicitRequirement")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedProtocolExecutionImplicitRequirement), "ResolvedProtocolExecutionImplicitRequirement")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedSecp256k1PublicKeyImplicitRequirement), "ResolvedSecp256k1PublicKeyImplicitRequirement")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedValidatorExecutionImplicitRequirement), "ResolvedValidatorExecutionImplicitRequirement")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedSecp256k1PublicKeyImplicitRequirement), "Secp256k1PublicKey")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedValidatorExecutionImplicitRequirement), "ValidatorExecution")]
     public partial class ResolvedImplicitRequirement : IEquatable<ResolvedImplicitRequirement>
     {
 
@@ -121,19 +125,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedImplicitRequirement" /> class.
         /// </summary>
-        /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
         /// <param name="type">type (required).</param>
-        public ResolvedImplicitRequirement(long firstSeenStateVersion = default(long), ResolvedImplicitRequirementType type = default(ResolvedImplicitRequirementType))
+        public ResolvedImplicitRequirement(ResolvedImplicitRequirementType type = default(ResolvedImplicitRequirementType))
         {
-            this.FirstSeenStateVersion = firstSeenStateVersion;
             this.Type = type;
         }
-
-        /// <summary>
-        /// Gets or Sets FirstSeenStateVersion
-        /// </summary>
-        [DataMember(Name = "first_seen_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long FirstSeenStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,7 +139,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ResolvedImplicitRequirement {\n");
-            sb.Append("  FirstSeenStateVersion: ").Append(FirstSeenStateVersion).Append("\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -181,10 +176,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.FirstSeenStateVersion == input.FirstSeenStateVersion ||
-                    this.FirstSeenStateVersion.Equals(input.FirstSeenStateVersion)
-                ) && 
-                (
                     this.Type == input.Type ||
                     this.Type.Equals(input.Type)
                 );
@@ -199,7 +190,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.FirstSeenStateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }

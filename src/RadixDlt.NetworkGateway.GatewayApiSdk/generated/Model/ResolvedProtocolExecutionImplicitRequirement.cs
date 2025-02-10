@@ -84,50 +84,38 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResolvedGlobalCallerEntityImplicitRequirementAllOf
+    /// ResolvedProtocolExecutionImplicitRequirement
     /// </summary>
-    [DataContract(Name = "ResolvedGlobalCallerEntityImplicitRequirement_allOf")]
-    public partial class ResolvedGlobalCallerEntityImplicitRequirementAllOf : IEquatable<ResolvedGlobalCallerEntityImplicitRequirementAllOf>
+    [DataContract(Name = "ResolvedProtocolExecutionImplicitRequirement")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedEd25519PublicKeyImplicitRequirement), "Ed25519PublicKey")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerBlueprintImplicitRequirement), "GlobalCallerBlueprint")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerEntityImplicitRequirement), "GlobalCallerEntity")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedPackageOfDirectCallerImplicitRequirement), "PackageOfDirectCaller")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedProtocolExecutionImplicitRequirement), "ProtocolExecution")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedSecp256k1PublicKeyImplicitRequirement), "Secp256k1PublicKey")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedValidatorExecutionImplicitRequirement), "ValidatorExecution")]
+    public partial class ResolvedProtocolExecutionImplicitRequirement : ResolvedImplicitRequirement, IEquatable<ResolvedProtocolExecutionImplicitRequirement>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResolvedGlobalCallerEntityImplicitRequirementAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ResolvedProtocolExecutionImplicitRequirement" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResolvedGlobalCallerEntityImplicitRequirementAllOf() { }
+        protected ResolvedProtocolExecutionImplicitRequirement() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResolvedGlobalCallerEntityImplicitRequirementAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ResolvedProtocolExecutionImplicitRequirement" /> class.
         /// </summary>
-        /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
-        /// <param name="entityAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public ResolvedGlobalCallerEntityImplicitRequirementAllOf(long firstSeenStateVersion = default(long), string entityAddress = default(string))
+        /// <param name="type">type (required) (default to ResolvedImplicitRequirementType.ProtocolExecution).</param>
+        public ResolvedProtocolExecutionImplicitRequirement(ResolvedImplicitRequirementType type = ResolvedImplicitRequirementType.ProtocolExecution) : base(type)
         {
-            this.FirstSeenStateVersion = firstSeenStateVersion;
-            // to ensure "entityAddress" is required (not null)
-            if (entityAddress == null)
-            {
-                throw new ArgumentNullException("entityAddress is a required property for ResolvedGlobalCallerEntityImplicitRequirementAllOf and cannot be null");
-            }
-            this.EntityAddress = entityAddress;
         }
-
-        /// <summary>
-        /// Gets or Sets FirstSeenStateVersion
-        /// </summary>
-        [DataMember(Name = "first_seen_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long FirstSeenStateVersion { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +124,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResolvedGlobalCallerEntityImplicitRequirementAllOf {\n");
-            sb.Append("  FirstSeenStateVersion: ").Append(FirstSeenStateVersion).Append("\n");
-            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("class ResolvedProtocolExecutionImplicitRequirement {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -147,7 +134,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -159,30 +146,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResolvedGlobalCallerEntityImplicitRequirementAllOf);
+            return this.Equals(input as ResolvedProtocolExecutionImplicitRequirement);
         }
 
         /// <summary>
-        /// Returns true if ResolvedGlobalCallerEntityImplicitRequirementAllOf instances are equal
+        /// Returns true if ResolvedProtocolExecutionImplicitRequirement instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResolvedGlobalCallerEntityImplicitRequirementAllOf to be compared</param>
+        /// <param name="input">Instance of ResolvedProtocolExecutionImplicitRequirement to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResolvedGlobalCallerEntityImplicitRequirementAllOf input)
+        public bool Equals(ResolvedProtocolExecutionImplicitRequirement input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
-                (
-                    this.FirstSeenStateVersion == input.FirstSeenStateVersion ||
-                    this.FirstSeenStateVersion.Equals(input.FirstSeenStateVersion)
-                ) && 
-                (
-                    this.EntityAddress == input.EntityAddress ||
-                    (this.EntityAddress != null &&
-                    this.EntityAddress.Equals(input.EntityAddress))
-                );
+            return base.Equals(input);
         }
 
         /// <summary>
@@ -193,12 +171,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.FirstSeenStateVersion.GetHashCode();
-                if (this.EntityAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
-                }
+                int hashCode = base.GetHashCode();
                 return hashCode;
             }
         }

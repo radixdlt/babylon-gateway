@@ -103,23 +103,31 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedSecp256k1PublicKeyImplicitRequirementAllOf" /> class.
         /// </summary>
-        /// <param name="publicKeyBytes">Hex-encoded binary blob. (required).</param>
-        public ResolvedSecp256k1PublicKeyImplicitRequirementAllOf(string publicKeyBytes = default(string))
+        /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
+        /// <param name="publicKeyBytesHex">Hex-encoded binary blob. (required).</param>
+        public ResolvedSecp256k1PublicKeyImplicitRequirementAllOf(long firstSeenStateVersion = default(long), string publicKeyBytesHex = default(string))
         {
-            // to ensure "publicKeyBytes" is required (not null)
-            if (publicKeyBytes == null)
+            this.FirstSeenStateVersion = firstSeenStateVersion;
+            // to ensure "publicKeyBytesHex" is required (not null)
+            if (publicKeyBytesHex == null)
             {
-                throw new ArgumentNullException("publicKeyBytes is a required property for ResolvedSecp256k1PublicKeyImplicitRequirementAllOf and cannot be null");
+                throw new ArgumentNullException("publicKeyBytesHex is a required property for ResolvedSecp256k1PublicKeyImplicitRequirementAllOf and cannot be null");
             }
-            this.PublicKeyBytes = publicKeyBytes;
+            this.PublicKeyBytesHex = publicKeyBytesHex;
         }
+
+        /// <summary>
+        /// Gets or Sets FirstSeenStateVersion
+        /// </summary>
+        [DataMember(Name = "first_seen_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long FirstSeenStateVersion { get; set; }
 
         /// <summary>
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "public_key_bytes", IsRequired = true, EmitDefaultValue = true)]
-        public string PublicKeyBytes { get; set; }
+        [DataMember(Name = "public_key_bytes_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PublicKeyBytesHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +137,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ResolvedSecp256k1PublicKeyImplicitRequirementAllOf {\n");
-            sb.Append("  PublicKeyBytes: ").Append(PublicKeyBytes).Append("\n");
+            sb.Append("  FirstSeenStateVersion: ").Append(FirstSeenStateVersion).Append("\n");
+            sb.Append("  PublicKeyBytesHex: ").Append(PublicKeyBytesHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,9 +175,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.PublicKeyBytes == input.PublicKeyBytes ||
-                    (this.PublicKeyBytes != null &&
-                    this.PublicKeyBytes.Equals(input.PublicKeyBytes))
+                    this.FirstSeenStateVersion == input.FirstSeenStateVersion ||
+                    this.FirstSeenStateVersion.Equals(input.FirstSeenStateVersion)
+                ) && 
+                (
+                    this.PublicKeyBytesHex == input.PublicKeyBytesHex ||
+                    (this.PublicKeyBytesHex != null &&
+                    this.PublicKeyBytesHex.Equals(input.PublicKeyBytesHex))
                 );
         }
 
@@ -181,9 +194,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PublicKeyBytes != null)
+                hashCode = (hashCode * 59) + this.FirstSeenStateVersion.GetHashCode();
+                if (this.PublicKeyBytesHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.PublicKeyBytes.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PublicKeyBytesHex.GetHashCode();
                 }
                 return hashCode;
             }

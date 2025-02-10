@@ -99,7 +99,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerBlueprintImplicitRequirement), "GlobalCallerBlueprint")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedGlobalCallerEntityImplicitRequirement), "GlobalCallerEntity")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedPackageOfDirectCallerImplicitRequirement), "PackageOfDirectCaller")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedProtocolExecutionImplicitRequirement), "ProtocolExecution")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedSecp256k1PublicKeyImplicitRequirement), "Secp256k1PublicKey")]
+    [JsonSubtypes.KnownSubType(typeof(ResolvedValidatorExecutionImplicitRequirement), "ValidatorExecution")]
     public partial class ResolvedPackageOfDirectCallerImplicitRequirement : ResolvedImplicitRequirement, IEquatable<ResolvedPackageOfDirectCallerImplicitRequirement>
     {
         /// <summary>
@@ -110,11 +112,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedPackageOfDirectCallerImplicitRequirement" /> class.
         /// </summary>
-        /// <param name="packageAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="firstSeenStateVersion">firstSeenStateVersion (required).</param>
+        /// <param name="packageAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="type">type (required) (default to ResolvedImplicitRequirementType.PackageOfDirectCaller).</param>
-        public ResolvedPackageOfDirectCallerImplicitRequirement(string packageAddress = default(string), long firstSeenStateVersion = default(long), ResolvedImplicitRequirementType type = ResolvedImplicitRequirementType.PackageOfDirectCaller) : base(firstSeenStateVersion, type)
+        public ResolvedPackageOfDirectCallerImplicitRequirement(long firstSeenStateVersion = default(long), string packageAddress = default(string), ResolvedImplicitRequirementType type = ResolvedImplicitRequirementType.PackageOfDirectCaller) : base(type)
         {
+            this.FirstSeenStateVersion = firstSeenStateVersion;
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
             {
@@ -122,6 +125,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.PackageAddress = packageAddress;
         }
+
+        /// <summary>
+        /// Gets or Sets FirstSeenStateVersion
+        /// </summary>
+        [DataMember(Name = "first_seen_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long FirstSeenStateVersion { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the address.
@@ -139,6 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ResolvedPackageOfDirectCallerImplicitRequirement {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  FirstSeenStateVersion: ").Append(FirstSeenStateVersion).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -176,6 +186,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
+                    this.FirstSeenStateVersion == input.FirstSeenStateVersion ||
+                    this.FirstSeenStateVersion.Equals(input.FirstSeenStateVersion)
+                ) && base.Equals(input) && 
+                (
                     this.PackageAddress == input.PackageAddress ||
                     (this.PackageAddress != null &&
                     this.PackageAddress.Equals(input.PackageAddress))
@@ -191,6 +205,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 59) + this.FirstSeenStateVersion.GetHashCode();
                 if (this.PackageAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
