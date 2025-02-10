@@ -25,6 +25,8 @@ Release built: _not released yet_
 
 ### What’s new?
 - Added a new configuration parameter, `GatewayApi__Endpoint__EntitiesByRoleRequirementLookupMaxRequestedRequirementsCount`, which sets the limit (default `50`) on the number of requirements that can be queried using the `/extensions/entities-by-role-requirement/lookup` endpoint.
+- Added a new configuration parameter, `GatewayApi__Endpoint__ImplicitRequirementsLookupMaxRequestedRequirementsCount`, which sets the limit (default `100`) on the number of implicit requirements that can be queried using the `/extensions/implicit-requirements/lookup` endpoint.
+
 
 ## 1.9.2
 Release built: 9.12.2024
