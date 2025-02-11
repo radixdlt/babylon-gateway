@@ -354,21 +354,45 @@ ON COMMIT DROP";
         await writer.CompleteAsync(_context.Token);
         await writer.DisposeAsync();
 
-// TODO PP: check performance here.
         await using var mergeCommand = connection.CreateCommand();
         mergeCommand.CommandText = @"
 MERGE INTO implicit_requirements oh
-USING tmp_implicit_requirements tmp
+USING (select * from tmp_implicit_requirements where discriminator = 'ed25519public_key') tmp
+ON
+    oh.hash = tmp.hash AND
+    oh.discriminator = tmp.discriminator
+WHEN NOT MATCHED THEN INSERT VALUES(id, hash, first_seen_state_version, discriminator, public_key_bytes, entity_id, blueprint_name);
+
+MERGE INTO implicit_requirements oh
+USING (select * from tmp_implicit_requirements where discriminator = 'secp256k1public_key') tmp
+ON
+    oh.hash = tmp.hash AND
+    oh.discriminator = tmp.discriminator
+WHEN NOT MATCHED THEN INSERT VALUES(id, hash, first_seen_state_version, discriminator, public_key_bytes, entity_id, blueprint_name);
+
+MERGE INTO implicit_requirements oh
+USING (select * from tmp_implicit_requirements where discriminator = 'package_of_direct_caller') tmp
 ON
     oh.hash = tmp.hash AND
     oh.discriminator = tmp.discriminator AND
-    (
-        (tmp.discriminator  = 'ed25519public_key') OR
-        (tmp.discriminator  = 'secp256k1public_key') OR
-        (tmp.discriminator  = 'global_caller_blueprint' AND oh.entity_id = tmp.entity_id AND oh.blueprint_name = tmp.blueprint_name) OR
-        (tmp.discriminator  = 'package_of_direct_caller' AND oh.entity_id = tmp.entity_id) OR
-        (tmp.discriminator  = 'global_caller_entity' AND oh.entity_id = tmp.entity_id)
-    )
+    oh.entity_id = tmp.entity_id
+WHEN NOT MATCHED THEN INSERT VALUES(id, hash, first_seen_state_version, discriminator, public_key_bytes, entity_id, blueprint_name);
+
+MERGE INTO implicit_requirements oh
+USING (select * from tmp_implicit_requirements where discriminator = 'global_caller_entity') tmp
+ON
+    oh.hash = tmp.hash AND
+    oh.discriminator = tmp.discriminator AND
+    oh.entity_id = tmp.entity_id
+WHEN NOT MATCHED THEN INSERT VALUES(id, hash, first_seen_state_version, discriminator, public_key_bytes, entity_id, blueprint_name);
+
+MERGE INTO implicit_requirements oh
+USING (select * from tmp_implicit_requirements where discriminator = 'global_caller_blueprint') tmp
+ON
+    oh.hash = tmp.hash AND
+    oh.discriminator = tmp.discriminator AND
+    oh.entity_id = tmp.entity_id AND
+    oh.blueprint_name = tmp.blueprint_name
 WHEN NOT MATCHED THEN INSERT VALUES(id, hash, first_seen_state_version, discriminator, public_key_bytes, entity_id, blueprint_name);";
 
         await mergeCommand.ExecuteNonQueryAsync(_context.Token);
