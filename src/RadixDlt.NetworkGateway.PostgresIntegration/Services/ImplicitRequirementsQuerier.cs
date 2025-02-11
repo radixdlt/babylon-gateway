@@ -87,9 +87,9 @@ internal class ImplicitRequirementsQuerier : IImplicitRequirementsQuerier
 
     private record struct ImplicitRequirementQueryResult(
         QueriedImplicitRequirementType QueriedType,
-        string Hash,
-        ImplicitRequirementType ResolvedType,
+        string QueriedHash,
         long? FirstSeenStateVersion,
+        ImplicitRequirementType ResolvedType,
         EntityAddress? EntityAddress,
         string? BlueprintName,
         byte[] PublicKeyBytes);
@@ -187,39 +187,70 @@ WITH variables(queried_type, hash) AS
         UNNEST(@implicitRequirementHashes)
 )
 SELECT
-       ir.first_seen_state_version  AS FirstSeenStateVersion
-     , variables.queried_type       AS QueriedType
+    variables.queried_type       AS QueriedType
+     , variables.hash               AS QueriedHash
+     , ir.first_seen_state_version  AS FirstSeenStateVersion
      , ir.discriminator             AS ResolvedType
-     , variables.hash               AS Hash
      , e.address                    AS EntityAddress
      , ir.blueprint_name            AS BlueprintName
      , ir.public_key_bytes          AS PublicKeyBytes
 FROM variables
 LEFT JOIN LATERAL (
-    SELECT
-          first_seen_state_version
-         ,discriminator
-         ,entity_id
-         ,blueprint_name
-         ,public_key_bytes
-    FROM implicit_requirements ir
-    WHERE
-        (
-            (variables.queried_type = 'package_of_direct_caller' AND ir.discriminator = 'package_of_direct_caller') OR
-            (variables.queried_type = 'global_caller' AND (ir.discriminator = 'global_caller_entity' OR ir.discriminator = 'global_caller_blueprint')) OR
-            (variables.queried_type = 'ed25519public_key' AND ir.discriminator = 'ed25519public_key') OR
-            (variables.queried_type = 'secp256k1public_key' AND ir.discriminator = 'secp256k1public_key')
-            ) AND
-        ir.hash = variables.hash
-    ) ir ON true
-LEFT JOIN entities e ON ir.entity_id = e.id
-",
+        SELECT
+            first_seen_state_version
+             ,discriminator
+             ,entity_id
+             ,blueprint_name
+             ,public_key_bytes
+        FROM implicit_requirements ir
+        WHERE
+            variables.queried_type = 'package_of_direct_caller'::queried_implicit_requirement_type AND
+            ir.discriminator = 'package_of_direct_caller' AND
+            ir.hash = variables.hash
+    UNION
+        SELECT
+            first_seen_state_version
+             ,discriminator
+             ,entity_id
+             ,blueprint_name
+             ,public_key_bytes
+        FROM implicit_requirements ir
+        WHERE
+            variables.queried_type = 'ed25519public_key'::queried_implicit_requirement_type AND
+            ir.discriminator = 'ed25519public_key' AND
+            ir.hash = variables.hash
+    UNION
+        SELECT
+            first_seen_state_version
+             ,discriminator
+             ,entity_id
+             ,blueprint_name
+             ,public_key_bytes
+        FROM implicit_requirements ir
+        WHERE
+            variables.queried_type = 'secp256k1public_key'::queried_implicit_requirement_type AND
+            ir.discriminator = 'secp256k1public_key' AND
+            ir.hash = variables.hash
+    UNION
+        SELECT
+            first_seen_state_version
+             ,discriminator
+             ,entity_id
+             ,blueprint_name
+             ,public_key_bytes
+        FROM implicit_requirements ir
+        WHERE
+            variables.queried_type = 'global_caller'::queried_implicit_requirement_type AND
+            (ir.discriminator = 'global_caller_entity' OR ir.discriminator = 'global_caller_blueprint') AND
+            ir.hash = variables.hash
+) ir ON true
+LEFT JOIN entities e ON ir.entity_id = e.id;",
             parameters,
             cancellationToken: token
         );
 
         var queryResult = (await _dapperWrapper.ToListAsync<ImplicitRequirementQueryResult>(_dbContext.Database.GetDbConnection(), cd))
-             .ToDictionary(x => new ImplicitRequirementLookup(x.QueriedType, x.Hash), y => y);
+             .ToDictionary(x => new ImplicitRequirementLookup(x.QueriedType, x.QueriedHash), y => y);
 
         var mappedResult = queryResult
             .Select(
@@ -243,7 +274,7 @@ LEFT JOIN entities e ON ir.entity_id = e.id
                         ImplicitRequirementType.GlobalCallerEntity =>
                             new GatewayModel.ResolvedGlobalCallerEntityImplicitRequirement(x.Value.FirstSeenStateVersion.Value, x.Value.EntityAddress),
                         ImplicitRequirementType.GlobalCallerBlueprint =>
-                            new GatewayModel.ResolvedGlobalCallerBlueprintImplicitRequirement(x.Value.FirstSeenStateVersion.Value, x.Value.EntityAddress),
+                            new GatewayModel.ResolvedGlobalCallerBlueprintImplicitRequirement(x.Value.FirstSeenStateVersion.Value, x.Value.EntityAddress, x.Value.BlueprintName),
                         ImplicitRequirementType.Ed25519PublicKey =>
                             new GatewayModel.ResolvedEd25519PublicKeyImplicitRequirement(x.Value.FirstSeenStateVersion.Value, x.Value.PublicKeyBytes.ToHex()),
                         ImplicitRequirementType.Secp256k1PublicKey =>
