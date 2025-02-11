@@ -1271,44 +1271,44 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_implicit_requirements_discriminator_hash",
-                table: "implicit_requirements",
-                columns: new[] { "discriminator", "hash" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_implicit_requirements_ed25519public_key",
                 table: "implicit_requirements",
                 column: "hash",
                 unique: true,
-                filter: "discriminator = 'ed25519public_key'");
+                filter: "discriminator = 'ed25519public_key'")
+                .Annotation("Npgsql:IndexInclude", new[] { "public_key_bytes", "first_seen_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_implicit_requirements_global_caller_blueprint",
                 table: "implicit_requirements",
                 columns: new[] { "hash", "entity_id", "blueprint_name" },
                 unique: true,
-                filter: "discriminator = 'global_caller_blueprint'");
+                filter: "discriminator = 'global_caller_blueprint'")
+                .Annotation("Npgsql:IndexInclude", new[] { "first_seen_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_implicit_requirements_global_caller_entity",
                 table: "implicit_requirements",
                 columns: new[] { "hash", "entity_id" },
                 unique: true,
-                filter: "discriminator = 'global_caller_entity'");
+                filter: "discriminator = 'global_caller_entity'")
+                .Annotation("Npgsql:IndexInclude", new[] { "first_seen_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_implicit_requirements_package_of_direct_caller",
                 table: "implicit_requirements",
                 columns: new[] { "hash", "entity_id" },
                 unique: true,
-                filter: "discriminator = 'package_of_direct_caller'");
+                filter: "discriminator = 'package_of_direct_caller'")
+                .Annotation("Npgsql:IndexInclude", new[] { "first_seen_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_implicit_requirements_secp256k1public_key",
                 table: "implicit_requirements",
                 column: "hash",
                 unique: true,
-                filter: "discriminator = 'secp256k1public_key'");
+                filter: "discriminator = 'secp256k1public_key'")
+                .Annotation("Npgsql:IndexInclude", new[] { "public_key_bytes", "first_seen_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_key_value_store_entry_definition_key_value_store_entity_id_~",

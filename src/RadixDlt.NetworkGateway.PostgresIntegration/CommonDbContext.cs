@@ -490,15 +490,15 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<Secp256K1PublicKeyImplicitRequirement>(ImplicitRequirementType.Secp256k1PublicKey)
             .HasValue<Ed25519PublicKeyImplicitRequirement>(ImplicitRequirementType.Ed25519PublicKey);
 
-        // TODO PP: do we need to include discriminator in indexes as it already uses discriminator filter?
-
         // TODO PP:
         // should be used by Data aggregator when inserting new data. (isn't right now)
+        // do we need to include discriminator in indexes as it already uses discriminator filter?
         modelBuilder
             .Entity<GlobalCallerEntityImplicitRequirement>()
             .HasIndex(e => new { e.Hash, e.EntityId })
             .HasFilter("discriminator = 'global_caller_entity'")
             .HasDatabaseName("IX_implicit_requirements_global_caller_entity")
+            .IncludeProperties(x => new { x.FirstSeenStateVersion })
             .IsUnique();
 
         modelBuilder
@@ -506,6 +506,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.Hash, e.EntityId })
             .HasFilter("discriminator = 'package_of_direct_caller'")
             .HasDatabaseName("IX_implicit_requirements_package_of_direct_caller")
+            .IncludeProperties(x => new { x.FirstSeenStateVersion })
             .IsUnique();
 
         modelBuilder
@@ -513,6 +514,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.Hash, e.EntityId, e.BlueprintName })
             .HasFilter("discriminator = 'global_caller_blueprint'")
             .HasDatabaseName("IX_implicit_requirements_global_caller_blueprint")
+            .IncludeProperties(x => new { x.FirstSeenStateVersion })
             .IsUnique();
 
         modelBuilder
@@ -520,6 +522,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.Hash })
             .HasFilter("discriminator = 'secp256k1public_key'")
             .HasDatabaseName("IX_implicit_requirements_secp256k1public_key")
+            .IncludeProperties(x => new { x.PublicKeyBytes, x.FirstSeenStateVersion })
             .IsUnique();
 
         modelBuilder
@@ -527,14 +530,8 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.Hash })
             .HasFilter("discriminator = 'ed25519public_key'")
             .HasDatabaseName("IX_implicit_requirements_ed25519public_key")
+            .IncludeProperties(x => new { x.PublicKeyBytes, x.FirstSeenStateVersion })
             .IsUnique();
-
-        // TODO PP: check performance here if we use that index.
-        // we might actually not as we're using lots of OR in query, maybe we'll have to do unions?
-        modelBuilder
-            .Entity<ImplicitRequirement>()
-            .HasIndex(e => new { e.Discriminator, e.Hash })
-            .IncludeProperties("first_seen_state_version, entity_id, blueprint_name, public_key_bytes");
     }
 
     private static void RegisterEntitiesByRoleRequirement(ModelBuilder modelBuilder)

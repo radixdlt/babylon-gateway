@@ -926,8 +926,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Discriminator", "Hash");
-
                     b.ToTable("implicit_requirements");
 
                     b.HasDiscriminator<ImplicitRequirementType>("Discriminator");
@@ -2730,6 +2728,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasDatabaseName("IX_implicit_requirements_ed25519public_key")
                         .HasFilter("discriminator = 'ed25519public_key'");
 
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Hash"), new[] { "PublicKeyBytes", "FirstSeenStateVersion" });
+
                     b.ToTable("implicit_requirements");
 
                     b.HasDiscriminator().HasValue(ImplicitRequirementType.Ed25519PublicKey);
@@ -2754,6 +2754,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasDatabaseName("IX_implicit_requirements_global_caller_blueprint")
                         .HasFilter("discriminator = 'global_caller_blueprint'");
 
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Hash", "EntityId", "BlueprintName"), new[] { "FirstSeenStateVersion" });
+
                     b.ToTable("implicit_requirements");
 
                     b.HasDiscriminator().HasValue(ImplicitRequirementType.GlobalCallerBlueprint);
@@ -2772,6 +2774,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_implicit_requirements_global_caller_entity")
                         .HasFilter("discriminator = 'global_caller_entity'");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Hash", "EntityId"), new[] { "FirstSeenStateVersion" });
 
                     b.ToTable("implicit_requirements");
 
@@ -2792,6 +2796,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasDatabaseName("IX_implicit_requirements_package_of_direct_caller")
                         .HasFilter("discriminator = 'package_of_direct_caller'");
 
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Hash", "EntityId"), new[] { "FirstSeenStateVersion" });
+
                     b.ToTable("implicit_requirements");
 
                     b.HasDiscriminator().HasValue(ImplicitRequirementType.PackageOfDirectCaller);
@@ -2811,6 +2817,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_implicit_requirements_secp256k1public_key")
                         .HasFilter("discriminator = 'secp256k1public_key'");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Hash"), new[] { "PublicKeyBytes", "FirstSeenStateVersion" });
 
                     b.ToTable("implicit_requirements");
 
