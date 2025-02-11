@@ -490,9 +490,6 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<Secp256K1PublicKeyImplicitRequirement>(ImplicitRequirementType.Secp256k1PublicKey)
             .HasValue<Ed25519PublicKeyImplicitRequirement>(ImplicitRequirementType.Ed25519PublicKey);
 
-        // TODO PP:
-        // should be used by Data aggregator when inserting new data. (isn't right now)
-        // do we need to include discriminator in indexes as it already uses discriminator filter?
         modelBuilder
             .Entity<GlobalCallerEntityImplicitRequirement>()
             .HasIndex(e => new { e.Hash, e.EntityId })
