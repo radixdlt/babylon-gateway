@@ -2170,17 +2170,22 @@ paths:
       operationId: ImplicitRequirementsLookup
       summary: Resolve implicit requirement target from global nfid
       description: |
-        Access rules can include requirements on implicit proofs under special system-reserved resource addresses, which have special meanings to the Radix Engine and aren’t part of the standard authorization zone.
+        Access rules can include requirements for implicit proofs under special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone.
 
-        This endpoint is intended to resolve target from implicit access rule requirements.
+        This endpoint is intended to resolve targets based on implicit access rule requirements.
 
-        Supported resource addresses are:
-        - Secp256k1 Signature Resource
-        - Ed25519 Signature Resource
-        - Package of Direct Caller Resource
-        - Global Caller Resource
+        The following resource addresses are supported:
+        - **Secp256k1 Signature Resource**
+        - **Ed25519 Signature Resource**
+        - **Package of Direct Caller Resource**
+        - **Global Caller Resource**
+        - **System Execution Resource**
 
-        A maximum of `100` implicit requirements can be queried.
+        When querying, you must provide a pair of the following for each requirement to resolve:
+        - `resource_address` (one of the above)
+        - `non_fungible_id`, which should contain the hash used in the access rule you are trying to resolve (With the exception of `System Execution Resource`, you must provide an integer as a simple string).
+
+        You can query a maximum of `100` implicit requirements at a time.
 
         See the documentation on
         [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements)

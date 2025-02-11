@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ImplicitRequirementsLookupRequestAllOf" /> class.
         /// </summary>
-        /// <param name="requirements">requirements (required).</param>
+        /// <param name="requirements">limited to max 100 items. (required).</param>
         public ImplicitRequirementsLookupRequestAllOf(List<NonFungibleGlobalId> requirements = default(List<NonFungibleGlobalId>))
         {
             // to ensure "requirements" is required (not null)
@@ -115,8 +115,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets Requirements
+        /// limited to max 100 items.
         /// </summary>
+        /// <value>limited to max 100 items.</value>
         [DataMember(Name = "requirements", IsRequired = true, EmitDefaultValue = true)]
         public List<NonFungibleGlobalId> Requirements { get; set; }
 

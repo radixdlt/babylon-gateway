@@ -136,6 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Resolve implicit requirement target from global nfid
         /// </summary>
+        /// <remarks>
+        /// Access rules can include requirements for implicit proofs under special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone.  This endpoint is intended to resolve targets based on implicit access rule requirements.  The following resource addresses are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;, which should contain the hash used in the access rule you are trying to resolve. (With the exception of &#x60;System Execution Resource&#x60;, you must provide an integer as a simple string).  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
         /// <returns>ImplicitRequirementsLookupResponse</returns>
@@ -145,7 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Resolve implicit requirement target from global nfid
         /// </summary>
         /// <remarks>
-        /// 
+        /// Access rules can include requirements for implicit proofs under special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone.  This endpoint is intended to resolve targets based on implicit access rule requirements.  The following resource addresses are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;, which should contain the hash used in the access rule you are trying to resolve. (With the exception of &#x60;System Execution Resource&#x60;, you must provide an integer as a simple string).  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -231,7 +234,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Resolve implicit requirement target from global nfid
         /// </summary>
         /// <remarks>
-        /// 
+        /// Access rules can include requirements for implicit proofs under special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone.  This endpoint is intended to resolve targets based on implicit access rule requirements.  The following resource addresses are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;, which should contain the hash used in the access rule you are trying to resolve. (With the exception of &#x60;System Execution Resource&#x60;, you must provide an integer as a simple string).  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -243,7 +246,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Resolve implicit requirement target from global nfid
         /// </summary>
         /// <remarks>
-        /// 
+        /// Access rules can include requirements for implicit proofs under special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone.  This endpoint is intended to resolve targets based on implicit access rule requirements.  The following resource addresses are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;, which should contain the hash used in the access rule you are trying to resolve. (With the exception of &#x60;System Execution Resource&#x60;, you must provide an integer as a simple string).  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -721,7 +724,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Resolve implicit requirement target from global nfid 
+        /// Resolve implicit requirement target from global nfid Access rules can include requirements for implicit proofs under special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone.  This endpoint is intended to resolve targets based on implicit access rule requirements.  The following resource addresses are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;, which should contain the hash used in the access rule you are trying to resolve. (With the exception of &#x60;System Execution Resource&#x60;, you must provide an integer as a simple string).  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -733,7 +736,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Resolve implicit requirement target from global nfid 
+        /// Resolve implicit requirement target from global nfid Access rules can include requirements for implicit proofs under special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone.  This endpoint is intended to resolve targets based on implicit access rule requirements.  The following resource addresses are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;, which should contain the hash used in the access rule you are trying to resolve. (With the exception of &#x60;System Execution Resource&#x60;, you must provide an integer as a simple string).  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -777,7 +780,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Resolve implicit requirement target from global nfid 
+        /// Resolve implicit requirement target from global nfid Access rules can include requirements for implicit proofs under special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone.  This endpoint is intended to resolve targets based on implicit access rule requirements.  The following resource addresses are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;, which should contain the hash used in the access rule you are trying to resolve. (With the exception of &#x60;System Execution Resource&#x60;, you must provide an integer as a simple string).  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
@@ -790,7 +793,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Resolve implicit requirement target from global nfid 
+        /// Resolve implicit requirement target from global nfid Access rules can include requirements for implicit proofs under special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone.  This endpoint is intended to resolve targets based on implicit access rule requirements.  The following resource addresses are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;, which should contain the hash used in the access rule you are trying to resolve. (With the exception of &#x60;System Execution Resource&#x60;, you must provide an integer as a simple string).  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="implicitRequirementsLookupRequest"></param>
