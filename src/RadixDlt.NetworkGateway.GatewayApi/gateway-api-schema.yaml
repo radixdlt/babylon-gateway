@@ -2170,7 +2170,21 @@ paths:
       operationId: ImplicitRequirementsLookup
       summary: Resolve implicit requirement target from global nfid
       description: |
-     #TODO PP
+        Access rules can include requirements on implicit proofs under special system-reserved resource addresses, which have special meanings to the Radix Engine and aren’t part of the standard authorization zone.
+
+        This endpoint is intended to resolve target from implicit access rule requirements.
+
+        Supported resource addresses are:
+        - Secp256k1 Signature Resource
+        - Ed25519 Signature Resource
+        - Package of Direct Caller Resource
+        - Global Caller Resource
+
+        A maximum of `100` implicit requirements can be queried.
+
+        See the documentation on
+        [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements)
+        for more information.
       tags:
         - Extensions
       requestBody:
@@ -5981,12 +5995,12 @@ components:
           properties:
             requirements:
               type: array
-              description: # TODO PP add description and document limited to?
+              description: limited to max 100 items.
               items:
                 $ref: "#/components/schemas/NonFungibleGlobalId"
       example:
         requirements:
-          - resource_address: "<sample-implicit-requirement-resource-address>" # TODO PP: create it
+          - resource_address: "<sample-implicit-requirement-resource-address>"
             non_fungible_id: "<sample-implicit-requirement-non-fungible-id>"
 
     ImplicitRequirementsLookupResponse:

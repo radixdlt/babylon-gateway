@@ -67,7 +67,13 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public record OpenApiDocumentPlaceholderData(string? RandomIntentHash, string? RandomSubintentHash, long? CurrentEpoch, string? RequirementResourceAddress, string? RequirementNonFungibleId);
+public record OpenApiDocumentPlaceholderData(
+    string? RandomIntentHash,
+    string? RandomSubintentHash,
+    long? CurrentEpoch,
+    string? RequirementResourceAddress,
+    string? RequirementNonFungibleId,
+    string? SampleImplicitRequirementGlobalCallerEntityHash);
 
 public interface IOpenApiDocumentQuerier
 {
