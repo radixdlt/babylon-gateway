@@ -166,6 +166,11 @@ internal class ImplicitRequirementsQuerier : IImplicitRequirementsQuerier
             }
         }
 
+        if (implicitRequirementsToResolve.Count == 0)
+        {
+            return new GatewayModel.ImplicitRequirementsLookupResponse(resolvedSystemExecutionRequirements);
+        }
+
         implicitRequirementsToResolve.Keys.Unzip(
             x => x.Type,
             x => x.Hash,
