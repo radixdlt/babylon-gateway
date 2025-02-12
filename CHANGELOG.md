@@ -10,6 +10,8 @@ Release built: _not released yet_
 - Added two new endpoints that allow querying for entities that have ever used a requirement (resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
   - `/extensions/entities-by-role-requirement/lookup` – allows querying by multiple requirements.
   - `/extensions/entities-by-role-requirement/page` – allows querying and paginating by a single requirement.
+- The `manifest_classes` of the transaction manifest in the `/stream/transactions` endpoint have been adjusted slightly. Notably:
+  - The `General` classification has been expanded to permit validator stake/unstake/claim actions and pool contribute and redeem actions. 
 
 ### Database changes
 - New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.
