@@ -10,6 +10,8 @@ Release built: _not released yet_
 - Added two new endpoints that allow querying for entities that have ever used a requirement (resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
   - `/extensions/entities-by-role-requirement/lookup` – allows querying by multiple requirements.
   - `/extensions/entities-by-role-requirement/page` – allows querying and paginating by a single requirement.
+- The `manifest_classes` of the transaction manifest in the `/stream/transactions` endpoint have been adjusted slightly. Notably:
+  - The `General` classification has been expanded to permit validator stake/unstake/claim actions and pool contribute and redeem actions. 
 - Added a new endpoint `/extensions/implicit-requirements/lookup` for resolving implicit access rule requirements (https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements).
 
 ### Database changes
