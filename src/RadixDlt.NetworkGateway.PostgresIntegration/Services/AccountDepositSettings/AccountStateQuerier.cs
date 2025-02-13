@@ -68,7 +68,6 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Queries;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
