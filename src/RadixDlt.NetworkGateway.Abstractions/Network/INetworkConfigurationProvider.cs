@@ -214,7 +214,6 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
         catch (Exception ex)
         {
             await _observers.ForEachAsync(x => x.GetNetworkConfigurationFailed(coreApiProvider.CoreApiNode.Name, ex));
-
             throw;
         }
     }
