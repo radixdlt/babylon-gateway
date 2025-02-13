@@ -225,7 +225,6 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
         modelBuilder.HasPostgresEnum<StandardMetadataKey>();
         modelBuilder.HasPostgresEnum<EntityRoleRequirementType>();
-        modelBuilder.HasPostgresEnum<QueriedImplicitRequirementType>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -480,6 +479,7 @@ internal abstract class CommonDbContext : DbContext
     private static void RegisterImplicitRequirements(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresEnum<ImplicitRequirementType>();
+        modelBuilder.HasPostgresEnum<QueriedImplicitRequirementType>();
 
         modelBuilder
             .Entity<ImplicitRequirement>()
@@ -490,6 +490,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<Secp256K1PublicKeyImplicitRequirement>(ImplicitRequirementType.Secp256k1PublicKey)
             .HasValue<Ed25519PublicKeyImplicitRequirement>(ImplicitRequirementType.Ed25519PublicKey);
 
+        // All indexes here are used by both DataAggregator and API.
+        // Only difference is that API when reading needed to include `FirstSeenStateVersion` field.
         modelBuilder
             .Entity<GlobalCallerEntityImplicitRequirement>()
             .HasIndex(e => new { e.Hash, e.EntityId })
