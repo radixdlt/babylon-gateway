@@ -120,71 +120,40 @@ internal class ImplicitRequirementsQuerier : IImplicitRequirementsQuerier
         var wellKnownAddresses = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).WellKnownAddresses;
 
         var implicitRequirementsToResolve = new Dictionary<ImplicitRequirementLookup, GatewayModel.NonFungibleGlobalId>();
-        var resolvedSystemExecutionRequirements = new List<GatewayModel.ImplicitRequirementsLookupCollectionItem>();
+        var resolvedSystemExecutionRequirements = new Dictionary<string, GatewayModel.ImplicitRequirementsLookupCollectionItem>();
 
         foreach (var item in nonFungibleGlobalIds)
         {
-            if (item.ResourceAddress == wellKnownAddresses.Secp256k1SignatureVirtualBadge)
+            if (item.ResourceAddress == wellKnownAddresses.SystemTransactionBadge)
             {
-                implicitRequirementsToResolve.TryAdd(new ImplicitRequirementLookup(QueriedImplicitRequirementType.Secp256k1PublicKey, item.NonFungibleId), item);
+                var mapped = MapSystemExecutionImplicitRequirements(item);
+                resolvedSystemExecutionRequirements.TryAdd(item.NonFungibleId, mapped);
             }
-            else if (item.ResourceAddress == wellKnownAddresses.Ed25519SignatureVirtualBadge)
+            else
             {
-                implicitRequirementsToResolve.TryAdd(new ImplicitRequirementLookup(QueriedImplicitRequirementType.Ed25519PublicKey, item.NonFungibleId), item);
-            }
-            else if (item.ResourceAddress == wellKnownAddresses.GlobalCallerVirtualBadge)
-            {
-                implicitRequirementsToResolve.TryAdd(new ImplicitRequirementLookup(QueriedImplicitRequirementType.GlobalCaller, item.NonFungibleId), item);
-            }
-            else if (item.ResourceAddress == wellKnownAddresses.PackageOfDirectCallerVirtualBadge)
-            {
-                implicitRequirementsToResolve.TryAdd(new ImplicitRequirementLookup(QueriedImplicitRequirementType.PackageOfDirectCaller, item.NonFungibleId), item);
-            }
-            else if (item.ResourceAddress == wellKnownAddresses.SystemTransactionBadge)
-            {
-                switch (item.NonFungibleId)
-                {
-                    case "#0#":
-                        resolvedSystemExecutionRequirements.Add(
-                            new GatewayModel.ImplicitRequirementsLookupCollectionItem(
-                                requirement: item,
-                                resolved: new GatewayModel.ResolvedProtocolExecutionImplicitRequirement()));
-                        break;
-                    case "#1#":
-                        resolvedSystemExecutionRequirements.Add(
-                            new GatewayModel.ImplicitRequirementsLookupCollectionItem(
-                                requirement: item,
-                                resolved: new GatewayModel.ResolvedValidatorExecutionImplicitRequirement()));
-                        break;
-                    default:
-                        resolvedSystemExecutionRequirements.Add(
-                            new GatewayModel.ImplicitRequirementsLookupCollectionItem(
-                                requirement: item,
-                                resolved: null));
-                        break;
-                }
+                var lookup = MapToLookup(item, wellKnownAddresses);
+                implicitRequirementsToResolve.TryAdd(lookup, item);
             }
         }
 
-        if (implicitRequirementsToResolve.Count == 0)
+        Dictionary<ImplicitRequirementLookup, ImplicitRequirementQueryResult> resolvedFromDb = new Dictionary<ImplicitRequirementLookup, ImplicitRequirementQueryResult>();
+
+        if (implicitRequirementsToResolve.Count > 0)
         {
-            return new GatewayModel.ImplicitRequirementsLookupResponse(resolvedSystemExecutionRequirements);
-        }
+            implicitRequirementsToResolve.Keys.Unzip(
+                x => x.Type,
+                x => x.Hash,
+                out var implicitRequirementTypes,
+                out var implicitRequirementHashes);
 
-        implicitRequirementsToResolve.Keys.Unzip(
-            x => x.Type,
-            x => x.Hash,
-            out var implicitRequirementTypes,
-            out var implicitRequirementHashes);
+            var parameters = new
+            {
+                implicitRequirementTypes = implicitRequirementTypes,
+                implicitRequirementHashes = implicitRequirementHashes,
+            };
 
-        var parameters = new
-        {
-            implicitRequirementTypes = implicitRequirementTypes,
-            implicitRequirementHashes = implicitRequirementHashes,
-        };
-
-        var cd = DapperExtensions.CreateCommandDefinition(
-            @"
+            var cd = DapperExtensions.CreateCommandDefinition(
+                @"
 WITH variables(queried_type, hash) AS
 (
     SELECT
@@ -250,49 +219,101 @@ LEFT JOIN LATERAL (
             ir.hash = variables.hash
 ) ir ON true
 LEFT JOIN entities e ON ir.entity_id = e.id;",
-            parameters,
-            cancellationToken: token
-        );
+                parameters,
+                cancellationToken: token
+            );
 
-        var queryResult = (await _dapperWrapper.ToListAsync<ImplicitRequirementQueryResult>(_dbContext.Database.GetDbConnection(), cd))
-             .ToDictionary(x => new ImplicitRequirementLookup(x.QueriedType, x.QueriedHash), y => y);
+            resolvedFromDb = (await _dapperWrapper.ToListAsync<ImplicitRequirementQueryResult>(_dbContext.Database.GetDbConnection(), cd))
+                .ToDictionary(x => new ImplicitRequirementLookup(x.QueriedType, x.QueriedHash), y => y);
+        }
 
-        var mappedResult = queryResult
-            .Select(
-                x =>
-                {
-                    var requestRequirement = implicitRequirementsToResolve[x.Key];
+        var result = new List<GatewayModel.ImplicitRequirementsLookupCollectionItem>();
 
-                    if (!x.Value.FirstSeenStateVersion.HasValue)
-                    {
-                        return
-                            new GatewayModel.ImplicitRequirementsLookupCollectionItem(
-                                requirement: requestRequirement,
-                                resolved: null
-                            );
-                    }
+        foreach (var requestNfid in nonFungibleGlobalIds)
+        {
+            if (requestNfid.ResourceAddress == wellKnownAddresses.SystemTransactionBadge)
+            {
+                var mappedResultItem = resolvedSystemExecutionRequirements[requestNfid.NonFungibleId];
+                result.Add(mappedResultItem);
+            }
+            else
+            {
+                var lookup = MapToLookup(requestNfid, wellKnownAddresses);
+                var dbResolvedItem = resolvedFromDb[lookup];
+                var dbResolvedMappedItem = MapDbResolvedItem(dbResolvedItem, requestNfid);
+                result.Add(dbResolvedMappedItem);
+            }
+        }
 
-                    GatewayModel.ResolvedImplicitRequirement resolved = x.Value.ResolvedType switch
-                    {
-                        ImplicitRequirementType.PackageOfDirectCaller =>
-                            new GatewayModel.ResolvedPackageOfDirectCallerImplicitRequirement(x.Value.FirstSeenStateVersion.Value, x.Value.EntityAddress),
-                        ImplicitRequirementType.GlobalCallerEntity =>
-                            new GatewayModel.ResolvedGlobalCallerEntityImplicitRequirement(x.Value.FirstSeenStateVersion.Value, x.Value.EntityAddress),
-                        ImplicitRequirementType.GlobalCallerBlueprint =>
-                            new GatewayModel.ResolvedGlobalCallerBlueprintImplicitRequirement(x.Value.FirstSeenStateVersion.Value, x.Value.EntityAddress, x.Value.BlueprintName),
-                        ImplicitRequirementType.Ed25519PublicKey =>
-                            new GatewayModel.ResolvedEd25519PublicKeyImplicitRequirement(x.Value.FirstSeenStateVersion.Value, x.Value.PublicKeyBytes.ToHex()),
-                        ImplicitRequirementType.Secp256k1PublicKey =>
-                            new GatewayModel.ResolvedSecp256k1PublicKeyImplicitRequirement(x.Value.FirstSeenStateVersion.Value, x.Value.PublicKeyBytes.ToHex()),
-                        _ => throw new NotSupportedException($"Not supported implicit requirement type: {x.Value.ResolvedType}"),
-                    };
+        return new GatewayModel.ImplicitRequirementsLookupResponse(result);
+    }
 
-                    return new GatewayModel.ImplicitRequirementsLookupCollectionItem(
-                        requirement: requestRequirement,
-                        resolved: resolved);
-                })
-            .ToList();
+    private ImplicitRequirementLookup MapToLookup(GatewayModel.NonFungibleGlobalId item, WellKnownAddresses wellKnownAddresses)
+    {
+        if (item.ResourceAddress == wellKnownAddresses.Secp256k1SignatureVirtualBadge)
+        {
+            return new ImplicitRequirementLookup(QueriedImplicitRequirementType.Secp256k1PublicKey, item.NonFungibleId);
+        }
 
-        return new GatewayModel.ImplicitRequirementsLookupResponse(mappedResult.Union(resolvedSystemExecutionRequirements).ToList());
+        if (item.ResourceAddress == wellKnownAddresses.Ed25519SignatureVirtualBadge)
+        {
+            return new ImplicitRequirementLookup(QueriedImplicitRequirementType.Ed25519PublicKey, item.NonFungibleId);
+        }
+
+        if (item.ResourceAddress == wellKnownAddresses.GlobalCallerVirtualBadge)
+        {
+            return new ImplicitRequirementLookup(QueriedImplicitRequirementType.GlobalCaller, item.NonFungibleId);
+        }
+
+        if (item.ResourceAddress == wellKnownAddresses.PackageOfDirectCallerVirtualBadge)
+        {
+            return new ImplicitRequirementLookup(QueriedImplicitRequirementType.PackageOfDirectCaller, item.NonFungibleId);
+        }
+
+        throw new NotSupportedException($"Not supported implicit requirement type: {item.ResourceAddress}");
+    }
+
+    private GatewayModel.ImplicitRequirementsLookupCollectionItem MapSystemExecutionImplicitRequirements(GatewayModel.NonFungibleGlobalId item)
+    {
+        const string ProtocolExecutionNfid = "#0#";
+        const string ValidatorExecutionNfid = "#1#";
+
+        return item.NonFungibleId switch
+        {
+            ProtocolExecutionNfid => new GatewayModel.ImplicitRequirementsLookupCollectionItem(requirement: item, resolved: new GatewayModel.ResolvedProtocolExecutionImplicitRequirement()),
+            ValidatorExecutionNfid => new GatewayModel.ImplicitRequirementsLookupCollectionItem(requirement: item, resolved: new GatewayModel.ResolvedValidatorExecutionImplicitRequirement()),
+            _ => new GatewayModel.ImplicitRequirementsLookupCollectionItem(requirement: item, resolved: null),
+        };
+    }
+
+    private GatewayModel.ImplicitRequirementsLookupCollectionItem MapDbResolvedItem(ImplicitRequirementQueryResult resultRow, GatewayModel.NonFungibleGlobalId requestItem)
+    {
+        if (!resultRow.FirstSeenStateVersion.HasValue)
+        {
+            return
+                new GatewayModel.ImplicitRequirementsLookupCollectionItem(
+                    requirement: requestItem,
+                    resolved: null
+                );
+        }
+
+        GatewayModel.ResolvedImplicitRequirement resolved = resultRow.ResolvedType switch
+        {
+            ImplicitRequirementType.PackageOfDirectCaller =>
+                new GatewayModel.ResolvedPackageOfDirectCallerImplicitRequirement(resultRow.FirstSeenStateVersion.Value, resultRow.EntityAddress),
+            ImplicitRequirementType.GlobalCallerEntity =>
+                new GatewayModel.ResolvedGlobalCallerEntityImplicitRequirement(resultRow.FirstSeenStateVersion.Value, resultRow.EntityAddress),
+            ImplicitRequirementType.GlobalCallerBlueprint =>
+                new GatewayModel.ResolvedGlobalCallerBlueprintImplicitRequirement(resultRow.FirstSeenStateVersion.Value, resultRow.EntityAddress, resultRow.BlueprintName),
+            ImplicitRequirementType.Ed25519PublicKey =>
+                new GatewayModel.ResolvedEd25519PublicKeyImplicitRequirement(resultRow.FirstSeenStateVersion.Value, resultRow.PublicKeyBytes.ToHex()),
+            ImplicitRequirementType.Secp256k1PublicKey =>
+                new GatewayModel.ResolvedSecp256k1PublicKeyImplicitRequirement(resultRow.FirstSeenStateVersion.Value, resultRow.PublicKeyBytes.ToHex()),
+            _ => throw new NotSupportedException($"Not supported implicit requirement type: {resultRow.ResolvedType}"),
+        };
+
+        return new GatewayModel.ImplicitRequirementsLookupCollectionItem(
+            requirement: requestItem,
+            resolved: resolved);
     }
 }
