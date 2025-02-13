@@ -115,21 +115,38 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
 
     public void VisitTransaction(CoreModel.CommittedTransaction transaction, long stateVersion)
     {
-        if (transaction.LedgerTransaction is CoreModel.UserLedgerTransaction userLedgerTransactionV1)
+        switch (transaction.LedgerTransaction)
         {
-            var signerPublicKeys = NotarizedTransactionV1.FromPayloadBytes(userLedgerTransactionV1.NotarizedTransaction.GetPayloadBytes()).SignerPublicKeys();
-            foreach (var key in signerPublicKeys)
+            case CoreModel.FlashLedgerTransaction:
+                return;
+            case CoreModel.GenesisLedgerTransaction:
+                return;
+            case CoreModel.RoundUpdateLedgerTransaction:
+                return;
+            case CoreModel.UserLedgerTransaction userLedgerTransactionV1:
             {
-                ObservePublicKeyHash(key, stateVersion);
+                var signerPublicKeys = NotarizedTransactionV1.FromPayloadBytes(userLedgerTransactionV1.NotarizedTransaction.GetPayloadBytes()).SignerPublicKeys();
+                foreach (var key in signerPublicKeys)
+                {
+                    ObservePublicKeyHash(key, stateVersion);
+                }
+
+                break;
             }
-        }
-        else if (transaction.LedgerTransaction is CoreModel.UserLedgerTransactionV2 userLedgerTransactionV2)
-        {
-            var signerPublicKeys = NotarizedTransactionV2.FromPayloadBytes(userLedgerTransactionV2.NotarizedTransaction.GetPayloadBytes()).SignerPublicKeys();
-            foreach (var key in signerPublicKeys)
+
+            case CoreModel.UserLedgerTransactionV2 userLedgerTransactionV2:
             {
-                ObservePublicKeyHash(key, stateVersion);
+                var signerPublicKeys = NotarizedTransactionV2.FromPayloadBytes(userLedgerTransactionV2.NotarizedTransaction.GetPayloadBytes()).SignerPublicKeys();
+                foreach (var key in signerPublicKeys)
+                {
+                    ObservePublicKeyHash(key, stateVersion);
+                }
+
+                break;
             }
+
+            default:
+                throw new NotSupportedException($"Unsupported transaction type: {transaction.LedgerTransaction.GetType()}");
         }
 
         foreach (var newGlobalEntity in transaction.Receipt.StateUpdates.NewGlobalEntities)
