@@ -79,7 +79,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddNetworkConfigurationProvider(this IServiceCollection services)
     {
-        // NetworkConfigurationProvider is registered as HostedService as we want to fetch network configuration on app starup using  StartAsync() method.
+        // NetworkConfigurationProvider is registered as a HostedService as we want to fetch network configuration on app startup using the `StartAsync()` method.
         // NetworkConfigurationProvider is registered as singleton as we want to reuse fetched network configuration once it's fetched.
         // To provide better separation it's also registered as INetworkConfigurationProvider (no need to share NetworkConfigurationProvider which contains also HostedService methods).
         // https://stackoverflow.com/questions/58397807/how-to-resolve-hostedservice-in-controller
