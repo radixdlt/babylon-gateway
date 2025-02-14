@@ -66,7 +66,6 @@ using FluentAssertions;
 using Moq;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Validators;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
