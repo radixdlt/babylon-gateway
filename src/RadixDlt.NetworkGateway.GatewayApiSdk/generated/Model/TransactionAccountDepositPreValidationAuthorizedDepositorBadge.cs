@@ -116,24 +116,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionAccountDepositPreValidationAuthorizedDepositorBadge" /> class.
         /// </summary>
         /// <param name="badgeType">badgeType (required).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public TransactionAccountDepositPreValidationAuthorizedDepositorBadge(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType), string resourceAddress = default(string))
+        public TransactionAccountDepositPreValidationAuthorizedDepositorBadge(AccountAuthorizedDepositorBadgeType badgeType = default(AccountAuthorizedDepositorBadgeType))
         {
             this.BadgeType = badgeType;
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
-            {
-                throw new ArgumentNullException("resourceAddress is a required property for TransactionAccountDepositPreValidationAuthorizedDepositorBadge and cannot be null");
-            }
-            this.ResourceAddress = resourceAddress;
         }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,7 +130,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionAccountDepositPreValidationAuthorizedDepositorBadge {\n");
             sb.Append("  BadgeType: ").Append(BadgeType).Append("\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,11 +168,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.BadgeType == input.BadgeType ||
                     this.BadgeType.Equals(input.BadgeType)
-                ) && 
-                (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -201,10 +181,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.BadgeType.GetHashCode();
-                if (this.ResourceAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
-                }
                 return hashCode;
             }
         }

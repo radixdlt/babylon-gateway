@@ -66,7 +66,6 @@ using FluentAssertions;
 using Moq;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi.Validators;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -133,8 +132,8 @@ public class RadixAddressValidatorTests
         // Prepare.
         var networkConfigurationProviderMock = new Mock<INetworkConfigurationProvider>();
         networkConfigurationProviderMock
-            .Setup(x => x.GetNetworkConfiguration(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new NetworkConfiguration(0, null!, 0, 0, null!, null!, expectedNetworkHrpSuffix, null!));
+            .Setup(x => x.GetNetworkConfiguration())
+            .Returns(new NetworkConfiguration(0, null!, 0, 0, null!, null!, expectedNetworkHrpSuffix, null!));
         var validator = new RadixAddressValidator(networkConfigurationProviderMock.Object);
 
         // Act.
@@ -156,8 +155,8 @@ public class RadixAddressValidatorTests
         // Prepare.
         var networkConfigurationProviderMock = new Mock<INetworkConfigurationProvider>();
         networkConfigurationProviderMock
-            .Setup(x => x.GetNetworkConfiguration(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new NetworkConfiguration(0, null!, 0, 0, null!, null!, expectedNetworkHrpSuffix, null!));
+            .Setup(x => x.GetNetworkConfiguration())
+            .Returns(new NetworkConfiguration(0, null!, 0, 0, null!, null!, expectedNetworkHrpSuffix, null!));
         var validator = new RadixAddressValidator(networkConfigurationProviderMock.Object);
 
         // Act.

@@ -127,8 +127,11 @@ public static class OpenApiDocumentHandler
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
         response = OptionalReplace(response, "<sample-preview-transaction-hex>", placeholderReplacements.SamplePreviewTransactionHex);
-        response = OptionalReplace(response, "<sample-requirement-non-fungible-id>", placeholderReplacements.SampleRequirementNonFungibleId);
         response = OptionalReplace(response, "<sample-requirement-resource-address>", placeholderReplacements.SampleRequirementResourceAddress);
+        response = OptionalReplace(response, "<sample-requirement-non-fungible-id>", placeholderReplacements.SampleRequirementNonFungibleId);
+        response = OptionalReplace(response, "<sample-implicit-requirement-resource-address>", placeholderReplacements.SampleImplicitRequirementResourceAddress);
+        response = OptionalReplace(response, "<sample-implicit-requirement-non-fungible-id>", placeholderReplacements.SampleImplicitRequirementNonFungibleId);
+
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 
@@ -178,6 +181,10 @@ public static class OpenApiDocumentHandler
         public string? SampleRequirementResourceAddress { get; set; }
 
         public string? SampleRequirementNonFungibleId { get; set; }
+
+        public string? SampleImplicitRequirementResourceAddress { get; set; }
+
+        public string? SampleImplicitRequirementNonFungibleId { get; set; }
     }
 
     private static async Task<PlaceholderReplacements> GetPlaceholderReplacementsAsync(
@@ -186,7 +193,7 @@ public static class OpenApiDocumentHandler
         CancellationToken token)
     {
         var placeholderReplacements = new PlaceholderReplacements();
-        var networkConfiguration = await networkConfigurationProvider.GetNetworkConfiguration(token);
+        var networkConfiguration = networkConfigurationProvider.GetNetworkConfiguration();
 
         try
         {
@@ -208,6 +215,8 @@ public static class OpenApiDocumentHandler
             placeholderReplacements.CommittedSubintentHash = placeholderData.RandomSubintentHash;
             placeholderReplacements.SampleRequirementResourceAddress = placeholderData.RequirementResourceAddress;
             placeholderReplacements.SampleRequirementNonFungibleId = placeholderData.RequirementNonFungibleId;
+            placeholderReplacements.SampleImplicitRequirementResourceAddress = networkConfiguration.WellKnownAddresses.GlobalCallerVirtualBadge;
+            placeholderReplacements.SampleImplicitRequirementNonFungibleId = placeholderData.SampleImplicitRequirementGlobalCallerEntityHash;
             placeholderReplacements.SamplePreviewTransactionHex = GenerateRandomPreviewTransactionHex(networkConfiguration.Id, (ulong?)placeholderData.CurrentEpoch);
         }
         catch (Exception)

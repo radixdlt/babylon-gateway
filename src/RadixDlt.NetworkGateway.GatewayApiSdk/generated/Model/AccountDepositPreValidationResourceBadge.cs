@@ -107,11 +107,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountDepositPreValidationResourceBadge" /> class.
         /// </summary>
-        /// <param name="badgeType">badgeType (required) (default to AccountAuthorizedDepositorBadgeType.ResourceBadge).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public AccountDepositPreValidationResourceBadge(AccountAuthorizedDepositorBadgeType badgeType = AccountAuthorizedDepositorBadgeType.ResourceBadge, string resourceAddress = default(string)) : base(badgeType, resourceAddress)
+        /// <param name="badgeType">badgeType (required) (default to AccountAuthorizedDepositorBadgeType.ResourceBadge).</param>
+        public AccountDepositPreValidationResourceBadge(string resourceAddress = default(string), AccountAuthorizedDepositorBadgeType badgeType = AccountAuthorizedDepositorBadgeType.ResourceBadge) : base(badgeType)
         {
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for AccountDepositPreValidationResourceBadge and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,6 +135,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccountDepositPreValidationResourceBadge {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -156,7 +170,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             {
                 return false;
             }
-            return base.Equals(input);
+            return base.Equals(input) && 
+                (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                );
         }
 
         /// <summary>
@@ -168,6 +187,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
                 return hashCode;
             }
         }

@@ -131,7 +131,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
     {
         var defaultPageSize = _endpointConfiguration.Value.DefaultPageSize;
         var packagePageSize = _endpointConfiguration.Value.DefaultHeavyCollectionsPageSize;
-        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
+        var networkConfiguration = _networkConfigurationProvider.GetNetworkConfiguration();
 
         var entities = await _entityQuerier.GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
@@ -152,7 +152,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 PageSize = _endpointConfiguration.Value.DefaultPageSize,
                 MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
             },
-            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id,
+            _networkConfigurationProvider.GetNetworkConfiguration().Id,
             token);
 
         var roleAssignmentsHistory = await _roleAssignmentQuerier.GetRoleAssignmentsHistory(globalPersistedComponentEntities, ledgerState, token);
@@ -160,6 +160,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var packageBlueprintHistory = await PackageQueries.PackageBlueprintHistoryMultiLookup(_dbContext, packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var packageCodeHistory = await PackageQueries.PackageCodeHistoryMultiLookup(_dbContext, packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var packageSchemaHistory = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
+
         var resolvedTwoWayLinks = optIns.DappTwoWayLinks
             ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, ledgerState, token)
             : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
@@ -345,7 +346,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                 case PreAllocatedIdentityEntity:
                 case PreAllocatedAccountComponentEntity:
-                    var preAllocatedEntityData = await _preAllocatedEntityDataProvider.GetPreAllocatedEntityData(entity.Address);
+                    var preAllocatedEntityData = _preAllocatedEntityDataProvider.GetPreAllocatedEntityData(entity.Address);
 
                     details = preAllocatedEntityData.Details;
                     metadata[entity.Id] = preAllocatedEntityData.Metadata;
@@ -383,6 +384,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     string? componentRoyaltyVaultBalance = null;
                     ComponentMethodRoyaltyEntryHistory[]? componentRoyaltyConfig = null;
                     GatewayModel.TwoWayLinkedDappOnLedgerDetails? twoWayLinkedDappOnLedgerDetails = null;
+
                     var nonAccountTwoWayLinkedDapp = twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress;
 
                     if (ce is GlobalAccountEntity)
@@ -488,7 +490,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     entityIds,
                     optIns.ExplicitMetadata.ToArray(),
                     ledgerState,
-                    (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id,
+                    _networkConfigurationProvider.GetNetworkConfiguration().Id,
                     token)
                 : null;
 
@@ -560,7 +562,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     entityIds,
                     optIns.ExplicitMetadata.ToArray(),
                     ledgerState,
-                    (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id,
+                    _networkConfigurationProvider.GetNetworkConfiguration().Id,
                     token)
                 : null;
 
@@ -631,7 +633,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         if (entity is PreAllocatedIdentityEntity or PreAllocatedAccountComponentEntity)
         {
-            var (_, preAllocatedEntityMetadata) = await _preAllocatedEntityDataProvider.GetPreAllocatedEntityData(entity.Address);
+            var (_, preAllocatedEntityMetadata) = _preAllocatedEntityDataProvider.GetPreAllocatedEntityData(entity.Address);
             metadata = preAllocatedEntityMetadata;
         }
         else
@@ -647,7 +649,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     PageSize = request.Limit,
                     MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
                 },
-                (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id,
+                _networkConfigurationProvider.GetNetworkConfiguration().Id,
                 token))[entity.Id];
         }
 
@@ -868,7 +870,7 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({schemaEntityIds}), UNNEST({sch
                         schemaBytes!,
                         sborStateHistory.SborTypeKind,
                         sborStateHistory.TypeIndex,
-                        (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id);
+                        _networkConfigurationProvider.GetNetworkConfiguration().Id);
 
                     result.Add(state.EntityId, jsonState);
                     break;

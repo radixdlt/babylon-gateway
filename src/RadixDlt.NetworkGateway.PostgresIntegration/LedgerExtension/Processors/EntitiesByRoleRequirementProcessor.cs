@@ -88,9 +88,7 @@ internal class EntitiesByRoleRequirementProcessor : IProcessorBase, ISubstateSca
     private readonly record struct NonFungibleDbLookup(string EntityAddress, string ResourceAddress, string NonFungibleLocalId);
 
     private readonly ProcessorContext _context;
-
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
-
     private readonly Dictionary<ResourceDbLookup, long> _observedByResource = new();
     private readonly Dictionary<NonFungibleDbLookup, long> _observedByNonFungible = new();
     private readonly List<EntitiesByRoleRequirementEntryDefinition> _toAdd = new();
@@ -286,8 +284,20 @@ ON COMMIT DROP";
         await using var mergeCommand = connection.CreateCommand();
         mergeCommand.CommandText = @"
 MERGE INTO entities_by_role_requirement_entry_definition ebrr
-USING tmp_entities_by_role_requirement_entry_definition tmp
-ON ebrr.entity_id = tmp.entity_id AND ebrr.resource_entity_id = tmp.resource_entity_id AND ebrr.non_fungible_local_id = tmp.non_fungible_local_id
+USING (SELECT * FROM tmp_entities_by_role_requirement_entry_definition WHERE discriminator = 'resource') tmp
+ON
+    ebrr.discriminator = tmp.discriminator AND
+    ebrr.entity_id = tmp.entity_id AND
+    ebrr.resource_entity_id = tmp.resource_entity_id
+WHEN NOT MATCHED THEN INSERT VALUES (id, entity_id, first_seen_state_version, discriminator, resource_entity_id, non_fungible_local_id);
+
+MERGE INTO entities_by_role_requirement_entry_definition ebrr
+USING (SELECT * FROM tmp_entities_by_role_requirement_entry_definition WHERE discriminator = 'non_fungible') tmp
+ON
+    ebrr.discriminator = tmp.discriminator AND
+    ebrr.entity_id = tmp.entity_id AND
+    ebrr.resource_entity_id = tmp.resource_entity_id AND
+    ebrr.non_fungible_local_id = tmp.non_fungible_local_id
 WHEN NOT MATCHED THEN INSERT VALUES(id, entity_id, first_seen_state_version, discriminator, resource_entity_id, non_fungible_local_id);";
 
         await mergeCommand.ExecuteNonQueryAsync(_context.Token);

@@ -121,7 +121,7 @@ internal class NonFungibleQuerier : INonFungibleQuerier
             _dapperWrapper,
             nonFungibleResourceEntity,
             nonFungibleIds,
-            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id,
+            _networkConfigurationProvider.GetNetworkConfiguration().Id,
             ledgerState,
             token);
     }

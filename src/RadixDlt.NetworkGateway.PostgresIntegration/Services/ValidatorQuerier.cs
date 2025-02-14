@@ -289,7 +289,7 @@ INNER JOIN LATERAL (
                 PageSize = _endpointConfiguration.Value.DefaultPageSize,
                 MaxDefinitionsLookupLimit = _endpointConfiguration.Value.MaxDefinitionsLookupLimit,
             },
-            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id,
+            _networkConfigurationProvider.GetNetworkConfiguration().Id,
             token);
 
         var items = validatorsAndOneMore

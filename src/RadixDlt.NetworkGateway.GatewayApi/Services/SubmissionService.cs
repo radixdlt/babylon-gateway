@@ -123,7 +123,7 @@ internal class SubmissionService : ISubmissionService
         var options = _coreApiIntegrationOptions.CurrentValue;
         var submissionResult = await _submissionTrackingService.ObserveSubmissionToGatewayAndSubmitToNetworkIfNew(
             _coreApiProvider.TransactionApi,
-            (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
+            _networkConfigurationProvider.GetNetworkConfiguration().Name,
             targetNode.Name,
             new PendingTransactionHandlingConfig(
                 options.MaxSubmissionAttempts,
@@ -183,12 +183,12 @@ internal class SubmissionService : ISubmissionService
 
             if (isV1UserTransaction)
             {
-                return await HandlePreSubmissionParseTransactionV1(notarizedTransactionBytes);
+                return HandlePreSubmissionParseTransactionV1(notarizedTransactionBytes);
             }
 
             if (isV2UserTransaction)
             {
-                return await HandlePreSubmissionParseTransactionV2(notarizedTransactionBytes);
+                return HandlePreSubmissionParseTransactionV2(notarizedTransactionBytes);
             }
 
             throw InvalidTransactionException.FromStaticallyInvalid("Unable to decode transaction. Unexpected payload prefix.");
@@ -212,10 +212,10 @@ internal class SubmissionService : ISubmissionService
         }
     }
 
-    private async Task<ParsedTransactionData> HandlePreSubmissionParseTransactionV1(byte[] notarizedTransactionBytes)
+    private ParsedTransactionData HandlePreSubmissionParseTransactionV1(byte[] notarizedTransactionBytes)
     {
         using var notarizedTransaction = ToolkitModel.NotarizedTransactionV1.FromPayloadBytes(notarizedTransactionBytes);
-        notarizedTransaction.StaticallyValidate((await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
+        notarizedTransaction.StaticallyValidate(_networkConfigurationProvider.GetNetworkConfiguration().Id);
 
         return new ParsedTransactionData(
             notarizedTransaction.IntentHash().AsStr(),
@@ -224,10 +224,10 @@ internal class SubmissionService : ISubmissionService
             notarizedTransaction.SignedIntent().Intent().Header().endEpochExclusive);
     }
 
-    private async Task<ParsedTransactionData> HandlePreSubmissionParseTransactionV2(byte[] notarizedTransactionBytes)
+    private ParsedTransactionData HandlePreSubmissionParseTransactionV2(byte[] notarizedTransactionBytes)
     {
         using var notarizedTransaction = ToolkitModel.NotarizedTransactionV2.FromPayloadBytes(notarizedTransactionBytes);
-        notarizedTransaction.StaticallyValidate((await _networkConfigurationProvider.GetNetworkConfiguration()).Id);
+        notarizedTransaction.StaticallyValidate(_networkConfigurationProvider.GetNetworkConfiguration().Id);
 
         return new ParsedTransactionData(
             notarizedTransaction.IntentHash().AsStr(),

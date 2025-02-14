@@ -81,14 +81,20 @@ public class ExtensionsController(IExtensionsHandler extensionsHandler) : Contro
     }
 
     [HttpPost("entities-by-role-requirement/page")]
-    public async Task<GatewayModel.EntitiesByRoleRequirementPageResponse> ResourceHoldersPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token)
+    public async Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token)
     {
         return await extensionsHandler.EntitiesByRoleRequirementPage(request, token);
     }
 
     [HttpPost("entities-by-role-requirement/lookup")]
-    public async Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> ResourceHoldersLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token)
+    public async Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token)
     {
         return await extensionsHandler.EntitiesByRoleRequirementLookup(request, token);
+    }
+
+    [HttpPost("implicit-requirements/lookup")]
+    public async Task<GatewayModel.ImplicitRequirementsLookupResponse> ImplicitRequirementsLookup(GatewayModel.ImplicitRequirementsLookupRequest request, CancellationToken token)
+    {
+        return await extensionsHandler.ImplicitRequirementsLookup(request, token);
     }
 }

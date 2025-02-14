@@ -79,11 +79,14 @@ public interface IExtensionsHandler
     Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token);
 
     Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token);
+
+    Task<GatewayModel.ImplicitRequirementsLookupResponse> ImplicitRequirementsLookup(GatewayModel.ImplicitRequirementsLookupRequest request, CancellationToken token);
 }
 
 internal class DefaultExtensionsHandler(
     IResourceHoldersQuerier resourceHoldersQuerier,
     IEntitiesByRoleRequirementQuerier entitiesByRoleRequirementQuerier,
+    IImplicitRequirementsQuerier implicitRequirementsQuerier,
     IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
 {
     public async Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token)
@@ -115,5 +118,10 @@ internal class DefaultExtensionsHandler(
             request.Requirements,
             endpointConfiguration.Value.MaxHeavyCollectionsPageSize,
             token);
+    }
+
+    public async Task<GatewayModel.ImplicitRequirementsLookupResponse> ImplicitRequirementsLookup(GatewayModel.ImplicitRequirementsLookupRequest request, CancellationToken token)
+    {
+        return await implicitRequirementsQuerier.ImplicitRequirementsLookup(request.Requirements, token);
     }
 }

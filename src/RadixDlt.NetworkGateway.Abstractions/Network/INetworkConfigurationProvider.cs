@@ -63,9 +63,10 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Nito.AsyncEx;
+using Polly;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -80,16 +81,17 @@ namespace RadixDlt.NetworkGateway.Abstractions.Network;
 
 public interface INetworkConfigurationProvider
 {
-    public Task<NetworkConfiguration> GetNetworkConfiguration(CancellationToken token = default);
+    public NetworkConfiguration GetNetworkConfiguration();
 }
 
-public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
+public sealed class NetworkConfigurationProvider : IHostedService, INetworkConfigurationProvider
 {
     private readonly ILogger<NetworkConfigurationProvider> _logger;
     private readonly NetworkOptions _networkOptions;
     private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<INetworkConfigurationReaderObserver> _observers;
-    private readonly AsyncLazy<NetworkConfiguration> _factory;
+
+    private NetworkConfiguration? _networkConfiguration;
 
     public NetworkConfigurationProvider(
         IOptions<NetworkOptions> networkOptions,
@@ -101,15 +103,32 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
         _serviceProvider = serviceProvider;
         _observers = observers;
         _logger = logger;
-        _factory = new AsyncLazy<NetworkConfiguration>(ReadNetworkConfiguration, AsyncLazyFlags.RetryOnFailure);
     }
 
-    public Task<NetworkConfiguration> GetNetworkConfiguration(CancellationToken token = default)
+    public NetworkConfiguration GetNetworkConfiguration()
     {
-        return _factory.Task;
+        if (_networkConfiguration == null)
+        {
+            throw new Exception("Network configuration is not available.");
+        }
+
+        return _networkConfiguration;
     }
 
-    private async Task<NetworkConfiguration> ReadNetworkConfiguration()
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        var policy = Policy.Handle<Exception>()
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+        await policy.ExecuteAsync(async () => _networkConfiguration = await ReadNetworkConfiguration(cancellationToken));
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    private async Task<NetworkConfiguration> ReadNetworkConfiguration(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
         var coreApiNode = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<NetworkOptions>>().CurrentValue.CoreApiNodes.GetRandomEnabledNode();
@@ -118,8 +137,8 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
 
         try
         {
-            var configuration = await coreApiProvider.StatusApi.StatusNetworkConfigurationPostAsync();
-            var status = await coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(_networkOptions.NetworkName));
+            var configuration = await coreApiProvider.StatusApi.StatusNetworkConfigurationPostAsync(cancellationToken);
+            var status = await coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(_networkOptions.NetworkName), cancellationToken);
 
             var addressTypeDefinitions = new List<AddressTypeDefinition>();
 
@@ -214,7 +233,6 @@ public sealed class NetworkConfigurationProvider : INetworkConfigurationProvider
         catch (Exception ex)
         {
             await _observers.ForEachAsync(x => x.GetNetworkConfigurationFailed(coreApiProvider.CoreApiNode.Name, ex));
-
             throw;
         }
     }

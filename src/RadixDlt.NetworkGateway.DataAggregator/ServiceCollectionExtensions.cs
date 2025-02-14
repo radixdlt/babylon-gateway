@@ -95,7 +95,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddNetworkGatewayAbstractions()
-            .AddNetworkGatewayCoreServices();
+            .AddNetworkConfigurationProvider();
 
         services
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("DataAggregator:Network")

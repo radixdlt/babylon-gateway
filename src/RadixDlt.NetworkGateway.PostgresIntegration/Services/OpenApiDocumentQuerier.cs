@@ -114,6 +114,17 @@ internal class OpenApiDocumentQuerier : IOpenApiDocumentQuerier
             )
             .FirstOrDefaultAsync(token);
 
-        return new OpenApiDocumentPlaceholderData(randomIntentHash, randomSubintentHash, currentEpoch, requirement?.Address, requirement?.NonFungibleLocalId);
+        var implicitRequirement = await _dbContext
+            .ImplicitRequirements
+            .OfType<GlobalCallerEntityImplicitRequirement>()
+            .FirstOrDefaultAsync(token);
+
+        return new OpenApiDocumentPlaceholderData(
+            randomIntentHash,
+            randomSubintentHash,
+            currentEpoch,
+            requirement?.Address,
+            requirement?.NonFungibleLocalId,
+            implicitRequirement?.Hash);
     }
 }

@@ -69,7 +69,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal class TransactionTypeLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor
+internal class TransactionTypeLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor, ITransactionProcessor
 {
     private readonly ProcessorContext _context;
     private readonly List<TransactionTypeLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();

@@ -88,6 +88,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:entity_relationship", "component_to_instantiating_package,vault_to_resource,validator_to_stake_vault,validator_to_pending_xrd_withdraw_vault,validator_to_locked_owner_stake_unit_vault,validator_to_pending_owner_stake_unit_unlock_vault,stake_unit_of_validator,claim_token_of_validator,entity_to_royalty_vault,royalty_vault_of_entity,account_locker_of_locker,account_locker_of_account,resource_pool_to_unit_resource,resource_pool_to_resource,resource_pool_to_resource_vault,unit_resource_of_resource_pool,resource_vault_of_resource_pool,access_controller_to_recovery_badge,recovery_badge_of_access_controller")
                 .Annotation("Npgsql:Enum:entity_role_requirement_type", "resource,non_fungible")
                 .Annotation("Npgsql:Enum:entity_type", "global_consensus_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_validator,global_access_controller,global_identity,global_one_resource_pool,global_two_resource_pool,global_multi_resource_pool,global_transaction_tracker,global_account_locker")
+                .Annotation("Npgsql:Enum:implicit_requirement_type", "package_of_direct_caller,global_caller_entity,global_caller_blueprint,ed25519public_key,secp256k1public_key")
                 .Annotation("Npgsql:Enum:ledger_transaction_manifest_class", "general,transfer,validator_stake,validator_unstake,validator_claim,account_deposit_settings_update,pool_contribution,pool_redemption")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from,account_owner_method_call,badge_presented")
@@ -101,6 +102,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:pending_transaction_intent_ledger_status", "unknown,committed,commit_pending,permanent_rejection,possible_to_commit,likely_but_not_certain_rejection")
                 .Annotation("Npgsql:Enum:pending_transaction_payload_ledger_status", "unknown,committed,commit_pending,clashing_commit,permanently_rejected,transiently_accepted,transiently_rejected")
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
+                .Annotation("Npgsql:Enum:queried_implicit_requirement_type", "package_of_direct_caller,global_caller,ed25519public_key,secp256k1public_key")
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible")
                 .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
                 .Annotation("Npgsql:Enum:standard_metadata_key", "dapp_account_type,dapp_definition,dapp_definitions,dapp_claimed_websites,dapp_claimed_entities,dapp_account_locker")
@@ -486,6 +488,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_entity_role_assignments_owner_role_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "implicit_requirements",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    hash = table.Column<string>(type: "text", nullable: false),
+                    first_seen_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    discriminator = table.Column<ImplicitRequirementType>(type: "implicit_requirement_type", nullable: false),
+                    public_key_bytes = table.Column<byte[]>(type: "bytea", nullable: true),
+                    entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    blueprint_name = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_implicit_requirements", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1155,6 +1175,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "discriminator = 'global_validator'");
 
             migrationBuilder.CreateIndex(
+                name: "IX_entities_by_role_requirement_entry_definition_entity_id_re~1",
+                table: "entities_by_role_requirement_entry_definition",
+                columns: new[] { "entity_id", "resource_entity_id", "non_fungible_local_id" },
+                filter: "discriminator = 'non_fungible'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_by_role_requirement_entry_definition_entity_id_res~",
+                table: "entities_by_role_requirement_entry_definition",
+                columns: new[] { "entity_id", "resource_entity_id" },
+                filter: "discriminator = 'resource'");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_entities_by_role_requirement_entry_definition_first_seen_s~1",
                 table: "entities_by_role_requirement_entry_definition",
                 columns: new[] { "first_seen_state_version", "id", "entity_id", "resource_entity_id", "non_fungible_local_id" },
@@ -1164,18 +1196,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_entities_by_role_requirement_entry_definition_first_seen_st~",
                 table: "entities_by_role_requirement_entry_definition",
                 columns: new[] { "first_seen_state_version", "id", "entity_id", "resource_entity_id" },
-                filter: "discriminator = 'resource'");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entities_by_role_requirement_entry_definition_resource_ent~1",
-                table: "entities_by_role_requirement_entry_definition",
-                columns: new[] { "resource_entity_id", "non_fungible_local_id" },
-                filter: "discriminator = 'non_fungible'");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entities_by_role_requirement_entry_definition_resource_enti~",
-                table: "entities_by_role_requirement_entry_definition",
-                column: "resource_entity_id",
                 filter: "discriminator = 'resource'");
 
             migrationBuilder.CreateIndex(
@@ -1249,6 +1269,46 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_entity_role_assignments_owner_role_history_entity_id_from_s~",
                 table: "entity_role_assignments_owner_role_history",
                 columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_implicit_requirements_ed25519public_key",
+                table: "implicit_requirements",
+                column: "hash",
+                unique: true,
+                filter: "discriminator = 'ed25519public_key'")
+                .Annotation("Npgsql:IndexInclude", new[] { "public_key_bytes", "first_seen_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_implicit_requirements_global_caller_blueprint",
+                table: "implicit_requirements",
+                columns: new[] { "hash", "entity_id", "blueprint_name" },
+                unique: true,
+                filter: "discriminator = 'global_caller_blueprint'")
+                .Annotation("Npgsql:IndexInclude", new[] { "first_seen_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_implicit_requirements_global_caller_entity",
+                table: "implicit_requirements",
+                columns: new[] { "hash", "entity_id" },
+                unique: true,
+                filter: "discriminator = 'global_caller_entity'")
+                .Annotation("Npgsql:IndexInclude", new[] { "first_seen_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_implicit_requirements_package_of_direct_caller",
+                table: "implicit_requirements",
+                columns: new[] { "hash", "entity_id" },
+                unique: true,
+                filter: "discriminator = 'package_of_direct_caller'")
+                .Annotation("Npgsql:IndexInclude", new[] { "first_seen_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_implicit_requirements_secp256k1public_key",
+                table: "implicit_requirements",
+                column: "hash",
+                unique: true,
+                filter: "discriminator = 'secp256k1public_key'")
+                .Annotation("Npgsql:IndexInclude", new[] { "public_key_bytes", "first_seen_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_key_value_store_entry_definition_key_value_store_entity_id_~",
@@ -1600,6 +1660,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "entity_role_assignments_owner_role_history");
+
+            migrationBuilder.DropTable(
+                name: "implicit_requirements");
 
             migrationBuilder.DropTable(
                 name: "key_value_store_entry_definition");

@@ -134,6 +134,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of EntitiesByRoleRequirementPageResponse</returns>
         ApiResponse<EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPageWithHttpInfo(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest);
         /// <summary>
+        /// Resolve implicit requirement target from global non-fungible id
+        /// </summary>
+        /// <remarks>
+        /// Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can&#39;t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;,  of the requirement.  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="implicitRequirementsLookupRequest"></param>
+        /// <returns>ImplicitRequirementsLookupResponse</returns>
+        ImplicitRequirementsLookupResponse ImplicitRequirementsLookup(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest);
+
+        /// <summary>
+        /// Resolve implicit requirement target from global non-fungible id
+        /// </summary>
+        /// <remarks>
+        /// Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can&#39;t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;,  of the requirement.  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="implicitRequirementsLookupRequest"></param>
+        /// <returns>ApiResponse of ImplicitRequirementsLookupResponse</returns>
+        ApiResponse<ImplicitRequirementsLookupResponse> ImplicitRequirementsLookupWithHttpInfo(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest);
+        /// <summary>
         /// Get Resource Holders Page
         /// </summary>
         /// <remarks>
@@ -209,6 +230,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (EntitiesByRoleRequirementPageResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<EntitiesByRoleRequirementPageResponse>> EntitiesByRoleRequirementPageWithHttpInfoAsync(EntitiesByRoleRequirementPageRequest entitiesByRoleRequirementPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Resolve implicit requirement target from global non-fungible id
+        /// </summary>
+        /// <remarks>
+        /// Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can&#39;t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;,  of the requirement.  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="implicitRequirementsLookupRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ImplicitRequirementsLookupResponse</returns>
+        System.Threading.Tasks.Task<ImplicitRequirementsLookupResponse> ImplicitRequirementsLookupAsync(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Resolve implicit requirement target from global non-fungible id
+        /// </summary>
+        /// <remarks>
+        /// Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can&#39;t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;,  of the requirement.  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="implicitRequirementsLookupRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (ImplicitRequirementsLookupResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<ImplicitRequirementsLookupResponse>> ImplicitRequirementsLookupWithHttpInfoAsync(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Resource Holders Page
         /// </summary>
@@ -673,6 +717,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("EntitiesByRoleRequirementPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Resolve implicit requirement target from global non-fungible id Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can&#39;t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;,  of the requirement.  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="implicitRequirementsLookupRequest"></param>
+        /// <returns>ImplicitRequirementsLookupResponse</returns>
+        public ImplicitRequirementsLookupResponse ImplicitRequirementsLookup(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ImplicitRequirementsLookupResponse> localVarResponse = ImplicitRequirementsLookupWithHttpInfo(implicitRequirementsLookupRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Resolve implicit requirement target from global non-fungible id Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can&#39;t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;,  of the requirement.  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="implicitRequirementsLookupRequest"></param>
+        /// <returns>ApiResponse of ImplicitRequirementsLookupResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ImplicitRequirementsLookupResponse> ImplicitRequirementsLookupWithHttpInfo(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest)
+        {
+            // verify the required parameter 'implicitRequirementsLookupRequest' is set
+            if (implicitRequirementsLookupRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'implicitRequirementsLookupRequest' when calling ExtensionsApi->ImplicitRequirementsLookup");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = implicitRequirementsLookupRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<ImplicitRequirementsLookupResponse>("/extensions/implicit-requirements/lookup", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("ImplicitRequirementsLookup", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Resolve implicit requirement target from global non-fungible id Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can&#39;t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;,  of the requirement.  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="implicitRequirementsLookupRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ImplicitRequirementsLookupResponse</returns>
+        public async System.Threading.Tasks.Task<ImplicitRequirementsLookupResponse> ImplicitRequirementsLookupAsync(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ImplicitRequirementsLookupResponse> localVarResponse = await ImplicitRequirementsLookupWithHttpInfoAsync(implicitRequirementsLookupRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Resolve implicit requirement target from global non-fungible id Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can&#39;t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - &#x60;resource_address&#x60; (one of the above) - &#x60;non_fungible_id&#x60;,  of the requirement.  You can query a maximum of &#x60;100&#x60; implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="implicitRequirementsLookupRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (ImplicitRequirementsLookupResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ImplicitRequirementsLookupResponse>> ImplicitRequirementsLookupWithHttpInfoAsync(ImplicitRequirementsLookupRequest implicitRequirementsLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'implicitRequirementsLookupRequest' is set
+            if (implicitRequirementsLookupRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'implicitRequirementsLookupRequest' when calling ExtensionsApi->ImplicitRequirementsLookup");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = implicitRequirementsLookupRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<ImplicitRequirementsLookupResponse>("/extensions/implicit-requirements/lookup", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("ImplicitRequirementsLookup", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

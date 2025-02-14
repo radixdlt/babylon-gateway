@@ -12,6 +12,7 @@ Release built: _not released yet_
   - `/extensions/entities-by-role-requirement/page` – allows querying and paginating by a single requirement.
 - The `manifest_classes` of the transaction manifest in the `/stream/transactions` endpoint have been adjusted slightly. Notably:
   - The `General` classification has been expanded to permit validator stake/unstake/claim actions and pool contribute and redeem actions. 
+- Added a new endpoint `/extensions/implicit-requirements/lookup` for resolving implicit access rule requirements (https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements).
 
 ### Database changes
 - New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.
@@ -22,9 +23,12 @@ Release built: _not released yet_
 - New `outer_object_entity_id` column in the `entities` table, which holds the outer object entity id (e.g resource entity id for vaults and consensus manager entity id for validators).
 - New `receipt_event_emitter_entity_ids` column in the `ledger_transaction_events` table, which holds the emitter entity ids for transaction events.
 - Added a new `entities_by_role_requirement_entry_definition` table that stores information about entities that have ever used a requirement (resource or non-fungible global ID) in their access rules.
+- Added a new `implicit_requirements` table to store data necessary for resolving implicit access rule requirements.
 
 ### What’s new?
 - Added a new configuration parameter, `GatewayApi__Endpoint__EntitiesByRoleRequirementLookupMaxRequestedRequirementsCount`, which sets the limit (default `50`) on the number of requirements that can be queried using the `/extensions/entities-by-role-requirement/lookup` endpoint.
+- Added a new configuration parameter, `GatewayApi__Endpoint__ImplicitRequirementsLookupMaxRequestedRequirementsCount`, which sets the limit (default `100`) on the number of implicit requirements that can be queried using the `/extensions/implicit-requirements/lookup` endpoint.
+
 
 ## 1.9.2
 Release built: 9.12.2024

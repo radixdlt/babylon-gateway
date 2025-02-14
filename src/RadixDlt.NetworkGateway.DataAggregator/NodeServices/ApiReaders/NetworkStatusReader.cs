@@ -95,7 +95,7 @@ internal class NetworkStatusReader : INetworkStatusReader
         {
             return await _coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(
                 new CoreModel.NetworkStatusRequest(
-                    network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name
+                    network: _networkConfigurationProvider.GetNetworkConfiguration().Name
                 ),
                 token
             );

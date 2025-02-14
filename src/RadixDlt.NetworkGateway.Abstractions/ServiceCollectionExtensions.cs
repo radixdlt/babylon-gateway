@@ -77,9 +77,16 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddNetworkGatewayCoreServices(this IServiceCollection services)
+    public static IServiceCollection AddNetworkConfigurationProvider(this IServiceCollection services)
     {
-        services.TryAddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
+        // NetworkConfigurationProvider is registered as a HostedService as we want to fetch network configuration on app startup using the `StartAsync()` method.
+        // NetworkConfigurationProvider is registered as singleton as we want to reuse fetched network configuration once it's fetched.
+        // To provide better separation it's also registered as INetworkConfigurationProvider (no need to share NetworkConfigurationProvider which contains also HostedService methods).
+        // https://stackoverflow.com/questions/58397807/how-to-resolve-hostedservice-in-controller
+
+        services.AddSingleton<NetworkConfigurationProvider>();
+        services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>(serviceProvider => serviceProvider.GetRequiredService<NetworkConfigurationProvider>());
+        services.AddHostedService<NetworkConfigurationProvider>(serviceProvider => serviceProvider.GetRequiredService<NetworkConfigurationProvider>());
 
         return services;
     }
