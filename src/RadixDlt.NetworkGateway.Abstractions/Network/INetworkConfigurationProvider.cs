@@ -66,6 +66,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -116,7 +117,10 @@ public sealed class NetworkConfigurationProvider : IHostedService, INetworkConfi
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _networkConfiguration = await ReadNetworkConfiguration(cancellationToken);
+        var policy = Policy.Handle<Exception>()
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+        await policy.ExecuteAsync(async () => _networkConfiguration = await ReadNetworkConfiguration(cancellationToken));
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
