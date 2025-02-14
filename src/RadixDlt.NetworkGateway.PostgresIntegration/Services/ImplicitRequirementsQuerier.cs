@@ -114,7 +114,7 @@ internal class ImplicitRequirementsQuerier : IImplicitRequirementsQuerier
             return new GatewayModel.ImplicitRequirementsLookupResponse(new List<GatewayModel.ImplicitRequirementsLookupCollectionItem>());
         }
 
-        var wellKnownAddresses = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).WellKnownAddresses;
+        var wellKnownAddresses = _networkConfigurationProvider.GetNetworkConfiguration().WellKnownAddresses;
 
         var implicitRequirementsToResolve = new Dictionary<ImplicitRequirementLookup, GatewayModel.NonFungibleGlobalId>();
         var resolvedSystemExecutionRequirements = new Dictionary<string, GatewayModel.ImplicitRequirementsLookupCollectionItem>();

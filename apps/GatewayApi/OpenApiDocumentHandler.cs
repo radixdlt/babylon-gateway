@@ -193,7 +193,7 @@ public static class OpenApiDocumentHandler
         CancellationToken token)
     {
         var placeholderReplacements = new PlaceholderReplacements();
-        var networkConfiguration = await networkConfigurationProvider.GetNetworkConfiguration(token);
+        var networkConfiguration = networkConfigurationProvider.GetNetworkConfiguration();
 
         try
         {

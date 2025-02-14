@@ -128,7 +128,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
         return new GatewayModel.GatewayStatusResponse(
             new GatewayModel.LedgerState(
-                (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
+                _networkConfigurationProvider.GetNetworkConfiguration().Name,
                 topLedgerTransaction.StateVersion,
                 topLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 topLedgerTransaction.Epoch,
@@ -411,7 +411,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
             ? null
             : new LedgerStateReport(
                 new GatewayModel.LedgerState(
-                    (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
+                    _networkConfigurationProvider.GetNetworkConfiguration().Name,
                     lt.StateVersion,
                     lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                     lt.Epoch,

@@ -591,7 +591,7 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
             eventDetailsData = await SchemaDefinitionDataQuery.Execute(_dapperWrapper, _dbContext, entityIds, token);
         }
 
-        var networkId = (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Id;
+        var networkId = _networkConfigurationProvider.GetNetworkConfiguration().Id;
         var mappedTransactions = MapTransactions(transactions, transactionStateVersions, optIns, entityIdToAddressMap, eventDetailsData, schemas, networkId);
         return mappedTransactions;
     }

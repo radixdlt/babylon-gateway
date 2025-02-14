@@ -230,7 +230,7 @@ UPDATE pending_transactions
 
     private async Task<ExtendLedgerReport> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
-        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
+        var networkConfiguration = _networkConfigurationProvider.GetNetworkConfiguration();
         var rowsInserted = 0;
         var rowsUpdated = 0;
         var dbReadDuration = TimeSpan.Zero;

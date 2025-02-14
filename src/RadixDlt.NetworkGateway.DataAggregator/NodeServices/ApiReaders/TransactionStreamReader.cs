@@ -96,7 +96,7 @@ internal class TransactionStreamReader : ITransactionStreamReader
         {
             return await _coreApiProvider.StreamApi.StreamTransactionsPostWithHttpInfoAsync(
                 new CoreModel.StreamTransactionsRequest(
-                    network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
+                    network: _networkConfigurationProvider.GetNetworkConfiguration().Name,
                     fromStateVersion: fromStateVersion,
                     limit: count,
                     transactionFormatOptions: new CoreModel.TransactionFormatOptions

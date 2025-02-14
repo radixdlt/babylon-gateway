@@ -63,6 +63,7 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 

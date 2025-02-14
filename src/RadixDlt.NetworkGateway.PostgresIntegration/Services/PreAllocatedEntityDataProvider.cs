@@ -78,7 +78,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal interface IPreAllocatedEntityDataProvider
 {
-    Task<(GatewayModel.StateEntityDetailsResponseComponentDetails Details, GatewayModel.EntityMetadataCollection Metadata)> GetPreAllocatedEntityData(EntityAddress address);
+    (GatewayModel.StateEntityDetailsResponseComponentDetails Details, GatewayModel.EntityMetadataCollection Metadata) GetPreAllocatedEntityData(EntityAddress address);
 }
 
 internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
@@ -94,10 +94,10 @@ internal class PreAllocatedEntityDataProvider : IPreAllocatedEntityDataProvider
         _preAllocatedIdentityRoleAssignmentEntries = GeneratePreAllocatedIdentityRoleAssignmentEntries(roleAssignmentsKeyProvider);
     }
 
-    public async Task<(GatewayModel.StateEntityDetailsResponseComponentDetails Details, GatewayModel.EntityMetadataCollection Metadata)> GetPreAllocatedEntityData(EntityAddress address)
+    public (GatewayModel.StateEntityDetailsResponseComponentDetails Details, GatewayModel.EntityMetadataCollection Metadata) GetPreAllocatedEntityData(EntityAddress address)
     {
         var decoded = address.Decode();
-        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration();
+        var networkConfiguration = _networkConfigurationProvider.GetNetworkConfiguration();
 
         if (!decoded.IsSecp256k() && !decoded.IsEd25519())
         {

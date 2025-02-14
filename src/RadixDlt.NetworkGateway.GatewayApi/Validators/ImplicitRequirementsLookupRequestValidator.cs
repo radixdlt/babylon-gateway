@@ -101,7 +101,7 @@ internal class ImplicitRequirementNonFungibleGlobalIdValidator : AbstractValidat
 {
     public ImplicitRequirementNonFungibleGlobalIdValidator(RadixAddressValidator radixAddressValidator, INetworkConfigurationProvider networkConfigurationProvider)
     {
-        var wka = networkConfigurationProvider.GetNetworkConfiguration().ConfigureAwait(false).GetAwaiter().GetResult().WellKnownAddresses;
+        var wka = networkConfigurationProvider.GetNetworkConfiguration().WellKnownAddresses;
         var allowedImplicitRequirementResourceAddresses = new[]
         {
             wka.Ed25519SignatureVirtualBadge,
