@@ -119,10 +119,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="royaltyConfig">royaltyConfig.</param>
         /// <param name="twoWayLinkedDappAddress">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="directLinkedDappAddress">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="blueprintLinkedDappAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="twoWayLinkedDappDetails">twoWayLinkedDappDetails.</param>
         /// <param name="nativeResourceDetails">nativeResourceDetails.</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Component).</param>
-        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig), string twoWayLinkedDappAddress = default(string), TwoWayLinkedDappOnLedgerDetails twoWayLinkedDappDetails = default(TwoWayLinkedDappOnLedgerDetails), NativeResourceDetails nativeResourceDetails = default(NativeResourceDetails), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
+        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), ComponentRoyaltyConfig royaltyConfig = default(ComponentRoyaltyConfig), string twoWayLinkedDappAddress = default(string), string directLinkedDappAddress = default(string), string blueprintLinkedDappAddress = default(string), TwoWayLinkedDappOnLedgerDetails twoWayLinkedDappDetails = default(TwoWayLinkedDappOnLedgerDetails), NativeResourceDetails nativeResourceDetails = default(NativeResourceDetails), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -142,6 +144,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.RoyaltyVaultBalance = royaltyVaultBalance;
             this.RoyaltyConfig = royaltyConfig;
             this.TwoWayLinkedDappAddress = twoWayLinkedDappAddress;
+            this.DirectLinkedDappAddress = directLinkedDappAddress;
+            this.BlueprintLinkedDappAddress = blueprintLinkedDappAddress;
             this.TwoWayLinkedDappDetails = twoWayLinkedDappDetails;
             this.NativeResourceDetails = nativeResourceDetails;
         }
@@ -199,6 +203,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string TwoWayLinkedDappAddress { get; set; }
 
         /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "direct_linked_dapp_address", EmitDefaultValue = true)]
+        public string DirectLinkedDappAddress { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "blueprint_linked_dapp_address", EmitDefaultValue = true)]
+        public string BlueprintLinkedDappAddress { get; set; }
+
+        /// <summary>
         /// Gets or Sets TwoWayLinkedDappDetails
         /// </summary>
         [DataMember(Name = "two_way_linked_dapp_details", EmitDefaultValue = true)]
@@ -227,6 +245,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
             sb.Append("  TwoWayLinkedDappAddress: ").Append(TwoWayLinkedDappAddress).Append("\n");
+            sb.Append("  DirectLinkedDappAddress: ").Append(DirectLinkedDappAddress).Append("\n");
+            sb.Append("  BlueprintLinkedDappAddress: ").Append(BlueprintLinkedDappAddress).Append("\n");
             sb.Append("  TwoWayLinkedDappDetails: ").Append(TwoWayLinkedDappDetails).Append("\n");
             sb.Append("  NativeResourceDetails: ").Append(NativeResourceDetails).Append("\n");
             sb.Append("}\n");
@@ -305,6 +325,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TwoWayLinkedDappAddress.Equals(input.TwoWayLinkedDappAddress))
                 ) && base.Equals(input) && 
                 (
+                    this.DirectLinkedDappAddress == input.DirectLinkedDappAddress ||
+                    (this.DirectLinkedDappAddress != null &&
+                    this.DirectLinkedDappAddress.Equals(input.DirectLinkedDappAddress))
+                ) && base.Equals(input) && 
+                (
+                    this.BlueprintLinkedDappAddress == input.BlueprintLinkedDappAddress ||
+                    (this.BlueprintLinkedDappAddress != null &&
+                    this.BlueprintLinkedDappAddress.Equals(input.BlueprintLinkedDappAddress))
+                ) && base.Equals(input) && 
+                (
                     this.TwoWayLinkedDappDetails == input.TwoWayLinkedDappDetails ||
                     (this.TwoWayLinkedDappDetails != null &&
                     this.TwoWayLinkedDappDetails.Equals(input.TwoWayLinkedDappDetails))
@@ -356,6 +386,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.TwoWayLinkedDappAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.TwoWayLinkedDappAddress.GetHashCode();
+                }
+                if (this.DirectLinkedDappAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.DirectLinkedDappAddress.GetHashCode();
+                }
+                if (this.BlueprintLinkedDappAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintLinkedDappAddress.GetHashCode();
                 }
                 if (this.TwoWayLinkedDappDetails != null)
                 {
