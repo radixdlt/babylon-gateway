@@ -5253,7 +5253,7 @@ components:
               $ref: "#/components/schemas/ComponentRoyaltyConfig"
             two_way_linked_dapp_address:
               description: |
-                *Verified two-way link to the dApp address, if available. Resolves to `direct_linked_dapp_address` if it exists; otherwise, it falls back to `blueprint_linked_dapp_address`.
+                Verified two-way link to the dApp address, if available. Resolves to `direct_linked_dapp_address` if it exists; otherwise, it falls back to `blueprint_linked_dapp_address`.
                 See the [resolved link](https://docs.radixdlt.com/docs/metadata-for-verification#resolved-link) documentation for details.
               $ref: "#/components/schemas/Address"
             direct_linked_dapp_address:
