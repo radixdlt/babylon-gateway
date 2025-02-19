@@ -13,7 +13,7 @@ Release built: _not released yet_
 - The `manifest_classes` of the transaction manifest in the `/stream/transactions` endpoint have been adjusted slightly. Notably:
   - The `General` classification has been expanded to permit validator stake/unstake/claim actions and pool contribute and redeem actions. 
 - Added a new endpoint `/extensions/implicit-requirements/lookup` for resolving implicit access rule requirements (https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements).
-- Added auto link blueprint feature support (https://docs.radixdlt.com/docs/metadata-for-verification#blueprint-Link)
+- Added [blueprint link](https://docs.radixdlt.com/docs/metadata-for-verification#blueprint-Link) support
   - dApp details
     - `auto_link_blueprints` property added to `two_way_linked_dapp_details.entities.items` if entity is package and has any auto link blueprint defined.
   - Linked entity changes
