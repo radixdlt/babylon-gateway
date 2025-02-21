@@ -104,7 +104,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TwoWayLinkedEntitiesCollectionItem" /> class.
         /// </summary>
         /// <param name="entityAddress">Bech32m-encoded human readable version of the address. (required).</param>
-        public TwoWayLinkedEntitiesCollectionItem(string entityAddress = default(string))
+        /// <param name="autoLinkBlueprints">List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp. Returned only for packages. .</param>
+        public TwoWayLinkedEntitiesCollectionItem(string entityAddress = default(string), List<string> autoLinkBlueprints = default(List<string>))
         {
             // to ensure "entityAddress" is required (not null)
             if (entityAddress == null)
@@ -112,6 +113,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("entityAddress is a required property for TwoWayLinkedEntitiesCollectionItem and cannot be null");
             }
             this.EntityAddress = entityAddress;
+            this.AutoLinkBlueprints = autoLinkBlueprints;
         }
 
         /// <summary>
@@ -122,6 +124,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string EntityAddress { get; set; }
 
         /// <summary>
+        /// List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp. Returned only for packages. 
+        /// </summary>
+        /// <value>List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp. Returned only for packages. </value>
+        [DataMember(Name = "auto_link_blueprints", EmitDefaultValue = true)]
+        public List<string> AutoLinkBlueprints { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -130,6 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TwoWayLinkedEntitiesCollectionItem {\n");
             sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  AutoLinkBlueprints: ").Append(AutoLinkBlueprints).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,6 +179,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.EntityAddress == input.EntityAddress ||
                     (this.EntityAddress != null &&
                     this.EntityAddress.Equals(input.EntityAddress))
+                ) && 
+                (
+                    this.AutoLinkBlueprints == input.AutoLinkBlueprints ||
+                    this.AutoLinkBlueprints != null &&
+                    input.AutoLinkBlueprints != null &&
+                    this.AutoLinkBlueprints.SequenceEqual(input.AutoLinkBlueprints)
                 );
         }
 
@@ -184,6 +200,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.EntityAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                }
+                if (this.AutoLinkBlueprints != null)
+                {
+                    hashCode = (hashCode * 59) + this.AutoLinkBlueprints.GetHashCode();
                 }
                 return hashCode;
             }

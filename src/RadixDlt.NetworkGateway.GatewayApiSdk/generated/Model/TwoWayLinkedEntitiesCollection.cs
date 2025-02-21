@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// A collection of two-way linked (resolved &amp; verified) entities linked to the entity defining this collection.
+    /// A collection of directly two-way linked (resolved &amp; verified) entities linked to the entity defining this collection.
     /// </summary>
     [DataContract(Name = "TwoWayLinkedEntitiesCollection")]
     public partial class TwoWayLinkedEntitiesCollection : IEquatable<TwoWayLinkedEntitiesCollection>

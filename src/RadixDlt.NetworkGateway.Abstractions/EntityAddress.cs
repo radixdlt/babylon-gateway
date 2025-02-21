@@ -83,6 +83,8 @@ public readonly record struct EntityAddress
 
     public bool IsAccount => _address.StartsWith("account_");
 
+    public bool IsPackage => _address.StartsWith("package_");
+
     public bool IsIdentity => _address.StartsWith("identity_");
 
     public bool IsResource => _address.StartsWith("resource_");

@@ -2624,7 +2624,7 @@ components:
           $ref: "#/components/schemas/Address"
 
     TwoWayLinkedEntitiesCollection:
-      description: A collection of two-way linked (resolved & verified) entities linked to the entity defining this collection.
+      description: A collection of directly two-way linked (resolved & verified) entities linked to the entity defining this collection.
       type: object
       required:
         - items
@@ -2640,6 +2640,13 @@ components:
       properties:
         entity_address:
           $ref: "#/components/schemas/Address"
+        auto_link_blueprints:
+          description: |
+            List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
+            Returned only for packages.
+          type: array
+          items:
+            type: string
 
     TwoWayLinkedDappOnLedgerDetails:
       type: object
@@ -5245,7 +5252,19 @@ components:
             royalty_config:
               $ref: "#/components/schemas/ComponentRoyaltyConfig"
             two_way_linked_dapp_address:
-              description: Two-way linked (resolved & verified) dApp address, if any. Applicable to non-Account dApp components only.
+              description: |
+                Verified two-way link to the dApp address, if available. Resolves to `direct_linked_dapp_address` if it exists; otherwise, it falls back to `blueprint_linked_dapp_address`.
+                See the [resolved link](https://docs.radixdlt.com/docs/metadata-for-verification#resolved-link) documentation for details.
+              $ref: "#/components/schemas/Address"
+            direct_linked_dapp_address:
+              description: |
+                Verified direct two-way link to the dApp address, if available.
+                See the documentation on [direct link](https://docs.radixdlt.com/docs/metadata-for-verification#direct-link) for more information.
+              $ref: "#/components/schemas/Address"
+            blueprint_linked_dapp_address :
+              description: |
+                Verified blueprint two-way link to the dApp address, if available.
+                See the documentation on [direct link](https://docs.radixdlt.com/docs/metadata-for-verification#blueprint-link) for more information.
               $ref: "#/components/schemas/Address"
             two_way_linked_dapp_details:
               description: Two-way linked (resolved & verified) dApp details. Applicable to dApp definition accounts only and limited to on-ledger information only.

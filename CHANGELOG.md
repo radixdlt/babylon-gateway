@@ -13,6 +13,13 @@ Release built: _not released yet_
 - The `manifest_classes` of the transaction manifest in the `/stream/transactions` endpoint have been adjusted slightly. Notably:
   - The `General` classification has been expanded to permit validator stake/unstake/claim actions and pool contribute and redeem actions. 
 - Added a new endpoint `/extensions/implicit-requirements/lookup` for resolving implicit access rule requirements (https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements).
+- Added [blueprint link](https://docs.radixdlt.com/docs/metadata-for-verification#blueprint-Link) support
+  - dApp details
+    - `auto_link_blueprints` property added to `two_way_linked_dapp_details.entities.items` if entity is package and has any auto link blueprint defined.
+  - Linked entity changes
+    - Update to `two_way_linked_dapp_address` previously it returned only direct links, right now it resolves to `direct_linked_dapp_address` if it exists; otherwise, it falls back to `blueprint_linked_dapp_address`.
+    - New property `direct_linked_dapp_address` returns verified direct two-way link to the dApp address, if available.
+    - New property `blueprint_linked_dapp_address` returns verified blueprint two-way link to the dApp address, if available.
 
 ### Database changes
 - New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.

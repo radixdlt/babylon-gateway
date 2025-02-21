@@ -110,13 +110,11 @@ internal class StandardMetadataResolver
     }
 
     public async Task<IDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>> ResolveTwoWayLinks(
-        ICollection<Entity> entities,
+        long[] entityIds,
         bool validateOnLedgerOnly,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var entityIds = entities.Select(e => e.Id).ToList();
-
         if (!entityIds.Any())
         {
             return ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;

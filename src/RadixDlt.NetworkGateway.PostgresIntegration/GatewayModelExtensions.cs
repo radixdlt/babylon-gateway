@@ -110,9 +110,9 @@ internal static class GatewayModelExtensions
         return new GatewayModel.TwoWayLinkedDappsCollectionItem(input.EntityAddress);
     }
 
-    public static GatewayModel.TwoWayLinkedEntitiesCollectionItem ToGatewayModel(this DappClaimedEntityResolvedTwoWayLink input)
+    public static GatewayModel.TwoWayLinkedEntitiesCollectionItem ToGatewayModel(this DappClaimedEntityResolvedTwoWayLink input, List<string>? autoLinkBlueprints = null)
     {
-        return new GatewayModel.TwoWayLinkedEntitiesCollectionItem(input.EntityAddress);
+        return new GatewayModel.TwoWayLinkedEntitiesCollectionItem(input.EntityAddress, autoLinkBlueprints);
     }
 
     public static GatewayModel.AccountDefaultDepositRule ToGatewayModel(this AccountDefaultDepositRule input)

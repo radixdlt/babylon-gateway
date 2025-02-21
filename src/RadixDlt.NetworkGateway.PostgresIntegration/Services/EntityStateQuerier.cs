@@ -161,8 +161,19 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var packageCodeHistory = await PackageQueries.PackageCodeHistoryMultiLookup(_dbContext, packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var packageSchemaHistory = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
 
+        var instantiatingPackageDictionary = entities.ToDictionary(
+            x => x.Id,
+            x =>
+            {
+                x.TryGetCorrelation(EntityRelationship.ComponentToInstantiatingPackage, out var correlation);
+                return correlation?.EntityId;
+            }
+        );
+        var instantiatingPackageIds = instantiatingPackageDictionary.Values.Where(x => x.HasValue).Select(x => x!.Value).ToArray();
+
+        var entityIdsToResolveTwoWayLinks = entities.Select(x => x.Id).Union(instantiatingPackageIds).ToArray();
         var resolvedTwoWayLinks = optIns.DappTwoWayLinks
-            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entities, true, ledgerState, token)
+            ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entityIdsToResolveTwoWayLinks, true, ledgerState, token)
             : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
         var resolvedNativeResourceDetails = optIns.NativeResourceDetails
             ? await new NativeResourceDetailsResolver(_dbContext, _dapperWrapper, networkConfiguration).GetNativeResourceDetails(entities, ledgerState, token)
@@ -246,6 +257,22 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var componentRoyaltyConfigs = globalPersistedComponentEntities.Any() && optIns.ComponentRoyaltyConfig
             ? await GetComponentRoyaltyConfigs(globalPersistedComponentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
             : null;
+
+        var dappDefinitionsLinkedEntitiesPackageAddresses = resolvedTwoWayLinks
+            .Values
+            .SelectMany(x => x)
+            .OfType<DappClaimedEntityResolvedTwoWayLink>()
+            .Where(x => x.EntityAddress.IsPackage)
+            .Select(x => x.EntityAddress)
+            .ToList();
+
+        var dappDefinitionsLinkedEntitiesPackageIdsDictionary = await _entityQuerier.ResolveEntityIds(dappDefinitionsLinkedEntitiesPackageAddresses, token);
+
+        var autoLinkBlueprintDictionary = await GetBlueprintLinkMetadata(
+            instantiatingPackageIds.Union(dappDefinitionsLinkedEntitiesPackageIdsDictionary.Values).ToHashSet().ToArray(),
+            ledgerState,
+            networkConfiguration,
+            token);
 
         var items = new List<GatewayModel.StateEntityDetailsResponseItem>();
 
@@ -383,21 +410,42 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 case ComponentEntity ce:
                     string? componentRoyaltyVaultBalance = null;
                     ComponentMethodRoyaltyEntryHistory[]? componentRoyaltyConfig = null;
-                    GatewayModel.TwoWayLinkedDappOnLedgerDetails? twoWayLinkedDappOnLedgerDetails = null;
+                    GatewayModel.TwoWayLinkedDappOnLedgerDetails? dAppDefinitionLinkDetail = null;
 
-                    var nonAccountTwoWayLinkedDapp = twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress;
+                    var directlyLinkedDapp = twoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress;
 
+                    var instantiatingPackageId = ce.GetInstantiatingPackageId();
+                    var instantiatingPackageAddress = correlatedAddresses[instantiatingPackageId];
+                    resolvedTwoWayLinks.TryGetValue(instantiatingPackageAddress, out var instantiatingPackageTwoWayLinks);
+                    var twoWayLinkedBlueprints = autoLinkBlueprintDictionary[instantiatingPackageId];
+
+                    var blueprintLinkedDapp = twoWayLinkedBlueprints?.Contains(ce.BlueprintName) == true
+                        ? instantiatingPackageTwoWayLinks?.OfType<DappDefinitionResolvedTwoWayLink>().FirstOrDefault()?.EntityAddress
+                        : null;
+
+                    // The dApp is represented by a GlobalAccount.
+                    // We try to resolve the dApp details only if the entity is an account as it is not possible for other entity types.
                     if (ce is GlobalAccountEntity)
                     {
-                        var accountTwoWayLinkedDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
-                        var accountTwoWayLinkedEntities = twoWayLinks?.OfType<DappClaimedEntityResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var dAppDefinitionPartnerDapps = twoWayLinks?.OfType<DappDefinitionsResolvedTwoWayLink>().Select(x => x.ToGatewayModel()).ToList();
+                        var dAppDefinitionClaimedEntities = twoWayLinks?.OfType<DappClaimedEntityResolvedTwoWayLink>().Select(x =>
+                        {
+                            if (!x.EntityAddress.IsPackage)
+                            {
+                                return x.ToGatewayModel();
+                            }
+
+                            var entityId = dappDefinitionsLinkedEntitiesPackageIdsDictionary[x.EntityAddress];
+                            var autoLinkBlueprints = autoLinkBlueprintDictionary[entityId];
+                            return x.ToGatewayModel(autoLinkBlueprints);
+                        }).ToList();
                         var accountTwoWayLinkedLocker = twoWayLinks?.OfType<DappAccountLockerResolvedTwoWayLink>().FirstOrDefault()?.LockerAddress;
 
-                        if (accountTwoWayLinkedDapps?.Any() == true || accountTwoWayLinkedEntities?.Any() == true || accountTwoWayLinkedLocker != null)
+                        if (dAppDefinitionPartnerDapps?.Any() == true || dAppDefinitionClaimedEntities?.Any() == true || accountTwoWayLinkedLocker != null)
                         {
-                            twoWayLinkedDappOnLedgerDetails = new GatewayModel.TwoWayLinkedDappOnLedgerDetails(
-                                dapps: accountTwoWayLinkedDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: accountTwoWayLinkedDapps) : null,
-                                entities: accountTwoWayLinkedEntities?.Any() == true ? new GatewayModel.TwoWayLinkedEntitiesCollection(items: accountTwoWayLinkedEntities) : null,
+                            dAppDefinitionLinkDetail = new GatewayModel.TwoWayLinkedDappOnLedgerDetails(
+                                dapps: dAppDefinitionPartnerDapps?.Any() == true ? new GatewayModel.TwoWayLinkedDappsCollection(items: dAppDefinitionPartnerDapps) : null,
+                                entities: dAppDefinitionClaimedEntities?.Any() == true ? new GatewayModel.TwoWayLinkedEntitiesCollection(items: dAppDefinitionClaimedEntities) : null,
                                 primaryLocker: accountTwoWayLinkedLocker);
                         }
                     }
@@ -413,15 +461,17 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
-                        packageAddress: correlatedAddresses[ce.GetInstantiatingPackageId()],
+                        packageAddress: instantiatingPackageAddress,
                         blueprintName: ce.BlueprintName,
                         blueprintVersion: ce.BlueprintVersion,
                         state: state != null ? new JRaw(state) : null,
                         roleAssignments: roleAssignments,
                         royaltyVaultBalance: componentRoyaltyVaultBalance,
                         royaltyConfig: optIns.ComponentRoyaltyConfig ? componentRoyaltyConfig.ToGatewayModel() : null,
-                        twoWayLinkedDappAddress: nonAccountTwoWayLinkedDapp,
-                        twoWayLinkedDappDetails: twoWayLinkedDappOnLedgerDetails,
+                        twoWayLinkedDappAddress: directlyLinkedDapp ?? blueprintLinkedDapp,
+                        blueprintLinkedDappAddress: blueprintLinkedDapp,
+                        directLinkedDappAddress: directlyLinkedDapp,
+                        twoWayLinkedDappDetails: dAppDefinitionLinkDetail,
                         nativeResourceDetails: nativeResourceDetails);
                     break;
             }
@@ -914,5 +964,36 @@ ORDER BY component_method_royalty_join.ordinality ASC;")
                 .ToListAsync(token))
             .GroupBy(b => b.EntityId)
             .ToDictionary(g => g.Key, g => g.ToArray());
+    }
+
+    private async Task<IDictionary<long, List<string>?>> GetBlueprintLinkMetadata(
+        long[] entityIds,
+        GatewayModel.LedgerState ledgerState,
+        NetworkConfiguration networkConfiguration,
+        CancellationToken token)
+    {
+        const string EnableBlueprintLinkingMetadataKey = "enable_blueprint_linking";
+
+        if (entityIds.Length == 0)
+        {
+            return ImmutableDictionary<long, List<string>?>.Empty;
+        }
+
+        var blueprintLinkingMetaData = await MetadataMultiLookupQuery.Execute(
+            _dbContext.Database.GetDbConnection(),
+            _dapperWrapper,
+            entityIds,
+            new[] { EnableBlueprintLinkingMetadataKey },
+            ledgerState,
+            networkConfiguration.Id,
+            token);
+
+        return blueprintLinkingMetaData.ToDictionary(
+            x => x.Key,
+            x =>
+            {
+                var typed = x.Value.Items.FirstOrDefault()?.Value.Typed;
+                return typed is not GatewayModel.MetadataStringArrayValue stringArrayValue ? null : stringArrayValue.Values;
+            });
     }
 }
