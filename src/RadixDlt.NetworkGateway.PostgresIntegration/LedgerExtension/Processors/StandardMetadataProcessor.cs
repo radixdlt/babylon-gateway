@@ -99,6 +99,16 @@ internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProces
 
     public void VisitUpsert(CoreModel.IUpsertedSubstate substate, ReferencedEntity referencedEntity, long stateVersion)
     {
+        T? ParseMetadataValue<T>(CoreModel.MetadataModuleEntrySubstate metadataSubstate)
+            where T : GatewayModel.MetadataTypedValue
+        {
+            var parsed = metadataSubstate.Value == null
+                ? null
+                : ScryptoSborUtils.DecodeToGatewayMetadataItemValue(metadataSubstate.Value.DataStruct.StructData.GetDataBytes(), _context.NetworkConfiguration.Id);
+
+            return parsed as T;
+        }
+
         var substateData = substate.Value.SubstateData;
 
         if (substateData is not CoreModel.MetadataModuleEntrySubstate metadataEntry)
@@ -106,28 +116,11 @@ internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProces
             return;
         }
 
-        bool TryParseValue<T>([NotNullWhen(true)] out T? value)
-            where T : GatewayModel.MetadataTypedValue
-        {
-            var parsed = metadataEntry.Value == null
-                ? null
-                : ScryptoSborUtils.DecodeToGatewayMetadataItemValue(metadataEntry.Value.DataStruct.StructData.GetDataBytes(), _context.NetworkConfiguration.Id);
-
-            if (parsed is T typed)
-            {
-                value = typed;
-                return true;
-            }
-
-            value = default;
-            return false;
-        }
-
         var key = metadataEntry.Key.Name;
 
         if (referencedEntity.Address.IsAccount)
         {
-            if (key == StandardMetadataConstants.DappAccountType && TryParseValue<GatewayModel.MetadataStringValue>(out var accountType))
+            if (key == StandardMetadataConstants.DappAccountType)
             {
                 _entriesToAdd.Add(
                     new DappAccountTypeUnverifiedStandardMetadataEntryHistory
@@ -137,10 +130,10 @@ internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProces
                         EntityId = referencedEntity.DatabaseId,
                         IsDeleted = metadataEntry.Value == null,
                         IsLocked = substateData.IsLocked,
-                        Value = accountType.Value,
+                        Value = ParseMetadataValue<GatewayModel.MetadataStringValue>(metadataEntry)?.Value,
                     });
             }
-            else if (key == StandardMetadataConstants.DappClaimedWebsites && TryParseValue<GatewayModel.MetadataOriginArrayValue>(out var claimedWebsites))
+            else if (key == StandardMetadataConstants.DappClaimedWebsites)
             {
                 _entriesToAdd.Add(
                     new DappClaimedWebsitesUnverifiedStandardMetadataEntryHistory
@@ -150,10 +143,10 @@ internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProces
                         EntityId = referencedEntity.DatabaseId,
                         IsDeleted = metadataEntry.Value == null,
                         IsLocked = substateData.IsLocked,
-                        ClaimedWebsites = claimedWebsites.Values.ToArray(),
+                        ClaimedWebsites = ParseMetadataValue<GatewayModel.MetadataOriginArrayValue>(metadataEntry)?.Values.ToArray(),
                     });
             }
-            else if (key == StandardMetadataConstants.DappClaimedEntities && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var claimedEntities))
+            else if (key == StandardMetadataConstants.DappClaimedEntities)
             {
                 _entriesToAdd.Add(
                     new DappClaimedEntitiesUnverifiedStandardMetadataEntryHistory
@@ -163,10 +156,13 @@ internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProces
                         EntityId = referencedEntity.DatabaseId,
                         IsDeleted = metadataEntry.Value == null,
                         IsLocked = substateData.IsLocked,
-                        ClaimedEntityIds = claimedEntities.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
+                        ClaimedEntityIds = ParseMetadataValue<GatewayModel.MetadataGlobalAddressArrayValue>(metadataEntry)
+                            ?.Values
+                            .Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId)
+                            .ToArray(),
                     });
             }
-            else if (key == StandardMetadataConstants.DappDefinitions && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var dappDefinitions))
+            else if (key == StandardMetadataConstants.DappDefinitions)
             {
                 _entriesToAdd.Add(
                     new DappDefinitionsUnverifiedStandardMetadataEntryHistory
@@ -176,11 +172,16 @@ internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProces
                         EntityId = referencedEntity.DatabaseId,
                         IsDeleted = metadataEntry.Value == null,
                         IsLocked = substateData.IsLocked,
-                        DappDefinitionEntityIds = dappDefinitions.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
+                        DappDefinitionEntityIds = ParseMetadataValue<GatewayModel.MetadataGlobalAddressArrayValue>(metadataEntry)
+                            ?.Values
+                            .Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId)
+                            .ToArray(),
                     });
             }
-            else if (key == StandardMetadataConstants.DappAccountLocker && TryParseValue<GatewayModel.MetadataGlobalAddressValue>(out var dappAccountLocker))
+            else if (key == StandardMetadataConstants.DappAccountLocker)
             {
+                var parsedValue = ParseMetadataValue<GatewayModel.MetadataGlobalAddressValue>(metadataEntry);
+
                 _entriesToAdd.Add(
                     new DappAccountLockerUnverifiedStandardMetadataEntryHistory
                     {
@@ -189,13 +190,13 @@ internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProces
                         EntityId = referencedEntity.DatabaseId,
                         IsDeleted = metadataEntry.Value == null,
                         IsLocked = substateData.IsLocked,
-                        AccountLockerEntityId = _referencedEntities.Get((EntityAddress)dappAccountLocker.Value).DatabaseId,
+                        AccountLockerEntityId = parsedValue != null ? _referencedEntities.Get((EntityAddress)parsedValue.Value).DatabaseId : null,
                     });
             }
         }
         else if (referencedEntity.Address.IsResource)
         {
-            if (key == StandardMetadataConstants.DappDefinitions && TryParseValue<GatewayModel.MetadataGlobalAddressArrayValue>(out var dappDefinitions))
+            if (key == StandardMetadataConstants.DappDefinitions)
             {
                 _entriesToAdd.Add(
                     new DappDefinitionsUnverifiedStandardMetadataEntryHistory
@@ -205,14 +206,18 @@ internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProces
                         EntityId = referencedEntity.DatabaseId,
                         IsDeleted = metadataEntry.Value == null,
                         IsLocked = substateData.IsLocked,
-                        DappDefinitionEntityIds = dappDefinitions.Values.Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId).ToArray(),
+                        DappDefinitionEntityIds = ParseMetadataValue<GatewayModel.MetadataGlobalAddressArrayValue>(metadataEntry)
+                            ?.Values
+                            .Select(address => _referencedEntities.Get((EntityAddress)address).DatabaseId)
+                            .ToArray(),
                     });
             }
         }
         else if (referencedEntity.Address.IsGlobal)
         {
-            if (key == StandardMetadataConstants.DappDefinition && TryParseValue<GatewayModel.MetadataGlobalAddressValue>(out var dappDefinition))
+            if (key == StandardMetadataConstants.DappDefinition)
             {
+                var parsedValue = ParseMetadataValue<GatewayModel.MetadataGlobalAddressValue>(metadataEntry);
                 _entriesToAdd.Add(
                     new DappDefinitionUnverifiedStandardMetadataEntryHistory
                     {
@@ -221,7 +226,7 @@ internal class StandardMetadataProcessor : IProcessorBase, ISubstateUpsertProces
                         EntityId = referencedEntity.DatabaseId,
                         IsDeleted = metadataEntry.Value == null,
                         IsLocked = substateData.IsLocked,
-                        DappDefinitionEntityId = _referencedEntities.Get((EntityAddress)dappDefinition.Value).DatabaseId,
+                        DappDefinitionEntityId = parsedValue != null ? _referencedEntities.Get((EntityAddress)parsedValue.Value).DatabaseId : null,
                     });
             }
         }
