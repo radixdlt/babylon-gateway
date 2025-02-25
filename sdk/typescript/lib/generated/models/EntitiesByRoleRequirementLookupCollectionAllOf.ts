@@ -13,54 +13,66 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { EntitiesByRoleRequirementItem } from './EntitiesByRoleRequirementItem';
+import {
+    EntitiesByRoleRequirementItemFromJSON,
+    EntitiesByRoleRequirementItemFromJSONTyped,
+    EntitiesByRoleRequirementItemToJSON,
+} from './EntitiesByRoleRequirementItem';
+import type { EntitiesByRoleRequirementRequestRequirement } from './EntitiesByRoleRequirementRequestRequirement';
+import {
+    EntitiesByRoleRequirementRequestRequirementFromJSON,
+    EntitiesByRoleRequirementRequestRequirementFromJSONTyped,
+    EntitiesByRoleRequirementRequestRequirementToJSON,
+} from './EntitiesByRoleRequirementRequestRequirement';
+
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface EntitiesByRoleRequirementLookupCollectionAllOf
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface EntitiesByRoleRequirementLookupCollectionAllOf {
     /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * 
+     * @type {EntitiesByRoleRequirementRequestRequirement}
+     * @memberof EntitiesByRoleRequirementLookupCollectionAllOf
      */
-    entity_address: string;
+    requirement: EntitiesByRoleRequirementRequestRequirement;
     /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * 
+     * @type {Array<EntitiesByRoleRequirementItem>}
+     * @memberof EntitiesByRoleRequirementLookupCollectionAllOf
      */
-    auto_link_blueprints?: Array<string>;
+    entities: Array<EntitiesByRoleRequirementItem>;
 }
 
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * Check if a given object implements the EntitiesByRoleRequirementLookupCollectionAllOf interface.
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export function instanceOfEntitiesByRoleRequirementLookupCollectionAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
+    isInstance = isInstance && "requirement" in value;
+    isInstance = isInstance && "entities" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function EntitiesByRoleRequirementLookupCollectionAllOfFromJSON(json: any): EntitiesByRoleRequirementLookupCollectionAllOf {
+    return EntitiesByRoleRequirementLookupCollectionAllOfFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function EntitiesByRoleRequirementLookupCollectionAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntitiesByRoleRequirementLookupCollectionAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'requirement': EntitiesByRoleRequirementRequestRequirementFromJSON(json['requirement']),
+        'entities': ((json['entities'] as Array<any>).map(EntitiesByRoleRequirementItemFromJSON)),
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function EntitiesByRoleRequirementLookupCollectionAllOfToJSON(value?: EntitiesByRoleRequirementLookupCollectionAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +81,8 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'requirement': EntitiesByRoleRequirementRequestRequirementToJSON(value.requirement),
+        'entities': ((value.entities as Array<any>).map(EntitiesByRoleRequirementItemToJSON)),
     };
 }
 

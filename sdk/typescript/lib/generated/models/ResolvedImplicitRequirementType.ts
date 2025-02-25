@@ -12,65 +12,32 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
+
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
-    /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
-     */
-    entity_address: string;
-    /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
+export const ResolvedImplicitRequirementType = {
+    Secp256k1PublicKey: 'Secp256k1PublicKey',
+    Ed25519PublicKey: 'Ed25519PublicKey',
+    GlobalCallerBlueprint: 'GlobalCallerBlueprint',
+    GlobalCallerEntity: 'GlobalCallerEntity',
+    PackageOfDirectCaller: 'PackageOfDirectCaller',
+    ProtocolExecution: 'ProtocolExecution',
+    ValidatorExecution: 'ValidatorExecution'
+} as const;
+export type ResolvedImplicitRequirementType = typeof ResolvedImplicitRequirementType[keyof typeof ResolvedImplicitRequirementType];
 
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
-     */
-    auto_link_blueprints?: Array<string>;
+
+export function ResolvedImplicitRequirementTypeFromJSON(json: any): ResolvedImplicitRequirementType {
+    return ResolvedImplicitRequirementTypeFromJSONTyped(json, false);
 }
 
-/**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
- */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
-
-    return isInstance;
+export function ResolvedImplicitRequirementTypeFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResolvedImplicitRequirementType {
+    return json as ResolvedImplicitRequirementType;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
-}
-
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
-    if ((json === undefined) || (json === null)) {
-        return json;
-    }
-    return {
-        
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
-    };
-}
-
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
-    if (value === undefined) {
-        return undefined;
-    }
-    if (value === null) {
-        return null;
-    }
-    return {
-        
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
-    };
+export function ResolvedImplicitRequirementTypeToJSON(value?: ResolvedImplicitRequirementType | null): any {
+    return value as any;
 }
 

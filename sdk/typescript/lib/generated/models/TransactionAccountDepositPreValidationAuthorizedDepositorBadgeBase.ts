@@ -32,12 +32,6 @@ export interface TransactionAccountDepositPreValidationAuthorizedDepositorBadgeB
      * @memberof TransactionAccountDepositPreValidationAuthorizedDepositorBadgeBase
      */
     badge_type: AccountAuthorizedDepositorBadgeType;
-    /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof TransactionAccountDepositPreValidationAuthorizedDepositorBadgeBase
-     */
-    resource_address: string;
 }
 
 /**
@@ -46,7 +40,6 @@ export interface TransactionAccountDepositPreValidationAuthorizedDepositorBadgeB
 export function instanceOfTransactionAccountDepositPreValidationAuthorizedDepositorBadgeBase(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "badge_type" in value;
-    isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
@@ -62,7 +55,6 @@ export function TransactionAccountDepositPreValidationAuthorizedDepositorBadgeBa
     return {
         
         'badge_type': AccountAuthorizedDepositorBadgeTypeFromJSON(json['badge_type']),
-        'resource_address': json['resource_address'],
     };
 }
 
@@ -76,7 +68,6 @@ export function TransactionAccountDepositPreValidationAuthorizedDepositorBadgeBa
     return {
         
         'badge_type': AccountAuthorizedDepositorBadgeTypeToJSON(value.badge_type),
-        'resource_address': value.resource_address,
     };
 }
 

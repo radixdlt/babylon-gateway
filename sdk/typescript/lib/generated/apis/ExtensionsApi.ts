@@ -15,18 +15,48 @@
 
 import * as runtime from '../runtime';
 import type {
+  EntitiesByRoleRequirementLookupRequest,
+  EntitiesByRoleRequirementLookupResponse,
+  EntitiesByRoleRequirementPageRequest,
+  EntitiesByRoleRequirementPageResponse,
   ErrorResponse,
+  ImplicitRequirementsLookupRequest,
+  ImplicitRequirementsLookupResponse,
   ResourceHoldersRequest,
   ResourceHoldersResponse,
 } from '../models';
 import {
+    EntitiesByRoleRequirementLookupRequestFromJSON,
+    EntitiesByRoleRequirementLookupRequestToJSON,
+    EntitiesByRoleRequirementLookupResponseFromJSON,
+    EntitiesByRoleRequirementLookupResponseToJSON,
+    EntitiesByRoleRequirementPageRequestFromJSON,
+    EntitiesByRoleRequirementPageRequestToJSON,
+    EntitiesByRoleRequirementPageResponseFromJSON,
+    EntitiesByRoleRequirementPageResponseToJSON,
     ErrorResponseFromJSON,
     ErrorResponseToJSON,
+    ImplicitRequirementsLookupRequestFromJSON,
+    ImplicitRequirementsLookupRequestToJSON,
+    ImplicitRequirementsLookupResponseFromJSON,
+    ImplicitRequirementsLookupResponseToJSON,
     ResourceHoldersRequestFromJSON,
     ResourceHoldersRequestToJSON,
     ResourceHoldersResponseFromJSON,
     ResourceHoldersResponseToJSON,
 } from '../models';
+
+export interface EntitiesByRoleRequirementLookupOperationRequest {
+    entitiesByRoleRequirementLookupRequest: EntitiesByRoleRequirementLookupRequest;
+}
+
+export interface EntitiesByRoleRequirementPageOperationRequest {
+    entitiesByRoleRequirementPageRequest: EntitiesByRoleRequirementPageRequest;
+}
+
+export interface ImplicitRequirementsLookupOperationRequest {
+    implicitRequirementsLookupRequest: ImplicitRequirementsLookupRequest;
+}
 
 export interface ResourceHoldersPageRequest {
     resourceHoldersRequest: ResourceHoldersRequest;
@@ -38,7 +68,112 @@ export interface ResourceHoldersPageRequest {
 export class ExtensionsApi extends runtime.BaseAPI {
 
     /**
-     * A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter. 
+     * This endpoint is intended to query for entities that have ever used a given requirement (resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments). This endpoint allows querying by multiple requirements. A maximum of `50` requirements can be queried. A maximum of 20 entities per requirement will be returned. To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.  Behaviour: - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger. - It may include entities that no longer use the requirement as part of an access rule. - If no entities are found, an empty list will be returned. 
+     * Get entities by role requirement lookup
+     */
+    async entitiesByRoleRequirementLookupRaw(requestParameters: EntitiesByRoleRequirementLookupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntitiesByRoleRequirementLookupResponse>> {
+        if (requestParameters.entitiesByRoleRequirementLookupRequest === null || requestParameters.entitiesByRoleRequirementLookupRequest === undefined) {
+            throw new runtime.RequiredError('entitiesByRoleRequirementLookupRequest','Required parameter requestParameters.entitiesByRoleRequirementLookupRequest was null or undefined when calling entitiesByRoleRequirementLookup.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/extensions/entities-by-role-requirement/lookup`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: EntitiesByRoleRequirementLookupRequestToJSON(requestParameters.entitiesByRoleRequirementLookupRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EntitiesByRoleRequirementLookupResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * This endpoint is intended to query for entities that have ever used a given requirement (resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments). This endpoint allows querying by multiple requirements. A maximum of `50` requirements can be queried. A maximum of 20 entities per requirement will be returned. To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.  Behaviour: - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger. - It may include entities that no longer use the requirement as part of an access rule. - If no entities are found, an empty list will be returned. 
+     * Get entities by role requirement lookup
+     */
+    async entitiesByRoleRequirementLookup(requestParameters: EntitiesByRoleRequirementLookupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntitiesByRoleRequirementLookupResponse> {
+        const response = await this.entitiesByRoleRequirementLookupRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments). This endpoint allows querying by a single requirement. By default it returns up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter. To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.  To lookup multiple requirements, please call the `/extensions/entities-by-role-requirement/lookup` endpoint.  Behaviour: - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger. - It may include entities that no longer use the requirement as part of an access rule. - If no entities are found, an empty list will be returned. 
+     * Get entities by role requirement page
+     */
+    async entitiesByRoleRequirementPageRaw(requestParameters: EntitiesByRoleRequirementPageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntitiesByRoleRequirementPageResponse>> {
+        if (requestParameters.entitiesByRoleRequirementPageRequest === null || requestParameters.entitiesByRoleRequirementPageRequest === undefined) {
+            throw new runtime.RequiredError('entitiesByRoleRequirementPageRequest','Required parameter requestParameters.entitiesByRoleRequirementPageRequest was null or undefined when calling entitiesByRoleRequirementPage.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/extensions/entities-by-role-requirement/page`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: EntitiesByRoleRequirementPageRequestToJSON(requestParameters.entitiesByRoleRequirementPageRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EntitiesByRoleRequirementPageResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments). This endpoint allows querying by a single requirement. By default it returns up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter. To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.  To lookup multiple requirements, please call the `/extensions/entities-by-role-requirement/lookup` endpoint.  Behaviour: - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger. - It may include entities that no longer use the requirement as part of an access rule. - If no entities are found, an empty list will be returned. 
+     * Get entities by role requirement page
+     */
+    async entitiesByRoleRequirementPage(requestParameters: EntitiesByRoleRequirementPageOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntitiesByRoleRequirementPageResponse> {
+        const response = await this.entitiesByRoleRequirementPageRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can\'t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - `resource_address` (one of the above) - `non_fungible_id`,  of the requirement.  You can query a maximum of `100` implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+     * Resolve implicit requirement target from global non-fungible id
+     */
+    async implicitRequirementsLookupRaw(requestParameters: ImplicitRequirementsLookupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ImplicitRequirementsLookupResponse>> {
+        if (requestParameters.implicitRequirementsLookupRequest === null || requestParameters.implicitRequirementsLookupRequest === undefined) {
+            throw new runtime.RequiredError('implicitRequirementsLookupRequest','Required parameter requestParameters.implicitRequirementsLookupRequest was null or undefined when calling implicitRequirementsLookup.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/extensions/implicit-requirements/lookup`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ImplicitRequirementsLookupRequestToJSON(requestParameters.implicitRequirementsLookupRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ImplicitRequirementsLookupResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system. These implicit requirements typically store their details as a hash, which means the subject of the requirement can\'t be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.  The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported: - **Secp256k1 Signature Resource** - **Ed25519 Signature Resource** - **Package of Direct Caller Resource** - **Global Caller Resource** - **System Execution Resource**  When querying, you must provide a pair of the following for each requirement to resolve: - `resource_address` (one of the above) - `non_fungible_id`,  of the requirement.  You can query a maximum of `100` implicit requirements at a time.  See the documentation on [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) for more information. 
+     * Resolve implicit requirement target from global non-fungible id
+     */
+    async implicitRequirementsLookup(requestParameters: ImplicitRequirementsLookupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ImplicitRequirementsLookupResponse> {
+        const response = await this.implicitRequirementsLookupRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter. 
      * Get Resource Holders Page
      */
     async resourceHoldersPageRaw(requestParameters: ResourceHoldersPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResourceHoldersResponse>> {
@@ -64,7 +199,7 @@ export class ExtensionsApi extends runtime.BaseAPI {
     }
 
     /**
-     * A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances). This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice. Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter. 
+     * A paginated endpoint to discover which global entities hold the most of a given resource. More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances).  This endpoint operates only at the **current state version**, it is not possible to browse historical data. Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.  Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter. 
      * Get Resource Holders Page
      */
     async resourceHoldersPage(requestParameters: ResourceHoldersPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResourceHoldersResponse> {

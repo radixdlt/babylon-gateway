@@ -21,7 +21,7 @@ import {
 } from './TwoWayLinkedEntitiesCollectionItem';
 
 /**
- * A collection of two-way linked (resolved & verified) entities linked to the entity defining this collection.
+ * A collection of directly two-way linked (resolved & verified) entities linked to the entity defining this collection.
  * @export
  * @interface TwoWayLinkedEntitiesCollection
  */

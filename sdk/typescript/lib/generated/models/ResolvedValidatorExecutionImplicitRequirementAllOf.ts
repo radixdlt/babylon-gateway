@@ -16,51 +16,51 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface ResolvedValidatorExecutionImplicitRequirementAllOf
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface ResolvedValidatorExecutionImplicitRequirementAllOf {
     /**
-     * Bech32m-encoded human readable version of the address.
+     * 
      * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * @memberof ResolvedValidatorExecutionImplicitRequirementAllOf
      */
-    entity_address: string;
-    /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
-     */
-    auto_link_blueprints?: Array<string>;
+    type?: ResolvedValidatorExecutionImplicitRequirementAllOfTypeEnum;
 }
 
+
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * @export
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export const ResolvedValidatorExecutionImplicitRequirementAllOfTypeEnum = {
+    ValidatorExecution: 'ValidatorExecution'
+} as const;
+export type ResolvedValidatorExecutionImplicitRequirementAllOfTypeEnum = typeof ResolvedValidatorExecutionImplicitRequirementAllOfTypeEnum[keyof typeof ResolvedValidatorExecutionImplicitRequirementAllOfTypeEnum];
+
+
+/**
+ * Check if a given object implements the ResolvedValidatorExecutionImplicitRequirementAllOf interface.
+ */
+export function instanceOfResolvedValidatorExecutionImplicitRequirementAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function ResolvedValidatorExecutionImplicitRequirementAllOfFromJSON(json: any): ResolvedValidatorExecutionImplicitRequirementAllOf {
+    return ResolvedValidatorExecutionImplicitRequirementAllOfFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function ResolvedValidatorExecutionImplicitRequirementAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResolvedValidatorExecutionImplicitRequirementAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function ResolvedValidatorExecutionImplicitRequirementAllOfToJSON(value?: ResolvedValidatorExecutionImplicitRequirementAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +69,7 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'type': value.type,
     };
 }
 

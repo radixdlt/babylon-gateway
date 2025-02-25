@@ -13,54 +13,65 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { NonFungibleGlobalId } from './NonFungibleGlobalId';
+import {
+    NonFungibleGlobalIdFromJSON,
+    NonFungibleGlobalIdFromJSONTyped,
+    NonFungibleGlobalIdToJSON,
+} from './NonFungibleGlobalId';
+import type { ResolvedImplicitRequirement } from './ResolvedImplicitRequirement';
+import {
+    ResolvedImplicitRequirementFromJSON,
+    ResolvedImplicitRequirementFromJSONTyped,
+    ResolvedImplicitRequirementToJSON,
+} from './ResolvedImplicitRequirement';
+
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface ImplicitRequirementsLookupCollectionItem
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface ImplicitRequirementsLookupCollectionItem {
     /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * 
+     * @type {NonFungibleGlobalId}
+     * @memberof ImplicitRequirementsLookupCollectionItem
      */
-    entity_address: string;
+    requirement: NonFungibleGlobalId;
     /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * 
+     * @type {ResolvedImplicitRequirement}
+     * @memberof ImplicitRequirementsLookupCollectionItem
      */
-    auto_link_blueprints?: Array<string>;
+    resolved?: ResolvedImplicitRequirement;
 }
 
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * Check if a given object implements the ImplicitRequirementsLookupCollectionItem interface.
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export function instanceOfImplicitRequirementsLookupCollectionItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
+    isInstance = isInstance && "requirement" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function ImplicitRequirementsLookupCollectionItemFromJSON(json: any): ImplicitRequirementsLookupCollectionItem {
+    return ImplicitRequirementsLookupCollectionItemFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function ImplicitRequirementsLookupCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): ImplicitRequirementsLookupCollectionItem {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'requirement': NonFungibleGlobalIdFromJSON(json['requirement']),
+        'resolved': !exists(json, 'resolved') ? undefined : ResolvedImplicitRequirementFromJSON(json['resolved']),
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function ImplicitRequirementsLookupCollectionItemToJSON(value?: ImplicitRequirementsLookupCollectionItem | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +80,8 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'requirement': NonFungibleGlobalIdToJSON(value.requirement),
+        'resolved': ResolvedImplicitRequirementToJSON(value.resolved),
     };
 }
 

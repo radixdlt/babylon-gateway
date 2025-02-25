@@ -16,51 +16,49 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface EntitiesByRoleRequirementRequestRequirement
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface EntitiesByRoleRequirementRequestRequirement {
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * @memberof EntitiesByRoleRequirementRequestRequirement
      */
-    entity_address: string;
+    resource_address: string;
     /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * String-encoded non-fungible ID.
+     * @type {string}
+     * @memberof EntitiesByRoleRequirementRequestRequirement
      */
-    auto_link_blueprints?: Array<string>;
+    non_fungible_id?: string;
 }
 
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * Check if a given object implements the EntitiesByRoleRequirementRequestRequirement interface.
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export function instanceOfEntitiesByRoleRequirementRequestRequirement(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
+    isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function EntitiesByRoleRequirementRequestRequirementFromJSON(json: any): EntitiesByRoleRequirementRequestRequirement {
+    return EntitiesByRoleRequirementRequestRequirementFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function EntitiesByRoleRequirementRequestRequirementFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntitiesByRoleRequirementRequestRequirement {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'resource_address': json['resource_address'],
+        'non_fungible_id': !exists(json, 'non_fungible_id') ? undefined : json['non_fungible_id'],
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function EntitiesByRoleRequirementRequestRequirementToJSON(value?: EntitiesByRoleRequirementRequestRequirement | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +67,8 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'resource_address': value.resource_address,
+        'non_fungible_id': value.non_fungible_id,
     };
 }
 

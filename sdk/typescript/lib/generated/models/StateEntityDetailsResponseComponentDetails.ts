@@ -103,6 +103,18 @@ custom JSON model defined in the Core API schema.
      */
     two_way_linked_dapp_address?: string;
     /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof StateEntityDetailsResponseComponentDetails
+     */
+    direct_linked_dapp_address?: string;
+    /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof StateEntityDetailsResponseComponentDetails
+     */
+    blueprint_linked_dapp_address?: string;
+    /**
      * 
      * @type {TwoWayLinkedDappOnLedgerDetails}
      * @memberof StateEntityDetailsResponseComponentDetails
@@ -157,6 +169,8 @@ export function StateEntityDetailsResponseComponentDetailsFromJSONTyped(json: an
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
         'royalty_config': !exists(json, 'royalty_config') ? undefined : ComponentRoyaltyConfigFromJSON(json['royalty_config']),
         'two_way_linked_dapp_address': !exists(json, 'two_way_linked_dapp_address') ? undefined : json['two_way_linked_dapp_address'],
+        'direct_linked_dapp_address': !exists(json, 'direct_linked_dapp_address') ? undefined : json['direct_linked_dapp_address'],
+        'blueprint_linked_dapp_address': !exists(json, 'blueprint_linked_dapp_address') ? undefined : json['blueprint_linked_dapp_address'],
         'two_way_linked_dapp_details': !exists(json, 'two_way_linked_dapp_details') ? undefined : TwoWayLinkedDappOnLedgerDetailsFromJSON(json['two_way_linked_dapp_details']),
         'native_resource_details': !exists(json, 'native_resource_details') ? undefined : NativeResourceDetailsFromJSON(json['native_resource_details']),
     };
@@ -180,6 +194,8 @@ export function StateEntityDetailsResponseComponentDetailsToJSON(value?: StateEn
         'royalty_vault_balance': value.royalty_vault_balance,
         'royalty_config': ComponentRoyaltyConfigToJSON(value.royalty_config),
         'two_way_linked_dapp_address': value.two_way_linked_dapp_address,
+        'direct_linked_dapp_address': value.direct_linked_dapp_address,
+        'blueprint_linked_dapp_address': value.blueprint_linked_dapp_address,
         'two_way_linked_dapp_details': TwoWayLinkedDappOnLedgerDetailsToJSON(value.two_way_linked_dapp_details),
         'native_resource_details': NativeResourceDetailsToJSON(value.native_resource_details),
     };

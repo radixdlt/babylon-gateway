@@ -16,51 +16,68 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface ResolvedGlobalCallerEntityImplicitRequirement
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface ResolvedGlobalCallerEntityImplicitRequirement {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResolvedGlobalCallerEntityImplicitRequirement
+     */
+    type: ResolvedGlobalCallerEntityImplicitRequirementTypeEnum;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResolvedGlobalCallerEntityImplicitRequirement
+     */
+    first_seen_state_version: number;
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * @memberof ResolvedGlobalCallerEntityImplicitRequirement
      */
     entity_address: string;
-    /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
-     */
-    auto_link_blueprints?: Array<string>;
 }
 
+
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * @export
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export const ResolvedGlobalCallerEntityImplicitRequirementTypeEnum = {
+    GlobalCallerEntity: 'GlobalCallerEntity'
+} as const;
+export type ResolvedGlobalCallerEntityImplicitRequirementTypeEnum = typeof ResolvedGlobalCallerEntityImplicitRequirementTypeEnum[keyof typeof ResolvedGlobalCallerEntityImplicitRequirementTypeEnum];
+
+
+/**
+ * Check if a given object implements the ResolvedGlobalCallerEntityImplicitRequirement interface.
+ */
+export function instanceOfResolvedGlobalCallerEntityImplicitRequirement(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "type" in value;
+    isInstance = isInstance && "first_seen_state_version" in value;
     isInstance = isInstance && "entity_address" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function ResolvedGlobalCallerEntityImplicitRequirementFromJSON(json: any): ResolvedGlobalCallerEntityImplicitRequirement {
+    return ResolvedGlobalCallerEntityImplicitRequirementFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function ResolvedGlobalCallerEntityImplicitRequirementFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResolvedGlobalCallerEntityImplicitRequirement {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
+        'type': json['type'],
+        'first_seen_state_version': json['first_seen_state_version'],
         'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function ResolvedGlobalCallerEntityImplicitRequirementToJSON(value?: ResolvedGlobalCallerEntityImplicitRequirement | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +86,9 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
+        'type': value.type,
+        'first_seen_state_version': value.first_seen_state_version,
         'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
     };
 }
 

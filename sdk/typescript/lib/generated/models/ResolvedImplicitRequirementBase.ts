@@ -13,54 +13,52 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { ResolvedImplicitRequirementType } from './ResolvedImplicitRequirementType';
+import {
+    ResolvedImplicitRequirementTypeFromJSON,
+    ResolvedImplicitRequirementTypeFromJSONTyped,
+    ResolvedImplicitRequirementTypeToJSON,
+} from './ResolvedImplicitRequirementType';
+
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface ResolvedImplicitRequirementBase
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface ResolvedImplicitRequirementBase {
     /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * 
+     * @type {ResolvedImplicitRequirementType}
+     * @memberof ResolvedImplicitRequirementBase
      */
-    entity_address: string;
-    /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
-     */
-    auto_link_blueprints?: Array<string>;
+    type: ResolvedImplicitRequirementType;
 }
 
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * Check if a given object implements the ResolvedImplicitRequirementBase interface.
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export function instanceOfResolvedImplicitRequirementBase(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
+    isInstance = isInstance && "type" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function ResolvedImplicitRequirementBaseFromJSON(json: any): ResolvedImplicitRequirementBase {
+    return ResolvedImplicitRequirementBaseFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function ResolvedImplicitRequirementBaseFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResolvedImplicitRequirementBase {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'type': ResolvedImplicitRequirementTypeFromJSON(json['type']),
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function ResolvedImplicitRequirementBaseToJSON(value?: ResolvedImplicitRequirementBase | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +67,7 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'type': ResolvedImplicitRequirementTypeToJSON(value.type),
     };
 }
 

@@ -13,54 +13,52 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { NonFungibleGlobalId } from './NonFungibleGlobalId';
+import {
+    NonFungibleGlobalIdFromJSON,
+    NonFungibleGlobalIdFromJSONTyped,
+    NonFungibleGlobalIdToJSON,
+} from './NonFungibleGlobalId';
+
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface ImplicitRequirementsLookupRequestAllOf
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface ImplicitRequirementsLookupRequestAllOf {
     /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * limited to max 100 items.
+     * @type {Array<NonFungibleGlobalId>}
+     * @memberof ImplicitRequirementsLookupRequestAllOf
      */
-    entity_address: string;
-    /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
-     */
-    auto_link_blueprints?: Array<string>;
+    requirements: Array<NonFungibleGlobalId>;
 }
 
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * Check if a given object implements the ImplicitRequirementsLookupRequestAllOf interface.
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export function instanceOfImplicitRequirementsLookupRequestAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
+    isInstance = isInstance && "requirements" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function ImplicitRequirementsLookupRequestAllOfFromJSON(json: any): ImplicitRequirementsLookupRequestAllOf {
+    return ImplicitRequirementsLookupRequestAllOfFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function ImplicitRequirementsLookupRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ImplicitRequirementsLookupRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'requirements': ((json['requirements'] as Array<any>).map(NonFungibleGlobalIdFromJSON)),
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function ImplicitRequirementsLookupRequestAllOfToJSON(value?: ImplicitRequirementsLookupRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +67,7 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'requirements': ((value.requirements as Array<any>).map(NonFungibleGlobalIdToJSON)),
     };
 }
 

@@ -20,6 +20,12 @@ import { exists, mapValues } from '../runtime';
  */
 export interface AccountDepositPreValidationNonFungibleBadgeAllOf {
     /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof AccountDepositPreValidationNonFungibleBadgeAllOf
+     */
+    resource_address: string;
+    /**
      * String-encoded non-fungible ID.
      * @type {string}
      * @memberof AccountDepositPreValidationNonFungibleBadgeAllOf
@@ -48,6 +54,7 @@ export type AccountDepositPreValidationNonFungibleBadgeAllOfBadgeTypeEnum = type
  */
 export function instanceOfAccountDepositPreValidationNonFungibleBadgeAllOf(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "non_fungible_id" in value;
 
     return isInstance;
@@ -63,6 +70,7 @@ export function AccountDepositPreValidationNonFungibleBadgeAllOfFromJSONTyped(js
     }
     return {
         
+        'resource_address': json['resource_address'],
         'non_fungible_id': json['non_fungible_id'],
         'badge_type': !exists(json, 'badge_type') ? undefined : json['badge_type'],
     };
@@ -77,6 +85,7 @@ export function AccountDepositPreValidationNonFungibleBadgeAllOfToJSON(value?: A
     }
     return {
         
+        'resource_address': value.resource_address,
         'non_fungible_id': value.non_fungible_id,
         'badge_type': value.badge_type,
     };

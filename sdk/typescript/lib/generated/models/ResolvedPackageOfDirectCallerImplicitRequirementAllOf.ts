@@ -16,51 +16,67 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface ResolvedPackageOfDirectCallerImplicitRequirementAllOf
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface ResolvedPackageOfDirectCallerImplicitRequirementAllOf {
+    /**
+     * 
+     * @type {number}
+     * @memberof ResolvedPackageOfDirectCallerImplicitRequirementAllOf
+     */
+    first_seen_state_version: number;
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * @memberof ResolvedPackageOfDirectCallerImplicitRequirementAllOf
      */
-    entity_address: string;
+    package_address: string;
     /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * 
+     * @type {string}
+     * @memberof ResolvedPackageOfDirectCallerImplicitRequirementAllOf
      */
-    auto_link_blueprints?: Array<string>;
+    type?: ResolvedPackageOfDirectCallerImplicitRequirementAllOfTypeEnum;
 }
 
+
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * @export
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export const ResolvedPackageOfDirectCallerImplicitRequirementAllOfTypeEnum = {
+    PackageOfDirectCaller: 'PackageOfDirectCaller'
+} as const;
+export type ResolvedPackageOfDirectCallerImplicitRequirementAllOfTypeEnum = typeof ResolvedPackageOfDirectCallerImplicitRequirementAllOfTypeEnum[keyof typeof ResolvedPackageOfDirectCallerImplicitRequirementAllOfTypeEnum];
+
+
+/**
+ * Check if a given object implements the ResolvedPackageOfDirectCallerImplicitRequirementAllOf interface.
+ */
+export function instanceOfResolvedPackageOfDirectCallerImplicitRequirementAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
+    isInstance = isInstance && "first_seen_state_version" in value;
+    isInstance = isInstance && "package_address" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function ResolvedPackageOfDirectCallerImplicitRequirementAllOfFromJSON(json: any): ResolvedPackageOfDirectCallerImplicitRequirementAllOf {
+    return ResolvedPackageOfDirectCallerImplicitRequirementAllOfFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function ResolvedPackageOfDirectCallerImplicitRequirementAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResolvedPackageOfDirectCallerImplicitRequirementAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'first_seen_state_version': json['first_seen_state_version'],
+        'package_address': json['package_address'],
+        'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function ResolvedPackageOfDirectCallerImplicitRequirementAllOfToJSON(value?: ResolvedPackageOfDirectCallerImplicitRequirementAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +85,9 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'first_seen_state_version': value.first_seen_state_version,
+        'package_address': value.package_address,
+        'type': value.type,
     };
 }
 

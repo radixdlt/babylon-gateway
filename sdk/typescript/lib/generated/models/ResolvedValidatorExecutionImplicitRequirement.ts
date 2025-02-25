@@ -16,51 +16,52 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface ResolvedValidatorExecutionImplicitRequirement
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface ResolvedValidatorExecutionImplicitRequirement {
     /**
-     * Bech32m-encoded human readable version of the address.
+     * 
      * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * @memberof ResolvedValidatorExecutionImplicitRequirement
      */
-    entity_address: string;
-    /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
-     */
-    auto_link_blueprints?: Array<string>;
+    type: ResolvedValidatorExecutionImplicitRequirementTypeEnum;
 }
 
+
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * @export
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export const ResolvedValidatorExecutionImplicitRequirementTypeEnum = {
+    ValidatorExecution: 'ValidatorExecution'
+} as const;
+export type ResolvedValidatorExecutionImplicitRequirementTypeEnum = typeof ResolvedValidatorExecutionImplicitRequirementTypeEnum[keyof typeof ResolvedValidatorExecutionImplicitRequirementTypeEnum];
+
+
+/**
+ * Check if a given object implements the ResolvedValidatorExecutionImplicitRequirement interface.
+ */
+export function instanceOfResolvedValidatorExecutionImplicitRequirement(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
+    isInstance = isInstance && "type" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function ResolvedValidatorExecutionImplicitRequirementFromJSON(json: any): ResolvedValidatorExecutionImplicitRequirement {
+    return ResolvedValidatorExecutionImplicitRequirementFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function ResolvedValidatorExecutionImplicitRequirementFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResolvedValidatorExecutionImplicitRequirement {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'type': json['type'],
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function ResolvedValidatorExecutionImplicitRequirementToJSON(value?: ResolvedValidatorExecutionImplicitRequirement | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +70,7 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'type': value.type,
     };
 }
 

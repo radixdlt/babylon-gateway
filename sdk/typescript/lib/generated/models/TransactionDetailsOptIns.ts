@@ -65,7 +65,7 @@ export interface TransactionDetailsOptIns {
     /**
      * if set to `true`, detailed events object is returned.
 
-For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained).
+For more information please visit the [Detailed Events docs](#section/Detailed-Events-Explained).
 
      * @type {boolean}
      * @memberof TransactionDetailsOptIns

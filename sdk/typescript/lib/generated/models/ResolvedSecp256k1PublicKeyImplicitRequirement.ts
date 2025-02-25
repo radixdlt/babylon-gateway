@@ -16,51 +16,68 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface ResolvedSecp256k1PublicKeyImplicitRequirement
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface ResolvedSecp256k1PublicKeyImplicitRequirement {
     /**
-     * Bech32m-encoded human readable version of the address.
+     * 
      * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * @memberof ResolvedSecp256k1PublicKeyImplicitRequirement
      */
-    entity_address: string;
+    type: ResolvedSecp256k1PublicKeyImplicitRequirementTypeEnum;
     /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * 
+     * @type {number}
+     * @memberof ResolvedSecp256k1PublicKeyImplicitRequirement
      */
-    auto_link_blueprints?: Array<string>;
+    first_seen_state_version: number;
+    /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof ResolvedSecp256k1PublicKeyImplicitRequirement
+     */
+    public_key_bytes_hex: string;
 }
 
+
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * @export
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export const ResolvedSecp256k1PublicKeyImplicitRequirementTypeEnum = {
+    Secp256k1PublicKey: 'Secp256k1PublicKey'
+} as const;
+export type ResolvedSecp256k1PublicKeyImplicitRequirementTypeEnum = typeof ResolvedSecp256k1PublicKeyImplicitRequirementTypeEnum[keyof typeof ResolvedSecp256k1PublicKeyImplicitRequirementTypeEnum];
+
+
+/**
+ * Check if a given object implements the ResolvedSecp256k1PublicKeyImplicitRequirement interface.
+ */
+export function instanceOfResolvedSecp256k1PublicKeyImplicitRequirement(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
+    isInstance = isInstance && "type" in value;
+    isInstance = isInstance && "first_seen_state_version" in value;
+    isInstance = isInstance && "public_key_bytes_hex" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function ResolvedSecp256k1PublicKeyImplicitRequirementFromJSON(json: any): ResolvedSecp256k1PublicKeyImplicitRequirement {
+    return ResolvedSecp256k1PublicKeyImplicitRequirementFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function ResolvedSecp256k1PublicKeyImplicitRequirementFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResolvedSecp256k1PublicKeyImplicitRequirement {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'type': json['type'],
+        'first_seen_state_version': json['first_seen_state_version'],
+        'public_key_bytes_hex': json['public_key_bytes_hex'],
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function ResolvedSecp256k1PublicKeyImplicitRequirementToJSON(value?: ResolvedSecp256k1PublicKeyImplicitRequirement | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +86,9 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'type': value.type,
+        'first_seen_state_version': value.first_seen_state_version,
+        'public_key_bytes_hex': value.public_key_bytes_hex,
     };
 }
 

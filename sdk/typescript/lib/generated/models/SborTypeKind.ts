@@ -14,7 +14,11 @@
 
 
 /**
- * 
+ * Kind of SBOR type.
+
+- If `WellKnown`, then it is a pointer to a well known scrypto type with that ID,
+- If `SchemaLocal`, then it is an index into the given schema.
+
  * @export
  */
 export const SborTypeKind = {

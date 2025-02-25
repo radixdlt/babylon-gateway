@@ -16,51 +16,68 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TwoWayLinkedEntitiesCollectionItem
+ * @interface ResolvedEd25519PublicKeyImplicitRequirement
  */
-export interface TwoWayLinkedEntitiesCollectionItem {
+export interface ResolvedEd25519PublicKeyImplicitRequirement {
     /**
-     * Bech32m-encoded human readable version of the address.
+     * 
      * @type {string}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * @memberof ResolvedEd25519PublicKeyImplicitRequirement
      */
-    entity_address: string;
+    type: ResolvedEd25519PublicKeyImplicitRequirementTypeEnum;
     /**
-     * List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
-Returned only for packages.
-
-     * @type {Array<string>}
-     * @memberof TwoWayLinkedEntitiesCollectionItem
+     * 
+     * @type {number}
+     * @memberof ResolvedEd25519PublicKeyImplicitRequirement
      */
-    auto_link_blueprints?: Array<string>;
+    first_seen_state_version: number;
+    /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof ResolvedEd25519PublicKeyImplicitRequirement
+     */
+    public_key_bytes_hex: string;
 }
 
+
 /**
- * Check if a given object implements the TwoWayLinkedEntitiesCollectionItem interface.
+ * @export
  */
-export function instanceOfTwoWayLinkedEntitiesCollectionItem(value: object): boolean {
+export const ResolvedEd25519PublicKeyImplicitRequirementTypeEnum = {
+    Ed25519PublicKey: 'Ed25519PublicKey'
+} as const;
+export type ResolvedEd25519PublicKeyImplicitRequirementTypeEnum = typeof ResolvedEd25519PublicKeyImplicitRequirementTypeEnum[keyof typeof ResolvedEd25519PublicKeyImplicitRequirementTypeEnum];
+
+
+/**
+ * Check if a given object implements the ResolvedEd25519PublicKeyImplicitRequirement interface.
+ */
+export function instanceOfResolvedEd25519PublicKeyImplicitRequirement(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "entity_address" in value;
+    isInstance = isInstance && "type" in value;
+    isInstance = isInstance && "first_seen_state_version" in value;
+    isInstance = isInstance && "public_key_bytes_hex" in value;
 
     return isInstance;
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSON(json: any): TwoWayLinkedEntitiesCollectionItem {
-    return TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json, false);
+export function ResolvedEd25519PublicKeyImplicitRequirementFromJSON(json: any): ResolvedEd25519PublicKeyImplicitRequirement {
+    return ResolvedEd25519PublicKeyImplicitRequirementFromJSONTyped(json, false);
 }
 
-export function TwoWayLinkedEntitiesCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): TwoWayLinkedEntitiesCollectionItem {
+export function ResolvedEd25519PublicKeyImplicitRequirementFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResolvedEd25519PublicKeyImplicitRequirement {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'entity_address': json['entity_address'],
-        'auto_link_blueprints': !exists(json, 'auto_link_blueprints') ? undefined : json['auto_link_blueprints'],
+        'type': json['type'],
+        'first_seen_state_version': json['first_seen_state_version'],
+        'public_key_bytes_hex': json['public_key_bytes_hex'],
     };
 }
 
-export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEntitiesCollectionItem | null): any {
+export function ResolvedEd25519PublicKeyImplicitRequirementToJSON(value?: ResolvedEd25519PublicKeyImplicitRequirement | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,8 +86,9 @@ export function TwoWayLinkedEntitiesCollectionItemToJSON(value?: TwoWayLinkedEnt
     }
     return {
         
-        'entity_address': value.entity_address,
-        'auto_link_blueprints': value.auto_link_blueprints,
+        'type': value.type,
+        'first_seen_state_version': value.first_seen_state_version,
+        'public_key_bytes_hex': value.public_key_bytes_hex,
     };
 }
 

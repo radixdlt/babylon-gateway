@@ -20,6 +20,12 @@ import { exists, mapValues } from '../runtime';
  */
 export interface AccountDepositPreValidationResourceBadgeAllOf {
     /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof AccountDepositPreValidationResourceBadgeAllOf
+     */
+    resource_address: string;
+    /**
      * 
      * @type {string}
      * @memberof AccountDepositPreValidationResourceBadgeAllOf
@@ -42,6 +48,7 @@ export type AccountDepositPreValidationResourceBadgeAllOfBadgeTypeEnum = typeof 
  */
 export function instanceOfAccountDepositPreValidationResourceBadgeAllOf(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
@@ -56,6 +63,7 @@ export function AccountDepositPreValidationResourceBadgeAllOfFromJSONTyped(json:
     }
     return {
         
+        'resource_address': json['resource_address'],
         'badge_type': !exists(json, 'badge_type') ? undefined : json['badge_type'],
     };
 }
@@ -69,6 +77,7 @@ export function AccountDepositPreValidationResourceBadgeAllOfToJSON(value?: Acco
     }
     return {
         
+        'resource_address': value.resource_address,
         'badge_type': value.badge_type,
     };
 }
