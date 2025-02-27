@@ -1,6 +1,11 @@
 ## 1.10.0
 Release built: _not released yet_
 
+### Bug fixes
+- Fixed two bugs in two-way links returned from `/state/entity/details`:
+  - If one end of the link pointed to an entity without a corresponding metadata key, it was incorrectly considered a valid two-way link.
+  - Fixed invalidation after removing a metadata entry on one end. Previously, the link was still considered valid even after the metadata entry was removed.
+
 ### API Changes
 - New filters are supported on the `/stream/transactions` endpoint:
     - `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
@@ -35,7 +40,6 @@ Release built: _not released yet_
 ### What’s new?
 - Added a new configuration parameter, `GatewayApi__Endpoint__EntitiesByRoleRequirementLookupMaxRequestedRequirementsCount`, which sets the limit (default `50`) on the number of requirements that can be queried using the `/extensions/entities-by-role-requirement/lookup` endpoint.
 - Added a new configuration parameter, `GatewayApi__Endpoint__ImplicitRequirementsLookupMaxRequestedRequirementsCount`, which sets the limit (default `100`) on the number of implicit requirements that can be queried using the `/extensions/implicit-requirements/lookup` endpoint.
-
 
 ## 1.9.2
 Release built: 9.12.2024

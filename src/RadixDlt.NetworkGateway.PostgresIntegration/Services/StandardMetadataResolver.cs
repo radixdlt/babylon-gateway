@@ -164,9 +164,9 @@ WITH
             target_entity.id AS target_entity_id,
             target_entity.address AS target_entity_address,
             target_entity.discriminator AS target_entity_discriminator,
-            dapp_marker_check.valid AS dapp_marker_check_valid,
-            target_dapp_marker_check.valid AS target_dapp_marker_check_valid,
-            target_entity_check.valid AS target_entity_check_valid
+            COALESCE(dapp_marker_check.valid, FALSE) AS dapp_marker_check_valid,
+            COALESCE(target_dapp_marker_check.valid, FALSE) AS target_dapp_marker_check_valid,
+            COALESCE(target_entity_check.valid, FALSE) AS target_entity_check_valid
         FROM entry_history_expanded entry
         INNER JOIN entities source_entity ON source_entity.id = entry.entity_id
         LEFT JOIN entities target_entity ON target_entity.id = entry.target_entity_id
@@ -229,7 +229,7 @@ WITH
             -- 'on-app-check' - on-ledger, partially validated,
             -- 'off-app-check' - off-ledger, partially validated,
             -- <non-null string value> - validation failure
-            coalesce(CASE c.discriminator
+            COALESCE(CASE c.discriminator
                 WHEN 'dapp_account_type' THEN
                     CASE FALSE
                         WHEN source_discriminator = 'global_account_component' THEN 'account expected'
